@@ -1693,51 +1693,74 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private static final long THIRTY_MINUTES = 1800000l;
 
     /**
-     * Checks the start date of specified calendar object if it is not more than 30 minutes in the past and its end date is not in the past
-     * compared to {@link System#currentTimeMillis()}.
+     * Checks the dates of specified calendar object.
+     * <ul>
+     * <li>For a single event: if it is not more than 30 minutes in the past and its end date is not in the past compared to
+     * {@link System#currentTimeMillis()}.</li>
+     * <li>For a recurring event: if its until date is in the past</li>
+     * </ul>
      * 
      * @param calendarObj The calendar object whose start and end date is ought to be checked
      * @param module The module
-     * @return <code>true</code> if the start date of specified calendar object if it is not more than 30 minutes in the past and its end
-     *         date is not in the past compared to {@link System#currentTimeMillis()}; otherwise <code>false</code>.
+     * @return <code>true</code> if notifications shall be dropped; otherwise <code>false</code>.
      */
     static final boolean checkStartAndEndDate(final CalendarObject calendarObj, final int module) {
         final long now = System.currentTimeMillis();
-        {
-            // Do not send notification mails for tasks and appointments in the
-            // past. Bug #12063
-            final Date endDate = calendarObj.getEndDate();
-            if (endDate != null) {
-                if (Types.APPOINTMENT == module && endDate.getTime() < now) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for appointment object ").append(
-                            calendarObj.getObjectID()).append(" since its end date is in the past").toString());
+        if (calendarObj.getRecurrenceType() == CalendarObject.NONE) {
+            {
+                // Do not send notification mails for tasks and appointments in the
+                // past. Bug #12063
+                final Date endDate = calendarObj.getEndDate();
+                if (endDate != null) {
+                    if (Types.APPOINTMENT == module && endDate.getTime() < now) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(new StringBuilder().append("Ignoring notification(s) for single appointment object ").append(
+                                calendarObj.getObjectID()).append(" since its end date is in the past").toString());
+                        }
+                        return false;
                     }
-                    return false;
-                }
-                if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for task object ").append(calendarObj.getObjectID()).append(
-                            " since its end date is in the past").toString());
+                    if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(new StringBuilder().append("Ignoring notification(s) for single task object ").append(
+                                calendarObj.getObjectID()).append(" since its end date is in the past").toString());
+                        }
+                        return false;
                     }
-                    return false;
                 }
             }
-        }
-        {
-            // Do not send notification mails for appointments whose
-            // start date is more than 30 minutes in the past
-            final Date startDate = calendarObj.getStartDate();
-            if (startDate != null) {
-                if (Types.APPOINTMENT == module && (now - startDate.getTime()) > THIRTY_MINUTES) {
+            {
+                // Do not send notification mails for appointments whose
+                // start date is more than 30 minutes in the past
+                final Date startDate = calendarObj.getStartDate();
+                if (startDate != null) {
+                    if (Types.APPOINTMENT == module && (now - startDate.getTime()) > THIRTY_MINUTES) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(new StringBuilder().append("Ignoring notification(s) for single appointment object ").append(
+                                calendarObj.getObjectID()).append(" since its start date is more than 30 minutes in the past").toString());
+                        }
+                        return false;
+                    }
+                    // Ignore Start Date for Tasks
+                    // See Bug 13086
+                }
+            }
+        } else {
+            final Date untilDate = calendarObj.getUntil();
+            if (null != untilDate) {
+                if (Types.APPOINTMENT == module && untilDate.getTime() < now) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for appointment object ").append(
-                            calendarObj.getObjectID()).append(" since its start date is more than 30 minutes in the past").toString());
+                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for recurring appointment object ").append(
+                            calendarObj.getObjectID()).append(" since its until date is in the past").toString());
                     }
                     return false;
                 }
-                // Ignore Start Date for Tasks
-                // See Bug 13086
+                if (Types.TASK == module && !compare2Date(untilDate.getTime(), now)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for recurring task object ").append(
+                            calendarObj.getObjectID()).append(" since its until date is in the past").toString());
+                    }
+                    return false;
+                }
             }
         }
         return true;
