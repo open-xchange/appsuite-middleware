@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -86,11 +89,13 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
     private final boolean failOnError;
 
+    private String view;
+
     public GetRequest(final String folder, final String ID) {
         this(new String[] { folder, ID }, true);
     }
 
-    public GetRequest(final String folder, final String ID, boolean failOnError) {
+    public GetRequest(final String folder, final String ID, final boolean failOnError) {
         this(new String[] { folder, ID }, failOnError);
     }
 
@@ -115,6 +120,14 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         this.failOnError = failOnError;
     }
 
+    public String getView() {
+        return view;
+    }
+
+    public void setView(final String view) {
+        this.view = view;
+    }
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
@@ -136,9 +149,14 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]), new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
+        final List<Parameter> l = new ArrayList<Parameter>(4);
+        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        l.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]));
+        l.add(new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]));
+        if (null != view) {
+            l.add(new Parameter(Mail.PARAMETER_VIEW, view));
+        }
+        return l.toArray(new Parameter[l.size()]);
     }
 
     /*
