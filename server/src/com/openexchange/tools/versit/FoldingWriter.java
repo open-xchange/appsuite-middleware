@@ -57,17 +57,21 @@ public class FoldingWriter implements VersitDefinition.Writer {
     private final Writer w;
 
     private int LineLength;
+    
+    private final int MAX = 75;
+    
+    private final String INDENTATION = " ";
 
     public FoldingWriter(final Writer w) {
         this.w = w;
     }
 
-    public void write(final String s) throws IOException {
+    public void sdfwrite(final String s) throws IOException {
         int start = 0, len = s.length() + LineLength;
         while (len > 75) {
             final int delta = 75 - LineLength;
             w.write(s.substring(start, start + delta));
-            w.write("\r\n ");
+            w.write("\n ");
             start += delta;
             len -= 75;
             LineLength = 1;
@@ -76,8 +80,27 @@ public class FoldingWriter implements VersitDefinition.Writer {
         LineLength += s.length() - start;
     }
 
+    public void write(String s) throws IOException {
+        if (s.length() > MAX) {
+            writeLong(s);
+        } else {
+            w.write(s);
+        }
+    }
+    
+    private void writeLong(String s) throws IOException {
+        w.write("\n");
+        w.write(INDENTATION);
+        if (s.length() > MAX) {
+            w.write(s.substring(0, MAX - INDENTATION.length() - 2));
+            writeLong(s.substring(MAX - INDENTATION.length() - 2, s.length()));
+        } else {
+            w.write(s);
+        }
+    }
+    
     public void writeln() throws IOException {
-        w.write("\r\n");
+        w.write("\n");
         LineLength = 0;
     }
 
