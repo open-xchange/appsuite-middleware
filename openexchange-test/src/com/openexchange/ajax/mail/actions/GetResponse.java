@@ -54,14 +54,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.AbstractOXException;
@@ -82,6 +79,8 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 public class GetResponse extends AbstractAJAXResponse {
 
 	private MailMessage mail;
+
+	private JSONArray attachments;
 
 	/**
 	 * @param response
@@ -112,6 +111,21 @@ public class GetResponse extends AbstractAJAXResponse {
 			mail = parsed;
 		}
 		return mail;
+	}
+	
+	public JSONArray getAttachments() throws JSONException {
+	    if (null == attachments) {
+	        final JSONObject jsonObj;
+            if (getResponse().getData() instanceof JSONObject) {
+                jsonObj = (JSONObject) getResponse().getData();
+            } else {
+                jsonObj = new JSONObject(getResponse().getData().toString());
+            }
+            if (jsonObj.hasAndNotNull(MailJSONField.ATTACHMENTS.getKey())) {
+                attachments = jsonObj.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+            }
+	    }
+	    return attachments;
 	}
 
 	private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone)
