@@ -113,7 +113,7 @@ public final class HttpManagersInit implements Initialization {
             return;
         }
         HttpSessionManagement.reset();
-        HttpServletManager.releaseHttpServletManager();
+        HttpServletManager.shutdownHttpServletManager();
         if (LOG.isInfoEnabled()) {
             LOG.info("HTTP servlet manager successfully stopped");
         }

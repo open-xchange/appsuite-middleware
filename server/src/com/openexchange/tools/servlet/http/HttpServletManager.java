@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
@@ -77,13 +76,11 @@ public class HttpServletManager {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpServletManager.class);
 
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
-    private static final ConcurrentMap<String, ServletQueue> SERVLET_POOL = new ConcurrentHashMap<String, ServletQueue>();
+    private static ConcurrentMap<String, ServletQueue> servletPool;
 
     private static Map<String, Constructor<?>> servletConstructorMap;
 
-    private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock(true);
+    private static NonBlockingRWLock readWriteLock;
 
     /**
      * Initializes a new {@link HttpServletManager}
@@ -101,30 +98,36 @@ public class HttpServletManager {
      */
     public static HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
         int state;
-        HttpServlet retval;
+        HttpServlet retval = null;
         String path2Append;
         do {
-            state = RW_LOCK.acquireRead();
-            final ServletQueue servletQueue = SERVLET_POOL.get(path);
+            state = readWriteLock.acquireRead();
+            final ServletQueue servletQueue = servletPool.get(path);
             if (servletQueue != null) {
+                if (null != retval) {
+                    // Previously obtained
+                    releaseServletInternal(servletQueue, retval);
+                }
                 path2Append = path;
                 retval = getServletInternal(servletQueue, path);
             } else {
-                retval = null;
-                path2Append = null;
                 /*
                  * Try through resolving
                  */
+                path2Append = null;
                 try {
-                    final int size = SERVLET_POOL.size();
-                    final Iterator<Map.Entry<String, ServletQueue>> iter = SERVLET_POOL.entrySet().iterator();
                     boolean b = true;
-                    for (int i = 0; i < size && b; i++) {
+                    for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); b && iter.hasNext();) {
                         final Map.Entry<String, ServletQueue> e = iter.next();
                         final String currentPath = e.getKey();
                         if (implies(currentPath, path)) {
+                            final ServletQueue queue = e.getValue();
+                            if (null != retval) {
+                                // Previously obtained
+                                releaseServletInternal(queue, retval);
+                            }
                             path2Append = currentPath;
-                            retval = getServletInternal(e.getValue(), currentPath);
+                            retval = getServletInternal(queue, currentPath);
                             b = false;
                         }
                     }
@@ -134,7 +137,7 @@ public class HttpServletManager {
                     LOG.warn("Resolving servlet path failed. Trying again...", e);
                 }
             }
-        } while (!RW_LOCK.releaseRead(state));
+        } while (!readWriteLock.releaseRead(state));
         if (path2Append != null) {
             pathStorage.append(path2Append);
         }
@@ -193,6 +196,12 @@ public class HttpServletManager {
         return servletInstance;
     }
 
+    private static final void releaseServletInternal(final ServletQueue servletQueue, final HttpServlet servletInstance) {
+        if (servletInstance instanceof SingleThreadModel) {
+            servletQueue.enqueue(servletInstance);
+        }
+    }
+
     private final static Class<?>[] CLASS_ARR = new Class[] {};
 
     /**
@@ -202,16 +211,16 @@ public class HttpServletManager {
      * @param servletObj The servlet instance
      */
     public static final void putServlet(final String path, final HttpServlet servletObj) {
-        if (SERVLET_POOL.containsKey(path) && !(servletObj instanceof SingleThreadModel)) {
+        if (servletPool.containsKey(path) && !(servletObj instanceof SingleThreadModel)) {
             return;
         }
-        RW_LOCK.acquireWrite();
+        readWriteLock.acquireWrite();
         try {
-            if (SERVLET_POOL.containsKey(path)) {
+            if (servletPool.containsKey(path)) {
                 /*
                  * Since heading condition failed the servlet must be an instance of SingleThreadModel
                  */
-                SERVLET_POOL.get(path).enqueue(servletObj);
+                servletPool.get(path).enqueue(servletObj);
             } else {
                 final ServletQueue servlets;
                 try {
@@ -233,10 +242,10 @@ public class HttpServletManager {
                     return;
                 }
                 servlets.enqueue(servletObj);
-                SERVLET_POOL.put(path, servlets);
+                servletPool.put(path, servlets);
             }
         } finally {
-            RW_LOCK.releaseWrite();
+            readWriteLock.releaseWrite();
         }
     }
 
@@ -249,10 +258,10 @@ public class HttpServletManager {
      * @throws ServletException If servlet's initialization fails or another servlet has already been registered with the same alias
      */
     public static final void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
-        RW_LOCK.acquireWrite();
+        readWriteLock.acquireWrite();
         try {
             final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
-            if (SERVLET_POOL.containsKey(path)) {
+            if (servletPool.containsKey(path)) {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
                     "\" has already been registered before.").toString());
             }
@@ -289,7 +298,7 @@ public class HttpServletManager {
             /*
              * Put into servlet pool for being accessible
              */
-            if (SERVLET_POOL.putIfAbsent(path, servletQueue) != null) {
+            if (servletPool.putIfAbsent(path, servletQueue) != null) {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
                     "\" has already been registered before.").toString());
             }
@@ -302,7 +311,7 @@ public class HttpServletManager {
             se.initCause(e);
             throw se;
         } finally {
-            RW_LOCK.releaseWrite();
+            readWriteLock.releaseWrite();
         }
     }
 
@@ -312,7 +321,7 @@ public class HttpServletManager {
      * @param id The servlet ID or alias
      */
     public static final void unregisterServlet(final String id) {
-        RW_LOCK.acquireWrite();
+        readWriteLock.acquireWrite();
         try {
             final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
@@ -320,14 +329,14 @@ public class HttpServletManager {
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
                 return;
             }
-            configLoader.removeConfig(SERVLET_POOL.get(path).dequeue().getClass().getCanonicalName());
-            SERVLET_POOL.remove(path);
+            configLoader.removeConfig(servletPool.get(path).dequeue().getClass().getCanonicalName());
+            servletPool.remove(path);
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);
             LOG.error("Unregistering servlet failed. Servlet path is not a valid URI: " + id, se);
         } finally {
-            RW_LOCK.releaseWrite();
+            readWriteLock.releaseWrite();
         }
     }
 
@@ -338,7 +347,7 @@ public class HttpServletManager {
      * @param servletObj The servlet instance
      */
     public static final void destroyServlet(final String id, final HttpServlet servletObj) {
-        RW_LOCK.acquireWrite();
+        readWriteLock.acquireWrite();
         try {
             if (servletObj instanceof SingleThreadModel) {
                 /*
@@ -347,50 +356,48 @@ public class HttpServletManager {
                  */
                 return;
             }
-            SERVLET_POOL.remove(id);
+            servletPool.remove(id);
         } finally {
-            RW_LOCK.releaseWrite();
+            readWriteLock.releaseWrite();
         }
     }
 
     private static final void clearServletPool() {
-        RW_LOCK.acquireWrite();
+        readWriteLock.acquireWrite();
         try {
-            SERVLET_POOL.clear();
+            servletPool.clear();
         } finally {
-            RW_LOCK.releaseWrite();
+            readWriteLock.releaseWrite();
         }
     }
 
     /**
-     * Initializes HTTP servlet manager with specified initial servlet constructor map
+     * Initializes HTTP servlet manager with specified initial servlet constructor map.
      * 
      * @param servletConstructorMap The servlet constructor map
      */
     final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (!initialized.get()) {
-                    HttpServletManager.servletConstructorMap = servletConstructorMap;
-                    createServlets();
-                    initialized.set(true);
-                }
+        synchronized (HttpServletManager.class) {
+            if (null == servletPool) {
+                servletPool = new ConcurrentHashMap<String, ServletQueue>();
+                readWriteLock = new NonBlockingRWLock(true);
+                HttpServletManager.servletConstructorMap = servletConstructorMap;
+                createServlets();
             }
         }
     }
 
     /**
-     * Releases the HTTP servlet manager
+     * Shuts down the HTTP servlet manager.
      */
-    final static void releaseHttpServletManager() {
-        if (initialized.get()) {
-            synchronized (initialized) {
-                if (initialized.get()) {
-                    clearServletPool();
-                    HttpServletManager.servletConstructorMap.clear();
-                    HttpServletManager.servletConstructorMap = null;
-                    initialized.set(false);
-                }
+    final static void shutdownHttpServletManager() {
+        synchronized (HttpServletManager.class) {
+            if (null != servletPool) {
+                clearServletPool();
+                HttpServletManager.servletConstructorMap.clear();
+                HttpServletManager.servletConstructorMap = null;
+                servletPool = null;
+                readWriteLock = null;
             }
         }
     }
@@ -398,7 +405,7 @@ public class HttpServletManager {
     private static final Object[] INIT_ARGS = new Object[] {};
 
     private static final void createServlets() {
-        RW_LOCK.acquireWrite();
+        readWriteLock.acquireWrite();
         try {
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
             if (null == configLoader) {
@@ -451,13 +458,13 @@ public class HttpServletManager {
                         LOG.error(t.getMessage(), t);
                     }
                 }
-                SERVLET_POOL.put(path, servletQueue);
+                servletPool.put(path, servletQueue);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("All Servlet Instances created & initialized");
             }
         } finally {
-            RW_LOCK.releaseWrite();
+            readWriteLock.releaseWrite();
         }
     }
 }
