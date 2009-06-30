@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.contact;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -143,6 +147,19 @@ public class ContactInterfaceProviderRegistry {
     public ContactInterfaceProvider getService(final int folderId, final int contextId) {
         return services.get(new Key(folderId, contextId));
     }
+    
+    public List<ContactInterfaceProviderRegistration> getRegistrations(int contextId) {
+        Set<Entry<Key,ContactInterfaceProvider>> entrySet = services.entrySet();
+        List<ContactInterfaceProviderRegistration> registrations = new LinkedList<ContactInterfaceProviderRegistration>();
+        for (Entry<Key, ContactInterfaceProvider> entry : entrySet) {
+            if(entry.getKey().contextId == contextId) {
+                registrations.add(new ContactInterfaceProviderRegistration(entry.getKey().folderId, entry.getValue()));
+            }
+        }
+        
+        return registrations;
+    }
+
 
     private static final class Key {
 
@@ -189,5 +206,6 @@ public class ContactInterfaceProviderRegistry {
             return true;
         }
     } // End of class Key
+
 
 }

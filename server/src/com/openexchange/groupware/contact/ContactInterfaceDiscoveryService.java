@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.session.Session;
 
@@ -103,4 +104,11 @@ public interface ContactInterfaceDiscoveryService {
      * @throws OXException If returning an appropriate {@link ContactInterface} instance fails
      */
     public ContactInterface newDefaultContactInterface(Session session) throws OXException;
+    
+    /**
+     * Gets a list of all currently known contactInterface providers along with their folderIds for a specified context
+     * @param The contextId for which the list shall be retrieved
+     * @return all custom ContactInterfaceProviders along with their respective folderIds.
+     */
+    List<ContactInterfaceProviderRegistration> getRegistrations(int contextId);
 }

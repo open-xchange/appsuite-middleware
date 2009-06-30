@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.contact.internal;
 
+import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
+import com.openexchange.groupware.contact.ContactInterfaceProviderRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -164,6 +166,11 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
             throw new OXException(e);
         }
     }
+    
+    public List<ContactInterfaceProviderRegistration> getRegistrations(int contextId) {
+        return ContactInterfaceProviderRegistry.getInstance().getRegistrations(contextId);
+    }
+
 
     private static final class RdbContactInterfaceProvider implements ContactInterfaceProvider {
 
@@ -205,5 +212,6 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
             map.dispose();
         }
     } // End of RdbContactInterfaceProviderCache
+
 
 }

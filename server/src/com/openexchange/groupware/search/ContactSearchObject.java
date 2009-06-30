@@ -50,6 +50,7 @@
 package com.openexchange.groupware.search;
 
 import java.util.Date;
+import java.util.List;
 
 public class ContactSearchObject extends SearchObject {
 
@@ -286,4 +287,5 @@ public class ContactSearchObject extends SearchObject {
     public final void setStartLetter(final boolean startLetter) {
         this.startLetter = startLetter;
     }
+
 }
