@@ -185,7 +185,7 @@ public class POP3StorageUtil {
 
         // Determine & insert new UIDLs
         final Set<String> newUIDLs = new HashSet<String>(actualUIDLs);
-        newUIDLs.remove(databaseUIDLs);
+        newUIDLs.removeAll(databaseUIDLs);
         return newUIDLs.size();
     }
 

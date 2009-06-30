@@ -782,7 +782,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
 
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
-            msg.setFlags((Flags) item, true);
+            msg.setFlags((FLAGS) item, true);
         }
     };
 

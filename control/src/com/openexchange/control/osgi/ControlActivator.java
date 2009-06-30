@@ -137,7 +137,7 @@ public final class ControlActivator implements BundleActivator {
         }
     }
 
-    private final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+    private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
         private final BundleContext bundleContext;
 
@@ -201,7 +201,7 @@ public final class ControlActivator implements BundleActivator {
      * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
-    private final class ControlShutdownHookThread extends Thread {
+    private static final class ControlShutdownHookThread extends Thread {
 
         private final BundleContext bundleContext;
 

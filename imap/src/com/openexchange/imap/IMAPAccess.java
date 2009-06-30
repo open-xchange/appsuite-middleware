@@ -95,12 +95,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     private static final long serialVersionUID = -7510487764376433468L;
 
+    /**
+     * The logger instance for {@link IMAPAccess} class.
+     */
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPAccess.class);
 
+    /**
+     * The string for <code>ISO-8859-1</code> character encoding.
+     */
     private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
+    /**
+     * Remembers timed out servers for {@link IIMAPProperties#getImapTemporaryDown()} milliseconds. Any further attempts to connect to such
+     * a server-port-pair will throw an appropriate exception.
+     */
     private static Map<HostAndPort, Long> timedOutServers;
 
+    /**
+     * Remembers failed authentication for 10 seconds. Any further login attempts with such remembered credentials will throw an appropriate
+     * exception.
+     */
     private static Map<LoginAndPass, Long> failedAuths;
 
     /*-
@@ -483,8 +497,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void startup() throws MailException {
-        timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
-        failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+        initMaps();
         IMAPCapabilityAndGreetingCache.init();
         try {
             ACLExtensionInit.getInstance().start();
@@ -501,6 +514,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             throw e;
         } catch (final AbstractOXException e) {
             throw new MailException(e);
+        }
+    }
+
+    private static synchronized void initMaps() {
+        if (null == timedOutServers) {
+            timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+        }
+        if (null == failedAuths) {
+            failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
         }
     }
 
@@ -524,8 +546,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         IMAPCapabilityAndGreetingCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
-        timedOutServers = null;
-        failedAuths = null;
+        dropMaps();
+    }
+
+    private static synchronized void dropMaps() {
+        if (null != timedOutServers) {
+            timedOutServers = null;
+        }
+        if (null != failedAuths) {
+            failedAuths = null;
+        }
     }
 
     @Override

@@ -84,7 +84,7 @@ public abstract class AbstractConsoleHandler {
      * The default parameter for host, port, login, and password: <code>&quot;-h&quot;</code>, <code>&quot;-p&quot;</code>,
      * <code>&quot;-l&quot;</code>, and <code>&quot;-pw&quot;</code>.
      */
-    protected static final String[] DEFAULT_PARAMETER = { "-h", "-p", "-l", "-pw" };
+    static final String[] DEFAULT_PARAMETER = { "-h", "-p", "-l", "-pw" };
 
     protected String jmxHost = "localhost";
 

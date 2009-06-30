@@ -73,7 +73,7 @@ public final class ACLExtensionInit implements Initialization {
         return instance;
     }
 
-    private Class<? extends ACLExtension> implementingClass;
+    // private Class<? extends ACLExtension> implementingClass;
 
     private final AtomicBoolean started;
 

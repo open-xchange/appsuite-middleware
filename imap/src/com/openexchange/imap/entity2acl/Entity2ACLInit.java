@@ -90,38 +90,36 @@ public final class Entity2ACLInit implements Initialization {
             return;
         }
         Entity2ACLAutoDetector.initEntity2ACLMappings();
-        synchronized (this) {
-            try {
-                if (null == implementingClass) {
-                    final String classNameProp = IMAPProperties.getInstance().getEntity2AclImpl();
-                    if ((null == classNameProp) || (classNameProp.length() == 0)) {
-                        throw new Entity2ACLException(Entity2ACLException.Code.MISSING_SETTING, "com.openexchange.imap.User2ACLImpl");
-                    }
-                    if ("auto".equalsIgnoreCase(classNameProp)) {
-                        /*
-                         * Try to detect dependent on IMAP server greeting
-                         */
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Auto-Detection for IMAP server implementation");
-                        }
-                        implementingClass = null;
-                        return;
-                    }
-                    final String className = IMAPServer.getIMAPServerImpl(classNameProp);
-                    implementingClass = className == null ? Class.forName(classNameProp).asSubclass(Entity2ACL.class) : Class.forName(
-                        className).asSubclass(Entity2ACL.class);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Used IMAP server implementation: " + implementingClass.getName());
-                    }
-                    Entity2ACL.setInstance(implementingClass.newInstance());
+        try {
+            if (null == implementingClass) {
+                final String classNameProp = IMAPProperties.getInstance().getEntity2AclImpl();
+                if ((null == classNameProp) || (classNameProp.length() == 0)) {
+                    throw new Entity2ACLException(Entity2ACLException.Code.MISSING_SETTING, "com.openexchange.imap.User2ACLImpl");
                 }
-            } catch (final ClassNotFoundException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, new Object[0]);
-            } catch (final InstantiationException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
-            } catch (final IllegalAccessException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+                if ("auto".equalsIgnoreCase(classNameProp)) {
+                    /*
+                     * Try to detect dependent on IMAP server greeting
+                     */
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Auto-Detection for IMAP server implementation");
+                    }
+                    implementingClass = null;
+                    return;
+                }
+                final String className = IMAPServer.getIMAPServerImpl(classNameProp);
+                implementingClass = className == null ? Class.forName(classNameProp).asSubclass(Entity2ACL.class) : Class.forName(
+                    className).asSubclass(Entity2ACL.class);
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Used IMAP server implementation: " + implementingClass.getName());
+                }
+                Entity2ACL.setInstance(implementingClass.newInstance());
             }
+        } catch (final ClassNotFoundException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.CLASS_NOT_FOUND, e, new Object[0]);
+        } catch (final InstantiationException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
+        } catch (final IllegalAccessException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
         }
         started.set(true);
     }
