@@ -74,7 +74,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -138,6 +137,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;
@@ -2643,10 +2643,10 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Get rfc822 bytes and create corresponding mail message
              */
             final InternetAddress from;
+            final ManagedMimeMessage mm;
             final MailMessage m;
             {
-                final MimeMessage mm = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(
-                    body.getBytes("US-ASCII")));
+                mm = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), body.getBytes("US-ASCII"));
                 final String fromAddr = mm.getHeader(MessageHeaders.HDR_FROM, null);
                 if (null == fromAddr) {
                     // Add from address
@@ -2658,141 +2658,147 @@ public class Mail extends PermissionServlet implements UploadListener {
                     m = MIMEMessageConverter.convertMessage(mm);
                 }
             }
-            /*
-             * Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
-             */
-            if (folder == null) {
+            try {
                 /*
-                 * Determine the account to transport with
+                 * Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
                  */
-                final int accountId;
-                {
-                    int accId;
-                    try {
-                        accId = resolveFrom2Account(session, from, true);
-                    } catch (final MailException e) {
-                        if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
-                            // Re-throw
-                            throw e;
-                        }
-                        LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
-                        // Send with default account's transport provider
-                        accId = MailAccount.DEFAULT_ID;
-                    }
-                    accountId = accId;
-                }
-                /*
-                 * Missing "folder" element indicates to send given message via default mail account
-                 */
-                final MailTransport transport = MailTransport.getInstance(session, accountId);
-                try {
+                if (folder == null) {
                     /*
-                     * Send raw message source
+                     * Determine the account to transport with
                      */
-                    final MailMessage sentMail = transport.sendRawMessage(m.getSourceBytes());
-                    if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
-                        /*
-                         * Copy in sent folder allowed
-                         */
-                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                        mailAccess.connect();
+                    final int accountId;
+                    {
+                        int accId;
                         try {
-                            final String sentFullname = MailFolderUtility.prepareMailFolderParam(
-                                mailAccess.getFolderStorage().getSentFolder()).getFullname();
-                            final String[] uidArr;
+                            accId = resolveFrom2Account(session, from, true);
+                        } catch (final MailException e) {
+                            if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
+                                // Re-throw
+                                throw e;
+                            }
+                            LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                            // Send with default account's transport provider
+                            accId = MailAccount.DEFAULT_ID;
+                        }
+                        accountId = accId;
+                    }
+                    /*
+                     * Missing "folder" element indicates to send given message via default mail account
+                     */
+                    final MailTransport transport = MailTransport.getInstance(session, accountId);
+                    try {
+                        /*
+                         * Send raw message source
+                         */
+                        final MailMessage sentMail = transport.sendRawMessage(m.getSourceBytes());
+                        if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
+                            /*
+                             * Copy in sent folder allowed
+                             */
+                            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+                            mailAccess.connect();
                             try {
-                                /*
-                                 * Append to default "sent" folder
-                                 */
-                                if (flags != ParamContainer.NOT_FOUND) {
-                                    sentMail.setFlags(flags);
-                                }
-                                uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname, new MailMessage[] { sentMail });
+                                final String sentFullname = MailFolderUtility.prepareMailFolderParam(
+                                    mailAccess.getFolderStorage().getSentFolder()).getFullname();
+                                final String[] uidArr;
                                 try {
                                     /*
-                                     * Update cache
+                                     * Append to default "sent" folder
                                      */
-                                    MailMessageCache.getInstance().removeFolderMessages(
-                                        accountId,
-                                        sentFullname,
-                                        session.getUserId(),
-                                        session.getContext().getContextId());
-                                } catch (final OXCachingException e) {
-                                    LOG.error(e.getMessage(), e);
+                                    if (flags != ParamContainer.NOT_FOUND) {
+                                        sentMail.setFlags(flags);
+                                    }
+                                    uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname, new MailMessage[] { sentMail });
+                                    try {
+                                        /*
+                                         * Update cache
+                                         */
+                                        MailMessageCache.getInstance().removeFolderMessages(
+                                            accountId,
+                                            sentFullname,
+                                            session.getUserId(),
+                                            session.getContext().getContextId());
+                                    } catch (final OXCachingException e) {
+                                        LOG.error(e.getMessage(), e);
+                                    }
+                                } catch (final MailException e) {
+                                    if (e.getMessage().indexOf("quota") != -1) {
+                                        throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA, e, new Object[0]);
+                                    }
+                                    throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
                                 }
-                            } catch (final MailException e) {
-                                if (e.getMessage().indexOf("quota") != -1) {
-                                    throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA, e, new Object[0]);
+                                if ((uidArr != null) && (uidArr[0] != null)) {
+                                    /*
+                                     * Mark appended sent mail as seen
+                                     */
+                                    mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
                                 }
-                                throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
-                            }
-                            if ((uidArr != null) && (uidArr[0] != null)) {
                                 /*
-                                 * Mark appended sent mail as seen
+                                 * Compose JSON object
                                  */
-                                mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
+                                responseData = new JSONObject();
+                                responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(
+                                    MailAccount.DEFAULT_ID,
+                                    sentFullname));
+                                responseData.put(DataFields.ID, uidArr[0]);
+                            } finally {
+                                mailAccess.close(true);
                             }
-                            /*
-                             * Compose JSON object
-                             */
-                            responseData = new JSONObject();
-                            responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(
-                                MailAccount.DEFAULT_ID,
-                                sentFullname));
-                            responseData.put(DataFields.ID, uidArr[0]);
-                        } finally {
-                            mailAccess.close(true);
                         }
+                    } finally {
+                        transport.close();
                     }
-                } finally {
-                    transport.close();
+                } else {
+                    /*
+                     * Check for valid from address
+                     */
+                    try {
+                        final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                        final UserSettingMail usm = session.getUserSettingMail();
+                        if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                            validAddrs.add(new InternetAddress(usm.getSendAddr()));
+                        }
+                        final User user = session.getUser();
+                        validAddrs.add(new InternetAddress(user.getMail()));
+                        final String[] aliases = user.getAliases();
+                        for (final String alias : aliases) {
+                            validAddrs.add(new InternetAddress(alias));
+                        }
+                        final List<InternetAddress> froms = Arrays.asList(m.getFrom());
+                        if (!validAddrs.containsAll(froms)) {
+                            throw new MailException(
+                                MailException.Code.INVALID_SENDER,
+                                froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(m.getFrom()));
+                        }
+                    } catch (final AddressException e) {
+                        throw MIMEMailException.handleMessagingException(e);
+                    }
+                    /*
+                     * Append message to denoted folder in proper mail storage
+                     */
+                    final FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder);
+                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fullnameArgument.getAccountId());
+                    mailAccess.connect();
+                    try {
+                        if (flags != ParamContainer.NOT_FOUND) {
+                            m.setFlags(flags);
+                        }
+                        final String draftsFolder = mailAccess.getFolderStorage().getDraftsFolder();
+                        if (draftsFolder.equals(fullnameArgument.getFullname())) {
+                            m.setFlag(MailMessage.FLAG_DRAFT, true);
+                        }
+                        final String id = mailAccess.getMessageStorage().appendMessages(
+                            fullnameArgument.getFullname(),
+                            new MailMessage[] { m })[0];
+                        responseData = new JSONObject();
+                        responseData.put(FolderChildFields.FOLDER_ID, folder);
+                        responseData.put(DataFields.ID, id);
+                    } finally {
+                        mailAccess.close(true);
+                    }
                 }
-            } else {
-                /*
-                 * Check for valid from address
-                 */
-                try {
-                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                    final UserSettingMail usm = session.getUserSettingMail();
-                    if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                        validAddrs.add(new InternetAddress(usm.getSendAddr()));
-                    }
-                    final User user = session.getUser();
-                    validAddrs.add(new InternetAddress(user.getMail()));
-                    final String[] aliases = user.getAliases();
-                    for (final String alias : aliases) {
-                        validAddrs.add(new InternetAddress(alias));
-                    }
-                    final List<InternetAddress> froms = Arrays.asList(m.getFrom());
-                    if (!validAddrs.containsAll(froms)) {
-                        throw new MailException(
-                            MailException.Code.INVALID_SENDER,
-                            froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(m.getFrom()));
-                    }
-                } catch (final AddressException e) {
-                    throw MIMEMailException.handleMessagingException(e);
-                }
-                /*
-                 * Append message to denoted folder in proper mail storage
-                 */
-                final FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder);
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fullnameArgument.getAccountId());
-                mailAccess.connect();
-                try {
-                    if (flags != ParamContainer.NOT_FOUND) {
-                        m.setFlags(flags);
-                    }
-                    final String draftsFolder = mailAccess.getFolderStorage().getDraftsFolder();
-                    if (draftsFolder.equals(fullnameArgument.getFullname())) {
-                        m.setFlag(MailMessage.FLAG_DRAFT, true);
-                    }
-                    final String id = mailAccess.getMessageStorage().appendMessages(fullnameArgument.getFullname(), new MailMessage[] { m })[0];
-                    responseData = new JSONObject();
-                    responseData.put(FolderChildFields.FOLDER_ID, folder);
-                    responseData.put(DataFields.ID, id);
-                } finally {
-                    mailAccess.close(true);
-                }
+            } finally {
+                mm.cleanUp();
             }
         } catch (final MailException e) {
             LOG.error(e.getMessage(), e);

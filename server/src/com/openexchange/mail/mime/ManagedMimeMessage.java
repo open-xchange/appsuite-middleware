@@ -49,38 +49,104 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.IOException;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeMessage;
+import javax.mail.util.SharedFileInputStream;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link ByteArrayMimeMessage} - A {@link MimeMessage} backed by an array.
+ * {@link ManagedMimeMessage} - A {@link MimeMessage} backed by an array or file dependent on provided byte array's size.
+ * <p>
+ * Invoke {@link #cleanUp()} to release used resources immediately; otherwise they will be released if a specific idle time has elapsed.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ByteArrayMimeMessage extends MimeMessage {
+public final class ManagedMimeMessage extends MimeMessage {
+
+    private static final int DEFAULT_MAX_INMEMORY_SIZE = 131072; // 128KB
+
+    private ManagedFile managedFile;
 
     /**
-     * Initializes a new {@link ByteArrayMimeMessage}.
+     * Initializes a new {@link ManagedMimeMessage} with default in-memory size of 128KB.
      * 
      * @param session The session
      * @param sourceBytes The RFC822 source bytes
-     * @throws MessagingException
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
      */
-    public ByteArrayMimeMessage(final Session session, final byte[] sourceBytes) throws MessagingException {
+    public ManagedMimeMessage(final Session session, final byte[] sourceBytes) throws MessagingException, IOException {
+        this(session, sourceBytes, DEFAULT_MAX_INMEMORY_SIZE);
+    }
+
+    /**
+     * Initializes a new {@link ManagedMimeMessage}.
+     * 
+     * @param session The session
+     * @param sourceBytes The RFC822 source bytes
+     * @param maxInMemorySize The max. in-memory size in bytes
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public ManagedMimeMessage(final Session session, final byte[] sourceBytes, final int maxInMemorySize) throws MessagingException, IOException {
         super(session);
+        if (0 > maxInMemorySize) {
+            throw new IllegalArgumentException("maxInMemorySize is less than zero.");
+        }
         flags = new Flags(); // empty Flags object
         final byte[][] splitted = split(sourceBytes);
         headers = splitted[0].length == 0 ? new InternetHeaders() : new InternetHeaders(new UnsynchronizedByteArrayInputStream(splitted[0]));
-        content = splitted[1];
+        final byte[] contentBytes = splitted[1];
+        if (contentBytes.length > maxInMemorySize) {
+            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            if (null == management) {
+                content = contentBytes;
+            } else {
+                try {
+                    managedFile = management.createManagedFile(contentBytes);
+                    contentStream = new SharedFileInputStream(managedFile.getFile(), maxInMemorySize);
+                } catch (final ManagedFileException e) {
+                    throw new MessagingException(e.getMessage(), e);
+                }
+            }
+        } else {
+            content = contentBytes;
+        }
         modified = false;
         saved = true;
     }
 
+    /**
+     * Cleans up this managed MIME message.
+     * 
+     * @throws MessagingException If a messaging error occurs
+     */
+    public void cleanUp() throws MessagingException {
+        if (null == managedFile) {
+            return;
+        }
+        final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        if (null != management) {
+            try {
+                management.removeByID(managedFile.getID());
+            } catch (final ManagedFileException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
+        }
+    }
+
     private static final byte[][] split(final byte[] sourceBytes) {
+        if (null == sourceBytes) {
+            return new byte[][] { new byte[] {}, new byte[] {} };
+        }
         byte[] pattern = new byte[] { '\r', '\n', '\r', '\n' };
         int pos = indexOf(sourceBytes, pattern, 0, computeFailure(pattern));
         if (pos >= 0) {
