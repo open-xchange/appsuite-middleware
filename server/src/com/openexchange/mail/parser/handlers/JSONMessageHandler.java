@@ -463,6 +463,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                      * Add HTML alternative part as attachment
                      */
                     asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName);
+                } else if (DisplayMode.RAW.equals(displayMode)) {
+                    /*
+                     * Return HTML content as-is
+                     */
+                    asRawContent(id, contentType.getBaseType(), htmlContent);
                 } else {
                     /*
                      * Discard
@@ -514,7 +519,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
     // private static final RTF2HtmlConverter RTFCONV = new RTF2HtmlConverter();
 
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
-        if (isAlternative && usm.isDisplayHtmlInlineContent() && contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
+        if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
             /*
              * User wants to see message's alternative content
              */
@@ -530,6 +535,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                          */
                         asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
                         return true;
+                    } else if (DisplayMode.RAW.equals(displayMode)) {
+                        /*
+                         * Return plain-text content as-is
+                         */
+                        asRawContent(id, contentType.getBaseType(), plainTextContentArg);
                     }
                     /*
                      * Discard
@@ -556,7 +566,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     }
                 } else if (DisplayMode.RAW.equals(displayMode)) {
                     /*
-                     * Return HTML content as-is
+                     * Return plain-text content as-is
                      */
                     asRawContent(id, contentType.getBaseType(), plainTextContentArg);
                 } else {
