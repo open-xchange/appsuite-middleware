@@ -690,7 +690,7 @@ public final class IMAPDefaultFolderChecker {
      * @throws MessagingException If a messaging error occurs
      */
     private static boolean inferiors(final IMAPFolder folder) throws MessagingException {
-        return ((folder.getType() & IMAPFolder.HOLDS_FOLDERS) == IMAPFolder.HOLDS_FOLDERS);
+        return ((folder.getType() & IMAPFolder.HOLDS_FOLDERS) > 0);
     }
 
     private static class StringWriter extends Writer {
