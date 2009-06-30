@@ -59,44 +59,36 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
 public class I18nServiceListener implements ServiceTrackerCustomizer{
-	
+
+    private static final Log LOG = LogFactory.getLog(I18nServiceListener.class);
+
     private final BundleContext context;
-	
+
     private final I18nServices services = I18nServices.getInstance();
-    
-	private static final Log LOG = LogFactory.getLog(I18nServiceListener.class);
-	
-	
-	public I18nServiceListener(final BundleContext context){
+
+    public I18nServiceListener(BundleContext context) {
         super();
         this.context = context;
-	}
-	
-	public Object addingService(final ServiceReference reference) {
-        final I18nService i18n = (I18nService)context.getService(reference); 
-        
-        LOG.info("Adding Service Bundle I18nTools "+i18n.getLocale());
-        
+    }
+
+    public Object addingService(ServiceReference reference) {
+        final I18nService i18n = (I18nService) context.getService(reference);
+        LOG.info("Adding service I18nService for locale " + i18n.getLocale());
         services.addService(i18n.getLocale(), i18n);
-        
-		return i18n;
-	}
+        return i18n;
+    }
 
-	public void modifiedService(final ServiceReference reference, final Object service) {
-		// Nothing to do.
-		
-	}
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
 
-	public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(ServiceReference reference, Object service) {
         try {
-			final I18nService i18n = (I18nService)context.getService(reference);
-	        
-	        LOG.info("Removing Service Bundle I18nTools "+i18n.getLocale());
-	        
-	        services.removeService(i18n.getLocale(), i18n);
+            final I18nService i18n = (I18nService) service;
+            LOG.info("Removing service I18nService for locale " + i18n.getLocale());
+            services.removeService(i18n.getLocale(), i18n);
         } finally {
-        	context.ungetService(reference);
+            context.ungetService(reference);
         }
-	}
-
+    }
 }
