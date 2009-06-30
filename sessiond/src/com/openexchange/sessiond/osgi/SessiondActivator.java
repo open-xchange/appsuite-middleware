@@ -217,12 +217,10 @@ public final class SessiondActivator extends DeferredActivator {
                     }
                 }
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("stopping bundle:\n" + "Remaining active sessions were put into session cache for remote distribution\n");
+                    LOG.info("stopping bundle:\nRemaining active sessions were put into session cache for remote distribution\n");
                 }
             } catch (final ServiceException e) {
-                LOG.warn(
-                    "Missing caching service." + " Remaining active sessions could not be put into session cache for remote distribution",
-                    e);
+                LOG.warn("Missing caching service. Remaining active sessions could not be put into session cache for remote distribution.");
             }
             /*
              * Stop sessiond
