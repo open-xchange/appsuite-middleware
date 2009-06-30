@@ -208,10 +208,10 @@ public final class IMAPDefaultFolderChecker {
     private void checkDefaultFolders(final String key) throws MailException {
         if (!isDefaultFoldersChecked(key)) {
             synchronized (session) {
+                if (isDefaultFoldersChecked(key)) {
+                    return;
+                }
                 try {
-                    if (isDefaultFoldersChecked(key)) {
-                        return;
-                    }
                     if (LOG.isDebugEnabled()) {
                         final StringBuilder sb = new StringBuilder(2048);
                         sb.append("\n\nDefault folder check for account ").append(accountId).append(" (");
