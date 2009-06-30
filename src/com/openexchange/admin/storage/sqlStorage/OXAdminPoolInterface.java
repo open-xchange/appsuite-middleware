@@ -53,14 +53,17 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 
 import java.sql.Connection;
 
-
 public interface OXAdminPoolInterface {
-    
-    public Connection getConnectionForConfigDB() throws PoolException;
-    
-    public Connection getConnectionForContext( int context_id ) throws PoolException;
-    
-    public boolean pushConnectionForConfigDB(Connection con) throws PoolException;
-    
-    public boolean pushConnectionForContext(int context_id,Connection con) throws PoolException;
+
+    Connection getConnectionForConfigDB() throws PoolException;
+
+    Connection getConnectionForContext(int contextId) throws PoolException;
+
+    Connection getConnectionForContextNoTimeout(int contextId) throws PoolException;
+
+    boolean pushConnectionForConfigDB(Connection con) throws PoolException;
+
+    boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
+
+    boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException;
 }
