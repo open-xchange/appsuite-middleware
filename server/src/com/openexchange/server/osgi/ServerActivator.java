@@ -286,8 +286,8 @@ public final class ServerActivator extends DeferredActivator {
         (databaseActivator = new Activator()).start(context);
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
-        Version.buildnumber = (String) headers.get("OXVersion") + " Rev" + (String) headers.get("OXRevision");
-        Version.version = (String) headers.get("Bundle-Version");
+        Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
+        Version.version = (String) headers.get("OXVersion");
         // (Re-)Initialize server service registry with available services
         {
             final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
