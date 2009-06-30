@@ -56,7 +56,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jsieve.SieveException;
@@ -65,7 +64,6 @@ import org.apache.jsieve.parser.generated.TokenMgrError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
@@ -174,6 +172,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
         } catch (final JSONException e) {
             throw new OXMailfilterException(Code.JSON_ERROR, e, e.getMessage());
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -229,6 +231,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -280,6 +286,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -351,6 +361,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, e.getMessage());
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -411,6 +425,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -478,6 +496,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e, EMPTY_ARGS);
         } catch (final TokenMgrError error) {
             throw new OXMailfilterException(OXMailfilterException.Code.LEXICAL_ERROR, error, error.getMessage());
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -510,6 +532,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
             throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -540,6 +566,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
             throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
+        } catch (final NumberFormatException nfe) {
+            throw new OXMailfilterException(OXMailfilterException.Code.NAN, nfe, getNANString(nfe));
+        } catch (final RuntimeException re) {
+            throw new OXMailfilterException(OXMailfilterException.Code.PROBLEM, re, re.getMessage());
         } finally {
             if (null != sieveHandler) {
                 try {
@@ -768,6 +798,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"));
             sieveHandler.setScriptStatus(this.scriptname, true);
         }
+    }
+
+    private static String getNANString(final NumberFormatException nfe) {
+        final String msg = nfe.getMessage();
+        if (msg != null && msg.startsWith("For input string: \"")) {
+            return msg.substring(19, msg.length() - 1);
+        }
+        return msg;
     }
 
 }

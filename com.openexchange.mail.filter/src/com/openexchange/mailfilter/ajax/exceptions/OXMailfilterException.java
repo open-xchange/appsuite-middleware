@@ -135,7 +135,11 @@ public class OXMailfilterException extends AbstractOXException {
         /**
          * Lexical error: %1$s
          */
-        LEXICAL_ERROR("Lexical error: %1$s", Category.CODE_ERROR, 16);
+        LEXICAL_ERROR("Lexical error: %1$s", Category.CODE_ERROR, 16),
+        /**
+         * Input string "%1$s" is not a number.
+         */
+        NAN("Input string \"%1$s\" is not a number.", Category.USER_INPUT, 17);
 
         private final String message;
 
