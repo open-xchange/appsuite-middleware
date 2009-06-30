@@ -176,8 +176,8 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              */
             target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
             if (null == target) {
-                final Throwable t = new Throwable("Missing publication target for ID: com.openexchange.publish.online.infostore.document");
-                throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN, t, new Object[0]);
+                LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
+                throw new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED, Long.valueOf(uploadQuota));
             }
             /*
              * ... and in turn target's publication service

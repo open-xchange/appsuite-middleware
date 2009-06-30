@@ -6,6 +6,7 @@
 
  - Bugfix #14035: Fixed IMAP folder deletion
  - Bugfix #14033: Added logging if a cached session is found
+ - Bugfix #14034: Throwing quota-exceeded exception if necessary bundle to perform "publish, don't attach" feature is missing
 
 * 2009-06-30 - marcus.klein@open-xchange.com
 
