@@ -103,6 +103,9 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -1471,31 +1474,49 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public void sendReceiptAck(final String folder, final String msgUID, final String fromAddr) throws MailException {
-        /*
-         * Check for valid from address
-         */
-        try {
-            final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-            if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                validAddrs.add(new InternetAddress(usm.getSendAddr()));
-            }
-            final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-            validAddrs.add(new InternetAddress(user.getMail()));
-            final String[] aliases = user.getAliases();
-            for (final String alias : aliases) {
-                validAddrs.add(new InternetAddress(alias));
-            }
-            if (!validAddrs.contains(new InternetAddress(fromAddr))) {
-                throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
-            }
-        } catch (final AddressException e) {
-            throw MIMEMailException.handleMessagingException(e);
-        }
+    	final FullnameArgument argument = prepareMailFolderParam(folder);
+    	final int acc = argument.getAccountId();
+    	try {
+			final MailAccountStorageService ss = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+			MailAccount ma = ss.getMailAccount(acc, session.getUserId(), session.getContextId());
+			if (ma.isDefaultAccount()) {
+				/*
+			     * Check for valid from address
+			     */
+			    try {
+			        final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+			        if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+			            validAddrs.add(new InternetAddress(usm.getSendAddr()));
+			        }
+			        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+			        validAddrs.add(new InternetAddress(user.getMail()));
+			        final String[] aliases = user.getAliases();
+			        for (final String alias : aliases) {
+			            validAddrs.add(new InternetAddress(alias));
+			        }
+			        if (!validAddrs.contains(new InternetAddress(fromAddr))) {
+			            throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+			        }
+			    } catch (final AddressException e) {
+			        throw MIMEMailException.handleMessagingException(e);
+			    }
+			} else {
+				InternetAddress i1 = new InternetAddress(ma.getPrimaryAddress());
+				if (!new InternetAddress(ma.getPrimaryAddress()).equals(new InternetAddress(fromAddr))) {
+					throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+				}
+			}
+		} catch (final AddressException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		} catch (final ServiceException e) {
+			throw new MailException(e);
+		} catch (final MailAccountException e) {
+			throw new MailException(e);
+		}
         /*
          * Initialize
          */
-        final FullnameArgument argument = prepareMailFolderParam(folder);
-        initConnection(argument.getAccountId());
+        initConnection(acc);
         final String fullname = argument.getFullname();
         final MailTransport transport = MailTransport.getInstance(session);
         try {
