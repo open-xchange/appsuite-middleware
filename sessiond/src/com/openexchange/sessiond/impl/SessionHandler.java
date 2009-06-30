@@ -138,7 +138,7 @@ public final class SessionHandler {
      * @return The wrapper objects for removed sessions
      */
     public static SessionControl[] removeUserSessions(final int userId, final int contextId, final boolean propagate) {
-        SessionControl[] retval = sessionData.removeUserSessions(userId, contextId);
+        final SessionControl[] retval = sessionData.removeUserSessions(userId, contextId);
         if (propagate) {
             for (final SessionControl sessionControl : retval) {
                 try {
@@ -173,7 +173,7 @@ public final class SessionHandler {
     protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException {
         final int maxSessPerUser = config.getMaxSessionsPerUser();
         if (maxSessPerUser > 0) {
-            int count = sessionData.getNumOfUserSessions(userId, context);
+            final int count = sessionData.getNumOfUserSessions(userId, context);
             if (count >= maxSessPerUser) {
                 throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
             }
@@ -221,7 +221,7 @@ public final class SessionHandler {
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
     protected static boolean clearSession(final String sessionid) {
-        SessionControl sessionControl = sessionData.clearSession(sessionid);
+        final SessionControl sessionControl = sessionData.clearSession(sessionid);
         if (null == sessionControl) {
             LOG.debug("Cannot find session id to remove session <" + sessionid + '>');
             return false;
@@ -243,7 +243,7 @@ public final class SessionHandler {
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("changeSessionPassword <").append(sessionid).append('>').toString());
         }
-        SessionControl sessionControl = sessionData.getSession(sessionid);
+        final SessionControl sessionControl = sessionData.getSession(sessionid);
         if (null == sessionControl) {
             throw new SessiondException(SessiondException.Code.PASSWORD_UPDATE_FAILED);
         }
@@ -252,10 +252,10 @@ public final class SessionHandler {
     }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String localIp) {
-        SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken, config.getRandomTokenTimeout(), localIp);
+        final SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken, config.getRandomTokenTimeout(), localIp);
         if (null == sessionControl) {
             return null;
-                 }
+        }
         return sessionControl.getSession();
     }
 
@@ -269,7 +269,7 @@ public final class SessionHandler {
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("getSession <").append(sessionid).append('>').toString());
         }
-        SessionControl sessionControl = sessionData.getSession(sessionid);
+        final SessionControl sessionControl = sessionData.getSession(sessionid);
         if (null == sessionControl) {
             return null;
         }
@@ -277,11 +277,9 @@ public final class SessionHandler {
          * Look-up cache if current session wrapped by session-control is marked for removal
          */
         try {
-            SessionCache cache = SessionCache.getInstance();
+            final SessionCache cache = SessionCache.getInstance();
             final Session s = sessionControl.getSession();
-            final CachedSession cachedSession = cache.getCachedSessionByUser(
-                s.getUserId(),
-                s.getContextId());
+            final CachedSession cachedSession = cache.getCachedSessionByUser(s.getUserId(), s.getContextId());
             if (null != cachedSession) {
                 if (cachedSession.isMarkedAsRemoved()) {
                     cache.removeCachedSession(cachedSession.getSecret());
@@ -319,6 +317,7 @@ public final class SessionHandler {
                     /*
                      * A cache hit! Add to local session containers
                      */
+                    LOG.info("Cached session found. ID: " + cachedSession.getSessionId());
                     return sessionData.addSession(new SessionImpl(cachedSession, localIP), config.getLifeTime(), noLimit);
                 }
             }
@@ -348,9 +347,9 @@ public final class SessionHandler {
         if (LOG.isDebugEnabled()) {
             LOG.debug("session cleanup");
         }
-        List<SessionControl> sessionControls = sessionData.rotate();
+        final List<SessionControl> sessionControls = sessionData.rotate();
         if (LOG.isInfoEnabled()) {
-            for (SessionControl sessionControl : sessionControls) {
+            for (final SessionControl sessionControl : sessionControls) {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
             }
         }
@@ -388,13 +387,13 @@ public final class SessionHandler {
         }
     }
 
-    private static void postContainerRemoval(List<SessionControl> sessionControls) {
+    private static void postContainerRemoval(final List<SessionControl> sessionControls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
             final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
-            Map<String, Session> eventMap = new HashMap<String, Session>();
-            for (SessionControl sessionControl : sessionControls) {
-                Session session = sessionControl.getSession();
+            final Map<String, Session> eventMap = new HashMap<String, Session>();
+            for (final SessionControl sessionControl : sessionControls) {
+                final Session session = sessionControl.getSession();
                 eventMap.put(session.getSessionID(), session);
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);

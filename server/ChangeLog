@@ -1,6 +1,7 @@
 * 2009-06-30 - thorben.betten@open-xchange.com
 
  - Bugfix #14035: Fixed IMAP folder deletion
+ - Bugfix #14033: Added logging if a cached session is found
 
 * 2009-06-30 - marcus.klein@open-xchange.com
 
