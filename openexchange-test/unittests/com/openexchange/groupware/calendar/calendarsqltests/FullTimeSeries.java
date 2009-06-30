@@ -81,7 +81,8 @@ public class FullTimeSeries extends CalendarSqlTest {
         Calendar loadedUntil = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         loadedUntil.setTime(loaded.getUntil());
 
-        assertEquals("Wrong day in until", cal.get(Calendar.DAY_OF_MONTH) + 1, loadedUntil.get(Calendar.DAY_OF_MONTH));
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        assertEquals("Wrong day in until", cal.get(Calendar.DAY_OF_MONTH), loadedUntil.get(Calendar.DAY_OF_MONTH));
         assertEquals("Wrong hour in until", 0, loadedUntil.get(Calendar.HOUR_OF_DAY));
     }
 }
