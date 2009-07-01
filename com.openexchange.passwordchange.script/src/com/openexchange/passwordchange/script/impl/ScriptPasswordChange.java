@@ -130,13 +130,18 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		 *  4. newpwd - New user password
 		 */
 		
-		String[] cmd = new String[6];
+		String[] cmd = new String[11];
 		cmd[0] = shellscript_to_execute; // the script, after that, the parameter 
-		cmd[1] = "--cid "+cid;
-		cmd[2] = "--username "+usern;
-		cmd[3] = "--userid "+userid;
-		cmd[4] = "--oldpassword "+oldpw; // for spaces in passwor
-		cmd[5] = "--newpassword "+newpw; // 
+		cmd[1] = "--cid";
+		cmd[2] = cid;
+		cmd[3] = "--username";
+		cmd[4] = usern;
+		cmd[5] = "--userid";
+		cmd[6] = userid;
+		cmd[7] = "--oldpassword";
+		cmd[8] = oldpw; 
+		cmd[9] = "--newpassword";
+		cmd[10] = newpw; // 
 		
 		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
 		
@@ -165,7 +170,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		String line = null;
 		
 		while ((line = br.readLine()) != null){
-			LOG.info("PWD CHANGE: "+line);
+			LOG.debug("PWD CHANGE: "+line);
 		}
 		
 		return proc.waitFor();
