@@ -179,13 +179,25 @@ public final class Tools {
      * 
      * @param con writable database connection.
      * @param table name of the table that should get a new index.
+     * @param name name of the index or <code>null</code> to let the database define the name.
      * @param columns names of the columns the index should cover.
+     * @param unique if this should be a unique index.
      * @throws SQLException if some SQL problem occurs.
      */
-    public static final void createIndex(final Connection con, final String table, final String[] columns) throws SQLException {
+    public static final void createIndex(Connection con, String table, String name, String[] columns, boolean unique) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(table);
-        sql.append("` ADD INDEX (`");
+        sql.append("` ADD ");
+        if (unique) {
+            sql.append("UNIQUE ");
+        }
+        sql.append("INDEX ");
+        if (null != name) {
+            sql.append('`');
+            sql.append(name);
+            sql.append("` ");
+        }
+        sql.append("(`");
         for (final String column : columns) {
             sql.append(column);
             sql.append("`,`");
@@ -199,6 +211,19 @@ public final class Tools {
         } finally {
             closeSQLStuff(null, stmt);
         }
+    }
+
+    /**
+     * This method creates a new index on a table. Beware, this method is vulnerable to SQL injection because table and column names can not
+     * be set through a {@link PreparedStatement}.
+     * 
+     * @param con writable database connection.
+     * @param table name of the table that should get a new index.
+     * @param columns names of the columns the index should cover.
+     * @throws SQLException if some SQL problem occurs.
+     */
+    public static final void createIndex(Connection con, String table, String[] columns) throws SQLException {
+        createIndex(con, table, null, columns, false);
     }
 
     public static final boolean tableExists(final Connection con, final String table) throws SQLException {
