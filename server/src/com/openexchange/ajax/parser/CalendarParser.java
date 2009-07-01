@@ -118,7 +118,10 @@ public class CalendarParser extends CommonParser {
 		}
 		
 		if (jsonobject.has(CalendarFields.DAYS)) {
-			calendarobject.setDays(parseInt(jsonobject, CalendarFields.DAYS));
+		    int days = parseInt(jsonobject, CalendarFields.DAYS);
+		    if (days != 0) {
+		        calendarobject.setDays(parseInt(jsonobject, CalendarFields.DAYS));
+		    }
 		}
 		
 		if (jsonobject.has(CalendarFields.DAY_IN_MONTH)) {
