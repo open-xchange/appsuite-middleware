@@ -53,6 +53,7 @@ import java.sql.Connection;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -97,8 +98,16 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                         Integer.valueOf(contextId));
                 }
             }
-            final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
-            final Context ctx = contextService.getContext(contextId);
+            final Context ctx;
+            {
+                // Prefer context service
+                final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+                if (null == contextService) {
+                    ctx = ContextStorage.getStorageContext(contextId);
+                } else {
+                    ctx = contextService.getContext(contextId);
+                }
+            }
             // Create and fill appropriate description object
             final MailAccountDescription mailAccountDescription = new MailAccountDescription();
             mailAccountDescription.setName("Unified INBOX");
