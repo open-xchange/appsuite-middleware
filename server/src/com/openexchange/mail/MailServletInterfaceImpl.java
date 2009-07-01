@@ -1478,7 +1478,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     	final int acc = argument.getAccountId();
     	try {
 			final MailAccountStorageService ss = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-			MailAccount ma = ss.getMailAccount(acc, session.getUserId(), session.getContextId());
+			final MailAccount ma = ss.getMailAccount(acc, session.getUserId(), session.getContextId());
 			if (ma.isDefaultAccount()) {
 				/*
 			     * Check for valid from address
@@ -1501,7 +1501,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			        throw MIMEMailException.handleMessagingException(e);
 			    }
 			} else {
-				InternetAddress i1 = new InternetAddress(ma.getPrimaryAddress());
 				if (!new InternetAddress(ma.getPrimaryAddress()).equals(new InternetAddress(fromAddr))) {
 					throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
 				}
