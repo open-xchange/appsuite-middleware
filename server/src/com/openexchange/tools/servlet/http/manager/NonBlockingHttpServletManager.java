@@ -66,7 +66,7 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.ServletQueue;
 
 /**
- * {@link NonBlockingHttpServletManager} - A HTTP servlet manager using a {@link NonBlockingRWLock non-blocking lock}.
+ * {@link NonBlockingHttpServletManager} - A HTTP servlet manager using a {@link NonBlockingRWLock non-blocking read-write lock}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
