@@ -1,3 +1,9 @@
+open-xchange-admin (6.8.1-10) unstable; urgency=low
+
+  * build for ptf_2009-07-03_2009040610000072
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  1 Jul 2009 09:17:41 +0200
+
 open-xchange-admin (6.8.1-9) unstable; urgency=low
 
   * build for public ptf 2009-06-16

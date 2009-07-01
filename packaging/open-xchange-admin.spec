@@ -33,7 +33,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	9
+Release:	10
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -221,6 +221,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jun 30 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13477: If a user is deleted a connection without timeout is used because a lot of data must be moved taking a lot of time.
 * Fri May 08 2009 - carsten.hoeger@open-xchange.com
  - Bugfix #13565: Added script method to wait for process to stop.
 * Thu Apr 23 2009 - marcus.klein@open-xchange.com
