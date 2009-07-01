@@ -1,3 +1,9 @@
+open-xchange-jcharset (1.3.0-42) unstable; urgency=low
+
+  * build for public ptf 2009-07-01
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  1 Jul 2009 13:28:27 +0200
+
 open-xchange-jcharset (1.3.0-41) unstable; urgency=low
 
   * build for public ptf 2009-06-16

@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	13
+Release:	14
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jul 01 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14022: Adding additional unique indexes on prg_dates_members table to improve performance.
 * Tue Jun 30 2009 - thorben.betten@open-xchange.com
  - Bugfix #13968: Fixed IE < 8 vulnerability for HTML content nested inside corrupt image files.
 * Fri Jun 19 2009 - thorben.betten@open-xchange.com
