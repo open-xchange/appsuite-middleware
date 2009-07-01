@@ -1165,7 +1165,7 @@ public final class Contacts {
                 try {
                     ps.close();
                 } catch (final Exception sq) {
-                    LOG.error("UNABLE TO CLOSE STATEMENR ", sq);
+                    LOG.error("UNABLE TO CLOSE STATEMENT", sq);
                 }
             }
             if (null != writecon) {
