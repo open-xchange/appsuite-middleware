@@ -343,12 +343,12 @@ public class EasyLogin extends HttpServlet {
 			"		function(result) { dologin(result); },\n" +
 			"		function(result, status) {\n" +
 			"			if (!status) {\n" +
-			"				if (result.code == \"LGI-0006\")\n";
+			"				if (result.code == \"LGI-0006\"){\n";
 			
 	private static final String RESPONSE23 =	"alert(_(\"Login failed. Please check your user name and password and try again.\"));\n";
 			
 	private static final String RESPONSE24 =
-			"			} else\n" +
+			"			    } else\n" +
 			"				//#. HTTP Errors from the server\n" +
 			"				//#. %1$s is the numeric HTTP status code\n" +
 			"				//#. %2$s is the corresponding HTTP status text\n";
@@ -357,16 +357,16 @@ public class EasyLogin extends HttpServlet {
 		
 	private static final String REDIRECT_BY_REFERRER =	
 			"			window.location.href = document.referrer + \"?login=failed&user=\" + u;\n" +
-			"			return true;\n" ;
+			"			return true;\n}\n" ;
 	
 	private static final String REDIRECT_BASE =	
 		"			window.location.href = location.protocol+\"//\"+location.host;\n" +
-		"			return true;\n" ;
+		"			return true;\n}\n" ;
 		
 		
 	private String getCustomRedirectURL(String url){
 		return "window.location.href = \""+url+"\";\n" +
-				"return true;\n";
+				"return true;\n}\n";
 	}
 			
 	private static final String RESPONSE28 =			
@@ -492,6 +492,7 @@ public class EasyLogin extends HttpServlet {
 			out.print(RESPONSE1);
 			out.print(AJAX_ROOT);
 			out.print(RESPONSE2);
+			
 			if( popUpOnError ) {
 				out.print(RESPONSE23);
 				
@@ -511,25 +512,23 @@ public class EasyLogin extends HttpServlet {
 					out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
 				}
 			}
+			
 			out.print(RESPONSE24);
-			if( popUpOnError ) {
-				out.print(RESPONSE25);
-				
-				// redirect to given action
-				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
-					// redir param was sent, now check what action is requested
-					if(req.getParameter(redirPara).equals("_BASE_")){
-						// send javascript redirect to / 
-						out.print(REDIRECT_BASE);
-					}else{
-						// custom redirect url was requested, send this URL in javascript to redirect
-						out.print(getCustomRedirectURL(req.getParameter(redirPara).toString()));
-					}
+			out.print(RESPONSE25);
+			
+			// redirect to given action
+			if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
+				// redir param was sent, now check what action is requested
+				if(req.getParameter(redirPara).equals("_BASE_")){
+					// send javascript redirect to / 
+					out.print(REDIRECT_BASE);
 				}else{
-					// no special redirect was requested, do it via referrer
-					out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
+					// custom redirect url was requested, send this URL in javascript to redirect
+					out.print(getCustomRedirectURL(req.getParameter(redirPara).toString()));
 				}
-				
+			}else{
+				// no special redirect was requested, do it via referrer
+				out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
 			}
 			
 			
