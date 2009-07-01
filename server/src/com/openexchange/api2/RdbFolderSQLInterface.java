@@ -62,6 +62,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
@@ -129,6 +130,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         return retval;
     }
 
+    private static final int[] VIRTUAL_IDS = {
+        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbFolderSQLInterface.class);
 
     private final int userId;
@@ -183,6 +188,21 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
      * @see com.openexchange.api2.FolderSQLInterface#getFolderById(int)
      */
     public FolderObject getFolderById(final int id) throws OXException {
+        final int pos = Arrays.binarySearch(VIRTUAL_IDS, id);
+        if (pos >= 0) {
+            final FolderObject fo = FolderObject.createVirtualFolderObject(id, FolderObject.getFolderString(
+                id,
+                session.getUser().getLocale()), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+            if (3 == pos) {
+                fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+            } else {
+                fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+            }
+            if (FolderCacheManager.isInitialized()) {
+                FolderCacheManager.getInstance().putFolderObject(fo, ctx);
+            }
+            return fo;
+        }
         try {
             final FolderObject fo = oxfolderAccess.getFolderObject(id);
             final EffectivePermission perm = fo.getEffectiveUserPermission(userId, userConfiguration);
@@ -373,7 +393,23 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
      */
     public int deleteFolderObject(final FolderObject folderobject, final Date clientLastModified) throws OXException {
         try {
-            folderobject.fill(oxfolderAccess.getFolderObject(folderobject.getObjectID()), false);
+            final int pos = Arrays.binarySearch(VIRTUAL_IDS, folderobject.getObjectID());
+            if (pos >= 0) {
+                final FolderObject fo = FolderObject.createVirtualFolderObject(folderobject.getObjectID(), FolderObject.getFolderString(
+                    folderobject.getObjectID(),
+                    session.getUser().getLocale()), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                if (3 == pos) {
+                    fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+                } else {
+                    fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+                }
+                if (FolderCacheManager.isInitialized()) {
+                    FolderCacheManager.getInstance().putFolderObject(fo, ctx);
+                }
+                folderobject.fill(fo);
+            } else {
+                folderobject.fill(oxfolderAccess.getFolderObject(folderobject.getObjectID()), false);
+            }
             if (folderobject.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
                 throw new OXFolderException(
                     FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
@@ -727,6 +763,21 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 
     public int clearFolder(final FolderObject folderobject, final Date clientLastModified) throws OXException {
         try {
+            final int pos = Arrays.binarySearch(VIRTUAL_IDS, folderobject.getObjectID());
+            if (pos >= 0) {
+                final FolderObject fo = FolderObject.createVirtualFolderObject(folderobject.getObjectID(), FolderObject.getFolderString(
+                    folderobject.getObjectID(),
+                    session.getUser().getLocale()), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                if (3 == pos) {
+                    fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+                } else {
+                    fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+                }
+                if (FolderCacheManager.isInitialized()) {
+                    FolderCacheManager.getInstance().putFolderObject(fo, ctx);
+                }
+                folderobject.fill(fo);
+            }
             if (folderobject.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
                 throw new OXFolderException(
                     FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,

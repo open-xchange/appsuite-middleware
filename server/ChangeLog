@@ -12,6 +12,7 @@
 
  - Bugfix #14028: Using Java's concurrent read-write lock to control access to HTTP servlet manager
  - Bugfix #13736: Fallback to ContextStorage implementation if ContextService is missing
+ - Bugfix #14047: Checking for virtual folder IDs on action=get to folder servlet
 
 * 2009-06-30 - martin.herfurth@open-xchange.com
 
