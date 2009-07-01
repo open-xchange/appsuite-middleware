@@ -2648,7 +2648,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             {
                 mm = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), body.getBytes("US-ASCII"));
                 final String fromAddr = mm.getHeader(MessageHeaders.HDR_FROM, null);
-                if (null == fromAddr) {
+                if (isEmpty(fromAddr)) {
                     // Add from address
                     from = new InternetAddress(getDefaultSendAddress(session), true);
                     mm.setFrom(from);
@@ -3637,6 +3637,18 @@ public class Mail extends PermissionServlet implements UploadListener {
             accountId = MailAccount.DEFAULT_ID;
         }
         return accountId;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
     }
 
 }
