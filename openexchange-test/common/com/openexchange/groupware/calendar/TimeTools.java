@@ -103,6 +103,18 @@ public final class TimeTools {
 
     private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm" };
 
+    public static Calendar createCalendar(TimeZone tz, int year, int month, int day, int hour) {
+        Calendar calendar = new GregorianCalendar(tz);
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
+    }
+    
     public static Date D(final String value, TimeZone timeZone) {
         for (String fallbackPattern : patterns) {
             try {
