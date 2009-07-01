@@ -47,32 +47,18 @@
  *
  */
 
-package com.openexchange.tools.servlet.http;
+package com.openexchange.tools.servlet.http.manager;
 
-import java.lang.reflect.Constructor;
 import java.util.Dictionary;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import com.openexchange.tools.servlet.http.manager.ConcurrentHttpServletManager;
-import com.openexchange.tools.servlet.http.manager.IHttpServletManager;
-import com.openexchange.tools.servlet.http.manager.NonBlockingHttpServletManager;
 
 /**
- * {@link HttpServletManager} - The HTTP servlet manager
+ * {@link IHttpServletManager} - Interface for HTTP servlet manager.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HttpServletManager {
-
-    private static IHttpServletManager instance;
-
-    /**
-     * Initializes a new {@link HttpServletManager}
-     */
-    private HttpServletManager() {
-        super();
-    }
+public interface IHttpServletManager {
 
     /**
      * Determines the instance of {@link HttpServlet} that corresponds to given path; e.g. <code>/servlet/path</code>
@@ -81,9 +67,7 @@ public class HttpServletManager {
      * @param pathStorage A container to keep the actual servlet path contained in servlet mapping for later servlet release
      * @return The instance of {@link HttpServlet} or <code>null</code> if no instance is bound to specified path
      */
-    public static HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
-        return instance.getServlet(path, pathStorage);
-    }
+    public HttpServlet getServlet(final String path, final StringBuilder pathStorage);
 
     /**
      * Puts a servlet bound to given ID into this servlet manager's pool
@@ -91,9 +75,7 @@ public class HttpServletManager {
      * @param path The servlet's path
      * @param servletObj The servlet instance
      */
-    public static final void putServlet(final String path, final HttpServlet servletObj) {
-        instance.putServlet(path, servletObj);
-    }
+    public void putServlet(final String path, final HttpServlet servletObj);
 
     /**
      * Registers a servlet if not already contained
@@ -103,18 +85,14 @@ public class HttpServletManager {
      * @param initParams The servlet's init parameters
      * @throws ServletException If servlet's initialization fails or another servlet has already been registered with the same alias
      */
-    public static final void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
-        instance.registerServlet(id, servlet, initParams);
-    }
+    public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException;
 
     /**
      * Unregisters the servlet bound to given ID from mapping.
      * 
      * @param id The servlet ID or alias
      */
-    public static final void unregisterServlet(final String id) {
-        instance.unregisterServlet(id);
-    }
+    public void unregisterServlet(final String id);
 
     /**
      * Destroys the servlet that is bound to given ID.
@@ -122,38 +100,6 @@ public class HttpServletManager {
      * @param id The servlet ID
      * @param servletObj The servlet instance
      */
-    public static final void destroyServlet(final String id, final HttpServlet servletObj) {
-        instance.destroyServlet(id, servletObj);
-    }
-
-    /**
-     * Initializes HTTP servlet manager with specified initial servlet constructor map.
-     * 
-     * @param servletConstructorMap The servlet constructor map
-     * @param nonBlocking <code>true</code> to use a non-blocking {@link IHttpServletManager servlet manager}; otherwise <code>false</code>
-     *            to use a concurrent {@link IHttpServletManager servlet manager}
-     */
-    final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap, final boolean nonBlocking) {
-        synchronized (HttpServletManager.class) {
-            if (null == instance) {
-                if (nonBlocking) {
-                    instance = new NonBlockingHttpServletManager(servletConstructorMap);
-                } else {
-                    instance = new ConcurrentHttpServletManager(servletConstructorMap);
-                }
-            }
-        }
-    }
-
-    /**
-     * Shuts down the HTTP servlet manager.
-     */
-    final static void shutdownHttpServletManager() {
-        synchronized (HttpServletManager.class) {
-            if (null != instance) {
-                instance = null;
-            }
-        }
-    }
+    public void destroyServlet(final String id, final HttpServlet servletObj);
 
 }

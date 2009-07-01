@@ -67,7 +67,7 @@ import com.openexchange.server.Initialization;
 import com.openexchange.tools.servlet.OXServletException;
 
 /**
- * {@link HttpManagersInit}
+ * {@link HttpManagersInit} - {@link Initialization} for HTTP servlet management.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -119,8 +119,6 @@ public final class HttpManagersInit implements Initialization {
         }
     }
 
-    private final static String STR_PROPERTIES = ".properties";
-
     private void initServletMappings() throws OXServletException {
         try {
             final String servletMappingDir = SystemConfig.getProperty(SystemConfig.Property.ServletMappingDir);
@@ -137,12 +135,8 @@ public final class HttpManagersInit implements Initialization {
             }
             final File[] propFiles = dir.listFiles(new FilenameFilter() {
 
-                /*
-                 * (non-Javadoc)
-                 * @see java.io.FilenameFilter#accept(java.io.File, java.lang.String)
-                 */
                 public boolean accept(final File dir, final String name) {
-                    return toLowerCase(name).endsWith(STR_PROPERTIES);
+                    return toLowerCase(name).endsWith(".properties");
 
                 }
             });
@@ -161,7 +155,10 @@ public final class HttpManagersInit implements Initialization {
                     addServletClass(iter.next().toString().trim(), properties, servletConstructorMap);
                 }
             }
-            HttpServletManager.initHttpServletManager(servletConstructorMap);
+            /*
+             * Initialize HTTP servlet manager
+             */
+            HttpServletManager.initHttpServletManager(servletConstructorMap, false);
         } catch (final IOException exc) {
             throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc.getMessage());
         }
