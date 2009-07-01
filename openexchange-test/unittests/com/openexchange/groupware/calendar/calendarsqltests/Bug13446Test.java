@@ -49,58 +49,40 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.sql.SQLException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class CalendarSqlTestSuite {
+public class Bug13446Test extends CalendarSqlTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+    private CalendarDataObject appointment;
 
-        tests.addTestSuite(FullTimeSeries.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug5557Test.class);
-        tests.addTestSuite(Bug4778Test.class);
-        tests.addTestSuite(Bug13358Test.class);
-        tests.addTestSuite(Bug13121Test.class);
-        tests.addTestSuite(Bug13068Test.class);
-        tests.addTestSuite(Bug12923Test.class);
-        tests.addTestSuite(Bug12681Test.class);
-        tests.addTestSuite(Bug12662Test.class);
-        tests.addTestSuite(Bug12659Test.class);
-        tests.addTestSuite(Bug12601Test.class);
-        tests.addTestSuite(Bug12571Test.class);
-        tests.addTestSuite(Bug12509Test.class);
-        tests.addTestSuite(Bug12496Test.class);
-        tests.addTestSuite(Bug12489Test.class);
-        tests.addTestSuite(Bug12466Test.class);
-        tests.addTestSuite(Bug12413Test.class);
-        tests.addTestSuite(Bug12377Test.class);
-        tests.addTestSuite(Bug12269Test.class);
-        tests.addTestSuite(Bug12072Test.class);
-        tests.addTestSuite(Bug11881Test.class);
-        tests.addTestSuite(Bug11865Test.class);
-        tests.addTestSuite(Bug11803Test.class);
-        tests.addTestSuite(Bug11730Test.class);
-        tests.addTestSuite(Bug11708Test.class);
-        tests.addTestSuite(Bug11695Test.class);
-        tests.addTestSuite(Bug11453Test.class);
-        tests.addTestSuite(Bug11424Test.class);
-        tests.addTestSuite(Bug11316Test.class);
-        tests.addTestSuite(Bug11307Test.class);
-        tests.addTestSuite(Bug11148Test.class);
-        tests.addTestSuite(Bug11059Test.class);
-        tests.addTestSuite(Bug11051Test.class);
-        tests.addTestSuite(Bug10806Test.class);
-        tests.addTestSuite(Bug10154Test.class);
-        tests.addTestSuite(Node1077Test.class);
-        tests.addTestSuite(ParticipantsAgreeViaDifferentLoadMethods.class);
-        tests.addTestSuite(Bug13995Test.class);
-        tests.addTestSuite(Bug13446Test.class);
-        
-        return tests;
+    public void setUp() throws Exception {
+        super.setUp();
+
+        appointment = appointments.buildRecurringAppointment();
+        appointment.setOccurrence(30);
+        appointments.save(appointment);
+        clean.add(appointment);
+    }
+
+    public void testBug13446() throws Exception {
+        for (int i = 1; i <= 25; i++) {
+            CalendarDataObject exception = appointments.createIdentifyingCopy(appointment);
+            exception.setRecurrencePosition(i);
+            exception.setTitle(appointment.getTitle() + " - exception " + i);
+            try {
+                appointments.save(exception);
+            } catch (Exception e) {
+                fail("Unable to create exception " + i + ", with error: " + e.getMessage());
+            }
+        }
+    }
+
+    public void tearDown() throws AbstractOXException, SQLException {
+        super.tearDown();
     }
 }
