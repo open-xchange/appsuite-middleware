@@ -1115,7 +1115,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (cdao.containsStartDate()) {
                 start = cdao.getStartDate();
             }
-            if (start != null && until.getTime() < start.getTime()) {
+            if (isUntilBeforeStart(until, start)) {
                 throw new OXCalendarException(OXCalendarException.Code.UNTIL_BEFORE_START_DATE);
             }
         }
@@ -1157,6 +1157,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsParticipants()) {
             recColl.simpleParticipantCheck(cdao);
         }
+    }
+
+    private boolean isUntilBeforeStart(Date until, Date start) {
+        return start != null && recColl.normalizeLong(until.getTime()) < recColl.normalizeLong(start.getTime());
     }
 
     final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
