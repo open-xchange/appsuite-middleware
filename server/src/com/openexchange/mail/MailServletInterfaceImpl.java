@@ -77,6 +77,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -1221,7 +1223,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return prepareFullname(accountId, mailAccess.getFolderStorage().createFolder(mailFolder));
     }
 
-    private static String fullCopy(final MailAccess<?, ?> srcAccess, final String srcFullname, final MailAccess<?, ?> destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws MailException {
+    private static String fullCopy(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> srcAccess, final String srcFullname, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> destAccess, final String destParent, final char destSeparator, final int user, final boolean hasPermissions) throws MailException {
         // Create folder
         final MailFolder source = srcAccess.getFolderStorage().getFolder(srcFullname);
         final MailFolderDescription mfd = new MailFolderDescription();
@@ -1248,7 +1250,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailSortField.RECEIVED_DATE,
             OrderDirection.ASC,
             new MailField[] { MailField.FULL });
-        destAccess.getMessageStorage().appendMessages(destFullname, msgs);
+        final IMailMessageStorage destMessageStorage = destAccess.getMessageStorage();
+        // Append messages to destination account
+        /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
+        /*-
+         * 
+        // Ensure flags
+        final String[] arr = new String[1];
+        for (int i = 0; i < msgs.length; i++) {
+            final MailMessage m = msgs[i];
+            final String mailId = mailIds[i];
+            if (null != m && null != mailId) {
+                arr[0] = mailId;
+                // System flags
+                destMessageStorage.updateMessageFlags(destFullname, arr, m.getFlags(), true);
+                // Color label
+                if (m.containsColorLabel() && m.getColorLabel() != MailMessage.COLOR_LABEL_NONE) {
+                    destMessageStorage.updateMessageColorLabel(destFullname, arr, m.getColorLabel());
+                }
+            }
+        }
+         */
         // Iterate subfolders
         final MailFolder[] tmp = srcAccess.getFolderStorage().getSubfolders(srcFullname, true);
         for (int i = 0; i < tmp.length; i++) {
@@ -1474,44 +1496,44 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public void sendReceiptAck(final String folder, final String msgUID, final String fromAddr) throws MailException {
-    	final FullnameArgument argument = prepareMailFolderParam(folder);
-    	final int acc = argument.getAccountId();
-    	try {
-			final MailAccountStorageService ss = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-			final MailAccount ma = ss.getMailAccount(acc, session.getUserId(), session.getContextId());
-			if (ma.isDefaultAccount()) {
-				/*
-			     * Check for valid from address
-			     */
-			    try {
-			        final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-			        if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-			            validAddrs.add(new InternetAddress(usm.getSendAddr()));
-			        }
-			        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-			        validAddrs.add(new InternetAddress(user.getMail()));
-			        final String[] aliases = user.getAliases();
-			        for (final String alias : aliases) {
-			            validAddrs.add(new InternetAddress(alias));
-			        }
-			        if (!validAddrs.contains(new InternetAddress(fromAddr))) {
-			            throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
-			        }
-			    } catch (final AddressException e) {
-			        throw MIMEMailException.handleMessagingException(e);
-			    }
-			} else {
-				if (!new InternetAddress(ma.getPrimaryAddress()).equals(new InternetAddress(fromAddr))) {
-					throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
-				}
-			}
-		} catch (final AddressException e) {
-			throw MIMEMailException.handleMessagingException(e);
-		} catch (final ServiceException e) {
-			throw new MailException(e);
-		} catch (final MailAccountException e) {
-			throw new MailException(e);
-		}
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int acc = argument.getAccountId();
+        try {
+            final MailAccountStorageService ss = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final MailAccount ma = ss.getMailAccount(acc, session.getUserId(), session.getContextId());
+            if (ma.isDefaultAccount()) {
+                /*
+                 * Check for valid from address
+                 */
+                try {
+                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                    if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                        validAddrs.add(new InternetAddress(usm.getSendAddr()));
+                    }
+                    final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                    validAddrs.add(new InternetAddress(user.getMail()));
+                    final String[] aliases = user.getAliases();
+                    for (final String alias : aliases) {
+                        validAddrs.add(new InternetAddress(alias));
+                    }
+                    if (!validAddrs.contains(new InternetAddress(fromAddr))) {
+                        throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+                    }
+                } catch (final AddressException e) {
+                    throw MIMEMailException.handleMessagingException(e);
+                }
+            } else {
+                if (!new InternetAddress(ma.getPrimaryAddress()).equals(new InternetAddress(fromAddr))) {
+                    throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
+                }
+            }
+        } catch (final AddressException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        } catch (final MailAccountException e) {
+            throw new MailException(e);
+        }
         /*
          * Initialize
          */

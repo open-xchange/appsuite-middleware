@@ -57,7 +57,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,6 +108,11 @@ import com.sun.mail.pop3.POP3Folder;
 public final class MIMEMessageConverter {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageConverter.class);
+
+    private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
+        MailField.BODY,
+        MailField.FULL,
+        MailField.ACCOUNT_NAME));
 
     private static interface MailMessageFieldFiller {
 
@@ -711,17 +718,27 @@ public final class MIMEMessageConverter {
      * @throws MailException If field fillers cannot be created
      */
     private static MailMessageFieldFiller[] createFieldFillers(final MailField[] fields) throws MailException {
-        final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(fields[i]);
+        final MailField[] arr;
+        {
+            final EnumSet<MailField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+            if (fieldSet.contains(MailField.FULL)) {
+                arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
+            } else {
+                arr = fields;
+            }
+        }
+        final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            final MailField field = arr[i];
+            final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(field);
             if (filler == null) {
-                if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i]) || MailField.ACCOUNT_NAME.equals(fields[i])) {
+                if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Ignoring mail field " + fields[i]);
+                        LOG.debug("Ignoring mail field " + field);
                     }
                     fillers[i] = null;
                 } else {
-                    throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
+                    throw new MailException(MailException.Code.INVALID_FIELD, field.toString());
                 }
             } else {
                 fillers[i] = filler;
@@ -999,11 +1016,21 @@ public final class MIMEMessageConverter {
      * @throws MailException If field fillers cannot be created
      */
     private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailField[] fields) throws MailException {
-        final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            final MailMessageFieldFiller filler = FILLER_MAP.get(fields[i]);
+        final MailField[] arr;
+        {
+            final EnumSet<MailField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+            if (fieldSet.contains(MailField.FULL)) {
+                arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
+            } else {
+                arr = fields;
+            }
+        }
+        final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            final MailField field = arr[i];
+            final MailMessageFieldFiller filler = FILLER_MAP.get(field);
             if (filler == null) {
-                if (MailField.ID.equals(fields[i])) {
+                if (MailField.ID.equals(field)) {
                     fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
@@ -1016,20 +1043,20 @@ public final class MIMEMessageConverter {
                             }
                         }
                     };
-                } else if (MailField.FOLDER_ID.equals(fields[i])) {
+                } else if (MailField.FOLDER_ID.equals(field)) {
                     fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                             mailMessage.setFolder(folder.getFullName());
                         }
                     };
-                } else if (MailField.BODY.equals(fields[i]) || MailField.FULL.equals(fields[i]) || MailField.ACCOUNT_NAME.equals(fields[i])) {
+                } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Ignoring mail field " + fields[i]);
+                        LOG.debug("Ignoring mail field " + field);
                     }
                     fillers[i] = null;
                 } else {
-                    throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
+                    throw new MailException(MailException.Code.INVALID_FIELD, field.toString());
                 }
             } else {
                 fillers[i] = filler;

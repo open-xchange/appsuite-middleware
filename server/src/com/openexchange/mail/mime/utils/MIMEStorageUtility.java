@@ -324,6 +324,11 @@ public final class MIMEStorageUtility {
         // ENV_FIELDS.add(MailListField.SIZE);
     }
 
+    private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
+        MailField.BODY,
+        MailField.FULL,
+        MailField.ACCOUNT_NAME));
+
     /**
      * Gets the appropriate fetch profile
      * <p>
@@ -337,13 +342,22 @@ public final class MIMEStorageUtility {
      * @return The appropriate IMAP fetch profile
      */
     public static FetchProfile getFetchProfile(final MailField[] fields, final MailField[] searchFields, final MailField sortField, final boolean preferEnvelope) {
+        final MailField[] arr;
+        {
+            final EnumSet<MailField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+            if (fieldSet.contains(MailField.FULL)) {
+                arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
+            } else {
+                arr = fields;
+            }
+        }
         final FetchProfile retval = new FetchProfile();
         /*
          * Use a set to avoid duplicate entries
          */
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
-        if (fields != null) {
-            set.addAll(Arrays.asList(fields));
+        if (arr != null) {
+            set.addAll(Arrays.asList(arr));
         }
         if (searchFields != null) {
             set.addAll(Arrays.asList(searchFields));
