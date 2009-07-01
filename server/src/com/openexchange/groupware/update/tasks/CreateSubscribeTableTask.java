@@ -93,7 +93,7 @@ public class CreateSubscribeTableTask implements UpdateTask {
     private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_subscriptions (cid, id) VALUES (?, 0)";
 
     public int addedWithVersion() {
-        return 40;
+        return 46;
     }
 
     public int getPriority() {

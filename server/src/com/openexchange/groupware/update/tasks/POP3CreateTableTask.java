@@ -81,7 +81,7 @@ public class POP3CreateTableTask implements UpdateTask {
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(POP3CreateTableTask.class);
 
     public int addedWithVersion() {
-        return 36;
+        return 42;
     }
 
     public int getPriority() {

@@ -91,7 +91,7 @@ public class RenameGroupTask implements UpdateTask {
     }
 
     public int addedWithVersion() {
-        return 46;
+        return 52;
     }
 
     public int getPriority() {

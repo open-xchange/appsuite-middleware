@@ -81,7 +81,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailAccountCreateTablesTask.class);
 
     public int addedWithVersion() {
-        return 34;
+        return 40;
     }
 
     public int getPriority() {

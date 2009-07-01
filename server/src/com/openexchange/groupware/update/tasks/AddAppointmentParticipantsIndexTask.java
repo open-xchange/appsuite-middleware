@@ -49,8 +49,17 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.update.Tools.createIndex;
+import static com.openexchange.tools.update.Tools.existsIndex;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -60,88 +69,65 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.tools.update.Tools;
-
 
 /**
- * {@link CreateGenconfTablesTask}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * Update task for adding an index on prg_dates_members.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public class CreateGenconfTablesTask implements UpdateTask {
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CreateGenconfTablesTask.class);
-    
-    private static final String STRING_TABLE_CREATE = "CREATE TABLE `genconf_attributes_strings` ( "+
-   "`cid` int(10) unsigned NOT NULL,"+
-   "`id` int(10) unsigned NOT NULL,"+
-   "`name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`value` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "KEY (`cid`,`id`,`name`)"+
-   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
-    private static final String BOOL_TABLE_CREATE = "CREATE TABLE `genconf_attributes_bools` ("+
-    "`cid` int(10) unsigned NOT NULL,"+
-   "`id` int(10) unsigned NOT NULL,"+
-   "`name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "`value` tinyint(1) COLLATE utf8_unicode_ci DEFAULT NULL,"+
-   "KEY (`cid`,`id`,`name`)"+
-   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
-    private static final String SEQUENCE_TABLE_CREATE = "CREATE TABLE `sequence_genconf` ("+
-    "`cid` int(10) unsigned NOT NULL,"+
-    "`id` int(10) unsigned NOT NULL,"+
-    "PRIMARY KEY (`cid`)"+
-    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private static final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_genconf (cid, id) VALUES (?, 0)";
-    
+public class AddAppointmentParticipantsIndexTask implements UpdateTask {
+
+    private static final Log LOG = LogFactory.getLog(AddAppointmentParticipantsIndexTask.class);
+
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(AddAppointmentParticipantsIndexTask.class);
+
+    public AddAppointmentParticipantsIndexTask() {
+        super();
+    }
+
     public int addedWithVersion() {
-        return 44;
+        return 34;
     }
 
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        Connection con = null;
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+        desc = { "" },
+        exceptionId = { 1 },
+        msg = { "An SQL error occurred: %1$s." }
+    )
+    public void perform(Schema schema, int contextId) throws AbstractOXException {
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
-            con = Database.getNoTimeout(contextId, true);
-            if(!Tools.tableExists(con, "genconf_attributes_strings")) {
-                Tools.exec(con, STRING_TABLE_CREATE);
-            }
-            if(!Tools.tableExists(con, "genconf_attributes_bools")) {
-                Tools.exec(con, BOOL_TABLE_CREATE);
-            }
-            if(!Tools.tableExists(con, "sequence_genconf")) {
-                Tools.exec(con, SEQUENCE_TABLE_CREATE);
-            }
-            for(final int ctxId : Tools.getContextIDs(con)) {
-                if(!Tools.hasSequenceEntry("sequence_genconf", con, ctxId)) {
-                    Tools.exec(con, INSERT_IN_SEQUENCE, ctxId);
-                }
-            }
+            con.setAutoCommit(false);
+            correctAppointmentParticipantIndexes(con);
+            con.commit();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            rollback(con);
+            throw EXCEPTION.create(1, e, e.getMessage());
         } finally {
-            if(con != null) {
-                Database.backNoTimeout(contextId, true, con);
+            autocommit(con);
+            Database.backNoTimeout(contextId, true, con);
+        }
+    }
+
+    private void correctAppointmentParticipantIndexes(Connection con) {
+        String[] columns = { "cid", "member_uid", "object_id" };
+        for (String table : new String[] { "prg_dates_members", "del_dates_members" }) {
+            try {
+                String indexName = existsIndex(con, table, columns);
+                if (null == indexName) {
+                    LOG.info("Creating new index named member with columns (cid,member_uid,object_id) on table " + table + ".");
+                    createIndex(con, table, "member", columns, true);
+                } else {
+                    LOG.info("New unique index named " + indexName + " with columns (cid,member_uid,object_id) already exists on table " + table + ".");
+                }
+            } catch (SQLException e) {
+                LOG.error("Problem correcting indexes on table " + table + ".", e);
             }
         }
     }
-    
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "A SQL error occurred while performing task CreateGenconfTablesTask: %1$s." }
-    )
-    private static UpdateException createSQLError(final SQLException e) {
-        return EXCEPTION.create(1, e, e.getMessage());
-    }
-
 }

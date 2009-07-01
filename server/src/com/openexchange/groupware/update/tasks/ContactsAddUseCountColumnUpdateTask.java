@@ -80,7 +80,7 @@ public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
     private final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(ContactsAddUseCountColumnUpdateTask.class);
 
     public int addedWithVersion() {
-        return 44;
+        return 50;
     }
 
     public int getPriority() {

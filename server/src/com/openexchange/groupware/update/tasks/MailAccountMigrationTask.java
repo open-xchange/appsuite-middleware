@@ -106,7 +106,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
     }
 
     public int addedWithVersion() {
-        return 34;
+        return 40;
     }
 
     public int getPriority() {

@@ -93,7 +93,7 @@ public class CreatePublicationTablesTask implements UpdateTask {
     private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_publications (cid, id) VALUES (?, 0)";
 
     public int addedWithVersion() {
-        return 42;
+        return 48;
     }
 
     public int getPriority() {

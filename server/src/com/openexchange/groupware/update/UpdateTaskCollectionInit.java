@@ -200,6 +200,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.UpdateFolderIdInReminder());
             // Version 11
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask());
+            // SP4 starts here.
             // Version 12
             // Searches for duplicate infostore folder names and changes them.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreResolveFolderNameCollisions());
@@ -259,6 +260,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // viewable anymore in the calendar. This update task tries to replace the wrong
             // folder identifier with the correct one.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectWrongAppointmentFolder());
+            // SP5 starts from here.
             // Version 26
             // Introduces foreign key constraints on infostore_document and del_infostore_document.
             // Assures these constraints are met.
@@ -288,29 +290,33 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Extends size of VARCHAR column 'dn' in both working and backup table of 'prg_date_rights'.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTask());
             // Version 34
+            // Adds an index on prg_dates_members to improve performance in large contexts.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AddAppointmentParticipantsIndexTask());
+            // Version 6.10 starts here.
+            // Version 40
             // Adds necessary tables for multiple mail accounts and migrates mail account data
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask());
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountMigrationTask());
-            // Version 36
+            // Version 42
             // Adds necessary tables to support missing POP3 features
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.POP3CreateTableTask());
-            // Version 38
+            // Version 44
             // Adds necessary tables to support generic configuration storage
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateGenconfTablesTask());
-            // Version 40
+            // Version 46
             // Adds necessary tables for subscribe service
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateSubscribeTableTask());
-            // Version 42
+            // Version 48
             // Adds necessary tables for publish service
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreatePublicationTablesTask());
-            // Version 44
+            // Version 50
             // Adds necessary column in contact table for counting usage.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddUseCountColumnUpdateTask());
-            // Version 46
+            // Version 52
             // Renames the standard group of all users.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RenameGroupTask());
-            // Version 48
-            // This update tasks changes the order of the primary key of prg_dates_members for improving performance.
+            // Version 54
+            // This update tasks improves performance of indexes for InfoStore tables.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectIndexes6_10());
         }
         if (LOG.isInfoEnabled()) {

@@ -51,10 +51,13 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.update.Tools.createForeignKey;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.createPrimaryKey;
+import static com.openexchange.tools.update.Tools.dropForeignKey;
 import static com.openexchange.tools.update.Tools.dropIndex;
 import static com.openexchange.tools.update.Tools.dropPrimaryKey;
+import static com.openexchange.tools.update.Tools.existsForeignKey;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import static com.openexchange.tools.update.Tools.existsPrimaryKey;
 
@@ -74,7 +77,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.tools.update.Tools;
 
 /**
  * Update task for improving indexes with version 6.10.
@@ -92,7 +94,7 @@ public class CorrectIndexes6_10 implements UpdateTask {
     }
 
     public int addedWithVersion() {
-        return 48;
+        return 54;
     }
 
     public int getPriority() {
@@ -108,7 +110,6 @@ public class CorrectIndexes6_10 implements UpdateTask {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            correctAppointmentParticipantIndexes(con);
             correctInfoStorePrimaryKey(con);
             correctInfoStoreLastModified(con);
             dropInfoStoreDocumentLastModified(con);
@@ -123,23 +124,6 @@ public class CorrectIndexes6_10 implements UpdateTask {
         }
     }
 
-    private void correctAppointmentParticipantIndexes(Connection con) {
-        String[] columns = { "cid", "member_uid", "object_id" };
-        for (String table : new String[] { "prg_dates_members", "del_dates_members" }) {
-            try {
-                String indexName = existsIndex(con, table, columns);
-                if (null == indexName) {
-                    LOG.info("Creating new index named member with columns (cid,member_uid,object_id) on table " + table + ".");
-                    createIndex(con, table, "member", columns, true);
-                } else {
-                    LOG.info("New unique index named " + indexName + " with columns (cid,member_uid,object_id) already exists on table " + table + ".");
-                }
-            } catch (SQLException e) {
-                LOG.error("Problem correcting indexes on table " + table + ".", e);
-            }
-        }
-    }
-
     private void correctInfoStorePrimaryKey(Connection con) {
         for (String table : new String[] { "infostore", "del_infostore" }) {
             String[] columns = { "cid", "id" };
@@ -147,20 +131,20 @@ public class CorrectIndexes6_10 implements UpdateTask {
             String[] documentForeignKeyColumns = { "cid", "infostore_id" };
             try {
                 if (!existsPrimaryKey(con, table, columns)) {
-                    String foreignKey = Tools.existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
+                    String foreignKey = existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
                     if (null != foreignKey) {
                         LOG.info("Removing foreign key on " + documentTable + " referencing " + table + " temporarily.");
-                        Tools.dropForeignKey(con, documentTable, foreignKey);
+                        dropForeignKey(con, documentTable, foreignKey);
                     }
                     LOG.info("Removing old primary key (cid,id,folder_id) from table " + table + ".");
                     dropPrimaryKey(con, table);
                     LOG.info("Creating new primary key (cid,id) on table " + table + ".");
                     createPrimaryKey(con, table, columns);
                     if (null != foreignKey) {
-                        foreignKey = Tools.existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
+                        foreignKey = existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
                         if (null == foreignKey) {
                             LOG.info("Recreating foreign key on " + documentTable + " referencing " + table + ".");
-                            Tools.createForeignKey(con, documentTable, documentForeignKeyColumns, table, columns);
+                            createForeignKey(con, documentTable, documentForeignKeyColumns, table, columns);
                         }
                     }
                 } else {
