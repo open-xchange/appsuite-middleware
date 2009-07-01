@@ -104,7 +104,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 3, oldTimestamp, true);
         CommonDeleteResponse response = getClient().execute(deleteRequest);
         
-        assertFalse("Timestamps should differ", oldTimestamp.equals(response.getTimestamp()));
+        assertTrue("Timestamp should be later", oldTimestamp.before(response.getTimestamp()));
         
     }
 
