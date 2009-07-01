@@ -1,6 +1,7 @@
 * 2009-07-01 - marcus.klein@open-xchange.com
 
  - Bugfix #12215: Logging was changed to not log invalid email addresses.
+ - Bugfix #14048: Added missing import to xerces bundle.
 
 * 2009-07-01 - martin.herfurth@open-xchange.com
 
