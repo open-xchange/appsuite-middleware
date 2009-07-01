@@ -1227,7 +1227,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 calculateEndDateForNewType(cdao, edao);
             }
             
-            cdao.setRecurrence(recColl.createDSString(cdao));
+            recColl.changeRecurrenceString(cdao);
             cdao.setExceptions(null);
             cdao.setDelExceptions(null);
             return recColl.CHANGE_RECURRING_TYPE;
@@ -1244,7 +1244,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setEndDate(edao.getEndDate());
             }
             if (!cdao.containsRecurrenceString()) {
-                cdao.setRecurrence(recColl.createDSString(cdao));
+                recColl.changeRecurrenceString(cdao);
             }
             cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY)));
             cdao.setEndDate(calculateRealRecurringEndDate(cdao));

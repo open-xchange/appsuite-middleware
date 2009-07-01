@@ -591,7 +591,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 // Insufficient information
                 return false;
             }
-            cdao.setRecurrence(createDSString(cdao));
+            changeRecurrenceString(cdao);
         }
         try {
             convertDSString(cdao);
@@ -600,6 +600,14 @@ public final class CalendarCollection implements CalendarCollectionService {
             LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
         }
         return false;
+    }
+
+    public void changeRecurrenceString(final CalendarDataObject cdao) throws OXException {
+        String recString = createDSString(cdao);
+        if (recString == null) {
+            cdao.removeRecurrenceID();
+        }
+        cdao.setRecurrence(recString);
     }
 
     /**
@@ -612,7 +620,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public String createDSString(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsStartDate()) {
             checkRecurring(cdao);
-            final StringBuilder recStrBuilder = new StringBuilder(64);
+            StringBuilder recStrBuilder = new StringBuilder(64);
             final int recurrenceType = cdao.getRecurrenceType();
             int interval = cdao.getInterval(); // i
             if (interval > MAXTC) {
@@ -737,9 +745,9 @@ public final class CalendarCollection implements CalendarCollectionService {
                     }
                 }
             } else {
-                recStrBuilder.append(NO_DS);
+                recStrBuilder = null;
             }
-            return recStrBuilder.toString();
+            return recStrBuilder == null ? null : recStrBuilder.toString();
         }
         throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_START_DATE);
     }

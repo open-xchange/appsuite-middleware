@@ -194,9 +194,7 @@ public class CalendarDataObject extends Appointment {
 
     public final void setRecurrence(final String rec_string) {
         this.rec_string = rec_string;
-        if (rec_string != null) {
-            b_recurrencestring = true;
-        }
+        b_recurrencestring = true;
     }
 
     public final boolean containsRecurrenceString() {
@@ -263,7 +261,7 @@ public class CalendarDataObject extends Appointment {
      */
     public final boolean isSequence(final boolean what) {
         if (what) {
-            return (containsRecurrenceString() || (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
+            return ((containsRecurrenceString() && getRecurrence() != null)|| (containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0));
         }
         return (containsRecurrenceID() && containsRecurrenceType() && getRecurrenceType() > 0 && getInterval() > 0);
     }
