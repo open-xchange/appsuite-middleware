@@ -82,7 +82,7 @@ public class AlterChangeExceptionFieldLength implements UpdateTask {
         Connection writecon = null;
         Statement stmt = null;
         try {
-            writecon = Database.get(contextId, true);
+            writecon = Database.getNoTimeout(contextId, true);
             try {
                 stmt = writecon.createStatement();
             } catch (final SQLException ex) {
@@ -105,7 +105,7 @@ public class AlterChangeExceptionFieldLength implements UpdateTask {
                 ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).closeStatement(stmt);
             }
             if (writecon != null) {
-                Database.back(contextId, true, writecon);
+                Database.backNoTimeout(contextId, true, writecon);
             }
         }
     }
