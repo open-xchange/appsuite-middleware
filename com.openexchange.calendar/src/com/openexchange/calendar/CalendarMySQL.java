@@ -4126,6 +4126,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             final CalendarDataObject ldao = loadObjectForUpdate(udao, so, ctx, fid);
             udao.setDeleteExceptions(collection.addException(ldao.getDeleteException(), de));
             updateAppointment(udao, ldao, writecon, so, ctx, fid, clientLastModified, false, true);
+            cdao.setLastModified(udao.getLastModified());
         } catch (final OXException oxe) {
             throw oxe;
         } catch (final LdapException lde) {

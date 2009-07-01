@@ -466,6 +466,9 @@ public class AppointmentRequest {
 
         try {
             appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
+            if (appointmentObj.getLastModified() != null) {
+                timestamp = appointmentObj.getLastModified();
+            }
         } catch (final SQLException e) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e, new Object[0]);
         }
