@@ -24,7 +24,7 @@ CREATE TABLE prg_dates (
     field04 TEXT,
     field06 VARCHAR(64),
     field07 TEXT,
-    field08 VARCHAR(255),
+    field08 TEXT,
     field09 VARCHAR(255),
     PRIMARY KEY (cid, intfield01),
     INDEX (cid, intfield02),
@@ -76,7 +76,7 @@ CREATE TABLE del_dates (
     field04 TEXT,
     field06 VARCHAR(255),
     field07 text,
-    field08 VARCHAR(255),
+    field08 TEXT,
     field09 VARCHAR(255),
     PRIMARY KEY (cid, intfield01)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
