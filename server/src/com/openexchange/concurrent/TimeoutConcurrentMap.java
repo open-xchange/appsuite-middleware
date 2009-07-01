@@ -64,8 +64,6 @@ import com.openexchange.timer.TimerService;
  */
 public final class TimeoutConcurrentMap<K, V> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimeoutConcurrentMap.class);
-
     /*-
      * Members
      */
