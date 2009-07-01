@@ -257,7 +257,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (lastPos < pos) {
                 fetchValidSeqNumsWithFallback(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
             }
-            if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
+            if (fieldSet.contains(MailField.ACCOUNT_NAME) || fieldSet.contains(MailField.FULL)) {
                 return setAccountInfo(convert2Mails(messages, fields, body));
             }
             return convert2Mails(messages, fields, body);
@@ -440,7 +440,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     msgs,
                     usedFields.toArray(),
                     usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
-                if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     setAccountInfo(mails);
                 }
             } else {
@@ -471,7 +471,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     return new MailMessage[0];
                 }
                 mails = convert2Mails(msgs, usedFields.toArray(), body);
-                if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     setAccountInfo(mails);
                 }
                 /*
@@ -625,7 +625,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             final List<ThreadSortMailMessage> structuredList;
             {
                 final MailMessage[] mails;
-                if (usedFields.contains(MailField.ACCOUNT_NAME)) {
+                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     mails = setAccountInfo(convert2Mails(msgs, usedFields.toArray(), body));
                 } else {
                     mails = convert2Mails(msgs, usedFields.toArray(), body);
@@ -673,7 +673,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Sort
                  */
                 mails = convert2Mails(msgs, fields);
-                if (fieldSet.contains(MailField.ACCOUNT_NAME)) {
+                if (fieldSet.contains(MailField.ACCOUNT_NAME) || fieldSet.contains(MailField.FULL)) {
                     setAccountInfo(mails);
                 }
                 final List<MailMessage> msgList = Arrays.asList(mails);
