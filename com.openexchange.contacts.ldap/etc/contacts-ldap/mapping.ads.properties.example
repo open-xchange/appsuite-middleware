@@ -7,6 +7,9 @@
 
 # Required
 com.openexchange.contacts.ldap.mapping.ads.uniqueid				= sAMAccountName
+# Use this if your ADS only uses one DC (two DCs can work but not tested yet) see
+# documentation for this
+#com.openexchange.contacts.ldap.mapping.ads.uniqueid				= uSNCreated
 
 # Optional
 com.openexchange.contacts.ldap.mapping.ads.displayname			= displayName
@@ -23,6 +26,10 @@ com.openexchange.contacts.ldap.mapping.ads.distributionlistname = name
 # This attribute must be set to have a uid field for distributionlists because this
 # differs from the uid for user object on some LDAP servers
 com.openexchange.contacts.ldap.mapping.ads.distributionuid = sAMAccountName
+# Use this if your ADS only uses one DC (two DCs can work but not tested yet) see
+# documentation for this
+#com.openexchange.contacts.ldap.mapping.ads.distributionuid = uSNCreated
+
 
 com.openexchange.contacts.ldap.mapping.ads.birthday				=
 com.openexchange.contacts.ldap.mapping.ads.anniversary			=

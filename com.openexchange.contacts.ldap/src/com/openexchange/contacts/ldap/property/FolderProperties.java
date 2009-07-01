@@ -62,7 +62,7 @@ public class FolderProperties {
         AdminBindPW("AdminBindPW"),
         AdminDN("AdminDN"),
         authtype("authtype"),
-        baseDN("baseDN"),
+        baseDN("baseDN_users"),
         foldername("foldername"),
         mappingfile("mappingfile"),
         memorymapping("memorymapping"),
@@ -83,7 +83,8 @@ public class FolderProperties {
         searchfilter_distributionlist("searchfilter_distributionlist"),
         searchScope_distributionlist("searchScope_distributionlist"),
         baseDN_distributionlist("baseDN_distributionlist"),
-        outlook_support("outlook_support");
+        outlook_support("outlook_support"),
+        ADS_deletion_support("ADS_deletion_support");
         
         private final String name;
         
@@ -151,6 +152,8 @@ public class FolderProperties {
     private String baseDNDistributionlist;
     
     private boolean outlook_support;
+    
+    private boolean ads_deletion_support;
     
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -343,6 +346,10 @@ public class FolderProperties {
         final String outlookSupportString = checkStringProperty(parameterObject, Parameters.outlook_support);
         retval.setOutlook_support(Boolean.parseBoolean(outlookSupportString));
         logBuilder.append("\toutlook_support: ").append(retval.isOutlook_support()).append('\n');
+
+        final String ads_deletion_supportString = checkStringProperty(parameterObject, Parameters.ADS_deletion_support);
+        retval.setAds_deletion_support(Boolean.parseBoolean(ads_deletion_supportString));
+        logBuilder.append("\tADS_deletion_support: ").append(retval.isAds_deletion_support()).append('\n');
         
         final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
         
@@ -375,6 +382,8 @@ public class FolderProperties {
         return retval;
     }
 
+    
+    
     public String getAdminBindPW() {
         return adminBindPW;
     }
@@ -500,6 +509,12 @@ public class FolderProperties {
         return this.userSearchScope;
     }
 
+    public boolean isAds_deletion_support() {
+        return ads_deletion_support;
+    }
+
+
+
     public boolean isMemorymapping() {
         return memorymapping;
     }
@@ -515,6 +530,12 @@ public class FolderProperties {
     private void setAdminDN(final String adminDN) {
         this.adminDN = adminDN;
     }
+
+    private void setAds_deletion_support(boolean ads_deletion_support) {
+        this.ads_deletion_support = ads_deletion_support;
+    }
+
+
 
     private void setAuthtype(final AuthType authtype) {
         this.authtype = authtype;

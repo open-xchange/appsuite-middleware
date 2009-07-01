@@ -170,7 +170,12 @@ public class LdapException extends OXException {
         /**
          * No keys mapping table found
          */
-        NO_KEYS_MAPPING_TABLE_FOUND("No keys mapping table found", Category.CODE_ERROR, 21);
+        NO_KEYS_MAPPING_TABLE_FOUND("No keys mapping table found", Category.CODE_ERROR, 21),
+
+        /**
+         * An error occurred while trying to get the defaultNamingContext attribute
+         */
+        ERROR_GETTING_DEFAULT_NAMING_CONTEXT("An error occurred while trying to get the defaultNamingContext attribute", Category.CODE_ERROR, 22);
 
 
         

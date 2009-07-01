@@ -103,6 +103,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class LdapContactInterface implements ContactInterface {
 
+    private static final ArrayIterator<Contact> EMPTY_ARRAY_ITERATOR = new ArrayIterator<Contact>(new Contact[0]);
+
     public class SortInfo {
 
         private final int field;
@@ -129,6 +131,32 @@ public class LdapContactInterface implements ContactInterface {
             return sort;
         }
         
+    }
+
+    /**
+     * This class is used to be able to view deleted object in an Active Directory
+     *
+     * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+     *
+     */
+    private class DeletedControl implements Control {
+
+        /**
+         * For serialization
+         */
+        private static final long serialVersionUID = -3548239536056697658L;
+
+        public byte[] getEncodedValue() {
+            return new byte[] {};
+        }
+
+        public String getID() {
+            return "1.2.840.113556.1.4.417";
+        }
+
+        public boolean isCritical() {
+            return true;
+        }
     }
 
 
@@ -240,7 +268,7 @@ public class LdapContactInterface implements ContactInterface {
             if (both || ContactTypes.distributionlists.equals(contacttype)) {
                 distrifilter = "(" + folderprop.getMappings().getDistributionlistname() + "=" + escapeLDAPSearchFilter(searchobject.getPattern()) + "*)";
             }
-            arrayList = getLDAPContacts(folderId, columns, userfilter, distrifilter, null);
+            arrayList = getLDAPContacts(folderId, columns, userfilter, distrifilter, null, false);
         } else {
             final StringBuilder user = new StringBuilder();
             final StringBuilder distri = new StringBuilder();
@@ -257,7 +285,7 @@ public class LdapContactInterface implements ContactInterface {
             if (both || ContactTypes.distributionlists.equals(contacttype)) {
                 addFilterFor(mappings.getDistributionlistname(), searchobject.getDisplayName(), distri);
             }
-            arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null);
+            arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null, false);
         }
         
         sorting(orderBy, orderDir, valueOf, arrayList);
@@ -277,7 +305,7 @@ public class LdapContactInterface implements ContactInterface {
             columns.add(Contact.EMAIL1);
             columns.add(Contact.EMAIL2);
         }
-        final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null);
+        final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
         
         // Get only the needed parts...
         final List<Contact> subList = getSubList(from, to, arrayList);
@@ -289,7 +317,20 @@ public class LdapContactInterface implements ContactInterface {
 
 
     public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
-        return new ArrayIterator<Contact>(new Contact[0]);
+        if (folderprop.isOutlook_support() && folderprop.isAds_deletion_support()) {
+            // Here we start to do some dirty tricks only possible with an AD which stores deleted objects in a special structure
+            // this is done for a lifetime of 60 days for forests initially built using W2k and Server 2k3, and 180 days
+            // for forests that were initially built with Server 2k3 SP1
+            
+            // TODO: Check the cols, because not all cols are available on deleted objects
+            final Set<Integer> columns = getColumnSet(cols);
+            final ArrayList<Contact> contacts = getLDAPContacts(folderId, columns, null, null, null, true);
+            removeOlder(since, contacts);
+            
+            return new ArrayIterator<Contact>(contacts.toArray(new Contact[contacts.size()]));
+        } else {
+            return EMPTY_ARRAY_ITERATOR;
+        }
     }
 
     public int getFolderId() {
@@ -305,19 +346,22 @@ public class LdapContactInterface implements ContactInterface {
     public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         if (folderprop.isOutlook_support()) {
             final Set<Integer> columns = getColumnSet(cols);
-            final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null);
-            for (int i = 0; i < arrayList.size(); i++) {
-                final Contact obj = arrayList.get(i);
-                final Date lastModified = obj.getLastModified();
-                if (null != lastModified && lastModified.before(since)) {
-                    arrayList.remove(i--);
-                }
-            }
-            final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(
-                arrayList.toArray(new Contact[arrayList.size()]));
-            return searchIterator;
+            final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
+            removeOlder(since, arrayList);
+            return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
         } else {
-            return new ArrayIterator<Contact>(new Contact[0]);
+            return EMPTY_ARRAY_ITERATOR;
+        }
+    }
+
+
+    private void removeOlder(final Date since, final List<Contact> list) {
+        for (int i = 0; i < list.size(); i++) {
+            final Contact obj = list.get(i);
+            final Date lastModified = obj.getLastModified();
+            if (null != lastModified && lastModified.before(since)) {
+                list.remove(i--);
+            }
         }
     }
 
@@ -343,16 +387,12 @@ public class LdapContactInterface implements ContactInterface {
             final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
             // Here we have to differentiate between users, distributionlists or both
             if (both || ContactTypes.users.equals(folderprop.getContacttypes())) {
-                userfilter = "(" + folderprop.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id, getKeyMappingTable()) + ")";
+                userfilter = "(" + folderprop.getMappings().getUniqueid() + "=" + oxUidToLdapUid(object_id) + ")";
             }
             if (both || ContactTypes.distributionlists.equals(folderprop.getContacttypes())) {
-                distrifilter = "(" + folderprop.getMappings().getDistributionuid() + "=" + oxUidToLdapUid(object_id, getKeyMappingTable()) + ")";
+                distrifilter = "(" + folderprop.getMappings().getDistributionuid() + "=" + oxUidToLdapUid(object_id) + ")";
             }
-            if (folderprop.isMemorymapping()) {
-                contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null));
-            } else {
-                contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null));
-            }
+            contacts.addAll(getLDAPContacts(folder_id, columns, userfilter, distrifilter, null, false));
         }
         return new ArrayIterator<Contact>(contacts.toArray(new Contact[contacts.size()]));
     }
@@ -618,6 +658,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
+    @SuppressWarnings("unchecked")
     private Map<Integer, String> getKeyMappingTable() throws LdapException {
         final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
         if (null == keys) {
@@ -628,7 +669,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField) throws LdapException {
+    private ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, boolean deleted) throws LdapException {
         final ArrayList<Contact> arrayList = new ArrayList<Contact>();
         final LdapContext context;
         try {
@@ -647,31 +688,35 @@ public class LdapContactInterface implements ContactInterface {
                 final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
                 final boolean distributionlist = both || ContactTypes.distributionlists.equals(folderprop.getContacttypes());
                 final int pagesize = folderprop.getPagesize();
-                if (null != sortField && folderprop.getSorting().equals(Sorting.server)) {
-                    final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField(), distributionlist), sortField.getSort().equals(Order.asc), null);
-                    final SortKey[] sortKeyArray = new SortKey[] { sortKey };
-                    final Control[] controls = new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
-                    context.setRequestControls(controls);
+                context.setRequestControls(getControls(sortField, distributionlist, deleted, pagesize));
+                final String defaultNamingContext;
+                if (deleted) {
+                    defaultNamingContext = getDefaultNamingContext(context);
                 } else {
-                    final Control[] controls = new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
-                    context.setRequestControls(controls);
+                    defaultNamingContext = null;
                 }
                 if (both || ContactTypes.users.equals(folderprop.getContacttypes())) {
+                    final String filter;
                     if (null != usersearchfilter) {
-                        searchAndFetch(false, folderId, columns, folderprop.getBaseDN(), "(&" + folderprop.getSearchfilter() + usersearchfilter + ")", arrayList, context, pagesize);
+                        filter = "(&" + folderprop.getSearchfilter() + usersearchfilter + ")";
                     } else {
-                        searchAndFetch(false, folderId, columns, folderprop.getBaseDN(), folderprop.getSearchfilter(), arrayList, context, pagesize);
+                        filter = folderprop.getSearchfilter();
                     }
+                    searchAndFetch(false, folderId, columns, folderprop.getBaseDN(), filter, arrayList, context, pagesize, defaultNamingContext);
                 }
                 if (distributionlist) {
+                    final String filter;
                     if (null != distributionsearchfilter) {
-                        searchAndFetch(true, folderId, columns, folderprop.getBaseDNDistributionlist(), "(&" + folderprop.getSearchfilterDistributionlist() + distributionsearchfilter + ")", arrayList, context, pagesize);
+                        filter = "(&" + folderprop.getSearchfilterDistributionlist() + distributionsearchfilter + ")";
                     } else {
-                        searchAndFetch(true, folderId, columns, folderprop.getBaseDNDistributionlist(), folderprop.getSearchfilterDistributionlist(), arrayList, context, pagesize);
+                        filter = folderprop.getSearchfilterDistributionlist();
                     }
+                    searchAndFetch(true, folderId, columns, folderprop.getBaseDNDistributionlist(), filter, arrayList, context, pagesize, defaultNamingContext);
                 }
-                
             } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+                throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+            } catch (final NamingException e) {
                 LOG.error(e.getMessage(), e);
                 throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
             } finally {
@@ -682,6 +727,21 @@ public class LdapContactInterface implements ContactInterface {
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
         return arrayList;
+    }
+
+
+    private Control[] getControls(final SortInfo sortField, final boolean distributionlist, boolean deleted, final int pagesize) throws IOException, NamingException {
+        if (deleted) {
+            return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL), new DeletedControl() };
+        } else {
+            if (null != sortField && folderprop.getSorting().equals(Sorting.server)) {
+                final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField(), distributionlist), sortField.getSort().equals(Order.asc), null);
+                final SortKey[] sortKeyArray = new SortKey[] { sortKey };
+                return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
+            } else {
+                return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
+            }
+        }
     }
 
 
@@ -838,12 +898,14 @@ public class LdapContactInterface implements ContactInterface {
         return searchControls;
     }
 
-    private SearchControls getSearchControlDistri(final Set<Integer> columns) {
+    private SearchControls getSearchControlDistri(final Set<Integer> columns, boolean deleted) {
         final SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScopeDistributionlist()));
         searchControls.setCountLimit(0);
         final List<String> array = getAttributes(columns, true);
-        array.add("member");
+        if (!deleted) {
+            array.add("member");
+        }
         searchControls.setReturningAttributes(array.toArray(new String[array.size()]));
         return searchControls;
     }
@@ -922,6 +984,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
+    @SuppressWarnings("unchecked")
     private Map<String, Integer> getValuesMappingTable() throws LdapException {
         final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
         if (null == values) {
@@ -963,26 +1026,41 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
     
-    private String oxUidToLdapUid(final int uid, final Map<Integer, String> keys) throws LdapException {
-        final String ldapUid = keys.get(Autoboxing.I(uid));
-        if (null != ldapUid) {
-            return ldapUid;
+    private String oxUidToLdapUid(final int uid) throws LdapException {
+        if (folderprop.isMemorymapping()) {
+            final Map<Integer, String> keys = getKeyMappingTable();
+            final String ldapUid = keys.get(Autoboxing.I(uid));
+            if (null != ldapUid) {
+                return ldapUid;
+            } else {
+                throw new LdapException(Code.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND, String.valueOf(uid));
+            }
         } else {
-            throw new LdapException(Code.NO_SUCH_LONG_UID_IN_MAPPING_TABLE_FOUND, String.valueOf(uid));
+            return String.valueOf(uid);
         }
     }
 
-    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapContext context, final int pagesize) throws NamingException, LdapException, IOException {
+    private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapContext context, final int pagesize, String defaultNamingContext) throws NamingException, LdapException, IOException {
         final SearchControls searchControls;
+        final boolean deleted = (null != defaultNamingContext);
         if (distributionslist) {
-            searchControls = getSearchControlDistri(columns);
+            searchControls = getSearchControlDistri(columns, deleted);
         } else {
             searchControls = getSearchControl(columns);
         }
+        final String ownBaseDN;
+        final String ownFilter;
+        if (deleted) {
+            ownBaseDN = defaultNamingContext;
+            ownFilter = "(&" + filter + "(isDeleted=TRUE))";
+        } else {
+            ownBaseDN = baseDN;
+            ownFilter = filter;
+        }
         byte[] cookie = null;
         do {
-            final NamingEnumeration<SearchResult> search = context.search(baseDN, filter, searchControls);
-            while (null != search && search.hasMore()) {
+            final NamingEnumeration<SearchResult> search = context.search(ownBaseDN, ownFilter, searchControls);
+            while (null != search && search.hasMoreElements()) {
                 final SearchResult next = search.next();
                 final Attributes attributes = next.getAttributes();
                 final LdapGetter ldapGetter = getLdapGetter(attributes, context, next.getNameInNamespace());
@@ -1008,6 +1086,36 @@ public class LdapContactInterface implements ContactInterface {
             context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
         } while (null != cookie);
     }
+
+    private static String getDefaultNamingContext(final LdapContext ctx) throws LdapException {
+        try {
+            SearchControls searchCtls2 = new SearchControls();
+            searchCtls2.setSearchScope(SearchControls.OBJECT_SCOPE);
+            searchCtls2.setReturningAttributes(new String[]{"defaultnamingcontext"});
+            final NamingEnumeration<SearchResult> search = ctx.search("", "(objectclass=*)", searchCtls2);
+            while (search.hasMoreElements()) {
+                SearchResult sr = (SearchResult)search.next();
+                Attributes attrs = sr.getAttributes();
+                if (attrs != null) {
+                    for (NamingEnumeration<?> ae = attrs.getAll();ae.hasMoreElements();) {
+                        Attribute attr = (Attribute)ae.next();
+                        if (null != attr) {
+                            for (NamingEnumeration<?> e = attr.getAll(); e.hasMore();) {
+                                final Object next = e.next();
+                                if (null != next) {
+                                    return next.toString();
+                                }
+                            }
+                        }
+                    }
+                } 
+            }
+            throw new LdapException(Code.ERROR_GETTING_DEFAULT_NAMING_CONTEXT);
+        } catch (final NamingException e) {
+            throw new LdapException(Code.ERROR_GETTING_DEFAULT_NAMING_CONTEXT, e);
+        }
+    }
+
 
     private void sorting(final int orderBy, final String orderDir, final Order valueOf, final List<Contact> subList) {
         if (null != orderDir && folderprop.getSorting().equals(Sorting.groupware)) {
