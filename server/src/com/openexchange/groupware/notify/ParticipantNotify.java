@@ -1144,7 +1144,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 EmailableParticipant p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, null, resourceSet, receivers, all, true);
+                    addSingleParticipant(p, null, resourceSet, receivers, all, false);
                 }
                 break;
             case Participant.RESOURCE:
@@ -1560,9 +1560,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         addReceiver(participant, receivers, all);
         if (resource) {
             resourceSet.add(participant);
-            return;
+        } else {
+            participantSet.add(participant);
         }
-        participantSet.add(participant);
     }
 
     static final class MailMessage {
