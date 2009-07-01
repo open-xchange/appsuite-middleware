@@ -74,6 +74,8 @@ public final class TimeoutConcurrentMap<K, V> {
 
     private TimeoutListener<V> defaultTimeoutListener;
 
+    private boolean disposed;
+
     /**
      * Initializes a new {@link TimeoutConcurrentMap}.
      * 
@@ -91,12 +93,21 @@ public final class TimeoutConcurrentMap<K, V> {
      * Disposes this timed map. This is a shut-down command.
      */
     public void dispose() {
-        timeoutTask.cancel(true);
-        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-        if (null != timer) {
-            timer.purge();
+        if (disposed) {
+            return;
         }
-        clear();
+        synchronized (this) {
+            if (disposed) {
+                return;
+            }
+            timeoutTask.cancel(true);
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+            if (null != timer) {
+                timer.purge();
+            }
+            clear();
+            disposed = true;
+        }
     }
 
     /**
@@ -109,8 +120,13 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Acts like all values kept in this time-out map receive their time-out event. <br>
      * Furthermore the map is cleared.
+     * 
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public void timeoutAll() {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
         for (final Iterator<ValueWrapper<V>> it = map.values().iterator(); it.hasNext();) {
             final ValueWrapper<V> vw = it.next();
             it.remove();
@@ -123,8 +139,14 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Acts like the value associated with specified key receives its time-out event. <br>
      * Furthermore the value is removed from map.
+     * 
+     * @param key The value's key
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public void timeout(final K key) {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
         final ValueWrapper<V> vw = map.remove(key);
         if (vw != null && vw.timeoutListener != null) {
             vw.timeoutListener.onTimeout(vw.value);
@@ -138,6 +160,7 @@ public final class TimeoutConcurrentMap<K, V> {
      * @param value The value to put
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @return The value previously associated with given key or <code>null</code>
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public V put(final K key, final V value, final int timeToLiveSeconds) {
         return put(key, value, timeToLiveSeconds, defaultTimeoutListener);
@@ -151,8 +174,12 @@ public final class TimeoutConcurrentMap<K, V> {
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @param timeoutListener The value's time-out listener triggered on its time-out event
      * @return The value previously associated with given key or <code>null</code>
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public V put(final K key, final V value, final int timeToLiveSeconds, final TimeoutListener<V> timeoutListener) {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
         final ValueWrapper<V> vw = map.put(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, timeoutListener));
         if (null == vw) {
             return null;
@@ -168,6 +195,7 @@ public final class TimeoutConcurrentMap<K, V> {
      * @param value The value to put
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public V putIfAbsent(final K key, final V value, final int timeToLiveSeconds) {
         return putIfAbsent(key, value, timeToLiveSeconds, defaultTimeoutListener);
@@ -181,8 +209,12 @@ public final class TimeoutConcurrentMap<K, V> {
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @param timeoutListener The value's time-out listener triggered on its time-out event
      * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public V putIfAbsent(final K key, final V value, final int timeToLiveSeconds, final TimeoutListener<V> timeoutListener) {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
         final ValueWrapper<V> vw = map.putIfAbsent(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, timeoutListener));
         if (null == vw) {
             return null;
@@ -213,8 +245,12 @@ public final class TimeoutConcurrentMap<K, V> {
      * 
      * @param key The key
      * @return The value associated with given key or <code>null</code>
+     * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public V remove(final K key) {
+        if (disposed) {
+            throw new IllegalStateException("time-out map was disposed.");
+        }
         final ValueWrapper<V> vw = map.remove(key);
         if (null == vw) {
             return null;
