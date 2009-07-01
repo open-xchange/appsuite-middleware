@@ -94,11 +94,9 @@ public final class TimeoutConcurrentMap<K, V> {
      */
     public void dispose() {
         timeoutTask.cancel(true);
-        try {
-            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+        if (null != timer) {
             timer.purge();
-        } catch (final ServiceException e) {
-            LOG.warn(e.getMessage(), e);
         }
         clear();
     }
