@@ -341,33 +341,7 @@ public class EasyLogin extends HttpServlet {
 			"		{ name: u, password: p },\n" +
 			"		null,\n" +
 			"		function(result) { dologin(result); },\n" +
-			"		function(result, status) {\n" +
-			"			if (!status) {\n" +
-			"				if (result.code == \"LGI-0006\"){\n";
-			
-	private static final String RESPONSE23 =	"alert(_(\"Login failed. Please check your user name and password and try again.\"));\n";
-			
-	private static final String RESPONSE24 =
-			"			    } else\n" +
-			"				//#. HTTP Errors from the server\n" +
-			"				//#. %1$s is the numeric HTTP status code\n" +
-			"				//#. %2$s is the corresponding HTTP status text\n";
-			
-	private static final String RESPONSE25 =	"alert(\"Error: \"+status+\" - \"+result);\n";
-		
-	private static final String REDIRECT_BY_REFERRER =	
-			"			window.location.href = document.referrer + \"?login=failed&user=\" + u;\n" +
-			"			return true;\n}\n" ;
-	
-	private static final String REDIRECT_BASE =	
-		"			window.location.href = location.protocol+\"//\"+location.host;\n" +
-		"			return true;\n}\n" ;
-		
-		
-	private String getCustomRedirectURL(String url){
-		return "window.location.href = \""+url+"\";\n" +
-				"return true;\n}\n";
-	}
+			"		function(result, status) {\n";	
 			
 	private static final String RESPONSE28 =			
 			"		},\n" +
@@ -494,46 +468,38 @@ public class EasyLogin extends HttpServlet {
 			out.print(RESPONSE2);
 			
 			if( popUpOnError ) {
-				out.print(RESPONSE23);
 				
 				// for normal errors we must also redirect
 				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
-					
 					// redir param was sent, now check what action is requested
 					if(req.getParameter(redirPara).equals("_BASE_")){
-						// send javascript redirect to /
-						out.print(REDIRECT_BASE);
+						out.println(getJsWithPopUpAlertBase());
 					}else{
 						// custom redirect url was requested, send this URL in javascript to redirect
-						out.print(getCustomRedirectURL(req.getParameter(redirPara).toString()));
+						out.print(getJsWithPopUpAlertCustom(req.getParameter(redirPara).toString()));
 					}
-				}else{
-					// no special redirect was requested, do it via referrer
-					out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
+				}else{				
+					// if via referrer
+					out.println(getJsWithPopUpAlertReferrer());
+				}
+				
+			} else{
+				
+				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
+					// redir param was sent, now check what action is requested
+					if(req.getParameter(redirPara).equals("_BASE_")){
+						out.println(getJsBase());
+					}else{
+						// custom redirect url was requested, send this URL in javascript to redirect
+						out.print(getJsCustom(req.getParameter(redirPara).toString()));						
+					}
+				}else{				
+					// if via referrer
+					out.println(getJsReferrer());
 				}
 			}
 			
-			out.print(RESPONSE24);
-			out.print(RESPONSE25);
-			
-			// redirect to given action
-			if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
-				// redir param was sent, now check what action is requested
-				if(req.getParameter(redirPara).equals("_BASE_")){
-					// send javascript redirect to / 
-					out.print(REDIRECT_BASE);
-				}else{
-					// custom redirect url was requested, send this URL in javascript to redirect
-					out.print(getCustomRedirectURL(req.getParameter(redirPara).toString()));
-				}
-			}else{
-				// no special redirect was requested, do it via referrer
-				out.print(REDIRECT_BY_REFERRER); // send redirect via referrer 
-			}
-			
-			
-			
-			
+			// normal next js lines
 			out.print(RESPONSE28);  
 			
 			// direct links redirecting
@@ -552,6 +518,113 @@ public class EasyLogin extends HttpServlet {
 					");return;");
 			out.print(RESPONSE4);
 		}
+		
+	}
+	
+	private String getJsReferrer() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (!status) { \n");
+		sb.append("		// json error \n");
+		sb.append("		if (result.code == \"LGI-0006\"){  \n");
+		sb.append("		}\n");
+		sb.append("} else { \n");
+		sb.append("		// http error\n");
+		sb.append("}\n");
+		sb.append("// now redirect correctly\n");
+		sb.append("window.location.href = document.referrer + \"?login=failed&user=\"+ u;  \n");
+		sb.append("return true; \n");
+		
+		return sb.toString();
+	}
+
+	private String getJsCustom(String url) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (!status) { \n");
+		sb.append("		// json error \n");
+		sb.append("		if (result.code == \"LGI-0006\"){  \n");
+		sb.append("		}\n");
+		sb.append("} else { \n");
+		sb.append("		// http error\n");
+		sb.append("}\n");
+		sb.append("// now redirect correctly\n");
+		sb.append("window.location.href = \""+url+"\";\n");
+		sb.append("return true; \n");
+		
+		return sb.toString();
+	}
+
+	private String getJsBase() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (!status) { \n");
+		sb.append("		// json error \n");
+		sb.append("		if (result.code == \"LGI-0006\"){  \n");		
+		sb.append("		}\n");
+		sb.append("} else { \n");
+		sb.append("		// http error\n");		
+		sb.append("}\n");
+		sb.append("// now redirect correctly}\n");
+		sb.append("window.location.href = location.protocol+\"//\"+location.host;\n");
+		sb.append("return true; \n");
+		
+		return sb.toString();
+	}
+
+	private String getJsWithPopUpAlertCustom(String url) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (!status) {  \n");
+		sb.append("		// json error \n");
+		sb.append("		if (result.code == \"LGI-0006\"){  \n");
+		sb.append("			alert(_(\"Login failed. Please check your user name and password and try again.\")); \n");
+		sb.append("		}\n");
+		sb.append("} else { \n");
+		sb.append("		// http error\n");
+		sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
+		sb.append("}\n");
+		sb.append("// now redirect correctly\n");
+		sb.append("window.location.href = \""+url+"\";\n");
+		sb.append("return true; \n");
+		
+		return sb.toString();
+		
+		
+	}
+
+	private String getJsWithPopUpAlertBase() {
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (!status) { \n");
+		sb.append("		// json error \n");
+		sb.append("		if (result.code == \"LGI-0006\"){  \n");
+		sb.append("			alert(_(\"Login failed. Please check your user name and password and try again.\")); \n");
+		sb.append("		}\n");
+		sb.append("} else { \n");
+		sb.append("		// http error\n");
+		sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
+		sb.append("}\n");
+		sb.append("// now redirect correctly\n");
+		sb.append("window.location.href = location.protocol+\"//\"+location.host;\n");
+		sb.append("return true; \n");
+		
+		return sb.toString();
+	}
+
+	private String getJsWithPopUpAlertReferrer(){
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (!status) { \n");
+		sb.append("		// json error \n");
+		sb.append("		if (result.code == \"LGI-0006\"){ \n");
+		sb.append("			alert(_(\"Login failed. Please check your user name and password and try again.\")); \n");
+		sb.append("		}\n");
+		sb.append("} else { \n");
+		sb.append("		// http error\n");
+		sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
+		sb.append("}\n");
+		sb.append("// now redirect correctly\n");
+		sb.append("window.location.href = document.referrer + \"?login=failed&user=\"+ u;  \n");
+		sb.append("return true; \n");
+		
+		return sb.toString();
 		
 	}
 	
