@@ -318,6 +318,10 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 54
             // This update tasks improves performance of indexes for InfoStore tables.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectIndexes6_10());
+            // Version 56
+            // Changes the column for series appointments exceptions to type TEXT to be able
+            // to store a lot of exceptions.
+            registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterChangeExceptionFieldLength());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
