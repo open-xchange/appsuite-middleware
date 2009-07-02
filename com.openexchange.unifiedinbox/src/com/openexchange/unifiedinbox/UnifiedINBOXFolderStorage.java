@@ -185,194 +185,313 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
-            final MailFolder[] retval = new MailFolder[5];
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(retval.length << 4);
-            final TrackingCompletionService<Retval> completionService = new UnifiedINBOXCompletionService<Retval>(executor);
-            // Init names
-            final String[][] names = new String[5][];
-            names[0] = new String[] { UnifiedINBOXAccess.INBOX, getLocalizedName(UnifiedINBOXAccess.INBOX) };
-            names[1] = new String[] { UnifiedINBOXAccess.DRAFTS, getLocalizedName(UnifiedINBOXAccess.DRAFTS) };
-            names[2] = new String[] { UnifiedINBOXAccess.SENT, getLocalizedName(UnifiedINBOXAccess.SENT) };
-            names[3] = new String[] { UnifiedINBOXAccess.SPAM, getLocalizedName(UnifiedINBOXAccess.SPAM) };
-            names[4] = new String[] { UnifiedINBOXAccess.TRASH, getLocalizedName(UnifiedINBOXAccess.TRASH) };
-            // Create a Callable for each known subfolder
-            for (int i = 0; i < retval.length; i++) {
-                final int index = i;
-                final String[] tmp = names[index];
-                completionService.submit(new LoggingCallable<Retval>(session, access.getAccountId()) {
-
-                    public Retval call() throws Exception {
-                        return new Retval(UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
-                            getAccountId(),
-                            getSession(),
-                            tmp[0],
-                            tmp[1],
-                            executor), index);
-                    }
-                });
-            }
-            // Wait for completion of each submitted task
-            try {
-                final int timeout = getMaxRunningTime();
-                int completed = 0;
-                int failed = 0;
-                while (completed < retval.length) {
-                    final Retval r;
-                    if (timeout <= 0) {
-                        // No timeout
-                        r = completionService.take().get();
-                    } else {
-                        final Future<Retval> f = completionService.poll(timeout, TimeUnit.MILLISECONDS);
-                        if (null == f) {
-                            // Waiting time elapsed before a completed task was present.
-                            if (++failed <= 1) {
-                                continue;
-                            }
-                            if (LOG.isWarnEnabled()) {
-                                final UnifiedINBOXException e = new UnifiedINBOXException(
-                                    UnifiedINBOXException.Code.TIMEOUT,
-                                    Integer.valueOf(timeout * failed),
-                                    TimeUnit.MILLISECONDS.toString().toLowerCase());
-                                LOG.warn(e.getMessage(), e);
-                            }
-                            r = null;
-                        } else {
-                            r = f.get();
-                        }
-                    }
-                    completed++;
-                    if (null != r) {
-                        retval[r.index] = r.mailFolder;
-                    }
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append(
-                        "msec."));
-                }
-                // Return them
-                return retval;
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
-            } catch (final ExecutionException e) {
-                final Throwable t = e.getCause();
-                if (MailException.class.isAssignableFrom(t.getClass())) {
-                    throw (MailException) t;
-                } else if (t instanceof RuntimeException) {
-                    throw (RuntimeException) t;
-                } else if (t instanceof Error) {
-                    throw (Error) t;
-                } else {
-                    throw new IllegalStateException("Not unchecked", t);
-                }
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+            return getRootSubfolders(false);
         }
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(parentFullname)) {
-            final MailAccount[] accounts;
-            try {
-                final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
-                    true);
-                final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-                final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
-                for (int i = 0; i < tmp.length; i++) {
-                    final MailAccount mailAccount = tmp[i];
-                    if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                        l.add(mailAccount);
-                    }
-                }
-                accounts = l.toArray(new MailAccount[l.size()]);
-            } catch (final ServiceException e) {
-                throw new UnifiedINBOXException(e);
-            } catch (final MailAccountException e) {
-                throw new UnifiedINBOXException(e);
-            }
-            final int unifiedInboxAccountId = access.getAccountId();
-            final int length = accounts.length;
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            final TrackingCompletionService<MailFolder> completionService = new UnifiedINBOXCompletionService<MailFolder>(executor);
-            for (final MailAccount mailAccount : accounts) {
-                completionService.submit(new LoggingCallable<MailFolder>(session) {
-
-                    public MailFolder call() throws Exception {
-                        final MailAccess<?, ?> mailAccess;
-                        try {
-                            mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
-                            mailAccess.connect();
-                        } catch (final MailException e) {
-                            getLogger().error(e.getMessage(), e);
-                            return null;
-                        }
-                        try {
-                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, parentFullname);
-                            // Check if account fullname is not null
-                            if (null == accountFullname) {
-                                return null;
-                            }
-                            // Get mail folder
-                            final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
-                            mailFolder.setFullname(new StringBuilder(MailFolderUtility.prepareFullname(
-                                unifiedInboxAccountId,
-                                parentFullname)).append(SEPERATOR).append(
-                                MailFolderUtility.prepareFullname(mailAccount.getId(), mailFolder.getFullname())).toString());
-                            mailFolder.setSubfolders(false);
-                            mailFolder.setSubscribedSubfolders(false);
-                            mailFolder.setName(mailAccount.getName());
-                            return mailFolder;
-                        } finally {
-                            mailAccess.close(true);
-                        }
-                    }
-                });
-            }
-            // Wait for completion of each submitted task
-            try {
-                final List<MailFolder> folders = new ArrayList<MailFolder>(length << 2);
-                for (int i = 0; i < length; i++) {
-                    final MailFolder f = completionService.take().get();
-                    if (null != f) {
-                        folders.add(f);
-                    }
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder("Retrieving subfolders of \"").append(parentFullname).append("\" took ").append(
-                        completionService.getDuration()).append("msec."));
-                }
-                // Sort them
-                Collections.sort(folders, new MailFolderNameComparator(getLocale()));
-                // Return as array
-                return folders.toArray(new MailFolder[folders.size()]);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
-            } catch (final ExecutionException e) {
-                final Throwable t = e.getCause();
-                if (MailException.class.isAssignableFrom(t.getClass())) {
-                    throw (MailException) t;
-                } else if (t instanceof RuntimeException) {
-                    throw (RuntimeException) t;
-                } else if (t instanceof Error) {
-                    throw (Error) t;
-                } else {
-                    throw new IllegalStateException("Not unchecked", t);
-                }
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+            return getKnownFolderSubfolders(parentFullname);
         }
         throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, parentFullname);
+    }
+
+    private static final String[] FULLNAMES = {
+        UnifiedINBOXAccess.INBOX, UnifiedINBOXAccess.DRAFTS, UnifiedINBOXAccess.SENT, UnifiedINBOXAccess.SPAM, UnifiedINBOXAccess.TRASH };
+
+    private MailFolder[] getRootSubfolders(final boolean byAccount) throws MailException {
+        if (byAccount) {
+            return getRootSubfoldersByAccount();
+        }
+        return getRootSubfoldersByFolder();
+    }
+
+    private MailFolder[] getRootSubfoldersByAccount() throws MailException {
+        // Determine accounts
+        final int unifiedINBOXAccountId = access.getAccountId();
+        final MailAccount[] accounts;
+        try {
+            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
+            for (int i = 0; i < arr.length; i++) {
+                final MailAccount mailAccount = arr[i];
+                if (unifiedINBOXAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
+                    l.add(mailAccount);
+                }
+            }
+            accounts = l.toArray(new MailAccount[l.size()]);
+        } catch (final ServiceException e) {
+            throw new UnifiedINBOXException(e);
+        } catch (final MailAccountException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        final int nAccounts = accounts.length;
+        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(nAccounts);
+        final TrackingCompletionService<int[][]> completionService = new UnifiedINBOXCompletionService<int[][]>(executor);
+        // Create a task for each account
+        for (int i = 0; i < nAccounts; i++) {
+            final int accountId = accounts[i].getId();
+            completionService.submit(new LoggingCallable<int[][]>(session, unifiedINBOXAccountId) {
+
+                public int[][] call() throws Exception {
+                    return UnifiedINBOXFolderConverter.getAccountDefaultFolders(accountId, session, FULLNAMES);
+                }
+            });
+        }
+        // Wait for completion
+        final List<int[][]> list = new ArrayList<int[][]>(nAccounts);
+        try {
+            final int timeout = getMaxRunningTime();
+            int completed = 0;
+            int failed = 0;
+            while (completed < nAccounts) {
+                if (timeout <= 0) {
+                    // No timeout
+                    list.add(completionService.take().get());
+                } else {
+                    final Future<int[][]> f = completionService.poll(timeout, TimeUnit.MILLISECONDS);
+                    if (null == f) {
+                        // Waiting time elapsed before a completed task was present.
+                        if (++failed <= 1) {
+                            continue;
+                        }
+                        if (LOG.isWarnEnabled()) {
+                            final UnifiedINBOXException e = new UnifiedINBOXException(
+                                UnifiedINBOXException.Code.TIMEOUT,
+                                Integer.valueOf(timeout * failed),
+                                TimeUnit.MILLISECONDS.toString().toLowerCase());
+                            LOG.warn(e.getMessage(), e);
+                        }
+                    } else {
+                        list.add(f.get());
+                    }
+                }
+                completed++;
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append("msec."));
+                System.out.println(new StringBuilder("-----\nRetrieving root's subfolders took ").append(completionService.getDuration()).append(
+                    "msec."));
+            }
+            // Merge them
+            final String[] names = new String[5];
+            names[0] = getLocalizedName(UnifiedINBOXAccess.INBOX);
+            names[1] = getLocalizedName(UnifiedINBOXAccess.DRAFTS);
+            names[2] = getLocalizedName(UnifiedINBOXAccess.SENT);
+            names[3] = getLocalizedName(UnifiedINBOXAccess.SPAM);
+            names[4] = getLocalizedName(UnifiedINBOXAccess.TRASH);
+            return UnifiedINBOXFolderConverter.mergeAccountDefaultFolders(list, FULLNAMES, names);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (MailException.class.isAssignableFrom(t.getClass())) {
+                throw (MailException) t;
+            } else if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else if (t instanceof Error) {
+                throw (Error) t;
+            } else {
+                throw new IllegalStateException("Not unchecked", t);
+            }
+        } finally {
+            try {
+                executor.shutdownNow();
+                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private MailFolder[] getRootSubfoldersByFolder() throws MailException {
+        final MailFolder[] retval = new MailFolder[5];
+        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(retval.length << 4);
+        final TrackingCompletionService<Retval> completionService = new UnifiedINBOXCompletionService<Retval>(executor);
+        // Init names
+        final String[][] names = new String[5][];
+        names[0] = new String[] { UnifiedINBOXAccess.INBOX, getLocalizedName(UnifiedINBOXAccess.INBOX) };
+        names[1] = new String[] { UnifiedINBOXAccess.DRAFTS, getLocalizedName(UnifiedINBOXAccess.DRAFTS) };
+        names[2] = new String[] { UnifiedINBOXAccess.SENT, getLocalizedName(UnifiedINBOXAccess.SENT) };
+        names[3] = new String[] { UnifiedINBOXAccess.SPAM, getLocalizedName(UnifiedINBOXAccess.SPAM) };
+        names[4] = new String[] { UnifiedINBOXAccess.TRASH, getLocalizedName(UnifiedINBOXAccess.TRASH) };
+        // Create a Callable for each known subfolder
+        for (int i = 0; i < retval.length; i++) {
+            final int index = i;
+            final String[] tmp = names[index];
+            completionService.submit(new LoggingCallable<Retval>(session, access.getAccountId()) {
+
+                public Retval call() throws Exception {
+                    return new Retval(UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
+                        getAccountId(),
+                        getSession(),
+                        tmp[0],
+                        tmp[1],
+                        executor), index);
+                }
+            });
+        }
+        // Wait for completion of each submitted task
+        try {
+            final int timeout = getMaxRunningTime();
+            int completed = 0;
+            int failed = 0;
+            while (completed < retval.length) {
+                final Retval r;
+                if (timeout <= 0) {
+                    // No timeout
+                    r = completionService.take().get();
+                } else {
+                    final Future<Retval> f = completionService.poll(timeout, TimeUnit.MILLISECONDS);
+                    if (null == f) {
+                        // Waiting time elapsed before a completed task was present.
+                        if (++failed <= 1) {
+                            continue;
+                        }
+                        if (LOG.isWarnEnabled()) {
+                            final UnifiedINBOXException e = new UnifiedINBOXException(
+                                UnifiedINBOXException.Code.TIMEOUT,
+                                Integer.valueOf(timeout * failed),
+                                TimeUnit.MILLISECONDS.toString().toLowerCase());
+                            LOG.warn(e.getMessage(), e);
+                        }
+                        r = null;
+                    } else {
+                        r = f.get();
+                    }
+                }
+                completed++;
+                if (null != r) {
+                    retval[r.index] = r.mailFolder;
+                }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append("msec."));
+                System.out.println(new StringBuilder("-----\nRetrieving root's subfolders took ").append(completionService.getDuration()).append(
+                    "msec."));
+            }
+            // Return them
+            return retval;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (MailException.class.isAssignableFrom(t.getClass())) {
+                throw (MailException) t;
+            } else if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else if (t instanceof Error) {
+                throw (Error) t;
+            } else {
+                throw new IllegalStateException("Not unchecked", t);
+            }
+        } finally {
+            try {
+                executor.shutdownNow();
+                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private MailFolder[] getKnownFolderSubfolders(final String parentFullname) throws MailException {
+        final MailAccount[] accounts;
+        try {
+            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+                MailAccountStorageService.class,
+                true);
+            final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
+            for (int i = 0; i < tmp.length; i++) {
+                final MailAccount mailAccount = tmp[i];
+                if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
+                    l.add(mailAccount);
+                }
+            }
+            accounts = l.toArray(new MailAccount[l.size()]);
+        } catch (final ServiceException e) {
+            throw new UnifiedINBOXException(e);
+        } catch (final MailAccountException e) {
+            throw new UnifiedINBOXException(e);
+        }
+        final int unifiedInboxAccountId = access.getAccountId();
+        final int length = accounts.length;
+        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
+        final TrackingCompletionService<MailFolder> completionService = new UnifiedINBOXCompletionService<MailFolder>(executor);
+        for (final MailAccount mailAccount : accounts) {
+            completionService.submit(new LoggingCallable<MailFolder>(session) {
+
+                public MailFolder call() throws Exception {
+                    final MailAccess<?, ?> mailAccess;
+                    try {
+                        mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
+                        mailAccess.connect();
+                    } catch (final MailException e) {
+                        getLogger().error(e.getMessage(), e);
+                        return null;
+                    }
+                    try {
+                        final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, parentFullname);
+                        // Check if account fullname is not null
+                        if (null == accountFullname) {
+                            return null;
+                        }
+                        // Get mail folder
+                        final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
+                        mailFolder.setFullname(new StringBuilder(MailFolderUtility.prepareFullname(unifiedInboxAccountId, parentFullname)).append(
+                            SEPERATOR).append(MailFolderUtility.prepareFullname(mailAccount.getId(), mailFolder.getFullname())).toString());
+                        mailFolder.setSubfolders(false);
+                        mailFolder.setSubscribedSubfolders(false);
+                        mailFolder.setName(mailAccount.getName());
+                        return mailFolder;
+                    } finally {
+                        mailAccess.close(true);
+                    }
+                }
+            });
+        }
+        // Wait for completion of each submitted task
+        try {
+            final List<MailFolder> folders = new ArrayList<MailFolder>(length << 2);
+            for (int i = 0; i < length; i++) {
+                final MailFolder f = completionService.take().get();
+                if (null != f) {
+                    folders.add(f);
+                }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder("Retrieving subfolders of \"").append(parentFullname).append("\" took ").append(
+                    completionService.getDuration()).append("msec."));
+            }
+            // Sort them
+            Collections.sort(folders, new MailFolderNameComparator(getLocale()));
+            // Return as array
+            return folders.toArray(new MailFolder[folders.size()]);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (MailException.class.isAssignableFrom(t.getClass())) {
+                throw (MailException) t;
+            } else if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else if (t instanceof Error) {
+                throw (Error) t;
+            } else {
+                throw new IllegalStateException("Not unchecked", t);
+            }
+        } finally {
+            try {
+                executor.shutdownNow();
+                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     @Override
