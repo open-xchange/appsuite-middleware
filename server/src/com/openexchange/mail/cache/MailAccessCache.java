@@ -49,12 +49,6 @@
 
 package com.openexchange.mail.cache;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -75,10 +69,6 @@ import com.openexchange.session.Session;
  */
 public final class MailAccessCache {
 
-    private static final Lock LOCK_MOD = new ReentrantLock();
-
-    private static final Map<Key, ReadWriteLock> contextLocks = new HashMap<Key, ReadWriteLock>();
-
     private static volatile MailAccessCache singleton;
 
     /*
@@ -96,40 +86,6 @@ public final class MailAccessCache {
     private MailAccessCache() throws MailException {
         super();
         initCache();
-    }
-
-    /**
-     * Fetches the appropriate lock.
-     * 
-     * @param key The lock's key
-     * @return The appropriate lock
-     */
-    private static ReadWriteLock getLock(final Key key) {
-        if (!contextLocks.containsKey(key)) {
-            LOCK_MOD.lock();
-            try {
-                if (!contextLocks.containsKey(key)) {
-                    contextLocks.put(key, new ReentrantReadWriteLock());
-                }
-            } finally {
-                LOCK_MOD.unlock();
-            }
-        }
-        return contextLocks.get(key);
-    }
-
-    /**
-     * Drops the lock bound to given key.
-     * 
-     * @param key The lock's key
-     */
-    private static void dropLock(final Key key) {
-        LOCK_MOD.lock();
-        try {
-            contextLocks.remove(key);
-        } finally {
-            LOCK_MOD.unlock();
-        }
     }
 
     /**
@@ -208,45 +164,7 @@ public final class MailAccessCache {
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
     public MailAccess<?, ?> removeMailAccess(final Session session, final int accountId) {
-        final Key key = getUserKey(session.getUserId(), accountId, session.getContextId());
-        final Lock readLock = getLock(key).readLock();
-        readLock.lock();
-        try {
-            if (timeoutMap.get(key) == null) {
-                /*
-                 * Connection is not available. Return immediately.
-                 */
-                return null;
-            }
-            /*
-             * Upgrade lock: unlock first to acquire write lock
-             */
-            readLock.unlock();
-            final Lock writeLock = getLock(key).writeLock();
-            writeLock.lock();
-            try {
-                final MailAccess<?, ?> mailAccess = timeoutMap.get(key);
-                /*
-                 * Still available?
-                 */
-                if (mailAccess == null) {
-                    return null;
-                }
-                timeoutMap.remove(key);
-                return mailAccess;
-            } finally {
-                /*
-                 * Downgrade lock: reacquire read without giving up write lock and...
-                 */
-                readLock.lock();
-                /*
-                 * ... unlock write.
-                 */
-                writeLock.unlock();
-            }
-        } finally {
-            readLock.unlock();
-        }
+        return timeoutMap.remove(getUserKey(session.getUserId(), accountId, session.getContextId()));
     }
 
     /**
@@ -258,49 +176,11 @@ public final class MailAccessCache {
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
     public boolean putMailAccess(final Session session, final int accountId, final MailAccess<?, ?> mailAccess) {
-        final Key key = getUserKey(session.getUserId(), accountId, session.getContextId());
-        final Lock readLock = getLock(key).readLock();
-        readLock.lock();
-        try {
-            if (timeoutMap.get(key) != null) {
-                /*
-                 * Key is already in use and therefore an mail connection is already in cache for current user
-                 */
-                return false;
-            }
-            /*
-             * Upgrade lock: unlock first to acquire write lock
-             */
-            readLock.unlock();
-            final Lock writeLock = getLock(key).writeLock();
-            writeLock.lock();
-            try {
-                /*
-                 * Still not present?
-                 */
-                if (timeoutMap.get(key) != null) {
-                    return false;
-                }
-                final int idleTime = mailAccess.getCacheIdleSeconds();
-                if (idleTime <= 0) {
-                    timeoutMap.put(key, mailAccess, defaultIdleSeconds);
-                } else {
-                    timeoutMap.put(key, mailAccess, idleTime);
-                }
-                return true;
-            } finally {
-                /*
-                 * Downgrade lock: reacquire read without giving up write lock and...
-                 */
-                readLock.lock();
-                /*
-                 * ... unlock write.
-                 */
-                writeLock.unlock();
-            }
-        } finally {
-            readLock.unlock();
+        int idleTime = mailAccess.getCacheIdleSeconds();
+        if (idleTime <= 0) {
+            idleTime = defaultIdleSeconds;
         }
+        return (null == timeoutMap.putIfAbsent(getUserKey(session.getUserId(), accountId, session.getContextId()), mailAccess, idleTime));
     }
 
     /**
@@ -311,14 +191,7 @@ public final class MailAccessCache {
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      */
     public boolean containsMailAccess(final Session session, final int accountId) {
-        final Key key = getUserKey(session.getUserId(), accountId, session.getContextId());
-        final Lock readLock = getLock(key).readLock();
-        readLock.lock();
-        try {
-            return (timeoutMap.get(key) != null);
-        } finally {
-            readLock.unlock();
-        }
+        return (timeoutMap.get(getUserKey(session.getUserId(), accountId, session.getContextId())) != null);
     }
 
     /**
@@ -336,15 +209,7 @@ public final class MailAccessCache {
                 true);
             final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
             for (final MailAccount mailAccount : accounts) {
-                final Key key = getUserKey(user, mailAccount.getId(), cid);
-                final Lock writeLock = getLock(key).writeLock();
-                writeLock.lock();
-                try {
-                    timeoutMap.timeout(key);
-                } finally {
-                    writeLock.unlock();
-                }
-                dropLock(key);
+                timeoutMap.timeout(getUserKey(user, mailAccount.getId(), cid));
             }
         } catch (final ServiceException e) {
             throw new MailException(e);
