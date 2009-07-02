@@ -49,18 +49,19 @@
 
 package com.openexchange.ajax.folder;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.GetResponse;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.GetRequest;
-import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import java.util.List;
 
 /**
  * Title of Bug: Lost permission on infostore folder
@@ -97,7 +98,8 @@ public class Bug12393Test extends AbstractAJAXSession {
 		super(name);
 	}
 	
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 		super.setUp();
 		final AJAXClient client = getClient();
 		//create the parent folder
@@ -123,8 +125,8 @@ public class Bug12393Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        AJAXClient client2 = new AJAXClient(User.User2);
-        int userId2 = client2.getValues().getUserId();
+        final AJAXClient client2 = new AJAXClient(User.User2);
+        final int userId2 = client2.getValues().getUserId();
         client2.logout();
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(userId2);
@@ -143,16 +145,17 @@ public class Bug12393Test extends AbstractAJAXSession {
         subFolderId = subFolderObject.getObjectID();
 	}
 	
-	public void tearDown() throws Exception {
+	@Override
+    public void tearDown() throws Exception {
 		final AJAXClient client = getClient();
 		// reload the parent folder (it has been changed since its creation by the modification of permissions)
-		GetRequest getRequest = new GetRequest(Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
-		GetResponse getResponse = client.execute(getRequest);
+		final GetRequest getRequest = new GetRequest(Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
+		final GetResponse getResponse = client.execute(getRequest);
 		parentFolderObject = getResponse.getFolder();
 		// lastModified has to be set separately
 		parentFolderObject.setLastModified(getResponse.getTimestamp());
 		//delete the parent folder and with it the subfolder
-		com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(parentFolderObject);
+		final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(parentFolderObject);
 		client.execute(folderDeleteRequest);
 		
 		super.tearDown();
@@ -178,13 +181,25 @@ public class Bug12393Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION);
         parentFolderObject.setPermissionsAsArray(new OCLPermission[] { perm });
         // update the parent folder
-        UpdateRequest updateRequest = new UpdateRequest(parentFolderObject);
+        final UpdateRequest updateRequest = new UpdateRequest(parentFolderObject);
         client.execute(updateRequest);
 		// load the subfolder
         getRequest = new GetRequest(Integer.toString(subFolderId), false);
         getResponse = client.execute(getRequest);
-        FolderObject newSubFolderObject = getResponse.getFolder();
+        final FolderObject newSubFolderObject = getResponse.getFolder();
 		// assert the permission there is still intact
-        assertEquals("The permissions of the subfolder have changed", originalSubFolderPermissions.toString(), newSubFolderObject.getPermissions().toString());
+        final Set<String> expectedSet = new HashSet<String>();
+        for (final OCLPermission permission : originalSubFolderPermissions) {
+            expectedSet.add(permission.toString());
+        }
+        final Set<String> isSet = new HashSet<String>();
+        for (final OCLPermission permission : newSubFolderObject.getPermissions()) {
+            isSet.add(permission.toString());
+        }
+
+        assertTrue("The permissions of the subfolder have changed", expectedSet.size() == isSet.size());
+        
+        expectedSet.removeAll(isSet);
+        assertTrue("The permissions of the subfolder have changed: " + expectedSet.toString(), expectedSet.isEmpty());
 	}
 }
