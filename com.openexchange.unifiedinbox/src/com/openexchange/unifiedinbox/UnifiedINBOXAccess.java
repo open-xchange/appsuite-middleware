@@ -131,6 +131,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
      */
     protected UnifiedINBOXAccess(final Session session) {
         super(session);
+        cacheable = false;
     }
 
     /**
@@ -141,6 +142,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
      */
     protected UnifiedINBOXAccess(final Session session, final int accountId) {
         super(session, accountId);
+        cacheable = false;
     }
 
     private void reset() {
