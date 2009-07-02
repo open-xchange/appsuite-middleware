@@ -1,3 +1,9 @@
+open-xchange-data-conversion-ical4j (6.10.0.0-1) unstable; urgency=low
+
+  * first build for 6.10 RC1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  2 Jul 2009 11:07:27 +0200
+
 open-xchange-data-conversion-ical4j (6.10.0.0-0) unstable; urgency=low
 
   * first build for 6.10 RC1

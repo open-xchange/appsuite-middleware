@@ -1,3 +1,9 @@
+open-xchange-subscribe-xing (6.10.0.0-1) unstable; urgency=low
+
+  * first build for 6.10 RC1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  2 Jul 2009 11:08:16 +0200
+
 open-xchange-subscribe-xing (6.10.0.0-0) unstable; urgency=low
 
   * first build for 6.10 RC1
