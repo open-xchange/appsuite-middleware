@@ -223,6 +223,16 @@ public final class TimeoutConcurrentMap<K, V> {
     }
 
     /**
+     * Checks if this time-out map contains a mapping for specified key.
+     * 
+     * @param key The key
+     * @return <code>true</code> if this time-out map contains a mapping for specified key; otherwise <code>false</code>
+     */
+    public boolean containsKey(final K key) {
+        return map.containsKey(key);
+    }
+
+    /**
      * Gets the value associated with given key.
      * 
      * @param key The key
