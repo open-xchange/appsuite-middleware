@@ -192,6 +192,9 @@ public class RecurringCalculation {
      * @param recurring_days a <code>int</code>
      */
     public void setDays(final int recurring_days) {
+        if (recurring_days == 0) {
+            return;
+        }
         this.recurring_days = recurring_days;
         contains_days = true;
     }
