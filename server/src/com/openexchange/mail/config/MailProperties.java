@@ -78,15 +78,37 @@ public final class MailProperties implements IMailProperties {
 
     private static final Log LOG = LogFactory.getLog(MailProperties.class);
 
-    private static final MailProperties instance = new MailProperties();
+    private static volatile MailProperties instance;
 
     /**
-     * Gets the singleton instance of {@link MailProperties}
+     * Gets the singleton instance of {@link MailProperties}.
      * 
      * @return The singleton instance of {@link MailProperties}
      */
     public static MailProperties getInstance() {
-        return instance;
+        MailProperties tmp = instance;
+        if (null == tmp) {
+            synchronized (MailProperties.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = instance = new MailProperties();
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Releases the singleton instance of {@link MailProperties}.
+     */
+    public static void releaseInstance() {
+        if (null != instance) {
+            synchronized (MailProperties.class) {
+                if (null != instance) {
+                    instance = null;
+                }
+            }
+        }
     }
 
     private final AtomicBoolean loaded;

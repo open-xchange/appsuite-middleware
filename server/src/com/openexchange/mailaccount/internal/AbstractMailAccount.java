@@ -143,8 +143,10 @@ public abstract class AbstractMailAccount implements MailAccount {
         properties = Collections.emptyMap();
         transportPort = 25;
         mailPort = 143;
-        transportProtocol = TransportProperties.getInstance().getDefaultTransportProvider();
-        mailProtocol = MailProperties.getInstance().getDefaultMailProvider();
+        final String transportProvider = TransportProperties.getInstance().getDefaultTransportProvider();
+        transportProtocol = transportProvider == null ? "smtp" : transportProvider;
+        final String mailProvider = MailProperties.getInstance().getDefaultMailProvider();
+        mailProtocol = mailProvider == null ? "imap" : mailProvider;
     }
 
     public int getId() {

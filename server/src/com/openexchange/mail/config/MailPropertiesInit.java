@@ -95,6 +95,7 @@ public final class MailPropertiesInit implements Initialization {
             return;
         }
         MailProperties.getInstance().resetProperties();
+        MailProperties.releaseInstance();
         started.set(false);
     }
 
