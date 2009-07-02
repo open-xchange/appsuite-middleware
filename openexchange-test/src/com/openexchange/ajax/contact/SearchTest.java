@@ -20,7 +20,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -43,6 +42,13 @@ public class SearchTest extends ContactTest {
 
         if (username == null) {
             username = getLogin();
+            if (null == username) {
+                fail("Cannot determine valid user name from ajax.properties.");
+            }
+            final int pos = username.indexOf('@');
+            if (pos >= 0) {
+                username = username.substring(0, pos);
+            }
         }
 
         final Contact[] contactArray = searchContact(
@@ -159,28 +165,28 @@ public class SearchTest extends ContactTest {
         try {
             final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
             final GetResponse getResponse = client.execute(new GetRequest(Tree.ContactCollectFolder));
-            int collectFolderId = getResponse.getInteger();
+            final int collectFolderId = getResponse.getInteger();
             contactIds = insertSearchableContacts(collectFolderId);
             
-            ContactSearchObject searchObject = new ContactSearchObject();
+            final ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.setEmail1("*e*");
             searchObject.setEmailAutoComplete(true);
             searchObject.addFolder(6);
             searchObject.addFolder(collectFolderId);
             
-            int[] columns = new int[] {Contact.FOLDER_ID, Contact.OBJECT_ID, Contact.USE_COUNT};
+            final int[] columns = new int[] {Contact.FOLDER_ID, Contact.OBJECT_ID, Contact.USE_COUNT};
             
-            List<Parameter> parameters = new ArrayList<Parameter>();
+            final List<Parameter> parameters = new ArrayList<Parameter>();
             parameters.add(new Parameter(AJAXServlet.PARAMETER_SORT, Contact.USE_COUNT_GLOBAL_FIRST));
             parameters.add(new Parameter(AJAXServlet.PARAMETER_ORDER, "ASC"));
-            com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
-            com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
+            final com.openexchange.ajax.user.actions.SearchRequest request = new com.openexchange.ajax.user.actions.SearchRequest(searchObject, columns, true, parameters);
+            final com.openexchange.ajax.user.actions.SearchResponse response = Executor.execute(client, request);
             
-            Contact[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
+            final Contact[] result = jsonArray2ContactArray((JSONArray) response.getData(), columns);
             
             boolean stillGlobal = true;
             int previousCount = Integer.MAX_VALUE;
-            for (Contact contactObject : result) {
+            for (final Contact contactObject : result) {
                 if (!stillGlobal) {
                     assertFalse("Did not expect global contacts any more.", contactObject.getParentFolderID() == 6);
                 }
@@ -200,7 +206,7 @@ public class SearchTest extends ContactTest {
 
     // Node 3087
 
-    private int[] insertSearchableContacts(int folderId) throws IOException, SAXException, JSONException, Exception {
+    private int[] insertSearchableContacts(final int folderId) throws IOException, SAXException, JSONException, Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("Mustermann");
         contactObj.setGivenName("Tom");
@@ -232,35 +238,35 @@ public class SearchTest extends ContactTest {
         return insertSearchableContacts(contactFolderId);
     }
 
-    private void deleteContacts(int... ids) throws IOException, SAXException, JSONException, Exception {
-        for (int objectId : ids) {
+    private void deleteContacts(final int... ids) throws IOException, SAXException, JSONException, Exception {
+        for (final int objectId : ids) {
             deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
         }
     }
 
     public void testSearchByFirstAndLastName() throws Exception {
 
-        int[] objectIds = insertSearchableContacts();
+        final int[] objectIds = insertSearchableContacts();
         
         try {
-            ContactSearchObject cso = new ContactSearchObject();
+            final ContactSearchObject cso = new ContactSearchObject();
             cso.setSurname("Must*");
             cso.setGivenName("U*");
             cso.setFolder(contactFolderId);
 
-            SearchRequest search = new SearchRequest(
+            final SearchRequest search = new SearchRequest(
                 cso,
                 new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME },
                 true);
 
-            AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+            final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
 
-            SearchResponse result = client.execute(search);
-            Object[][] rows = result.getArray();
+            final SearchResponse result = client.execute(search);
+            final Object[][] rows = result.getArray();
 
             assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
 
-            for (Object[] row : rows) {
+            for (final Object[] row : rows) {
                 assertTrue(((String) row[1]).startsWith("Must"));
                 assertTrue(((String) row[2]).startsWith("U"));
             }
@@ -274,30 +280,30 @@ public class SearchTest extends ContactTest {
     // Bug 13227
 
     public void testOrSearchHabit() throws Exception {
-        int[] objectIds = insertSearchableContacts();
+        final int[] objectIds = insertSearchableContacts();
         
         try {
-            ContactSearchObject cso = new ContactSearchObject();
+            final ContactSearchObject cso = new ContactSearchObject();
             cso.setSurname("Must*");
             cso.setGivenName("Gue*");
             cso.setFolder(contactFolderId);
             cso.setOrSearch(true);
             
-            SearchRequest search = new SearchRequest(
+            final SearchRequest search = new SearchRequest(
                 cso,
                 new int[] { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.GIVEN_NAME },
                 true);
 
-            AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+            final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
 
-            SearchResponse result = client.execute(search);
-            Object[][] rows = result.getArray();
+            final SearchResponse result = client.execute(search);
+            final Object[][] rows = result.getArray();
 
             assertTrue("contact array size > 0. Expected at least 1 result.", rows.length > 0);
             
             boolean foundTom = false, foundUte = false, foundGuenter = false;
             
-            for (Object[] row : rows) {
+            for (final Object[] row : rows) {
                 if(row[2].equals("Ute")) {
                     foundUte = true;
                 }
