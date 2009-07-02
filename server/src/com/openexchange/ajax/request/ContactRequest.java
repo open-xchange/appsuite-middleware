@@ -612,17 +612,11 @@ public class ContactRequest {
 
         final ContactInterface contactInterface;
         final int[] folders = searchObj.getFolders();
-        SearchIterator<Contact> it = null;
         
-        if (null != folders && folders.length >= 1) {
-            ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-            it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
-        } else {
-            contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newDefaultContactInterface(
-                session);
-            it = contactInterface.getContactsByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
-        }
-
+        
+        ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
+        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
+        
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
