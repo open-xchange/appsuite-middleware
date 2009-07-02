@@ -232,19 +232,33 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jun 30 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13477: If a user is deleted a connection without timeout is used because a lot of data must be moved taking a lot of time.
+* Fri Jun 26 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13951: Writing understandable exception to RMI client if database is updated.  
+* Thu Jun 25 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13987: Removed using of general classes that are not available in command line tools.  
+* Tue Jun 23 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
+* Mon Jun 15 2009 - marcus.klein@open-xchange.com
+ - Bugfix #6692: Renamed group 0 to "All users" and group 1 to "Standard group". An update task fixes values in the database.
+* Fri Jun 12 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13849: Added missing primary mail account identifier when updating it.
 * Thu May 28 2009 - dennis.sieben@open-xchange.com
- - Bugfix ID#13733: antispam plugin cannot be enabled via soap
+ - Bugfix #13733: antispam plugin cannot be enabled via soap
      renamed variable inside of user object
 * Thu May 21 2009 - dennis.sieben@open-xchange.com
- - Bugfix ID#13606: [L3] Admin doesn't provide parameters to edit a user's mail_upload quota settings
+ - Bugfix #13606: [L3] Admin doesn't provide parameters to edit a user's mail_upload quota settings
 * Thu Apr 23 2009 - marcus.klein@open-xchange.com
- - Bugfix ID#13440: Clearing string values with the CLT can be done with an empty string.
+ - Bugfix #13440: Clearing string values with the CLT can be done with an empty string.
 * Tue Feb 24 2009 - choeger@open-xchange.com
  - Bugfix #12517: [L3] Foldercache does not synchronize properly
      set jcs.region.OXFolderCache.elementattributes.IsLateral=false on update
 * Mon Feb 23 2009 - marcus.klein@open-xchange.com
  - Bugfix #13248: Checking existance of a group on already existing connection to prevent problems with not committed groups. 
- * Thu Jan 29 2009 - choeger@open-xchange.com
+* Fri Feb 20 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12791: Checking existence of user's default group prior to performing a storage insert
+* Thu Jan 29 2009 - choeger@open-xchange.com
  - Bugfix ID#13087 Credentials cache not cleared when deleting a context
 * Wed Jan 07 2009 - marcus.klein@open-xchange.com
  - Bugfix #12864: Only creating the statement if the available flag is set.
