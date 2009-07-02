@@ -151,7 +151,7 @@ public final class MailAccessCache {
     }
 
     /**
-     * Releases the singleton instance
+     * Releases the singleton instance.
      */
     public static void releaseInstance() {
         if (null != singleton) {
@@ -201,7 +201,7 @@ public final class MailAccessCache {
     }
 
     /**
-     * Removes and returns a mail access from cache
+     * Removes and returns a mail access from cache.
      * 
      * @param session The session
      * @param accountId The account ID
@@ -250,7 +250,7 @@ public final class MailAccessCache {
     }
 
     /**
-     * Puts given mail access into cache if none user-bound connection is already contained in cache
+     * Puts given mail access into cache if none user-bound connection is already contained in cache.
      * 
      * @param session The session
      * @param accountId The account ID
@@ -282,7 +282,7 @@ public final class MailAccessCache {
                     return false;
                 }
                 final int idleTime = mailAccess.getCacheIdleSeconds();
-                if (idleTime <= 0 || defaultIdleSeconds == idleTime) {
+                if (idleTime <= 0) {
                     timeoutMap.put(key, mailAccess, defaultIdleSeconds);
                 } else {
                     timeoutMap.put(key, mailAccess, idleTime);
