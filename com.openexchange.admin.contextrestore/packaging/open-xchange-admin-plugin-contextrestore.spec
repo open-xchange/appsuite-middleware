@@ -96,3 +96,5 @@ mv doc javadoc
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %changelog
+* Wed Jun 24 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13886: Fixed NPE when starting bundle.

@@ -83,6 +83,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Mon Jun 15 2009 - choeger@open-xchange.com
+ - Bugfix ID#13385: config update script destroys parameters on update when no
+   newline is at the end of a configuration file
 * Mon Mar 16 2009 - choeger@open-xchange.com
  - Bugfix ID#13385: allpluginsloaded does not work with SP5U1RC1
    added missing @start to commons logging

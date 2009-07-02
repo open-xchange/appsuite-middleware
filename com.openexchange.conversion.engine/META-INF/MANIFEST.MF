@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Conversion Engine
 Bundle-SymbolicName: com.openexchange.conversion.engine
-Bundle-Version: 6.9.0.0
+Bundle-Version: 6.10.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.conversion,

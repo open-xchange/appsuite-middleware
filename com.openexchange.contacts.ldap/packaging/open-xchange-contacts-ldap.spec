@@ -78,3 +78,23 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/contacts-ldap
 /opt/open-xchange/etc/groupware/contacts-ldap/*
 %changelog
+* Mon Jun 22 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #13920 Unable to get public LDAP folders to Outlook
+    - Now returning a SearchIterator in getDeletedContactsInFolder
+* Thu Jun 18 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #13926 gal bundle: java.lang.Exception: The given value for authtype
+    "%s" is not a possible one
+    - Changed text to "The directory "%s" is not a context identifier."
+* Tue Jun 16 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #13892 contacts-ldap bundle contains documentation as odt format at
+   the sources
+   - Removed documentation as it is now contained in the Installation and
+     Administrator documentation
+* Tue Jun 16 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #13909 NPE when contacts-ldap is enabled to access distribution
+    lists (ADS)
+    - Surrounded code segment with if
+* Mon May 11 2009 - dennis.sieben@open-xchange.com
+  - Implemented distributionlist
+* Thu Apr 23 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #13539 Search field in global LDAP contact folder does not work

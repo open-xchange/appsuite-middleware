@@ -1,3 +1,9 @@
+open-xchange-imap (6.10.0.0-0) unstable; urgency=low
+
+  * first build for 6.10 RC1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  2 Jul 2009 10:15:57 +0200
+
 open-xchange-imap (6.9.0.0-0) unstable; urgency=low
 
   * new unstable cycle
