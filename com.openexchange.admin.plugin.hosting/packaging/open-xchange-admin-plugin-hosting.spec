@@ -143,6 +143,14 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Jun 23 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
+* Mon Jun 22 2009 - marcus.klein@open-xchange.com
+ - Bugfix #12983: Added check if destination filestore has enough space for another context on moving context.
+* Mon Jun 15 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13386: Improved exception message if maximum number of context for every database is reached.
+* Fri Jun 12 2009 - marcus.klein@open-xchange.com
+ - Bugfix #6692: Renamed group 0 to "All users" and group 1 to "Standard group". An update task fixes values in the database.
 * Mon Feb 23 2009 - choeger@open-xchange.com
  - Bugfix #13252: oxinstaller broken when system has no FQDN
    give proper error message
