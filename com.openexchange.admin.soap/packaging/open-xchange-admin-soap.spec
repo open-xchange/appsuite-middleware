@@ -86,3 +86,6 @@ ant -Ddestdir=%{buildroot} \
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
 %doc docs
 %changelog
+* Tue Jun 02 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #13796: soap interface throws error "reconnect to rmi service" on first call .
+     Implemented a second call after the reconnect
