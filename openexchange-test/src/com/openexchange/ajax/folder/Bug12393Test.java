@@ -197,7 +197,7 @@ public class Bug12393Test extends AbstractAJAXSession {
             isSet.add(permission.toString());
         }
 
-        assertTrue("The permissions of the subfolder have changed", expectedSet.size() == isSet.size());
+        assertEquals("The permissions of the subfolder have changed. Differing size. ", expectedSet.size(), isSet.size());
         
         expectedSet.removeAll(isSet);
         assertTrue("The permissions of the subfolder have changed: " + expectedSet.toString(), expectedSet.isEmpty());
