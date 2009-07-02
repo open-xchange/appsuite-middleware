@@ -147,7 +147,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess An instance of {@link MailAccess}
      * @throws MailException If implementation-specific startup fails
      */
-    static void startupImpl(final MailAccess<?, ?> mailAccess) throws MailException {
+    static void startupImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
         mailAccess.startup();
     }
 
@@ -157,7 +157,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param mailAccess An instance of {@link MailAccess}
      * @throws MailException If implementation-specific shutdown fails
      */
-    static void shutdownImpl(final MailAccess<?, ?> mailAccess) throws MailException {
+    static void shutdownImpl(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
         mailAccess.shutdown();
     }
 
@@ -181,7 +181,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return A proper instance of {@link MailAccess}
      * @throws MailException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session) throws MailException {
         return getInstance(session, MailAccount.DEFAULT_ID);
     }
 
@@ -206,7 +206,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return A proper instance of {@link MailAccess}
      * @throws MailException If instantiation fails or a caching error occurs
      */
-    public static final MailAccess<?, ?> getInstance(final Session session, final int accountId) throws MailException {
+    public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(final Session session, final int accountId) throws MailException {
         /*
          * Check for proper initialization
          */
