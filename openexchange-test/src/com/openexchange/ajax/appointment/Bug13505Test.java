@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -89,8 +90,8 @@ public class Bug13505Test extends AbstractAJAXSession {
         appointment = new Appointment();
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Bug 13505 Test");
-        appointment.setStartDate(TimeTools.createCalendar(tz, 2009, Calendar.JUNE, 6, 12).getTime());
-        appointment.setEndDate(TimeTools.createCalendar(tz, 2009, Calendar.JUNE, 6, 13).getTime());
+        appointment.setStartDate(TimeTools.createCalendar(tz, 2009, Calendar.JULY, 6, 12).getTime());
+        appointment.setEndDate(TimeTools.createCalendar(tz, 2009, Calendar.JULY, 6, 13).getTime());
         appointment.setParticipants(ParticipantTools.createParticipants(userId));
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setDays(Appointment.MONDAY);
@@ -120,6 +121,9 @@ public class Bug13505Test extends AbstractAJAXSession {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+        GetRequest get = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID());
+        Appointment loadA = getClient().execute(get).getAppointment(tz);
+        assertFalse("No days values expected", loadA.containsDays());
     }
 
     public void tearDown() throws Exception {
