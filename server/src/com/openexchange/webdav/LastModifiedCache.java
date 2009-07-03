@@ -78,8 +78,9 @@ public class LastModifiedCache {
      * @return The current valid last-modified time stamp for the given objectId
      */
     public long getLastModified(final int objectId, final long lastModified) {
-        if (storage.containsKey(Integer.valueOf(objectId))) {
-            final LastModifiedMemory memory = storage.get(Integer.valueOf(objectId));
+        final Integer key = Integer.valueOf(objectId);
+        if (storage.containsKey(key)) {
+            final LastModifiedMemory memory = storage.get(key);
             if (lastModified >= memory.getOriginal()) {
                 return memory.getCurrent();
             }
@@ -118,7 +119,7 @@ public class LastModifiedCache {
         }
     }
 
-    private class LastModifiedMemory {
+    private static class LastModifiedMemory {
 
         private long original;
 
