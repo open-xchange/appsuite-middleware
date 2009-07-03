@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Crawler Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.crawler
-Bundle-Version: 6.10.0.0
+Bundle-Version: 6.11.0.0
 Bundle-Activator: com.openexchange.subscribe.crawler.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

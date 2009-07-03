@@ -1,3 +1,9 @@
+open-xchange-common (6.11.0.0-0) unstable; urgency=low
+
+  * prepare for unstable
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri,  3 Jul 2009 16:03:49 +0200
+
 open-xchange-common (6.10.0.0-1) unstable; urgency=low
 
   * first build for 6.10 RC1
