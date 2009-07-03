@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-
+import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -14,7 +14,6 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
-
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -255,13 +254,13 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER);
 		
 		assertEquals("check response", id.length, response.length);
-		
-		final ArrayList idList = new ArrayList();
+
+		final List<Integer> idList = new ArrayList<Integer>();
 		
 		for (int a = 0; a < response.length; a++) {
 			if (response[a].hasError()) {
 				final FolderObject folderObj = (FolderObject)response[a].getDataObject();
-				idList.add(new Integer(folderObj.getObjectID()));
+				idList.add(Integer.valueOf(folderObj.getObjectID()));
 			}
 			
 			if (response[0].getStatus() != 200) {
@@ -272,11 +271,67 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final int[] failed = new int[idList.size()];
 		
 		for (int a = 0; a < failed.length; a++) {
-			failed[a] = ((Integer)idList.get(a)).intValue();
+			failed[a] = idList.get(a).intValue();
 		}
 		
 		return failed;
 	}
+
+	public static int[] clearFolder(final WebConversation webCon, final int[] id, final String[] modules, final Date lastModified, String host, final String login, final String password) throws Exception, OXException {
+        host = AbstractWebdavXMLTest.appendPrefix(host);
+        
+        final Element rootElement = new Element("multistatus", webdav);
+        rootElement.addNamespaceDeclaration(XmlServlet.NS);
+        
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        
+        for (int a = 0; a < id.length; a++) {
+            final Element eProp = new Element("prop", webdav);
+            DataWriter.addElement(FolderFields.OBJECT_ID, id[a], eProp);
+            DataWriter.addElement(FolderFields.MODULE, modules[a], eProp);
+            DataWriter.addElement(FolderFields.LAST_MODIFIED, lastModified, eProp);
+            DataWriter.addElement("method", "CLEAR", eProp);
+            
+            rootElement.addContent(addProp2PropertyUpdate(eProp));
+        }
+        
+        final Document doc = new Document(rootElement);
+        final XMLOutputter xo = new XMLOutputter();
+        xo.output(doc, baos);
+        
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
+        req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
+        final WebResponse resp = webCon.getResource(req);
+        
+        assertEquals(207, resp.getResponseCode());
+        
+        bais = new ByteArrayInputStream(resp.getText().getBytes());
+        final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER);
+        
+        assertEquals("check response", id.length, response.length);
+        
+        final List<Integer> idList = new ArrayList<Integer>();
+        
+        for (int a = 0; a < response.length; a++) {
+            if (response[a].hasError()) {
+                final FolderObject folderObj = (FolderObject)response[a].getDataObject();
+                idList.add(Integer.valueOf(folderObj.getObjectID()));
+            }
+            
+            if (response[0].getStatus() != 200) {
+                throw new TestException(response[0].getErrorMessage());
+            }
+        }
+        
+        final int[] failed = new int[idList.size()];
+        
+        for (int a = 0; a < failed.length; a++) {
+            failed[a] = (idList.get(a)).intValue();
+        }
+        
+        return failed;
+    }
 	
 	public static int[] listFolder(final WebConversation webCon, String host, final String login, final String password) throws Exception {
 		host = AbstractWebdavXMLTest.appendPrefix(host);
@@ -307,14 +362,14 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-        InputStream body = propFindMethod.getResponseBodyAsStream();
+        final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.FOLDER, true);
 		
 		assertEquals("response length not is 1", 1, response.length);
@@ -370,14 +425,14 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-        InputStream body = propFindMethod.getResponseBodyAsStream();
+        final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.FOLDER);
 		
 		final FolderObject[] folderArray = new FolderObject[response.length];
@@ -419,14 +474,14 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + AbstractFolderRequest.FOLDER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-        InputStream body = propFindMethod.getResponseBodyAsStream();
+        final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.FOLDER);
 		
 		assertTrue("no response object found", response.length > 0);
