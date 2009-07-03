@@ -60,10 +60,8 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 
@@ -105,6 +103,10 @@ public class SieveHandler {
 
     private final static String SIEVE_LOGOUT = "LOGOUT" + CRLF;
 
+    /*-
+     * Member section
+     */
+
     private boolean AUTH = false;
 
     private String sieve_user = null;
@@ -127,67 +129,6 @@ public class SieveHandler {
 
     private static Log log = LogFactory.getLog(SieveHandler.class);
     
-    public class Capabilities {
-
-        private Boolean starttls = Boolean.FALSE;
-
-        private String implementation = null;
-
-        private ArrayList<String> sieve = null;
-
-        private ArrayList<String> sasl = null;
-
-        public ArrayList<String> getSasl() {
-            return sasl;
-        }
-
-        public void setSasl(final ArrayList<String> sasl) {
-            this.sasl = sasl;
-        }
-
-        public void addSasl(final String saslcapa) {
-            if (null != sasl) {
-                sasl.add(saslcapa);
-            } else {
-                sasl = new ArrayList<String>();
-                sasl.add(saslcapa);
-            }
-        }
-
-        public ArrayList<String> getSieve() {
-            return sieve;
-        }
-
-        public void setSieve(final ArrayList<String> sieve) {
-            this.sieve = sieve;
-        }
-
-        public void addSieve(final String sievecapa) {
-            if (null != sieve) {
-                sieve.add(sievecapa);
-            } else {
-                sieve = new ArrayList<String>();
-                sieve.add(sievecapa);
-            }
-        }
-
-        public String getImplementation() {
-            return implementation;
-        }
-
-        public void setImplementation(final String implementation) {
-            this.implementation = implementation;
-        }
-
-        public Boolean getStarttls() {
-            return starttls;
-        }
-
-        public void setStarttls(final Boolean starttls) {
-            this.starttls = starttls;
-        }
-    }
-
     /**
      * SieveHandler use socket-connection to manage sieve-scripts.<br>
      * <br>
