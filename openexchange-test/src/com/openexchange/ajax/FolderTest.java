@@ -89,6 +89,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 public class FolderTest extends AbstractAJAXTest {
 
@@ -452,7 +453,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
         final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
-        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        final ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
             bais,
@@ -472,7 +473,7 @@ public class FolderTest extends AbstractAJAXTest {
     public static int[] deleteFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int[] folderIds, final long timestamp) throws JSONException, IOException, SAXException {
         final JSONArray deleteIds = new JSONArray(Arrays.toString(folderIds));
         final byte[] bytes = deleteIds.toString().getBytes("UTF-8");
-        final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        final ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(bytes);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
@@ -481,6 +482,36 @@ public class FolderTest extends AbstractAJAXTest {
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
             bais,
             "text/javascript; charset=UTF-8");
+        final WebResponse resp = conversation.getResponse(req);
+        final JSONObject respObj = new JSONObject(resp.getText());
+        if (respObj.has("error")) {
+            throw new JSONException("JSON Response object contains an error: " + respObj.getString("error"));
+        }
+        final JSONArray arr = respObj.getJSONArray("data");
+        final int[] retval = new int[arr.length()];
+        for (int i = 0; i < arr.length(); i++) {
+            retval[i] = arr.getInt(i);
+        }
+        return retval;
+    }
+
+    public static int[] clearFolder(final WebConversation conversation, final String hostname, final String sessionId, final int[] folderIds, final long timestamp) throws JSONException, IOException, SAXException {
+        return clearFolder(conversation, null, hostname, sessionId, folderIds, timestamp);
+    }
+
+    public static int[] clearFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int[] folderIds, final long timestamp) throws JSONException, IOException, SAXException {
+        final JSONArray clearIds = new JSONArray(Arrays.toString(folderIds));
+
+        final URLParameter urlParam = new URLParameter();
+        urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR);
+        urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+        urlParam.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp));
+
+        final WebRequest req = new PutMethodWebRequest(
+            ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
+            new UnsynchronizedByteArrayInputStream(clearIds.toString().getBytes("UTF-8")),
+            "text/javascript; charset=UTF-8");
+
         final WebResponse resp = conversation.getResponse(req);
         final JSONObject respObj = new JSONObject(resp.getText());
         if (respObj.has("error")) {
