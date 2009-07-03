@@ -58,6 +58,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,28 +195,32 @@ public class SieveHandler {
         bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 
-        if (getServerWelcome()) {
-            log.debug("Got welcome from sieve");
-        } else {
+        if (!getServerWelcome()) {
             throw new OXSieveHandlerException("No welcome from server", sieve_host, sieve_host_port);
         }
+        log.debug("Got welcome from sieve");
         measureEnd("getServerWelcome");
-
+        /*
+         * Capabilities read; further communication dependent on capabilities
+         */
         measureStart();
-        final ArrayList<String> temp = capa.getSasl();
+        final List<String> sasl = capa.getSasl();
         measureEnd("capa.getSasl");
 
-        if (null != temp && temp.contains("PLAIN")) {
-            measureStart();
-            if (selectAuth("PLAIN")) {
-                log.debug("Authentication to sieve successful");
-            } else {
-                throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
+        if (null == sasl || !sasl.contains("PLAIN")) {
+            if (!capa.getStarttls().booleanValue()) {
+                throw new OXSieveHandlerException("The server doesn't suppport PLAIN authentication", sieve_host, sieve_host_port);
             }
-            measureEnd("selectAuth");
-        } else {
-            throw new OXSieveHandlerException("The server doesn't suppport PLAIN authentication", sieve_host, sieve_host_port);
+            // TODO: Start TLS connection here...
+
         }
+        measureStart();
+        if (selectAuth("PLAIN")) {
+            log.debug("Authentication to sieve successful");
+        } else {
+            throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
+        }
+        measureEnd("selectAuth");
     }
 
     /**
