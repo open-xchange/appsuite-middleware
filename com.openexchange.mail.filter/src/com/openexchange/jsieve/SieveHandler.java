@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.jsieve;
 
 import java.io.BufferedOutputStream;
@@ -66,8 +67,7 @@ import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 
 /**
- * This class is used to deal with the communication with sieve. For a
- * description of the communication system to sieve see {@see <a
+ * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see {@see <a
  * href="http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt"
  * >http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt</a>}
  * 
@@ -128,7 +128,11 @@ public class SieveHandler {
     private BufferedOutputStream bos_sieve = null;
 
     private static Log log = LogFactory.getLog(SieveHandler.class);
-    
+
+    private long mStart;
+
+    private long mEnd;
+
     /**
      * SieveHandler use socket-connection to manage sieve-scripts.<br>
      * <br>
@@ -147,7 +151,6 @@ public class SieveHandler {
         sieve_host_port = port;
     }
 
-
     public SieveHandler(final String userName, final String authUserName, final String authUserPasswd, final String host, final int port) {
         sieve_user = userName;
         sieve_auth = authUserName;
@@ -157,27 +160,25 @@ public class SieveHandler {
 
     }
 
-    private long mStart;
-    private long mEnd;
     private void measureStart() {
         this.mStart = System.currentTimeMillis();
     }
-    
+
     private void measureEnd(final String method) {
         this.mEnd = System.currentTimeMillis();
-        if( log.isDebugEnabled() ) {
-            log.debug("SieveHandler."+ method + "() took " + (this.mEnd-this.mStart) + "ms to perform");
+        if (log.isDebugEnabled()) {
+            log.debug("SieveHandler." + method + "() took " + (this.mEnd - this.mStart) + "ms to perform");
         }
     }
-    
+
     /**
-     * Use this function to initialize the connection. It will get the welcome messages from the
-     * server, parse the capabilities and login the user.
+     * Use this function to initialize the connection. It will get the welcome messages from the server, parse the capabilities and login
+     * the user.
      * 
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
-     * @throws OXSieveHandlerInvalidCredentialsException 
+     * @throws OXSieveHandlerInvalidCredentialsException
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
@@ -190,7 +191,7 @@ public class SieveHandler {
          * Set timeout to 30sec
          */
         s_sieve.setSoTimeout(30000);
-        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(),"UTF-8"));
+        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 
         if (getServerWelcome()) {
@@ -199,11 +200,11 @@ public class SieveHandler {
             throw new OXSieveHandlerException("No welcome from server", sieve_host, sieve_host_port);
         }
         measureEnd("getServerWelcome");
-        
+
         measureStart();
         final ArrayList<String> temp = capa.getSasl();
         measureEnd("capa.getSasl");
-        
+
         if (null != temp && temp.contains("PLAIN")) {
             measureStart();
             if (selectAuth("PLAIN")) {
@@ -272,8 +273,7 @@ public class SieveHandler {
     }
 
     /**
-     * Activate/Deactivate sieve script. Is status is true, activate this
-     * script.
+     * Activate/Deactivate sieve script. Is status is true, activate this script.
      * 
      * @param script_name
      * @param status
@@ -386,7 +386,7 @@ public class SieveHandler {
             if (temp.startsWith(SIEVE_NO)) {
                 throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port);
             }
-            
+
             if (temp.matches(".*ACTIVE")) {
                 scriptname = temp.substring(temp.indexOf('\"') + 1, temp.lastIndexOf('\"'));
             }
@@ -394,7 +394,6 @@ public class SieveHandler {
 
     }
 
-    
     /**
      * Remove the sieve script. If the script is active it is deactivated before removing
      * 
@@ -410,9 +409,9 @@ public class SieveHandler {
         if (null == script_name) {
             throw new OXSieveHandlerException("Script can't be removed", sieve_host, sieve_host_port);
         }
-        
+
         setScriptStatus(script_name, false);
-        
+
         final String delete = SIEVE_DELETE + "\"" + script_name + "\"" + CRLF;
         bos_sieve.write(delete.getBytes("UTF-8"));
         bos_sieve.flush();
@@ -559,7 +558,7 @@ public class SieveHandler {
         if (AUTH == false) {
             throw new OXSieveHandlerException("Deactivate a script not possible. Auth first.", sieve_host, sieve_host_port);
         }
-        
+
         boolean scriptactive = false;
         if (sieve_script_name.equals(getActiveScript())) {
             scriptactive = true;
@@ -568,7 +567,7 @@ public class SieveHandler {
         if (scriptactive) {
             bos_sieve.write(SIEVE_DEACTIVE.getBytes("UTF-8"));
             bos_sieve.flush();
-            
+
             while (true) {
                 final String temp = bis_sieve.readLine();
                 if (temp.startsWith(SIEVE_OK)) {
@@ -602,7 +601,6 @@ public class SieveHandler {
         final String sieve = "\"SIEVE\"";
         final String sasl = "\"SASL\"";
 
-        
         String temp = line;
 
         if (temp.startsWith(starttls)) {
@@ -636,13 +634,12 @@ public class SieveHandler {
     }
 
     /**
-     * 
      * @param toConvert
      * @return Base64String
      * @throws UnsupportedEncodingException
      */
     private String convertStringToBase64(final String toConvert) throws UnsupportedEncodingException {
-        final String converted = com.openexchange.tools.encoding.Base64.encode(toConvert.getBytes("UTF-8")); 
+        final String converted = com.openexchange.tools.encoding.Base64.encode(toConvert.getBytes("UTF-8"));
         return converted.replaceAll("(\\r)?\\n", "");
     }
 
