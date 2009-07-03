@@ -47,179 +47,190 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.IOException;
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
- * DataParser
- *
+ * {@link DataParser} - The WebDAV/XML data parser.
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class DataParser {
-	
-	public static final int SAVE = 1;
-	
-	public static final int DELETE = 2;
-	
-	public static final int CONFIRM = 3;
 
-	protected Session sessionObj;
-	
-	protected String client_id;
-	
-	protected int method = SAVE;
-	
-	private int inFolder;
-	
-	private static final Log LOG = LogFactory.getLog(DataParser.class);
-	
-	protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws Exception {
-		if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {
-			dataobject.setObjectID(getValueAsInt(parser));
-		} else if (isTag(parser, DataFields.LAST_MODIFIED, XmlServlet.NAMESPACE)) {
-			dataobject.setLastModified(getValueAsDate(parser));
-		} else if (isTag(parser, "client_id", XmlServlet.NAMESPACE)) {
-			client_id = getValue(parser);
-		} else if (isTag(parser, "method", XmlServlet.NAMESPACE)) {
-			final String s = getValue(parser);
-			if (s != null) {
-				if (s.equalsIgnoreCase("save")) {
-					method = SAVE;
-				} else if (s.equalsIgnoreCase("delete")) {
-					method = DELETE;
-				} else if (s.equalsIgnoreCase("confirm")) {
-					method = CONFIRM;
-				}
-			} 
-		} else {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("unknown xml tag: " + parser.getName());
-			}
-			getValue(parser);
-		}
-	}
-	
-	protected boolean hasCorrectNamespace(final XmlPullParser parser) throws Exception {
-		if (parser.getEventType() == XmlPullParser.START_TAG && parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
-			//if (parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
-				return true;
-			//}
-		}
-		return false;
-	}
-		
-	public boolean isTag(final XmlPullParser parser, final String name) throws XmlPullParserException {
-		return parser.getEventType() == XmlPullParser.START_TAG	&& (name == null || name.equals(parser.getName()));
-	}
-	
-	public boolean isTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
-		return parser.getEventType() == XmlPullParser.START_TAG	&& (name == null || name.equals(parser.getName()));
-	}
-	
-	public String getClientID() {
-		return client_id;
-	}
-	
-	public int getMethod() {
-		return method;
-	}
+    /**
+     * Save method. Either a create or an update operation.
+     */
+    public static final int SAVE = 1;
 
-	protected void setInFolder(final int folderId) {
-	    this.inFolder = folderId;
-	}
+    /**
+     * Delete method.
+     */
+    public static final int DELETE = 2;
 
-	public int getFolder() {
-		return inFolder;
-	}
-	
-	public int getValueAsInt(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = null;
-		
-		if ((s = getValue(parser)) != null && s.length() > 0) {
-			try {
-				return Integer.parseInt(s);
-			} catch (final NumberFormatException e) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("Value is not a number: " + s, e);
-				}
-			}
-		}
-		return 0;
-	}
-	
-	public float getValueAsFloat(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = null;
-		
-		if ((s = getValue(parser)) != null && s.length() > 0) {
-			return Float.parseFloat(s);
-		}
-		return 0;
-	}
-	
-	public long getValueAsLong(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = null;
-		
-		if ((s = getValue(parser)) != null && s.length() > 0) {
-			return Long.parseLong(s);
-		}
-		return 0;
-	}
-	
-	public Date getValueAsDate(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = null;
-		
-		if ((s = getValue(parser)) != null && s.length() > 0) {
-			return new Date(Long.parseLong(s));
-		}
-		return null;
-	}
-	
-	public boolean getValueAsBoolean(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		String s = null;
-		
-		if ((s = getValue(parser)) != null && s.equalsIgnoreCase("true")) {
-			return true;
-		}
-		return false;
-	}
-	
-	public byte[] getValueAsByteArray(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		final String s = parser.nextText();
-		
-		if (s != null && s.length() == 0) {
-			return null;
-		} 
-		return s.getBytes();
-	}
-	
-	public String getValue(final XmlPullParser parser) throws XmlPullParserException, IOException {
-		final String s = parser.nextText();
-		
-		if (s != null && s.length() == 0) {
-			return null;
-		} 
-		return s;
-	}
-	
-	public static boolean isEnd(final XmlPullParser parser) throws XmlPullParserException {
-		return (parser.getEventType() == XmlPullParser.END_DOCUMENT);
-	}
+    /**
+     * Confirm method. For calendar/task module only.
+     */
+    public static final int CONFIRM = 3;
+
+    /**
+     * Clear method. Applies to folder module only.
+     */
+    public static final int CLEAR = 4;
+
+    /*-
+     * Member section
+     */
+
+    protected Session sessionObj;
+
+    protected String client_id;
+
+    protected int method = SAVE;
+
+    private int inFolder;
+
+    private static final Log LOG = LogFactory.getLog(DataParser.class);
+
+    protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws Exception {
+        if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {
+            dataobject.setObjectID(getValueAsInt(parser));
+        } else if (isTag(parser, DataFields.LAST_MODIFIED, XmlServlet.NAMESPACE)) {
+            dataobject.setLastModified(getValueAsDate(parser));
+        } else if (isTag(parser, "client_id", XmlServlet.NAMESPACE)) {
+            client_id = getValue(parser);
+        } else if (isTag(parser, "method", XmlServlet.NAMESPACE)) {
+            final String s = getValue(parser);
+            if (s != null) {
+                if (s.equalsIgnoreCase("save")) {
+                    method = SAVE;
+                } else if (s.equalsIgnoreCase("delete")) {
+                    method = DELETE;
+                } else if (s.equalsIgnoreCase("confirm")) {
+                    method = CONFIRM;
+                } else if (s.equalsIgnoreCase("clear")) {
+                    method = CLEAR;
+                }
+            }
+        } else {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("unknown xml tag: " + parser.getName());
+            }
+            getValue(parser);
+        }
+    }
+
+    protected boolean hasCorrectNamespace(final XmlPullParser parser) throws Exception {
+        if (parser.getEventType() == XmlPullParser.START_TAG && parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
+            // if (parser.getNamespace().equals(XmlServlet.NAMESPACE)) {
+            return true;
+            // }
+        }
+        return false;
+    }
+
+    public boolean isTag(final XmlPullParser parser, final String name) throws XmlPullParserException {
+        return parser.getEventType() == XmlPullParser.START_TAG && (name == null || name.equals(parser.getName()));
+    }
+
+    public boolean isTag(final XmlPullParser parser, final String name, final String namespace) throws XmlPullParserException {
+        return parser.getEventType() == XmlPullParser.START_TAG && (name == null || name.equals(parser.getName()));
+    }
+
+    public String getClientID() {
+        return client_id;
+    }
+
+    public int getMethod() {
+        return method;
+    }
+
+    protected void setInFolder(final int folderId) {
+        this.inFolder = folderId;
+    }
+
+    public int getFolder() {
+        return inFolder;
+    }
+
+    public int getValueAsInt(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        String s = null;
+
+        if ((s = getValue(parser)) != null && s.length() > 0) {
+            try {
+                return Integer.parseInt(s);
+            } catch (final NumberFormatException e) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Value is not a number: " + s, e);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public float getValueAsFloat(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        String s = null;
+
+        if ((s = getValue(parser)) != null && s.length() > 0) {
+            return Float.parseFloat(s);
+        }
+        return 0;
+    }
+
+    public long getValueAsLong(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        String s = null;
+
+        if ((s = getValue(parser)) != null && s.length() > 0) {
+            return Long.parseLong(s);
+        }
+        return 0;
+    }
+
+    public Date getValueAsDate(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        String s = null;
+
+        if ((s = getValue(parser)) != null && s.length() > 0) {
+            return new Date(Long.parseLong(s));
+        }
+        return null;
+    }
+
+    public boolean getValueAsBoolean(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        String s = null;
+
+        if ((s = getValue(parser)) != null && s.equalsIgnoreCase("true")) {
+            return true;
+        }
+        return false;
+    }
+
+    public byte[] getValueAsByteArray(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        final String s = parser.nextText();
+
+        if (s != null && s.length() == 0) {
+            return null;
+        }
+        return s.getBytes();
+    }
+
+    public String getValue(final XmlPullParser parser) throws XmlPullParserException, IOException {
+        final String s = parser.nextText();
+
+        if (s != null && s.length() == 0) {
+            return null;
+        }
+        return s;
+    }
+
+    public static boolean isEnd(final XmlPullParser parser) throws XmlPullParserException {
+        return (parser.getEventType() == XmlPullParser.END_DOCUMENT);
+    }
 }
-
-
-
-

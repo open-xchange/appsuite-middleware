@@ -163,6 +163,10 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                 pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
                         inFolder));
                 break;
+            case DataParser.CLEAR:
+                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
+                    inFolder));
+                break;
             default:
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(_invalidMethodError);
@@ -272,6 +276,13 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                     }
 
                     foldersSQL.deleteFolderObject(folderObject, lastModified);
+                    break;
+                case DataParser.CLEAR:
+                    if (lastModified == null) {
+                        throw new OXMandatoryFieldException(new WebdavException(WebdavException.Code.MISSING_FIELD, DataFields.LAST_MODIFIED));
+                    }
+
+                    foldersSQL.clearFolder(folderObject, lastModified);
                     break;
                 default:
                     throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
