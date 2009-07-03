@@ -567,6 +567,6 @@ public class RdbTaskStorage extends TaskStorage {
     static {
         LIST_MODIFIED.put(
             ACTIVE,
-            "SELECT @fields@ FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND last_modified>=?");
+            "SELECT @fields@ FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND last_modified>?");
     }
 }

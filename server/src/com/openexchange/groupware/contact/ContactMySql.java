@@ -214,7 +214,7 @@ public class ContactMySql implements ContactSql {
 
         // range search in time for field changed_from
         if (changed_since > 0) {
-            sb.append(" (co.changing_date >= ").append(changed_since).append(") AND ");
+            sb.append(" (co.changing_date > ").append(changed_since).append(") AND ");
         }
 
         // range search in time for field created_from

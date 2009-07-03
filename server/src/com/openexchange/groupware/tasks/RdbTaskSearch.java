@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,7 +57,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.tools.Collections;
@@ -130,7 +128,7 @@ public class RdbTaskSearch extends TaskSearch {
         sql1.append(folderTable);
         sql1.append(".folder=? AND ");
         sql1.append(taskTable);
-        sql1.append(".last_modified>=?");
+        sql1.append(".last_modified>?");
         if (onlyOwn) {
             sql1.append(" AND ");
             sql1.append(SQL.getOnlyOwn(taskTable));
@@ -179,7 +177,7 @@ public class RdbTaskSearch extends TaskSearch {
             sql2.append(removedPartsTable);
             sql2.append(".folder=? AND ");
             sql2.append(activeTaskTable);
-            sql2.append(".last_modified>=?");
+            sql2.append(".last_modified>?");
             if (onlyOwn) {
                 sql2.append(" AND ");
                 sql2.append(SQL.getOnlyOwn(activeTaskTable));

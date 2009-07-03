@@ -75,11 +75,11 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
@@ -1064,7 +1064,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private static final void getSince(final StringBuilder sb) {
-        sb.append(" pd.changing_date >= ?");
+        sb.append(" pd.changing_date > ?");
     }
 
     private static final String parseSelect(final String select) {
@@ -3035,8 +3035,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     }
 
-    private void prepareConfirmation(final CalendarDataObject edao, UserParticipant[] modified_userparticipants, PreparedStatement pu, int a) throws SQLException {
-        UserParticipant oldUser = searchUser(modified_userparticipants[a].getIdentifier(), edao);
+    private void prepareConfirmation(final CalendarDataObject edao, final UserParticipant[] modified_userparticipants, final PreparedStatement pu, final int a) throws SQLException {
+        final UserParticipant oldUser = searchUser(modified_userparticipants[a].getIdentifier(), edao);
         if (!modified_userparticipants[a].containsConfirm() && oldUser != null) {
             pu.setInt(1, oldUser.getConfirm());
         } else {
@@ -3064,8 +3064,8 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @param calendarDataObject
      * @return the UserParticipant if found, null otherwise.
      */
-    private UserParticipant searchUser(int id, CalendarDataObject calendarDataObject) {
-        for (UserParticipant user : calendarDataObject.getUsers()) {
+    private UserParticipant searchUser(final int id, final CalendarDataObject calendarDataObject) {
+        for (final UserParticipant user : calendarDataObject.getUsers()) {
             if (user.getIdentifier() == id) {
                 return user;
             }
@@ -3181,9 +3181,9 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx) throws OXException, OXPermissionException {
         if (uid != so.getUserId()) {
-            UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
-            OXFolderAccess ofa = new OXFolderAccess(ctx);
-            EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
+            final OXFolderAccess ofa = new OXFolderAccess(ctx);
+            final EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
             if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
                 throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
             }

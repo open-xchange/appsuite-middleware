@@ -59,11 +59,10 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
-import com.openexchange.groupware.contexts.Context;
 
 public class InfostoreQueryCatalog {
 
-    private static final String SQL_CHUNK05 = " AND infostore.last_modified >= ";
+    private static final String SQL_CHUNK05 = " AND infostore.last_modified > ";
 
     private static final String SQL_CHUNK04 = " FROM infostore JOIN infostore_document ON infostore.cid = ";
 
@@ -283,9 +282,9 @@ public class InfostoreQueryCatalog {
     }
 
     public String getNumberOfVersionsQueryForOneDocument() {
-        Table table = Table.INFOSTORE_DOCUMENT;
-        String idColumn = (String) Metadata.ID_LITERAL.doSwitch(table.getFieldSwitcher());
-        StringBuilder builder = new StringBuilder(200);
+        final Table table = Table.INFOSTORE_DOCUMENT;
+        final String idColumn = (String) Metadata.ID_LITERAL.doSwitch(table.getFieldSwitcher());
+        final StringBuilder builder = new StringBuilder(200);
         builder.append("SELECT COUNT(infostore_id) AS number_of_versions FROM infostore_document WHERE ").append(idColumn).append(" = ? ").append(
             "AND cid = ? GROUP BY infostore_id");
         return builder.toString();

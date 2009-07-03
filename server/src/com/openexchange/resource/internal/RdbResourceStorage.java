@@ -378,7 +378,7 @@ public class RdbResourceStorage extends ResourceStorage {
         return resources.toArray(new Resource[resources.size()]);
     }
 
-    private static final String SQL_SELECT_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM resource WHERE cid = ? AND lastModified >= ?";
+    private static final String SQL_SELECT_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM resource WHERE cid = ? AND lastModified > ?";
 
     @Override
     public Resource[] listModified(final Date modifiedSince, final Context context) throws LdapException {

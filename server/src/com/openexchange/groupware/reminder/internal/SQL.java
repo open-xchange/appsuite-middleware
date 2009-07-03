@@ -100,7 +100,7 @@ public final class SQL {
 
     public static final String sqlModified =
         "SELECT object_id,target_id,module,userid,alarm,recurrence,description,"
-        + "folder,last_modified FROM reminder WHERE cid=? AND userid=? AND last_modified>=?";
+        + "folder,last_modified FROM reminder WHERE cid=? AND userid=? AND last_modified>?";
 
     /**
      * Prevent instantiation.

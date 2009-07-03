@@ -265,7 +265,7 @@ public final class OXFolderIteratorSQL {
     private static SearchIterator<FolderObject> getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException {
         final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PRIVATE).append(
             " AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append(
-            (since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
+            (since == null ? STR_EMPTY : " AND (changing_date > ?)"));
         final String sqlSelectStr = getSQLUserVisibleFolders(
             FolderObjectIterator.getFieldsForSQL(STR_OT),
             StringCollection.getSqlInString(userId, groups),
@@ -342,7 +342,7 @@ public final class OXFolderIteratorSQL {
      */
     private static SearchIterator<FolderObject> getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException, SearchIteratorException {
         final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PUBLIC).append(
-            ") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
+            ") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
         final String sqlSelectStr = getSQLUserVisibleFolders(
             FolderObjectIterator.getFieldsForSQL(STR_OT),
             StringCollection.getSqlInString(userId, groups),
@@ -397,7 +397,7 @@ public final class OXFolderIteratorSQL {
             condBuilder.append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ").append(userId).append(
                 ") ");
         }
-        condBuilder.append("AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
+        condBuilder.append("AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
         final String sqlSelectStr = getSQLUserVisibleFolders(
             FolderObjectIterator.getFieldsForSQL(STR_OT),
             StringCollection.getSqlInString(userId, memberInGroups),
@@ -443,7 +443,7 @@ public final class OXFolderIteratorSQL {
         if (owner > -1) {
             condBuilder.append(" AND (ot.created_from = ").append(owner).append(')');
         }
-        condBuilder.append(since == null ? STR_EMPTY : " AND (changing_date >= ?)");
+        condBuilder.append(since == null ? STR_EMPTY : " AND (changing_date > ?)");
         final String sqlSelectStr = getSQLUserVisibleFolders(
             FolderObjectIterator.getFieldsForSQL(STR_OT),
             StringCollection.getSqlInString(userId, memberInGroups),
@@ -935,7 +935,7 @@ public final class OXFolderIteratorSQL {
             "WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(" OR (ot.permission_flag = ").append(
             FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append(
             "((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(
-            StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date >= ?)").append(" AND (ot.module IN ").append(
+            StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date > ?)").append(" AND (ot.module IN ").append(
             StringCollection.getSqlInString(accessibleModules)).append(")").append(
             OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(" ORDER by ot.fuid");
         Connection readCon = null;
@@ -970,7 +970,7 @@ public final class OXFolderIteratorSQL {
      * since a given date.
      */
     public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final boolean userFoldersOnly, final Context ctx) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (changing_date >= ?) AND (module IN ").append(
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND (changing_date > ?) AND (module IN ").append(
             FolderObject.SQL_IN_STR_STANDARD_MODULES).append(')');
         if (userFoldersOnly) {
             condBuilder.append(" AND (ot.created_from = ").append(userId).append(") ");
