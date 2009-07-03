@@ -65,6 +65,8 @@ public class CalendarTestConfig {
 
     private String group;
 
+    private final String contextName;
+
     public CalendarTestConfig() throws ConfigurationException {
         AJAXConfig.init();
         user = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
@@ -82,6 +84,11 @@ public class CalendarTestConfig {
 
         group = AJAXConfig.getProperty(AJAXConfig.Property.GROUP_PARTICIPANT);
 
+        contextName = AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+    }
+
+    public String getContextName() {
+        return contextName;
     }
 
     public String getUser() {
@@ -114,7 +121,7 @@ public class CalendarTestConfig {
     }
 
     
-    public void setFourthUser(String fourthUser) {
+    public void setFourthUser(final String fourthUser) {
         this.fourthUser = fourthUser;
     }
 
