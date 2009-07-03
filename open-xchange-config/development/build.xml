@@ -31,6 +31,7 @@
         </copy>
         <antcall target="patchConfigFiles">
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
+            <param name="patch.conf.dir" value="${patch.conf.dir}"/>
         </antcall>
     </target>
 
@@ -39,6 +40,10 @@
         <copy todir="${patchConfDir}" overwrite="true">
             <fileset dir="${commonConfDir}"/>
         </copy>
+        <antcall target="patchPath">
+            <param name="conf.subst.patch" value="${conf.install.dir}"/>
+            <param name="patch.conf.dir" value="${patchConfDir}"/>
+        </antcall>
     </target>
 
     <target name="patchAdminConfig" depends="prepare">
@@ -54,7 +59,7 @@
 
     <target name="install">
         <antcall target="patchConfig"/>
-        <antcall target="patchConfig"/>
+        <antcall target="patchCommonConfig"/>
         <antcall target="patchAdminConfig"/>
     </target>
 
