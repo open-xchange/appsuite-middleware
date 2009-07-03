@@ -423,7 +423,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                             priority = Integer.parseInt(tmp[0]);
                         } catch (final NumberFormatException nfe) {
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
+                                LOG.warn("Strange X-Priority header: " + tmp[0]);
                             }
                             priority = MailMessage.PRIORITY_NORMAL;
                         }
