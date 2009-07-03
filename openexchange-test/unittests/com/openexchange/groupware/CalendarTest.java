@@ -56,26 +56,24 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
-import com.openexchange.event.impl.EventConfigImpl;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.CalendarSqlImp;
 import com.openexchange.calendar.ConflictHandler;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.calendar.RecurringResult;
-import com.openexchange.calendar.RecurringResults;
-import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -118,6 +116,10 @@ public class CalendarTest extends TestCase {
     private static boolean do_not_delete = false;
     
     static int cols[] = new int[] { Appointment.START_DATE, Appointment.END_DATE, Appointment.TITLE, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS, Appointment.FULL_TIME };
+
+    protected static Date decrementDate(final Date d) {
+        return new Date(d.getTime() - 1); 
+    }
     
     @Override
 	protected void setUp() throws Exception {        
@@ -126,8 +128,16 @@ public class CalendarTest extends TestCase {
         init = true;
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
-        userid = getUserId();
+
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        final Context ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        final int user = tools.resolveUser(userName, ctx);
+
+        contextid = ctx.getContextId();
+        userid = user;
         ContextStorage.start();
     }
     
@@ -1806,7 +1816,7 @@ public class CalendarTest extends TestCase {
         
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
         
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified(), true);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()), true);
         boolean found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1818,7 +1828,7 @@ public class CalendarTest extends TestCase {
         }
         assertTrue("Found our object (userA)", found);        
         
-        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified(), true);
+        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()), true);
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();
@@ -1844,7 +1854,7 @@ public class CalendarTest extends TestCase {
         csql.updateAppointmentObject(update_with_time_change, fid, testobject.getLastModified());        
         
         
-        si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified(), true);
+        si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()), true);
         found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1856,7 +1866,7 @@ public class CalendarTest extends TestCase {
         }
         assertTrue("Found our object (userA)", found);        
         
-        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified(), true);
+        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()), true);
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();

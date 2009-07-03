@@ -2,8 +2,9 @@ package com.openexchange.webdav.protocol;
 
 
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
@@ -46,11 +47,20 @@ public class TestWebdavFactoryBuilder {
 		factory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
 		factory.setProvider(new DBPoolProvider());
 		factory.setResolver(new PathResolverImpl(factory.getDatabase()));
-		final ContextStorage ctxstor = ContextStorage.getInstance();
-        final int contextId = ctxstor.getContextId("defaultcontext");
-        final Context ctx = ctxstor.getContext(contextId);
-		factory.setSessionHolder(new DummySessionHolder(AjaxInit.getAJAXProperty("login"), ctx));
+		
+		final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        final Context ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+
+		factory.setSessionHolder(new DummySessionHolder(getUsername(), ctx));
 		return factory;
+	}
+
+	private static String getUsername() {
+	    final String un = AjaxInit.getAJAXProperty("login");
+	    final int pos = un.indexOf('@');
+	    return pos == -1 ? un : un.substring(0, pos);
 	}
 	
 	public static void setUp() throws Exception {

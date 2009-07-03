@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
-
 import com.openexchange.groupware.container.Appointment;
 
 public class DailyRecurrenceTest extends AbstractRecurrenceTest {
@@ -34,7 +33,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -64,7 +63,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

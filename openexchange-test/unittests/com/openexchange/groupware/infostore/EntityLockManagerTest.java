@@ -2,10 +2,10 @@ package com.openexchange.groupware.infostore;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
@@ -28,7 +28,7 @@ public class EntityLockManagerTest extends TestCase {
 	private final int entity = 23;
 	
 	
-	private final Context ctx = new ContextImpl(1);
+	private Context ctx = new ContextImpl(1);
 	private User user = null;
 	private final UserConfiguration userConfig = null;
 	
@@ -36,6 +36,12 @@ public class EntityLockManagerTest extends TestCase {
 	public void setUp() throws Exception {
         super.setUp();
 		Init.startServer();
+		
+		final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+		
 		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx); //FIXME
 		lockManager = new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock");
 		lockManager.startTransaction();
@@ -43,7 +49,9 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	private String getUsername() {
-		return AjaxInit.getAJAXProperty("login");
+		final String userName = AjaxInit.getAJAXProperty("login");
+		final int pos = userName.indexOf('@');
+        return pos == -1 ? userName : userName.substring(0, pos);
 	}
 
 	@Override
@@ -110,7 +118,7 @@ public class EntityLockManagerTest extends TestCase {
 	
 	public void testTimeoutTriggersListener() throws Exception {
 	    final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user, userConfig);
-        LockExpirySpy spy = new LockExpirySpy();
+        final LockExpirySpy spy = new LockExpirySpy();
         lockManager.addExpiryListener(spy);
 	    clean.add(lockId);
         
@@ -154,9 +162,9 @@ public class EntityLockManagerTest extends TestCase {
 	
 	private static final class LockExpirySpy implements LockExpiryListener {
 
-	    private List<Lock> expired = new ArrayList<Lock>();
+	    private final List<Lock> expired = new ArrayList<Lock>();
 	    
-        public void lockExpired(Lock lock) {
+        public void lockExpired(final Lock lock) {
             expired.add( lock );
         }
         

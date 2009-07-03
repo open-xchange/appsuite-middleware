@@ -51,10 +51,8 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import java.util.Iterator;
-
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-
 import com.mysql.jdbc.AssertionFailedException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
@@ -62,11 +60,12 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextToolkit;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.folder.FolderToolkit;
@@ -99,6 +98,11 @@ public class DowngradeTest extends TestCase {
     public DowngradeTest(final String name) {
         super(name);
     }
+    
+    private static String getUsername(final String un) {
+        final int pos = un.indexOf('@');
+        return pos == -1 ? un : un.substring(0, pos);
+    }
 
     /**
      * {@inheritDoc}
@@ -108,13 +112,18 @@ public class DowngradeTest extends TestCase {
         super.setUp();
         Init.startServer();
         AJAXConfig.init();
+        
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 
-        ctx = ContextToolkit.getDefaultContext();
-        final String userName = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
-        user = UserToolkit.getUser(userName, ctx);
+        user = UserToolkit.getUser(getUsername(userName), ctx);
+
         final String secondUserName = AJAXConfig.getProperty(AJAXConfig.Property
             .SECONDUSER);
-        secondUser = UserToolkit.getUser(secondUserName, ctx);
+        secondUser = UserToolkit.getUser(getUsername(secondUserName), ctx);
 
         session = SessionObjectWrapper.createSessionObject(user.getId(), ctx,
             "DowngradeTest");

@@ -7,13 +7,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
@@ -56,17 +55,24 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	
 	private WebdavFactory factory;
 	
+	private static String getUsername(final String un) {
+        final int pos = un.indexOf('@');
+        return pos == -1 ? un : un.substring(0, pos);
+    }
 	
 	@Override
 	public void setUp() throws Exception {
 		Init.startServer();
-		ctx = ContextStorage.getInstance().getContext(1); 
+		final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 		
 		final String userNameA = AjaxInit.getAJAXProperty("login");
 		final String userNameB = AjaxInit.getAJAXProperty("seconduser");
 		
-		userIdA = UserStorage.getInstance().getUserId(userNameA, ctx);
-		userIdB = UserStorage.getInstance().getUserId(userNameB, ctx);
+		userIdA = UserStorage.getInstance().getUserId(getUsername(userNameA), ctx);
+		userIdB = UserStorage.getInstance().getUserId(getUsername(userNameB), ctx);
 		
 		userA = UserStorage.getInstance().getUser(userIdA, ctx);
 		userB = UserStorage.getInstance().getUser(userIdB, ctx);
@@ -177,7 +183,7 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	
 	public void testAddAdminOnCreateAndDontInheritFromSystemFolders() throws Exception {
 	    
-	    FolderObject publicInfostore = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, ctx);
+	    final FolderObject publicInfostore = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, ctx);
 	    
         final String url = "/"+publicInfostore.getFolderName()+"/subfolder";
         

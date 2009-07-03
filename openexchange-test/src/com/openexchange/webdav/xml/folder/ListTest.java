@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.folder;
 
 import java.util.Date;
-
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
@@ -30,7 +29,7 @@ public class ListTest extends FolderTest {
 		final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword());
 		final Date modified = loadFolder.getLastModified();
 		
-		final FolderObject[] folderArray = listFolder(webCon, modified, true, false, PROTOCOL + hostName, login, password);
+		final FolderObject[] folderArray = listFolder(webCon, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("expected response size is < 2", folderArray.length >= 2);
 	}
@@ -51,7 +50,7 @@ public class ListTest extends FolderTest {
 		
 		final int[] failed = deleteFolder(webCon, id, PROTOCOL + hostName, login, password);
 		
-		final FolderObject[] folderArray = listFolder(webCon, modified, false, true, PROTOCOL + hostName, login, password);
+		final FolderObject[] folderArray = listFolder(webCon, decrementDate(modified), false, true, PROTOCOL + hostName, login, password);
 		
 		assertTrue("expected response size is < 2", folderArray.length >= 2);
 	}

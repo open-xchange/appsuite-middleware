@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -41,6 +41,12 @@ public class FolderTestCase extends TestCase {
 
         final UserStorage userStorage = UserStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 
         session = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(), ctx), ctx, getClass().getName());
 		user = userStorage.getUser(session.getUserId(), ctx);
@@ -48,7 +54,9 @@ public class FolderTestCase extends TestCase {
 	}
 	
 	private String getUsername() {
-		return AjaxInit.getAJAXProperty("login");
+		final String userName = AjaxInit.getAJAXProperty("login");
+		final int pos = userName.indexOf('@');
+        return pos == -1 ? userName : userName.substring(0, pos);
 	}
 
 	@Override

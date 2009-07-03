@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml.task;
 
 import java.util.Date;
-
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.TaskTest;
@@ -73,7 +72,7 @@ public class ListTest extends TaskTest {
         final Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword());
         final Date modified = loadTask.getLastModified();
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
 
         assertTrue("check response", taskArray.length >= 2);
     }
@@ -93,7 +92,7 @@ public class ListTest extends TaskTest {
 
         deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, modified, false, true, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), false, true, PROTOCOL + hostName, login, password);
 
         assertTrue("wrong response array length", taskArray.length >= 2);
     }
@@ -151,7 +150,7 @@ public class ListTest extends TaskTest {
         Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
         final Date modified = loadTask.getLastModified();
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
 
         assertEquals("wrong response array length", 1, taskArray.length);
 
@@ -194,7 +193,7 @@ public class ListTest extends TaskTest {
 
         updateTask(webCon, taskObj, objectId, taskFolderId, PROTOCOL + hostName, login, password);
 
-        final Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+        final Task[] taskArray = listTask(webCon, taskFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
 
         loadTask = null;
         for (int i = 0; i < taskArray.length && loadTask == null; i++) {

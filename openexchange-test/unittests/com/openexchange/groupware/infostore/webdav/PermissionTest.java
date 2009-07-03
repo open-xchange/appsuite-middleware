@@ -9,16 +9,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -43,9 +42,9 @@ import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 
@@ -73,22 +72,29 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     private final List<FolderObject> clean = new ArrayList<FolderObject>();
 
+    private static String getUsername(final String un) {
+        final int pos = un.indexOf('@');
+        return pos == -1 ? un : un.substring(0, pos);
+    }
+    
     @Override
 	public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
-        final ContextStorage ctxstor = ContextStorage.getInstance();
-        final int contextId = ctxstor.getContextId("defaultcontext");
-        ctx = ctxstor.getContext(contextId);
+        
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 
         final UserStorage userStorage = UserStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 
-        session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx), ctx, getClass().getName());
+        session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN)), ctx), ctx, getClass().getName());
 		user1 = userStorage.getUser(session1.getUserId(), ctx);
         userConfig1 = userConfigStorage.getUserConfiguration(user1.getId(),ctx);
 
-        session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER), ctx), ctx, getClass().getName());
+        session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER)), ctx), ctx, getClass().getName());
 		user2 = userStorage.getUser(session2.getUserId(), ctx);
         userConfig2 = userConfigStorage.getUserConfiguration(user2.getId(), ctx);
 

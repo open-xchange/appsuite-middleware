@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -16,7 +15,6 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
-
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -58,6 +56,10 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	public TaskTest(final String name) {
 		super(name);
 	}
+
+	protected static Date decrementDate(final Date date) {
+        return new Date(date.getTime() - 1);
+    }
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -426,14 +428,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-        InputStream body = propFindMethod.getResponseBodyAsStream();
+        final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK, true);
 		
 		assertEquals("response length not is 1", 1, response.length);
@@ -492,14 +494,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-        InputStream body = propFindMethod.getResponseBodyAsStream();
+        final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 		
 		final Task[] taskArray = new Task[response.length];
@@ -546,14 +548,14 @@ public class TaskTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + TASK_URL);
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 		
 		final int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-        InputStream body = propFindMethod.getResponseBodyAsStream();
+        final InputStream body = propFindMethod.getResponseBodyAsStream();
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(body), Types.TASK);
 		
 		assertEquals("check response" , 1, response.length);

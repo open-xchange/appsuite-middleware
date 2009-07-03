@@ -13,18 +13,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.util.GetSwitch;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -615,26 +615,35 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
 
 		public Context getContext()  {
-            final ContextStorage cs = ContextStorage.getInstance();
-			try {
-				return cs.getContext(cs.getContextId("defaultcontext"));
-			} catch (final ContextException e) {
-				e.printStackTrace();
-				return null;
-			}
+		    try {
+                final CalendarTestConfig config = new CalendarTestConfig();
+                final CalendarContextToolkit tools = new CalendarContextToolkit();
+                final String ctxName = config.getContextName();
+                return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+            } catch (final ConfigurationException e) {
+                e.printStackTrace();
+                return null;
+            }
 		}
 
 		public User getUser() {
 			try {
 				final UserStorage users = UserStorage.getInstance();
 				final Context ctx = getContext();
-				final int id = users.getUserId("francisco", ctx);
+				
+				final CalendarTestConfig config = new CalendarTestConfig();
+				
+				final int id = users.getUserId(getUsername(config.getUser()), ctx);
 				return users.getUser(id, ctx);
 			} catch (final Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 		
+		private static String getUsername(final String un) {
+	        final int pos = un.indexOf('@');
+	        return pos == -1 ? un : un.substring(0, pos);
+	    }
 	}
 	
 	public static class STATIC extends AbstractAttachmentTest.ISOLATION implements Mode {

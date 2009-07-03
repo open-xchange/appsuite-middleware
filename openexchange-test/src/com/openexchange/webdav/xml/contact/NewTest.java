@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.io.ByteArrayInputStream;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -100,7 +99,7 @@ public class NewTest extends ContactTest {
 		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword());
 		
 		final Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
-		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, loadContact.getLastModified(), true, false, getHostName(), getLogin(), getPassword());
+		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, decrementDate(loadContact.getLastModified()), true, false, getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		for (int a = 0; a < contactArray.length; a++) {

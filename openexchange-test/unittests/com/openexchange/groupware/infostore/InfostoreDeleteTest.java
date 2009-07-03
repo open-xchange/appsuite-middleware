@@ -1,10 +1,10 @@
 package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -30,8 +30,15 @@ public class InfostoreDeleteTest extends TestCase {
     @Override
 	public void setUp() throws Exception {
 		Init.startServer();
-		ctx = ContextStorage.getInstance().getContext(1);
-		session = ServerSessionFactory.createServerSession(UserStorage.getInstance().getUserId("francisco", ctx), ctx, "Blubb");
+		
+		final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        final int user = tools.resolveUser(userName, ctx);
+
+		session = ServerSessionFactory.createServerSession(user, ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
 		

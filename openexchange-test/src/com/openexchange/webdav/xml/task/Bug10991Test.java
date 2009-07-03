@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.task;
 
 import java.io.ByteArrayInputStream;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -33,7 +32,7 @@ public class Bug10991Test extends TaskTest {
 		
 		
 		final Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
-		final Task[] taskArray = listTask(getWebConversation(), taskFolderId, loadTask.getLastModified(), true, false, getHostName(), getLogin(), getPassword());
+		final Task[] taskArray = listTask(getWebConversation(), taskFolderId, decrementDate(loadTask.getLastModified()), true, false, getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		for (int a = 0; a < taskArray.length; a++) {

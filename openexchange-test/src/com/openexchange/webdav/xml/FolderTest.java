@@ -66,6 +66,10 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		
 		groupParticipant = AbstractConfigWrapper.parseProperty(webdavProps, "group_participant", "");
 	}
+
+	protected static Date decrementDate(final Date date) {
+        return new Date(date.getTime() - 1);
+    }
 	
 	protected void compareFolder(final FolderObject folderObj1, final FolderObject folderObj2) throws Exception {
 		assertEqualsAndNotNull("id is not equals", folderObj1.getObjectID(), folderObj2.getObjectID());

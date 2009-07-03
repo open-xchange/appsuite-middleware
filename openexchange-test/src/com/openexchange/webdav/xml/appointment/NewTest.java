@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -43,7 +42,7 @@ public class NewTest extends AppointmentTest {
 
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
@@ -66,7 +65,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
@@ -97,7 +96,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();		
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
@@ -131,7 +130,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
@@ -158,7 +157,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		final int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
@@ -196,7 +195,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -239,7 +238,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -284,7 +283,7 @@ public class NewTest extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -370,7 +369,7 @@ public class NewTest extends AppointmentTest {
 		
 		modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -394,7 +393,7 @@ public class NewTest extends AppointmentTest {
 		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword());
 		
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
-		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, loadAppointment.getLastModified(), true, false, getHostName(), getLogin(), getPassword());
+		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, decrementDate(loadAppointment.getLastModified()), true, false, getHostName(), getLogin(), getPassword());
 		
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {

@@ -1,13 +1,12 @@
 package com.openexchange.groupware.infostore;
 
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -39,17 +38,26 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	
 	private FolderObject privateInfostoreFolder;
 	private FolderObject folderWithOtherEntity;
+
+	private static String getUsername(final String un) {
+        final int pos = un.indexOf('@');
+        return pos == -1 ? un : un.substring(0, pos);
+    }
    
     @Override
 	public void setUp() throws Exception {
 		Init.startServer();
-		ctx = ContextStorage.getInstance().getContext(1); 
+
+		final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 		
 		final String userNameA = AjaxInit.getAJAXProperty("login");
 		final String userNameB = AjaxInit.getAJAXProperty("seconduser");
 		
-		userIdA = UserStorage.getInstance().getUserId(userNameA, ctx);
-		userIdB = UserStorage.getInstance().getUserId(userNameB, ctx);
+		userIdA = UserStorage.getInstance().getUserId(getUsername(userNameA), ctx);
+		userIdB = UserStorage.getInstance().getUserId(getUsername(userNameB), ctx);
 		
 		userA = UserStorage.getInstance().getUser(userIdA, ctx);
 		userB = UserStorage.getInstance().getUser(userIdB, ctx);

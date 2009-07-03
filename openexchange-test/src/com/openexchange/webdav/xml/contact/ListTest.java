@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.contact;
 
 import java.util.Date;
-
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
@@ -24,7 +23,7 @@ public class ListTest extends ContactTest {
 		final Contact loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadContact.getLastModified();
 		
-		final Contact[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+		final Contact[] contactArray = listContact(webCon, contactFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("check response", contactArray.length >= 2);
 		deleteContact(getWebConversation(), objectId1, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -46,7 +45,7 @@ public class ListTest extends ContactTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		final Contact[] appointmentArray = listContact(webCon, contactFolderId, modified, false, true, PROTOCOL + hostName, login, password);
+		final Contact[] appointmentArray = listContact(webCon, contactFolderId, decrementDate(modified), false, true, PROTOCOL + hostName, login, password);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 2);
 	}
@@ -88,7 +87,7 @@ public class ListTest extends ContactTest {
 		Contact loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadContact.getLastModified();		
 		
-		final Contact[] appointmentArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+		final Contact[] appointmentArray = listContact(webCon, contactFolderId, decrementDate(modified), true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		

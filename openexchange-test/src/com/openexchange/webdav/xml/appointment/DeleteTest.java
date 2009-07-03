@@ -3,7 +3,6 @@ package com.openexchange.webdav.xml.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -121,17 +120,18 @@ public class DeleteTest extends AppointmentTest {
 		Appointment loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, modified, PROTOCOL + hostName, login, password);
+		loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, decrementDate(modified), PROTOCOL + hostName, login, password);
 		compareObject(appointmentObj, loadAppointment);
 		
 		appointmentObj.setDeleteExceptions(new Date[] { new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis) } );
 		
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(webCon, new int[][] { { objectId, appointmentFolderId } }, PROTOCOL + hostName, login, password);
 	}
+
 }
 

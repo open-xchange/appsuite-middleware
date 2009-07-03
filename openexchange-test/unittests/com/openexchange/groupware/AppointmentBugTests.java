@@ -64,6 +64,7 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -72,6 +73,8 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -111,8 +114,15 @@ public class AppointmentBugTests extends TestCase {
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
 
-        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
-        userid = getUserId();
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        final Context ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        final int user = tools.resolveUser(userName, ctx);
+
+        contextid = ctx.getContextId();
+        userid = user;
     }
 
     @Override
@@ -142,7 +152,15 @@ public class AppointmentBugTests extends TestCase {
     }
 
     public static Context getContext() {
-        return new ContextImpl(contextid);
+        try {
+            final CalendarTestConfig config = new CalendarTestConfig();
+            final CalendarContextToolkit tools = new CalendarContextToolkit();
+            final String ctxName = config.getContextName();
+            return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        } catch (final ConfigurationException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     void deleteAllAppointments() throws Exception  {

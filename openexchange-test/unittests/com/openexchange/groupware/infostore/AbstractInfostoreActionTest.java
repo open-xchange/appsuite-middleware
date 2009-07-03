@@ -7,8 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -38,8 +39,16 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		Init.startServer();
 		provider = new DBPoolProvider();
 		queryCatalog = new InfostoreQueryCatalog();
+		
+		final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        final int userId = tools.resolveUser(userName, ctx);
+		
 		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx);
+		user = UserStorage.getInstance().getUser(userId, ctx);
 
 		initDocMeta();
 	}

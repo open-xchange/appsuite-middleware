@@ -3,10 +3,8 @@ package com.openexchange.webdav.xml.appointment;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -79,7 +77,7 @@ public class Bug8453Test extends AppointmentTest {
 		
 		final Date modified = loadAppointment.getLastModified();
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

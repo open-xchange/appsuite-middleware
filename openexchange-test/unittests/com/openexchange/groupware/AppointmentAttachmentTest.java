@@ -8,12 +8,10 @@
 package com.openexchange.groupware;
 
 import java.sql.Connection;
-
 import junit.framework.TestCase;
-
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -77,7 +75,7 @@ public class AppointmentAttachmentTest extends TestCase {
         try {
             final long check_modified = System.currentTimeMillis();
             last_modified = csql.attachmentAction(oid, userid, context, false);
-            assertTrue("Check for last_modified ", last_modified >= check_modified);
+            assertTrue("Check for last_modified ", last_modified > check_modified);
         } catch(final Exception e) {
             return; 
         }

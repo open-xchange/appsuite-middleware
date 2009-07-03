@@ -6,13 +6,12 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import org.junit.Test;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -25,8 +24,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.webdav.protocol.DummySessionHolder;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 // Bug #9109
@@ -43,12 +42,21 @@ public class DropBoxScenarioTest extends TestCase{
 	WebdavPath dropBox = null;
 	
 	List<WebdavPath> clean = new ArrayList<WebdavPath>();
+
+	private static String getUsername(final String un) {
+        final int pos = un.indexOf('@');
+        return pos == -1 ? un : un.substring(0, pos);
+    }
 	
 	@Override
 	public void setUp() throws Exception {
-		
-        user1 = "thorben";
-        user2 = "francisco"; //FIXME
+	    final CalendarTestConfig config = new CalendarTestConfig();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+	    
+        user1 = getUsername(config.getUser());
+        user2 = getUsername(config.getSecondUser());
         
 		TestWebdavFactoryBuilder.setUp();
 

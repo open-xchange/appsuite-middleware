@@ -51,8 +51,11 @@ package com.openexchange.groupware.infostore;
 
 import java.util.ArrayList;
 import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -68,7 +71,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
-import junit.framework.TestCase;
 
 
 /**
@@ -108,11 +110,15 @@ public class AbstractInfostoreTest extends TestCase{
         
         final ContextStorage ctxstor = ContextStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-
-        final int contextId = ctxstor.getContextId("defaultcontext");
-        ctx = ctxstor.getContext(contextId);
-        user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("thorben", ctx), ctx); //FIXME
-        user2 = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx); //FIXME
+        
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final String userName2 = config.getSecondUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);
+        user2 = UserStorage.getInstance().getUser(tools.resolveUser(userName2, ctx), ctx);
         
         
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");

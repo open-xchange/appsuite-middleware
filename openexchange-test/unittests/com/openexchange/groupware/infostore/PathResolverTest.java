@@ -1,19 +1,19 @@
 package com.openexchange.groupware.infostore;
 
 import static com.openexchange.webdav.protocol.WebdavPathTest.assertComponents;
-
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
@@ -32,7 +32,6 @@ import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.api2.OXException;
 
 public class PathResolverTest extends TestCase {
 
@@ -90,9 +89,15 @@ public class PathResolverTest extends TestCase {
 	}
 	
 	private Context getContext() throws ContextException {
-        final ContextStorage ctxstor = ContextStorage.getInstance();
-        final int contextId = ctxstor.getContextId("defaultcontext");
-        return ctxstor.getContext(contextId);
+	    try {
+            final CalendarTestConfig config = new CalendarTestConfig();
+            final CalendarContextToolkit tools = new CalendarContextToolkit();
+            final String ctxName = config.getContextName();
+            return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        } catch (final ConfigurationException e) {
+            e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
@@ -116,7 +121,15 @@ public class PathResolverTest extends TestCase {
 	}
 
 	private String getUsername() {
-		return "francisco"; //FIXME
+	    try {
+            final CalendarTestConfig config = new CalendarTestConfig();
+            final String userName = config.getUser();
+            final int pos = userName.indexOf('@');
+            return pos == -1 ? userName : userName.substring(0, pos);
+        } catch (final ConfigurationException e) {
+            e.printStackTrace();
+            return null;
+        }
 	}
 
 	public void testResolvePathDocument() throws Exception {
@@ -181,11 +194,11 @@ public class PathResolverTest extends TestCase {
 
     // Bug 12618
     public void testRespectsAliases() throws OXException {
-        WebdavFolderAliases aliases = new InMemoryAliases();
+        final WebdavFolderAliases aliases = new InMemoryAliases();
         aliases.registerNameWithIDAndParent("ALIAS!", id5, id4);
         pathResolver.setAliases(aliases);
 
-        Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), ctx, user, userConfig);
+        final Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/ALIAS!"), ctx, user, userConfig);
         assertFalse(resolved.isDocument());
         assertTrue(resolved.isFolder());
         assertEquals(id5, resolved.getId());

@@ -1,10 +1,8 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug7915Test extends AbstractRecurrenceTest {
@@ -65,10 +63,10 @@ public class Bug7915Test extends AbstractRecurrenceTest {
         // Loaded exception MUST NOT contains any recurrence information except recurrence identifier and position.
         compareObject(exceptionAppointmentObject, loadAppointment);
 		
-		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 
-		loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, decrementDate(modified), getHostName(), getLogin(), getPassword());
 		compareObject(exceptionAppointmentObject, loadAppointment);
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

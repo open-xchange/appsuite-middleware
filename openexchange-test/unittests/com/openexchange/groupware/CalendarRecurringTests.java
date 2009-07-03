@@ -60,15 +60,16 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.CalendarSql;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.CalendarSql;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -104,11 +105,19 @@ public class CalendarRecurringTests extends TestCase {
         super.setUp();
         Init.startServer();
         init = true;
+        
+        final CalendarTestConfig config = new CalendarTestConfig();
+        final String userName = config.getUser();
+        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final String ctxName = config.getContextName();
+        final Context ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
+        final int user = tools.resolveUser(userName, ctx);
+        
         //com.openexchange.groupware.Init.initContext();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
-        userid = getUserId();
+        contextid = ctx.getContextId();
+        userid = user;
         ContextStorage.start();
     }
     
@@ -1201,9 +1210,9 @@ public class CalendarRecurringTests extends TestCase {
         cdao2.setDayInMonth(20);
         new CalendarCollection().fillDAO(cdao);
 
-        CalendarCollection coll = new CalendarCollection();
+        final CalendarCollection coll = new CalendarCollection();
         
-        Calendar check_until2 = new GregorianCalendar();
+        final Calendar check_until2 = new GregorianCalendar();
         check_until2.setTime(cdao2.getStartDate());
         // No longer any calculation, just say, what is expected...
         // (-1) in years because internal calculation is 1-based.
