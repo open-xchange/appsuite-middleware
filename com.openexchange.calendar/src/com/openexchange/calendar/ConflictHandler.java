@@ -150,12 +150,6 @@ public class ConflictHandler {
          * for non series appointments.
          */
         if (cdao.getRecurrenceType() == 0) {
-            if (create) {
-                if (request_participants) {
-                    return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
-                }
-                return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
-            }
             if (request_participants) {
                 return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
             }
