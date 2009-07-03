@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.xerces.sun
 Bundle-Version: 6.10.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Bundle-ClassPath: lib/xerces.jar,
- .
+Bundle-ClassPath: lib/xerces.jar
 Eclipse-BuddyPolicy: registered
 Export-Package:  org.apache.xerces.impl,
  org.apache.xerces.parsers,
