@@ -55,6 +55,7 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.FolderTest;
 
 /**
  * This is a test for bug 13262. Note, that the test passes although the bug isn't fixed. That's because the bug is located in the outlook
@@ -68,14 +69,17 @@ public class Bug13262Test extends AppointmentTest {
     private Appointment appointment;
     private Calendar thirdOccurrence;
 
-    public Bug13262Test(String name) {
+    public Bug13262Test(final String name) {
         super(name);
     }
     
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        
-        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+
+        FolderTest.clearFolder(webCon, new int[] {appointmentFolderId}, new String[] {"calendar"}, new Date(), PROTOCOL + hostName, login, password);
+
+        final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.setTime(startTime);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -98,6 +102,7 @@ public class Bug13262Test extends AppointmentTest {
         thirdOccurrence = cal;
     }
     
+    @Override
     public void tearDown() throws Exception {
         if (objectId != -1) {
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
@@ -112,15 +117,15 @@ public class Bug13262Test extends AppointmentTest {
         assertTrue("No object Id returned after creation", objectId > 0);
         
         // Create Exception with update
-        Appointment exception = createException();
-        int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+        final Appointment exception = createException();
+        final int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
 
         // Load Appointment
-        Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+        final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
 
         // Load exception
-        Appointment loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+        final Appointment loadException = loadAppointment(getWebConversation(), exceptionId, appointmentFolderId, getHostName(), getLogin(), getPassword());
         assertNotNull("Loaded Exception is null", loadException);
         
         // Checks
@@ -128,7 +133,7 @@ public class Bug13262Test extends AppointmentTest {
     }
 
     private Appointment createException() {
-        Appointment exception = new Appointment();
+        final Appointment exception = new Appointment();
         exception.setObjectID(objectId);
         exception.setParentFolderID(appointmentFolderId);
         exception.setLastModified(appointment.getLastModified());
