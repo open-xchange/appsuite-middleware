@@ -342,10 +342,8 @@ public class Starter implements Initialization {
     /**
      * Start in admin mode
      */
-    public void adminStart() throws AbstractOXException {
-
+    public void adminStart() {
         dumpServerInfos();
-
         for (final Initialization init : adminInits) {
             try {
                 init.start();
@@ -354,7 +352,6 @@ public class Starter implements Initialization {
                 LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
             }
         }
-
         if (LOG.isInfoEnabled()) {
             if (started.size() == adminInits.length) {
                 LOG.info("Admin successfully initialized.");
@@ -362,7 +359,6 @@ public class Starter implements Initialization {
                 LOG.info("Admin initialized with errors.");
             }
         }
-
         if (LOG.isInfoEnabled()) {
             if (started.size() == adminInits.length) {
                 LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
@@ -370,7 +366,6 @@ public class Starter implements Initialization {
                 LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
             }
         }
-
     }
 
     /**
@@ -378,7 +373,7 @@ public class Starter implements Initialization {
      */
     private static final void dumpServerInfos() {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Open-Xchange 6.0");
+            LOG.info(Version.NAME + ' ' + Version.getVersionString());
             LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
         }
 
@@ -407,7 +402,7 @@ public class Starter implements Initialization {
         }
 
         if (LOG.isInfoEnabled()) {
-            LOG.info("System version : Open-Xchange Server [" + Version.buildnumber + "] initializing ...");
+            LOG.info("System version : " + Version.NAME + " Server [" + Version.getVersionString() + "] initializing ...");
             LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
         }
     }
