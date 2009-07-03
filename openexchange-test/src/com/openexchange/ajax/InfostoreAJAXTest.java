@@ -8,13 +8,11 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.httpclient.HttpException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -92,6 +90,10 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
     protected void removeDocumentsAndFolders() throws JSONException, IOException, SAXException {
         removeAll();
         FolderTest.deleteFolders(getWebConversation(), getHostName(), sessionId, new int[]{folderId}, Long.MAX_VALUE, false);
+    }
+
+    protected void removeDocumentsInFolder(final int folderId) throws JSONException, IOException, SAXException {
+        FolderTest.clearFolder(getWebConversation(), getHostName(), sessionId, new int[]{folderId}, Long.MAX_VALUE);
     }
 
     public void removeAll() throws JSONException, IOException, SAXException {
