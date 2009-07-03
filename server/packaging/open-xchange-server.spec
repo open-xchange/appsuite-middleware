@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -360,6 +360,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Jul 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14061: Properly initialization of AbstractMailAccount if mail properties have not been initialized, yet
+* Fri Jul 03 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14072: Corrected version number in server start log entries.
 * Wed Jul 01 2009 - thorben.betten@open-xchange.com
  - Bugfix #14028: Using Java's concurrent read-write lock to control access to HTTP servlet manager
  - Bugfix #13736: Fallback to ContextStorage implementation if ContextService is missing
