@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +29,6 @@ import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
-import junit.framework.TestCase;
 
 public abstract class AbstractCalendarTest extends TestCase {
 
@@ -104,7 +104,8 @@ public abstract class AbstractCalendarTest extends TestCase {
         fourthUser = config.getFourthUser();
     
         final CalendarContextToolkit tools = new CalendarContextToolkit();
-        ctx = tools.getDefaultContext();
+        final String ctxName = config.getContextName();
+        ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
     
         appointments = new CommonAppointments(ctx, user);
     
@@ -211,7 +212,7 @@ public abstract class AbstractCalendarTest extends TestCase {
             List<Object> args = new ArrayList<Object>();
             private Verifyer verifyer;
     
-            public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,int inFolder, final ServerSession session) {
+            public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,final int inFolder, final ServerSession session) {
                 this.called = "createdChangeExceptionInRecurringAppointment";
                 this.args.add(master);
                 this.args.add(changeException);
@@ -259,7 +260,7 @@ public abstract class AbstractCalendarTest extends TestCase {
         super();
     }
 
-    public AbstractCalendarTest(String name) {
+    public AbstractCalendarTest(final String name) {
         super(name);
     }
     

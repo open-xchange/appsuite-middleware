@@ -81,7 +81,8 @@ public class CalendarContextToolkit {
         UserStorage uStorage = null;
         try {
             uStorage = UserStorage.getInstance();
-            return uStorage.getUserId(username, ctx);
+            final int pos = username.indexOf('@');
+            return uStorage.getUserId((pos == -1 ? username : username.substring(0, pos)), ctx);
         } catch (final LdapException e) {
             e.printStackTrace();
             return -1;
