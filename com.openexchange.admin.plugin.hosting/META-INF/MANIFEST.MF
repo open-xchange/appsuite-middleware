@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open_xchange_admin_plugin_hosting Plug-in
 Bundle-SymbolicName: open_xchange_admin_plugin_hosting
-Bundle-Version: 6.10.0.0
+Bundle-Version: 6.11.0.0
 Bundle-Activator: com.openexchange.admin.osgi.Activator
 Import-Package: com.openexchange.api2,
  com.openexchange.caching,
