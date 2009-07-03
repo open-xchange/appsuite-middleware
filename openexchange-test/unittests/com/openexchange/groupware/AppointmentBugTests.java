@@ -57,17 +57,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.event.impl.EventConfigImpl;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -94,6 +93,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class AppointmentBugTests extends TestCase {
 
@@ -131,6 +131,10 @@ public class AppointmentBugTests extends TestCase {
         return uStorage.getUserId(u, getContext());
     }
 
+    private static Date decrementDate(final Date d) {
+        return new Date(d.getTime() - 1);
+    }
+    
     public static int getUserId() throws Exception {
 
         final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
@@ -386,8 +390,22 @@ public class AppointmentBugTests extends TestCase {
         final int userid2 = resolveUser(user2);
         final int fid = getPrivateFolder(userid);
         final int fid2 = getPrivateFolder(userid2);
+        
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
         final SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
+        
+        // Clean up appointments
+        FolderObject fo = new FolderObject();
+        fo.setObjectID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        new RdbFolderSQLInterface(new ServerSessionAdapter(so)).clearFolder(fo, new Date());
+        fo = new FolderObject();
+        fo.setObjectID(fid2);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        new RdbFolderSQLInterface(new ServerSessionAdapter(so2)).clearFolder(fo, new Date());
+        
 
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -420,7 +438,7 @@ public class AppointmentBugTests extends TestCase {
         update.setIgnoreConflicts(true);
 
         final CalendarDataObject conflicts[] = csql.updateAppointmentObject(update, fid, new Date());
-        assertTrue("Got no conflicts ", conflicts == null);
+        assertTrue("Got conflicts ", conflicts == null);
 
         final CalendarDataObject testobject = csql.getObjectById(object_id, fid);
         final Participant participants[] = testobject.getParticipants();
@@ -1815,7 +1833,7 @@ public class AppointmentBugTests extends TestCase {
         CalendarDataObject testobject2 = csql2.getObjectById(object_id, fid2);
         assertTrue("Check that userB has no alarm set in the cdao", !testobject2.containsAlarm());
 
-        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified(), true);
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()), true);
         boolean found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1827,7 +1845,7 @@ public class AppointmentBugTests extends TestCase {
         }
         assertTrue("Found our object (userA)", found);
 
-        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified(), true);
+        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()), true);
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();
@@ -1856,7 +1874,7 @@ public class AppointmentBugTests extends TestCase {
         testobject2 = csql2.getObjectById(object_id, fid2);
         assertTrue("Check that userB has no alarm set in the cdao", !testobject2.containsAlarm());
 
-        si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified(), true);
+        si = csql.getModifiedAppointmentsInFolder(fid, cols, decrementDate(cdao.getLastModified()), true);
         found = false;
         while (si.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si.next();
@@ -1868,7 +1886,7 @@ public class AppointmentBugTests extends TestCase {
         }
         assertTrue("Found our object (userA)", found);
 
-        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified(), true);
+        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, decrementDate(cdao.getLastModified()), true);
         found = false;
         while (si2.hasNext()) {
             final CalendarDataObject tdao = (CalendarDataObject)si2.next();
@@ -1898,6 +1916,14 @@ public class AppointmentBugTests extends TestCase {
 
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        // Clean up appointments
+        final FolderObject fo = new FolderObject();
+        fo.setObjectID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        new RdbFolderSQLInterface(new ServerSessionAdapter(so)).clearFolder(fo, new Date());
+
         final CalendarSql csql = new CalendarSql(so);
 
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -2913,7 +2939,7 @@ public class AppointmentBugTests extends TestCase {
 
         final String confirm_message = "jaja";
 
-        int fid2 = AppointmentBugTests.getPrivateFolder(userid2);
+        final int fid2 = AppointmentBugTests.getPrivateFolder(userid2);
         csql.setUserConfirmation(object_id, fid, userid, CalendarDataObject.ACCEPT, confirm_message);
         csql2.setUserConfirmation(object_id, fid2, userid2, CalendarDataObject.ACCEPT, confirm_message);
 
