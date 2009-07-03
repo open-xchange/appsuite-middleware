@@ -33,4 +33,8 @@
    "com.openexchange.server/Open-Xchange Server Startup.launch" launcher file. Right click on file
    and select "Run as" and press first entry.
    
+   
+7. To build open-xchange-axis2 correctly, please execute "jar" task in the open-xchange-axis2 build.xml
+  - then hit F5 to refresh all projects including open-xchange-axis2
+   
 TODO: Explain how to import profile files for formatter, clean-up, etc.
