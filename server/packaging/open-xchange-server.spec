@@ -362,6 +362,7 @@ fi
 %changelog
 * Mon Jul 06 2009 - marcus.klein@open-xchange.com
  - Bugfix #14077: Tasks in public folders now get context administrator as creating or changing user if original user is removed.
+ - Bugfix #14074: Moving series is now respecting different time zone offsets due to daylight saving times.
 * Fri Jul 03 2009 - thorben.betten@open-xchange.com
  - Bugfix #14061: Properly initialization of AbstractMailAccount if mail properties have not been initialized, yet
 * Fri Jul 03 2009 - marcus.klein@open-xchange.com
