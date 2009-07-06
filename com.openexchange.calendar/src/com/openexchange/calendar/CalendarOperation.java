@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -584,19 +585,22 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return new Date(until + mod);
     }
 
-    private static final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao,
-            final CalendarDataObject edao) {
-        long start_date = edao.getRecurringStart();
-        if (start_date == 0) {
-            start_date = edao.getStartDate().getTime();
+    private static final void calculateAndSetRealRecurringStartAndEndDate(CalendarDataObject cdao, CalendarDataObject edao) {
+        long startDate = edao.getRecurringStart();
+        if (startDate == 0) {
+            startDate = edao.getStartDate().getTime();
         }
-        final long end_date = edao.getUntil().getTime();
-        long start_time = cdao.getStartDate().getTime();
-        long end_time = (cdao.getEndDate().getTime());
-        start_time = start_time % Constants.MILLI_DAY;
-        end_time = end_time % Constants.MILLI_DAY  + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
-        cdao.setStartDate(recColl.calculateRecurringDate(start_date, start_time));
-        cdao.setEndDate(recColl.calculateRecurringDate(end_date, end_time));
+        TimeZone tz = Tools.getTimeZone(cdao.getTimezone());
+        int startDateZoneOffset = tz.getOffset(startDate);
+        final long endDate = edao.getUntil().getTime();
+        long startTime = cdao.getStartDate().getTime();
+        long endTime = (cdao.getEndDate().getTime());
+        int startTimeZoneOffset = tz.getOffset(startTime);
+        startTime = startTime % Constants.MILLI_DAY;
+        endTime = endTime % Constants.MILLI_DAY  + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
+        // FIXME daylight saving time offset
+        cdao.setStartDate(recColl.calculateRecurringDate(startDate, startTime, startTimeZoneOffset - startDateZoneOffset));
+        cdao.setEndDate(recColl.calculateRecurringDate(endDate, endTime, startTimeZoneOffset - startDateZoneOffset));
     }
 
     public final boolean hasNext() {

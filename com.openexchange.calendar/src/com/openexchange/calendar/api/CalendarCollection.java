@@ -1093,8 +1093,8 @@ public final class CalendarCollection implements CalendarCollectionService {
         dsf(sb, 't', type);
     }
     
-    public Date calculateRecurringDate(final long date, final long time) {
-        return new Date((date - (date % Constants.MILLI_DAY)) + time);
+    public Date calculateRecurringDate(final long date, final long time, int timeZoneOffsetDiff) {
+        return new Date((date - (date % Constants.MILLI_DAY)) + time + timeZoneOffsetDiff);
     }
 
     /**

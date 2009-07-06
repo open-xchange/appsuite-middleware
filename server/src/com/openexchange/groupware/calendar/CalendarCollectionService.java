@@ -758,7 +758,7 @@ public interface CalendarCollectionService {
 
     public void fillMap(final RecurringResultsInterface rss, final long s, final long diff, final int d, final int counter);
 
-    public Date calculateRecurringDate(final long date, final long time);
+    public Date calculateRecurringDate(final long date, final long time, int timeZoneOffsetDiff);
 
     /**
      * Checks if recurring information provided in specified calendar object is complete.<br>
