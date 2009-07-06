@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -360,6 +360,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jul 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14077: Tasks in public folders now get context administrator as creating or changing user if original user is removed.
 * Fri Jul 03 2009 - thorben.betten@open-xchange.com
  - Bugfix #14061: Properly initialization of AbstractMailAccount if mail properties have not been initialized, yet
 * Fri Jul 03 2009 - marcus.klein@open-xchange.com
