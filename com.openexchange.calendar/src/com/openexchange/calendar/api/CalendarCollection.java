@@ -310,7 +310,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 }
                 cdao.setInterval(1);
             }
-            if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
+            if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
@@ -1093,8 +1093,8 @@ public final class CalendarCollection implements CalendarCollectionService {
         dsf(sb, 't', type);
     }
     
-    public Date calculateRecurringDate(final long date, final long time) {
-        return new Date((date - (date % Constants.MILLI_DAY)) + time);
+    public Date calculateRecurringDate(final long date, final long time, int timeZoneOffsetDiff) {
+        return new Date((date - (date % Constants.MILLI_DAY)) + time + timeZoneOffsetDiff);
     }
 
     /**
