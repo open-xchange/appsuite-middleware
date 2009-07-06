@@ -94,10 +94,9 @@ public final class SQL {
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
-     * Search for delegated tasks.
+     * Search for all tasks of a user.
      */
-    static final Map<StorageType, String> SEARCH_DELEGATED =
-        new EnumMap<StorageType, String>(StorageType.class);
+    static final Map<StorageType, String> SEARCH_USER_TASKS = new EnumMap<StorageType, String>(StorageType.class);
 
     /**
      * SQL statements for inserting participants.
@@ -426,15 +425,12 @@ public final class SQL {
         FOLDER_TABLES.put(StorageType.ACTIVE, "task_folder");
         FOLDER_TABLES.put(StorageType.DELETED, "del_task_folder");
 
-        String sql = "SELECT id FROM @taskTable@ JOIN @participantTable@ "
-            + "ON @taskTable@.cid=@participantTable@.cid "
-            + "AND @taskTable@.id=@participantTable@.task "
-            + "WHERE @taskTable@.cid=? AND "
+        String sql = "SELECT id FROM @taskTable@ LEFT JOIN @participantTable@ ON @taskTable@.cid=@participantTable@.cid "
+            + "AND @taskTable@.id=@participantTable@.task WHERE @taskTable@.cid=? AND "
             + "(@taskTable@.created_from=? OR @taskTable@.changed_from=?)";
         for (final StorageType type : activeDelete) {
-            SEARCH_DELEGATED.put(type, sql.replace("@taskTable@", TASK_TABLES
-                .get(type)).replace("@participantTable@", PARTS_TABLES
-                .get(type)));
+            SEARCH_USER_TASKS.put(type, sql.replace("@taskTable@", TASK_TABLES.get(type))
+                .replace("@participantTable@", PARTS_TABLES.get(type)));
         }
 
         sql = "INSERT INTO " + tableName + " (cid,task,user,group_id,accepted,"

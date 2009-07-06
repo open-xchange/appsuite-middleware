@@ -77,17 +77,13 @@ public class RdbTaskSearch extends TaskSearch {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    int[] findDelegatedTasks(final Context ctx, final Connection con,
-        final int userId, final StorageType type) throws TaskException {
+    int[] findUserTasks(Context ctx, Connection con, int userId, StorageType type) throws TaskException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<Integer> tasks = new ArrayList<Integer>();
         try {
-            stmt = con.prepareStatement(SQL.SEARCH_DELEGATED.get(type));
+            stmt = con.prepareStatement(SQL.SEARCH_USER_TASKS.get(type));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, userId);
@@ -97,8 +93,7 @@ public class RdbTaskSearch extends TaskSearch {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (final SQLException e) {
-            throw new TaskException(TaskException.Code.SQL_ERROR, e,
-                e.getMessage());
+            throw new TaskException(TaskException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }

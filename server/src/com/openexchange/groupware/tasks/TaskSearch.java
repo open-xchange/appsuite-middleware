@@ -90,8 +90,7 @@ abstract class TaskSearch {
      * @return an int array with all task identifier found.
      * @throws TaskException if an exception occurs.
      */
-    abstract int[] findDelegatedTasks(Context ctx, Connection con, int userId,
-        StorageType type) throws TaskException;
+    abstract int[] findUserTasks(Context ctx, Connection con, int userId, StorageType type) throws TaskException;
 
     /**
      * List tasks in a folder that are modified since the specified date.
