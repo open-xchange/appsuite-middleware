@@ -1,3 +1,7 @@
+* 2009-07-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #14077: Tasks in public folders now get context administrator as creating or changing user if original user is removed.
+
 * 2009-07-03 - marcus.klein@open-xchange.com
 
  - Bugfix #14072: Corrected version number in server start log entries.
