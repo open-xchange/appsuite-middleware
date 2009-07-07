@@ -68,8 +68,10 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.MultipleAdapterServlet;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
@@ -88,250 +90,33 @@ import static com.openexchange.publish.json.PublicationJSONErrorMessage.*;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class PublicationServlet extends AbstractPublicationServlet{
+public class PublicationServlet extends MultipleAdapterServlet{
 
-    private static final Log LOG = LogFactory.getLog(PublicationServlet.class);
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(PublicationServlet.class, LOG);
 
-    private static PublicationTargetDiscoveryService discovery = null;
-    
-    private static final Map<String, EntityType> entities = new EntityMap();
-    
-    public static void setPublicationTargetDiscoveryService(PublicationTargetDiscoveryService service) {
-        discovery = service;
-    }
-    
-    
-    @Override
-    protected Log getLog() {
-        return LOG;
-    }
-
-    @Override
-    protected LoggingLogic getLoggingLogic() {
-        return LL;
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handleRequest(req, resp);
+    private static PublicationMultipleHandlerFactory multipleFactory;
+    public static void setFactory(PublicationMultipleHandlerFactory factory) {
+        multipleFactory = factory;
     }
     
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handleRequest(req, resp);
+    protected MultipleHandler createMultipleHandler() {
+        return multipleFactory.createMultipleHandler();
+    }
+
+    @Override
+    protected boolean requiresBody(String action) {
+        return PublicationMultipleHandler.ACTIONS_REQUIRING_BODY.contains(action);
+    }
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        return session.getUserConfiguration().isPublication();
     }
     
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handleRequest(req, resp);
-    }
-    
-    protected void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            String action = req.getParameter("action");
-            if(null == action) {
-                throw MISSING_PARAMETER.create("action");
-            } else if (action.equals("new")) {
-                createPublication(req, resp);
-            } else if (action.equals("update")) {
-                updatePublication(req, resp);
-            } else if (action.equals("delete")) {
-                deletePublication(req, resp);
-            } else if (action.equals("get")) {
-                loadPublication(req, resp);
-            } else if (action.equals("all")) {
-                loadAllPublicationsForEntity(req, resp);
-            } else if (action.equals("list")) {
-                listPublications(req, resp);
-            } else {
-                throw UNKNOWN_ACTION.create(action);
-            }
-        } catch (AbstractOXException x) {
-            writeOXException(x, resp);
-        } catch (Throwable t) {
-            writeOXException(wrapThrowable(t), resp);
-        }
+    protected JSONObject modify(HttpServletRequest req, String action, JSONObject request) throws JSONException {
+        request.put("__query", req.getQueryString());
+        return request;
     }
 
-    private void createPublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException, PublicationJSONException {
-        ServerSession session = getSessionObject(req);
-        Publication publication = getPublication(req, session);
-        publication.setId(-1);
-        
-        publication.create();
-        
-        writeData(publication.getId(), resp);
-        
-    }
-
-    private Publication getPublication(HttpServletRequest req, ServerSession session) throws JSONException, IOException, PublicationException, PublicationJSONException {
-        JSONObject object = new JSONObject(getBody(req));
-        Publication publication = new PublicationParser(discovery).parse(object);
-        publication.setUserId(session.getUserId());
-        publication.setContext(session.getContext());
-        if(publication.getTarget() == null && publication.getId() > 0) {
-            PublicationTarget target = discovery.getTarget(publication.getContext(), publication.getId());
-            publication.setTarget(target);
-        }
-        return publication;
-    }
-
-
-    private void updatePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException, PublicationJSONException {
-        ServerSession session = getSessionObject(req);
-        Publication publication = getPublication(req, session);
-        
-        publication.update();
-
-        writeData(1, resp);
-    }
-
-
-    private void deletePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
-        JSONArray ids = new JSONArray(getBody(req));
-        Context context = getSessionObject(req).getContext();
-        for(int i = 0, size = ids.length(); i < size; i++) {
-            int id = ids.getInt(i);
-            PublicationService publisher = discovery.getTarget(context, id).getPublicationService();
-            Publication publication = new Publication();
-            publication.setContext(context);
-            publication.setId(id);
-            publisher.delete(publication);
-        }
-        writeData(1, resp);
-
-    }
-
-
-    private void loadPublication(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, JSONException {
-        int id = Integer.parseInt(req.getParameter("id"));
-        String target = req.getParameter("target");
-        Context context = getSessionObject(req).getContext();
-        Publication publication = loadPublication(id, context, target);
-        writePublication(publication, resp);
-    }
-
-
-    private void writePublication(Publication publication, HttpServletResponse resp) throws JSONException, PublicationJSONException {
-        JSONObject object = new PublicationWriter().write(publication);
-        writeData(object, resp);
-    }
-
-    private Publication loadPublication(int id, Context context, String target) throws AbstractOXException {
-        PublicationService service = null;
-        if(target != null) {
-            service = discovery.getTarget(target).getPublicationService();
-        } else {
-            service = discovery.getTarget(context, id).getPublicationService();
-        }
-        return service.load(context, id);
-    }
-
-
-    // Robustness!
-    private void loadAllPublicationsForEntity(HttpServletRequest req, HttpServletResponse resp) throws PublicationJSONException, PublicationException, JSONException {
-        if(null == req.getParameter("entityModule")) {
-            throw MISSING_PARAMETER.create("entityModule");
-        }
-        String module = req.getParameter("entityModule");
-        EntityType entityType = entities.get(module);
-        if(null == entityType) {
-            throw UNKOWN_ENTITY_MODULE.create(module);
-        }
-        String entityId = entityType.toEntityID(req);
-        Context context = getSessionObject(req).getContext();
-        List<Publication> publications = loadAllPublicationsForEntity(context, entityId, module);
-    
-        String[] basicColumns = getBasicColumns(req);
-        Map<String, String[]> dynamicColumns = getDynamicColumns(req);
-        List<String> dynamicColumnOrder = getDynamicColumnOrder(req);
-        
-        writePublications(publications, basicColumns, dynamicColumns, dynamicColumnOrder, resp);
-    }
-
-
-    private List<Publication> loadAllPublicationsForEntity(Context context, String entityId, String module) throws PublicationException {
-        List<Publication> publications = new LinkedList<Publication>();
-        Collection<PublicationTarget> targetsForEntityType = discovery.getTargetsForEntityType(module);
-        for(PublicationTarget target : targetsForEntityType) {
-            if(target.isResponsibleFor(module)) {
-                PublicationService publicationService = target.getPublicationService();
-                Collection<Publication> allPublicationsForEntity = publicationService.getAllPublications(context, entityId);
-                if(allPublicationsForEntity != null) {
-                    publications.addAll(allPublicationsForEntity);
-                }
-            }
-        }
-        return publications;
-    }
-
-
-    private void listPublications(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException, PublicationJSONException {
-        JSONArray ids = new JSONArray(getBody(req));
-        Context context = getSessionObject(req).getContext();
-        List<Publication> publications = new ArrayList<Publication>(ids.length());
-        for(int i = 0, size = ids.length(); i < size; i++) {
-            int id = ids.getInt(i);
-            PublicationService publicationService = discovery.getTarget(context, id).getPublicationService();
-            Publication publication = publicationService.load(context, id);
-            if(publication != null) {
-                publications.add(publication);
-            }
-        }
-        String[] basicColumns = getBasicColumns(req);
-        Map<String, String[]> dynamicColumns = getDynamicColumns(req);
-        List<String> dynamicColumnOrder = getDynamicColumnOrder(req);
-        
-        writePublications(publications, basicColumns, dynamicColumns, dynamicColumnOrder, resp);
-    }
-
-    private void writePublications(List<Publication> allPublications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder, HttpServletResponse resp) throws PublicationJSONException, JSONException {
-        JSONArray rows = new JSONArray();
-        PublicationWriter writer = new PublicationWriter();
-        for (Publication publication : allPublications) {
-            JSONArray row = writer.writeArray(publication, basicColumns, dynamicColumns, dynamicColumnOrder, publication.getTarget().getFormDescription());
-            rows.put(row);
-        }
-        writeData(rows, resp);
-    }
-
-    private Map<String, String[]> getDynamicColumns(HttpServletRequest req) {
-        List<String> identifiers = getDynamicColumnOrder(req);
-        Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
-        for(String identifier : identifiers) {
-            String columns = req.getParameter(identifier);
-            dynamicColumns.put(identifier, columns.split("\\s*,\\s*"));
-        }
-        return dynamicColumns;
-    }
-    
-    private static final Set<String> KNOWN_PARAMS = new HashSet<String>() {{
-        add("entityModule");
-        add("columns");
-        add("session");
-        add("action");
-    }};
-    
-    private List<String> getDynamicColumnOrder(HttpServletRequest req) {
-        Enumeration parameterNames = req.getParameterNames();
-        List<String> dynamicColumnIdentifiers = new ArrayList<String>();
-        while(parameterNames.hasMoreElements()) {
-            String paramName = (String) parameterNames.nextElement();
-            if(!KNOWN_PARAMS.contains(paramName) && paramName.contains(".")) {
-                dynamicColumnIdentifiers.add(paramName);
-            }
-        }
-        Collections.sort(dynamicColumnIdentifiers, new QueryStringPositionComparator(req.getQueryString()));
-        return dynamicColumnIdentifiers;
-    }
-
-    private String[] getBasicColumns(HttpServletRequest req) {
-        String columns = req.getParameter("columns");
-        if(columns == null) {
-            return new String[]{"id", "entityId", "entityModule", "target"};
-        }
-        return columns.split("\\s*,\\s*");
-    }
     
 }

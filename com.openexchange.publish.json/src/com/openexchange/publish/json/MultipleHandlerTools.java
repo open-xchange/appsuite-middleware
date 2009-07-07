@@ -66,11 +66,4 @@ public class MultipleHandlerTools {
     public static PublicationJSONException wrapThrowable(Throwable t) {
         return THROWABLE.create(t, t.getMessage());
     }
-    
-    public static JSONValue response(Object data) throws JSONException {
-        Response response = new Response();
-        response.setData(data);
-        return ResponseWriter.getJSON(response);
-    }
-
 }

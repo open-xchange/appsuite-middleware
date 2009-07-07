@@ -62,14 +62,14 @@ import static com.openexchange.groupware.AbstractOXException.Category.*;
  */
 public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
 
-    MISSING_PARAMETER(SubscriptionSourcesServlet.CLASS_ID*100+1, "Missing parameter %s", "", CODE_ERROR),
-    UNKNOWN_ACTION(SubscriptionSourcesServlet.CLASS_ID*100+2, "Unknown Action: %s", "", CODE_ERROR),
+    MISSING_PARAMETER(SubscriptionSourceMultipleHandler.CLASS_ID*100+1, "Missing parameter %s", "", CODE_ERROR),
+    UNKNOWN_ACTION(SubscriptionSourceMultipleHandler.CLASS_ID*100+2, "Unknown Action: %s", "", CODE_ERROR),
     
     JSONEXCEPTION(SubscriptionSourceJSONWriter.CLASS_ID*100+1, "Got JSONException", "", CODE_ERROR),
     MISSING_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+2, "Missing Field(s): %s", "", CODE_ERROR),
     MISSING_FORM_FIELD(SubscriptionSourceJSONWriter.CLASS_ID*100+3, "Missing Form Field(s): %s", "", CODE_ERROR),
     
-    THROWABLE(SubscriptionSourcesServlet.CLASS_ID*100+3, "Got Exception %s", "", CODE_ERROR),
+    THROWABLE(SubscriptionSourceMultipleHandler.CLASS_ID*100+3, "Got Exception %s", "", CODE_ERROR),
     UNKNOWN_COLUMN(SubscriptionJSONWriter.CLASS_ID*100+1,"Unknown column: %s", "Please ask only for columns the server knows", USER_INPUT),
     
     ;

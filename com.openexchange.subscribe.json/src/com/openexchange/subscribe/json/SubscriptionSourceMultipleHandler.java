@@ -51,10 +51,11 @@ package com.openexchange.subscribe.json;
 
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_PARAMETER;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.UNKNOWN_ACTION;
-import static com.openexchange.subscribe.json.MultipleHandlerTools.response;
 import static com.openexchange.subscribe.json.MultipleHandlerTools.wrapThrowable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,10 +76,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SubscriptionSourceMultipleHandler implements MultipleHandler {
 
+    public static final int CLASS_ID = 1;
+    public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
+
     private SubscriptionSourceDiscoveryService discoverer;
     private SubscriptionSourceJSONWriterInterface writer = new SubscriptionSourceJSONWriter();
     
-    private SubscriptionSourceMultipleHandler(SubscriptionSourceDiscoveryService discoverer) {
+    public SubscriptionSourceMultipleHandler(SubscriptionSourceDiscoveryService discoverer) {
         super();
         this.discoverer = discoverer;
     }
@@ -118,7 +122,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         List<SubscriptionSource> sources = discoverer.getSources(module);
         String[] columns = getColumns(req);
         JSONArray json = writer.writeJSONArray(sources, columns);
-        return response(json);
+        return json;
     }
     
     private String[] getColumns(JSONObject req) {
@@ -136,7 +140,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         }
         SubscriptionSource source = discoverer.getSource(identifier);
         JSONObject data = writer.writeJSON(source);
-        return response(data);
+        return data;
     }
     
     protected int getModule(JSONObject req) throws AbstractOXException {

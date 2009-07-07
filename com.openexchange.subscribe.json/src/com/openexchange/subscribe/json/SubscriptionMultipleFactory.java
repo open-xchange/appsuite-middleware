@@ -49,59 +49,34 @@
 
 package com.openexchange.subscribe.json;
 
-import java.io.IOException;
-import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.ajax.MultipleAdapterServlet;
-import com.openexchange.ajax.PermissionServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.*;
 
 
 /**
- * {@link SubscriptionSourcesServlet}
+ * {@link SubscriptionMultipleFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class SubscriptionSourcesServlet extends MultipleAdapterServlet {
+public class SubscriptionMultipleFactory implements MultipleHandlerFactoryService {
 
- private static SubscriptionSourceMultipleFactory multipleFactory = null;
+    private SubscriptionExecutionService executor;
+    private SubscriptionSourceDiscoveryService discovery;
     
-    public static void setFactory(SubscriptionSourceMultipleFactory factory) {
-        multipleFactory = factory;
-    }
-    
-    @Override
-    protected MultipleHandler createMultipleHandler() {
-        return multipleFactory.createMultipleHandler();
+    public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor) {
+        this.executor = executor;
+        this.discovery = discovery;
     }
 
-    @Override
-    protected boolean requiresBody(String action) {
-        return SubscriptionSourceMultipleHandler.ACTIONS_REQUIRING_BODY.contains(action);
-    }
-    @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserConfiguration().isSubscription();
+    public MultipleHandler createMultipleHandler() {
+        return new SubscriptionMultipleHandler(discovery, executor);
     }
 
-    
-    
-    
+    public String getSupportedModule() {
+        return "subscriptions";
+    }
+
 }

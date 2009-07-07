@@ -50,8 +50,10 @@
 package com.openexchange.subscribe.json.osgi;
 
 import javax.servlet.Servlet;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -59,8 +61,11 @@ import com.openexchange.subscribe.SubscriptionHandler;
 import com.openexchange.subscribe.json.SubscribeJSONServlet;
 import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
+import com.openexchange.subscribe.json.SubscriptionMultipleFactory;
+import com.openexchange.subscribe.json.SubscriptionMultipleHandler;
 import com.openexchange.subscribe.json.SubscriptionServlet;
 import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
+import com.openexchange.subscribe.json.SubscriptionSourceMultipleFactory;
 import com.openexchange.subscribe.json.SubscriptionSourcesServlet;
 import com.openexchange.subscribe.osgi.tools.WhiteboardSubscriptionSourceDiscoveryService;
 
@@ -85,6 +90,10 @@ public class ServletActivator extends DeferredActivator {
 
     private WhiteboardSubscriptionSourceDiscoveryService discoverer;
 
+    private ServiceRegistration subscriptionsMultipleReg;
+
+    private ServiceRegistration subscriptionSourceMultipleReg;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -98,9 +107,6 @@ public class ServletActivator extends DeferredActivator {
 
     private void registerServlets(HttpService httpService) {
         try {
-            SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
-            SubscriptionServlet.setSubscriptionExecutionService(subscriptionExecutionService);
-            
             httpService.registerServlet(SUBSCRIPTION_SOURCES_ALIAS, (subscriptionSources = new SubscriptionSourcesServlet()), null, null);
             httpService.registerServlet(SUBSCRIPTION_ALIAS, (subscriptions = new SubscriptionServlet()), null, null);
             LOG.info("Registered Servlets for Subscriptions");
@@ -124,7 +130,6 @@ public class ServletActivator extends DeferredActivator {
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         final HttpService httpService = getService(HttpService.class);
-        SubscriptionServlet.setSubscriptionExecutionService(null);
         deregisterServlets(httpService);
     }
 
@@ -133,19 +138,26 @@ public class ServletActivator extends DeferredActivator {
         discoverer = new WhiteboardSubscriptionSourceDiscoveryService(context);
         componentRegistration = new ComponentRegistration(context, "SUBH","com.openexchange.subscribe.json", SubscriptionJSONErrorMessages.FACTORY);
         
-        SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
-        SubscriptionServlet.setSubscriptionExecutionService(subscriptionExecutionService);
-        
-        
-        SubscriptionSourcesServlet.setSubscriptionSourceDiscoveryService(discoverer);
-        SubscriptionSourcesServlet.setSubscriptionSourceJSONWriter(new SubscriptionSourceJSONWriter());
-        
-        SubscriptionServlet.setSubscriptionSourceDiscoveryService(discoverer);
-        
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
+            createMultipleHandler();
             registerServlets(httpService);
         }
+    }
+
+    private void createMultipleHandler() {
+        SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
+
+        SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(discoverer, subscriptionExecutionService);
+        SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
+        
+        SubscriptionServlet.setFactory(subscriptionsFactory);
+        SubscriptionSourcesServlet.setFactory(subscriptionSourcesFactory);
+        
+        subscriptionsMultipleReg = context.registerService(MultipleHandlerFactoryService.class.getName(), subscriptionsFactory, null);
+        subscriptionSourceMultipleReg = context.registerService(MultipleHandlerFactoryService.class.getName(), subscriptionSourcesFactory, null);
+        
+        
     }
 
     @Override
@@ -153,12 +165,17 @@ public class ServletActivator extends DeferredActivator {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             deregisterServlets(httpService);
+            destroyMultipleHandler();
         }
-        SubscriptionServlet.setSubscriptionExecutionService(null);
-        SubscriptionSourcesServlet.setSubscriptionSourceDiscoveryService(null);
-        SubscriptionServlet.setSubscriptionSourceDiscoveryService(null);
         discoverer.close();
         componentRegistration.unregister();
         
+    }
+
+    private void destroyMultipleHandler() {
+        subscriptionsMultipleReg.unregister();
+        subscriptionSourceMultipleReg.unregister();
+        SubscriptionServlet.setFactory(null);
+        SubscriptionSourcesServlet.setFactory(null);
     }
 }

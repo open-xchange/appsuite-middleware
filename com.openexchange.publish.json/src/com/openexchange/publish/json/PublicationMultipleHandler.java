@@ -49,10 +49,10 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.publish.json.MultipleHandlerTools.wrapThrowable;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.MISSING_PARAMETER;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_ACTION;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE;
-import static com.openexchange.publish.json.MultipleHandlerTools.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,10 +67,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
@@ -93,7 +90,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
 
     private Map<String, EntityType> entities;
 
-    private PublicationMultipleHandler(PublicationTargetDiscoveryService discovery, Map<String, EntityType> entities) {
+    public PublicationMultipleHandler(PublicationTargetDiscoveryService discovery, Map<String, EntityType> entities) {
         this.discovery = discovery;
         this.entities = entities;
     }
@@ -105,8 +102,18 @@ public class PublicationMultipleHandler implements MultipleHandler {
     public Date getTimestamp() {
         return null;
     }
+    
+    public static final Set<String> ACTIONS_REQUIRING_BODY = new HashSet<String>() {{
+        
+        add("new");
+        add("update");
+        add("delete");
+        add("list");
+        
+    }};
 
-    public JSONValue performRequest(String action, JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
+
+    public Object performRequest(String action, JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
         try {
             if (null == action) {
                 throw MISSING_PARAMETER.create("action");
@@ -134,7 +141,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
     }
 
-    private JSONValue listPublications(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+    private Object listPublications(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
         JSONArray ids = request.getJSONArray(ResponseFields.DATA);
         Context context = session.getContext();
         List<Publication> publications = new ArrayList<Publication>(ids.length());
@@ -153,11 +160,11 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private JSONValue loadAllPublicationsForEntity(JSONObject request, ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
+    private Object loadAllPublicationsForEntity(JSONObject request, ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
         if (!request.has("entityModule")) {
             throw MISSING_PARAMETER.create("entityModule");
         }
-        String module = request.getString("entityModule");
+        String module = request.optString("entityModule");
         EntityType entityType = entities.get(module);
         if (null == entityType) {
             throw UNKOWN_ENTITY_MODULE.create(module);
@@ -183,12 +190,13 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
     };
 
+
     private Map<String, String[]> getDynamicColumns(JSONObject request) throws JSONException {
         List<String> identifiers = getDynamicColumnOrder(request);
         Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
         for (String identifier : identifiers) {
             String columns = request.optString(identifier);
-            if (columns != null) {
+            if (columns != null && ! columns.equals("")) {
                 dynamicColumns.put(identifier, columns.split("\\s*,\\s*"));
             }
         }
@@ -212,8 +220,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }
 
     private String[] getBasicColumns(JSONObject request) throws JSONException {
-        String columns = request.getString("columns");
-        if (columns == null) {
+        String columns = request.optString("columns");
+        if (columns == null || columns.equals("")) {
             return new String[] { "id", "entityId", "entityModule", "target" };
         }
         return columns.split("\\s*,\\s*");
@@ -234,9 +242,9 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return publications;
     }
 
-    private JSONValue loadPublication(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
+    private Object loadPublication(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
         int id = request.getInt("id");
-        String target = request.getString("target");
+        String target = request.optString("target");
         Context context = session.getContext();
         Publication publication = loadPublication(id, context, target);
         return createResponse(publication);
@@ -244,7 +252,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
 
     private Publication loadPublication(int id, Context context, String target) throws AbstractOXException {
         PublicationService service = null;
-        if (target != null) {
+        if (target != null && !target.equals("")) {
             service = discovery.getTarget(target).getPublicationService();
         } else {
             service = discovery.getTarget(context, id).getPublicationService();
@@ -252,7 +260,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return service.load(context, id);
     }
 
-    private JSONValue deletePublication(JSONObject request, ServerSession session) throws PublicationException, JSONException {
+    private Object deletePublication(JSONObject request, ServerSession session) throws PublicationException, JSONException {
         JSONArray ids = request.getJSONArray(ResponseFields.DATA);
         Context context = session.getContext();
         for (int i = 0, size = ids.length(); i < size; i++) {
@@ -261,31 +269,32 @@ public class PublicationMultipleHandler implements MultipleHandler {
             Publication publication = new Publication();
             publication.setContext(context);
             publication.setId(id);
+            publication.setUserId(session.getUserId());
             publisher.delete(publication);
         }
-        return response(1);
+        return 1;
     }
 
-    private JSONValue updatePublication(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+    private Object updatePublication(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
         Publication publication = getPublication(request, session);
 
         publication.update();
 
-        return response(1);
+        return 1;
 
     }
 
-    private JSONValue createPublication(JSONObject request, ServerSession session) throws PublicationException, PublicationJSONException, JSONException {
+    private Object createPublication(JSONObject request, ServerSession session) throws PublicationException, PublicationJSONException, JSONException {
         Publication publication = getPublication(request, session);
         publication.setId(-1);
 
         publication.create();
 
-        return response(publication.getId());
+        return publication.getId();
 
     }
 
-    private JSONValue createList(List<Publication> publications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder) throws PublicationJSONException, JSONException {
+    private Object createList(List<Publication> publications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder) throws PublicationJSONException, JSONException {
         JSONArray rows = new JSONArray();
         PublicationWriter writer = new PublicationWriter();
         for (Publication publication : publications) {
@@ -297,12 +306,12 @@ public class PublicationMultipleHandler implements MultipleHandler {
                 publication.getTarget().getFormDescription());
             rows.put(row);
         }
-        return response(rows);
+        return rows;
     }
 
-    private JSONValue createResponse(Publication publication) throws JSONException, PublicationJSONException {
+    private Object createResponse(Publication publication) throws JSONException, PublicationJSONException {
         JSONObject asJson = new PublicationWriter().write(publication);
-        return response(asJson);
+        return asJson;
     }
 
     private Publication getPublication(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {

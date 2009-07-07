@@ -1,12 +1,19 @@
 
 package com.openexchange.publish.json.osgi;
 
+import java.util.LinkedList;
+import java.util.List;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONErrorMessage;
+import com.openexchange.publish.json.PublicationMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationServlet;
+import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationTargetServlet;
+import com.openexchange.publish.json.types.EntityMap;
 import com.openexchange.publish.json.types.FolderType;
 import com.openexchange.publish.json.types.IDType;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -26,6 +33,8 @@ public class ServletActivator extends DeferredActivator {
 
     private PublicationServlet pubServlet;
 
+    private List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -33,17 +42,25 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        registerServlets();
+        register();
 
     }
 
-    private void registerServlets() {
+    private void register() {
         PublicationTargetDiscoveryService discovery = getService(PublicationTargetDiscoveryService.class);
         if(discovery == null) {
             return;
         }
-        PublicationTargetServlet.setPublicationTargetDiscoveryService(discovery);
-        PublicationServlet.setPublicationTargetDiscoveryService(discovery);
+        
+        PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap());
+        PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
+        
+        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationHandlerFactory, null));
+        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationTargetHandlerFactory, null));
+        
+        
+        PublicationServlet.setFactory(publicationHandlerFactory);
+        PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
         
         final HttpService httpService = getService(HttpService.class);
         try {
@@ -58,10 +75,18 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        unregisterServlets();
+        unregister();
     }
 
-    private void unregisterServlets() {
+    private void unregister() {
+        PublicationServlet.setFactory(null);
+        PublicationTargetServlet.setFactory(null);
+        
+        for(ServiceRegistration registration : serviceRegistrations) {
+            registration.unregister();
+        }
+        serviceRegistrations.clear();
+        
         final HttpService httpService = getService(HttpService.class);
         if (httpService != null && targetServlet != null) {
             httpService.unregister(TARGET_ALIAS);
@@ -81,12 +106,12 @@ public class ServletActivator extends DeferredActivator {
             "com.openexchange.publish.json",
             PublicationJSONErrorMessage.EXCEPTIONS);
 
-        registerServlets();
+        register();
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        unregisterServlets();
+        unregister();
         componentRegistration.unregister();
     }
 }

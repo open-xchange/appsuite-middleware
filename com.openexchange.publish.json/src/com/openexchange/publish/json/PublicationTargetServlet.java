@@ -49,110 +49,35 @@
 
 package com.openexchange.publish.json;
 
-import java.io.IOException;
-import java.util.Collection;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.PermissionServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.ajax.MultipleAdapterServlet;
+import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.session.ServerSession;
-
-import static com.openexchange.publish.json.PublicationJSONErrorMessage.*;
 
 /**
  * {@link PublicationTargetServlet}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PublicationTargetServlet extends AbstractPublicationServlet {
+public class PublicationTargetServlet extends MultipleAdapterServlet {
 
-    private static final Log LOG = LogFactory.getLog(PublicationTargetServlet.class);
 
-    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(PublicationTargetServlet.class, LOG);
-
-    private static PublicationTargetDiscoveryService discoverer = null;
-
-    private static final PublicationTargetWriter writer = new PublicationTargetWriter();
-
-    public static void setPublicationTargetDiscoveryService(PublicationTargetDiscoveryService service) {
-        discoverer = service;
+    private static PublicationTargetMultipleHandlerFactory multipleFactory;
+    public static void setFactory(PublicationTargetMultipleHandlerFactory factory) {
+        multipleFactory = factory;
+    }
+    
+    @Override
+    protected MultipleHandler createMultipleHandler() {
+        return multipleFactory.createMultipleHandler();
     }
 
+    @Override
+    protected boolean requiresBody(String action) {
+        return PublicationTargetMultipleHandler.ACTIONS_REQUIRING_BODY.contains(action);
+    }
     @Override
     protected boolean hasModulePermission(ServerSession session) {
-        return true;
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handleRequest(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handleRequest(req, resp);
-    }
-
-    protected void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            String action = req.getParameter("action");
-            if (null == action) {
-                throw MISSING_PARAMETER.create("action");
-            } else if (action.equals("listTargets") || action.equals("all")) {
-                listTargets(req, resp);
-            } else if (action.equals("getTarget") || action.equals("get")) {
-                getTarget(req, resp);
-            } else {
-                throw UNKNOWN_ACTION.create(action);
-            }
-        } catch (AbstractOXException x) {
-            writeOXException(x, resp);
-        } catch (Throwable t) {
-            writeOXException(wrapThrowable(t), resp);
-        }
-    }
-
-    protected void listTargets(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, JSONException {
-        Collection<PublicationTarget> targets = discoverer.listTargets();
-        String[] columns = getColumns(req);
-        JSONArray json = writer.writeJSONArray(targets, columns);
-        writeData(json, resp);
-    }
-
-    private String[] getColumns(HttpServletRequest req) {
-        String columns = req.getParameter("columns");
-        if (columns == null) {
-            return new String[] { "id", "displayName", "module", "icon", "formDescription" };
-        }
-        return columns.split("\\s*,\\s*");
-    }
-
-    protected void getTarget(HttpServletRequest req, HttpServletResponse resp) throws AbstractOXException, JSONException {
-        String identifier = req.getParameter("id");
-        if (identifier == null) {
-            throw MISSING_PARAMETER.create("id");
-        }
-        PublicationTarget target = discoverer.getTarget(identifier);
-        JSONObject data = writer.write(target);
-        writeData(data, resp);
-    }
-
-    protected Log getLog() {
-        return LOG;
-    }
-
-    protected LoggingLogic getLoggingLogic() {
-        return LL;
+        return session.getUserConfiguration().isPublication();
     }
 
     

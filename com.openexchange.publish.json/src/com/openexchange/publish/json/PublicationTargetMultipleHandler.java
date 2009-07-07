@@ -52,7 +52,10 @@ package com.openexchange.publish.json;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.MISSING_PARAMETER;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_ACTION;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,8 +78,8 @@ import static com.openexchange.publish.json.MultipleHandlerTools.*;
  */
 public class PublicationTargetMultipleHandler implements MultipleHandler {
 
+    public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
     private PublicationTargetDiscoveryService discoverer = null;
-
     private PublicationTargetWriter writer = new PublicationTargetWriter();
 
     public PublicationTargetMultipleHandler(PublicationTargetDiscoveryService discoverer) {
@@ -105,6 +108,8 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             }
         } catch (AbstractOXException x) {
             throw x;
+        } catch (JSONException x) {
+            throw x;
         } catch (Throwable t) {
             throw wrapThrowable(t);
         }
@@ -117,14 +122,14 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         }
         PublicationTarget target = discoverer.getTarget(identifier);
         JSONObject data = writer.write(target);
-        return response(data);
+        return data;
     }
 
     private JSONValue listTargets(JSONObject request, ServerSession session) throws JSONException, PublicationJSONException, PublicationException {
         Collection<PublicationTarget> targets = discoverer.listTargets();
         String[] columns = getColumns(request);
         JSONArray json = writer.writeJSONArray(targets, columns);
-        return response(json);
+        return json;
     }
     
     private String[] getColumns(JSONObject req) {
