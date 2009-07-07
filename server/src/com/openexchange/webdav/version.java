@@ -81,7 +81,7 @@ public final class version extends HttpServlet {
         try {
             resp.setContentType("text/plain; charset=UTF-8");
             final PrintWriter pw = resp.getWriter();
-            pw.println(new StringBuilder("WebDAV: ").append(Version.buildnumber).toString());
+            pw.println(Version.getVersionString());
             pw.flush();
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
