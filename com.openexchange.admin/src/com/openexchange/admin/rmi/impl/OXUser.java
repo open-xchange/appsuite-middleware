@@ -880,10 +880,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final String username = usr.getName();
                 final Integer userid = usr.getId();
                 if (userid != null && !tool.existsUser(ctx, userid.intValue())) {
-                    throw new NoSuchUserException("No such user "+usr);
+                    throw new NoSuchUserException("No such user "+useríd+" in context "+ctx.getId());
                 }
                 if (username != null && !tool.existsUserName(ctx, username)) {
-                    throw new NoSuchUserException("No such user " + usr);
+                    throw new NoSuchUserException("No such user " + username+" in context "+ctx.getId());
                 }
                 if (username == null && userid == null) {
                     throw new InvalidDataException("Username and userid missing.");
@@ -948,7 +948,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId().intValue();
             if (!tool.existsUser(ctx, user_id)) {
-                throw new NoSuchUserException("No such user " + user + " in context " + ctx.getId());
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             return oxu.getModuleAccess(ctx, user_id);
         } catch (final StorageException e) {
@@ -993,7 +993,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final int user_id = user.getId().intValue();
             
             if (!tool.existsUser(ctx, user_id)) {
-                throw new NoSuchUserException("No such user " + user + " in context " + ctx.getId());
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             
             return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, user_id));            
