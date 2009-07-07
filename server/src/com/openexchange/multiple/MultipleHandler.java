@@ -73,7 +73,7 @@ public interface MultipleHandler {
      * @throws AbstractOXException If performing the request fails
      * @throws JSONException If a JSON error occurs
      */
-    public JSONValue performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException;
+    public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException;
 
     /**
      * Gets the time stamp when {@link #performRequest()} has been called.
