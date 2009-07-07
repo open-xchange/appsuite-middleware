@@ -880,7 +880,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final String username = usr.getName();
                 final Integer userid = usr.getId();
                 if (userid != null && !tool.existsUser(ctx, userid.intValue())) {
-                    throw new NoSuchUserException("No such user "+useríd+" in context "+ctx.getId());
+                    throw new NoSuchUserException("No such user "+userid+" in context "+ctx.getId());
                 }
                 if (username != null && !tool.existsUserName(ctx, username)) {
                     throw new NoSuchUserException("No such user " + username+" in context "+ctx.getId());
