@@ -347,8 +347,8 @@ public class Attachment extends PermissionServlet {
 						attachments.set(index, attachment);
 						uploadFiles.set(index, uploadFile);
 						sum += uploadFile.getSize();
-						checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
-								session.getUserId(), session.getContext()));
+						//checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
+						//		session.getUserId(), session.getContext()));
 						checkSize(sum, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 								session.getContext()));
 					}
