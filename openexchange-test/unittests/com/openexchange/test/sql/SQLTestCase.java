@@ -64,7 +64,7 @@ import junit.framework.TestCase;
 
 /**
  * {@link SQLTestCase}
- * 
+ * TODO remove due to duplicate class in com.openexchange.server
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class SQLTestCase extends TestCase {
