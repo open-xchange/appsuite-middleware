@@ -1,3 +1,7 @@
+* 2009-07-09 - schweigi@open-xchange.com
+
+ - Added new distribution UCS in OS detection function ox_system_type()
+ 
 * 2009-06-15 - choeger@open-xchange.com
 
  - Bugfix ID#13385: config update script destroys parameters on update when no
