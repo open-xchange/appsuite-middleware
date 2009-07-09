@@ -83,6 +83,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(ListTest.class);
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(TaskRecurrenceTest.class);
+        tests.addTestSuite(ConfirmTest.class);
 
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);
