@@ -72,7 +72,7 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.Expression;
 import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.LIST;
-import com.openexchange.test.sql.SQLTestCase;
+import com.openexchange.tools.sql.SQLTestCase;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

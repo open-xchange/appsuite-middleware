@@ -75,7 +75,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.test.sql.SQLTestCase;
+import com.openexchange.tools.sql.SQLTestCase;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

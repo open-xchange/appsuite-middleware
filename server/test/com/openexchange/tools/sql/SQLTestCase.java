@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.test.sql;
+package com.openexchange.tools.sql;
 
 import java.io.FileInputStream;
 import java.io.IOException;

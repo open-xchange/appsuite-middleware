@@ -49,23 +49,17 @@
 
 package com.openexchange.datatypes.genericonf.storage;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.test.sql.SQLTestCase;
+import com.openexchange.tools.sql.SQLTestCase;
 
 /**
  * {@link MySQLGenericConfigurationStorageTest}
