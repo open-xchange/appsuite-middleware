@@ -1,3 +1,7 @@
+* 2009-07-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission.
+
 * 2009-07-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #14134: WebDAV Infostore disregards uploadfilesizelimitperfile.
