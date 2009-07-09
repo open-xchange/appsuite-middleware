@@ -76,11 +76,11 @@ KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
 KEEP_TMP_VALUES="true false"
 
-FILES_DIRS='
+FILES_DIRS="
 /opt/open-xchange/etc
-/var/log/open-xchange/
+/var/log/open-xchange
 /etc/*apache*
-'
+"
 
 PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;oxreport --detail'
 
@@ -205,6 +205,11 @@ if [ $(( $DIST & $DEBIAN )) -eq $DEBIAN ]; then
      FILES_DIRS="$FILES_DIRS /etc/debian_version"
      PROCS=${PROCS}';dpkg -l'
      test -f /etc/mysql/my.cnf && FILES_DIRS="$FILES_DIRS /etc/mysql/my.cnf"
+elif [ $(( $DIST & $UCS )) -eq $UCS ]; then
+     echo "Univention system detected"
+     FILES_DIRS="$FILES_DIRS /var/log/univention*"
+     PROCS=${PROCS}';dpkg -l;ucr dump'
+     test -f /etc/mysql/my.cnf && FILES_DIRS="$FILES_DIRS /etc/mysql/my.cnf"
 elif [ $(( $DIST & $SUSE )) -eq $SUSE ]; then
      echo SuSE system detected
      FILES_DIRS="$FILES_DIRS /etc/SuSE-release"
@@ -220,7 +225,7 @@ else
 fi
 
 collect_files() {
-   $TAR cvfj /$TMP/$LOGDIR/ox_files_and_logs.tar.Z $FILES_DIRS > /dev/null 2>&1
+   $TAR cvfj /$TMP/$LOGDIR/ox_files_and_logs.tar.bz2 ${FILES_DIRS} > /dev/null 2>&1
 }
 
 
