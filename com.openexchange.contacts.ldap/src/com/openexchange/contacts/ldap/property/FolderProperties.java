@@ -321,7 +321,6 @@ public class FolderProperties {
                 return retval.getSearchfilter();
             }
         });
-        logBuilder.append("\tsearchfilter_distributionlist: ").append(retval.getSearchfilterDistributionlist()).append('\n');
         
         final String searchScopeString = checkStringProperty(parameterObject, Parameters.searchScope_distributionlist);
         if (null != searchScopeString) {
@@ -333,7 +332,6 @@ public class FolderProperties {
         } else {
             retval.setSearchScopeDistributionlist(retval.getSearchScope());
         }
-        logBuilder.append("\tsearchScope_distributionlist: ").append(retval.getSearchScopeDistributionlist()).append('\n');
         
         checkStringProperty(parameterObject, Parameters.baseDN_distributionlist, new SetterFallbackClosure() {
             public void set(String string) {
