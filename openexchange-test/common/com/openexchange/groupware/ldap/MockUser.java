@@ -6,6 +6,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * TODO remove this duplicate class because of sim object in com.openexchange.server.
+ */
 public class MockUser implements User {
 	private static final int GROUP_ALL = 0;
 
