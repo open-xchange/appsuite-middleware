@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionHolder;
 
 public class OXWebdavPutAction extends WebdavPutAction {
@@ -59,9 +58,7 @@ public class OXWebdavPutAction extends WebdavPutAction {
 
 	@Override
 	public long getMaxSize() {
-		final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(UserSettingMailStorage
-				.getInstance().getUserSettingMail(sessionHolder.getSessionObject().getUserId(),
-						sessionHolder.getContext()));
+		final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
 		if (maxSize < 1) {
 			return -1;
 		}

@@ -105,7 +105,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -311,8 +310,7 @@ public class Attachment extends PermissionServlet {
 				session.getUserId(), session.getContext());
 		
 		try {
-			checkSize(req.getContentLength(), UserSettingMailStorage.getInstance().getUserSettingMail(
-					session.getUserId(), session.getContext()));
+			checkSize(req.getContentLength());
 			if (ACTION_ATTACH.equals(action)) {
 				UploadEvent upload = null;
 				try {
@@ -349,8 +347,7 @@ public class Attachment extends PermissionServlet {
 						sum += uploadFile.getSize();
 						//checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
 						//		session.getUserId(), session.getContext()));
-						checkSize(sum, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-								session.getContext()));
+						checkSize(sum);
 					}
 					attach(res, attachments, uploadFiles, ctx, user, userConfig);
 				} finally {
@@ -605,19 +602,13 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
-	private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
+	private void checkSize(final long size) throws UploadException {
 		if(maxUploadSize == -2) {
 			maxUploadSize = AttachmentConfig.getMaxUploadSize();
 		}
-		long maxSize = 0;
-		maxSize = userSettingMail.getUploadQuota();
-		maxSize = maxSize < 0 ? maxUploadSize : maxSize;
-		if(maxSize == 0) {
-			return;
-		}
 		
-		if(size > maxSize) {
-			throw new UploadSizeExceededException(size, maxSize, true);
+		if(size > maxUploadSize) {
+			throw new UploadSizeExceededException(size, maxUploadSize, true);
 		}
 	}
 	
