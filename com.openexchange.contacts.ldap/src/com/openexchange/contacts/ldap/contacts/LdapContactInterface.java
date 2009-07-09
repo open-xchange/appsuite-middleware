@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.naming.NamingEnumeration;
@@ -810,9 +811,9 @@ public class LdapContactInterface implements ContactInterface {
                         return -1;
                     }
                 } catch (final NumberFormatException e) {
-                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "Attributename: " + attributename + " - " + e.getMessage());
                 } catch (final NamingException e) {
-                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "Attributename: " + attributename + " - " + e.getMessage());
                 }
             }
     
@@ -820,7 +821,7 @@ public class LdapContactInterface implements ContactInterface {
                 try {
                     return getLdapGetter(context.getAttributes(dn), context, dn);
                 } catch (final NamingException e) {
-                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
+                    throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "AttributeDN: " + dn + " - " + e.getMessage());
                 }
             }
 
@@ -835,7 +836,11 @@ public class LdapContactInterface implements ContactInterface {
                                 retval.add((String)all.nextElement());
                             }
                         } else {
-                            retval.add((String)attribute.get());
+                            try {
+                                retval.add((String)attribute.get());
+                            } catch (final NoSuchElementException e) {
+                                // We ignore this if the list has no member
+                            }
                         }
                         return retval;
                     } else {
