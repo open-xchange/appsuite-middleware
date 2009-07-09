@@ -416,7 +416,7 @@ public class TaskRequest {
 		return jsonResponseObject;
 	}
 
-	public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException {
+	public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException, JSONException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
 		final Task taskObj = new Task();
 		
@@ -424,7 +424,10 @@ public class TaskRequest {
 		taskParser.parse(taskObj, jData);
 		
 		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
-		timestamp = taskSql.setUserConfirmation(taskObj.getObjectID(), session.getUserId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
+		
+		int taskId = (taskObj.containsObjectID()) ? taskObj.getObjectID() : DataParser.checkInt(jsonObj, "id");
+ 		
+		timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
 
 		return new JSONObject();
 	}
