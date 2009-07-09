@@ -49,14 +49,14 @@
 
 package com.openexchange.publish.json;
 
-import static com.openexchange.test.json.JSONAssertion.assertValidates;
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.json.JSONAssertion;
 import com.openexchange.publish.PublicationTarget;
-import com.openexchange.test.json.JSONAssertion;
 
 /**
  * {@link PublicationTargetWriterTest}

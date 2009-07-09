@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.test.json;
+package com.openexchange.json;
 
 
 /**
