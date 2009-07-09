@@ -78,6 +78,8 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     private static int max_operations_in_recurrence_calculations;
 
     private static boolean CACHED_ITERATOR_FAST_FETCH = true;
+    
+    private static boolean seriesconflictlimit = true;
 
     
     public static boolean isCACHED_ITERATOR_FAST_FETCH() {
@@ -204,6 +206,14 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 				max_operations_in_recurrence_calculations = 999 * 50;
 			} 
         }
+        
+        String series_conflict_limit_string = CalendarConfig.getProperty("com.openexchange.calendar.seriesconflictlimit");
+        if (series_conflict_limit_string != null){
+            series_conflict_limit_string = series_conflict_limit_string.trim();
+            if (series_conflict_limit_string.equalsIgnoreCase("FALSE")) {
+                seriesconflictlimit = false;
+            }
+        }     
     }
     
     public static boolean getCheckAndRemovePastReminders() {
@@ -216,6 +226,10 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 
     public static int getMaxOperationsInRecurrenceCalculations() {
         return max_operations_in_recurrence_calculations;
+    }
+    
+    public static boolean getSeriesConflictLimit() {
+        return seriesconflictlimit;
     }
     
 }

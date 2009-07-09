@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -129,10 +130,8 @@ public class ConflictHandler {
         	if (cdao.getIgnoreConflicts()) {
         		return NO_CONFLICTS;
         	}
-            if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
-                return prepareResolving(true);
-            }
-            return NO_CONFLICTS;
+
+            return prepareResolving(true);
         }
         final CalendarDataObject[] resources = prepareResolving(false);
         if (resources.length > 0) {
@@ -149,34 +148,49 @@ public class ConflictHandler {
          * Using original method {@link #resolveResourceConflicts(Date, Date)}
          * for non series appointments.
          */
-        if (cdao.getRecurrenceType() == 0) {
+        if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             if (request_participants) {
                 return resolveParticipantConflicts(cdao.getStartDate(), cdao.getEndDate());
             }
             return resolveResourceConflicts(cdao.getStartDate(), cdao.getEndDate());
         }
         if (request_participants) {
-            return NO_CONFLICTS;
+            return resolveParticipantsRecurring();
+        } else {
+            /*
+             * Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)}
+             * for series appointments.
+             */
+    		final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
+    		final Date resultStart = new Date(results.getRecurringResult(0).getStart());
+    		final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
+    	    final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
+    	    // Results must be sorted afterwards because already existing series
+    	    // appointments are returned in time reverse order by FreeBusyResults.
+    	    // Because of 999 maximum number of conflicts the returned array may
+    	    // contain a lot of appointments far in the future.
+    	    Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
+                public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
+                    return cdao1.getStartDate().compareTo(cdao2.getStartDate());
+                }
+    	    });
+            return resultConflicts;
         }
-        /*
-         * Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)}
-         * for series appointments.
-         */
-		final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
-		final Date resultStart = new Date(results.getRecurringResult(0).getStart());
-		final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
-	    final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
-	    // Results must be sorted afterwards because already existing series
-	    // appointments are returned in time reverse order by FreeBusyResults.
-	    // Because of 999 maximum number of conflicts the returned array may
-	    // contain a lot of appointments far in the future.
-	    Arrays.sort(resultConflicts, new Comparator<CalendarDataObject>() {
-            public int compare(final CalendarDataObject cdao1, final CalendarDataObject cdao2) {
-                return cdao1.getStartDate().compareTo(cdao2.getStartDate());
-            }
-	    });
-        return resultConflicts;
 	}
+    
+    private CalendarDataObject[] resolveParticipantsRecurring() throws OXException {
+        long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;
+        RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, 0, limit , 0);
+        for (int i = 0; i < rresults.size(); i++) {
+            RecurringResultInterface recurringResult = rresults.getRecurringResult(i);
+            CalendarDataObject[] conflicts = resolveParticipantConflicts(new Date(recurringResult.getStart()), new Date(recurringResult.getEnd()));
+            if (conflicts.length > 0) {
+                return conflicts;
+            }
+        }
+        
+        return NO_CONFLICTS;
+    }
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
         final String sql_in = recColl.getSQLInStringForParticipants(cdao.getUsers());
