@@ -61,11 +61,11 @@ public class CryptoServiceTest extends TestCase {
     
     protected String payload = "Hello World!";
     
-    protected String payloadSpecial = "H�ll� &/() w�RLD!";
+    protected String payloadSpecial = "H\u00d4\u00f8\u03a9ll\u00d4\u00f8\u03a9 &/() w\u00d4\u00f8\u03a9RLD!";
     
     protected String password = "passwordpasswordpasswordpassword";
     
-    protected String passwordSpecial = "p˧w�rd;";
+    protected String passwordSpecial = "p\u00c0\u00dfw\u00d4\u00f8\u03a9rd;";
     
     protected String badPassword  = "passwordpasswordpasswordpassword1";
     
