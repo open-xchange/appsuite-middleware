@@ -105,3 +105,12 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.outlook_support=false
 # 60 days for forests initially built using W2k and Server 2k3
 # 180 days for forests that were initially built with Server 2k3 SP1
 com.openexchange.contacts.ldap.context111.LDAPglobal1.ADS_deletion_support=false
+
+# Specify if the ldap server contains referrals and and how to handle them.
+# Available options are:
+# standard: leaves the setting in the java standard
+# follow: follows a referral
+# ignore: ignores a referral
+# See http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html for a
+# detailed description
+com.openexchange.contacts.ldap.context111.LDAPglobal1.referrals=follow

@@ -129,7 +129,12 @@ public class LdapConfigurationException extends OXException {
         /**
          * The directory "%1$s" is not a context identifier.
          */
-        DIRECTORY_IS_NOT_A_CONTEXT_ID("The directory \"%1$s\" is not a context identifier.", Category.SETUP_ERROR, 14);
+        DIRECTORY_IS_NOT_A_CONTEXT_ID("The directory \"%1$s\" is not a context identifier.", Category.SETUP_ERROR, 14),
+
+        /**
+         * The given value for referrals "%s" is not a possible one
+         */
+        REFERRALS_WRONG("The given value for referrals \"%s\" is not a possible one", Category.SETUP_ERROR, 15);
 
 
         /**

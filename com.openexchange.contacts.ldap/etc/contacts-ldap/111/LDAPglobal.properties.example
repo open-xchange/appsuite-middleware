@@ -95,7 +95,7 @@ com.openexchange.contacts.ldap.context111.LDAPglobal.baseDN_distributionlist=
 # the folder name is displayed in Outlook but not its contents. Note that even
 # if you enable Outlook support, Outlook will not recognize the deletion of
 # contacts in LDAP atm.
-com.openexchange.contacts.ldap.context111.LDAPglobal1.outlook_support=false
+com.openexchange.contacts.ldap.context111.LDAPglobal.outlook_support=false
 
 # Specify if the support for detection of deleted object should be enabled for
 # ADS, this is only used for the WebDAV interface used by Outlook.
@@ -103,4 +103,13 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.outlook_support=false
 # that the deleted information is only available for the following lifetimes:
 # 60 days for forests initially built using W2k and Server 2k3
 # 180 days for forests that were initially built with Server 2k3 SP1
-com.openexchange.contacts.ldap.context111.LDAPglobal1.ADS_deletion_support=false
+com.openexchange.contacts.ldap.context111.LDAPglobal.ADS_deletion_support=false
+
+# Specify if the ldap server contains referrals and and how to handle them.
+# Available options are:
+# standard: leaves the setting in the java standard
+# follow: follows a referral
+# ignore: ignores a referral
+# See http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html for a
+# detailed description
+com.openexchange.contacts.ldap.context111.LDAPglobal.referrals=follow

@@ -56,6 +56,12 @@ public class FolderProperties {
         distributionlists,
         both;
     }
+    
+    public enum ReferralTypes {
+        follow,
+        ignore,
+        standard
+    }
 
     
     private enum Parameters {
@@ -84,7 +90,8 @@ public class FolderProperties {
         searchScope_distributionlist("searchScope_distributionlist"),
         baseDN_distributionlist("baseDN_distributionlist"),
         outlook_support("outlook_support"),
-        ADS_deletion_support("ADS_deletion_support");
+        ADS_deletion_support("ADS_deletion_support"),
+        referrals("referrals");
         
         private final String name;
         
@@ -154,6 +161,8 @@ public class FolderProperties {
     private boolean outlook_support;
     
     private boolean ads_deletion_support;
+    
+    private ReferralTypes referrals;
     
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -261,7 +270,7 @@ public class FolderProperties {
         logBuilder.append("\tuserSearchFilter: ").append(retval.getUserSearchFilter()).append('\n');
 
         final String userSearchScopeString = checkStringProperty(parameterObject, Parameters.userSearchScope);
-        if (0 != userSearchScopeString.length()) {
+        if (null != userSearchScopeString && 0 != userSearchScopeString.length()) {
             try {
                 retval.setUserSearchScope(SearchScope.valueOf(userSearchScopeString));
             } catch (final IllegalArgumentException e) {
@@ -321,6 +330,7 @@ public class FolderProperties {
                 return retval.getSearchfilter();
             }
         });
+        logBuilder.append("\tsearchfilter_distributionlist: ").append(retval.getSearchfilterDistributionlist()).append('\n');
         
         final String searchScopeString = checkStringProperty(parameterObject, Parameters.searchScope_distributionlist);
         if (null != searchScopeString) {
@@ -332,6 +342,7 @@ public class FolderProperties {
         } else {
             retval.setSearchScopeDistributionlist(retval.getSearchScope());
         }
+        logBuilder.append("\tsearchScope_distributionlist: ").append(retval.getSearchScopeDistributionlist()).append('\n');
         
         checkStringProperty(parameterObject, Parameters.baseDN_distributionlist, new SetterFallbackClosure() {
             public void set(String string) {
@@ -351,6 +362,15 @@ public class FolderProperties {
         retval.setAds_deletion_support(Boolean.parseBoolean(ads_deletion_supportString));
         logBuilder.append("\tADS_deletion_support: ").append(retval.isAds_deletion_support()).append('\n');
         
+        checkStringPropertyEnum(parameterObject, Parameters.referrals, Code.REFERRALS_WRONG, new SetterEnumClosure<ReferralTypes>() {
+            public void set(ReferralTypes enumeration) {
+                retval.setReferrals(enumeration);
+            }
+            public ReferralTypes valueOf(String string) throws IllegalArgumentException {
+                return ReferralTypes.valueOf(string);
+            }
+        });
+
         final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
         
         // TODO: Throws no error, so use an error checking method
@@ -400,6 +420,8 @@ public class FolderProperties {
         return baseDN;
     }
 
+    
+    
     /**
      * Gets the contacttypes
      *
@@ -416,6 +438,10 @@ public class FolderProperties {
 
     public Mappings getMappings() {
         return mappings;
+    }
+
+    public ReferralTypes getReferrals() {
+        return referrals;
     }
 
     public int getPagesize() {
@@ -465,8 +491,6 @@ public class FolderProperties {
         return userAuthType;
     }
 
-    
-    
     /**
      * Gets the userLoginSource
      *
@@ -476,7 +500,6 @@ public class FolderProperties {
         return userLoginSource;
     }
 
-    
     /**
      * Gets the userSearchAttribute
      *
@@ -513,8 +536,6 @@ public class FolderProperties {
         return ads_deletion_support;
     }
 
-
-
     public boolean isMemorymapping() {
         return memorymapping;
     }
@@ -535,8 +556,6 @@ public class FolderProperties {
         this.ads_deletion_support = ads_deletion_support;
     }
 
-
-
     private void setAuthtype(final AuthType authtype) {
         this.authtype = authtype;
     }
@@ -553,7 +572,6 @@ public class FolderProperties {
     private void setContacttypes(final ContactTypes contacttypes) {
         this.contacttypes = contacttypes;
     }
-
 
     private void setFoldername(final String foldername) {
         this.foldername = foldername;
@@ -575,6 +593,10 @@ public class FolderProperties {
         this.pagesize = pagesize;
     }
     
+    private void setReferrals(ReferralTypes referrals) {
+        this.referrals = referrals;
+    }
+
     private void setSearchfilter(final String searchfilter) {
         this.searchfilter = searchfilter;
     }
@@ -640,8 +662,6 @@ public class FolderProperties {
         this.userSearchFilter = userSearchFilter;
     }
 
-    
-    
     /**
      * @param userSearchScope
      */

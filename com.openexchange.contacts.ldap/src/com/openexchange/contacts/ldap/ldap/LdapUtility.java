@@ -74,7 +74,7 @@ public class LdapUtility {
     private static Map<String, String> MAPPINGTABLE_USERNAME_LDAPBIND = new ConcurrentHashMap<String, String>();
 
     /**
-     * Private constructor prevents instanciation.
+     * Private constructor prevents instantiation.
      */
     private LdapUtility() {
     }
@@ -137,6 +137,17 @@ public class LdapUtility {
         }
         if (uri.startsWith("ldaps://")) {
             env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+        }
+        switch (folderProperties.getReferrals()) {
+        case follow:
+            env.put(Context.REFERRAL, "follow");
+            break;
+        case ignore:
+            env.put(Context.REFERRAL, "ignore");
+            break;
+        case standard:
+        default:
+            break;
         }
         return env;
     }
