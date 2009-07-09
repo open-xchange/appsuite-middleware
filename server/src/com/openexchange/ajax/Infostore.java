@@ -360,7 +360,7 @@ public class Infostore extends PermissionServlet {
 	}
 
 	private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
-		final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userSettingMail);
+		final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
 		if (maxSize == 0) {
 			return;
 		}

@@ -50,32 +50,14 @@
 package com.openexchange.groupware.infostore.utils;
 
 import com.openexchange.groupware.infostore.InfostoreConfig;
-import com.openexchange.mail.usersetting.UserSettingMail;
 
 public class InfostoreConfigUtils {
 
-	public static long determineRelevantUploadSize(final UserSettingMail userSettingMail) {
-		final long maxUploadSize = InfostoreConfig.getMaxUploadSize();
-		
-		long maxSize = 0;
-		maxSize = userSettingMail.getUploadQuota();
-
-		return maxSize < 0 ? maxUploadSize : maxSize;
-
+	public static long determineRelevantUploadSize() {
+		return InfostoreConfig.getMaxUploadSize();
 	}
 
-	public static long determineRelevantUploadSizePerFile(final UserSettingMail userSettingMail) {
-		long perFileSize = userSettingMail.getUploadQuotaPerFile();
-		if (perFileSize == 0) {
-			return 0;
-		}
-
-		final long size = determineRelevantUploadSize(userSettingMail);
-
-		if (perFileSize == -1 || (size > 1 && perFileSize > size)) {
-			perFileSize = size;
-		}
-
-		return perFileSize;
+	public static long determineRelevantUploadSizePerFile() {
+		return determineRelevantUploadSize();
 	}
 }

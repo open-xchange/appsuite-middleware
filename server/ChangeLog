@@ -6,6 +6,7 @@
 
  - Bugfix #14134: WebDAV Infostore disregards uploadfilesizelimitperfile.
  - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body wins.
+ - Bugfix #14134: Infostore and Object Attachments disregard user specific file upload quotas.
  
 * 2009-07-09 - martin.herfurth@open-xchange.com
 
