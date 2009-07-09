@@ -6,6 +6,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="sim"/>
-	<classpathentry kind="lib" path="/openexchange-test/lib/junit-4.4.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/open-xchange-test"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
