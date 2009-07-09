@@ -221,7 +221,7 @@
         <copy todir="${patch.bin.dir}" overwrite="true">
             <fileset dir="${bin.dir}"/>
         </copy>
-        <antcall target="patchBinFiles">
+        <antcall target="moveAndPatchScripts">
             <param name="common.conf.subst.patch" value="${conf.install.dir}"/>
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
             <param name="lib.subst.patch" value="${lib.install.dir}"/>
@@ -241,7 +241,7 @@
         <chmod perm="755" file="${bin.install.copy.dir}/open-xchange-groupware"/>
         <chmod perm="755" file="${bin.install.copy.dir}/checkconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/checkconfigconsistency"/>
-
+        <chmod perm="755" file="${bin.install.copy.dir}/oxreport"/>
         <copy todir="${destdir}/" overwrite="true">
             <fileset dir="system"/>
             <mapper type="glob" from="*.${distribution}" to="*"/>
@@ -338,52 +338,16 @@
         </replace>
     </target>
 
-    <target name="patchBinFiles">
-        <fail message="Define conf.subst.patch" unless="conf.subst.patch"/>
-        <fail message="Define common.conf.subst.patch" unless="common.conf.subst.patch"/>
-        <fail message="Define lib.subst.patch" unless="lib.subst.patch"/>
-        <antcall target="patchConsistencyStart"/>
-        <antcall target="patchGroupwareStart"/>
-    </target>
-
-    <!-- TODO -->
-    <target name="patchConsistencyStart">
+    <target name="moveAndPatchScripts">
         <move tofile="${patch.bin.dir}/checkconsistency" file="${patch.bin.dir}/checkconsistency.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/checkconfigconsistency" file="${patch.bin.dir}/checkconfigconsistency.in" overwrite="true"/>
-        <replace dir="${patch.bin.dir}">
+        <move tofile="${patch.bin.dir}/open-xchange-groupware" file="${patch.bin.dir}/open-xchange-groupware.in" overwrite="true"/>
+        <move tofile="${patch.bin.dir}/oxreport" file="${patch.bin.dir}/oxreport.in" overwrite="true"/>
+        <replace file="${patch.bin.dir}/open-xchange-groupware">
             <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@mysqljdbcjar@" value="${lib.subst.patch}/${mysqljdbcjar}"/>
-            <replacefilter token="@mailjar@" value="${lib.subst.patch}/${mailjar}"/>
-            <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
-            <replacefilter token="@jdomjar@" value="${lib.subst.patch}/${jdomjar}"/>
-            <replacefilter token="@servletjar@" value="${lib.subst.patch}/${servletjar}"/>
-            <replacefilter token="@jcsjar@" value="${lib.subst.patch}/${jcsjar}"/>
-            <replacefilter token="@concurrentjar@" value="${lib.subst.patch}/${concurrentjar}"/>
-            <replacefilter token="@commonsloggingjar@" value="${lib.subst.patch}/${commonsloggingjar}"/>
-            <replacefilter token="@jsonjar@" value="${lib.subst.patch}/${jsonjar}"/>
-            <replacefilter token="@commonsfileuploadjar@" value="${lib.subst.patch}/${commonsfileuploadjar}"/>
-            <replacefilter token="@commonsiojar@" value="${lib.subst.patch}/${commonsiojar}"/>
-            <replacefilter token="@jakartawebdavjar@" value="${lib.subst.patch}/${jakartawebdavjar}"/>
-            <replacefilter token="@commonshttpclientjar@" value="${lib.subst.patch}/${commonshttpclientjar}"/>
-            <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}"/>
-            <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}"/>
-            <replacefilter token="@oxgroupwarelibdir@" value="${lib.subst.patch}"/>
-              <replacefilter token="@libdirpath@"    value="${lib.subst.patch}"/>
-            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
-        </replace>
-    </target>
-
-    <target name="patchGroupwareStart">
-        <move tofile="${patch.bin.dir}/open-xchange-groupware" file="${patch.bin.dir}/open-xchange-groupware.in" overwrite="true"/>
-        <replace file="${patch.bin.dir}/open-xchange-groupware">
-            <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
-            <replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
-            <replacefilter token="@prefix@" value="${prefix}"/>
-            <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
             <replacefilter token="@configini@" value="${conf.subst.patch}/osgi/config.ini"/>
             <replacefilter token="@bundle.d@" value="${gwbundle.d}"/>
         </replace>
