@@ -73,7 +73,7 @@ public class LdapException extends OXException {
         DELETE_NOT_POSSIBLE("LDAP contacts cannot be deleted", Category.PERMISSION, 1),
 
         /**
-         * LDAP contacts cannot be deleted
+         * An error occured while trying to read an LDAP attribute: %s
          */
         ERROR_GETTING_ATTRIBUTE("An error occured while trying to read an LDAP attribute: %s", Category.INTERNAL_ERROR, 2),
 
