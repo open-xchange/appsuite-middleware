@@ -99,10 +99,15 @@ public class LinkedInWorkflowTest extends TestCase {
 		}
 		
 		assertTrue("There should be some contacts", contacts.length != 0);
-		Contact firstContact = contacts[0];
-		System.out.println("First contact retrieved is : " + firstContact.getDisplayName());
-		Contact lastContact = contacts[contacts.length-1];
-        System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
+		for (Contact contact: contacts) {
+			System.out.println("contact retrieved is : " + contact.getDisplayName());
+			System.out.println("contacts first name : " + contact.getGivenName());
+			System.out.println("contacts last name : " + contact.getSurName());
+			System.out.println("contacts email address : " + contact.getEmail1());
+			System.out.println("contacts note is : " + contact.getNote());
+			
+	        System.out.println("----------");
+		}
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
 	}
 	
