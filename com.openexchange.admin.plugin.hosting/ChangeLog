@@ -1,3 +1,7 @@
+* 2009-07-09 - schweigi@open-xchange.com
+
+ - Extended oxsysreport for distribution UCS
+ 
 * 2009-06-23 - marcus.klein@open-xchange.com
 
  - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
