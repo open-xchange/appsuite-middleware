@@ -333,7 +333,7 @@ public final class IMAPDefaultFolderChecker {
                                     sep,
                                     type,
                                     spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                    tmp);
+                                    tmp.toString());
                                 count++;
                             } else if (LOG.isDebugEnabled()) {
                                 LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
@@ -349,13 +349,13 @@ public final class IMAPDefaultFolderChecker {
                                     sep,
                                     type,
                                     spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
-                                    tmp);
+                                    tmp.toString());
                                 count++;
                             } else if (LOG.isDebugEnabled()) {
                                 LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                             }
                         } else {
-                            submitFolderCheckTask(completionService, index, prefix, fullname, defaultFolderNames[index], sep, type, 1, tmp);
+                            submitFolderCheckTask(completionService, index, prefix, fullname, defaultFolderNames[index], sep, type, 1, tmp.toString());
                             count++;
                         }
                     }
@@ -402,15 +402,15 @@ public final class IMAPDefaultFolderChecker {
         }
     }
 
-    private void submitFolderCheckTask(final CompletionService<Object> completionService, final int index, final String prefix, final String fullname, final String defaultFolderName, final char sep, final int type, final int subscribe, final StringBuilder tmp) {
+    private void submitFolderCheckTask(final CompletionService<Object> completionService, final int index, final String prefix, final String fullname, final String defaultFolderName, final char sep, final int type, final int subscribe, final String tmp) {
         completionService.submit(new AbstractCallable(imapConfig, session) {
 
             public Object call() throws MailException {
                 try {
                     if (null == fullname || 0 == fullname.length()) {
-                        setDefaultMailFolder(index, checkDefaultFolder(index, prefix, defaultFolderName, sep, type, subscribe, false));
+                        setDefaultMailFolder(index, checkDefaultFolder(index, prefix, defaultFolderName, sep, type, subscribe, false, tmp));
                     } else {
-                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, subscribe, true));
+                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, subscribe, true, tmp));
                     }
                     return null;
                 } catch (final MessagingException e) {
@@ -518,11 +518,11 @@ public final class IMAPDefaultFolderChecker {
     /**
      * Internally used by {@link IMAPDefaultFolderChecker}.
      */
-    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname) throws MessagingException, IMAPException {
+    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname, String tmpStarter) throws MessagingException, IMAPException {
         /*
          * Check default folder
          */
-        StringBuilder tmp = new StringBuilder();
+        StringBuilder tmp = new StringBuilder(tmpStarter);
         final boolean checkSubscribed = true;
         final long st = System.currentTimeMillis();
         Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
