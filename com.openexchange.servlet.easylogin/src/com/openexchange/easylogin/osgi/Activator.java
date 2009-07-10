@@ -148,8 +148,10 @@ public class Activator extends DeferredActivator {
 			 * Unregister servlet
 			 */
 			final HttpService httpService = getService(HttpService.class);
-			httpService.unregister(ALIAS);
-			LOG.info(EasyLogin.class.getName() + " successfully unregistered");
+			if (null != httpService) {
+                httpService.unregister(ALIAS);
+            }
+            LOG.info(EasyLogin.class.getName() + " successfully unregistered");
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
