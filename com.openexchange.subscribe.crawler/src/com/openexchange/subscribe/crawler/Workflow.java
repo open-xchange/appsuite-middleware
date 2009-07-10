@@ -8,6 +8,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.darkside.WebClientCloser;
 
 /**
  * A crawling workflow. This holds the individual Steps and the session information (WebClient instance). 
@@ -16,6 +17,8 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public class Workflow {
 
+    private static final WebClientCloser closer = new WebClientCloser();
+    
 	private List<Step> steps;
 	
 	public Workflow() {
@@ -45,21 +48,26 @@ public class Workflow {
 		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
 		// Javascript needs to be disabled for security reasons
 		webClient.setJavaScriptEnabled(false);
-		Step previousStep = null;
-		
-		for (Step currentStep : steps) {
-			if (previousStep != null) {
-				currentStep.setInput(previousStep.getOutput());
-			}
-			currentStep.execute(webClient);
-			previousStep = currentStep;
-			if (! currentStep.executedSuccessfully()) {
-				throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(); 
-			}
-		}
-		
-		webClient.closeAllWindows();
-		return (Contact[]) previousStep.getOutput();
+		try {
+		    
+		    Step previousStep = null;
+	        
+	        for (Step currentStep : steps) {
+	            if (previousStep != null) {
+	                currentStep.setInput(previousStep.getOutput());
+	            }
+	            currentStep.execute(webClient);
+	            previousStep = currentStep;
+	            if (! currentStep.executedSuccessfully()) {
+	                throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(); 
+	            }
+	        }
+	        
+	        webClient.closeAllWindows();
+	        return (Contact[]) previousStep.getOutput();
+	    } finally {
+	        closer.close(webClient);
+	    }
 	}
 
 	public List<Step> getSteps() {
