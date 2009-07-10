@@ -95,6 +95,16 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                  */
                 return;
             }
+            if(ServerUserSetting.isContactCollectionEnabled(cid, userId) == Boolean.FALSE) {
+                /*
+                 * Explicitely turned off
+                 */
+                return;
+            }
+            /*
+             * Should collect, or not explicitely set, so create folder
+             */
+            
             /*
              * Create folder
              */
