@@ -2,6 +2,7 @@
 
  - Bugfix #14143: Force connection close after a subscription has been loaded.
  - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
+ - Bugfix #14135: Don't share string builder instance among threads.
 
 * 2009-07-09 - marcus.klein@open-xchange.com
 
