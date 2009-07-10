@@ -1,6 +1,7 @@
 * 2009-07-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #14143: Force connection close after a subscription has been loaded.
+ - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
 
 * 2009-07-09 - marcus.klein@open-xchange.com
 
