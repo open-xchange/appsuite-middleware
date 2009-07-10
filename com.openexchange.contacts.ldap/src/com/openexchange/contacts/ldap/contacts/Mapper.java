@@ -646,6 +646,13 @@ public class Mapper {
             }
         }
         
+        if (cols.contains(Contact.SUR_NAME)) {
+            final String displayname = mappings.getDistributionlistname();
+            if (null != displayname && 0 != displayname.length()) {
+                retval.setSurName(getter.getAttribute(displayname));
+            }
+        }
+        
         if (cols.contains(DataObject.OBJECT_ID)) {
             final String uniqueid = mappings.getDistributionuid();
             if (folderprop.isMemorymapping()) {

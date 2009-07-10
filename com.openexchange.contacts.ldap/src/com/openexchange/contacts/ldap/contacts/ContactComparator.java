@@ -266,6 +266,8 @@ public class ContactComparator implements Comparator<Contact> {
             } else {
                 return 1;
             }
+        } else if (null == string2) {
+            return -1;
         } else {
             return this.alphanumComparator.compare(string1, string2);
         }
