@@ -306,6 +306,9 @@ public class LdapContactInterface implements ContactInterface {
             columns.add(Contact.EMAIL1);
             columns.add(Contact.EMAIL2);
         }
+        if (0 != orderBy) {
+            columns.addAll(getColumnSet(new int[]{orderBy}));
+        }
         final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
         
         // Get only the needed parts...
@@ -570,7 +573,11 @@ public class LdapContactInterface implements ContactInterface {
         case Contact.SUFFIX:
             return mappings.getSuffix();
         case Contact.SUR_NAME:
-            return mappings.getSurname();
+            if (distributionlist) {
+                return mappings.getDistributionlistname();
+            } else {
+                return mappings.getSurname();
+            }
         case Contact.TAX_ID:
             return mappings.getTax_id();
         case Contact.TELEPHONE_ASSISTANT:
