@@ -2,20 +2,28 @@ package com.openexchange.subscribe.xing;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.HttpWebConnection;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.darkside.WebClientCloser;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -45,16 +53,17 @@ public class XingContactParser {
     private String OFFSET = ";offset=";
     
     private String LOGOUT_PAGE = "/app/user?op=logout";
+    
+    private static final WebClientCloser closer = new WebClientCloser();
 	
 	public Contact[] getXingContactsForUser(String xingUser, String xingPassword) throws XingSubscriptionException {
 	    Vector<Contact> contactObjects = new Vector<Contact>();
-	    
+	    // emulate a known client, hopefully keeping our profile low
+        final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
+        // Javascript needs to be disabled as there are errors on the start page
+        webClient.setJavaScriptEnabled(false);
+        
 	    try {
-    		// emulate a known client, hopefully keeping our profile low
-    		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
-    		// Javascript needs to be disabled as there are errors on the start page
-    		webClient.setJavaScriptEnabled(false);
-    		
     		// 1st step - login page
     	    final HtmlPage loginPage = webClient.getPage(XING_WEBSITE);
     	    //fill in the credentials and submit the login form
@@ -103,10 +112,12 @@ public class XingContactParser {
     	    HtmlAnchor logout = currentPage.getAnchorByHref(LOGOUT_PAGE);
     	    logout.click();
     	    webClient.closeAllWindows();
-	    } catch (FailingHttpStatusCodeException e) {
+       } catch (FailingHttpStatusCodeException e) {
             throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (IOException e) {
             throw XingSubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } finally {
+            closer.close(webClient);
         }
 	    
 	    Contact[] contactObjectsArray = new Contact[contactObjects.size()];
@@ -116,7 +127,8 @@ public class XingContactParser {
 		return contactObjectsArray;
 	}
 
-	private Vector<Contact> getContactsFromVcardLinks (List<HtmlAnchor> allLinks) throws IOException, XingSubscriptionException{
+   
+    private Vector<Contact> getContactsFromVcardLinks (List<HtmlAnchor> allLinks) throws IOException, XingSubscriptionException{
 		Vector<Contact> contactObjects = new Vector<Contact>();
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 	    for (HtmlAnchor tempLink : allLinks){
