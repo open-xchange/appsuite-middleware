@@ -46,7 +46,8 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsloggingjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
