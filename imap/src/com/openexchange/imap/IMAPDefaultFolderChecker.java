@@ -52,6 +52,7 @@ package com.openexchange.imap;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -407,9 +408,9 @@ public final class IMAPDefaultFolderChecker {
             public Object call() throws MailException {
                 try {
                     if (null == fullname || 0 == fullname.length()) {
-                        setDefaultMailFolder(index, checkDefaultFolder(index, prefix, defaultFolderName, sep, type, subscribe, false, tmp));
+                        setDefaultMailFolder(index, checkDefaultFolder(index, prefix, defaultFolderName, sep, type, subscribe, false));
                     } else {
-                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, subscribe, true, tmp));
+                        setDefaultMailFolder(index, checkDefaultFolder(index, "", fullname, sep, type, subscribe, true));
                     }
                     return null;
                 } catch (final MessagingException e) {
@@ -517,10 +518,11 @@ public final class IMAPDefaultFolderChecker {
     /**
      * Internally used by {@link IMAPDefaultFolderChecker}.
      */
-    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname, final StringBuilder tmp) throws MessagingException, IMAPException {
+    String checkDefaultFolder(final int index, final String prefix, final String name, final char sep, final int type, final int subscribe, final boolean isFullname) throws MessagingException, IMAPException {
         /*
          * Check default folder
          */
+        StringBuilder tmp = new StringBuilder();
         final boolean checkSubscribed = true;
         final long st = System.currentTimeMillis();
         Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
