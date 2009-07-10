@@ -74,6 +74,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	
     private static final DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd");
     
+    
     private static final Log LOG = LogFactory.getLog(MapToContactObjectTransformer.class);
     
 	public List<Contact> transform (List<Map<String, String>> inlist){
@@ -308,64 +309,64 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 }
 			}  
 			if (map.containsKey("ox_userfield01")){
-				contact.setGivenName((String)map.get("ox_userfield01"));
+				contact.setUserField01((String)map.get("ox_userfield01"));
 			}  
 			if (map.containsKey("ox_userfield02")){
-				contact.setGivenName((String)map.get("ox_userfield02"));
+				contact.setUserField02((String)map.get("ox_userfield02"));
 			}  
 			if (map.containsKey("ox_userfield03")){
-				contact.setGivenName((String)map.get("ox_userfield03"));
+				contact.setUserField03((String)map.get("ox_userfield03"));
 			}  
 			if (map.containsKey("ox_userfield04")){
-				contact.setGivenName((String)map.get("ox_userfield04"));
+				contact.setUserField04((String)map.get("ox_userfield04"));
 			}  
 			if (map.containsKey("ox_userfield05")){
-				contact.setGivenName((String)map.get("ox_userfield05"));
+				contact.setUserField05((String)map.get("ox_userfield05"));
 			}  
 			if (map.containsKey("ox_userfield06")){
-				contact.setGivenName((String)map.get("ox_userfield06"));
+				contact.setUserField06((String)map.get("ox_userfield06"));
 			}  
 			if (map.containsKey("ox_userfield07")){
-				contact.setGivenName((String)map.get("ox_userfield07"));
+				contact.setUserField07((String)map.get("ox_userfield07"));
 			}  
 			if (map.containsKey("ox_userfield08")){
-				contact.setGivenName((String)map.get("ox_userfield08"));
+				contact.setUserField08((String)map.get("ox_userfield08"));
 			}  
 			if (map.containsKey("ox_userfield09")){
-				contact.setGivenName((String)map.get("ox_userfield09"));
+				contact.setUserField09((String)map.get("ox_userfield09"));
 			}  
 			if (map.containsKey("ox_userfield10")){
-				contact.setGivenName((String)map.get("ox_userfield10"));
+				contact.setUserField10((String)map.get("ox_userfield10"));
 			}  
 			if (map.containsKey("ox_userfield11")){
-				contact.setGivenName((String)map.get("ox_userfield11"));
+				contact.setUserField11((String)map.get("ox_userfield11"));
 			}  
 			if (map.containsKey("ox_userfield12")){
-				contact.setGivenName((String)map.get("ox_userfield12"));
+				contact.setUserField12((String)map.get("ox_userfield12"));
 			}  
 			if (map.containsKey("ox_userfield13")){
-				contact.setGivenName((String)map.get("ox_userfield13"));
+				contact.setUserField13((String)map.get("ox_userfield13"));
 			}  
 			if (map.containsKey("ox_userfield14")){
-				contact.setGivenName((String)map.get("ox_userfield14"));
+				contact.setUserField14((String)map.get("ox_userfield14"));
 			}  
 			if (map.containsKey("ox_userfield15")){
-				contact.setGivenName((String)map.get("ox_userfield15"));
+				contact.setUserField15((String)map.get("ox_userfield15"));
 			}  
 			if (map.containsKey("ox_userfield16")){
-				contact.setGivenName((String)map.get("ox_userfield16"));
+				contact.setUserField16((String)map.get("ox_userfield16"));
 			}  
 			if (map.containsKey("ox_userfield17")){
-				contact.setGivenName((String)map.get("ox_userfield17"));
+				contact.setUserField17((String)map.get("ox_userfield17"));
 			}  
 			if (map.containsKey("ox_userfield18")){
-				contact.setGivenName((String)map.get("ox_userfield18"));
+				contact.setUserField18((String)map.get("ox_userfield18"));
 			}  
 			if (map.containsKey("ox_userfield19")){
-				contact.setGivenName((String)map.get("ox_userfield19"));
+				contact.setUserField19((String)map.get("ox_userfield19"));
 			}  
 			if (map.containsKey("ox_userfield20")){
-				contact.setGivenName((String)map.get("ox_userfield20"));
+				contact.setUserField20((String)map.get("ox_userfield20"));
 			}  
 			
 			outlist.add(contact);
