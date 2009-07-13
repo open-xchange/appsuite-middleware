@@ -87,8 +87,9 @@ public class ContactMergeratorTest extends TestCase {
         SearchIterator<Contact> c1 = contactsWithIDs(11, 101, 1001);
         SearchIterator<Contact> c2 = contactsWithIDs(21,22,23);
         SearchIterator<Contact> c3 = contactsWithIDs(31,32,33);
+        SearchIterator<Contact> c4 = contactsWithIDs();
         
-        ContactMergerator merged = new ContactMergerator(new IDComparator(), c1, c2, c3);
+        ContactMergerator merged = new ContactMergerator(new IDComparator(), c1, c2, c3, c4);
         assertIDs(merged, 11,21,22,23,31,32,33,101,1001);
     }
     
