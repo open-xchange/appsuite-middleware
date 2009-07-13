@@ -79,7 +79,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
     }
 
     public int compare(Contact o1, Contact o2) {
-        if(field < 0) {
+        if(field <= 0) {
             return 1;
         }
         int rating;
