@@ -74,7 +74,6 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	
     private static final DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd");
     
-    
     private static final Log LOG = LogFactory.getLog(MapToContactObjectTransformer.class);
     
 	public List<Contact> transform (List<Map<String, String>> inlist){
@@ -82,17 +81,17 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 		
 		for (Map<String,String> map : inlist){
 		Contact contact = new Contact();	
-			if (map.containsKey("ox_display_name")){
-				contact.setDisplayName((String)map.get("ox_display_name"));
+			if (map.containsKey("ox_displayName")){
+				contact.setDisplayName((String)map.get("ox_displayName"));
 			}  
-			if (map.containsKey("ox_first_name")){
-				contact.setGivenName((String)map.get("ox_first_name"));
+			if (map.containsKey("ox_firstName")){
+				contact.setGivenName((String)map.get("ox_firstName"));
 			}  
-			if (map.containsKey("ox_last_name")){
-				contact.setSurName((String)map.get("ox_last_name"));
+			if (map.containsKey("ox_lastName")){
+				contact.setSurName((String)map.get("ox_lastName"));
 			}  
-			if (map.containsKey("ox_second_name")){
-				contact.setMiddleName((String)map.get("ox_second_name"));
+			if (map.containsKey("ox_secondName")){
+				contact.setMiddleName((String)map.get("ox_secondName"));
 			}  
 			if (map.containsKey("ox_suffix")){
 				contact.setSuffix((String)map.get("ox_suffix"));
@@ -100,50 +99,50 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 			if (map.containsKey("ox_title")){
 				contact.setTitle((String)map.get("ox_title"));
 			}  
-			if (map.containsKey("ox_street_home")){
-				contact.setStreetHome((String)map.get("ox_street_home"));
+			if (map.containsKey("ox_streetPrivate")){
+				contact.setStreetHome((String)map.get("ox_streetPrivate"));
 			}  
-			if (map.containsKey("ox_postal_code_home")){
-				contact.setPostalCodeHome((String)map.get("ox_postal_code_home"));
+			if (map.containsKey("ox_postalCodePrivate")){
+				contact.setPostalCodeHome((String)map.get("ox_postalCodePrivate"));
 			}  
-			if (map.containsKey("ox_city_home")){
-				contact.setCityHome((String)map.get("ox_city_home"));
+			if (map.containsKey("ox_cityPrivate")){
+				contact.setCityHome((String)map.get("ox_cityPrivate"));
 			}  
-			if (map.containsKey("ox_state_home")){
-				contact.setStateHome((String)map.get("ox_state_home"));
+			if (map.containsKey("ox_statePrivate")){
+				contact.setStateHome((String)map.get("ox_statePrivate"));
 			}  
-			if (map.containsKey("ox_country_home")){
-				contact.setCountryHome((String)map.get("ox_country_home"));
+			if (map.containsKey("ox_countryPrivate")){
+				contact.setCountryHome((String)map.get("ox_countryPrivate"));
 			} 
-			if (map.containsKey("ox_street_business")){
-				contact.setStreetBusiness((String)map.get("ox_street_business"));
+			if (map.containsKey("ox_streetBusiness")){
+				contact.setStreetBusiness((String)map.get("ox_streetBusiness"));
 			} 
-			if (map.containsKey("ox_postal_code_business")){
-				contact.setPostalCodeBusiness((String)map.get("ox_postal_code_business"));
+			if (map.containsKey("ox_postalCodeBusiness")){
+				contact.setPostalCodeBusiness((String)map.get("ox_postalCodeBusiness"));
 			} 
-			if (map.containsKey("ox_city_business")){
-				contact.setCityBusiness((String)map.get("ox_city_business"));
+			if (map.containsKey("ox_cityBusiness")){
+				contact.setCityBusiness((String)map.get("ox_cityBusiness"));
 			} 
-			if (map.containsKey("ox_state_business")){
-				contact.setStateBusiness((String)map.get("ox_state_business"));
+			if (map.containsKey("ox_stateBusiness")){
+				contact.setStateBusiness((String)map.get("ox_stateBusiness"));
 			} 
-			if (map.containsKey("ox_country_business")){
-				contact.setCountryBusiness((String)map.get("ox_country_business"));
+			if (map.containsKey("ox_countryBusiness")){
+				contact.setCountryBusiness((String)map.get("ox_countryBusiness"));
 			} 
-			if (map.containsKey("ox_street_other")){
-				contact.setStreetOther((String)map.get("ox_street_other"));
+			if (map.containsKey("ox_streetOther")){
+				contact.setStreetOther((String)map.get("ox_streetOther"));
 			} 
-			if (map.containsKey("ox_postal_code_other")){
-				contact.setPostalCodeOther((String)map.get("ox_postal_code_other"));
+			if (map.containsKey("ox_postalCodeOther")){
+				contact.setPostalCodeOther((String)map.get("ox_postalCodeOther"));
 			} 
-			if (map.containsKey("ox_city_other")){
-				contact.setCityOther((String)map.get("ox_city_other"));
+			if (map.containsKey("ox_cityOther")){
+				contact.setCityOther((String)map.get("ox_cityOther"));
 			} 
-			if (map.containsKey("ox_state_other")){
-				contact.setStateOther((String)map.get("ox_state_other"));
+			if (map.containsKey("ox_stateOther")){
+				contact.setStateOther((String)map.get("ox_stateOther"));
 			} 
-			if (map.containsKey("ox_country_other")){
-				contact.setCountryOther((String)map.get("ox_country_other"));
+			if (map.containsKey("ox_countryOther")){
+				contact.setCountryOther((String)map.get("ox_countryOther"));
 			} 
 			if (map.containsKey("ox_birthday")){
 				try {
@@ -152,11 +151,11 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 					e.printStackTrace();
 				}
 			} 
-			if (map.containsKey("ox_marital_status")){
-				contact.setMaritalStatus((String)map.get("ox_marital_status"));
+			if (map.containsKey("ox_maritalStatus")){
+				contact.setMaritalStatus((String)map.get("ox_maritalStatus"));
 			}  
-			if (map.containsKey("ox_number_of_children")){
-				contact.setNumberOfChildren((String)map.get("ox_number_of_children"));
+			if (map.containsKey("ox_numberOfChildren")){
+				contact.setNumberOfChildren((String)map.get("ox_numberOfChildren"));
 			} 
 			if (map.containsKey("ox_profession")){
 				contact.setProfession((String)map.get("ox_profession"));
@@ -164,8 +163,8 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 			if (map.containsKey("ox_nickname")){
 				contact.setNickname((String)map.get("ox_nickname"));
 			}  
-			if (map.containsKey("ox_spouse_name")){
-				contact.setSpouseName((String)map.get("ox_first_name"));
+			if (map.containsKey("ox_spouseName")){
+				contact.setSpouseName((String)map.get("ox_spouseName"));
 			}  
 			if (map.containsKey("ox_anniversary")){
 				try {
@@ -174,86 +173,86 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 					e.printStackTrace();
 				}
 			}  
-			if (map.containsKey("ox_note")){
-				contact.setNote((String)map.get("ox_note"));
-			}  
+			if (map.containsKey("ox_comment")){
+				contact.setNote((String)map.get("ox_comment"));
+			}    
 			if (map.containsKey("ox_department")){
 				contact.setDepartment((String)map.get("ox_department"));
 			}  
 			if (map.containsKey("ox_position")){
 				contact.setPosition((String)map.get("ox_position"));
 			}  
-			if (map.containsKey("ox_employee_type")){
-				contact.setEmployeeType((String)map.get("ox_employee_type"));
+			if (map.containsKey("ox_jobTitle")){
+				contact.setEmployeeType((String)map.get("ox_jobTitle"));
 			}  
-			if (map.containsKey("ox_room_number")){
-				contact.setRoomNumber((String)map.get("ox_room_number"));
+			if (map.containsKey("ox_roomNumber")){
+				contact.setRoomNumber((String)map.get("ox_roomNumber"));
 			}  
-			if (map.containsKey("ox_number_of_employees")){
-				contact.setNumberOfEmployee((String)map.get("ox_number_of_employees"));
+			if (map.containsKey("ox_numberOfEmployees")){
+				contact.setNumberOfEmployee((String)map.get("ox_numberOfEmployees"));
 			}  
-			if (map.containsKey("ox_sales_volume")){
-				contact.setSalesVolume((String)map.get("ox_sales_volume"));
+			if (map.containsKey("ox_salesVolume")){
+				contact.setSalesVolume((String)map.get("ox_salesVolume"));
 			}  
-			if (map.containsKey("ox_tax_id")){
-				contact.setTaxID((String)map.get("ox_tax_id"));
+			if (map.containsKey("ox_taxID")){
+				contact.setTaxID((String)map.get("ox_taxID"));
 			}  
-			if (map.containsKey("ox_commercial_register")){
-				contact.setCommercialRegister((String)map.get("ox_commercial_register"));
+			if (map.containsKey("ox_commercialRegister")){
+				contact.setCommercialRegister((String)map.get("ox_commercialRegister"));
 			}  
 			if (map.containsKey("ox_branches")){
 				contact.setBranches((String)map.get("ox_branches"));
 			}  
-			if (map.containsKey("ox_business_category")){
-				contact.setBusinessCategory((String)map.get("ox_business_category"));
+			if (map.containsKey("ox_businessCategory")){
+				contact.setBusinessCategory((String)map.get("ox_businessCategory"));
 			}  
-			if (map.containsKey("ox_info")){
-				contact.setInfo((String)map.get("ox_info"));
+			if (map.containsKey("ox_infoCompany")){
+				contact.setInfo((String)map.get("ox_infoCompany"));
 			}  
-			if (map.containsKey("ox_manager_name")){
-				contact.setManagerName((String)map.get("ox_manager_name"));
+			if (map.containsKey("ox_managerName")){
+				contact.setManagerName((String)map.get("ox_managerName"));
 			}  
-			if (map.containsKey("ox_assistant_name")){
-				contact.setAssistantName((String)map.get("ox_assistant_name"));
+			if (map.containsKey("ox_assistantName")){
+				contact.setAssistantName((String)map.get("ox_assistantName"));
 			}  
-			if (map.containsKey("ox_telephone_home1")){
-				contact.setTelephoneHome1((String)map.get("ox_telephone_home1"));
+			if (map.containsKey("ox_phonePrivate1")){
+				contact.setTelephoneHome1((String)map.get("ox_phonePrivate1"));
 			}  
-			if (map.containsKey("ox_telephone_home2")){
-				contact.setTelephoneHome2((String)map.get("ox_telephone_home2"));
+			if (map.containsKey("ox_phonePrivate2")){
+				contact.setTelephoneHome2((String)map.get("ox_phonePrivate2"));
 			}  
-			if (map.containsKey("ox_telephone_business1")){
-				contact.setTelephoneBusiness1((String)map.get("ox_telephone_business1"));
+			if (map.containsKey("ox_phoneBusiness1")){
+				contact.setTelephoneBusiness1((String)map.get("ox_phoneBusiness1"));
 			}  
-			if (map.containsKey("ox_telephone_business2")){
-				contact.setTelephoneBusiness2((String)map.get("ox_telephone_business2"));
+			if (map.containsKey("ox_phoneBusiness2")){
+				contact.setTelephoneBusiness2((String)map.get("ox_phoneBusiness2"));
 			}  
-			if (map.containsKey("ox_telephone_other")){
-				contact.setTelephoneOther((String)map.get("ox_telephone_other"));
+			if (map.containsKey("ox_phoneOther")){
+				contact.setTelephoneOther((String)map.get("ox_phoneOther"));
 			}  
-			if (map.containsKey("ox_fax_business")){
-				contact.setFaxBusiness((String)map.get("ox_fax_business"));
+			if (map.containsKey("ox_faxBusiness")){
+				contact.setFaxBusiness((String)map.get("ox_faxBusiness"));
 			}  
-			if (map.containsKey("ox_telephone_callback")){
-				contact.setTelephoneCallback((String)map.get("telephone_callback"));
+			if (map.containsKey("ox_phoneCallback")){
+				contact.setTelephoneCallback((String)map.get("ox_phoneCallback"));
 			}  
-			if (map.containsKey("ox_telephone_car")){
-				contact.setTelephoneCar((String)map.get("ox_telephone_car"));
+			if (map.containsKey("ox_phoneCar")){
+				contact.setTelephoneCar((String)map.get("ox_phoneCar"));
 			}  
-			if (map.containsKey("ox_telephone_company")){
-				contact.setTelephoneCompany((String)map.get("ox_telephone_company"));
+			if (map.containsKey("ox_phoneCompany")){
+				contact.setTelephoneCompany((String)map.get("ox_phoneCompany"));
 			}  
-			if (map.containsKey("ox_fax_home")){
-				contact.setFaxHome((String)map.get("ox_fax_home"));
+			if (map.containsKey("ox_faxPrivate")){
+				contact.setFaxHome((String)map.get("ox_faxPrivate"));
 			}  
-			if (map.containsKey("ox_cellular_telephone1")){
-				contact.setCellularTelephone1((String)map.get("ox_cellular_telephone1"));
+			if (map.containsKey("ox_phoneMobile1")){
+				contact.setCellularTelephone1((String)map.get("ox_phoneMobile1"));
 			}  
-			if (map.containsKey("ox_cellular_telephone2")){
-				contact.setCellularTelephone2((String)map.get("ox_cellular_telephone2"));
+			if (map.containsKey("ox_phoneMobile2")){
+				contact.setCellularTelephone2((String)map.get("ox_phoneMobile2"));
 			}  
-			if (map.containsKey("ox_fax_other")){
-				contact.setFaxOther((String)map.get("ox_fax_other"));
+			if (map.containsKey("ox_faxOther")){
+				contact.setFaxOther((String)map.get("ox_faxOther"));
 			}  
 			if (map.containsKey("ox_email1")){
 				contact.setEmail1((String)map.get("ox_email1"));
@@ -264,38 +263,41 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 			if (map.containsKey("ox_email3")){
 				contact.setEmail3((String)map.get("ox_email3"));
 			}  
-			if (map.containsKey("ox_url")){
-				contact.setURL((String)map.get("ox_url"));
+			if (map.containsKey("ox_URL")){
+				contact.setURL((String)map.get("ox_URL"));
 			}  
-			if (map.containsKey("ox_telephone_isdn")){
-				contact.setTelephoneISDN((String)map.get("ox_telephone_isdn"));
+			if (map.containsKey("ox_phoneISDN")){
+				contact.setTelephoneISDN((String)map.get("ox_phoneISDN"));
 			}  
-			if (map.containsKey("ox_telephone_pager")){
-				contact.setTelephonePager((String)map.get("ox_telephone_pager"));
+			if (map.containsKey("ox_pager")){
+				contact.setTelephonePager((String)map.get("ox_pager"));
 			}  
-			if (map.containsKey("ox_telephone_primary")){
-				contact.setTelephonePrimary((String)map.get("ox_telephone_primary"));
+			if (map.containsKey("ox_phonePrimary")){
+				contact.setTelephonePrimary((String)map.get("ox_phonePrimary"));
 			}  
-			if (map.containsKey("ox_telephone_radio")){
-				contact.setTelephoneRadio((String)map.get("ox_telephone_radio"));
+			if (map.containsKey("ox_phoneRadio")){
+				contact.setTelephoneRadio((String)map.get("ox_phoneRadio"));
 			}  
 			if (map.containsKey("ox_telephone_telex")){
 				contact.setTelephoneTelex((String)map.get("ox_telephone_telex"));
 			}  
-			if (map.containsKey("ox_telephone_ttytdd")){
-				contact.setTelephoneTTYTTD((String)map.get("ox_telephone_ttytdd"));
+			if (map.containsKey("ox_telex")){
+				contact.setTelephoneTelex((String)map.get("ox_telex"));
 			}  
-			if (map.containsKey("ox_instant_messenger1")){
-				contact.setInstantMessenger1((String)map.get("ox_instant_messenger1"));
+			if (map.containsKey("ox_phoneTTYTDD")){
+                contact.setTelephoneTTYTTD((String)map.get("ox_phoneTTYTDD"));
+            }  
+            if (map.containsKey("ox_instantMessenger1")){
+				contact.setInstantMessenger1((String)map.get("ox_instantMessenger1"));
 			}  
-			if (map.containsKey("ox_instant_messenger2")){
-				contact.setInstantMessenger2((String)map.get("ox_instant_messenger2"));
+			if (map.containsKey("ox_instantMessenger2")){
+				contact.setInstantMessenger2((String)map.get("ox_instantMessenger2"));
 			}  
-			if (map.containsKey("ox_telephone_ip")){
-				contact.setTelephoneIP((String)map.get("ox_telephone_ip"));
+			if (map.containsKey("ox_phoneIP")){
+				contact.setTelephoneIP((String)map.get("ox_phoneIP"));
 			}  
-			if (map.containsKey("ox_telephone_assistant")){
-				contact.setTelephoneAssistant((String)map.get("telephone_assistant"));
+			if (map.containsKey("ox_phoneAssistant")){
+				contact.setTelephoneAssistant((String)map.get("ox_phoneAssistant"));
 			}  
 			if (map.containsKey("ox_company")){
 				contact.setCompany((String)map.get("ox_company"));
@@ -368,7 +370,9 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 			if (map.containsKey("ox_userfield20")){
 				contact.setUserField20((String)map.get("ox_userfield20"));
 			}  
-			
+			if (map.containsKey("ox_tags")){
+                contact.setCategories((String)map.get("ox_tags"));
+            }
 			outlist.add(contact);
 		}
 		
