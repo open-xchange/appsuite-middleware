@@ -73,8 +73,8 @@ public class XingWorkflowTest extends TestCase {
 		ArrayList<Step> listOfSteps = new ArrayList<Step>();
 		
 		// insert valid credentials here
-		String username ="";
-		String password ="";
+		String username ="roxyexchanger@ox.io";
+		String password ="secret";
 		
 		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password","Home | XING"));
 		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
