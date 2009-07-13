@@ -152,16 +152,6 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 subscriptionsToRefresh.add(subscription);
             }
         }
-        if (request.has("folder")) {
-            String folderId = request.getString("folder");
-            List<Subscription> allSubscriptions = null;
-            allSubscriptions = getSubscriptionsInFolder(context, folderId, session.getPassword());
-            for(Subscription candidate : allSubscriptions) {
-                if(!ids.contains(candidate.getId())) {
-                    subscriptionsToRefresh.add(candidate);
-                }
-            }
-        }
 
         executor.executeSubscriptions(subscriptionsToRefresh);
         
