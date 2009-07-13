@@ -49,59 +49,107 @@
 
 package com.openexchange.imap.entity2acl;
 
+import java.net.InetSocketAddress;
+
+/**
+ * {@link IMAPServer} - Represents an IMAP server with ACL support.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public enum IMAPServer {
-	/**
-	 * Courier
-	 */
-	COURIER("Courier", CourierEntity2ACL.class.getName()),
-	/**
-	 * Cyrus
-	 */
-	CYRUS("Cyrus", CyrusEntity2ACL.class.getName());
+    /**
+     * Courier
+     */
+    COURIER("Courier", CourierEntity2ACL.class.getName(), new ArgumentGenerator() {
 
-	private final String impl;
+        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] {
+                Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
+        }
+    }),
+    /**
+     * Cyrus
+     */
+    CYRUS("Cyrus", CyrusEntity2ACL.class.getName(), new ArgumentGenerator() {
 
-	private final String name;
+        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
+        }
+    }),
+    /**
+     * Dovecot
+     */
+    DOVECOT("Dovecot", DovecotEntity2ACL.class.getName(), new ArgumentGenerator() {
 
-	private IMAPServer(final String name, final String impl) {
-		this.name = name;
-		this.impl = impl;
-	}
+        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] {
+                Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
+        }
+    });
 
-	/**
-	 * Gets the class name of {@link Entity2ACL} implementation
-	 * 
-	 * @return The class name of {@link Entity2ACL} implementation
-	 */
-	public String getImpl() {
-		return impl;
-	}
+    private final String impl;
 
-	/**
-	 * Gets the IMAP server's alias name
-	 * 
-	 * @return The IMAP server's alias name
-	 */
-	public String getName() {
-		return name;
-	}
+    private final String name;
 
-	/**
-	 * Gets the class name of {@link Entity2ACL} implementation that corresponds
-	 * to specified name.
-	 * 
-	 * @param name
-	 *            The IMAP server name
-	 * @return The class name of {@link Entity2ACL} implementation or
-	 *         <code>null</code> if none matches.
-	 */
-	public static final String getIMAPServerImpl(final String name) {
-		final IMAPServer[] imapServers = IMAPServer.values();
-		for (int i = 0; i < imapServers.length; i++) {
-			if (imapServers[i].getName().equalsIgnoreCase(name)) {
-				return imapServers[i].getImpl();
-			}
-		}
-		return null;
-	}
+    private final ArgumentGenerator argumentGenerator;
+
+    private IMAPServer(final String name, final String impl, final ArgumentGenerator argumentGenerator) {
+        this.name = name;
+        this.impl = impl;
+        this.argumentGenerator = argumentGenerator;
+    }
+
+    /**
+     * Gets the class name of {@link Entity2ACL} implementation
+     * 
+     * @return The class name of {@link Entity2ACL} implementation
+     */
+    public String getImpl() {
+        return impl;
+    }
+
+    /**
+     * Gets the IMAP server's alias name
+     * 
+     * @return The IMAP server's alias name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the needed arguments to reliably map an ACL entity to a system user and vice versa.
+     * 
+     * @param accountId The account ID
+     * @param imapServerAddress The IMAP server address
+     * @param sessionUser The session user ID
+     * @param fullname The IMAP folder's full name
+     * @param separator The IMAP folder's separator
+     * @return The needed arguments to reliably map an ACL entity to a system user and vice versa
+     */
+    public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+        return argumentGenerator.getArguments(accountId, imapServerAddress, sessionUser, fullname, separator);
+    }
+
+    /**
+     * Gets the class name of {@link Entity2ACL} implementation that corresponds to specified name.
+     * 
+     * @param name The IMAP server name
+     * @return The class name of {@link Entity2ACL} implementation or <code>null</code> if none matches.
+     */
+    public static final String getIMAPServerImpl(final String name) {
+        final IMAPServer[] imapServers = IMAPServer.values();
+        for (int i = 0; i < imapServers.length; i++) {
+            if (imapServers[i].getName().equalsIgnoreCase(name)) {
+                return imapServers[i].getImpl();
+            }
+        }
+        return null;
+    }
+
+    private static interface ArgumentGenerator {
+
+        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator);
+    }
+
 }

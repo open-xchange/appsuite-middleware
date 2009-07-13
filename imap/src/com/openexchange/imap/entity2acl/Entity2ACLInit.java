@@ -121,7 +121,6 @@ public final class Entity2ACLInit implements Initialization {
         } catch (final IllegalAccessException e) {
             throw new Entity2ACLException(Entity2ACLException.Code.INSTANTIATION_FAILED, e, new Object[0]);
         }
-        started.set(true);
     }
 
     public void stop() throws AbstractOXException {
@@ -132,7 +131,6 @@ public final class Entity2ACLInit implements Initialization {
         implementingClass = null;
         Entity2ACL.resetEntity2ACL();
         Entity2ACLAutoDetector.resetEntity2ACLMappings();
-        started.set(false);
     }
 
 }

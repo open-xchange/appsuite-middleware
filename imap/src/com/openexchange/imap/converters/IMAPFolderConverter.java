@@ -128,14 +128,7 @@ public final class IMAPFolderConverter {
         }
 
         public Object[] getArguments(final IMAPServer imapServer) throws AbstractOXException {
-            if (IMAPServer.CYRUS.equals(imapServer)) {
-                return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
-            } else if (IMAPServer.COURIER.equals(imapServer)) {
-                return new Object[] {
-                    Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
-            }
-            throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer.getName());
-
+            return imapServer.getArguments(accountId, imapServerAddress, sessionUser, fullname, separator);
         }
     }
 

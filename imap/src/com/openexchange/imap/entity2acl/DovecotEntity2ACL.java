@@ -52,6 +52,8 @@ package com.openexchange.imap.entity2acl;
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.api.MailConfig;
@@ -63,39 +65,106 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
 
 /**
- * {@link CyrusEntity2ACL} - Handles the ACL entities used by Cyrus IMAP server.
+ * {@link DovecotEntity2ACL} - Handles the ACL entities used by Dovecot IMAP server.
  * <p>
  * The current supported identifiers are:
  * <ul>
- * <li><i>anyone</i> which refers to all users, including the anonymous user</li>
+ * <li><i>owner</i></li>
+ * <li><i>anyone</i></li>
  * </ul>
  * <p>
  * Missing handling for identifiers:
  * <ul>
- * <li><i>anonymous</i> which refers to the anonymous, or unauthenticated user</li>
+ * <li><i>anonymous</i> (This is a synonym from <i>anyone</i>)</li>
+ * <li><i>user=loginid</i> (Rights or negative rights for IMAP account "loginid")</li>
+ * <li><i>group=name</i> (Rights or negative rights for account group "name")</li>
+ * <li><i>administrators</i> (This is an alias for <i>group=administrators</i>)</li>
  * </ul>
+ * <p>
+ * The complete implementation should be able to handle an ACL like this one:
+ * 
+ * <pre>
+ * owner aceilrstwx anyone lr user=john w -user=mary r administrators aceilrstwx
+ * </pre>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CyrusEntity2ACL extends Entity2ACL {
+public class DovecotEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CyrusEntity2ACL.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DovecotEntity2ACL.class);
 
-    private static final String AUTH_ID_ANYONE = "anyone";
+    private static final String ALIAS_OWNER = "owner";
+
+    private static final String ALIAS_ANYONE = "anyone";
+
+    private static final String SHARED_PREFIX = "#shared";
+
+    private static final String getSharedFolderOwner(final String sharedFolderName, final char delim) {
+        if (!sharedFolderName.startsWith(SHARED_PREFIX, 0)) {
+            return null;
+        }
+        final String quotedDelim = Pattern.quote(String.valueOf(delim));
+        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{ASCII}&&[^").append(
+            quotedDelim).append("]]+)").append(quotedDelim).append("\\p{ASCII}+").toString();
+        final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
+        if (m.matches()) {
+            return m.group(1).replaceAll("\\s+", String.valueOf(delim));
+        }
+        return null;
+    }
+
+    // session-user, fullname & delimiter
 
     /**
      * Default constructor
      */
-    public CyrusEntity2ACL() {
+    public DovecotEntity2ACL() {
         super();
     }
 
     @Override
     public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
-        if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
-            return AUTH_ID_ANYONE;
+        if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
+            return ALIAS_ANYONE;
         }
+        final Object[] args = entity2AclArgs.getArguments(IMAPServer.DOVECOT);
+        if (args == null || args.length == 0) {
+            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
+        }
+        final int accountId = ((Integer) args[0]).intValue();
+        final InetSocketAddress imapAddr = (InetSocketAddress) args[1];
+        final int sessionUser = ((Integer) args[2]).intValue();
+        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
+        if (null == sharedOwner) {
+            /*
+             * A non-shared folder
+             */
+            if (sessionUser == userId) {
+                /*
+                 * Logged-in user is equal to given user
+                 */
+                return ALIAS_OWNER;
+            }
+            return getACLNameInternal(userId, ctx, accountId, imapAddr);
+        }
+        /*
+         * A shared folder
+         */
+        final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser);
+        if (sharedOwnerID == userId) {
+            /*
+             * Owner is equal to given user
+             */
+            return ALIAS_OWNER;
+        }
+        return getACLNameInternal(userId, ctx, accountId, imapAddr);
+    }
+
+    private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws AbstractOXException {
         final MailAccountStorageService storageService = getServiceRegistry().getService(MailAccountStorageService.class, true);
+        if (null == storageService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, MailAccountStorageService.class.getName());
+        }
         final String userLoginInfo;
         {
             final UserService userService = getServiceRegistry().getService(UserService.class, true);
@@ -104,41 +173,50 @@ public final class CyrusEntity2ACL extends Entity2ACL {
             }
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
-        if (args == null || args.length == 0) {
-            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
-        }
         try {
-            return MailConfig.getMailLogin(
-                storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()),
-                userLoginInfo);
+            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
         } catch (final MailAccountException e) {
             throw new Entity2ACLException(
                 Entity2ACLException.Code.UNKNOWN_USER,
                 Integer.valueOf(userId),
                 Integer.valueOf(ctx.getContextId()),
-                args[1].toString());
+                imapAddr);
         }
     }
 
     @Override
     public int[] getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
-        if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
+        if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
+        final Object[] args = entity2AclArgs.getArguments(IMAPServer.DOVECOT);
         if (args == null || args.length == 0) {
             throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
         }
-        final int accountId;
-        final InetSocketAddress imapAddr;
-        final int sessionUser;
-        try {
-            accountId = ((Integer) args[0]).intValue();
-            imapAddr = (InetSocketAddress) args[1];
-            sessionUser = ((Integer) args[2]).intValue();
-        } catch (final ClassCastException e) {
-            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
+        final int accountId = ((Integer) args[0]).intValue();
+        final InetSocketAddress imapAddr = (InetSocketAddress) args[1];
+        final int sessionUser = ((Integer) args[2]).intValue();
+        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
+        if (null == sharedOwner) {
+            /*
+             * A non-shared folder
+             */
+            if (ALIAS_OWNER.equalsIgnoreCase(pattern)) {
+                /*
+                 * Map alias "owner" to logged-in user
+                 */
+                return getUserRetval(sessionUser);
+            }
+            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
+        }
+        /*
+         * A shared folder
+         */
+        if (ALIAS_OWNER.equalsIgnoreCase(pattern)) {
+            /*
+             * Map alias "owner" to shared folder owner
+             */
+            return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser));
         }
         return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
     }

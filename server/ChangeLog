@@ -1,3 +1,7 @@
+* 2009-07-13 - thorben.betten@open-xchange.com
+
+ - Bugfix 14152: Added support for Dovecot ACL identifiers
+
 * 2009-07-13 - martin.herfurth@open-xchange.com
 
  - Bugfix #12509: Participant creates change exception of an appointment
