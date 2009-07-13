@@ -610,10 +610,6 @@ public class ContactRequest {
 
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
-        final ContactInterface contactInterface;
-        final int[] folders = searchObj.getFolders();
-        
-        
         ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
         SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
         
