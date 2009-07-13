@@ -1,3 +1,4 @@
+com.openexchange.custom.audit.logging.AuditFileHandler.enabled=true
 com.openexchange.custom.audit.logging.AuditFileHandler.pattern=@auditlogfile@
 com.openexchange.custom.audit.logging.AuditFileHandler.level=ALL
 com.openexchange.custom.audit.logging.AuditFileHandler.limit=2097152

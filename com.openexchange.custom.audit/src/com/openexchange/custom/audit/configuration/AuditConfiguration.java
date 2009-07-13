@@ -60,6 +60,11 @@ import com.openexchange.custom.audit.services.AuditServiceRegistry;
  */
 public class AuditConfiguration {
 	
+	public static boolean getEnabled() throws com.openexchange.server.ServiceException {
+		ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.custom.audit.logging.AuditFileHandler.enabled", "false")); 
+	}
+	
 	public static String getLogfileLocation() throws com.openexchange.server.ServiceException {
 		ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
 		return configservice.getProperty("com.openexchange.custom.audit.impl.AuditEventHandler.pattern", "/var/log/open-xchange/open-xchange-audit.log"); 

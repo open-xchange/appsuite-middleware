@@ -52,13 +52,9 @@ package com.openexchange.custom.audit.impl;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -69,7 +65,6 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.custom.audit.configuration.AuditConfiguration;
 import com.openexchange.custom.audit.logging.AuditFileHandler;
 import com.openexchange.custom.audit.logging.AuditFilter;
-import com.openexchange.custom.audit.osgi.AuditActivator;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -104,65 +99,31 @@ public class AuditEventHandler implements EventHandler {
 		super();
 		
 		try {
-			Logger rootLogger = Logger.getLogger("");
-			Handler[] handlers = rootLogger.getHandlers();		
-			for (int position = 0; position < handlers.length; position ++) {
-				handlers[position].setFilter(new AuditFilter());
-			}
-			LOG.addHandler(new AuditFileHandler());
-		} catch (SecurityException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
-		} catch (IOException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
-		}
-		
-		LOG.log(Level.INFO, "INFO");
-		LOG.log(Level.WARNING, "WARNING");
-		LOG.log(Level.SEVERE, "SEVERE");
-		
-		/*
-		try {
-			Logger rootLogger = Logger.getLogger("");
-			Handler[] handlers = rootLogger.getHandlers();
-			for (int position = 0; position < handlers.length; position ++) {
-				handlers[position].setFilter(new AuditFilter());
-			}
-		} catch (SecurityException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
-		}
-		
-		try {
-			FileHandler handler = new FileHandler(
-					AuditConfiguration.getLogfileLocation(),
-					AuditConfiguration.getLogfileLimit(),
-					AuditConfiguration.getLogfileCount(),
-					AuditConfiguration.getLogfileAppend());
-        	try {
-				handler.setFormatter(AuditConfiguration.getLogfileFormatter());
-			} catch (InstantiationException e) {
-				LOG.log(Level.SEVERE, e.getMessage(), e);
-			} catch (IllegalAccessException e) {
-				LOG.log(Level.SEVERE, e.getMessage(), e);
-			} catch (ClassNotFoundException e) {
-				LOG.log(Level.SEVERE, e.getMessage(), e);
-			} finally {
-				LOG.severe(handler.getFormatter().toString());
-				if (handler.getFormatter() == null) {
-					LOG.log(Level.WARNING, "Setting java.util.logging.SimpleFormatter as default formatter for audit logging.");
-					handler.setFormatter(new SimpleFormatter());	
+			/*
+			 * Find out if the custom FileHandler should be used to log into
+			 * a seperate logfile. If so, add a filter to the root logger to
+			 * avoid that the messages will also be written to the master
+			 * logfile.
+			 */
+			{
+				if (AuditConfiguration.getEnabled() == true) {
+					try {
+						Logger rootLogger = Logger.getLogger("");
+						Handler[] handlers = rootLogger.getHandlers();		
+						for (int position = 0; position < handlers.length; position ++) {
+							handlers[position].setFilter(new AuditFilter());
+						}
+						LOG.addHandler(new AuditFileHandler());
+					} catch (SecurityException e) {
+						LOG.log(Level.SEVERE, e.getMessage(), e);
+					} catch (IOException e) {
+						LOG.log(Level.SEVERE, e.getMessage(), e);
+					}
 				}
 			}
-			
-        	LOG.setLevel(AuditConfiguration.getLoglevel());
-			LOG.addHandler(handler);
 		} catch (ServiceException e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
-		} catch (SecurityException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
-		} catch (IOException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
 		}
-		*/
 	}
 	
 	public void handleEvent(final Event event) {
