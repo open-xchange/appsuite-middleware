@@ -197,13 +197,13 @@
 				<@render key="ox_cityOther" title="City other" value=contact.cityOther!"" /> 
 				<@render key="ox_stateOther" title="State other" value=contact.stateOther!"" /> 
 				<@render key="ox_countryOther" title="Country other" value=contact.countryOther!"" /> 
-				<#if contact.birthday??><tr><td class="key">Birthday:</td><td class="ox_birthday value">${contact.birthday?string("yyyy-MM-dd")}</td></tr></#if>
+				<#if contact.birthday??><tr><td class="key">Birthday:</td><td class="ox_birthday value">${dateFormat.format(contact.birthday)}</td></tr></#if>
 				<@render key="ox_maritalStatus" title="Marital status" value=contact.maritalStatus!"" /> 
 				<@render key="ox_numberOfChildren" title="Number of children" value=contact.numberOfChildren!"" />
 				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
 				<@render key="ox_nickname" title="Nickname" value=contact.nickname!"" /> 
 				<@render key="ox_spouseName" title="Spouse name" value=contact.spouseName!"" /> 
-				<#if contact.anniversary??><tr><td class="key">Anniversary:</td><td class="ox_anniversary value">${contact.anniversary?string("yyyy-MM-dd")}</td></tr></#if>
+				<#if contact.anniversary??><tr><td class="key">Anniversary:</td><td class="ox_anniversary value">${dateFormat.format(contact.anniversary)}</td></tr></#if>
 				<@render key="ox_note" title="Note" value=contact.note!"" /> 
 				<@render key="ox_department" title="Department" value=contact.department!"" /> 
 				<@render key="ox_position" title="Position" value=contact.position!"" /> 

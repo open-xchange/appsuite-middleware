@@ -52,11 +52,14 @@ package com.openexchange.publish.microformats;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -96,6 +99,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
 
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    static {
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+    
     public static void setPublicationDataLoaderService(PublicationDataLoaderService service) {
         dataLoader = service;
     }
@@ -140,7 +148,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             variables.put("request", req);
-            
+            variables.put("dateFormat", DATE_FORMAT);
             if(additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
             }
