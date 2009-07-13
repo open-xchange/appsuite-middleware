@@ -90,7 +90,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         this.iterators = new ArrayList<RememberingIterator>(iterators.size());
         this.delegates = iterators;
         for (SearchIterator<Contact> searchIterator : iterators) {
-            if(searchIterator.size() > 0) {
+            if(!searchIterator.hasNext()) {
                 this.iterators.add(new RememberingIterator(searchIterator));
             }
         }
