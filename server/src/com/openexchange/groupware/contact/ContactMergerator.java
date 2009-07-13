@@ -90,7 +90,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         this.iterators = new ArrayList<RememberingIterator>(iterators.size());
         this.delegates = iterators;
         for (SearchIterator<Contact> searchIterator : iterators) {
-            if(!searchIterator.hasNext()) {
+            if(searchIterator.hasNext()) {
                 this.iterators.add(new RememberingIterator(searchIterator));
             }
         }
@@ -104,7 +104,6 @@ public class ContactMergerator implements SearchIterator<Contact>{
             return;
         }
         try {
-            removeEmptyIterators();
             if(this.iterators.size() > 1) {
                 Collections.sort(iterators, new TopMostComparator(comparator));
             }
@@ -123,16 +122,6 @@ public class ContactMergerator implements SearchIterator<Contact>{
                 this.iterators.remove(0);
             }
         }
-    }
-
-    private void removeEmptyIterators() {
-        List<RememberingIterator> nonEmpty = new ArrayList<RememberingIterator>(iterators.size());
-        for (RememberingIterator rememberingIterator : iterators) {
-            if(rememberingIterator.hasNext()) {
-                nonEmpty.add(rememberingIterator);
-            }
-        }
-        this.iterators = nonEmpty;
     }
 
     public void addWarning(AbstractOXException warning) {
