@@ -1373,7 +1373,27 @@ public final class CalendarCollection implements CalendarCollectionService {
             clone.setStartDate(new Date(rs.getStart()));
             clone.setEndDate(new Date(rs.getEnd()));
         }
+        
+        ensureOriginFolder(edao, clone);
         return clone;
+    }
+
+    private void ensureOriginFolder(CalendarDataObject edao, CalendarDataObject clone) {
+        int originFolder = 0;
+        for (UserParticipant userParticipant : edao.getUsers()) {
+            if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
+                originFolder = userParticipant.getPersonalFolderId();
+                break;
+            }
+        }
+        if (originFolder != 0) {
+            for (UserParticipant userParticipant : clone.getUsers()) {
+                if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
+                    userParticipant.setPersonalFolderId(originFolder);
+                    break;
+                }
+            }
+        }
     }
 
     /**
