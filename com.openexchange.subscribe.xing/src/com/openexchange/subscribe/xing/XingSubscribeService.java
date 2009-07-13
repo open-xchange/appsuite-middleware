@@ -51,6 +51,8 @@ package com.openexchange.subscribe.xing;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -60,6 +62,11 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep;
+import com.openexchange.subscribe.crawler.LoginPageStep;
+import com.openexchange.subscribe.crawler.Step;
+import com.openexchange.subscribe.crawler.TextPagesByLinkStep;
+import com.openexchange.subscribe.crawler.Workflow;
 
 /**
  * {@link XingSubscribeService}
@@ -76,8 +83,6 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
-    private XingContactParser xingContactParser;
-
     public XingSubscribeService() {
         FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
 
@@ -87,10 +92,6 @@ public class XingSubscribeService extends AbstractSubscribeService {
         SOURCE.setSubscribeService(this);
         SOURCE.setFolderModule(FolderObject.CONTACT);
         
-    }
-    
-    public void setXingContactParser(XingContactParser xingContactParser) {
-        this.xingContactParser = xingContactParser;
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -102,8 +103,17 @@ public class XingSubscribeService extends AbstractSubscribeService {
     }
 
     public Collection<Contact> getContent(Subscription subscription) throws XingSubscriptionException {
+        Workflow xingWorkflow = getWorkflow();
         Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(xingContactParser.getXingContactsForUser((String)configuration.get("login"), (String) configuration.get("password")));
+        return Arrays.asList(xingWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
+    }
+
+    private Workflow getWorkflow() {
+        List<Step> steps = new LinkedList<Step>(); 
+        steps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", "", "", "loginform", "login_user_name", "login_password","Home | XING"));
+        steps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
+        steps.add(new ContactObjectsByVcardTextPagesStep());
+        return new Workflow(steps);
     }
 
     @Override

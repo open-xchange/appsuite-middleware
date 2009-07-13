@@ -6,7 +6,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.xing.XingContactParser;
 import com.openexchange.subscribe.xing.XingSubscribeService;
 import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
 
@@ -23,9 +22,7 @@ public class Activator implements BundleActivator {
             "com.openexchange.subscribe.xing",
             XingSubscriptionErrorMessage.EXCEPTIONS);
 
-            XingContactParser contactParser = new XingContactParser();
             XingSubscribeService subscribeService = new XingSubscribeService();
-            subscribeService.setXingContactParser(contactParser);
 
             serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
     }

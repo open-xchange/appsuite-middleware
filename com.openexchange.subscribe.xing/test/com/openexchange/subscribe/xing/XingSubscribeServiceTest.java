@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.xing;
 
+import java.util.Collection;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import junit.framework.TestCase;
@@ -62,7 +64,9 @@ import junit.framework.TestCase;
 public class XingSubscribeServiceTest extends TestCase {
 
     private XingSubscribeService subscriptionService;
-
+    private String password = "secret";
+    private String login = "roxyexchanger@ox.io";
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -83,4 +87,21 @@ public class XingSubscribeServiceTest extends TestCase {
         assertEquals("Display name should be login name", "expected", subscription.getDisplayName());
     }
 
+    public void testBasics() throws XingSubscriptionException{
+        Subscription subscription = new Subscription();
+        subscription.getConfiguration().put("login", login);
+        subscription.getConfiguration().put("password", password);
+        
+        Collection<Contact> contacts = subscriptionService.getContent(subscription);
+        assertTrue("Should know at least two people, but is " + contacts.size(), contacts.size() > 1);
+        boolean foundMartin = false, foundCisco = false;
+        for(Contact contact: contacts){
+            if(contact.containsSurName() && "Francisco Laguna de la Vera".equals( contact.getSurName() ) )
+                foundCisco = true;
+            if(contact.containsSurName() && "Herfurth".equals( contact.getSurName() ) )
+                foundMartin = true;
+        }
+        assertTrue("Should find Martin", foundMartin);
+        assertTrue("Should find Cisco", foundCisco);
+    }
 }
