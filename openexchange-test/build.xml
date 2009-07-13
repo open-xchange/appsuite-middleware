@@ -122,7 +122,6 @@
 
             <test name="${test.class}" todir="${test.xml.dir}" />
 
-            <formatter type="brief" usefile="false" />
             <formatter type="xml" />
             <sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
         </junit>
