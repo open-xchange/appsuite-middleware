@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.linkedin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -61,6 +62,11 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.crawler.ContactObjectsByHTMLPagesStep;
+import com.openexchange.subscribe.crawler.LoginPageStep;
+import com.openexchange.subscribe.crawler.PageByUrlStep;
+import com.openexchange.subscribe.crawler.PagesByLinkRegexStep;
+import com.openexchange.subscribe.crawler.Step;
 import com.openexchange.subscribe.crawler.Workflow;
 
 /**
@@ -78,7 +84,6 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
 
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
-    private Workflow linkedInWorkflow;
 
     public LinkedInSubscribeService() {
         FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
@@ -91,9 +96,6 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
         
     }
     
-    public void setWorkflow(Workflow linkedInWorkflow) {
-        this.linkedInWorkflow = linkedInWorkflow;
-    }
 
     public SubscriptionSource getSubscriptionSource() {
         return SOURCE;
@@ -104,9 +106,41 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
     }
 
     public Collection<Contact> getContent(Subscription subscription) throws SubscriptionException {
+        
+        Workflow linkedInWorkflow = getWorkflow();
         Map<String, Object> configuration = subscription.getConfiguration();
         return Arrays.asList(linkedInWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
     }
+
+    private Workflow getWorkflow() {
+        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+        
+        listOfSteps.add(new LoginPageStep(
+            "Login to www.linkedin.com",
+            "https://www.linkedin.com/secure/login",
+            "",
+            "",
+            "login",
+            "session_key",
+            "session_password",
+            "LinkedIn: Home"));
+        listOfSteps.add(new PageByUrlStep(
+            "Get to the contacts list", 
+            "http://www.linkedin.com/connections?trk=hb_side_cnts"));
+        listOfSteps.add(new PageByUrlStep(
+            "Get to the no-javascript contacts list",
+            "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
+        listOfSteps.add(new PagesByLinkRegexStep(
+            "Get all pages that link to a connections profile",
+            "(/profile\\?viewProfile=).*(goback).*"));
+        listOfSteps.add(new ContactObjectsByHTMLPagesStep(
+            "Extract the contact information from these pages",
+            "/addressBookExport?exportMemberVCard",
+            "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
+
+        return new Workflow(listOfSteps);
+    }
+
 
     @Override
     public void modifyIncoming(Subscription subscription) throws SubscriptionException {

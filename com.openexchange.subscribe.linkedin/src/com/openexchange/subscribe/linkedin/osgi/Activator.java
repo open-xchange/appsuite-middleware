@@ -50,21 +50,17 @@
 package com.openexchange.subscribe.linkedin.osgi;
 
 import java.util.ArrayList;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.ContactObjectsByHTMLPagesStep;
-import com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep;
 import com.openexchange.subscribe.crawler.LoginPageStep;
 import com.openexchange.subscribe.crawler.PageByUrlStep;
 import com.openexchange.subscribe.crawler.PagesByLinkRegexStep;
 import com.openexchange.subscribe.crawler.Step;
-import com.openexchange.subscribe.crawler.TextPagesByLinkStep;
 import com.openexchange.subscribe.crawler.Workflow;
 import com.openexchange.subscribe.linkedin.LinkedInSubscribeService;
 
@@ -75,7 +71,7 @@ import com.openexchange.subscribe.linkedin.LinkedInSubscribeService;
  */
 public class Activator implements BundleActivator {
 
-	private ComponentRegistration componentRegistration;
+    private ComponentRegistration componentRegistration;
 
     private ServiceRegistration serviceRegistration;
 
@@ -86,17 +82,8 @@ public class Activator implements BundleActivator {
             "com.openexchange.subscribe.linkedin",
             SubscriptionErrorMessage.EXCEPTIONS);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
-		
-        listOfSteps.add(new LoginPageStep("Login to www.linkedin.com", "https://www.linkedin.com/secure/login", "", "", "login", "session_key", "session_password","LinkedIn: Home"));
-		listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
-		listOfSteps.add(new PageByUrlStep("Get to the no-javascript contacts list", "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-		listOfSteps.add(new PagesByLinkRegexStep("Get all pages that link to a connections profile", "(/profile\\?viewProfile=).*(goback).*"));
-		listOfSteps.add(new ContactObjectsByHTMLPagesStep("Extract the contact information from these pages", "/addressBookExport?exportMemberVCard", "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
-        
-		Workflow linkedInWorkflow = new Workflow(listOfSteps);
+
         LinkedInSubscribeService subscribeService = new LinkedInSubscribeService();
-        subscribeService.setWorkflow(linkedInWorkflow);
 
         serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
     }
