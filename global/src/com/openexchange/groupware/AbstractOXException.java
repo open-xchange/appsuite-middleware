@@ -288,7 +288,7 @@ public class AbstractOXException extends Exception {
     public AbstractOXException(final Component component, final Throwable cause) {
         super(cause);
         this.component = component;
-        category = Category.SUBSYSTEM_OR_SERVICE_DOWN;
+        category = Category.CODE_ERROR;
         problematics = new ArrayList<ProblematicAttribute>();
     }
 
@@ -514,7 +514,7 @@ public class AbstractOXException extends Exception {
     }
 
     public interface ProblematicAttribute {
-
+        // Different implementations will have different methods.
     }
 
     public interface Truncated extends ProblematicAttribute {
