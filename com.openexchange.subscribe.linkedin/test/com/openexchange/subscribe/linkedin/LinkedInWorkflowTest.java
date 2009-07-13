@@ -50,28 +50,18 @@
 
 package com.openexchange.subscribe.linkedin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-
-import org.ho.yaml.Yaml;
-
-import com.openexchange.exceptions.StringComponent;
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.ContactObjectsByHTMLPagesStep;
-import com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep;
 import com.openexchange.subscribe.crawler.LoginPageStep;
 import com.openexchange.subscribe.crawler.PageByUrlStep;
 import com.openexchange.subscribe.crawler.PagesByLinkRegexStep;
 import com.openexchange.subscribe.crawler.Step;
-import com.openexchange.subscribe.crawler.TextPagesByLinkStep;
 import com.openexchange.subscribe.crawler.Workflow;
-import com.openexchange.subscribe.crawler.WorkflowException;
 import com.openexchange.subscribe.crawler.WorkflowFactory;
-
-import junit.framework.TestCase;
 
 public class LinkedInWorkflowTest extends TestCase {
 	
@@ -79,8 +69,8 @@ public class LinkedInWorkflowTest extends TestCase {
 		ArrayList<Step> listOfSteps = new ArrayList<Step>();
 		
 		// insert valid credentials here
-		String username ="";
-		String password ="";
+		String username ="roxyexchanger@ox.io";
+		String password ="secret";
 		
 		listOfSteps.add(new LoginPageStep("Login to www.linkedin.com", "https://www.linkedin.com/secure/login", username, password, "login", "session_key", "session_password","LinkedIn: Home"));
 		listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
