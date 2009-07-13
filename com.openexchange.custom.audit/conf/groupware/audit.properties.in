@@ -1,6 +1,6 @@
-com.openexchange.custom.audit.imp.AuditEventHandler.pattern=@auditlogfile@
-com.openexchange.custom.audit.imp.AuditEventHandler.level=ALL
-com.openexchange.custom.audit.imp.AuditEventHandler.limit=2097152
-com.openexchange.custom.audit.imp.AuditEventHandler.count=99
-com.openexchange.custom.audit.imp.AuditEventHandler.formatter=java.util.logging.SimpleFormatter
-com.openexchange.custom.audit.imp.AuditEventHandler.append=true
+com.openexchange.custom.audit.logging.AuditFileHandler.pattern=@auditlogfile@
+com.openexchange.custom.audit.logging.AuditFileHandler.level=ALL
+com.openexchange.custom.audit.logging.AuditFileHandler.limit=2097152
+com.openexchange.custom.audit.logging.AuditFileHandler.count=99
+com.openexchange.custom.audit.logging.AuditFileHandler.formatter=java.util.logging.SimpleFormatter
+com.openexchange.custom.audit.logging.AuditFileHandler.append=true
