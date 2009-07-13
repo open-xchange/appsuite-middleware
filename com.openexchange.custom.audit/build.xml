@@ -1,13 +1,13 @@
-<project name="com.openexchange.custom.audit" default="installGui" basedir=".">
+<project name="com.openexchange.custom.audit" default="default" basedir=".">
 
 	<!-- Customizable values -->
 	<property name="destdir" value="" />
 	<property name="prefix" value="/opt/open-xchange" />
-	<!-- property name="guiprefix" value="/var/www/ox6" /> -->
-	<property name="guiprefix" value="/var/www/ox6" />
+	<property name="log.install.dir" value="/var/log/open-xchange"/>
 	
 	<!-- Constants -->
 	<property name="tmp.dir" value="tmp" />
+	<property name="conf.dir" value="conf/groupware"/>
 
 	<property file="META-INF/MANIFEST.MF" />
 	<property file="build.properties" />
@@ -18,9 +18,14 @@
 
 	<!-- Install Constants -->
 	<property name="bundlesdir" value="${prefix}/bundles" />
-	<property name="guipluginsdir" value="${guiprefix}/plugins" />
 	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d" />
 	<property name="commonlibdir" value="${bundlesdir}/com.openexchange.common/lib" />
+	
+    <!-- Replacements -->
+    <property name="common.conf.install.dir" value="${prefix}/etc"/>
+    <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
+    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+    <property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
 
 	<!-- JAR names for classpath -->
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -62,25 +67,26 @@
 		</jar>
 	</target>
 
-	<target name="install" depends="installJar,installConfig,installGui" />
-
-	<target name="installConfig">
-		<copy todir="${destdir}/${prefix}/etc/groupware/settings/" overwrite="true">
-			<fileset dir="conf/gui"/>
-		</copy>
+	<!-- Install targets -->	
+    <target name="installInclude">
 		<mkdir dir="${destdir}/${bundle.d}" />
-		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
-	</target>
+		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" 
+			message="${bundlesdir}/${bundle.name}@start${line.separator}" />
+    </target>
 
-	<target name="installGui">
-		<mkdir dir="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}" />
-		<copy todir="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}" overwrite="true">
-			<fileset dir="gui"/>
-		</copy>
+	<target name="installConfig" depends="patchConfig">
+        <mkdir dir="${conf.install.copy.dir}"/>
+        <copy todir="${conf.install.copy.dir}" overwrite="true">
+            <fileset dir="${patch.conf.dir}">
+            	<include name="**" />
+                <exclude name="*.in"/>
+                <exclude name="CVS"/>
+                <exclude name="osgi/**"/>
+            </fileset>
+        </copy>
 	</target>
 	
-
-	<target name="installJar" depends="jar">
+	<target name="installJar" depends="jar,installInclude">
 		<mkdir dir="${destdir}/${bundlesdir}" />
 		<copy todir="${destdir}/${bundlesdir}">
 			<fileset dir="${tmp.dir}">
@@ -88,7 +94,30 @@
 			</fileset>
 		</copy>
 	</target>
+	
+    <target name="patchConfig" depends="prepare">
+        <property name="patch.conf.dir" value="${tmp.dir}/${conf.dir}"/>
+        <mkdir dir="${patch.conf.dir}"/>
+        <copy todir="${patch.conf.dir}" overwrite="true">
+            <fileset dir="${conf.dir}"/>
+        </copy>
+        <antcall target="patchConfigFiles">
+            <param name="conf.subst.patch" value="${conf.install.dir}"/>
+        </antcall>
+    </target>
 
+    <target name="patchAuditProperties">
+        <move tofile="${patch.conf.dir}/audit.properties"
+            file="${patch.conf.dir}/audit.properties.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/file-logging.properties">
+            <replacefilter token="@auditlogfile@" value="${log.install.dir}/open-xchange-audit.log"/>
+        </replace>
+    </target>
+	
+    <target name="install" depends="installJar,installConfig"/>
+
+    <target name="default" depends="install"/>
+	
 	<!-- Dist -->
 	<target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package" />
@@ -106,6 +135,11 @@
 		<!-- dpkg-source does not like anything else -->
 		<delete dir="${dist-package}" />
 	</target>
+	
+    <target name="patchConfigFiles">
+        <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+        <antcall target="patchAuditProperties"/>
+    </target>
 
 	<target name="clean">
 		<delete dir="${output..}" />

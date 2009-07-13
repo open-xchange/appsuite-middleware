@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -65,6 +66,9 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
+import com.openexchange.custom.audit.configuration.AuditConfiguration;
+import com.openexchange.custom.audit.logging.AuditFileHandler;
+import com.openexchange.custom.audit.logging.AuditFilter;
 import com.openexchange.custom.audit.osgi.AuditActivator;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Types;
@@ -75,6 +79,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -84,10 +89,8 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class AuditEventHandler implements EventHandler {
 
-	//private static transient final Log LOG = LogFactory.getLog(AuditActivator.class);
-	
-    private static final Logger auditLogging = Logger.getLogger(AuditEventHandler.class.getName());
-    
+	private static final Logger LOG = Logger.getLogger(AuditEventHandler.class.getName());
+
 	private static final AuditEventHandler instance = new AuditEventHandler();
 	
     public static AuditEventHandler getInstance() {
@@ -101,23 +104,68 @@ public class AuditEventHandler implements EventHandler {
 		super();
 		
 		try {
-			FileHandler handler = new FileHandler("/Users/bartl3by/Desktop/log/open-xchange-audit.log", 2097152, 99, true);
-        	handler.setFormatter(new SimpleFormatter());
-        	auditLogging.setLevel(Level.INFO);
-			auditLogging.addHandler(handler);
+			Logger rootLogger = Logger.getLogger("");
+			Handler[] handlers = rootLogger.getHandlers();		
+			for (int position = 0; position < handlers.length; position ++) {
+				handlers[position].setFilter(new AuditFilter());
+			}
+			LOG.addHandler(new AuditFileHandler());
 		} catch (SecurityException e) {
-			//LOG.error(e.getMessage(), e);
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 		} catch (IOException e) {
-			//LOG.error(e.getMessage(), e);
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
-		auditLogging.log(Level.INFO, "Title222");
-		auditLogging.log(Level.INFO, AuditEventHandler.class.getName());
+		LOG.log(Level.INFO, "INFO");
+		LOG.log(Level.WARNING, "WARNING");
+		LOG.log(Level.SEVERE, "SEVERE");
+		
+		/*
+		try {
+			Logger rootLogger = Logger.getLogger("");
+			Handler[] handlers = rootLogger.getHandlers();
+			for (int position = 0; position < handlers.length; position ++) {
+				handlers[position].setFilter(new AuditFilter());
+			}
+		} catch (SecurityException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
+		}
+		
+		try {
+			FileHandler handler = new FileHandler(
+					AuditConfiguration.getLogfileLocation(),
+					AuditConfiguration.getLogfileLimit(),
+					AuditConfiguration.getLogfileCount(),
+					AuditConfiguration.getLogfileAppend());
+        	try {
+				handler.setFormatter(AuditConfiguration.getLogfileFormatter());
+			} catch (InstantiationException e) {
+				LOG.log(Level.SEVERE, e.getMessage(), e);
+			} catch (IllegalAccessException e) {
+				LOG.log(Level.SEVERE, e.getMessage(), e);
+			} catch (ClassNotFoundException e) {
+				LOG.log(Level.SEVERE, e.getMessage(), e);
+			} finally {
+				LOG.severe(handler.getFormatter().toString());
+				if (handler.getFormatter() == null) {
+					LOG.log(Level.WARNING, "Setting java.util.logging.SimpleFormatter as default formatter for audit logging.");
+					handler.setFormatter(new SimpleFormatter());	
+				}
+			}
+			
+        	LOG.setLevel(AuditConfiguration.getLoglevel());
+			LOG.addHandler(handler);
+		} catch (ServiceException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
+		} catch (SecurityException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
+		}
+		*/
 	}
 	
 	public void handleEvent(final Event event) {
-		
-		
 		try {
 			final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 			
@@ -126,26 +174,26 @@ public class AuditEventHandler implements EventHandler {
 	        case Types.APPOINTMENT:	        	
 	        	AppointmentObject appointment = (AppointmentObject)commonEvent.getActionObj();
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
-					auditLogging.info("Title222: " + appointment.getTitle());
-					auditLogging.info("Folder id: " + appointment.getParentFolderID());
-					auditLogging.info("Foldername: " + getPathToRoot(appointment.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()));					
+					LOG.info("Title222: " + appointment.getTitle());
+					LOG.info("Folder id: " + appointment.getParentFolderID());
+					LOG.info("Foldername: " + getPathToRoot(appointment.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()));					
 				}
 	        	break ModuleSwitch;
 	        case Types.CONTACT:
 	        	ContactObject contact = (ContactObject)commonEvent.getActionObj();
-	        	auditLogging.info(contact.getGivenName() + ", " + contact.getSurName());
+	        	LOG.info(contact.getGivenName() + ", " + contact.getSurName());
 	        	break ModuleSwitch;
 	        case Types.TASK:
 	        	Task task = (Task)commonEvent.getActionObj();
-	        	auditLogging.info(task.getTitle());
+	        	LOG.info(task.getTitle());
 	        	break ModuleSwitch;
 	        case Types.INFOSTORE:
 	        	DocumentMetadata document = (DocumentMetadata)commonEvent.getActionObj();
-	        	auditLogging.info(document.getTitle());
+	        	LOG.info(document.getTitle());
 	        	break ModuleSwitch;
 	        }
 		} catch (final Exception e) {
-			//LOG.error(e.getMessage(), e);
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 		}	
 	}
 	
@@ -177,5 +225,5 @@ public class AuditEventHandler implements EventHandler {
 		
 		return retval;
 	}
-
+	
 }
