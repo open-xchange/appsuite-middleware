@@ -70,6 +70,8 @@ public class Bug12509Test extends CalendarSqlTest {
                 "A nice private folder_" + System.currentTimeMillis(),
                 appointments.getPrivateFolder());
             cleanFolders.add(folder);
+            // Share to second user
+            folders.sharePrivateFolder(session, ctx, secondUserId, folder);
             final CalendarContextToolkit tools = new CalendarContextToolkit();
             final int secondParticipantDefaultFolder = folders.getStandardFolder(tools.resolveUser(participant2, ctx), ctx);
             // Create daily recurring appointment in previously created private
@@ -85,6 +87,7 @@ public class Bug12509Test extends CalendarSqlTest {
             appointments.save(appointment);
             clean.add(appointment);
             // Create a change exception on 2nd occurrence
+            appointments.switchUser(secondUser);
             final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
             update.setRecurrencePosition(2);
             update.setStartDate(D("11/04/2008 12:00"));
@@ -93,6 +96,7 @@ public class Bug12509Test extends CalendarSqlTest {
             appointments.save(update);
             clean.add(update);
             // Reload change exception to verify its parent folder
+            appointments.switchUser(user);
             final CalendarDataObject reloadedException = appointments.reload(update);
             assertEquals("Change-exception's start NOT changed", D("11/04/2008 12:00"), reloadedException.getStartDate());
             assertEquals("Change-exception's end NOT changed", D("11/04/2008 13:00"), reloadedException.getEndDate());

@@ -181,15 +181,26 @@ public class CalendarFolderToolkit {
      */
     public void sharePrivateFolder(final Session session, final Context ctx, final int otherUserId) {
         final FolderObject fo = getStandardFolderObject(session.getUserId(), ctx);
+        sharePrivateFolder(session, ctx, otherUserId, fo);
+    }
+
+    /**
+     * Shares a given calendar folder to a given userId with Admin permisson.
+     * @param sssion
+     * @param ctx
+     * @param otherUserId
+     * @param folder
+     */
+    public void sharePrivateFolder(Session session, Context ctx, int otherUserId, FolderObject folder) {
         final OCLPermission oclp = new OCLPermission();
         oclp.setAllPermission(
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        sharePrivateFolder(session, ctx, otherUserId, fo, oclp);
+        sharePrivateFolder(session, ctx, otherUserId, folder, oclp);
     }
-
+    
     /**
      * Shares a given Calendar Folder to a given userId with the given permission.
      * 
