@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -360,6 +360,16 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Jul 10 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14143: Force connection close after a subscription has been loaded.
+ - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
+ - Bugfix #14135: Don't share string builder instance among threads.
+* Thu Jul 09 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14134: WebDAV Infostore disregards uploadfilesizelimitperfile.
+ - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body wins.
+ - Bugfix #14134: Infostore and Object Attachments disregard user specific file upload quotas.
+* Thu Jul 09 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission.
 * Mon Jul 06 2009 - marcus.klein@open-xchange.com
  - Bugfix #14077: Tasks in public folders now get context administrator as creating or changing user if original user is removed.
  - Bugfix #14074: Moving series is now respecting different time zone offsets due to daylight saving times.

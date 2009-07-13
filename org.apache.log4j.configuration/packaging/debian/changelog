@@ -1,3 +1,9 @@
+open-xchange-log4j (6.10.0.0-4) unstable; urgency=low
+
+  * first build for 6.10 RC4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 Jul 2009 13:59:07 +0200
+
 open-xchange-log4j (6.10.0.0-3) unstable; urgency=low
 
   * first build for 6.10 RC3

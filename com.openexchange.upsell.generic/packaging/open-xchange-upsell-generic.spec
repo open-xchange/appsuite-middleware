@@ -5,7 +5,7 @@ Name:           open-xchange-upsell-generic
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-gui
-%if 0%{?suse_version}
+%if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
@@ -20,6 +20,11 @@ BuildRequires:  java-sdk-openjdk
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
+%if 0%{?sles_version} >= 11
+# SLES11 or higher
+BuildRequires:  java-1_6_0-ibm-devel
+%endif
+
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
 BuildRequires:  java-sdk-1.5.0-sun cairo
@@ -32,8 +37,9 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
-Version:	6.8.1
-Release:	3
+Version:        @OXVERSION@
+%define         ox_release 2
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build

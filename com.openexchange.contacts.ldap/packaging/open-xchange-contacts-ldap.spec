@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -78,6 +78,18 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/contacts-ldap
 /opt/open-xchange/etc/groupware/contacts-ldap/*
 %changelog
+* Mon Jul 13 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #14151 Contacts-ldap currently concatenates multi-value attributes
+    this must be changed
+    - Removed concatenation - now taking the first value
+* Fri Jul 10 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #14148 contact list is not sorted by name in contacts-ldap
+    - Distributionlist now have a sur_name
+* Thu Jul 09 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #14137 contacts-ldap must provide an option to deal with referrals
+    - Added new property value to set referrals behaviour
+  - Bugfix #14138 Fix for groups without members on ADS with contacts-ldap
+    - Added catch to ignore this exceptions
 * Mon Jun 22 2009 - dennis.sieben@open-xchange.com
   - Bugfix #13920 Unable to get public LDAP folders to Outlook
     - Now returning a SearchIterator in getDeletedContactsInFolder

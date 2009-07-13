@@ -1,3 +1,9 @@
+open-xchange-jcharset (1.3.0-42) unstable; urgency=low
+
+  * first build for 6.10 RC4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 Jul 2009 13:58:04 +0200
+
 open-xchange-jcharset (1.3.0-41) unstable; urgency=low
 
   * first build for 6.10 RC3
