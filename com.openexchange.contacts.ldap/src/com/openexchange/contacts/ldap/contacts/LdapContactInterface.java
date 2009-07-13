@@ -225,15 +225,15 @@ public class LdapContactInterface implements ContactInterface {
         return sb.toString();
     }
 
-    private static String joinValuesWithSeparator(final NamingEnumeration<?> all, final String separator) {
-        final StringBuilder sb = new StringBuilder();
-        while (all.hasMoreElements()) {
-            sb.append(all.nextElement());
-            sb.append(separator);
-        }
-        sb.delete(sb.length() - separator.length(), sb.length());
-        return sb.toString();
-    }
+//    private static String joinValuesWithSeparator(final NamingEnumeration<?> all, final String separator) {
+//        final StringBuilder sb = new StringBuilder();
+//        while (all.hasMoreElements()) {
+//            sb.append(all.nextElement());
+//            sb.append(separator);
+//        }
+//        sb.delete(sb.length() - separator.length(), sb.length());
+//        return sb.toString();
+//    }
 
 
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
@@ -761,8 +761,8 @@ public class LdapContactInterface implements ContactInterface {
                     final Attribute attribute = attributes.get(attributename);
                     if (null != attribute) {
                         if (1 < attribute.size()) {
-                            final NamingEnumeration<?> all = attribute.getAll();
-                            return joinValuesWithSeparator(all, ", ");
+                            // If we have multi-value attributes we only pick up the first one
+                            return (String) attribute.get(0);
                         } else {
                             return (String) attribute.get();
                         }
