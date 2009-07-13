@@ -79,8 +79,8 @@ public class DefaultContactComparator implements Comparator<Contact>{
     }
 
     public int compare(Contact o1, Contact o2) {
-        if(field < 0) {
-            return 1;
+        if(field <= 0) {
+            return 0;
         }
         int rating;
         if(SPECIAL_COMPARATORS.containsKey(field)) {
