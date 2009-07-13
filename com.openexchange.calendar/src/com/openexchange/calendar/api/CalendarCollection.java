@@ -310,7 +310,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 }
                 cdao.setInterval(1);
             }
-            if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
+            if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
