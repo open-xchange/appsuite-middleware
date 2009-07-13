@@ -6,6 +6,7 @@ import java.util.Vector;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.xing.XingSubscriptionErrorMessage;
 import com.openexchange.subscribe.xing.XingSubscriptionException;
 
@@ -25,6 +26,17 @@ public class Workflow {
 	public Workflow (List<Step> steps){
 		this.steps = steps;
 	}
+	
+    // Convenience method for setting username and password after the workflow was created
+    public Contact[] execute(String username, String password) throws XingSubscriptionException{
+        for (Step currentStep : steps) {
+            if (currentStep instanceof LoginPageStep){
+                ((LoginPageStep) currentStep).setUsername(username);
+                ((LoginPageStep) currentStep).setPassword(password);
+            }
+        }   
+        return execute();
+    }
 
 	public Contact[] execute()  throws XingSubscriptionException {
 		Vector<Contact> contactObjects = new Vector<Contact>();
