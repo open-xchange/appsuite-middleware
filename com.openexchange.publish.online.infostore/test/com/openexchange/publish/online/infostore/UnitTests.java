@@ -47,36 +47,25 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.publish.online.infostore;
 
-
-import com.openexchange.subscribe.database.SubscriptionUserDeleteListenerTest;
-import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategyTest;
-import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
-import com.openexchange.subscribe.sql.SubscriptionSQLStorageTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * {@link SubscriptionTestSuite}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SubscriptionTestSuite extends TestSuite{
-    public static Test suite() {
-        final TestSuite pubSuite = new TestSuite();
-        pubSuite.addTestSuite(SubscriptionUserDeleteListenerTest.class);
-        pubSuite.addTestSuite(ContactFolderUpdaterStrategyTest.class);
-        pubSuite.addTestSuite(SubscriptionExecutionServiceImplTest.class);
-        pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
-        pubSuite.addTestSuite(AbstractSubscribeServiceTest.class);
-        pubSuite.addTestSuite(CompositeSubscriptionSourceDiscoveryServiceTest.class);
-        //pubSuite.addTestSuite(FacebookContactParserTest.class);
-        //pubSuite.addTestSuite(LinkedInContactParserTest.class);
-        pubSuite.addTestSuite(MicroformatAppointmentParserTest.class);
-        //pubSuite.addTestSuite(MicroformatContactParserTest.class);
-        pubSuite.addTestSuite(StrategyFolderUpdaterTest.class);
-        pubSuite.addTestSuite(SubscriptionSourceCollectorTest.class);        
-        return pubSuite;
+public final class UnitTests {
+
+    public UnitTests() {
+        super();
+    }
+
+    public static final Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(InfostoreDocumentPublicationServiceTest.class);
+        return tests;
     }
 }
