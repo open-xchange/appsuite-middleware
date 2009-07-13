@@ -82,34 +82,8 @@ public class Activator implements BundleActivator {
             "com.openexchange.subscribe.linkedin",
             SubscriptionErrorMessage.EXCEPTIONS);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
 
-        listOfSteps.add(new LoginPageStep(
-            "Login to www.linkedin.com",
-            "https://www.linkedin.com/secure/login",
-            "",
-            "",
-            "login",
-            "session_key",
-            "session_password",
-            "LinkedIn: Home"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the contacts list", 
-            "http://www.linkedin.com/connections?trk=hb_side_cnts"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the no-javascript contacts list",
-            "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-        listOfSteps.add(new PagesByLinkRegexStep(
-            "Get all pages that link to a connections profile",
-            "(/profile\\?viewProfile=).*(goback).*"));
-        listOfSteps.add(new ContactObjectsByHTMLPagesStep(
-            "Extract the contact information from these pages",
-            "/addressBookExport?exportMemberVCard",
-            "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
-
-        Workflow linkedInWorkflow = new Workflow(listOfSteps);
         LinkedInSubscribeService subscribeService = new LinkedInSubscribeService();
-        subscribeService.setWorkflow(linkedInWorkflow);
 
         serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
     }
