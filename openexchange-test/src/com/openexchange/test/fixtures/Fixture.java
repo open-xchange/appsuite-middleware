@@ -74,7 +74,9 @@ public class Fixture<T> {
         for(String field : fields) {
             try {
                 final Method get = getMethod(field, klass);
-
+                if(get == null) {
+                    continue; // Skip fields we don't have access to.
+                }
                 final Object v1 = get.invoke(entry);
                 final Object v2 = get.invoke(other);
 
@@ -109,7 +111,8 @@ public class Fixture<T> {
                 return m;
             }
         }
-        throw new FixtureException("Don't know how to read "+field);
+        //throw new FixtureException("Don't know how to read "+field);
+        return null;
     }
 
     public T getEntry() {
