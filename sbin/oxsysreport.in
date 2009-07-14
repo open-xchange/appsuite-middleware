@@ -66,6 +66,7 @@ test -x $TAR || {
 export PATH="$PATH:/opt/open-xchange/sbin"
 
 # some defaults
+PATH="${PATH}:/opt/open-xchange/sbin"
 TMP=/tmp
 TMP_LONG=tempdir
 LOGDIR=ox_support_infos-$(date +%Y%m%d-%H%M%S)
@@ -82,7 +83,7 @@ FILES_DIRS="
 /etc/*apache*
 "
 
-PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;oxreport --detail'
+PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;oxreport --detail;listbundles;listservices'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
