@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.calendar.update;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -64,9 +66,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class RepairRecurrencePatternNullValue implements UpdateTask {
 
-    private static final String UPDATE_PRG_DATES = "UPDATE prg_dates SET field06 = ? WHERE field06 = ?";
-
-    private static final String UPDATE_DEL_DATES = "UPDATE del_dates SET field06 = ? WHERE field06 = ?";
+    private static final String[] STATEMENTS = { "UPDATE prg_dates SET field06 = ? WHERE field06 = ?", "UPDATE del_dates SET field06 = ? WHERE field06 = ?" };
 
     public int addedWithVersion() {
         return 58;
@@ -77,71 +77,31 @@ public class RepairRecurrencePatternNullValue implements UpdateTask {
     }
 
     public void perform(Schema schema, int contextId) throws AbstractOXException {
-        Connection writeCon = null;
-        PreparedStatement stmt1 = null;
-        PreparedStatement stmt2 = null;
-
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
-            writeCon = Database.getNoTimeout(contextId, true);
-            writeCon.setAutoCommit(false);
-
-            stmt1 = writeCon.prepareStatement(UPDATE_PRG_DATES);
-            stmt1.setNull(1, Types.VARCHAR);
-            stmt1.setString(2, "null");
-
-            stmt2 = writeCon.prepareStatement(UPDATE_DEL_DATES);
-            stmt2.setNull(1, Types.VARCHAR);
-            stmt2.setString(2, "null");
-
-            stmt1.execute();
-            stmt2.execute();
-            
-            writeCon.commit();
-        } catch (SQLException e) {
+            con.setAutoCommit(false);
+            for (String statement : STATEMENTS) {
+                executeStatement(con, statement);
+            }
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
             throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, e.getMessage());
         } finally {
-            try {
-                closeSQLStuff(contextId, writeCon, stmt1, stmt2);
-            } catch (SQLException e) {
-                throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, e.getMessage());
-            }
+            autocommit(con);
+            Database.backNoTimeout(contextId, true, con);
         }
-
     }
     
-    private void closeSQLStuff(int contextId, Connection con, PreparedStatement stmt1, PreparedStatement stmt2) throws SQLException {
-        SQLException sqle = null;
-        
-        if (con != null) {
-            try {
-                con.rollback();
-                con.setAutoCommit(true);
-            } catch (SQLException e) {
-                sqle = e;
-            } finally {
-                Database.backNoTimeout(contextId, true, con);
-            }
-        }
-        
-        if (stmt1 != null) {
-            try {
-                stmt1.close();
-            } catch (SQLException e) {
-                sqle = e;
-            }
-        }
-        
-        if (stmt2 != null) {
-            try {
-                stmt2.close();
-            } catch (SQLException e) {
-                sqle = e;
-            }
-        }
-        
-        if (sqle != null) {
-            throw sqle;
+    private void executeStatement(Connection con, String statement) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(statement);
+            stmt.setNull(1, Types.VARCHAR);
+            stmt.setString(2, "null");
+            stmt.execute();
+        } finally {
+            com.openexchange.tools.sql.DBUtils.closeSQLStuff(stmt);
         }
     }
-
 }
