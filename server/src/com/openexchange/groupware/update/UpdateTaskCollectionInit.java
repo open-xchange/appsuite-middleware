@@ -322,6 +322,10 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Changes the column for series appointments exceptions to type TEXT to be able
             // to store a lot of exceptions.
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterChangeExceptionFieldLength());
+            // Version 58
+            // Due to a bug, there are several appointments with the String "null" in the recurrence pattern
+            // instead of sql NULL. This update task repairs these broken lines in the database.
+            registry.addUpdateTask(new com.openexchange.groupware.calendar.update.RepairRecurrencePatternNullValue());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
