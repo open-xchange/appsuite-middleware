@@ -20,11 +20,14 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	<property name="globaljar" value="com.openexchange.global.jar"/>
-    <property name="httpclientjar" value="commons-httpclient-3.1.jar"/>
+    <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
+    <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
@@ -39,8 +42,8 @@
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-        <pathelement location="${bundlesdir}/${httpclientjar}"/>
         <pathelement location="${bundlesdir}/${subscribejar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
