@@ -1353,7 +1353,14 @@ public class CalendarRecurringTests extends TestCase {
         
     }
     
-    public void testRecurringConflictHandling() throws Throwable {
+    /**
+     * Disabled: Reccuring appointments conflict now.
+     * See <a href="http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=11210">Bug 11210</a>,
+     * com.openexchange.groupware.calendar.calendarsqltests.Bug11210Test
+     * and <a href="https://rally1.rallydev.com/slm/detail/ar/443993595">User Story 2237</a>.
+     * @throws Throwable
+     */
+    public void no_testRecurringConflictHandling() throws Throwable {
         final Context context = new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         
