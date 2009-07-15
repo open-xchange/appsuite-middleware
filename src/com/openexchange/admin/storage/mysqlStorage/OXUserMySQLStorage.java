@@ -165,25 +165,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public void change(final Context ctx, final User usrdata) throws StorageException {
-        Connection write_ox_con = null;
+        final int contextId = ctx.getId().intValue();
+        final Connection con;
+        try {
+            con = cache.getConnectionForContext(contextId);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
-        final int context_id = ctx.getId();
-        final int user_id = usrdata.getId();
+        final int userId = usrdata.getId().intValue();
         try {
 
             // first fill the user_data hash to update user table
-            write_ox_con = cache.getConnectionForContext(context_id);
-            write_ox_con.setAutoCommit(false);
+            con.setAutoCommit(false);
 
             // ########## Update login2user table if USERNAME_CHANGEABLE=true
             // ##################
             if (cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false) && usrdata.getName() != null && usrdata.getName().trim().length() > 0) {
 
-                stmt = write_ox_con.prepareStatement("UPDATE login2user SET uid=? WHERE cid=? AND id=?");
+                stmt = con.prepareStatement("UPDATE login2user SET uid=? WHERE cid=? AND id=?");
                 stmt.setString(1, usrdata.getName().trim());
                 stmt.setInt(2, ctx.getId());
-                stmt.setInt(3, user_id);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -191,116 +196,116 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // #################################################################
 
             if (usrdata.getPrimaryEmail() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPrimaryEmail());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getLanguage() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getLanguage());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getTimezone() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getTimezone());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getMailenabled() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
                 stmt.setBoolean(1, usrdata.getMailenabled().booleanValue());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getPassword_expired() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  shadowLastChange = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  shadowLastChange = ? WHERE cid = ? AND id = ?");
                 stmt.setInt(1, getintfrombool(usrdata.getPassword_expired()));
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getImapServer() == null && usrdata.isImapServerset()) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             } else if (usrdata.getImapServer() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
                 stmt.setString(1, usrdata.getImapSchema() + usrdata.getImapServer() + ":" + usrdata.getImapPort());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getImapLogin() == null && usrdata.isImapLoginset()) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             } else if (usrdata.getImapLogin() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getSmtpServer() == null && usrdata.isSmtpServerset()) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             } else if (usrdata.getSmtpServer() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 // TODO: This should be fixed in the future so that we don't
                 // split it up before we concatenate it here
                 stmt.setString(1, usrdata.getSmtpSchema() + usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getPassword() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, cache.encryptPassword(usrdata));
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
 
             if (usrdata.getPasswordMech() != null) {
-                stmt = write_ox_con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPasswordMech());
-                stmt.setInt(2, context_id);
-                stmt.setInt(3, user_id);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
             }
@@ -308,16 +313,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // update user aliases
             final HashSet<String> alias = usrdata.getAliases();
             if (null != alias) {
-                stmt = write_ox_con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?" + " AND name = \"alias\"");
-                stmt.setInt(1, context_id);
-                stmt.setInt(2, user_id);
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, "alias");
                 stmt.executeUpdate();
                 stmt.close();
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
-                        stmt.setInt(1, context_id);
-                        stmt.setInt(2, user_id);
+                        stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
+                        stmt.setInt(1, contextId);
+                        stmt.setInt(2, userId);
                         stmt.setString(3, "alias");
                         stmt.setString(4, elem);
                         stmt.executeUpdate();
@@ -325,9 +331,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                 }
             } else if (usrdata.isAliasesset()) {
-                stmt = write_ox_con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?" + " AND name = \"alias\"");
-                stmt.setInt(1, context_id);
-                stmt.setInt(2, user_id);
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, "alias");
                 stmt.executeUpdate();
                 stmt.close();
             }
@@ -413,7 +420,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 contact_query.delete(contact_query.length() - 2, contact_query.length() - 1);
                 contact_query.append(" WHERE cid = ? AND userid = ?");
 
-                stmt = write_ox_con.prepareStatement(contact_query.toString());
+                stmt = con.prepareStatement(contact_query.toString());
 
                 for (int i = 0; i < methodlist2.size(); i++) {
                     final int db = 1 + i;
@@ -463,8 +470,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     // cfield);
                 }
 
-                stmt.setInt(methodlist2.size() + 1, context_id);
-                stmt.setInt(methodlist2.size() + 2, user_id);
+                stmt.setInt(methodlist2.size() + 1, contextId);
+                stmt.setInt(methodlist2.size() + 2, userId);
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -474,9 +481,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (null != spam_filter_enabled) {
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
                 if (spam_filter_enabled) {
-                    tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con);
+                    tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 } else {
-                    tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con);
+                    tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, con);
                 }
             }
 
@@ -485,94 +492,94 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // bug
             // #10559
             if (null != send_addr) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET send_addr = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET send_addr = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, send_addr);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final String mailfolderdrafts = usrdata.getMail_folder_drafts_name();
             if (null != mailfolderdrafts) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET std_drafts = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_drafts = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, mailfolderdrafts);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final String mailfoldersent = usrdata.getMail_folder_sent_name();
             if (null != mailfoldersent) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET std_sent = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_sent = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, mailfoldersent);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final String mailfolderspam = usrdata.getMail_folder_spam_name();
             if (null != mailfolderspam) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET std_spam = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_spam = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, mailfolderspam);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final String mailfoldertrash = usrdata.getMail_folder_trash_name();
             if (null != mailfoldertrash) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET std_trash = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET std_trash = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, mailfoldertrash);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
             if (null != mailfolderconfirmedspam) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, mailfolderconfirmedspam);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final String mailfolderconfirmedham = usrdata.getMail_folder_confirmed_ham_name();
             if (null != mailfolderconfirmedham) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
                 folder_update.setString(1, mailfolderconfirmedham);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final Integer uploadFileSizeLimit = usrdata.getUploadFileSizeLimit();
             if (null != uploadFileSizeLimit) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = ? WHERE cid = ? AND user = ?");
                 folder_update.setInt(1, uploadFileSizeLimit);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             } else if (usrdata.isUploadFileSizeLimitset()) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota = DEFAULT WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, context_id);
-                folder_update.setInt(2, user_id);
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota = DEFAULT WHERE cid = ? AND user = ?");
+                folder_update.setInt(1, contextId);
+                folder_update.setInt(2, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
             final Integer uploadFileSizeLimitPerFile = usrdata.getUploadFileSizeLimitPerFile();
             if (null != uploadFileSizeLimitPerFile) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = ? WHERE cid = ? AND user = ?");
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = ? WHERE cid = ? AND user = ?");
                 folder_update.setInt(1, uploadFileSizeLimitPerFile);
-                folder_update.setInt(2, context_id);
-                folder_update.setInt(3, user_id);
+                folder_update.setInt(2, contextId);
+                folder_update.setInt(3, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             } else if (usrdata.isUploadFileSizeLimitset()) {
-                folder_update = write_ox_con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = DEFAULT WHERE cid = ? AND user = ?");
-                folder_update.setInt(1, context_id);
-                folder_update.setInt(2, user_id);
+                folder_update = con.prepareStatement("UPDATE user_setting_mail SET upload_quota_per_file = DEFAULT WHERE cid = ? AND user = ?");
+                folder_update.setInt(1, contextId);
+                folder_update.setInt(2, userId);
                 folder_update.executeUpdate();
                 folder_update.close();
             }
@@ -585,13 +592,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // update folder name via ox api if displayname was changed
                 final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
 
-                OXFolderAdminHelper.propagateUserModification(user_id, changedfields, System.currentTimeMillis(), write_ox_con, write_ox_con, ctx.getId().intValue());
+                OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, ctx.getId().intValue());
             }
 
             // if administrator sets GUI configuration existing GUI
             // configuration
             // is overwritten
-            final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), user_id);
+            final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), userId);
             final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
             if( guiPreferences != null ) {
                 final Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
@@ -603,71 +610,67 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         try {
                             final Setting setting = ConfigTree.getSettingByPath(key);
                             setting.setSingleValue(value);
-                            settStor.save(write_ox_con, setting);
+                            settStor.save(con, setting);
                         } catch (final SettingException e) {
                             log.error("Problem while storing GUI preferences.", e);
                         }
                     }
                 }
             }
-            changePrimaryMailAccount(ctx, write_ox_con, usrdata, user_id);
+            changePrimaryMailAccount(ctx, con, usrdata, userId);
 
             // update last modified column
-            changeLastModified(user_id, ctx, write_ox_con);
+            changeLastModified(userId, ctx, con);
 
             // fire up
-            write_ox_con.commit();
+            con.commit();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            rollback(write_ox_con);
+            rollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            rollback(write_ox_con);
-            throw new StorageException(e);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final ServiceException e) {
             log.error("Required service is missing.", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final SecurityException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final NoSuchAlgorithmException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final UnsupportedEncodingException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
-            rollback(write_ox_con);
+            rollback(con);
             throw e;
         } catch (final OXException e) {
             log.error("Error", e);
-            rollback(write_ox_con);
+            rollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -686,8 +689,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             try {
-                if (write_ox_con != null) {
-                    cache.pushConnectionForContext(context_id, write_ox_con);
+                if (con != null) {
+                    cache.pushConnectionForContext(contextId, con);
                 }
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox write connection to pool!", exp);
@@ -1538,8 +1541,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt2 = read_ox_con.prepareStatement(query.toString());
             stmtusername = read_ox_con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
             stmtusername.setInt(1, context_id);
-            stmtalias = read_ox_con.prepareStatement("SELECT value FROM user_attribute WHERE cid = ? and id = ? AND name = \"alias\"");
+            stmtalias = read_ox_con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? and id=? AND name=?");
             stmtalias.setInt(1, context_id);
+            stmtalias.setString(3, "alias");
             stmtstd = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
             stmtstd.setInt(1, context_id);
             ResultSet rs = null;

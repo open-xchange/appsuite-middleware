@@ -1,3 +1,7 @@
+* 2009-07-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #14158: Setting attribute value to alias using the PreparedStatement instead of error prone quoting in SQL statement.
+
 * 2009-06-30 - marcus.klein@open-xchange.com
 
  - Bugfix #13477: If a user is deleted a connection without timeout is used because a lot of data must be moved taking a lot of time.
