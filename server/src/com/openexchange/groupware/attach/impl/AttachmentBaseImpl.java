@@ -419,7 +419,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         try {
             removeFiles(context);
         } catch (final AbstractOXException e) {
-            LL.log(e);
             throw EXCEPTIONS.create(16,e,context.getContextId());
         }
         try {

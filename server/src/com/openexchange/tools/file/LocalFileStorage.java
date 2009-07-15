@@ -99,9 +99,6 @@ public class LocalFileStorage extends FileStorage {
 
     private static final Set<String> SPECIAL_FILENAMES = new HashSet<String>() {
 
-        /**
-		 * 
-		 */
         private static final long serialVersionUID = -1052533462069386445L;
 
         {
@@ -183,7 +180,7 @@ public class LocalFileStorage extends FileStorage {
      * {@inheritDoc}
      */
     @Override
-	protected Set<String> delete(final String[] names) {
+    protected Set<String> delete(final String[] names) {
         Set<String> notDeleted = new HashSet<String>();
         for (String name : names) {
             if (!new File(storage, name).delete()) {
@@ -247,9 +244,6 @@ public class LocalFileStorage extends FileStorage {
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void unlock() throws FileStorageException {
         File lock = new File(storage, LOCK_FILENAME);
@@ -261,10 +255,6 @@ public class LocalFileStorage extends FileStorage {
         }
     }
 
-    /**
-     * This implementation uses {@link File#createNewFile()} to exclusively create the lock file. Very old lock files are removed previously
-     * because they may be there because of an application crash.
-     */
     @Override
     protected void lock(long timeout) throws FileStorageException {
         File lock = new File(storage, LOCK_FILENAME);
