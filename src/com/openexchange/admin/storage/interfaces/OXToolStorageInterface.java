@@ -422,7 +422,9 @@ public abstract class OXToolStorageInterface {
     
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
     
-    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
+    public abstract void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException;
+    
+    public abstract void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException;
     
     public abstract boolean checkAndUpdateSchemaIfRequired(final Context ctx) throws StorageException;
     
