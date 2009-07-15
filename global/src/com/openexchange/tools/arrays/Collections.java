@@ -106,14 +106,13 @@ public final class Collections {
     }
 
     /**
-     * Converts a list of Integer into an int array.
-     * 
-     * @param col list to convert.
+     * Converts a collection of Integer into an int array.
+     * @param c collection of Integer to convert.
      * @return the converted int array.
      */
-    public static int[] toArray(final Collection<Integer> col) {
-        final int[] retval = new int[col.size()];
-        final Iterator<Integer> iter = col.iterator();
+    public static int[] toArray(Collection<Integer> c) {
+        int[] retval = new int[c.size()];
+        Iterator<Integer> iter = c.iterator();
         for (int i = 0; i < retval.length; i++) {
             retval[i] = iter.next().intValue();
         }

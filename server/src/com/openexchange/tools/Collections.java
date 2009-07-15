@@ -64,7 +64,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Methods for easy handling of collections.
- * 
+ * TODO use Collections in com.openexchange.tools.arrays.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
@@ -196,7 +196,7 @@ public final class Collections {
         }
 
         public SmartLongArray(final int initialSize) {
-            this(initialSize, (initialSize / 4));
+            this(initialSize, (initialSize >> 2));
         }
 
         public SmartLongArray(final int initialSize, final int growthSize) {
