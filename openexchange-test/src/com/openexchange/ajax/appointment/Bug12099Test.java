@@ -186,6 +186,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
                 appointment.setOccurrence(3);
                 appointment.setParticipants(ParticipantTools.createParticipants(
                     userIdA, userIdC));
+                appointment.setIgnoreConflicts(true);
                 final InsertRequest request = new InsertRequest(appointment, tzB);
                 final CommonInsertResponse response = clientB.execute(request);
                 response.fillObject(appointment);

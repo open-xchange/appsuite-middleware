@@ -256,6 +256,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
         cdao.setInterval(1);
         cdao.setDays(Appointment.MONDAY + Appointment.WEDNESDAY + Appointment.FRIDAY);
+        cdao.setIgnoreConflicts(true);
         new CalendarCollection().fillDAO(cdao);
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 10, m.size());
@@ -553,6 +554,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setRecurrenceType(CalendarDataObject.DAILY);
         cdao.setInterval(1);
         cdao.setOccurrence(2);
+        cdao.setIgnoreConflicts(true);
 
         new CalendarCollection().fillDAO(cdao);
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
@@ -768,6 +770,7 @@ public class AppointmentBugTests extends TestCase {
         update.setObjectID(object_id);
         update.setRecurrenceType(CalendarDataObject.DAILY);
         update.setInterval(1);
+        update.setIgnoreConflicts(true);
 
         csql.updateAppointmentObject(update, fid, cdao.getLastModified());
 
@@ -815,6 +818,7 @@ public class AppointmentBugTests extends TestCase {
         update.setRecurrenceType(CalendarDataObject.DAILY);
         update.setInterval(2);
         update.setOccurrence(0);
+        update.setIgnoreConflicts(true);
 
         csql.updateAppointmentObject(update, fid, cdao.getLastModified());
 
@@ -831,6 +835,7 @@ public class AppointmentBugTests extends TestCase {
         update2.setEndDate(cdao.getEndDate());
         update2.setRecurrenceType(CalendarDataObject.DAILY);
         update2.setInterval(1);
+        update2.setIgnoreConflicts(true);
         final Date check_until_date = new Date(cdao.getUntil().getTime()+new CalendarCollection().MILLI_DAY);
         update2.setUntil(check_until_date);
 
@@ -1262,6 +1267,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTitle("testBug4987");
         cdao.setRecurrenceType(CalendarDataObject.DAILY);
         cdao.setInterval(3);
+        cdao.setIgnoreConflicts(true);
 
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();

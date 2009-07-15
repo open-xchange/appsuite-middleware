@@ -128,6 +128,7 @@ public class UpdateTest extends AppointmentTest {
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());

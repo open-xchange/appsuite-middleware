@@ -501,6 +501,7 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setDayInMonth(15);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
+		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
