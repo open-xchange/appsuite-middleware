@@ -75,9 +75,9 @@ UCS=16
 ox_system_type() {
     local ret=0
     local isucs=$(uname -r|grep ucs)
-    if [ -f /etc/debian_version ] && [ -z $isucs ]; then
+    if [ -f /etc/debian_version ] && [ -z "$isucs" ]; then
         ret=$(( $ret | $DEBIAN ))
-    elif [ -n $isucs ]; then
+    elif [ -n "$isucs" ]; then
         ret=$(( $ret | $UCS))
     elif [ -f /etc/SuSE-release ]; then
 	ret=$(( $ret | $SUSE ))
