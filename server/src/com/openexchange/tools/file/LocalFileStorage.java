@@ -252,34 +252,37 @@ public class LocalFileStorage extends FileStorage {
      */
     @Override
     protected void unlock() throws FileStorageException {
-        final File lock = new File(storage, LOCK_FILENAME);
+        File lock = new File(storage, LOCK_FILENAME);
         if (!lock.delete()) {
             if (lock.exists()) {
-                LOG.error("Couldn't delete lock file : " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+                LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+                throw new FileStorageException(Code.UNLOCK);
             }
-            throw new FileStorageException(FileStorageException.Code.UNLOCK);
         }
     }
 
     /**
-     * {@inheritDoc}
+     * This implementation uses {@link File#createNewFile()} to exclusively create the lock file. Very old lock files are removed previously
+     * because they may be there because of an application crash.
      */
     @Override
-    protected void lock(final long timeout) throws FileStorageException {
-        final File lock = new File(storage, LOCK_FILENAME);
-        final long maxLifeTime = 100 * timeout;
-        final long lastModified = lock.lastModified();
+    protected void lock(long timeout) throws FileStorageException {
+        File lock = new File(storage, LOCK_FILENAME);
+        long maxLifeTime = 100 * timeout;
+        long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             lock.delete();
-            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed " + "by a crashed/restartet application.");
+            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restartet application.");
         }
-        final long failTime = System.currentTimeMillis() + timeout;
+        long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
+        IOException ioe = null;
         do {
             try {
                 created = lock.createNewFile();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 // Try again to create the file.
+                ioe = e;
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e.getMessage(), e);
                 }
@@ -287,17 +290,15 @@ public class LocalFileStorage extends FileStorage {
             if (!created) {
                 try {
                     Thread.sleep(RELOCK_TIME);
-                } catch (final InterruptedException e) {
-                    // Won't be interrupted.
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                } catch (InterruptedException e) {
+                    // Should not be interrupted.
+                    LOG.error(e.getMessage(), e);
                 }
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-            LOG.error("Cannot create lock file. Either there is a stale .lock " + "file here " + lock.getAbsolutePath() + " or the filestore was used too long.");
-            throw new FileStorageException(FileStorageException.Code.LOCK);
+            LOG.error("Cannot create lock file. Either there is a stale .lock file here " + lock.getAbsolutePath() + " or the filestore was used too long.");
+            throw null == ioe ? new FileStorageException(Code.LOCK) : new FileStorageException(Code.LOCK, ioe);
         }
     }
 
