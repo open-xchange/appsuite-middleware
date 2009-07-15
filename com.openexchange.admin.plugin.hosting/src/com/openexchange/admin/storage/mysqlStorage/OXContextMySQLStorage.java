@@ -211,6 +211,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
+        } catch (StorageException e) {
+            throw new StorageException(e.getMessage());
         } finally {
             // must be pushed back here, because in the "deleteContextFromConfigDB" the connection is "reset" in the pool.
             // else we would get an not nice error in the logfile from the dbpool
@@ -263,8 +265,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             con.setAutoCommit(false);
             // first delete everything with OSGi DeleteListener services.
-            DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
-            DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+            try {
+                DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
+                DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+            } catch (DeleteFailedException e) {
+                LOG.error("Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.", e);
+            } catch (ContextException e) {
+                LOG.error("Problem loading context data. Continuing with hard delete from tables using cid column.", e);
+            }
             // now go through tables and delete the remainders
             for (int i = sorted_tables.size() - 1; i >= 0; i--) {
                 deleteTableData(ctx, con, sorted_tables.get(i));
@@ -272,12 +280,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
             con.commit();
         } catch (SQLException e) {
-            DBUtils.rollback(con);
-            throw new StorageException(e);
-        } catch (DeleteFailedException e) {
-            DBUtils.rollback(con);
-            throw new StorageException(e);
-        } catch (ContextException e) {
             DBUtils.rollback(con);
             throw new StorageException(e);
         } finally {
