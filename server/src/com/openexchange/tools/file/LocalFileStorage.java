@@ -278,7 +278,6 @@ public class LocalFileStorage extends FileStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(e.getMessage(), e);
                 }
-                LOG.error(e.getMessage(), e);
                 ioe = e;
             }
             if (!created) {
