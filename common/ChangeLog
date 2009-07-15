@@ -1,3 +1,8 @@
+* 2009-07-15 - choeger@open-xchange.com
+
+ - Bugfix ID#14177 missing common shell functions file on update from RC3 to
+   RC4
+
 * 2009-07-09 - schweigi@open-xchange.com
 
  - Added new distribution UCS in OS detection function ox_system_type()
