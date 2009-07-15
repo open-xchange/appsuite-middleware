@@ -85,7 +85,7 @@ public class MailFilterPreferencesItem implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(true));
+                setting.setSingleValue(Boolean.TRUE);
             }
 
             public boolean isAvailable(final UserConfiguration userConfig) {

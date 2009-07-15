@@ -177,13 +177,11 @@ public class Activator extends DeferredActivator {
         final Properties file = config.getFile("mailfilter.properties");
         if (file.isEmpty()) {
             throw new Exception("No configfile found for mailfilter bundle");
-        } else {
-            for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
-                if (null == file.getProperty(type.property)) {
-                    throw new Exception("Property for mailfilter not found: " + type.property);
-                }
+        }
+        for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
+            if (null == file.getProperty(type.property)) {
+                throw new Exception("Property for mailfilter not found: " + type.property);
             }
         }
     }
-
 }
