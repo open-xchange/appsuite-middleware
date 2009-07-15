@@ -1415,34 +1415,42 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
+    public void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(ctx.getId());
-            prep_check = con.prepareStatement("SELECT mail FROM user WHERE cid = ? AND mail = ?");
-            prep_check.setInt(1,ctx.getId());
-            prep_check.setString(2, primary_mail);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                throw new InvalidDataException("Primary mail address already exists in this context");
-            }
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
+            con = cache.getConnectionForContext(ctx.getId().intValue());
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e.toString());
+        }
+        try {
+            primaryMailExists(con, ctx, mail);
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(prep_check);
-
             try {
                 cache.pushConnectionForContext(ctx.getId().intValue(), con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox db write connection to pool!", e);
             }
+        }
+    }
+
+    @Override
+    public void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT mail FROM user WHERE cid = ? AND mail = ?");
+            stmt.setInt(1, ctx.getId().intValue());
+            stmt.setString(2, mail);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                throw new InvalidDataException("Primary mail address already exists in this context.");
+            }
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            com.openexchange.tools.sql.DBUtils.closeSQLStuff(result, stmt);
         }
     }
 

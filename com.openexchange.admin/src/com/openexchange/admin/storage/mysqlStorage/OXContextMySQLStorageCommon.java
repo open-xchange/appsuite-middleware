@@ -218,13 +218,23 @@ public class OXContextMySQLStorageCommon {
         group_stmt.close();
     }
 
-    public final void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id, final int uid_number, final UserModuleAccess access) throws StorageException, InvalidDataException {
-        final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
-
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        tool.primaryMailExists(ctx, admin_user.getPrimaryEmail());
+    /**
+     * @param ctx
+     * @param admin_user
+     * @param con writable context database connection.
+     * @param internal_user_id
+     * @param contact_id
+     * @param uid_number
+     * @param access
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public final void createAdminForContext(final Context ctx, final User admin_user, final Connection con, final int internal_user_id, final int contact_id, final int uid_number, final UserModuleAccess access) throws StorageException, InvalidDataException {
+        OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
+        OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        tool.primaryMailExists(con, ctx, admin_user.getPrimaryEmail());
         admin_user.setDefaultSenderAddress(admin_user.getPrimaryEmail());
-        oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id, uid_number);
+        oxs.create(ctx, admin_user, access, con, internal_user_id, contact_id, uid_number);
     }
 
     public final void deleteContextFromConfigDB(final Connection configdb_write_con, final int context_id) throws SQLException {
