@@ -1,3 +1,7 @@
+* 2009-07-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission.
+
 * 2009-07-14 - martin.herfurth@open-xchange.com
 
  - Update Task #58: Repair bad null value in in recurrence pattern.
@@ -16,10 +20,6 @@
  - Bugfix #14143: Force connection close after a subscription has been loaded.
  - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
  - Bugfix #14135: Don't share string builder instance among threads.
-
-* 2009-07-09 - marcus.klein@open-xchange.com
-
- - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission.
 
 * 2009-07-09 - francisco.laguna@open-xchange.com
 
