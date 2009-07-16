@@ -1,25 +1,21 @@
-# translation of server.de_DE-new.po to deutsch
-# translation of server.po to deutsch
 # translation of server.de_DE.po to deutsch
-# translation of server.new.de_DE.po to
-# translation of server.de_DE.po to
-# Antje Faber, 2007.
-# Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
+# translation of server.new.de_DE.po to
+# translation of server.de_DE.po to
 msgid ""
 msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2009-02-17 12:23+0100\n"
+"PO-Revision-Date: 2009-06-25 11:02+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: KBabel 1.10.2\n"
+"X-Generator: KBabel 1.11.4\n"
 
 #. Name of the parent folder for the private user folders.
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:60
@@ -98,18 +94,26 @@ msgstr "Kontakte"
 msgid "Collected addresses"
 msgstr "Gesammelte Adressen"
 
-#. *
-#. * Display name of group with identifier 0.
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
-msgid "All internal users"
-msgstr "Alle internen Anwender"
+#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:66
+msgid "All users"
+msgstr "Alle Anwender"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:66
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:69
+msgid "Standard group"
+msgstr "Standardgruppe"
+
+#. The internationalized subject for a read acknowledgement
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:67
 msgid "Read Acknowledgement"
 msgstr "Lesebestätigung"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:68
+#. The text body of a received read acknowledgement
+#. #DATE# is replaced with the sent date of referenced email
+#. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
+#. #SUBJECT# is replaced with referenced email's subject
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:73
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -126,27 +130,52 @@ msgstr ""
 "Garantie, dass der Empfänger die E-Mail gelesen oder deren Inhalt verstanden "
 "hat."
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:70
+#. The prefixed text on reply.
+#. #DATE# is replaced with the sent date of referenced email
+#. #TIME# is replaced with time of referenced email
+#. #SENDER# is replaced with personal and/or email address of the sender
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:79
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:72
+#. The prefixed text on inline forward.
+#. #FROM# is replaced with personal and/or email address of original message's From header
+#. #TO# is replaced with personal and/or email address(es) of original message's To header
+#. #CC_LINE# is replaced with personal and/or email address(es) of original message's Cc header prefixed with "\nCc: " (which needs not
+#. to be internationalized
+#. #DATE# is replaced with the sent date of referenced email
+#. #TIME# is replaced with time of referenced email
+#. #SUBJECT# is replaced with referenced email's subject
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:89
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
-"To: #TO#\n"
+"To: #TO##CC_LINE#\n"
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
 "---------- Ursprüngliche Nachricht ----------\n"
 "Von: #FROM#\n"
-"An: #TO#\n"
+"An: #TO#CC_LINE#\n"
 "Datum: #DATE# um #TIME#\n"
 "Betreff: #SUBJECT#"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:74
+#. The internationalized default subject.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:92
 msgid "[No Subject]"
 msgstr "[Kein Betreff]"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Hints to the available attachments for affected message
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:96
+msgid "The available attachments for this E-Mail can be accessed via the links:"
+msgstr "Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the elapsed date for affected message's attachments
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:100
+msgid "The links will be deleted by #DATE#"
+msgstr "Die Links werden bis #DATE# gelöscht"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:59
 msgid ""
@@ -246,7 +275,7 @@ msgstr ""
 "\n"
 "====================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:122
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:128
 msgid ""
 "A new task was created by [created_by].\n"
 "You can check this task in your tasks:\n"
@@ -302,7 +331,7 @@ msgstr ""
 "\n"
 "========================================== "
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:154
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:160
 msgid ""
 "A new task was created by [created_by].\n"
 "\n"
@@ -354,7 +383,7 @@ msgstr ""
 "\n"
 "========================================== "
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:188
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:200
 msgid ""
 "This appointment does not take place.\n"
 "It was either deleted by [changed_by] or\n"
@@ -406,7 +435,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:221
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:233
 msgid ""
 "This task was either deleted by [changed_by] or\n"
 "you have been removed from the list of participants.\n"
@@ -460,7 +489,7 @@ msgstr ""
 "\n"
 "========================================== "
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:256
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:268
 msgid ""
 "This appointment was changed by [changed_by].\n"
 "You can check this appointment in your calendar:\n"
@@ -512,7 +541,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:289
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:301
 msgid ""
 "This appointment was changed by [changed_by].\n"
 "\n"
@@ -560,7 +589,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:320
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:338
 msgid ""
 "This task was changed by [changed_by].\n"
 "You can check this task in your tasks:\n"
@@ -616,7 +645,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:352
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:370
 msgid ""
 "This task was changed by [changed_by].\n"
 "\n"
@@ -668,7 +697,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:386
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:410
 msgid ""
 "[changed_by] has [confirmation_action] this appointment.\n"
 "You can check this appointment in your calendar:\n"
@@ -720,7 +749,7 @@ msgstr ""
 "\n"
 "=========================================="
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:419
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:443
 msgid ""
 "[changed_by] has [confirmation_action] this task.\n"
 "You can check this task in your tasks:\n"
@@ -779,248 +808,203 @@ msgstr ""
 #. -
 #. * MESSAGE SUBJECT PREFIXES
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:454
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:478
 msgid "New Appointment"
 msgstr "Neuer Termin"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:456
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:480
 msgid "Appointment changed"
 msgstr "Termin geändert"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:458
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:482
 msgid "Appointment deleted"
 msgstr "Termin gelöscht"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:460
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:484
 msgid "Appointment (accepted)"
 msgstr "Termin (bestätigt)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:462
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:486
 msgid "Appointment (declined)"
 msgstr "Termin (abgelehnt)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:464
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:488
 msgid "Appointment (tentative)"
 msgstr "Termin (vorläufig)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:466
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:490
 msgid "New task"
 msgstr "Neue Aufgabe"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:468
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:492
 msgid "Task changed"
 msgstr "Aufgabe geändert"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:470
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:494
 msgid "Task deleted"
 msgstr "Aufgabe gelöscht"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:472
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:496
 msgid "Task (accepted)"
 msgstr "Aufgabe (bestätigt)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:474
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:498
 msgid "Task (declined)"
 msgstr "Aufgabe (abgelehnt)"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:476
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:500
 msgid "Task (tentative)"
 msgstr "Aufgabe (vorläufig)"
 
 #. -
 #. * MISC
 #.
-#. *
-#. * No resources have been scheduled.
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:485
+#. No resources have been scheduled.
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:507
 msgid "No resources have been scheduled."
 msgstr "Es wurden keine Ressourcen zugewiesen."
 
-#. *
-#. * No series
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:490
+#. No series
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:510
 msgid "No series"
 msgstr "Keine Serie"
 
-#. *
-#. * No start date
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:495
+#. No start date
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:513
 msgid "No start date"
 msgstr "Kein Startdatum"
 
-#. *
-#. * No end date
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:500
+#. No end date
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:516
 msgid "No end date"
 msgstr "Kein Enddatum"
 
-#. *
-#. * No due date
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:505
+#. No due date
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:519
 msgid "No due date"
 msgstr "Kein Fälligkeitsdatum"
 
-#. *
-#. * No delete exceptions
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:510
+#. No delete exceptions
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:522
 msgid "No delete exceptions"
 msgstr "Keine Löschausnahmen"
 
-#. *
-#. * No change exceptions
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:515
+#. No change exceptions
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:525
 msgid "No change exceptions"
 msgstr "Keine Änderungsausnahmen"
 
-#. *
-#. * Mail to resource %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:520
+#. Mail to resource %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:528
 msgid "Mail to resource %1$s"
 msgstr "E-Mail an Ressource %1$s"
 
-#. *
-#. * Resource
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:525
+#. Resource
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:531
 msgid "Resource"
 msgstr "Ressource"
 
-#. *
-#. * Not set
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:530
+#. Not set
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:534
 msgid "Not set"
 msgstr "Nicht festgelegt"
 
 #. -
 #. * Confirmation actions
 #.
-#. *
-#. * accepted
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:536
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:573
+#. accepted
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:540
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:567
 msgid "accepted"
 msgstr "bestätigt"
 
-#. *
-#. * declined
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:538
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:578
+#. declined
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:542
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:570
 msgid "declined"
 msgstr "abgelehnt"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:540
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:544
 msgid "tentatively accepted"
 msgstr "vorläufig bestätigt"
 
 #. -
 #. * TASK PRIORITIES
 #.
-#. *
-#. * low
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:549
+#. low
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:551
 msgid "Low"
 msgstr "Niedrig"
 
-#. *
-#. * normal
-#.
+#. normal
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:554
 msgid "Normal"
 msgstr "Normal"
 
-#. *
-#. * high
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:559
+#. high
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:557
 msgid "High"
 msgstr "Hoch"
 
 #. -
 #. * Confirmation statuses
 #.
-#. *
-#. * waiting
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:568
+#. waiting
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:564
 msgid "waiting"
 msgstr "Wartestatus"
 
-#. *
-#. * tentative
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:583
+#. tentative
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:573
 msgid "tentative"
 msgstr "vorläufig"
+
+#. external
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:576
+msgid "external"
+msgstr "extern"
 
 #. -
 #. * Line patterns
 #.
-#. *
-#. * Location: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:592
+#. Location: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:583
 msgid "Location: %1$s"
 msgstr "Ort: %1$s"
 
-#. *
-#. * Description: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:597
+#. Description: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:586
 msgid "Description: %1$s"
 msgstr "Beschreibung: %1$s"
 
-#. *
-#. * Folder: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:602
+#. Folder: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:589
 msgid "Folder: %1$s"
 msgstr "Ordner: %1$s"
 
-#. *
-#. * Start date: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:607
+#. Start date: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:592
 msgid "Start date: %1$s"
 msgstr "Startdatum: %1$s"
 
-#. *
-#. * End date: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:612
+#. End date: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:595
 msgid "End date: %1$s"
 msgstr "Enddatum: %1$s"
 
-#. *
-#. * Due date: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:617
+#. Due date: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:598
 msgid "Due date: %1$s"
 msgstr "Fälligkeitsdatum: %1$s"
 
-#. *
-#. * Series: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:622
+#. Series: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:601
 msgid "Series: %1$s"
 msgstr "Serie: %1$s"
 
-#. *
-#. * Comments:<br>
-#. * %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:628
+#. Comments:
+#. %1$s: Placeholder for comments
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:605
 msgid ""
 "Comments:\n"
 "%1$s"
@@ -1028,413 +1012,306 @@ msgstr ""
 "Kommentare:\n"
 "%1$s"
 
-#. *
-#. * Priority: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:633
+#. Priority: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:608
 msgid "Priority: %1$s"
 msgstr "Priorität: %1$s"
 
-#. *
-#. * Status: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:638
+#. Status: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:611
 msgid "Status: %1$s"
 msgstr "Status: %1$s"
 
-#. *
-#. * Delete exceptions: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:643
+#. Delete exceptions: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:614
 msgid "Delete exceptions: %1$s"
 msgstr "Löschausnahme: %1$s"
 
-#. *
-#. * Change exceptions: %1$s
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:648
+#. Change exceptions: %1$s
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:617
 msgid "Change exceptions: %1$s"
 msgstr "Änderungsausnahme: %1$s"
 
-#. *
-#. * Change exception of %1$s on %2$s<br>
-#. * First place holder is recurrence title, second is change exception's date; e.g. Change exception of My Recurring Appointment on
-#. * 2009-12-06
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:655
+#. Change exception of %1$s on %2$s
+#. %1$s: Placeholder for recurrence title
+#. %2$s: Placeholder for change exception's date
+#. Example: My Recurring Appointment on 2009-12-06
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:623
 msgid "Change exception of %1$s on %2$s"
 msgstr "Änderungsausnahme von %1$s am %2$s"
 
 #. -
 #. * Task statuses
 #.
-#. *
-#. * Not started
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:664
+#. Not started
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:630
 msgid "Not started"
 msgstr "Nicht begonnen"
 
-#. *
-#. * In progress
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:669
+#. In progress
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:633
 msgid "In progress"
 msgstr "In Bearbeitung"
 
-#. *
-#. * Done
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:674
+#. Done
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:636
 msgid "Done"
 msgstr "Erledigt"
 
-#. *
-#. * Waiting
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:679
+#. Waiting
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:639
 msgid "Waiting"
 msgstr "Wartestatus"
 
-#. *
-#. * Deferred
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:684
+#. Deferred
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:642
 msgid "Deferred"
 msgstr "Verschoben"
 
 #. -
 #. * Added/Removed participant
 #.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:690
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:648
 msgid "Added"
 msgstr "Hinzugefügt"
 
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:692
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:650
 msgid "Removed"
 msgstr "Entfernt"
 
 #. -
 #. * Numeric recurrence templates
 #.
-#. *
-#. * The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:701
+#. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:657
 msgid "st"
 msgstr "."
 
-#. *
-#. * The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:706
+#. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:660
 msgid "nd"
 msgstr "."
 
-#. *
-#. * The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:711
+#. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:663
 msgid "rd"
 msgstr "."
 
-#. *
-#. * The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:716
+#. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:666
 msgid "th"
 msgstr "."
 
 #. -
 #. * Recurrence templates
 #.
-#. *
-#. * and
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:725
+#. and
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:673
 msgid "and"
 msgstr "und"
 
-#. *
-#. * Each day
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:730
+#. Each day
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:676
 msgid "Each day"
 msgstr "Jeden Tag"
 
-#. *
-#. * Each %1$s days; e.g. "Each 2 days"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:735
+#. Each %1$s days; e.g. "Each 2 days"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:679
 msgid "Each %1$s days"
 msgstr "Alle %1$s Tage"
 
-#. *
-#. * Each week on %1$s; e.g. "Each week on Monday"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:740
+#. Each week on %1$s; e.g. "Each week on Monday"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:682
 msgid "Each week on %1$s"
 msgstr "Jede Woche am %1$s"
 
-#. *
-#. * Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:745
+#. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:685
 msgid "Each %1$s weeks on %2$s"
 msgstr "Alle %1$s Wochen am %2$s"
 
-#. *
-#. * On %1$s day every month; e.g. "On 1st day every month"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:750
+#. On %1$s day every month; e.g. "On 1st day every month"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:688
 msgid "On %1$s day every month"
 msgstr "Am %1$s Tag jeden Monats"
 
-#. *
-#. * On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:755
+#. On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:691
 msgid "On %1$s day every %2$s month"
 msgstr "Am %1$s Tag jeden %2$s Monat"
 
-#. *
-#. * On %1$s %2$s each month; e.g. "On first Monday each month"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:760
+#. On %1$s %2$s each month; e.g. "On first Monday each month"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:694
 msgid "On %1$s %2$s each month"
 msgstr "Am %1$s %2$s jeden Monats"
 
-#. *
-#. * On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:765
+#. On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:697
 msgid "On %1$s %2$s each %3$s month"
 msgstr "Am %1$s %2$s jeden %3$s Monats"
 
-#. *
-#. * Each %1$s %2$s; e.g. "Each 10th October"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:770
+#. Each %1$s %2$s; e.g. "Each 10th October"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:700
 msgid "Each %1$s %2$s"
 msgstr "Jeden %1$s %2$s"
 
-#. *
-#. * On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:775
+#. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:703
 msgid "On %1$s %2$s in %3$s"
 msgstr "Am %1$s %2$s in %3$s"
 
-#. *
-#. * ", ends after %1$s appointment(s)"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:780
+#. ", ends after %1$s appointment(s)"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:706
 msgid ", ends after %1$s appointment(s)"
 msgstr ", endet nach %1$s Termin(en)"
 
-#. *
-#. * ", ends after %1$s task(s)"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:785
+#. ", ends after %1$s task(s)"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:709
 msgid ", ends after %1$s task(s)"
 msgstr ", endet nach %1$s Aufgab(en)"
 
-#. *
-#. * ", ends on %1$s"
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:790
+#. ", ends on %1$s"
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:712
 msgid ", ends on %1$s"
 msgstr ", endet am %1$s"
 
 #. -
 #. * Months
 #.
-#. *
-#. * January
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:799
+#. January
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:719
 msgid "January"
 msgstr "Januar"
 
-#. *
-#. * February
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:804
+#. February
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:722
 msgid "February"
 msgstr "Februar"
 
-#. *
-#. * March
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:809
+#. March
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:725
 msgid "March"
 msgstr "März"
 
-#. *
-#. * April
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:814
+#. April
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:728
 msgid "April"
 msgstr "April"
 
-#. *
-#. * May
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:819
+#. May
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:731
 msgid "May"
 msgstr "Mai"
 
-#. *
-#. * June
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:824
+#. June
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:734
 msgid "June"
 msgstr "Juni"
 
-#. *
-#. * July
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:829
+#. July
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:737
 msgid "July"
 msgstr "Juli"
 
-#. *
-#. * August
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:834
+#. August
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:740
 msgid "August"
 msgstr "August"
 
-#. *
-#. * September
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:839
+#. September
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:743
 msgid "September"
 msgstr "September"
 
-#. *
-#. * October
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:844
+#. October
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:746
 msgid "October"
 msgstr "Oktober"
 
-#. *
-#. * November
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:849
+#. November
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:749
 msgid "November"
 msgstr "November"
 
-#. *
-#. * December
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:854
+#. December
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:752
 msgid "December"
 msgstr "Dezember"
 
 #. -
 #. * Weekdays
 #.
-#. *
-#. * Monday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:863
+#. Monday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:759
 msgid "Monday"
 msgstr "Montag"
 
-#. *
-#. * Tuesday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:868
+#. Tuesday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:762
 msgid "Tuesday"
 msgstr "Dienstag"
 
-#. *
-#. * Wednesday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:873
+#. Wednesday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:765
 msgid "Wednesday"
 msgstr "Mittwoch"
 
-#. *
-#. * Thursday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:878
+#. Thursday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:768
 msgid "Thursday"
 msgstr "Donnerstag"
 
-#. *
-#. * Friday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:883
+#. Friday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:771
 msgid "Friday"
 msgstr "Freitag"
 
-#. *
-#. * Saturday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:888
+#. Saturday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:774
 msgid "Saturday"
 msgstr "Samstag"
 
-#. *
-#. * Sunday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:893
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:898
+#. Sunday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:777
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:780
 msgid "Sunday"
 msgstr "Sonntag"
 
-#. *
-#. * Weekday
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:903
+#. Weekday
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:783
 msgid "Weekday"
 msgstr "Wochentag"
 
-#. *
-#. * Weekend day
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:908
+#. Weekend day
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:786
 msgid "Weekend day"
 msgstr "Wochenendtag"
 
 #. -
 #. * Monthly1 constants
 #.
-#. *
-#. * first
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:917
+#. first
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:793
 msgid "first"
 msgstr "ersten"
 
-#. *
-#. * second
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:922
+#. second
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:796
 msgid "second"
 msgstr "zweiten"
 
-#. *
-#. * third
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:927
+#. third
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:799
 msgid "third"
 msgstr "dritten"
 
-#. *
-#. * fourth
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:932
+#. fourth
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:802
 msgid "fourth"
 msgstr "vierten"
 
-#. *
-#. * last
-#.
-#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:937
+#. last
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:805
 msgid "last"
 msgstr "letzten"
 
