@@ -194,7 +194,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb);
                 } catch (final UpdateException e) {
                     LOG.error(
-                        "Default mail account for user " + user.getDisplayName() + " in context " + contextId + " could not be created",
+                        "Default mail account for user " + user.getId() + " in context " + contextId + " could not be created",
                         e);
                 }
             }
@@ -213,7 +213,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         insertDefaultMailAccount(account, user.getId(), ctx);
         if (LOG.isInfoEnabled()) {
             sb.setLength(0);
-            LOG.info(sb.append("Created default mail account for user ").append(user.getDisplayName()).append(" in context ").append(
+            LOG.info(sb.append("Created default mail account for user ").append(user.getId()).append(" in context ").append(
                 ctx.getContextId()));
         }
     }
