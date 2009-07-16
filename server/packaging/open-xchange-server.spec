@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -360,6 +360,11 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Jul 16 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission.
+ - Bugfix #14154: Corrected replacements in PO files for forwarded mails.
+* Tue Jul 14 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14125: Update task repairs bad null value in in recurrence pattern.
 * Fri Jul 10 2009 - francisco.laguna@open-xchange.com
  - Bugfix #14143: Force connection close after a subscription has been loaded.
  - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
