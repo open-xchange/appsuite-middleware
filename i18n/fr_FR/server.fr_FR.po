@@ -151,7 +151,7 @@ msgid ""
 msgstr ""
 "---------- Message original ----------\n"
 "De : #FROM#\n"
-"À :  #TO#\n"
+"À :  #TO##CC_LINE#\n"
 "Date : #DATE# à #TIME#\n"
 "Sujet : #SUBJECT#"
 
