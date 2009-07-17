@@ -6,10 +6,7 @@ Bundle-Version: 6.11.0.0
 Bundle-Activator: com.openexchange.subscribe.crawler.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.datatypes.genericonf,
- com.openexchange.exceptions,
- com.openexchange.exceptions.osgi,
- com.openexchange.groupware,
+Import-Package: com.openexchange.groupware,
  com.openexchange.groupware.container,
  com.openexchange.subscribe,
  com.openexchange.tools.versit,
