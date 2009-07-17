@@ -47,6 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
 Requires:       open-xchange-admin-plugin-hosting-lib >= @OXVERSION@
+Requires:       open-xchange-admin-plugin-hosting-client >= @OXVERSION@
 Requires:       open-xchange-admin >= @OXVERSION@
 Conflicts:	open-xchange-admin-plugin-context-light
 #
