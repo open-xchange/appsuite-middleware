@@ -49,10 +49,8 @@
 
 package com.openexchange.subscribe;
 
-import com.openexchange.subscribe.database.SubscriptionUserDeleteListenerTest;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategyTest;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
-import com.openexchange.subscribe.sql.SubscriptionSQLStorageTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -69,10 +67,10 @@ public final class UnitTests {
 
     public static Test suite() {
         final TestSuite pubSuite = new TestSuite();
-        pubSuite.addTestSuite(SubscriptionUserDeleteListenerTest.class);
+//        pubSuite.addTestSuite(SubscriptionUserDeleteListenerTest.class);
         pubSuite.addTestSuite(ContactFolderUpdaterStrategyTest.class);
         pubSuite.addTestSuite(SubscriptionExecutionServiceImplTest.class);
-        pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
+//        pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
         pubSuite.addTestSuite(AbstractSubscribeServiceTest.class);
         pubSuite.addTestSuite(CompositeSubscriptionSourceDiscoveryServiceTest.class);
         //pubSuite.addTestSuite(FacebookContactParserTest.class);

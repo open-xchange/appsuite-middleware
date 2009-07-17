@@ -1,4 +1,3 @@
-
 /*
  *
  *    OPEN-XCHANGE legal information
