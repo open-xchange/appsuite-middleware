@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 Package: open-xchange-admin-plugin-hosting
 Architecture: all
 Conflicts: open-xchange-admin-plugin-context-light
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin (>= @OXVERSION@), open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting-lib (>=@OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin (>= @OXVERSION@), open-xchange-admin-hosting-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting-lib (>=@OXVERSION@)
 Description: Open Xchange Admin Hosting Plugin
 
 Package: open-xchange-admin-plugin-hosting-client
