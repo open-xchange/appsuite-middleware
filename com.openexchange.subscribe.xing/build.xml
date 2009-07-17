@@ -35,7 +35,7 @@
         <pathelement location="${bundlesdir}/${subscribejar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
-        <pathelement location="${bundlesdir}/${subscribejar}"/>
+        <pathelement location="${bundlesdir}/${crawlerjar}"/>
     </path>
 
     <!-- Compile -->
