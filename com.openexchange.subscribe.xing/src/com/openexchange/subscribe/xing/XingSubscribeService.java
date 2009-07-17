@@ -102,7 +102,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         return folderModule == FolderObject.CONTACT;
     }
 
-    public Collection<Contact> getContent(Subscription subscription) throws XingSubscriptionException {
+    public Collection<Contact> getContent(Subscription subscription) throws SubscriptionException {
         Workflow xingWorkflow = getWorkflow();
         Map<String, Object> configuration = subscription.getConfiguration();
         return Arrays.asList(xingWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));

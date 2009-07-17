@@ -49,20 +49,17 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-
-import org.ho.yaml.Yaml;
 
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep;
 import com.openexchange.subscribe.crawler.LoginPageStep;
 import com.openexchange.subscribe.crawler.Step;
 import com.openexchange.subscribe.crawler.TextPagesByLinkStep;
 import com.openexchange.subscribe.crawler.Workflow;
-import com.openexchange.subscribe.crawler.WorkflowException;
 import com.openexchange.subscribe.crawler.WorkflowFactory;
 
 import junit.framework.TestCase;
@@ -85,7 +82,7 @@ public class XingWorkflowTest extends TestCase {
 		Contact[] contacts = new Contact[0];
 		try {
 			contacts = xingWorkflow.execute();
-		} catch (XingSubscriptionException e) {
+		} catch (SubscriptionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -106,7 +103,7 @@ public class XingWorkflowTest extends TestCase {
 			// insert valid credentials in the file
 			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/XingWorkflow.yml");		
 			contacts = xingWorkflow.execute();
-		} catch (XingSubscriptionException e) {
+		} catch (SubscriptionException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
@@ -120,8 +117,8 @@ public class XingWorkflowTest extends TestCase {
 	}
 	
 	public void testInvalidCredentials() throws Exception {
-		XingSubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe.xing");
-        XingSubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("XING"));
+		SubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe.xing");
+        SubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("XING"));
 		
 		ArrayList<Step> listOfSteps = new ArrayList<Step>();
 		// invalid credentials
@@ -143,8 +140,8 @@ public class XingWorkflowTest extends TestCase {
 			// insert valid credentials in the file
 			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
 			fail("Exception expected");
-		} catch (XingSubscriptionException e) {
-			assertEquals("Wrong exception", XingSubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
+		} catch (SubscriptionException e) {
+			assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
 		}
 	}
 	

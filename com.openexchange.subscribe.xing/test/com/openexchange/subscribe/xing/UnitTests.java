@@ -66,7 +66,6 @@ public final class UnitTests {
     public static final Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(ContactSanitationTest.class);
-        tests.addTestSuite(XingContactParserTest.class);
         tests.addTestSuite(XingSubscribeServiceTest.class);
         tests.addTestSuite(XingWorkflowTest.class);
         return tests;

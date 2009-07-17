@@ -87,7 +87,7 @@ public class XingSubscribeServiceTest extends TestCase {
         assertEquals("Display name should be login name", "expected", subscription.getDisplayName());
     }
 
-    public void testBasics() throws XingSubscriptionException{
+    public void testBasics() throws SubscriptionException{
         Subscription subscription = new Subscription();
         subscription.getConfiguration().put("login", login);
         subscription.getConfiguration().put("password", password);
