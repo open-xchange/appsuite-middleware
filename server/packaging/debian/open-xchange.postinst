@@ -27,9 +27,6 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
-  dpkg-divert --list | grep oxreport && \
-	dpkg-divert --package open-xchange --rename --remove /opt/open-xchange/sbin/oxreport
-
   # SoftwareChange_Request-84
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/TidyConfiguration.properties
