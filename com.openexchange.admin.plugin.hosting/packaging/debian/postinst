@@ -23,6 +23,9 @@ postFix() {
   local version=${1%-*}
   version=${version//[-.]/}
 
+  dpkg-divert --list | grep oxreport && \
+        dpkg-divert --package open-xchange --rename --remove /opt/open-xchange/sbin/oxreport
+
   GLOBIGNORE='*'
 
   # we're updating from pre sp4
