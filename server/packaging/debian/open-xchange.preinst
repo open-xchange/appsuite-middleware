@@ -35,9 +35,12 @@ case "$1" in
     install)
     ;;
     upgrade)
-#    if isrunning; then
-#	invoke-rc.d open-xchange-groupware stop 2>/dev/null || true
-#    fi
+      oldversion=${2%-*}
+      oldversion=${oldversion//[-.]/}
+      if [ $oldversion -lt 6900 ]; then
+	 dpkg-divert --package open-xchange --divert /opt/open-xchange/sbin/oxreport.old \
+		--rename /opt/open-xchange/sbin/oxreport
+      fi
     ;;
 
     abort-upgrade)
