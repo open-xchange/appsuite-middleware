@@ -1,3 +1,7 @@
+* 2009-07-19 - choeger@open-xchange.com
+
+ - Bugfix #14193: Update from SP5 to 6.10 RC5 fails with error on Debian
+ 
 * 2009-07-17 - marcus.klein@open-xchange.com
 
  - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission. Added missing library to classpath.
