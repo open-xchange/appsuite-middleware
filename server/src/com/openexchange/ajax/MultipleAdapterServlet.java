@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.groupware.AbstractOXException;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -104,7 +102,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             return;
         }
         try {
-            String action = req.getParameter("action");
+            String action = req.getParameter(PARAMETER_ACTION);
             JSONObject request = toJSON(req, action);
             MultipleHandler handler = createMultipleHandler();
 
