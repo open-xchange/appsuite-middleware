@@ -270,8 +270,6 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append("msec."));
-                System.out.println(new StringBuilder("-----\nRetrieving root's subfolders took ").append(completionService.getDuration()).append(
-                    "msec."));
             }
             // Merge them
             final String[] names = new String[5];
@@ -368,8 +366,6 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append("msec."));
-                System.out.println(new StringBuilder("-----\nRetrieving root's subfolders took ").append(completionService.getDuration()).append(
-                    "msec."));
             }
             // Return them
             return retval;
