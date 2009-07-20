@@ -50,6 +50,7 @@
 package com.openexchange.jsieve;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link Capabilities} - The capabilities provided on connect to sieve server.
@@ -74,7 +75,7 @@ public final class Capabilities {
 
     private ArrayList<String> sasl = null;
 
-    public ArrayList<String> getSasl() {
+    public List<String> getSasl() {
         return sasl;
     }
 
