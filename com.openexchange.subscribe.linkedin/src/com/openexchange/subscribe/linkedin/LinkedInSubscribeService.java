@@ -112,7 +112,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
         return Arrays.asList(linkedInWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
     }
 
-    private Workflow getWorkflow() {
+    protected Workflow getWorkflow() {
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
         
         listOfSteps.add(new LoginPageStep(
@@ -123,7 +123,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
             "login",
             "session_key",
             "session_password",
-            "LinkedIn: Home"));
+            "LinkedIn | Home"));
         listOfSteps.add(new PageByUrlStep(
             "Get to the contacts list", 
             "http://www.linkedin.com/connections?trk=hb_side_cnts"));
