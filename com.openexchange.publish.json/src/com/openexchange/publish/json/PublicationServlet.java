@@ -49,55 +49,26 @@
 
 package com.openexchange.publish.json;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.MultipleAdapterServlet;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
-import com.openexchange.publish.PublicationService;
-import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.tools.QueryStringPositionComparator;
-import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
-
-import static com.openexchange.publish.json.PublicationJSONErrorMessage.*;
 
 /**
  * {@link PublicationServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class PublicationServlet extends MultipleAdapterServlet{
-
+public class PublicationServlet extends MultipleAdapterServlet {
 
     private static PublicationMultipleHandlerFactory multipleFactory;
+
     public static void setFactory(PublicationMultipleHandlerFactory factory) {
         multipleFactory = factory;
     }
-    
+
     @Override
     protected MultipleHandler createMultipleHandler() {
         return multipleFactory.createMultipleHandler();
@@ -107,16 +78,16 @@ public class PublicationServlet extends MultipleAdapterServlet{
     protected boolean requiresBody(String action) {
         return PublicationMultipleHandler.ACTIONS_REQUIRING_BODY.contains(action);
     }
+
     @Override
     protected boolean hasModulePermission(ServerSession session) {
         return session.getUserConfiguration().isPublication();
     }
-    
+
     @Override
     protected JSONObject modify(HttpServletRequest req, String action, JSONObject request) throws JSONException {
         request.put("__query", req.getQueryString());
         return request;
     }
 
-    
 }
