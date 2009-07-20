@@ -340,6 +340,8 @@ public final class HTMLProcessing {
 
     private static final Pattern PATTERN_XHTML_CDATA;
 
+    private static final Pattern PATTERN_XHTML_COMMENT;
+
     static {
         final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>[\r\n]*", true);
 
@@ -356,6 +358,10 @@ public final class HTMLProcessing {
         final String regex = RegexUtility.concat(group1, ignore1, group2, ignore2, group3);
 
         PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+        PATTERN_XHTML_COMMENT = Pattern.compile(
+            RegexUtility.concat(RegexUtility.quote("<!--"), ".*?", RegexUtility.quote("-->")),
+            Pattern.DOTALL);
     }
 
     /**
@@ -376,7 +382,7 @@ public final class HTMLProcessing {
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * &lt;!--
-     *  /&#42; Some Definitions &#42;/
+     *  /* Some Definitions &#42;/
      * --&gt;
      * &lt;/style&gt;
      * </pre>
@@ -384,13 +390,20 @@ public final class HTMLProcessing {
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
-    private static String removeXHTMLCData(final String htmlContent) {
+    public static String removeXHTMLCData(final String htmlContent) {
         final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
             final StringBuilder sb = new StringBuilder(htmlContent.length());
             do {
-                mr.appendReplacement(sb, "$1$2$3");
+                final String match = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
+                if (match.indexOf("-->") == -1) {
+                    // No additional HTML comments
+                    mr.appendReplacement(sb, "$1$2$3");
+                } else {
+                    // Additional HTML comments
+                    mr.appendReplacement(sb, "$1<!--\n" + match + "$3");
+                }
             } while (m.find());
             mr.appendTail(sb);
             return sb.toString();
