@@ -190,13 +190,18 @@ public class PublicationServlet extends AbstractPublicationServlet{
 
     private void deletePublication(HttpServletRequest req, HttpServletResponse resp) throws JSONException, IOException, PublicationException {
         JSONArray ids = new JSONArray(getBody(req));
-        Context context = getSessionObject(req).getContext();
+        ServerSession session = getSessionObject(req);
+        
+        Context context = session.getContext();
+        int userId = session.session.getUserId();
+        
         for(int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
             PublicationService publisher = discovery.getTarget(context, id).getPublicationService();
             Publication publication = new Publication();
             publication.setContext(context);
             publication.setId(id);
+            publication.setUserId(userId);
             publisher.delete(publication);
         }
         writeData(1, resp);
