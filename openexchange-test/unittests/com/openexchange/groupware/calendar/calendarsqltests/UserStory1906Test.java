@@ -49,61 +49,61 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
+import java.sql.SQLException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.calendar.CalendarConfig;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.ConfigHook;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class CalendarSqlTestSuite {
+public class UserStory1906Test extends CalendarSqlTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+    private CalendarDataObject appointment;
+    
+    private boolean parameterValue;
 
-        tests.addTestSuite(FullTimeSeries.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug5557Test.class);
-        tests.addTestSuite(Bug4778Test.class);
-        tests.addTestSuite(Bug13358Test.class);
-        tests.addTestSuite(Bug13121Test.class);
-        tests.addTestSuite(Bug13068Test.class);
-        tests.addTestSuite(Bug12923Test.class);
-        tests.addTestSuite(Bug12681Test.class);
-        tests.addTestSuite(Bug12662Test.class);
-        tests.addTestSuite(Bug12659Test.class);
-        tests.addTestSuite(Bug12601Test.class);
-        tests.addTestSuite(Bug12571Test.class);
-        tests.addTestSuite(Bug12509Test.class);
-        tests.addTestSuite(Bug12496Test.class);
-        tests.addTestSuite(Bug12489Test.class);
-        tests.addTestSuite(Bug12466Test.class);
-        tests.addTestSuite(Bug12413Test.class);
-        tests.addTestSuite(Bug12377Test.class);
-        tests.addTestSuite(Bug12269Test.class);
-        tests.addTestSuite(Bug12072Test.class);
-        tests.addTestSuite(Bug11881Test.class);
-        tests.addTestSuite(Bug11865Test.class);
-        tests.addTestSuite(Bug11803Test.class);
-        tests.addTestSuite(Bug11730Test.class);
-        tests.addTestSuite(Bug11708Test.class);
-        tests.addTestSuite(Bug11695Test.class);
-        tests.addTestSuite(Bug11453Test.class);
-        tests.addTestSuite(Bug11424Test.class);
-        tests.addTestSuite(Bug11316Test.class);
-        tests.addTestSuite(Bug11307Test.class);
-        tests.addTestSuite(Bug11148Test.class);
-        tests.addTestSuite(Bug11059Test.class);
-        tests.addTestSuite(Bug11051Test.class);
-        tests.addTestSuite(Bug10806Test.class);
-        tests.addTestSuite(Bug10154Test.class);
-        tests.addTestSuite(Node1077Test.class);
-        tests.addTestSuite(ParticipantsAgreeViaDifferentLoadMethods.class);
-        tests.addTestSuite(Bug13995Test.class);
-        tests.addTestSuite(Bug13446Test.class);
-        tests.addTestSuite(Bug11210Test.class);
+    public void setUp() throws Exception {
+        super.setUp();
         
-        tests.addTestSuite(UserStory1906Test.class);
+        parameterValue = CalendarConfig.getUndefinedStatusConflict();
         
-        return tests;
+        CalendarDataObject app1 = appointments.buildAppointmentWithUserParticipants(user);
+        app1.setStartDate(D("01.07.2010 08:00"));
+        app1.setEndDate(D("01.07.2010 09:00"));
+        app1.setIgnoreConflicts(false);
+        appointments.save(app1);
+        clean.add(app1);
+        
+        appointments.switchUser(secondUser);
+        appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+        appointment.setStartDate(D("01.07.2010 08:00"));
+        appointment.setEndDate(D("01.07.2010 09:00"));
+        appointment.setIgnoreConflicts(false);
+    }
+
+    public void testTrue() throws Exception {
+        ConfigHook.setUndefinedStatusConflict(true);
+        CalendarDataObject[] conflicts = appointments.save(appointment);
+        assertNotNull("Expected conflicts", conflicts);
+        assertTrue("Expected conflicts", conflicts.length > 0);
+    }
+    
+    public void testFalse() throws Exception {
+        ConfigHook.setUndefinedStatusConflict(false);
+        CalendarDataObject[] conflicts = appointments.save(appointment);
+        assertNull("Expected no conflicts", conflicts);
+    }
+
+    public void tearDown() throws AbstractOXException, SQLException {
+        ConfigHook.setUndefinedStatusConflict(parameterValue);
+        
+        if (appointment.getObjectID() > 0) {
+            clean.add(appointment);
+        }
+        
+        super.tearDown();
     }
 }

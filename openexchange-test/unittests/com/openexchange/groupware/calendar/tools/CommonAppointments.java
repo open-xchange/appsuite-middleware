@@ -357,4 +357,8 @@ public class CommonAppointments {
     public CalendarDataObject load(final int objectId, final int inFolder) throws OXException, SQLException {
         return calendar.getObjectById(objectId, inFolder);
     }
+    
+    public void confirm(int objectId, int userId, int status, String message) throws OXException {
+        calendar.setUserConfirmation(objectId, getPrivateFolder(), userId, status, message);
+    }
 }
