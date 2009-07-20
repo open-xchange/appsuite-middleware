@@ -71,16 +71,16 @@ public class UserStory1906Test extends CalendarSqlTest {
         parameterValue = CalendarConfig.getUndefinedStatusConflict();
         
         CalendarDataObject app1 = appointments.buildAppointmentWithUserParticipants(user);
-        app1.setStartDate(D("01.07.2010 08:00"));
-        app1.setEndDate(D("01.07.2010 09:00"));
+        app1.setStartDate(D("01.07.2020 08:00"));
+        app1.setEndDate(D("01.07.2020 09:00"));
         app1.setIgnoreConflicts(false);
         appointments.save(app1);
         clean.add(app1);
         
         appointments.switchUser(secondUser);
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
-        appointment.setStartDate(D("01.07.2010 08:00"));
-        appointment.setEndDate(D("01.07.2010 09:00"));
+        appointment.setStartDate(D("01.07.2020 08:00"));
+        appointment.setEndDate(D("01.07.2020 09:00"));
         appointment.setIgnoreConflicts(false);
     }
 
