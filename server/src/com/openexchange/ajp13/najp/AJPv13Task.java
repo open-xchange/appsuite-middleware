@@ -105,6 +105,11 @@ public final class AJPv13Task implements Runnable {
     private final AJPv13ListenerMonitor listenerMonitor;
 
     /**
+     * Whether this task is long-running.
+     */
+    private volatile boolean longRunning;
+
+    /**
      * Initializes a new {@link AJPv13Task}.
      * 
      * @param client The client socket to process
@@ -195,6 +200,24 @@ public final class AJPv13Task implements Runnable {
      */
     long getProcessingStartTime() {
         return processingStart;
+    }
+
+    /**
+     * Checks if this task is long-running.
+     * 
+     * @return <code>true</code> if this task is long-running; otherwise <code>false</code>
+     */
+    boolean isLongRunning() {
+        return longRunning;
+    }
+
+    /**
+     * Sets if this task is long-running.
+     * 
+     * @param longRunning <code>true</code> if this task is long-running; otherwise <code>false</code>
+     */
+    void setLongRunning(final boolean longRunning) {
+        this.longRunning = longRunning;
     }
 
     /**

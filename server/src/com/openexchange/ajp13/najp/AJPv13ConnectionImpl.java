@@ -327,6 +327,15 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         task.decrementWaiting();
     }
 
+    /**
+     * Sets if this connection's task is long-running.
+     * 
+     * @param longRunning <code>true</code> if this connection's task is long-running; otherwise <code>false</code>
+     */
+    void setLongRunning(final boolean longRunning) {
+        task.setLongRunning(longRunning);
+    }
+
     public void blockInputStream(final boolean block) {
         if (block) {
             inputStream.block();

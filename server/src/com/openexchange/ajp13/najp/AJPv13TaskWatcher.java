@@ -293,9 +293,9 @@ public class AJPv13TaskWatcher {
             if (enabled && task.isWaitingOnAJPSocket()) {
                 waiting.incrementAndGet();
             }
-            if (task.isProcessing()) {
+            if (task.isProcessing() && !task.isLongRunning()) {
                 /*
-                 * Task is currently processing
+                 * Task is currently processing and is NOT marked as a long-running task
                  */
                 if (enabled) {
                     processing.incrementAndGet();
