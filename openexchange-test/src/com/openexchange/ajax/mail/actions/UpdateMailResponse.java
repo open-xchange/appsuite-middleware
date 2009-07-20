@@ -51,10 +51,8 @@ package com.openexchange.ajax.mail.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.mail.MailJSONField;
 
 
 /**
