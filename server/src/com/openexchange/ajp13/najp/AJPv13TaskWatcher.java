@@ -325,7 +325,9 @@ public class AJPv13TaskWatcher {
                          * Send "keep-alive" package
                          */
                         try {
-                            keepAlive(task.getAJPConnection(), task.getSocket().getRemoteSocketAddress().toString());
+                            keepAlive(
+                                task.getAJPConnection(),
+                                log.isInfoEnabled() ? task.getSocket().getRemoteSocketAddress().toString() : null);
                         } catch (final AJPv13Exception e) {
                             log.error("AJP KEEP-ALIVE failed.", e);
                         } catch (final IOException e) {
