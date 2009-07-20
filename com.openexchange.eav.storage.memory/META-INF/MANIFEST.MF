@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: In Memory Storage for EAV Data
+Bundle-SymbolicName: com.openexchange.eav.storage.memory
+Bundle-Version: 6.11.0.0
+Bundle-Activator: com.openexchange.eav.storage.memory.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.osgi.framework;version="1.3.0"
