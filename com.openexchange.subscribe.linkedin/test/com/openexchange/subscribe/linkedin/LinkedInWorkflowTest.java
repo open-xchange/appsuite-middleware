@@ -65,23 +65,17 @@ import com.openexchange.subscribe.crawler.WorkflowFactory;
 public class LinkedInWorkflowTest extends TestCase {
 	
 	public void testLinkedInByCreatingStepsManually() {
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
 		
 		// insert valid credentials here
 		String username ="roxyexchanger@ox.io";
 		String password ="secret";
 		
-		listOfSteps.add(new LoginPageStep("Login to www.linkedin.com", "https://www.linkedin.com/secure/login", username, password, "login", "session_key", "session_password","LinkedIn: Home"));
-		listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
-		listOfSteps.add(new PageByUrlStep("Get to the no-javascript contacts list", "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-		listOfSteps.add(new PagesByLinkRegexStep("Get all pages that link to a connections profile", "(/profile\\?viewProfile=).*(goback).*"));
-		listOfSteps.add(new ContactObjectsByHTMLPagesStep("Extract the contact information from these pages", "/addressBookExport?exportMemberVCard", "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
-		
-		Workflow linkedInWorkflow = new Workflow(listOfSteps);
+		LinkedInSubscribeService service = new LinkedInSubscribeService();
+		Workflow linkedInWorkflow = service.getWorkflow();
 		
 		Contact[] contacts = new Contact[0];
 		try {
-			contacts = linkedInWorkflow.execute();
+			contacts = linkedInWorkflow.execute(username, password);
 		} catch (SubscriptionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
