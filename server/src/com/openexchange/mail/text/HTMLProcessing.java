@@ -390,7 +390,7 @@ public final class HTMLProcessing {
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
-    public static String removeXHTMLCData(final String htmlContent) {
+    private static String removeXHTMLCData(final String htmlContent) {
         final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
