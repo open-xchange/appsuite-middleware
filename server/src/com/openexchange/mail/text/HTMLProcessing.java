@@ -376,7 +376,7 @@ public final class HTMLProcessing {
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * &lt;!--
-     *  /* Some Definitions &#42;/
+     *  /&#42; Some Definitions &#42;/
      * --&gt;
      * &lt;/style&gt;
      * </pre>
