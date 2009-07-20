@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -193,7 +195,7 @@ public class ConflictHandler {
     }
     
     private CalendarDataObject[] resolveParticipantConflicts(final Date start, final Date end) throws OXException {
-        final String sql_in = recColl.getSQLInStringForParticipants(cdao.getUsers());
+        final String sql_in = recColl.getSQLInStringForParticipants(getConflictUsers());
         if (sql_in == null) {
             return NO_CONFLICTS;
         }
@@ -274,6 +276,28 @@ public class ConflictHandler {
                 DBPool.push(ctx, readcon);
             }
         }
+    }
+
+    private List<UserParticipant> getConflictUsers() {
+        List<UserParticipant> relevantUsers = new ArrayList<UserParticipant>();
+        for (UserParticipant user : cdao.getUsers()) {
+            switch (user.getConfirm()) {
+            case CalendarObject.ACCEPT:
+                relevantUsers.add(user);
+                break;
+            case CalendarObject.NONE:
+                if (CalendarConfig.getUndefinedStatusConflict()) {
+                    relevantUsers.add(user);
+                }
+                break;
+            case CalendarObject.DECLINE:
+            case CalendarObject.TENTATIVE:
+            default:
+                break;
+            }
+        }
+        
+        return relevantUsers;
     }
     
     private CalendarDataObject[] resolveResourceConflicts(final Date start, final Date end) throws OXException {

@@ -81,6 +81,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
+import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
@@ -393,8 +394,13 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(member_sql_in);
         sb.append(" AND pd.intfield06 != ");
         sb.append(Appointment.FREE);
-        sb.append(" AND pdm.confirm != ");
-        sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        if (CalendarConfig.getUndefinedStatusConflict()) {
+            sb.append(" AND pdm.confirm != ");
+            sb.append(CalendarObject.DECLINE);
+        } else {
+            sb.append(" AND pdm.confirm IN (");
+            sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(")");
+        }
 
         if (free_busy_select) {
             sb.append(UNION);
@@ -409,8 +415,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(member_sql_in);
             sb.append(" AND pd.intfield06 != ");
             sb.append(Appointment.FREE);
-            sb.append(" AND pdm.confirm != ");
-            sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+            if (CalendarConfig.getUndefinedStatusConflict()) {
+                sb.append(" AND pdm.confirm != ");
+                sb.append(CalendarObject.DECLINE);
+            } else {
+                sb.append(" AND pdm.confirm IN (");
+                sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(")");
+            }
         } else {
             sb.append(PDM_GROUP_BY_PD_INTFIELD01);
             sb.append(ORDER_BY);

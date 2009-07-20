@@ -80,7 +80,8 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     private static boolean CACHED_ITERATOR_FAST_FETCH = true;
     
     private static boolean seriesconflictlimit = true;
-
+    
+    private static boolean undefinedstatusconflict = true;
     
     public static boolean isCACHED_ITERATOR_FAST_FETCH() {
         return CACHED_ITERATOR_FAST_FETCH;
@@ -213,7 +214,15 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
             if (series_conflict_limit_string.equalsIgnoreCase("FALSE")) {
                 seriesconflictlimit = false;
             }
-        }     
+        }
+        
+        String undefined_status_conflict_string = CalendarConfig.getProperty("com.openexchange.calendar.undefinedstatusconflict");
+        if (undefined_status_conflict_string != null){
+            undefined_status_conflict_string = undefined_status_conflict_string.trim();
+            if (undefined_status_conflict_string.equalsIgnoreCase("FALSE")) {
+                undefinedstatusconflict = false;
+            }
+        }
     }
     
     public static boolean getCheckAndRemovePastReminders() {
@@ -232,4 +241,29 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         return seriesconflictlimit;
     }
     
+    public static boolean getUndefinedStatusConflict() {
+        return undefinedstatusconflict;
+    }
+    
+    //friendly methods for testing purposes
+    
+    static void setCheckAndRemovePastReminders(boolean value) {
+        check_and_remove_past_reminders = value;
+    }
+    
+    static void setSoloReminderTriggerEvent(boolean value) {
+        solo_reminder_trigger_event = value;
+    }
+
+    static void setMaxOperationsInRecurrenceCalculations(int value) {
+        max_operations_in_recurrence_calculations = value;
+    }
+    
+    static void setSeriesConflictLimit(boolean value) {
+        seriesconflictlimit = value;
+    }
+    
+    static void setUndefinedStatusConflict(boolean value) {
+        undefinedstatusconflict = value;
+    }
 }

@@ -189,7 +189,7 @@ public interface CalendarCollectionService {
 
     public void triggerModificationEvent(final Session session, final CalendarDataObject oldAppointment, final CalendarDataObject newAppointment) throws OXCalendarException;
 
-    public String getSQLInStringForParticipants(final UserParticipant[] userParticipant);
+    public String getSQLInStringForParticipants(final List<UserParticipant> userParticipant);
 
     public String getSQLInStringForParticipants(final Participant[] participant);
 

@@ -2181,16 +2181,16 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getSQLInStringForParticipants(com.openexchange.groupware.container.UserParticipant[])
      */
-    public String getSQLInStringForParticipants(final UserParticipant[] userParticipant) {
+    public String getSQLInStringForParticipants(final List<UserParticipant> userParticipant) {
         final StringBuilder sb = new StringBuilder(32);
-        if (userParticipant != null && userParticipant.length > 0) {
+        if (userParticipant != null && userParticipant.size() > 0) {
             sb.append('(');
-            for (int a = 0; a < userParticipant.length; a++) {
+            for (int a = 0; a < userParticipant.size(); a++) {
                 if (a > 0) {
                     sb.append(',');
-                    sb.append(userParticipant[a].getIdentifier());
+                    sb.append(userParticipant.get(a).getIdentifier());
                 } else {
-                    sb.append(userParticipant[a].getIdentifier());
+                    sb.append(userParticipant.get(a).getIdentifier());
                 }
             }
         } else {
