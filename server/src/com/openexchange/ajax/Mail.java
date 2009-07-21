@@ -172,7 +172,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
- * {@link Mail} - The servlet to handle mail requests
+ * {@link Mail} - The servlet to handle mail requests.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
