@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -210,7 +211,7 @@ public final class MimeReply {
             if (subjectHdrValue == null) {
                 subjectHdrValue = "";
             }
-            final String rawSubject = MIMEMessageUtility.unfold(subjectHdrValue);
+            final String rawSubject = unfold(subjectHdrValue);
             {
                 final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(rawSubject);
                 final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(
@@ -231,7 +232,7 @@ public final class MimeReply {
                 }
             } else {
                 final String[] replyTo = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
-                if (replyTo == null) {
+                if (MIMEMessageUtility.isEmptyHeader(replyTo)) {
                     /*
                      * Set from as recipient
                      */
@@ -240,7 +241,7 @@ public final class MimeReply {
                     /*
                      * Message holds header 'Reply-To'
                      */
-                    recipientAddrs = InternetAddress.parseHeader(MIMEMessageUtility.unfold(replyTo[0]), true);
+                    recipientAddrs = InternetAddress.parseHeader(unfold(replyTo[0]), true);
                 }
             }
             if (replyAll) {
@@ -319,7 +320,7 @@ public final class MimeReply {
                 filteredAddrs.clear();
                 hdrVal = originalMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
-                    filteredAddrs.addAll(filter(filter, parseAddressList(MIMEMessageUtility.unfold(hdrVal), true)));
+                    filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
                 }
                 if (!filteredAddrs.isEmpty()) {
                     replyMsg.addRecipients(RecipientType.CC, filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()]));
@@ -330,7 +331,7 @@ public final class MimeReply {
                 filteredAddrs.clear();
                 hdrVal = originalMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
                 if (hdrVal != null) {
-                    filteredAddrs.addAll(filter(filter, parseAddressList(MIMEMessageUtility.unfold(hdrVal), true)));
+                    filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
                 }
                 if (!filteredAddrs.isEmpty()) {
                     replyMsg.addRecipients(RecipientType.BCC, filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()]));

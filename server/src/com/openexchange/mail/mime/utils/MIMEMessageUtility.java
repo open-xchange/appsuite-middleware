@@ -112,6 +112,36 @@ public final class MIMEMessageUtility {
         super();
     }
 
+    /**
+     * Checks if specified headers are empty. The passed headers are considered as all the values for a certain header or <code>null</code>
+     * if no headers exist.
+     * 
+     * @param headers The values for a certain header
+     * @return <code>true</code> if specified headers are empty; otherwise <code>false</code>
+     */
+    public static boolean isEmptyHeader(final String[] headers) {
+        if (null == headers || 0 == headers.length) {
+            return true;
+        }
+        boolean isEmpty = true;
+        for (int i = 0; isEmpty && i < headers.length; i++) {
+            isEmpty = isEmpty(headers[i]);
+        }
+        return isEmpty;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
+    }
+
     private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
         "(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
