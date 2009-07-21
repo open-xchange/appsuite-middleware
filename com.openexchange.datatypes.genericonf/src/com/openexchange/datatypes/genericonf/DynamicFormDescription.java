@@ -50,7 +50,6 @@
 package com.openexchange.datatypes.genericonf;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,17 +58,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * {@link DynamicFormDescription}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class DynamicFormDescription implements Iterable<FormElement>{
+public class DynamicFormDescription implements Iterable<FormElement> {
+
     private List<FormElement> formElements;
+
     private Map<String, FormElement> namedElements = new HashMap<String, FormElement>();
-    
+
     public DynamicFormDescription() {
         formElements = new ArrayList<FormElement>();
     }
@@ -77,40 +76,39 @@ public class DynamicFormDescription implements Iterable<FormElement>{
     public Iterator<FormElement> iterator() {
         return formElements.iterator();
     }
-    
+
     public List<FormElement> getFormElements() {
         return Collections.unmodifiableList(formElements);
     }
-    
+
     public void addFormElement(FormElement formElement) {
         formElements.add(formElement);
         namedElements.put(formElement.getName(), formElement);
     }
-    
+
     public void removeFormElement(FormElement formElement) {
         formElements.remove(formElement);
         namedElements.remove(formElement.getName());
     }
-    
 
     public DynamicFormDescription add(FormElement formElement) {
         addFormElement(formElement);
         return this;
     }
-    
-    public List<Object> doSwitch(WidgetSwitcher switcher, Object...args) {
+
+    public List<Object> doSwitch(WidgetSwitcher switcher, Object... args) {
         List<Object> retvals = new ArrayList<Object>(formElements.size());
-        for(FormElement element : formElements) {
-            retvals.add( element.doSwitch(switcher, args));
+        for (FormElement element : formElements) {
+            retvals.add(element.doSwitch(switcher, args));
         }
         return retvals;
     }
-    
+
     public void iterate(DynamicFormIterator iterator, Map<String, Object> content) {
-        for(FormElement element : formElements) {
+        for (FormElement element : formElements) {
             try {
                 String name = element.getName();
-                if(content.containsKey(name)) {
+                if (content.containsKey(name)) {
                     iterator.handle(element, content.get(name));
                 }
             } catch (IterationBreak e) {
@@ -118,11 +116,11 @@ public class DynamicFormDescription implements Iterable<FormElement>{
             }
         }
     }
-    
+
     public Set<String> getMissingMandatoryFields(Map<String, Object> content) {
         Set<String> missing = new HashSet<String>();
         for (FormElement element : formElements) {
-            if(element.isMandatory() && !content.containsKey(element.getName())) {
+            if (element.isMandatory() && !content.containsKey(element.getName())) {
                 missing.add(element.getName());
             }
         }
@@ -132,5 +130,5 @@ public class DynamicFormDescription implements Iterable<FormElement>{
     public FormElement getField(String col) {
         return namedElements.get(col);
     }
-    
+
 }
