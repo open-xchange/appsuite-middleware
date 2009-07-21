@@ -990,7 +990,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  */
                 final MailMessage mail = mailInterface.getMessage(folderPath, uid);
                 if (mail == null) {
-                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), folderPath);
+                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, uid, folderPath);
                 }
                 if (showMessageSource) {
                     final UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();

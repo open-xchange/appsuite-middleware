@@ -1,3 +1,7 @@
+* 2009-07-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #14196: Fixed error message arguments
+
 * 2009-07-20 - martin.herfurth@open-xchange.com
 
  - New Parameter: com.openexchange.calendar.undefinedstatusconflict, conflict behaviour for
