@@ -49,15 +49,13 @@
 
 package com.openexchange.event;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.server.services.ServerServiceRegistry;
-
-import static com.openexchange.java.Autoboxing.I;
 
 
 /**
@@ -119,7 +117,7 @@ public class LoginEvent {
             LOG.debug("Event Admin is disabled, so skipping LoginEvent");
             return;
         }
-        Map ht = new Hashtable();
+        Dictionary ht = new Hashtable();
         ht.put(USER_KEY, userId);
         ht.put(CONTEXT_KEY, contextId);
         ht.put(SESSION_KEY, sessionId);

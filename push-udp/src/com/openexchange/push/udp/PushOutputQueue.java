@@ -52,10 +52,10 @@ package com.openexchange.push.udp;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
@@ -228,7 +228,7 @@ public class PushOutputQueue implements Runnable {
 
                 for (int a = 0; a < users.length; a++) {
                     final RemoteEvent remoteEvent = factoryService.newRemoteEvent(folderId, users[a], contextId, action, module, timestamp);
-                    final Map<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
+                    final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>();
                     ht.put(RemoteEvent.EVENT_KEY, remoteEvent);
                     eventAdmin.postEvent(new Event(topic, ht));
                 }
