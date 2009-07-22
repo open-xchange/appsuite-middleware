@@ -126,6 +126,8 @@ public interface CalendarCollectionService {
     public boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException;
 
     public boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
+    
+    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid) throws OXException;
 
     /**
      * Add editing user or shared folder owner to user participants. This ensures

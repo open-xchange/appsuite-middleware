@@ -115,8 +115,10 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -1847,6 +1849,39 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
         } else {
             cdao.setUsers(new UserParticipant[] { up } );
+        }
+    }
+    
+    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid) throws OXException {
+        if (cdao.getUsers() == null) {
+            return;
+        }
+        for (UserParticipant user : cdao.getUsers()) {
+            if (user.getIdentifier() == uid) {
+                continue;
+            }
+            try {
+                switch (cdao.getFolderType()) {
+                case FolderObject.SHARED:
+                    int folderOwner = new OXFolderAccess(ctx).getFolderOwner(cdao.getParentFolderID());
+                    if (user.getIdentifier() == folderOwner) {
+                        continue;
+                    } else {
+                        user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getIdentifier()));
+                    }
+                    break;
+                case FolderObject.PRIVATE:
+                    user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPrivate(ctx.getContextId(), user.getIdentifier()));
+                    break;
+                case FolderObject.PUBLIC:
+                    user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
+                    break;
+                default:
+                    break;
+                }
+            } catch (SettingException e) {
+                throw new OXCalendarException(e);
+            }
         }
     }
     

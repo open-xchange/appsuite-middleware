@@ -107,6 +107,46 @@ public class ServerUserSetting {
 
     };
 
+    private static final Attribute<Integer> DEFAULT_STATUS_PRIVATE = new Attribute<Integer>() {
+
+        public Integer getAttribute(ResultSet rs) throws SQLException {
+            return Integer.valueOf(rs.getInt(getColumnName()));
+        }
+
+        public String getColumnName() {
+            return "defaultStatusPrivate";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+            if (value == null) {
+                pstmt.setInt(1, 0);
+            } else {
+                pstmt.setInt(1, value.intValue());
+            }
+        }
+
+    };
+    
+    private static final Attribute<Integer> DEFAULT_STATUS_PUBLIC = new Attribute<Integer>() {
+
+        public Integer getAttribute(ResultSet rs) throws SQLException {
+            return Integer.valueOf(rs.getInt(getColumnName()));
+        }
+
+        public String getColumnName() {
+            return "defaultStatusPublic";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+            if (value == null) {
+                pstmt.setInt(1, 0);
+            } else {
+                pstmt.setInt(1, value.intValue());
+            }
+        }
+
+    };
+    
     private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
     /**
@@ -236,6 +276,62 @@ public class ServerUserSetting {
         return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, connection);
     }
 
+    /**
+     * Returns the default confirmation status for private folders.
+     * If no value is set this parameter defaults to 0.
+     * @param cid
+     * @param user
+     * @return
+     * @throws SettingException 
+     */
+    public Integer getDefaultStatusPrivate(int cid, int user) throws SettingException {
+        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, connection);
+        if (value == null) {
+            value = new Integer(0);
+        }
+        return value;
+    }
+    
+    /**
+     * Sets the default confirmation status for private folders.
+     * <code>null</code> will default to 0.
+     * @param cid
+     * @param user
+     * @param status
+     * @throws SettingException 
+     */
+    public void setDefaultStatusPrivate(int cid, int user, Integer status) throws SettingException {
+        setAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, status, connection);
+    }
+    
+    /**
+     * Returns the default confirmation status for public folders.
+     * If no value is set this parameter defaults to 0.
+     * @param cid
+     * @param user
+     * @return
+     * @throws SettingException 
+     */
+    public Integer getDefaultStatusPublic(int cid, int user) throws SettingException {
+        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, connection);
+        if (value == null) {
+            value = new Integer(0);
+        }
+        return value;
+    }
+    
+    /**
+     * Sets the default confirmation status for public folders.
+     * <code>null</code> will default to 0.
+     * @param cid
+     * @param user
+     * @param status
+     * @throws SettingException 
+     */
+    public void setDefaultStatusPublic(int cid, int user, Integer status) throws SettingException {
+        setAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, status, connection);
+    }
+    
     private static <T> T getAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
         final Connection con;
         final boolean closeCon;

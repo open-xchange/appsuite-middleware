@@ -326,6 +326,10 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Due to a bug, there are several appointments with the String "null" in the recurrence pattern
             // instead of sql NULL. This update task repairs these broken lines in the database.
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.RepairRecurrencePatternNullValue());
+            // Version 70
+            // New config parameters to set the default conifmration status of newly created appointments
+            // for participants in private an public folders
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DefaultConfirmStatusUpdateTask());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");

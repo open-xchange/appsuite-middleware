@@ -503,7 +503,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (!cdao.containsTimezone()) {
             cdao.setTimezone(timezone);
         }
-
+        
         simpleDataCheck(cdao, edao, uid);
         if (isInsert && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
             final Participant np[] = new Participant[1];
@@ -516,6 +516,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } catch (final LdapException e) {
             throw new OXCalendarException(e);
         }
+        recColl.updateDefaultStatus(cdao, cdao.getContext(), uid);
         return isInsert;
     }
 
