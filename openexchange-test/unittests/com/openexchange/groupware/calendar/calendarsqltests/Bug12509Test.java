@@ -51,9 +51,9 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.setuptools.TestContextToolkit;
 
 
 public class Bug12509Test extends CalendarSqlTest {
@@ -72,7 +72,7 @@ public class Bug12509Test extends CalendarSqlTest {
             cleanFolders.add(folder);
             // Share to second user
             folders.sharePrivateFolder(session, ctx, secondUserId, folder);
-            final CalendarContextToolkit tools = new CalendarContextToolkit();
+            final TestContextToolkit tools = new TestContextToolkit();
             final int secondParticipantDefaultFolder = folders.getStandardFolder(tools.resolveUser(participant2, ctx), ctx);
             // Create daily recurring appointment in previously created private
             // folder

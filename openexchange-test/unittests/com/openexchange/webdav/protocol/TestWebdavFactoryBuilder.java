@@ -2,8 +2,6 @@ package com.openexchange.webdav.protocol;
 
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -12,6 +10,8 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
@@ -48,8 +48,8 @@ public class TestWebdavFactoryBuilder {
 		factory.setProvider(new DBPoolProvider());
 		factory.setResolver(new PathResolverImpl(factory.getDatabase()));
 		
-		final CalendarTestConfig config = new CalendarTestConfig();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+		final TestConfig config = new TestConfig();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         final Context ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 

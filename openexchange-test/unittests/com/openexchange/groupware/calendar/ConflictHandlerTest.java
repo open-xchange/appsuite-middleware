@@ -61,12 +61,12 @@ import com.openexchange.api2.OXException;
 import com.openexchange.calendar.ConflictHandler;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestFolderToolkit;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -82,7 +82,7 @@ public class ConflictHandlerTest extends TestCase {
     private String secondUser;
     private Context ctx;
     private CommonAppointments appointments;
-    private CalendarFolderToolkit folders;
+    private TestFolderToolkit folders;
 
     List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
 
@@ -90,12 +90,12 @@ public class ConflictHandlerTest extends TestCase {
 	public void setUp() throws Exception {
         Init.startServer();
 
-        final CalendarTestConfig config = new CalendarTestConfig();
+        final TestConfig config = new TestConfig();
 
         user = config.getUser();
         secondUser = config.getSecondUser();
 
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         ctx = tools.getDefaultContext();
 
         appointments = new CommonAppointments(ctx, user);
@@ -115,7 +115,7 @@ public class ConflictHandlerTest extends TestCase {
 
         appointments.deleteAll(ctx);
 
-        folders = new CalendarFolderToolkit();
+        folders = new TestFolderToolkit();
     }
 
     @Override
@@ -227,7 +227,7 @@ public class ConflictHandlerTest extends TestCase {
 
     public void testShouldShowTitleIfReadPermissionsInPrivateFolderAllowIt() throws OXException {
         final Session session = appointments.getSession();
-        final int secondUserId = new CalendarContextToolkit().resolveUser(secondUser);
+        final int secondUserId = new TestContextToolkit().resolveUser(secondUser);
         folders.sharePrivateFolder(session, ctx, secondUserId);
         try {
             final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);

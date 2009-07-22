@@ -55,9 +55,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.setuptools.TestContextToolkit;
 
 
 public class Bug10154Test extends CalendarSqlTest {
@@ -78,7 +78,7 @@ public class Bug10154Test extends CalendarSqlTest {
 
             final ArrayList<Participant> participants = new ArrayList<Participant>(java.util.Arrays.asList(appointment.getParticipants()));
 
-            final CalendarContextToolkit tk = new CalendarContextToolkit();
+            final TestContextToolkit tk = new TestContextToolkit();
 
             final UserParticipant participant = new UserParticipant(tk.resolveUser(participant1));
             participants.add(participant);

@@ -57,8 +57,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.osgi.ServiceRegistry;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -68,6 +66,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -92,10 +92,10 @@ public class ContactCollectorTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         Init.startServer();
-        final CalendarTestConfig config = new CalendarTestConfig();
+        final TestConfig config = new TestConfig();
         user = prepareUser(config.getUser());
 
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         ctx = tools.getDefaultContext();
         userId = tools.resolveUser(user, ctx);
         session = tools.getSessionForUser(user, ctx);

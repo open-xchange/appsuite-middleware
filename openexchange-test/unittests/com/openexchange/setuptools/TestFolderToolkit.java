@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.calendar.tools;
+package com.openexchange.setuptools;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CalendarFolderToolkit {
+public class TestFolderToolkit {
 
     public int getStandardFolder(final int user, final Context ctx) {
         final FolderObject fo = getStandardFolderObject(user, ctx);

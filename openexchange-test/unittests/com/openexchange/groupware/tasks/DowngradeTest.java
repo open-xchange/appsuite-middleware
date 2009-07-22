@@ -60,8 +60,6 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -76,6 +74,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
@@ -113,9 +113,9 @@ public class DowngradeTest extends TestCase {
         Init.startServer();
         AJAXConfig.init();
         
-        final CalendarTestConfig config = new CalendarTestConfig();
+        final TestConfig config = new TestConfig();
         final String userName = config.getUser();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 

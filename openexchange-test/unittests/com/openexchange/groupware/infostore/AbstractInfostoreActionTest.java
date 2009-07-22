@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -21,6 +19,8 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.sql.DBUtils;
 
 public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
@@ -40,9 +40,9 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		provider = new DBPoolProvider();
 		queryCatalog = new InfostoreQueryCatalog();
 		
-		final CalendarTestConfig config = new CalendarTestConfig();
+		final TestConfig config = new TestConfig();
         final String userName = config.getUser();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
         final int userId = tools.resolveUser(userName, ctx);

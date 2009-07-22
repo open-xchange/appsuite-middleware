@@ -14,8 +14,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -33,6 +31,8 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -82,8 +82,8 @@ public class PermissionTest extends TestCase implements SessionHolder {
         Init.startServer();
         AJAXConfig.init();
         
-        final CalendarTestConfig config = new CalendarTestConfig();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestConfig config = new TestConfig();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 

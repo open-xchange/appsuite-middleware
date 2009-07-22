@@ -10,8 +10,6 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -20,6 +18,8 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.webdav.protocol.DummySessionHolder;
@@ -50,8 +50,8 @@ public class DropBoxScenarioTest extends TestCase{
 	
 	@Override
 	public void setUp() throws Exception {
-	    final CalendarTestConfig config = new CalendarTestConfig();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+	    final TestConfig config = new TestConfig();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 	    

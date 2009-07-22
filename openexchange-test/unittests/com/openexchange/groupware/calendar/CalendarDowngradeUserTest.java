@@ -66,8 +66,6 @@ import com.openexchange.calendar.CalendarSql;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -81,6 +79,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestFolderToolkit;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
@@ -99,8 +99,8 @@ public class CalendarDowngradeUserTest extends TestCase {
 
     private int publicFolderId = -1;
 
-    private static CalendarContextToolkit tools = new CalendarContextToolkit();
-    private static CalendarFolderToolkit folders = new CalendarFolderToolkit();
+    private static TestContextToolkit tools = new TestContextToolkit();
+    private static TestFolderToolkit folders = new TestFolderToolkit();
 
     @Override
 	public void setUp() throws Exception {

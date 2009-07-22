@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.calendar.tools;
+package com.openexchange.setuptools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CalendarContextToolkit {
+public class TestContextToolkit {
 
     public int resolveUser(final String username) {
         return resolveUser(username, getDefaultContext());
@@ -175,7 +175,7 @@ public class CalendarContextToolkit {
 
     public List<UserParticipant> users(final Context ctx, final String...users) {
         final List<UserParticipant> participants = new ArrayList<UserParticipant>(users.length);
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         for(final String user : users) {
             final int id = tools.resolveUser(user, ctx);
             final UserParticipant participant = new UserParticipant(id);
@@ -186,7 +186,7 @@ public class CalendarContextToolkit {
 
     public List<ResourceParticipant> resources(final Context ctx, final String...resources) {
         final List<ResourceParticipant> participants = new ArrayList<ResourceParticipant>(resources.length);
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         for(final String resource : resources) {
             final int id = tools.resolveResource(resource, ctx);
             final ResourceParticipant participant = new ResourceParticipant(id);
@@ -197,7 +197,7 @@ public class CalendarContextToolkit {
 
     public List<GroupParticipant> groups(final Context ctx, final String...groups) {
         final List<GroupParticipant> participants = new ArrayList<GroupParticipant>(groups.length);
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         for(final String group : groups) {
             final int id = tools.resolveGroup(group, ctx);
             final GroupParticipant participant = new GroupParticipant(id);

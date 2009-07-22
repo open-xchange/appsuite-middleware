@@ -11,14 +11,14 @@ import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.impl.AttachmentQueryCatalog;
 import com.openexchange.groupware.attach.util.GetSwitch;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 
 public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 
@@ -35,9 +35,9 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		provider = new DBPoolProvider();
 		queryCatalog = new AttachmentQueryCatalog();
 		
-		final CalendarTestConfig config = new CalendarTestConfig();
+		final TestConfig config = new TestConfig();
 		final String userName = config.getUser();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 		user = UserStorage.getInstance().getUser(tools.resolveUser(userName, ctx), ctx);

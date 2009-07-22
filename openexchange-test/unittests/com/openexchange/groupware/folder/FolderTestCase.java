@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -19,6 +17,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -42,8 +42,8 @@ public class FolderTestCase extends TestCase {
         final UserStorage userStorage = UserStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
         
-        final CalendarTestConfig config = new CalendarTestConfig();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestConfig config = new TestConfig();
+        final TestContextToolkit tools = new TestContextToolkit();
         
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);

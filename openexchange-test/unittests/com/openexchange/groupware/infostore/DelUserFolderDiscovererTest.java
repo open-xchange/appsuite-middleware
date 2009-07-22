@@ -3,8 +3,6 @@ package com.openexchange.groupware.infostore;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
@@ -16,6 +14,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -48,8 +48,8 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	public void setUp() throws Exception {
 		Init.startServer();
 
-		final CalendarTestConfig config = new CalendarTestConfig();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+		final TestConfig config = new TestConfig();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 		

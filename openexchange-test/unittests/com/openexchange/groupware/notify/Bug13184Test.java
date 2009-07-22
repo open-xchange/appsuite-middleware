@@ -55,15 +55,15 @@ import java.util.List;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestFolderToolkit;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
@@ -71,7 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
  */
 public class Bug13184Test extends ParticipantNotifyTest {
 
-    private CalendarFolderToolkit folders;
+    private TestFolderToolkit folders;
     
     private Context ctx;
 
@@ -92,10 +92,10 @@ public class Bug13184Test extends ParticipantNotifyTest {
     public void setUp() throws Exception {
         super.setUp();
         
-        folders = new CalendarFolderToolkit();
-        CalendarContextToolkit contextTools = new CalendarContextToolkit();
+        folders = new TestFolderToolkit();
+        TestContextToolkit contextTools = new TestContextToolkit();
         ctx = contextTools.getDefaultContext();
-        CalendarTestConfig config = new CalendarTestConfig();
+        TestConfig config = new TestConfig();
         user = config.getUser();
         secondUser = config.getSecondUser();
         userId = contextTools.resolveUser(user, ctx);

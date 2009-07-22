@@ -61,13 +61,13 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -97,10 +97,10 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         listener = new CopyAttachmentsForChangeExceptions(attachments);
 
 
-        final CalendarTestConfig config = new CalendarTestConfig();
+        final TestConfig config = new TestConfig();
 
         user = config.getUser();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         ctx = tools.getDefaultContext();
 
         appointments = new CommonAppointments(ctx, user);

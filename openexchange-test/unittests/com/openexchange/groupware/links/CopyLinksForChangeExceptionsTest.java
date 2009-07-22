@@ -51,8 +51,6 @@ package com.openexchange.groupware.links;
 import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -64,6 +62,8 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.api2.LinkSQLInterface;
 import com.openexchange.api2.RdbLinkSQLInterface;
@@ -96,10 +96,10 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
         listener = new CopyLinksForChangeExceptions(links);
 
 
-        final CalendarTestConfig config = new CalendarTestConfig();
+        final TestConfig config = new TestConfig();
 
         user = config.getUser();
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         ctx = tools.getDefaultContext();
 
         appointments = new CommonAppointments(ctx, user);

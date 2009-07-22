@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.calendar.tools;
+package com.openexchange.setuptools;
 
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
@@ -54,7 +54,7 @@ import com.openexchange.configuration.ConfigurationException;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CalendarTestConfig {
+public class TestConfig {
     private String user;
     private String secondUser;
     private String thirdUser;
@@ -67,7 +67,7 @@ public class CalendarTestConfig {
 
     private final String contextName;
 
-    public CalendarTestConfig() throws ConfigurationException {
+    public TestConfig() throws ConfigurationException {
         AJAXConfig.init();
         user = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
         secondUser = AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER);

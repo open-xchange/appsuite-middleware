@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.setuptools.TestContextToolkit;
 
 
 /**
@@ -80,7 +81,7 @@ public class CalendarAssertions {
     public static void assertParticipants(final CalendarDataObject cdao, final String[] users, final String[] resources) {
         assertNotNull("Participants should be set! ", cdao.getParticipants());
 
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
 
         final Set<UserParticipant> userParticipants = new HashSet<UserParticipant>(tools.users(cdao.getContext(), users));
         final Set<ResourceParticipant> resourceParticipants = new HashSet<ResourceParticipant>(tools.resources(cdao.getContext(), resources));

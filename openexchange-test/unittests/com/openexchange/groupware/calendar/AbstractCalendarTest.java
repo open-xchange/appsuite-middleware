@@ -16,15 +16,15 @@ import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestFolderToolkit;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -53,7 +53,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     protected int groupId;
     protected Context ctx;
     protected CommonAppointments appointments;
-    protected CalendarFolderToolkit folders;
+    protected TestFolderToolkit folders;
     protected Session session;
     protected Session session2;
     protected Session session3;
@@ -96,14 +96,14 @@ public abstract class AbstractCalendarTest extends TestCase {
     
         TestEventAdmin.getInstance().clearEvents();
     
-        final CalendarTestConfig config = new CalendarTestConfig();
+        final TestConfig config = new TestConfig();
     
         user = config.getUser();
         secondUser = config.getSecondUser();
         thirdUser = config.getThirdUser();
         fourthUser = config.getFourthUser();
     
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         final String ctxName = config.getContextName();
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
     
@@ -117,7 +117,7 @@ public abstract class AbstractCalendarTest extends TestCase {
         resource2 = config.getResource2();
         resource3 = config.getResource3();
     
-        folders = new CalendarFolderToolkit();
+        folders = new TestFolderToolkit();
     
         group = config.getGroup();
         groupId = tools.resolveGroup(group, ctx);

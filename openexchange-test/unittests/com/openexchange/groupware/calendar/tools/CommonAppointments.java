@@ -74,6 +74,8 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestFolderToolkit;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -170,7 +172,7 @@ public class CommonAppointments {
         cdao.setEndDate(new Date(FUTURE + FIVE_DAYS + THREE_HOURS));
         cdao.setContext(ctx);
 
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
 
         final List<Participant> participants = new ArrayList<Participant>(users.length+resources.length+groups.length);
         final List<UserParticipant> userParticipants = tools.users(ctx, users);
@@ -186,9 +188,9 @@ public class CommonAppointments {
     }
 
     public void switchUser(final String user) {
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         final int userId = tools.resolveUser(user,ctx);
-        privateFolder = new CalendarFolderToolkit().getStandardFolder(userId, ctx);
+        privateFolder = new TestFolderToolkit().getStandardFolder(userId, ctx);
         session = tools.getSessionForUser(user, ctx);
         calendar = new CalendarSql(session);
     }

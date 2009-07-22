@@ -53,7 +53,7 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.Date;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.setuptools.TestContextToolkit;
 
 
 public class Bug11881Test extends CalendarSqlTest {
@@ -92,7 +92,7 @@ public class Bug11881Test extends CalendarSqlTest {
 
         // Try adding participants later
 
-        final CalendarContextToolkit tools = new CalendarContextToolkit();
+        final TestContextToolkit tools = new TestContextToolkit();
         appointment = appointments.buildBasicAppointment(start, end);
         appointment.setPrivateFlag(true);
         appointments.save(appointment);

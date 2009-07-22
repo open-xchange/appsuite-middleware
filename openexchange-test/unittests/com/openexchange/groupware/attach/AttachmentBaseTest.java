@@ -21,8 +21,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.util.GetSwitch;
-import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
-import com.openexchange.groupware.calendar.tools.CalendarTestConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUser;
@@ -34,6 +32,8 @@ import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -616,8 +616,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
 		public Context getContext()  {
 		    try {
-                final CalendarTestConfig config = new CalendarTestConfig();
-                final CalendarContextToolkit tools = new CalendarContextToolkit();
+                final TestConfig config = new TestConfig();
+                final TestContextToolkit tools = new TestContextToolkit();
                 final String ctxName = config.getContextName();
                 return null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
             } catch (final ConfigurationException e) {
@@ -631,7 +631,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 				final UserStorage users = UserStorage.getInstance();
 				final Context ctx = getContext();
 				
-				final CalendarTestConfig config = new CalendarTestConfig();
+				final TestConfig config = new TestConfig();
 				
 				final int id = users.getUserId(getUsername(config.getUser()), ctx);
 				return users.getUser(id, ctx);
