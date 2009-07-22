@@ -90,14 +90,14 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
 */
 public class ContactTestManager {
-	private Vector<Contact> insertedOrUpdatedContacts;
+	private Vector<Contact> createdEntities;
 	private AJAXClient client;
 	private ContactParser contactParser;
 	private ContactWriter contactWriter;
 	
 	public ContactTestManager(AJAXClient client) {
 		this.client = client;
-		insertedOrUpdatedContacts = new Vector<Contact>();
+		createdEntities = new Vector<Contact>();
 		contactParser = new ContactParser();
 		try {
 			contactWriter = new ContactWriter(client.getValues().getTimeZone());
@@ -133,7 +133,7 @@ public class ContactTestManager {
 			fail("JSONException during contact creation: "+e.getMessage());
 		}
 		response.fillObject(contactToCreate);
-		insertedOrUpdatedContacts.add(contactToCreate);
+		createdEntities.add(contactToCreate);
 		return contactToCreate;
 	}
 	
@@ -197,6 +197,7 @@ public class ContactTestManager {
 			if (failOnError)
 				fail("JSONException while deleting contact with ID " + contactToDelete.getObjectID()+ ": " + e.getMessage());
 		}
+		createdEntities.remove(contactToDelete); //TODO: does this find the right contact, or does equals() suck, too? 
 	}
 	
 	/**
@@ -253,7 +254,7 @@ public class ContactTestManager {
 	 * removes all contacts inserted or updated by this Manager
 	 */
 	public void cleanUp(){
-		for(Contact contact: insertedOrUpdatedContacts){
+		for(Contact contact: new Vector<Contact>(createdEntities)){
 			deleteContactOnServer(contact);
 		}
 	}
@@ -367,12 +368,12 @@ public class ContactTestManager {
 	}
 	
 	private void remember (Contact contact) {
-		for (Contact tempContact: insertedOrUpdatedContacts) {
+		for (Contact tempContact: createdEntities) {
 			if (tempContact.getObjectID() == contact.getObjectID()) {
-				insertedOrUpdatedContacts.set(insertedOrUpdatedContacts.indexOf(tempContact), contact);
+				createdEntities.set(createdEntities.indexOf(tempContact), contact);
 			}
 			else {
-				insertedOrUpdatedContacts.add(contact);
+				createdEntities.add(contact);
 			}
 		}
 	}

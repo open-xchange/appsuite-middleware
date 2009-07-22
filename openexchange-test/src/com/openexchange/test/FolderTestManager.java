@@ -71,7 +71,6 @@ import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.AjaxException;
@@ -89,8 +88,6 @@ public class FolderTestManager extends TestCase {
 
     private AJAXClient client;
 
-    private FolderParser folderParser;
-
     public boolean isIgnoreMailFolders() {
         return ignoreMailFolders;
     }
@@ -104,7 +101,6 @@ public class FolderTestManager extends TestCase {
     public FolderTestManager(AJAXClient client) {
         this.client = client;
         insertedOrUpdatedFolders = new Vector<FolderObject>();
-        folderParser = new FolderParser();
     }
 
     /**
@@ -174,18 +170,20 @@ public class FolderTestManager extends TestCase {
      */
     private void removeFolderFromCleanupList(FolderObject folderToDelete) {
         /*
-         * Once someone implements a proper equals on FolderObject, this can be replace by a simple
+         * Once someone implements a proper equals on FolderObject, this can be replaced by a simple
          * insertedOrUpdatedFolders.remove(folderToDelete);
          */
         for (int i = 0, length = insertedOrUpdatedFolders.size(); i < length; i++) {
             FolderObject folder = insertedOrUpdatedFolders.get(i);
             // normal folder:
-            if (folder.getObjectID() == folderToDelete.getObjectID() && folder.getParentFolderID() == folderToDelete.getParentFolderID() && !folder.containsFullName() && !folderToDelete.containsFullName())
+            if (folder.getObjectID() == folderToDelete.getObjectID() && folder.getParentFolderID() == folderToDelete.getParentFolderID() && !folder.containsFullName() && !folderToDelete.containsFullName()){
                 insertedOrUpdatedFolders.remove(i);
+            }
             // mail folder:
             if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
-                folderToDelete.getFullName()))
+                folderToDelete.getFullName())){
                 insertedOrUpdatedFolders.remove(i);
+            }
         }
     }
 
@@ -301,8 +299,10 @@ public class FolderTestManager extends TestCase {
      * removes all folders inserted or updated by this Manager
      */
     public void cleanUp() {
+        Vector<FolderObject> deleteMe = new Vector<FolderObject>(insertedOrUpdatedFolders);
         try {
-            for (FolderObject folder : insertedOrUpdatedFolders) {
+            for (FolderObject folder : deleteMe) {
+                folder.setLastModified(new Date(Long.MAX_VALUE));
                 deleteFolderOnServer(folder);
             }
         } catch (AjaxException e) {

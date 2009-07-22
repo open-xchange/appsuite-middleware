@@ -208,6 +208,7 @@ public class TaskTestManager {
             if(failOnError)
                 fail("JSONException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
         }
+        createdEntities.remove(taskToDelete); //TODO matches the right task?
     }
 
     public Task getTaskFromServer(int folder, int objectId) {
@@ -310,7 +311,7 @@ public class TaskTestManager {
     }
 
     /**
-     * An AllRequest answers with a JSONArray of JSONArray, each of which contains a field belonging to a task. This method assembles a task
+     * An AllRequest answers with a JSONArray of JSONArrays, each of which contains a field belonging to a task. This method assembles a task
      * from this array.
      * 
      * @return
@@ -351,7 +352,7 @@ public class TaskTestManager {
      * removes all tasks created by this fixture
      */
     public void cleanUp() {
-        for (Task task : createdEntities) {
+        for (Task task : new LinkedList<Task>(createdEntities)) {
             deleteTaskOnServer(task);
         }
     }
