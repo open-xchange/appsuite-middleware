@@ -237,7 +237,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         /*
          * Check for possible long-running EAS request
          */
-        ajpCon.setLongRunning(("/Microsoft-Server-ActiveSync".equals(request.getRequestURI()) && "ping".equals(request.getParameter("Cmd"))));
+        ajpCon.setLongRunning(("/Microsoft-Server-ActiveSync".equals(request.getRequestURI()) && "Ping".equals(request.getParameter("Cmd"))));
         /*
          * Handle the important Content-Length header which controls further processing
          */
