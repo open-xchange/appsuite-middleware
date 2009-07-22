@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.rmi.RemoteException;
 import java.sql.Connection;
@@ -65,6 +67,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -164,13 +167,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    /**
-     * 
-     * @throws StorageException
-     * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#deleteContext(int)
-     */
     @Override
-    public void delete(final Context ctx) throws StorageException {
+    public void delete(Context ctx) throws StorageException {
         LOG.debug("Fetching connection and scheme for context " + ctx.getId());
         // groupware context must be loaded before entry from user_setting_admin table is removed.
         final com.openexchange.groupware.contexts.Context gwCtx;
@@ -201,8 +199,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // fetch tables which can contain context data and sort these tables magically by foreign keys
             LOG.debug("Fetching table structure from database scheme for context " + ctx.getId());
             final Vector<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
-            LOG.debug("Table structure fetched for context " + ctx.getId());
-            LOG.debug("Try to find foreign key dependencies between tables and sort table for context " + ctx.getId());
+            LOG.debug("Table structure fetched for context " + ctx.getId() + "\nTry to find foreign key dependencies between tables and sort table for context " + ctx.getId());
             // sort the tables by references (foreign keys)
             sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
             LOG.debug("Dependencies found and tables sorted for context " + ctx.getId());
@@ -230,10 +227,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         try {
             // fetch infos for filestore from configdb before deleting on this connection
-            URI createURI = FilestoreStorage.createURI(conForConfigDB, gwCtx);
+            URI storageURI = FilestoreStorage.createURI(conForConfigDB, gwCtx);
             // Delete filestore directory of the context
             LOG.debug("Starting filestore delete(cid=" + ctx.getId() + ") from disc!");
-            FileStorage.getInstance(createURI, gwCtx, DBProvider.DUMMY).remove();
+            try {
+                FileStorage.getInstance(storageURI, gwCtx, DBProvider.DUMMY).remove();
+            } catch (FileStorageException e) {
+                LOG.error("File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.", e);
+                FileUtils.deleteDirectory(new File(storageURI));
+            }
             LOG.debug("Filestore delete(cid=" + ctx.getId() + ") from disc finished!");
             // Execute delete context from configdb AND the drop database command if this context is the last one
             conForConfigDB.setAutoCommit(false);
@@ -243,10 +245,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (FilestoreException e) {
             LOG.error(e.getMessage(), e);
             throw new StorageException(e);
-        } catch (FileStorageException e) {
-            final String errortext = "Error deleting filestore(cid=" + ctx.getId() + ") from disc! Please run the consistency tool to resolve this problem!";
-            LOG.error(errortext, e);
-            throw new StorageException(errortext);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException(e);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             DBUtils.rollback(conForConfigDB);
