@@ -145,7 +145,7 @@ public interface Session {
      * <p>
      * A <code>null</code> value removes the parameter.
      * <p>
-     * <code>Note</code>: To ensure set parameter will reside in session on remote distribution the <code>Serializable</code> interface
+     * <code>Note</code>: To ensure the parameter will reside in session on remote distribution the <code>Serializable</code> interface
      * should be implemented for specified value.
      * 
      * @param name The parameter name
