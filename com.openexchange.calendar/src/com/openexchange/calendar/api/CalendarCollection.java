@@ -1860,6 +1860,9 @@ public final class CalendarCollection implements CalendarCollectionService {
             if (user.getIdentifier() == uid) {
                 continue;
             }
+            if (user.containsConfirm()) {
+                continue;
+            }
             try {
                 switch (cdao.getFolderType()) {
                 case FolderObject.SHARED:
