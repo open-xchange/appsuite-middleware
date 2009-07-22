@@ -50,6 +50,7 @@
 package com.openexchange.event;
 
 import java.util.Hashtable;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
@@ -118,7 +119,7 @@ public class LoginEvent {
             LOG.debug("Event Admin is disabled, so skipping LoginEvent");
             return;
         }
-        Hashtable ht = new Hashtable();
+        Map ht = new Hashtable();
         ht.put(USER_KEY, userId);
         ht.put(CONTEXT_KEY, contextId);
         ht.put(SESSION_KEY, sessionId);

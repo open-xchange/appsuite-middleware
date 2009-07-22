@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -377,7 +378,7 @@ public final class SessionHandler {
     private static void postSessionRemoval(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
             eventAdmin.postEvent(event);
@@ -390,7 +391,7 @@ public final class SessionHandler {
     private static void postContainerRemoval(final List<SessionControl> sessionControls) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
-            final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
+            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
             final Map<String, Session> eventMap = new HashMap<String, Session>();
             for (final SessionControl sessionControl : sessionControls) {
                 final Session session = sessionControl.getSession();
