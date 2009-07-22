@@ -141,8 +141,9 @@ public interface Session {
     public String getLogin();
 
     /**
-     * Sets the parameter. Any existing parameters bound to specified name are replaced with given value. A <code>null</code> value removes
-     * the parameter.
+     * Sets the parameter. Any existing parameters bound to specified name are replaced with given value.
+     * <p>
+     * A <code>null</code> value removes the parameter.
      * <p>
      * <code>Note</code>: To ensure set parameter will reside in session on remote distribution the <code>Serializable</code> interface
      * should be implemented for specified value.
