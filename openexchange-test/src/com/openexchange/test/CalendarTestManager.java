@@ -63,14 +63,12 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.servlet.AjaxException;
@@ -123,7 +121,7 @@ public class CalendarTestManager {
     }
 
     public void deleteAppointmentOnServer(Appointment appointment) {
-        createdEntities.remove(appointment);
+        createdEntities.remove(appointment); //TODO: Does this remove the right object or does equals() suck?
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest deleteRequest = new DeleteRequest(appointment);
         execute(deleteRequest);
@@ -269,7 +267,7 @@ public class CalendarTestManager {
 
     private boolean tryDate(Appointment app, int field, Long value) {
         try {
-            app.set(field, new Date(value));
+            app.set(field, new Date(value.longValue()));
             return true;
         } catch (ClassCastException x) {
             return false;
