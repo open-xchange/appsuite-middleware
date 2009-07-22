@@ -38,5 +38,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/javax.activation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/net.freeutils.jcharset"/>
+	<classpathentry kind="src" path="/com.openexchange.publish"/>
+	<classpathentry kind="src" path="/com.openexchange.publish.json"/>
+	<classpathentry kind="src" path="/com.openexchange.datatypes.genericonf"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
