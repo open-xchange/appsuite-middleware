@@ -244,7 +244,11 @@ public class SessionObject implements com.openexchange.session.Session {
     }
 
     public void setParameter(final String name, final Object value) {
-        parameters.put(name, value);
+        if (null == value) {
+            parameters.remove(name);
+        } else {
+            parameters.put(name, value);
+        }
     }
 
     public void removeRandomToken() {
