@@ -98,28 +98,10 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         contact.setParentFolderID(folder.getObjectID());
         cMgr.insertContactOnServer(contact);
 
-        //create publication
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
-        
-        PublicationTarget target = new PublicationTarget();
-        target.setFormDescription(form);
-        target.setId("com.openexchange.publish.microformats.contacts.online");
- 
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication");
-        config.put("protected", true);
-        
-        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
-        discovery.addTarget(target);
-        
-        Publication expected = new Publication();
-        expected.setModule("contacts");
-        expected.setEntityId(String.valueOf(folder.getObjectID()));
-        expected.setTarget(target);
-        expected.setConfiguration(config);
-        
         //publish
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+
+        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID() ), discovery );
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
@@ -134,7 +116,5 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should return the same module as sent to the server", expected.getModule(), actual.getModule());
         assertEquals("Should return the same user as sent to the server", expected.getUserId(), actual.getUserId());
         assertEquals("Should return the same target id as sent to the server", expected.getTarget().getId(), actual.getTarget().getId());
-        
-        //remove publication
     }
 }

@@ -50,11 +50,18 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
@@ -134,5 +141,28 @@ public abstract class AbstractPublicationTest extends AbstractAJAXSession {
         contact.setPosition("Testee");
         contact.setTitle("Tester");
         return contact;
+    }
+    
+    protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery){
+        //create publication
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
+        
+        PublicationTarget target = new PublicationTarget();
+        target.setFormDescription(form);
+        target.setId("com.openexchange.publish.microformats."+type+".online");
+ 
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("siteName", "publication");
+        config.put("protected", Boolean.valueOf(true) );
+        
+        discovery.addTarget(target);
+        
+        Publication pub = new Publication();
+        pub.setModule(type);
+        pub.setEntityId(folder);
+        pub.setTarget(target);
+        pub.setConfiguration(config);
+        return pub;
     }
 }
