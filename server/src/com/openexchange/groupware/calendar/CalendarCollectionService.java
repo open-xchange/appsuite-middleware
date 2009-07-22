@@ -127,7 +127,7 @@ public interface CalendarCollectionService {
 
     public boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
     
-    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid) throws OXException;
+    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException;
 
     /**
      * Add editing user or shared folder owner to user participants. This ensures

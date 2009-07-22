@@ -516,7 +516,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } catch (final LdapException e) {
             throw new OXCalendarException(e);
         }
-        recColl.updateDefaultStatus(cdao, cdao.getContext(), uid);
+        recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         return isInsert;
     }
 

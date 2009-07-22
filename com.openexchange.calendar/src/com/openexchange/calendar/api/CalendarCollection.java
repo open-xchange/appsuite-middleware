@@ -1852,7 +1852,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
     
-    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid) throws OXException {
+    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException {
         if (cdao.getUsers() == null) {
             return;
         }
@@ -1866,7 +1866,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             try {
                 switch (cdao.getFolderType()) {
                 case FolderObject.SHARED:
-                    int folderOwner = new OXFolderAccess(ctx).getFolderOwner(cdao.getParentFolderID());
+                    int folderOwner = new OXFolderAccess(ctx).getFolderOwner(inFolder);
                     if (user.getIdentifier() == folderOwner) {
                         continue;
                     } else {
