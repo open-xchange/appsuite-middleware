@@ -61,9 +61,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestFolderToolkit;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestFolderToolkit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
@@ -89,13 +89,14 @@ public class Bug13184Test extends ParticipantNotifyTest {
 
     private Session so;
     
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
         folders = new TestFolderToolkit();
-        TestContextToolkit contextTools = new TestContextToolkit();
+        final TestContextToolkit contextTools = new TestContextToolkit();
         ctx = contextTools.getDefaultContext();
-        TestConfig config = new TestConfig();
+        final TestConfig config = new TestConfig();
         user = config.getUser();
         secondUser = config.getSecondUser();
         userId = contextTools.resolveUser(user, ctx);
@@ -113,6 +114,7 @@ public class Bug13184Test extends ParticipantNotifyTest {
         notify.realUsers = true;
     }
     
+    @Override
     public void tearDown() throws Exception {
         folders.removeAll(so, new ArrayList<FolderObject>(){{add(folder);}});
         
@@ -121,9 +123,9 @@ public class Bug13184Test extends ParticipantNotifyTest {
     
     public void testBug13185() throws Exception {
         notify.appointmentCreated(appointment, so);
-        List<Message> messages = notify.getMessages();
+        final List<Message> messages = notify.getMessages();
         assertEquals("Wrong amount of notification messages.", 1, messages.size());
-        Message message = messages.get(0);
+        final Message message = messages.get(0);
         assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
         assertFalse("Message should not contain a link to the apointment.", message.message.contains("http://")); //TODO: Make more sophisticated.
     }
@@ -132,9 +134,9 @@ public class Bug13184Test extends ParticipantNotifyTest {
         Connection writecon = null;
         try {
             writecon = DBPool.pickupWriteable(ctx);
-            OXFolderManager oxma = OXFolderManager.getInstance(so, writecon, writecon);
+            final OXFolderManager oxma = OXFolderManager.getInstance(so, writecon, writecon);
 
-            ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>();
+            final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>();
             OCLPermission oclp = new OCLPermission();
             oclp.setEntity(userId);
             oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
