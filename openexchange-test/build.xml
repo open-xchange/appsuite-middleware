@@ -87,7 +87,7 @@
         <jar jarfile="open-xchange-unit-tests.jar" basedir="${build}" includes="**"/>
     </target>
 
-	<target name="all-jar" depends="unit-jar,interface-jar"/>
+    <target name="all-jar" depends="unit-jar,interface-jar"/>
 
     <target name="run-interface-tests">
         <antcall target="run-tests">
@@ -109,7 +109,7 @@
             <param name="test.class" value="com.openexchange.test.I18nTests"/>
         </antcall>
     </target>
-    
+
     <target name="run-tests">
         <delete dir="${test.xml.dir}"/>
         <mkdir dir="${test.xml.dir}"/>
@@ -125,8 +125,6 @@
             <formatter type="xml" />
             <sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
         </junit>
-
-        <!-- fail message="Tests failed!" if="test.failed" / -->
     </target>
 
 </project>
