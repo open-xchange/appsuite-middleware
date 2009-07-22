@@ -56,6 +56,7 @@ public class Workflow {
 	            if (previousStep != null) {
 	                currentStep.setInput(previousStep.getOutput());
 	            }
+	            //System.out.println("***** Current Step : " + currentStep);
 	            currentStep.execute(webClient);
 	            previousStep = currentStep;
 	            if (! currentStep.executedSuccessfully()) {

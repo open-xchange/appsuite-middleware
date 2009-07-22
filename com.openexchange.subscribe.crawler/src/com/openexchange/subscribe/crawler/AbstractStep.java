@@ -59,6 +59,7 @@ public class AbstractStep {
 	static final String LIST_OF_TEXT_PAGES = "List of TextPages";
 	static final String URL_STRING = "URL String";
 	static final String LIST_OF_CONTACT_OBJECTS = "List of ContactObjects";
+	static final String LIST_OF_HTML_ANCHORS = "List of HtmlAnchors";
 
 	public boolean executedSuccessfully() {
 		return executedSuccessfully;

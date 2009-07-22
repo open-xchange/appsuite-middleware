@@ -63,37 +63,64 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.subscribe.SubscriptionException;
 
 /**
- * This step takes a page and returns all pages linked from this page via links that fulfill a regular expression
+ * This step takes a page and returns all pages linked from this page (as HTMLAnchors) via links, also from subpages, that fulfill a regular expression
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PagesByLinkRegexStep extends AbstractStep implements Step<List<HtmlPage>, HtmlPage> {
+public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<HtmlAnchor>, HtmlPage> {
 	
 	private HtmlPage htmlPage;
 	private String linkRegex;
+	private String subpageLinkRegex;
+	private ArrayList<String> subpagesHref;
+	private ArrayList<HtmlPage> subpages;
+	private ArrayList<HtmlAnchor> resultpageLinks;
 	
-	private List<HtmlPage> returnedPages = new ArrayList<HtmlPage>();
-	
-	public PagesByLinkRegexStep() {
+	public AnchorsByLinkRegexStep() {
 		
 	}
 	
-	public PagesByLinkRegexStep(String description, String linkRegex) {
+	public AnchorsByLinkRegexStep(String description, String subpageLinkRegex, String linkRegex) {
 		this.description = description;
+		this.subpageLinkRegex = subpageLinkRegex;
 		this.linkRegex = linkRegex;
+		this.subpagesHref = new ArrayList<String>();
+		this.subpages = new ArrayList<HtmlPage>();
+		this.resultpageLinks = new ArrayList<HtmlAnchor>();
 	}
 
 	public void execute(WebClient webClient)  throws SubscriptionException{
 	    try {
+	    	// add the first page as there should always be results there
+	    	subpages.add(htmlPage);
 	    	
+	    	// search for subpages
 	    	for (HtmlAnchor link: htmlPage.getAnchors()) {
-	    		
-	    		if (link.getHrefAttribute().matches(linkRegex)){
-	    			HtmlPage tempPage = link.click();
-	    			returnedPages.add(tempPage);
+	    		// get the subpages
+	    		if (link.getHrefAttribute().matches(subpageLinkRegex)){
+	    			if (! subpagesHref.contains(link.getHrefAttribute())){
+	    				// remember this link is already noted
+	    				subpagesHref.add(link.getHrefAttribute());
+	    				// remember its page for later
+	    				subpages.add((HtmlPage)link.click());
+	    				//System.out.println("***** Subpages remembered : " + link.getHrefAttribute());
+	    			}
+	    			
+	    			
 	    		}
-	    	
 	    	}
+	    	
+	    	// traverse the subpages
+	    	for (HtmlPage subpage: subpages){
+	    		//System.out.println("***** Current subpage : " + subpage.getTitleText());
+	    		for (HtmlAnchor possibleLinkToResultpage: subpage.getAnchors()) {
+		    		// get the result pages
+		    		if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex)){
+		    			resultpageLinks.add(possibleLinkToResultpage);
+		    		}
+	    		}
+	    	}
+	    	
 	    	executedSuccessfully = true;
 			
 		} catch (FailingHttpStatusCodeException e) {
@@ -122,11 +149,11 @@ public class PagesByLinkRegexStep extends AbstractStep implements Step<List<Html
 	}
 
 	public String outputType() {
-		return LIST_OF_HTML_PAGES;
+		return LIST_OF_HTML_ANCHORS;
 	}
 
-	public List<HtmlPage> getOutput() {
-		return returnedPages;
+	public List<HtmlAnchor> getOutput() {
+		return resultpageLinks;
 	}
 
 	public void setInput(HtmlPage input) {
@@ -141,12 +168,38 @@ public class PagesByLinkRegexStep extends AbstractStep implements Step<List<Html
 		this.htmlPage = htmlPage;
 	}
 
-	public List<HtmlPage> getReturnedPages() {
-		return returnedPages;
+	
+
+	public String getSubpageLinkRegex() {
+		return subpageLinkRegex;
 	}
 
-	public void setReturnedPages(List<HtmlPage> returnedPages) {
-		this.returnedPages = returnedPages;
+	public void setSubpageLinkRegex(String subpageLinkRegex) {
+		this.subpageLinkRegex = subpageLinkRegex;
+	}
+
+	public ArrayList<String> getSubpagesHref() {
+		return subpagesHref;
+	}
+
+	public void setSubpagesHref(ArrayList<String> subpagesHref) {
+		this.subpagesHref = subpagesHref;
+	}
+
+	public ArrayList<HtmlPage> getSubpages() {
+		return subpages;
+	}
+
+	public void setSubpages(ArrayList<HtmlPage> subpages) {
+		this.subpages = subpages;
+	}
+
+	public ArrayList<HtmlAnchor> getResultpageLinks() {
+		return resultpageLinks;
+	}
+
+	public void setResultpageLinks(ArrayList<HtmlAnchor> resultpageLinks) {
+		this.resultpageLinks = resultpageLinks;
 	}
 
 	public String getLinkRegex() {

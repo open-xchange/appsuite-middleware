@@ -73,15 +73,15 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 //TODO: Expand this to handle single fields (consisting of fieldname and a regex) of a contact by extracting them from a webpage
-public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
-		Step<Contact[], List<HtmlPage>> {
+public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
+		Step<Contact[], List<HtmlAnchor>> {
 	
-	private List<HtmlPage> pages;
+	private List<HtmlAnchor> anchors;
 	private Contact[] contactObjectsArray;
 	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 	private String vcardUrl, pictureUrl;
 	
-	public ContactObjectsByHTMLPagesStep(String description, String vcardUrl, String pictureUrl) {
+	public ContactObjectsByHTMLAnchorsStep(String description, String vcardUrl, String pictureUrl) {
 		this.description = description;
 		this.vcardUrl = vcardUrl;
 		this.pictureUrl = pictureUrl;
@@ -93,9 +93,13 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
 		VersitDefinition.Reader versitReader;
 		String encoding = "ISO-8859-1";
-		
-		for (HtmlPage page : pages) {			
+		//int counter=0;
+		for (HtmlAnchor anchor : anchors) {			
     		try {
+    			//counter ++;
+    			//System.out.println("***** Contact No. " + Integer.toString(counter));
+    			//System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
+    			HtmlPage page = anchor.click();
     			Contact contact = new Contact();
     			TextPage vcardPage = null;
     			String imageUrl = "";
@@ -166,16 +170,16 @@ public class ContactObjectsByHTMLPagesStep extends AbstractStep implements
 		return contactObjectsArray;
 	}
 
-	public void setInput(List<HtmlPage> input) {
-		this.pages = input;
+	public void setInput(List<HtmlAnchor> input) {
+		this.anchors = input;
 	}
 
-	public List<HtmlPage> getPages() {
-		return pages;
+	public List<HtmlAnchor> getAnchors() {
+		return anchors;
 	}
 
-	public void setPages(List<HtmlPage> pages) {
-		this.pages = pages;
+	public void setAnchors(List<HtmlAnchor> pages) {
+		this.anchors = pages;
 	}
 
 	public Contact[] getContactObjectsArray() {

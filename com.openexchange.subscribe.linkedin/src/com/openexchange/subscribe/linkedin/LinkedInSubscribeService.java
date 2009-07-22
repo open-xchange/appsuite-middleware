@@ -62,10 +62,10 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.crawler.ContactObjectsByHTMLPagesStep;
+import com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsStep;
 import com.openexchange.subscribe.crawler.LoginPageStep;
 import com.openexchange.subscribe.crawler.PageByUrlStep;
-import com.openexchange.subscribe.crawler.PagesByLinkRegexStep;
+import com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep;
 import com.openexchange.subscribe.crawler.Step;
 import com.openexchange.subscribe.crawler.Workflow;
 
@@ -130,10 +130,11 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
         listOfSteps.add(new PageByUrlStep(
             "Get to the no-javascript contacts list",
             "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-        listOfSteps.add(new PagesByLinkRegexStep(
+        listOfSteps.add(new AnchorsByLinkRegexStep(
             "Get all pages that link to a connections profile",
+            "(/connectionsnojs\\?split_page=).*",
             "(/profile\\?viewProfile=).*(goback).*"));
-        listOfSteps.add(new ContactObjectsByHTMLPagesStep(
+        listOfSteps.add(new ContactObjectsByHTMLAnchorsStep(
             "Extract the contact information from these pages",
             "/addressBookExport?exportMemberVCard",
             "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
