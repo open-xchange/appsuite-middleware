@@ -58,6 +58,7 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.internal.runners.statements.FailOnTimeout;
 import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.contact.action.AllRequest;
@@ -255,7 +256,7 @@ public class ContactTestManager {
 	 */
 	public void cleanUp(){
 		for(Contact contact: new Vector<Contact>(createdEntities)){
-			deleteContactOnServer(contact);
+			deleteContactOnServer(contact, false);
 		}
 	}
 	
