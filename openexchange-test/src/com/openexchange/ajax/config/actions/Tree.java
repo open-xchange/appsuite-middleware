@@ -366,6 +366,14 @@ public enum Tree {
     CalendarNotifyNewModifiedDeleted("/modules/calendar/notifyNewModifiedDeleted"),
     CalendarNotifyNewAcceptedDeclinedAsCreator("/modules/calendar/notifyAcceptedDeclinedAsCreator"),
     CalendarNotifyNewAcceptedDeclinedAsParticipant("/modules/calendar/notifyAcceptedDeclinedAsParticipant"),
+    
+    /**
+     * Default status for new appointments in private/public folders, where the user is participant.
+     * This does not affect appointments created by this user, which always have the status "accepted".
+     * The status are described in  User participant object. Default is 0:none (added 2009-07-20/6.12)
+     */
+    CalendarDefaultStatusPrivate("/modules/calendar/defaultStatusPrivate"),
+    CalendarDefaultStatusPublic("/modules/calendar/defaultStatusPublic"),
 
     /** */
     ContactsEnabled("/modules/contacts/module"),
