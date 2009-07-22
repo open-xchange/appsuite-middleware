@@ -108,6 +108,7 @@ public class DefaultConfirmStatusUpdateTask implements UpdateTask {
                 stmt.execute();
                 stmt.close();
             }
+            con.commit();
         } catch (SQLException e) {
             rollback(con);
             throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, e.getMessage());
