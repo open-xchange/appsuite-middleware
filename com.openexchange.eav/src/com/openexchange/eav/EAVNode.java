@@ -100,9 +100,13 @@ public class EAVNode extends AbstractNode<EAVNode>{
     }
     
     public void setPayload(String...values) {
+        setPayload(EAVContainerType.MULTISET, values);
+    }
+    
+    public void setPayload(EAVContainerType cType, String...values) {
         this.payload = values;
         this.type = EAVType.STRING;
-        this.containerType = EAVContainerType.MULTISET;
+        this.containerType = cType;
     }
     
     //Booleans
@@ -114,9 +118,13 @@ public class EAVNode extends AbstractNode<EAVNode>{
     }
     
     public void setPayload(Boolean...values) {
+       setPayload(EAVContainerType.MULTISET, values); 
+    }
+    
+    public void setPayload(EAVContainerType cType, Boolean...values) {
         this.payload = values;
         this.type = EAVType.BOOLEAN;
-        this.containerType = EAVContainerType.MULTISET;
+        this.containerType = cType;
     }
     
     //Numbers
@@ -128,10 +136,19 @@ public class EAVNode extends AbstractNode<EAVNode>{
     }
     
     public void setPayload(Number...values) {
-        this.payload = values;
-        this.type = EAVType.NUMBER;
-        this.containerType = EAVContainerType.MULTISET;
+        setPayload(EAVType.NUMBER, EAVContainerType.MULTISET, values);
     }
+    
+    public void setPayload(EAVType type, Number...values) {
+        setPayload(type, EAVContainerType.MULTISET, values);
+    }
+    public void setPayload(EAVType type, EAVContainerType cType, Number...values) {
+        this.payload = values;
+        this.type = type;
+        this.containerType = cType;
+    }
+    
+    
     public boolean isMultiple() {
         return containerType.isMultiple();
     }

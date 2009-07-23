@@ -50,12 +50,65 @@
 package com.openexchange.eav;
 
 
+
 /**
- * {@link EAVTreeTransformationVisitor}
+ * {@link EAVSetTransformation}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface EAVTreeTransformationVisitor extends AbstractNodeVisitor<EAVTreeTransformation>{
+public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
+    private Object[] add;
+    private Object[] remove;
+    
+    private EAVType type;
+
+    private EAVSetTransformation() {
+        super();
+    }
+
+    public EAVSetTransformation(EAVSetTransformation parent, String name) {
+        super(parent, name);
+    }
+
+    public EAVSetTransformation(EAVSetTransformation parent) {
+        super(parent);
+    }
+
+    public EAVSetTransformation(String name) {
+        super(name);
+    }
+
+    
+    public Object[] getAdd() {
+        return add;
+    }
+
+    
+    public void setAdd(Object[] add) {
+        this.add = add;
+    }
+
+    
+    public Object[] getRemove() {
+        return remove;
+    }
+
+    
+    public void setRemove(Object[] remove) {
+        this.remove = remove;
+    }
+
+    
+    public EAVType getType() {
+        return type;
+    }
+
+    
+    public void setType(EAVType type) {
+        this.type = type;
+    }
+    
+    
     
 }

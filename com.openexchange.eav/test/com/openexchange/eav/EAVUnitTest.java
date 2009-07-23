@@ -50,10 +50,13 @@
 package com.openexchange.eav;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import junit.framework.TestCase;
+
+import static com.openexchange.eav.TransformList.*;
 
 /**
  * {@link EAVUnitTest}
@@ -62,6 +65,33 @@ import junit.framework.TestCase;
  */
 public class EAVUnitTest extends TestCase {
 
+    // Array Transformations
+    
+    public EAVSetTransformation TRANS(String name, EAVSetTransformation...children) {
+        EAVSetTransformation transformation = new EAVSetTransformation(name);
+        transformation.addChildren(children);
+        return transformation;
+    }
+    
+    public EAVSetTransformation TRANS(String name,  TransformList list) {
+        return TRANS(name, list, null);
+    }
+    
+    public EAVSetTransformation TRANS(String name,  TransformList list1, TransformList list2) {
+        EAVSetTransformation transformation = new EAVSetTransformation(name);
+        transformation.setType(list1.type);
+        for(TransformList transformList : Arrays.asList(list1, list2)) {
+            if(transformList == null) {
+                continue;
+            }
+            switch(transformList.operation) {
+            case ADD : transformation.setAdd(transformList.payload); break;
+            case REMOVE : transformation.setRemove(transformList.payload); break;
+            }
+        }
+        return transformation;
+    }
+    
     // Objects
 
     public EAVNode N(String name, EAVNode... children) {
@@ -69,12 +99,12 @@ public class EAVUnitTest extends TestCase {
         node.addChildren(children);
         return node;
     }
-    
+
     public EAVNode EMPTY_OBJECT(String name) {
         EAVNode node = new EAVNode(name);
         return node;
     }
-    
+
     public EAVNode NULL(String name) {
         return EAVNode.nullNode(name);
     }
@@ -96,6 +126,20 @@ public class EAVUnitTest extends TestCase {
         return node;
     }
 
+    public EAVNode SET(String name, String... values) {
+        EAVNode node = new EAVNode(name);
+        node.setPayload(EAVContainerType.SET, values);
+        return node;
+    }
+
+    public TransformList ADD(String... strings) {
+        return new TransformList(EAVType.STRING, ADD, strings);
+    }
+
+    public TransformList REMOVE(String... strings) {
+        return new TransformList(EAVType.STRING, REMOVE, strings);
+    }
+
     // Booleans
 
     public EAVNode N(String name, Boolean... values) {
@@ -114,6 +158,21 @@ public class EAVUnitTest extends TestCase {
         return node;
     }
 
+    public EAVNode SET(String name, Boolean... values) {
+        EAVNode node = new EAVNode(name);
+        node.setPayload(EAVContainerType.SET, values);
+        return node;
+    }
+    
+    public TransformList ADD(Boolean... values) {
+        return new TransformList(EAVType.STRING, ADD, values);
+    }
+
+    public TransformList REMOVE(Boolean...values) {
+        return new TransformList(EAVType.BOOLEAN, REMOVE, values);
+    }
+
+
     // Numbers
 
     public EAVNode N(String name, Number... values) {
@@ -131,6 +190,21 @@ public class EAVUnitTest extends TestCase {
         node.setPayload(values);
         return node;
     }
+
+    public EAVNode SET(String name, Number... values) {
+        EAVNode node = new EAVNode(name);
+        node.setPayload(EAVType.NUMBER, EAVContainerType.SET, values);
+        return node;
+    }
+    
+    public TransformList ADD(Number... values) {
+        return new TransformList(EAVType.STRING, ADD, values);
+    }
+
+    public TransformList REMOVE(Number...values) {
+        return new TransformList(EAVType.BOOLEAN, REMOVE, values);
+    }
+
 
     // Other Numbers (Date and Time)
 
@@ -154,10 +228,33 @@ public class EAVUnitTest extends TestCase {
             throw new IllegalArgumentException("Numbers can not be of type " + type.name());
         }
         EAVNode node = new EAVNode(name);
-        node.setPayload(values);
+        node.setPayload(type, values);
+        return node;
+    }
+
+    public EAVNode SET(String name, EAVType type, Number... values) {
+        if (!ACCEPTABLE_NUMBER_TYPES.contains(type)) {
+            throw new IllegalArgumentException("Numbers can not be of type " + type.name());
+        }
+        EAVNode node = new EAVNode(name);
+        node.setPayload(type, EAVContainerType.SET, values);
         return node;
     }
     
+    public TransformList ADD(EAVType type, Number... values) {
+        if (!ACCEPTABLE_NUMBER_TYPES.contains(type)) {
+            throw new IllegalArgumentException("Numbers can not be of type " + type.name());
+        }
+        return new TransformList(type, ADD, values);
+    }
+
+    public TransformList REMOVE(EAVType type, Number...values) {
+        if (!ACCEPTABLE_NUMBER_TYPES.contains(type)) {
+            throw new IllegalArgumentException("Numbers can not be of type " + type.name());
+        }
+        return new TransformList(type, REMOVE, values);
+    }
+
 
     public static void assertEquals(EAVNode expected, EAVNode actual) {
         assertEquals("", expected, actual);
@@ -196,7 +293,7 @@ public class EAVUnitTest extends TestCase {
                 failComparison(message, expected, actual);
             }
             EAVTypeSwitcher compare = null;
-            if(expectedNode.isMultiple()) {
+            if (expectedNode.isMultiple()) {
                 compare = new EAVMultipleCompare();
             } else {
                 compare = new EAVPayloadCompare();
@@ -229,7 +326,7 @@ public class EAVUnitTest extends TestCase {
         final StringBuilder builder = new StringBuilder("\n");
         final EAVValuePrettyPrint prettyPrinter = new EAVValuePrettyPrint();
         final EAVMultiplePrettyPrint prettyPrinterMultiple = new EAVMultiplePrettyPrint();
-        
+
         node.visit(new EAVNodeVisitor() {
 
             public void visit(int index, EAVNode node) {
@@ -237,7 +334,9 @@ public class EAVUnitTest extends TestCase {
                     builder.append("    ");
                 }
                 builder.append(node.getName());
-                String pretty = (String) node.getType().doSwitch(node.isMultiple() ? prettyPrinterMultiple : prettyPrinter, node.getPayload());
+                String pretty = (String) node.getType().doSwitch(
+                    node.isMultiple() ? prettyPrinterMultiple : prettyPrinter,
+                    node.getPayload());
                 if (pretty != null) {
                     builder.append(" : ").append(pretty);
                 }

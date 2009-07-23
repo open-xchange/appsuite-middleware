@@ -50,17 +50,26 @@
 package com.openexchange.eav;
 
 
-
 /**
- * {@link EAVTreeTransformation}
+ * {@link TransformList}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVTreeTransformation extends AbstractNode<EAVTreeTransformation>{
-    private Object[] add;
-    private Object[] remove;
+public class TransformList {
+    public static final int ADD = 1;
+    public static final int REMOVE = -1;
     
-    private EAVType type;
+    
+    public Object[] payload;
+    public EAVType type;
+    public int operation;
+    
+    public TransformList(EAVType type, int operation, Object[] payload) {
+        this.payload = payload;
+        this.type = type;
+        this.operation = operation;
+    }
+
     
 }
