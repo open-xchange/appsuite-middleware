@@ -85,6 +85,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -298,7 +299,7 @@ public final class IMAPCommandsCollection {
         if (li != null) {
             return li[0].separator;
         }
-        return '/';
+        return MailProperties.getInstance().getDefaultSeparator();
     }
 
     /**
