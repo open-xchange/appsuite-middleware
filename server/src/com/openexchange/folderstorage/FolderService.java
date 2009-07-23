@@ -1,0 +1,161 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.folderstorage;
+
+import java.util.Date;
+
+/**
+ * {@link FolderService} - The folder service.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface FolderService {
+
+    /**
+     * Gets the folder identified by given folder identifier and tree identifier.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The folder
+     * @throws FolderException If folder cannot be returned
+     */
+    Folder getFolder(String treeId, String folderId) throws FolderException;
+
+    /**
+     * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
+     * <p>
+     * Does only work on virtual trees.
+     * 
+     * @param sourceTreeId The source tree identifier
+     * @param folderId The (source) folder identifier
+     * @param targetTreeId The target tree identifier
+     * @param targetParentId The target parent identifier
+     * @throws FolderException If folder cannot be added
+     */
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId) throws FolderException;
+
+    /**
+     * Unsubscribes the specified folder in given (virtual) tree only.
+     * <p>
+     * Does only work on virtual trees.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @throws FolderException If folder cannot be deleted
+     */
+    void unsubscribeFolder(String treeId, String folderId) throws FolderException;
+
+    /**
+     * Gets the subfolders of specified parent in given tree.
+     * 
+     * @param treeId The tree identifier
+     * @param parentId The parent identifier
+     * @return The subfolders
+     * @throws FolderException If subfolders cannot be returned
+     */
+    Folder[] getSubfolders(String treeId, String parentId) throws FolderException;
+
+    /**
+     * Gets the changed folders since specified time stamp.
+     * 
+     * @param treeId The tree identifier
+     * @param since The time stamp
+     * @return The changed folders since specified time stamp
+     * @throws FolderException If changed folders cannot be returned
+     */
+    Folder[] getSubfolders(String treeId, Date since) throws FolderException;
+
+    /**
+     * Gets the path from given folder to specified tree's root folder.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The path from given folder to specified tree's root folder
+     * @throws FolderException If path cannot be returned
+     */
+    Folder[] getPath(String treeId, String folderId) throws FolderException;
+
+    /**
+     * Deletes the specified folder in given tree.
+     * <p>
+     * The folder is deleted from all trees and its subfolders as well
+     * 
+     * @param folderId The folder identifier
+     * @throws FolderException If folder cannot be deleted
+     */
+    void deleteFolder(String folderId) throws FolderException;
+
+    /**
+     * Clears the content of specified folder in given tree.
+     * 
+     * @param folderId The folder identifier
+     * @throws FolderException If folder cannot be cleared
+     */
+    void clearFolder(String folderId) throws FolderException;
+
+    /**
+     * Updates a folder identified through given folder object.
+     * 
+     * @param folder The folder object containing tree identifier, folder identifier and modified data.
+     * @throws FolderException If update fails
+     */
+    void updateFolder(Folder folder) throws FolderException;
+
+    /**
+     * Creates a new folder described by given folder object.
+     * 
+     * @param folder The folder object containing tree identifier, parent identifier and data.
+     * @throws FolderException If creation fails
+     */
+    void createFolder(Folder folder) throws FolderException;
+
+    // TODO: default folder? all visible folders
+
+}

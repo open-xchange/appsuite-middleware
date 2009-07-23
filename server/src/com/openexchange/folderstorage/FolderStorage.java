@@ -1,0 +1,137 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.folderstorage;
+
+/**
+ * {@link FolderStorage} - A folder storage bound to a certain folder source; e.g database, email, etc.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface FolderStorage {
+
+    /**
+     * Gets the folder denoted by specified folder ID.
+     * 
+     * @param folderId The folder ID
+     * @return The folder
+     * @throws FolderException If the folder cannot be returned
+     */
+    Folder getFolder(String folderId) throws FolderException;
+
+    /**
+     * Gets this storage's default folder for specified entity identifier.
+     * 
+     * @param entity The entity identifier
+     * @return The default folder for specified entity identifier
+     * @throws FolderException If the default folder cannot be returned
+     */
+    Folder getDefaultFolder(int entity) throws FolderException;
+
+    /**
+     * Deletes the folder denoted by specified folder ID.
+     * <p>
+     * A {@link FolderException} is thrown if denoted folder contains subfolders.
+     * 
+     * @param folderId The folder ID
+     * @throws FolderException If deletion fails
+     */
+    void deleteFolder(String folderId) throws FolderException;
+
+    /**
+     * Updates the data of the given folder on the storage.
+     * 
+     * @param folder object containing new folder data.
+     * @throws FolderException If changing the folder data fails.
+     */
+    void updateFolder(Folder folder) throws FolderException;
+
+    /**
+     * Creates the given folder on the storage.
+     * 
+     * @param folder The object containing the new folder data.
+     * @throws FolderException if creating the folder fails.
+     */
+    void createFolder(Folder folder) throws FolderException;
+
+    /**
+     * Gets the subfolder identifiers for specified parent.
+     * 
+     * @param parentId The parent identifier
+     * @return The subfolder identifiers for specified parent
+     * @throws FolderException If returning the subfolder identifiers fails
+     */
+    SortableId[] getSubfolders(String parentId) throws FolderException;
+
+    /**
+     * Starts a transaction on folder storage.
+     * 
+     * @param parameters The parameters
+     * @return The parameters with storage-specific extensions
+     * @throws FolderException If storage parameters cannot be returned
+     */
+    StorageParameters startTransaction(StorageParameters parameters) throws FolderException;
+
+    /**
+     * Publishes made changes on the storage.
+     * 
+     * @param params the storage parameters.
+     * @throws FolderException if committing the made changes fails.
+     */
+    void commitTransaction(StorageParameters params) throws FolderException;
+
+    /**
+     * Discards made changes on the storage. This method does not throw an exception because a rollback should only be used if already some
+     * problem or exception occurred. Problems executing this method should only be logged.
+     * 
+     * @param params the storage parameters.
+     */
+    void rollback(StorageParameters params);
+
+}
