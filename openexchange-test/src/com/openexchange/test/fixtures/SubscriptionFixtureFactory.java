@@ -93,17 +93,17 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
             
             Map<String, Object> config = new HashMap<String, Object>();
             
-            if (values.containsKey("target")) {
-                config.put("target", values.get("target"));
-                values.remove("target");
+            if (values.containsKey("source")) {
+                config.put("source", values.get("source"));
+                values.remove("source");
             }
-            if (values.containsKey("site_name")) {
-                config.put("site_name", values.get("site_name"));
-                values.remove("site_name");
+            if (values.containsKey("login")) {
+                config.put("login", values.get("login"));
+                values.remove("login");
             }
-            if (values.containsKey("secret")) {
-                config.put("secret", values.get("secret"));
-                values.remove("secret");
+            if (values.containsKey("password")) {
+                config.put("password", values.get("password"));
+                values.remove("password");
             }
             
             subscription.setConfiguration(config);
@@ -118,7 +118,7 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
 
         private void defaults(final Map<String, String> values) {
         	if (false == values.containsKey("displayName")) {
-        	    values.put("displayName", values.get("site_name"));
+        	    values.put("displayName", values.get("login"));
         	}
         }
     }
