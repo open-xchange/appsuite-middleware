@@ -81,6 +81,7 @@ public class InterfaceTests {
         tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.session.SessionTestSuite.suite());
         tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
+        tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
         tests.addTest(com.openexchange.ajax.user.UserAJAXSuite.suite());
 
 		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
