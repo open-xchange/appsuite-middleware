@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import static com.openexchange.java.Autoboxing.i2I;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i2I;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,7 +58,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.java.JSON;
 
 /**
@@ -69,29 +68,28 @@ import com.openexchange.java.JSON;
 public class DeletePublicationRequest extends AbstractPublicationRequest<DeletePublicationResponse> {
 
     private List<Integer> ids;
-    
+
     public Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
         return params.toArray(new Parameter[0]);
     }
-    
-    
+
     public DeletePublicationRequest() {
         super();
         ids = new LinkedList<Integer>();
     }
-    
-    public DeletePublicationRequest(int id){        
+
+    public DeletePublicationRequest(int id) {
         this();
         ids.add(I(id));
     }
-    
-    public DeletePublicationRequest(int... id){        
+
+    public DeletePublicationRequest(int... id) {
         this();
         ids = Arrays.asList(i2I(id));
     }
-    
+
     public Object getBody() throws JSONException {
         return JSON.collection2jsonArray(ids);
     }
@@ -99,7 +97,7 @@ public class DeletePublicationRequest extends AbstractPublicationRequest<DeleteP
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
-    
+
     public AbstractAJAXParser<? extends DeletePublicationResponse> getParser() {
         return new AbstractAJAXParser<DeletePublicationResponse>(isFailOnError()) {
 

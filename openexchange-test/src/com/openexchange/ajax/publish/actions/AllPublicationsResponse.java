@@ -53,36 +53,31 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.publish.json.PublicationParser;
-
 
 /**
  * {@link AllPublicationsResponse}
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AllPublicationsResponse extends AbstractAJAXResponse{
+public class AllPublicationsResponse extends AbstractAJAXResponse {
 
     public AllPublicationsResponse(Response response) {
         super(response);
     }
-    
-    public List<JSONArray> getAll() throws PublicationException, PublicationJSONException, JSONException{
+
+    public List<JSONArray> getAll() throws PublicationException, PublicationJSONException, JSONException {
         JSONArray all = (JSONArray) getData();
         LinkedList<JSONArray> allPubs = new LinkedList<JSONArray>();
-        
-        if(all == null)
+
+        if (all == null)
             return allPubs;
-        
-        for(int i = 0, length = all.length(); i < length; i++){
-            allPubs.add( all.getJSONArray(i));
+
+        for (int i = 0, length = all.length(); i < length; i++) {
+            allPubs.add(all.getJSONArray(i));
         }
         return allPubs;
     }
