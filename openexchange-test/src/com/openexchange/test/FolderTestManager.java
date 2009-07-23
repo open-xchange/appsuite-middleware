@@ -162,7 +162,15 @@ public class FolderTestManager extends TestCase {
         DeleteRequest request = new DeleteRequest(folderToDelete);
         client.execute(request);
         removeFolderFromCleanupList(folderToDelete);
+    }
 
+    /**
+     * Deletes a folder via HTTP-API
+     */
+    public void deleteFolderOnServer(int folderID, Date lastModified) throws AjaxException, IOException, SAXException, JSONException {
+        DeleteRequest request = new DeleteRequest(folderID, lastModified);
+        client.execute(request);
+        removeNonMailFolderFromCleanupList(folderID);
     }
 
     /**
@@ -182,6 +190,19 @@ public class FolderTestManager extends TestCase {
             // mail folder:
             if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
                 folderToDelete.getFullName())){
+                insertedOrUpdatedFolders.remove(i);
+            }
+        }
+    }
+    
+    /**
+     * Removes a non-mail folder form the cleanup list.
+     */
+    private void removeNonMailFolderFromCleanupList(int folderID) {
+        for (int i = 0, length = insertedOrUpdatedFolders.size(); i < length; i++) {
+            FolderObject folder = insertedOrUpdatedFolders.get(i);
+            // normal folder:
+            if (folder.getObjectID() == folderID){
                 insertedOrUpdatedFolders.remove(i);
             }
         }
