@@ -47,38 +47,19 @@
  *
  */
 
-package com.openexchange.ajax.publish;
+package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.ajax.publish.tests.AllPublicationsTest;
-import com.openexchange.ajax.publish.tests.CreatePublicationTest;
-import com.openexchange.ajax.publish.tests.DeletePublicationTest;
-import com.openexchange.ajax.publish.tests.GetPublicationTest;
-import com.openexchange.ajax.publish.tests.ListPublicationsTest;
-import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * {@link MailTestSuite}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- *
  */
-public final class PublishTestSuite extends TestSuite {
+public class UpdatePublicationResponse extends AbstractAJAXResponse {
 
-    private PublishTestSuite() {
-        super();
+    protected UpdatePublicationResponse(Response response) {
+        super(response);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(AllPublicationsTest.class);
-        suite.addTestSuite(CreatePublicationTest.class);
-        suite.addTestSuite(GetPublicationTest.class);
-        suite.addTestSuite(DeletePublicationTest.class);
-        suite.addTestSuite(ListPublicationsTest.class);
-        suite.addTestSuite(UpdatePublicationTest.class);
-        return suite;
-        
-    }
 }

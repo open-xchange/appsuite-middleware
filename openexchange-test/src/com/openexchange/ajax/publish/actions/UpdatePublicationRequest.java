@@ -47,38 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.publish;
+package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.ajax.publish.tests.AllPublicationsTest;
-import com.openexchange.ajax.publish.tests.CreatePublicationTest;
-import com.openexchange.ajax.publish.tests.DeletePublicationTest;
-import com.openexchange.ajax.publish.tests.GetPublicationTest;
-import com.openexchange.ajax.publish.tests.ListPublicationsTest;
-import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.json.PublicationJSONException;
+import com.openexchange.publish.json.PublicationWriter;
+
 
 /**
- * {@link MailTestSuite}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- *
  */
-public final class PublishTestSuite extends TestSuite {
+public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdatePublicationResponse> {
+    private Publication publication;
+    
+    public void setPublication(Publication publication) {
+        this.publication = publication;
+    }
 
-    private PublishTestSuite() {
+    public Publication getPublication() {
+        return publication;
+    }
+
+    public UpdatePublicationRequest(){
         super();
     }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(AllPublicationsTest.class);
-        suite.addTestSuite(CreatePublicationTest.class);
-        suite.addTestSuite(GetPublicationTest.class);
-        suite.addTestSuite(DeletePublicationTest.class);
-        suite.addTestSuite(ListPublicationsTest.class);
-        suite.addTestSuite(UpdatePublicationTest.class);
-        return suite;
-        
+    
+    public UpdatePublicationRequest(Publication pub){
+        this();
+        setPublication(pub);
     }
+    
+    public Object getBody() throws JSONException {
+        try {
+            return new PublicationWriter().write(getPublication());
+        } catch (PublicationJSONException e) {
+            throw new JSONException(e);
+        }
+    }
+
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public Parameter[] getParameters() {
+        return new Parameter[]{ new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE)};
+    }
+
+    public AbstractAJAXParser<? extends UpdatePublicationResponse> getParser() {
+        return new AbstractAJAXParser<UpdatePublicationResponse>(isFailOnError()) {
+
+            @Override
+            protected UpdatePublicationResponse createResponse(final Response response) throws JSONException {
+                return new UpdatePublicationResponse(response);
+            }
+        };
+    }
+
 }
