@@ -50,19 +50,21 @@
 package com.openexchange.eav;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
+import java.util.Set;
 
 /**
  * {@link EAVNode}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class EAVNode extends AbstractNode<EAVNode>{
-    
+public class EAVNode extends AbstractNode<EAVNode> {
+
     private Object payload;
+
     private EAVType type;
+
     private EAVContainerType containerType = EAVContainerType.SINGLE;
 
     public EAVNode() {
@@ -82,7 +84,7 @@ public class EAVNode extends AbstractNode<EAVNode>{
     }
 
     public EAVType getType() {
-        if(type == null) {
+        if (type == null) {
             type = EAVType.OBJECT;
         }
         return type;
@@ -98,68 +100,68 @@ public class EAVNode extends AbstractNode<EAVNode>{
         this.type = EAVType.STRING;
         this.containerType = EAVContainerType.SINGLE;
     }
-    
-    public void setPayload(String...values) {
+
+    public void setPayload(String... values) {
         setPayload(EAVContainerType.MULTISET, values);
     }
-    
-    public void setPayload(EAVContainerType cType, String...values) {
+
+    public void setPayload(EAVContainerType cType, String... values) {
         this.payload = values;
         this.type = EAVType.STRING;
         this.containerType = cType;
     }
-    
-    //Booleans
-    
+
+    // Booleans
+
     public void setPayload(Boolean value) {
         this.payload = value;
         this.type = EAVType.BOOLEAN;
         this.containerType = EAVContainerType.SINGLE;
     }
-    
-    public void setPayload(Boolean...values) {
-       setPayload(EAVContainerType.MULTISET, values); 
+
+    public void setPayload(Boolean... values) {
+        setPayload(EAVContainerType.MULTISET, values);
     }
-    
-    public void setPayload(EAVContainerType cType, Boolean...values) {
+
+    public void setPayload(EAVContainerType cType, Boolean... values) {
         this.payload = values;
         this.type = EAVType.BOOLEAN;
         this.containerType = cType;
     }
-    
-    //Numbers
-    
+
+    // Numbers
+
     public void setPayload(Number value) {
         this.payload = value;
         this.type = EAVType.NUMBER;
         this.containerType = EAVContainerType.SINGLE;
     }
-    
-    public void setPayload(Number...values) {
+
+    public void setPayload(Number... values) {
         setPayload(EAVType.NUMBER, EAVContainerType.MULTISET, values);
     }
-    
-    public void setPayload(EAVType type, Number...values) {
+
+    public void setPayload(EAVType type, Number... values) {
         setPayload(type, EAVContainerType.MULTISET, values);
     }
-    public void setPayload(EAVType type, EAVContainerType cType, Number...values) {
+
+    public void setPayload(EAVType type, EAVContainerType cType, Number... values) {
         this.payload = values;
         this.type = type;
         this.containerType = cType;
     }
-    
-    
+
     public boolean isMultiple() {
         return containerType.isMultiple();
     }
 
     public EAVPath getRelativePath(EAVPath relativePath) {
-        if(getPath().equals(relativePath)) {
+        if (getPath().equals(relativePath)) {
             return new EAVPath(name);
         }
         return parent.getRelativePath(relativePath).append(name);
     }
-    
+
     public EAVPath getRelativePath(EAVNode relativeNode) {
         return getRelativePath(relativeNode.getPath());
     }
@@ -177,5 +179,52 @@ public class EAVNode extends AbstractNode<EAVNode>{
         return node;
     }
 
-    
+    public EAVContainerType getContainerType() {
+        return containerType;
+    }
+
+    public void setPayload(EAVType type, EAVContainerType containerType, Collection<Object> collection) {
+        this.type = type;
+        this.containerType = containerType;
+
+        this.payload = collection.toArray((Object[]) type.doSwitch(TYPED_ARRAY, collection.size()));
+
+    }
+
+    private static final EAVTypeSwitcher TYPED_ARRAY = new EAVTypeSwitcher() {
+
+        public Object binary(Object... args) {
+            throw new UnsupportedOperationException("Implement me ;)");
+        }
+
+        public Object bool(Object... args) {
+            return new Boolean[(Integer) args[0]];
+        }
+
+        public Object date(Object... args) {
+            return new Number[(Integer) args[0]];
+        }
+
+        public Object nullValue(Object... args) {
+            throw new IllegalArgumentException("There are no sets of type NULL");
+        }
+
+        public Object number(Object... args) {
+            return new Number[(Integer) args[0]];
+        }
+
+        public Object object(Object... args) {
+            throw new IllegalArgumentException("There are no sets of type OBJECT");
+        }
+
+        public Object string(Object... args) {
+            return new String[(Integer) args[0]];
+        }
+
+        public Object time(Object... args) {
+            return new Number[(Integer) args[0]];
+        }
+
+    };
+
 }

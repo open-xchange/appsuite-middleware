@@ -47,68 +47,71 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.memory;
 
-
+import com.openexchange.eav.EAVException;
+import com.openexchange.eav.EAVExceptionFactory;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link EAVSetTransformation}
- *
+ * {@link EAVErrorMessages}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
-    private Object[] add = new Object[0];
-    private Object[] remove = new Object[0];
-    
-    private EAVType type;
+public enum EAVErrorMessages implements OXErrorMessage {
 
-    private EAVSetTransformation() {
-        super();
+    PATH_TAKEN(1, "The path '%s' has already been taken", "Update the path or save the data elsewhere", AbstractOXException.Category.USER_INPUT), 
+    TYPE_MISMATCH(2, "The type for path '%s' ( %s, %s ) is incompatible with the supplied type (%s, %s ).", "Updates must have correct types", AbstractOXException.Category.USER_INPUT), 
+    UNKNOWN_PATH(3, "The path '%s' does not exist.", "Only update paths that exist. You may want to insert the path, if it is to be created freshly", AbstractOXException.Category.USER_INPUT), 
+    CAN_ONLY_ADD_AND_REMOVE_FROM_SET_OR_MULTISET(4, "Can only add to or remove from a set or multiset. Object at path '%s' is '%s'", "Update arrays only applies to sets and multisets", AbstractOXException.Category.USER_INPUT);
+
+    public static EAVExceptionFactory FACTORY = new EAVExceptionFactory() {
+
+        @Override
+        protected void knownExceptions() {
+            declareAll(EAVErrorMessages.values());
+        }
+
+    };
+
+    private AbstractOXException.Category category;
+
+    private String help;
+
+    private String message;
+
+    private int errorCode;
+
+    EAVErrorMessages(final int errorCode, final String message, final String help, final AbstractOXException.Category category) {
+        this.category = category;
+        this.help = help;
+        this.message = message;
+        this.errorCode = errorCode;
     }
 
-    public EAVSetTransformation(EAVSetTransformation parent, String name) {
-        super(parent, name);
+    public int getDetailNumber() {
+        return errorCode;
     }
 
-    public EAVSetTransformation(EAVSetTransformation parent) {
-        super(parent);
+    public String getMessage() {
+        return message;
     }
 
-    public EAVSetTransformation(String name) {
-        super(name);
+    public String getHelp() {
+        return help;
     }
 
-    
-    public Object[] getAdd() {
-        return add;
+    public AbstractOXException.Category getCategory() {
+        return category;
     }
 
-    
-    public void setAdd(Object[] add) {
-        this.add = add;
+    public EAVException create(final Throwable cause, final Object... args) {
+        return FACTORY.create(this, cause, args);
     }
 
-    
-    public Object[] getRemove() {
-        return remove;
+    public EAVException create(final Object... args) {
+        return FACTORY.create(this, args);
     }
 
-    
-    public void setRemove(Object[] remove) {
-        this.remove = remove;
-    }
-
-    
-    public EAVType getType() {
-        return type;
-    }
-
-    
-    public void setType(EAVType type) {
-        this.type = type;
-    }
-    
-    
-    
 }

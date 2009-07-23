@@ -47,68 +47,63 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.memory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.eav.EAVContainerSwitcher;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVSetTransformation;
 
 
 /**
- * {@link EAVSetTransformation}
+ * {@link EAVSetUpdater}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
-    private Object[] add = new Object[0];
-    private Object[] remove = new Object[0];
-    
-    private EAVType type;
+public class EAVSetUpdater implements EAVContainerSwitcher {
 
-    private EAVSetTransformation() {
-        super();
-    }
-
-    public EAVSetTransformation(EAVSetTransformation parent, String name) {
-        super(parent, name);
-    }
-
-    public EAVSetTransformation(EAVSetTransformation parent) {
-        super(parent);
-    }
-
-    public EAVSetTransformation(String name) {
-        super(name);
-    }
-
-    
-    public Object[] getAdd() {
-        return add;
-    }
-
-    
-    public void setAdd(Object[] add) {
-        this.add = add;
-    }
-
-    
-    public Object[] getRemove() {
-        return remove;
-    }
-
-    
-    public void setRemove(Object[] remove) {
-        this.remove = remove;
-    }
-
-    
-    public EAVType getType() {
-        return type;
-    }
-
-    
-    public void setType(EAVType type) {
-        this.type = type;
+    private void handle(EAVNode node, EAVSetTransformation transformation, Collection<Object> payloadWithConstraints) {
+        for(Object element : transformation.getAdd()){
+            payloadWithConstraints.add(element);
+        }
+        
+        for(Object element : transformation.getRemove()){
+            payloadWithConstraints.remove(element);
+        }
+        
+        node.setPayload(node.getType(), node.getContainerType(), payloadWithConstraints);
     }
     
-    
-    
+    public Object multiset(Object... args) {
+        EAVNode node = (EAVNode) args[0];
+        EAVSetTransformation transformation = (EAVSetTransformation) args[1];
+        
+        List<Object> multiset = new ArrayList<Object>(Arrays.asList((Object[])node.getPayload()));
+        
+        handle(node, transformation, multiset);
+        
+        return null;
+    }
+
+    public Object set(Object... args) {
+        EAVNode node = (EAVNode) args[0];
+        EAVSetTransformation transformation = (EAVSetTransformation) args[1];
+        
+        Set<Object> set = new HashSet<Object>(Arrays.asList((Object[])node.getPayload()));
+        
+        handle(node, transformation, set);
+        
+        return null;
+    }
+
+    public Object single(Object... args) {
+        throw new UnsupportedOperationException("Can only apply add and remove to multiples");
+    }
+
 }

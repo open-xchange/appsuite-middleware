@@ -125,6 +125,12 @@ public class AbstractNode<T extends AbstractNode<T>> {
         }
         this.children = newNodes;
     }
+    
+    public void replaceChild(T tree) {
+        removeChild(tree.getName());
+        addChildren(tree);
+    }
+
 
     public void visitUpward(AbstractNodeVisitor<T> visitor) {
         visitUpward(0, visitor);

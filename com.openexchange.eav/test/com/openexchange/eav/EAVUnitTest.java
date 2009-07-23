@@ -165,7 +165,7 @@ public class EAVUnitTest extends TestCase {
     }
     
     public TransformList ADD(Boolean... values) {
-        return new TransformList(EAVType.STRING, ADD, values);
+        return new TransformList(EAVType.BOOLEAN, ADD, values);
     }
 
     public TransformList REMOVE(Boolean...values) {
@@ -198,11 +198,11 @@ public class EAVUnitTest extends TestCase {
     }
     
     public TransformList ADD(Number... values) {
-        return new TransformList(EAVType.STRING, ADD, values);
+        return new TransformList(EAVType.NUMBER, ADD, values);
     }
 
     public TransformList REMOVE(Number...values) {
-        return new TransformList(EAVType.BOOLEAN, REMOVE, values);
+        return new TransformList(EAVType.NUMBER, REMOVE, values);
     }
 
 

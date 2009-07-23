@@ -47,68 +47,62 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.memory;
 
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVSetTransformation;
+import com.openexchange.eav.EAVUnitTest;
 
 
 /**
- * {@link EAVSetTransformation}
+ * {@link SetUpdaterTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
-    private Object[] add = new Object[0];
-    private Object[] remove = new Object[0];
+public class SetUpdaterTest extends EAVUnitTest {
     
-    private EAVType type;
-
-    private EAVSetTransformation() {
-        super();
-    }
-
-    public EAVSetTransformation(EAVSetTransformation parent, String name) {
-        super(parent, name);
-    }
-
-    public EAVSetTransformation(EAVSetTransformation parent) {
-        super(parent);
-    }
-
-    public EAVSetTransformation(String name) {
-        super(name);
-    }
-
+    private EAVSetUpdater updater = new EAVSetUpdater();
     
-    public Object[] getAdd() {
-        return add;
-    }
-
-    
-    public void setAdd(Object[] add) {
-        this.add = add;
-    }
-
-    
-    public Object[] getRemove() {
-        return remove;
-    }
-
-    
-    public void setRemove(Object[] remove) {
-        this.remove = remove;
-    }
-
-    
-    public EAVType getType() {
-        return type;
-    }
-
-    
-    public void setType(EAVType type) {
-        this.type = type;
+    public void testAddToSet() {
+        EAVNode set = SET("exampleSet", 1,2,3);
+        EAVSetTransformation update = TRANS("exampleSet", ADD(2,3,4,5));
+        EAVNode expected = SET("exampleSet", 1,2,3,4,5);
+        
+        set.getContainerType().doSwitch(updater, set, update);
+        
+        assertEquals(expected, set);
     }
     
+    public void testAddToMultiset() {
+        EAVNode set = MULTISET("exampleMultiSet", 1,2,3);
+        EAVSetTransformation update = TRANS("exampleMultiSet", ADD(2,3,4,5));
+        EAVNode expected = MULTISET("exampleMultiSet", 1,2,2,3,3,4,5);
+        
+        set.getContainerType().doSwitch(updater, set, update);
+        
+        assertEquals(expected, set);
+    }
     
+    public void testRemoveFromSet() {
+        EAVNode set = SET("exampleSet", 1,2,3);
+        EAVSetTransformation update = TRANS("exampleSet", REMOVE(2,3,4,5));
+        EAVNode expected = SET("exampleSet", 1);
+        
+        set.getContainerType().doSwitch(updater, set, update);
+        
+        assertEquals(expected, set);
+        
+    }
+    
+    public void testRemoveFromMultiset() {
+        EAVNode set = MULTISET("exampleSet", 1,2,2,3);
+        EAVSetTransformation update = TRANS("exampleSet", REMOVE(2,3,4,5));
+        EAVNode expected = MULTISET("exampleSet", 1,2);
+        
+        set.getContainerType().doSwitch(updater, set, update);
+        
+        assertEquals(expected, set);
+    }
     
 }

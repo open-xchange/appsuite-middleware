@@ -49,6 +49,7 @@
 
 package com.openexchange.eav.storage.memory;
 
+import com.openexchange.eav.EAVException;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVPath;
 import com.openexchange.eav.EAVSetTransformation;
@@ -79,7 +80,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
      * First we test the happy paths.
      */
     
-    public void testInsert() {
+    public void testInsert() throws EAVException{
         EAVNode tree = N("com.openexchange.test", 
                             N("exampleString", "Hallo"),
                             N("exampleBoolean", true),
@@ -104,7 +105,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
         
     }
 
-    public void testUpdateSingleValue() {
+    public void testUpdateSingleValue() throws EAVException{
         EAVNode tree = N("com.openexchange.test", 
                             N("exampleString", "Hello")
                         );
@@ -121,7 +122,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
         assertEquals(expected, node);
     }
 
-    public void testUpdateObjectIncrementally() {
+    public void testUpdateObjectIncrementally() throws EAVException{
         EAVNode tree = N("com.openexchange.test", 
                             N("subObject", 
                                 N("exampleString", "Hello")
@@ -159,7 +160,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
         assertEquals(expected, loaded);
     }
     
-    public void testRemoveValueWithUpdateToNull() {
+    public void testRemoveValueWithUpdateToNull() throws EAVException{
         EAVNode tree = N("com.openexchange.test", 
                             N("subObject", 
                                 N("exampleString", "Hello")
@@ -185,12 +186,12 @@ public class InMemoryStorageTest extends EAVUnitTest {
     
     }
     
-    public void testRemoveSubtreeWithUpdateToNull() {
+    public void testRemoveSubtreeWithUpdateToNull() throws EAVException{
         EAVNode tree = N("com.openexchange.test", 
-            N("subObject", 
-                N("exampleString", "Hello")
-             )
-        );
+                            N("subObject", 
+                                   N("exampleString", "Hello")
+                            )
+                        );
 
 
         EAVNode update = NULL("subObject");
@@ -204,11 +205,29 @@ public class InMemoryStorageTest extends EAVUnitTest {
         assertEquals(expected, loaded);
     }
     
-    public void testRemoveDeeperNextingWithUpdateToNull() {
+    public void testRemoveDeeperNestingWithUpdateToNull() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+                            N("subObject", 
+                                N("exampleString", "Hello")
+                            )
+                        );
+
+
+        EAVNode update = N("com.openexchange.test", 
+                            NULL("subObject")
+                          );
+
+        EAVNode expected = EMPTY_OBJECT("com.openexchange.test");
+
+        storage.insert(ctx, PARENT, tree);
+        storage.update(ctx, PARENT, update);
+        EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
         
+        assertEquals(expected, loaded);
     }
     
-    public void testAddToSet() {
+    // Note: For a detailed test of set operations: see: SetUpdaterTest
+    public void testUpdateArrayBatch() throws EAVException{
         EAVNode tree = N("com.openexchange.test", 
                             SET("testSet", "Hallo", "Welt")
                         );
@@ -222,84 +241,231 @@ public class InMemoryStorageTest extends EAVUnitTest {
                             );
         
         storage.insert(ctx, PARENT, tree);
-        storage.updateArrays(ctx, PARENT.append(tree.getName()), update);
+        storage.updateArrays(ctx, PARENT, update);
+        EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
+        
+        assertEquals(expected, loaded);
+    }
+        
+    public void testReplaceSubtree() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+                            N("subObject", 
+                                N("exampleString", "Hello")
+                            )
+                        );
+        
+        EAVNode update = N("subObject", 
+                            N("otherAttribute", 12)
+                         );
+        EAVNode expected = N("com.openexchange.test", 
+                                N("subObject", 
+                                    N("otherAttribute", 12)
+                                )
+                            );
+        
+        storage.insert(ctx, PARENT, tree);
+        storage.replace(ctx, PARENT.append(tree.getName()), update);
+        
         EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
         
         assertEquals(expected, loaded);
     }
     
-    public void testRemoveFromSet() {
-        
-    }
-    
-    public void testAddToMultiset() {
-        
-    }
-    
-    public void testRemoveFromMultiset() {
-        
-    }
-    
-    public void testUpdateArrayBatch() {
-        
-    }
-    
-    public void testReplaceSubtree() {
-        
-    }
-    
-    public void testReplaceSingleValueChangingType() {
+    public void testReplaceSingleValueChangingType() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+            N("subObject", 
+                  N("attribute", "Hello")
+             )
+        );
 
+        EAVNode update = N("attribute", 12);
+
+        EAVNode expected = N("com.openexchange.test", 
+                                N("subObject", 
+                                    N("attribute", 12)
+                                )
+                            );
+
+        storage.insert(ctx, PARENT, tree);
+        storage.replace(ctx, PARENT.append(tree.getName()).append("subObject"), update);
+
+        EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
+
+        assertEquals(expected, loaded);
     }
 
-    public void testGet() {
-        
-    }
+    // Note: Regular 'get' was tested at length in the upper test cases.
     
-    public void testGetShouldOmitBinaries() {
+    public void testGetShouldOmitBinaries() throws EAVException{
         
     }
  
-   public void testGetAllBinaries() {
+    public void testGetAllBinaries() throws EAVException{
         
     }
     
-    public void testGetCertainBinaries() {
+    public void testGetCertainBinaries() throws EAVException{
         
     }
     
-    public void testDeleteSingleValue() {
-        
+    public void testDeleteSingleValue() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+                            N("subObject", 
+                                 N("attribute", "Hello")
+                            )
+                        );
+
+       
+        EAVNode expected = N("com.openexchange.test", 
+                                EMPTY_OBJECT("subObject")
+                            );
+
+
+        storage.insert(ctx, PARENT, tree);
+        storage.delete(ctx, PARENT.append(tree.getName()).append("subObject").append("attribute"));
+
+        EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
+
+        assertEquals(expected, loaded);
     }
     
-    public void testDeleteSubtree() {
-        
+    public void testDeleteSubtree() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+            N("subObject", 
+                  N("attribute", "Hello")
+             )
+        );
+
+       
+        EAVNode expected = EMPTY_OBJECT("com.openexchange.test");
+
+        storage.insert(ctx, PARENT, tree);
+        storage.delete(ctx, PARENT.append(tree.getName()).append("subObject"));
+
+        EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
+
+        assertEquals(expected, loaded);
     }
 
     /*
      * Error conditions
      */
     
-    public void testInsertOnExistingPathShouldFail() {
+    public void testInsertOnExistingPathShouldFail() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+            N("exampleString", "Hello")
+        );
+        
+        storage.insert(ctx, PARENT, tree);
+        
+        try {
+            storage.insert(ctx, PARENT, tree);
+            fail("Could insert on existing path");
+        } catch (EAVException x) {
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.PATH_TAKEN.getDetailNumber());
+        }
+    }
+    
+    public void testUpdateWithWrongTypesShouldFail() throws EAVException{
+        EAVNode tree = N("com.openexchange.test",
+                            N("exampleString", "Hello")
+                        );
+        
+        EAVNode update = N("exampleString", 12);
+        
+        storage.insert(ctx, PARENT, tree);
+        try {
+            storage.update(ctx, PARENT.append(tree.getName()), update);
+            fail("Could update with wrong type");
+        } catch (EAVException x) {
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.TYPE_MISMATCH.getDetailNumber());
+        }
+    }
+    
+    public void testUpdateWithWrongContainerTypeShouldFail() throws EAVException {
+        EAVNode tree = N("com.openexchange.test",
+                            SET("exampleSet", "Hello")
+                        );
 
+        EAVNode update = MULTISET("exampleSet", "Hello");
+
+        storage.insert(ctx, PARENT, tree);
+        try {
+             storage.update(ctx, PARENT.append(tree.getName()), update);
+             fail("Could update with wrong type");
+         } catch (EAVException x) {
+             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.TYPE_MISMATCH.getDetailNumber());
+         }
     }
     
-    public void testUpdateWithWrongTypesShouldFail() {
-        
-    }
-    
-    public void testUpdatingUnknownPathShouldFail() {
-        
+    public void testUpdatingUnknownPathShouldFail() throws EAVException{
+        try {
+            storage.update(ctx, new EAVPath("unknown"), EMPTY_OBJECT("bla"));
+            fail("Could update unknown path");
+        } catch (EAVException x) {
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.UNKNOWN_PATH.getDetailNumber());
+        }
     }
 
-    public void testUpdateArraysWithWrongTypesShouldFail() {
+    public void testUpdateArraysWithWrongTypesShouldFail() throws EAVException{
+        EAVNode tree = N("com.openexchange.test",
+                            SET("exampleSet", "Hello")
+                        );
         
+        EAVSetTransformation update = TRANS("exampleSet", ADD(12));
+        
+        storage.insert(ctx, PARENT, tree);
+        try {
+            storage.updateArrays(ctx, PARENT.append("com.openexchange.test"), update);
+            fail("Could update set of Strings adding a Number");
+        } catch (EAVException x){
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.TYPE_MISMATCH.getDetailNumber());
+        }
     }
     
-    public void testUpdatingArraysAtUnknownPathShouldFail() {
+    public void testUpdateArraysWithWrongContainerTypeShouldFail() throws EAVException{
+        EAVNode tree = N("com.openexchange.test",
+                            N("notASet", "Hello")
+                        );
         
+        EAVSetTransformation update = TRANS("notASet", ADD("World"));
+        
+        storage.insert(ctx, PARENT, tree);
+        try {
+            storage.updateArrays(ctx, PARENT.append("com.openexchange.test"), update);
+            fail("Could update a scalar adding a value");
+        } catch (EAVException x){
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.CAN_ONLY_ADD_AND_REMOVE_FROM_SET_OR_MULTISET.getDetailNumber());
+        }
     }
-    
-    
 
+    
+    public void testUpdatingArraysAtUnknownPathShouldFail() throws EAVException{
+        try {
+            storage.updateArrays(ctx, new EAVPath("unknown"), TRANS("someAttribute", ADD(12)));
+            fail("Could add to nonexisting list");
+        } catch (EAVException x) {
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.UNKNOWN_PATH.getDetailNumber());
+        }
+    }
+    
+    public void testUpdatingArraysWithUnknownNestedElementShouldFail() throws EAVException {
+        EAVNode tree = N("com.openexchange.test",
+                            SET("exampleSet", "Hello")
+                        );
+        
+        EAVSetTransformation update = TRANS("com.openexchange.test",
+                                            TRANS("unknown", ADD(12))
+                                        );
+        
+        storage.insert(ctx, PARENT, tree);
+        
+        try {
+            storage.updateArrays(ctx, PARENT, update);
+            fail("Could add to non existing element");
+        } catch (EAVException x) {
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessages.UNKNOWN_PATH.getDetailNumber());
+        }
+    }
+    
 }

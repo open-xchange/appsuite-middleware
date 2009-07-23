@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.eav.EAVException;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVNodeVisitor;
 import com.openexchange.eav.EAVPath;
@@ -70,13 +71,20 @@ public class InMemoryStorage {
 
     private EAVNode root = new EAVNode("");
     
-    public void insert(Context ctx, EAVPath parentPath, EAVNode tree) {
+    public void insert(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException {
+        assertNotSet(root, parentPath);
         EAVNode node = getContainerAndAppendMissing(root, parentPath);
         node.addChildren(tree);
     }
 
-    public void update(Context ctx, EAVPath parentPath, EAVNode tree) {
-        EAVNode node = getContainerAndAppendMissing(root, parentPath);
+    private void assertNotSet(EAVNode node, EAVPath path) throws EAVException {
+        if(null != node.resolve(path)) {
+            throw EAVErrorMessages.PATH_TAKEN.create(path.toString());
+        }
+    }
+
+    public void update(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException{
+        EAVNode node = resolve(root, parentPath);
         EAVNode child = node.getChildByName(tree.getName());
         if(child == null) {
             insert(ctx, parentPath, tree);
@@ -85,8 +93,10 @@ public class InMemoryStorage {
         }
     }
 
-    private void merge(final Context ctx, final EAVNode child, final EAVNode update) {
+    private void merge(final Context ctx, final EAVNode child, final EAVNode update) throws EAVException {
         final List<EAVNode> leavesToAdd = new ArrayList<EAVNode>();
+        final List<NodeTuple> updates = new ArrayList<NodeTuple>();
+        
         update.visit(new EAVNodeVisitor() {
             public void visit(int index, EAVNode node) {
                 if(!node.isLeaf()) {
@@ -96,23 +106,46 @@ public class InMemoryStorage {
                 EAVNode toUpdate = child.resolve(relativePath);
                 if(toUpdate != null) {
                     if(node.getType() == EAVType.NULL) {
+                        // FIXME: Don't do anything before the asserts. 
                         toUpdate.getParent().removeChild(node.getName());
                     } else {
-                        toUpdate.copyPayload(node);
+                        updates.add(new NodeTuple(toUpdate, node));
                     }
                 } else {
                     leavesToAdd.add(node);
                 }
             }
         });
+        
+        for (NodeTuple nodeTuple : updates) {
+            assertTypesMatch(nodeTuple.left, nodeTuple.right);
+        }
+        
+        for (NodeTuple nodeTuple : updates) {
+            nodeTuple.left.copyPayload(nodeTuple.right);
+        }
+        
         for(EAVNode leaf : leavesToAdd) {
             getContainerAndAppendMissing(child, leaf.getPath().parent()).addChildren(leaf);
         }
     }
 
-    public void updateArrays(Context ctx, EAVPath path, EAVSetTransformation update) {
-        final EAVNode parent = getContainerAndAppendMissing(root, path);
+    private void assertTypesMatch(EAVNode left, EAVNode right) throws EAVException {
+        if(left.getType() != right.getType() || left.getContainerType() != right.getContainerType()) {
+            throw EAVErrorMessages.TYPE_MISMATCH.create(left.toString(), left.getType().name(), left.getContainerType().name(), right.getType().name(), right.getContainerType().name());
+        }
+    }
+    
+    private void assertTypesMatch(EAVNode node, EAVSetTransformation transformation) throws EAVException {
+        if(node.getType() != transformation.getType()) {
+            throw EAVErrorMessages.TYPE_MISMATCH.create(node.toString(), node.getType().name(), node.getContainerType().name(), transformation.getType().name(), "MULTIPLE");
+        }
+    }
+
+    public void updateArrays(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException{
+        final EAVNode parent = resolve(root, path);
         
+        final List<SetUpdate> setUpdates = new ArrayList<SetUpdate>();
         update.visit(new EAVSetTransformationVisitor() {
             public void visit(int index, EAVSetTransformation node) {
                 if(!node.isLeaf()) {
@@ -121,38 +154,66 @@ public class InMemoryStorage {
                 
                 EAVPath relativePath = node.getPath();
                 EAVNode toUpdate = parent.resolve(relativePath);
-                if(toUpdate != null && toUpdate.isMultiple()) {
-                    applyArrayUpdate(toUpdate, node);
-                }
+                setUpdates.add(new SetUpdate(toUpdate, node));
             }
 
         });
         
+        for (SetUpdate setUpdate : setUpdates) {
+            if(setUpdate.node == null) {
+                throw EAVErrorMessages.UNKNOWN_PATH.create(setUpdate.transformation.getPath());
+            }
+            assertTypesMatch(setUpdate.node, setUpdate.transformation);
+            assertIsMultiple(setUpdate.node);
         
+        }
+
+        for (SetUpdate setUpdate : setUpdates) {
+            applySetUpdate(setUpdate.node, setUpdate.transformation);
+        }
+    }
+    
+    private EAVNode resolve(EAVNode node, EAVPath path) throws EAVException {
+        EAVNode subNode = node.resolve(path);
+        if(subNode == null) {
+            throw EAVErrorMessages.UNKNOWN_PATH.create(path);
+        }
+        return subNode;
+       
     }
 
-    private void applyArrayUpdate(EAVNode toUpdate, EAVSetTransformation node) {
-        
+    private void assertIsMultiple(EAVNode node) throws EAVException {
+        if(!node.isMultiple()) {
+            throw EAVErrorMessages.CAN_ONLY_ADD_AND_REMOVE_FROM_SET_OR_MULTISET.create(node.getPath().toString(), node.getContainerType().name());
+        }
     }
 
-    public void replace(Context ctx, EAVPath parentPath, EAVNode tree) {
-
+    private static final EAVSetUpdater SET_UPDATER = new EAVSetUpdater();
+    
+    private void applySetUpdate(EAVNode toUpdate, EAVSetTransformation node) {
+        toUpdate.getContainerType().doSwitch(SET_UPDATER, toUpdate, node);
     }
 
-    public EAVNode get(Context ctx, EAVPath path) {
+    public void replace(Context ctx, EAVPath path, EAVNode tree) throws EAVException{
+        final EAVNode parent = getContainerAndAppendMissing(root, path);
+        parent.replaceChild(tree);
+    }
+
+    public EAVNode get(Context ctx, EAVPath path) throws EAVException{
         return root.resolve(path);
     }
 
-    public EAVNode get(Context ctx, EAVPath path, boolean allBinaries) {
+    public EAVNode get(Context ctx, EAVPath path, boolean allBinaries) throws EAVException{
         return null;
     }
 
-    public EAVNode get(Context ctx, EAVPath path, List<EAVNode> loadBinaries) {
+    public EAVNode get(Context ctx, EAVPath path, List<EAVNode> loadBinaries) throws EAVException{
         return null;
     }
 
-    public void delete(Context ctx, EAVPath path) {
-
+    public void delete(Context ctx, EAVPath path) throws EAVException{
+        EAVNode node = getContainerAndAppendMissing(root, path);
+        node.getParent().removeChild(node.getName());
     }
     
     
@@ -167,6 +228,26 @@ public class InMemoryStorage {
         return getContainerAndAppendMissing(childNode, path.shiftLeft());
     }
 
-
+    private static final class NodeTuple {
+        public EAVNode left;
+        public EAVNode right;
+        
+        private NodeTuple(EAVNode left, EAVNode right) {
+            this.left = left;
+            this.right = right;
+        }
+        
+    }
+    
+    private static final class SetUpdate {
+        public EAVNode node;
+        public EAVSetTransformation transformation;
+        
+        private SetUpdate(EAVNode node, EAVSetTransformation transformation) {
+            this.node = node;
+            this.transformation = transformation;
+        }
+        
+    }
 
 }

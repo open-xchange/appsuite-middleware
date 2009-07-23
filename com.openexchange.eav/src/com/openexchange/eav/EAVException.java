@@ -49,66 +49,20 @@
 
 package com.openexchange.eav;
 
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
 
 /**
- * {@link EAVSetTransformation}
+ * {@link EAVException}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
-    private Object[] add = new Object[0];
-    private Object[] remove = new Object[0];
-    
-    private EAVType type;
-
-    private EAVSetTransformation() {
-        super();
+public class EAVException extends AbstractOXException{
+    public EAVException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
+        setMessageArgs(args);
     }
 
-    public EAVSetTransformation(EAVSetTransformation parent, String name) {
-        super(parent, name);
-    }
-
-    public EAVSetTransformation(EAVSetTransformation parent) {
-        super(parent);
-    }
-
-    public EAVSetTransformation(String name) {
-        super(name);
-    }
-
-    
-    public Object[] getAdd() {
-        return add;
-    }
-
-    
-    public void setAdd(Object[] add) {
-        this.add = add;
-    }
-
-    
-    public Object[] getRemove() {
-        return remove;
-    }
-
-    
-    public void setRemove(Object[] remove) {
-        this.remove = remove;
-    }
-
-    
-    public EAVType getType() {
-        return type;
-    }
-
-    
-    public void setType(EAVType type) {
-        this.type = type;
-    }
-    
-    
-    
 }
