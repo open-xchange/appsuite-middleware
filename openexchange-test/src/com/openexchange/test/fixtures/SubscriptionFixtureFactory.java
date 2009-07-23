@@ -97,6 +97,10 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
                 config.put("source", values.get("source"));
                 values.remove("source");
             }
+            if (values.containsKey("url")) {
+                config.put("url", values.get("url"));
+                values.remove("url");
+            }
             if (values.containsKey("login")) {
                 config.put("login", values.get("login"));
                 values.remove("login");
@@ -119,6 +123,10 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
         private void defaults(final Map<String, String> values) {
         	if (false == values.containsKey("displayName")) {
         	    values.put("displayName", values.get("login"));
+        	}
+        	
+        	if (false == values.containsKey("secret")) {
+        	    values.put("secret", values.get("false"));
         	}
         }
     }
