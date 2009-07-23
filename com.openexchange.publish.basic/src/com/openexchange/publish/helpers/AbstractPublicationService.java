@@ -51,7 +51,6 @@ package com.openexchange.publish.helpers;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.publish.Publication;
