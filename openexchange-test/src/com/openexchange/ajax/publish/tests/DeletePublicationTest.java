@@ -50,6 +50,7 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
+import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -59,13 +60,10 @@ import com.openexchange.ajax.publish.actions.GetPublicationResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -79,30 +77,22 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testDeletingAFolderDeletesThePublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
-        // create contact folder
-        FolderTestManager fMgr = getFolderManager();
-        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
-        fMgr.insertFolderOnServer(folder);
-
-        // fill contact folder
-        ContactTestManager cMgr = getContactManager();
-        Contact contact = generateContact("Herbert", "Meier");
-        contact.setParentFolderID(folder.getObjectID());
-        cMgr.insertContactOnServer(contact);
+    public void testDeletingAFolderDeletesThePublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException, InterruptedException {
+        Contact contact = createDefaultContactFolderWithOneContact();
 
         // publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
-        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID()), discovery);
+        Publication expected = generatePublication("contacts", String.valueOf(contact.getParentFolderID()), discovery);
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
         expected.setId(newResp.getId());
 
         // delete folder of publication
-        fMgr.deleteFolderOnServer(folder);
-
+        getFolderManager().deleteFolderOnServer(contact.getParentFolderID(), new Date(Long.MAX_VALUE));
+        Thread.sleep(1000); //asynchronous delete event needs time to hit
+        
         // verify deletion of publication
         GetPublicationRequest getReq = new GetPublicationRequest(expected.getId());
         GetPublicationResponse getResp = myClient.execute(getReq);
@@ -110,21 +100,12 @@ public class DeletePublicationTest extends AbstractPublicationTest {
     }
 
     public void testDeletionOfPublicationShouldWork() throws AjaxException, IOException, SAXException, JSONException {
-        // create contact folder
-        FolderTestManager fMgr = getFolderManager();
-        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
-        fMgr.insertFolderOnServer(folder);
-
-        // fill contact folder
-        ContactTestManager cMgr = getContactManager();
-        Contact contact = generateContact("Herbert", "Meier");
-        contact.setParentFolderID(folder.getObjectID());
-        cMgr.insertContactOnServer(contact);
+        Contact contact = createDefaultContactFolderWithOneContact();
 
         // publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
-        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID()), discovery);
+        Publication expected = generatePublication("contacts", String.valueOf(contact.getParentFolderID()), discovery);
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
