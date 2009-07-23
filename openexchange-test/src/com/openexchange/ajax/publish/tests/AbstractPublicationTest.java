@@ -143,6 +143,11 @@ public abstract class AbstractPublicationTest extends AbstractAJAXSession {
         return contact;
     }
     
+    protected Publication generatePublication(String type, String folder){
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        return generatePublication(type, folder, discovery);
+    }
+    
     protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery){
         //create publication
         DynamicFormDescription form = new DynamicFormDescription();
