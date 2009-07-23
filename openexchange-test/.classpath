@@ -41,5 +41,6 @@
 	<classpathentry kind="src" path="/com.openexchange.publish"/>
 	<classpathentry kind="src" path="/com.openexchange.publish.json"/>
 	<classpathentry kind="src" path="/com.openexchange.datatypes.genericonf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
