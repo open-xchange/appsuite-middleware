@@ -47,36 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.publish;
+package com.openexchange.ajax.publish.tests;
 
-import com.openexchange.ajax.publish.tests.AllPublicationsTest;
-import com.openexchange.ajax.publish.tests.CreatePublicationTest;
-import com.openexchange.ajax.publish.tests.DeletePublicationTest;
-import com.openexchange.ajax.publish.tests.GetPublicationTest;
-import com.openexchange.ajax.publish.tests.ListPublicationsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
+import java.util.Arrays;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.publish.actions.ListPublicationsRequest;
+import com.openexchange.ajax.publish.actions.ListPublicationsResponse;
+import com.openexchange.ajax.publish.actions.NewPublicationRequest;
+import com.openexchange.ajax.publish.actions.NewPublicationResponse;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.json.PublicationJSONException;
+import com.openexchange.tools.servlet.AjaxException;
+
 
 /**
- * {@link MailTestSuite}
+ * {@link ListPublicationsTest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- *
  */
-public final class PublishTestSuite extends TestSuite {
+public class ListPublicationsTest extends AbstractPublicationTest {
 
-    private PublishTestSuite() {
-        super();
+    public ListPublicationsTest(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(AllPublicationsTest.class);
-        suite.addTestSuite(CreatePublicationTest.class);
-        suite.addTestSuite(GetPublicationTest.class);
-        suite.addTestSuite(DeletePublicationTest.class);
-        suite.addTestSuite(ListPublicationsTest.class);
-        return suite;
+    public void testListExistingPublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        final Contact contact = createDefaultContactFolderWithOneContact();
+        String folderID = String.valueOf(contact.getParentFolderID() );
+        String module = "contacts";
         
+        Publication expected = generatePublication(module, folderID );
+        NewPublicationRequest newReq = new NewPublicationRequest(expected);
+        NewPublicationResponse newResp = getClient().execute(newReq);
+        expected.setId(newResp.getId());
+        
+        ListPublicationsRequest listReq = new ListPublicationsRequest(
+            Arrays.asList(I(expected.getId())), 
+            Arrays.asList("id","entity", "entityModule", "displayName", "target"));
+        ListPublicationsResponse listResp = getClient().execute(listReq);
+        
+        assertEquals("Should only find one element", 1, listResp.getList().size());
     }
 }

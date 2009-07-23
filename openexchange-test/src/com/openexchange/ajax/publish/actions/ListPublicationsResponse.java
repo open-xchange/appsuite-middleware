@@ -47,36 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.publish;
+package com.openexchange.ajax.publish.actions;
 
-import com.openexchange.ajax.publish.tests.AllPublicationsTest;
-import com.openexchange.ajax.publish.tests.CreatePublicationTest;
-import com.openexchange.ajax.publish.tests.DeletePublicationTest;
-import com.openexchange.ajax.publish.tests.GetPublicationTest;
-import com.openexchange.ajax.publish.tests.ListPublicationsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.json.PublicationJSONException;
+
 
 /**
- * {@link MailTestSuite}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- *
  */
-public final class PublishTestSuite extends TestSuite {
+public class ListPublicationsResponse extends AbstractAJAXResponse {
 
-    private PublishTestSuite() {
-        super();
+    public ListPublicationsResponse(Response response) {
+        super(response);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(AllPublicationsTest.class);
-        suite.addTestSuite(CreatePublicationTest.class);
-        suite.addTestSuite(GetPublicationTest.class);
-        suite.addTestSuite(DeletePublicationTest.class);
-        suite.addTestSuite(ListPublicationsTest.class);
-        return suite;
-        
+    public List<JSONArray> getList() throws PublicationException, PublicationJSONException, JSONException {
+        JSONArray all = (JSONArray) getData();
+        LinkedList<JSONArray> allPubs = new LinkedList<JSONArray>();
+
+        if (all == null)
+            return allPubs;
+
+        for (int i = 0, length = all.length(); i < length; i++) {
+            allPubs.add(all.getJSONArray(i));
+        }
+        return allPubs;
     }
 }
