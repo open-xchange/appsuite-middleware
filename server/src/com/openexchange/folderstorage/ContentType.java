@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link ContentType} - The content type of a folder.
+ * {@link ContentType} - The content type (aka the module) of a folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
