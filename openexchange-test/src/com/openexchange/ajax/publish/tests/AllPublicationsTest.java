@@ -119,7 +119,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
         assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
         assertEquals("Should have same module", expected.getModule(), actual.getString(2));
-        assertNotSame("Should change display name", expected.getDisplayName(), actual.getString(3));
+        assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
 }
