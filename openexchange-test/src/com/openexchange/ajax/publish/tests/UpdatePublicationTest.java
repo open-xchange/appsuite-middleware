@@ -99,6 +99,10 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
     public void testUpdatingTargetShouldCallForNewConfiguration(){
         fail("Implement me!");
     }
+    
+    public void testUpdatingWithActualChange(){
+        fail("Implement me!");
+    }
     */
     
     /*
