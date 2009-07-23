@@ -49,18 +49,28 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.publish.actions.AllPublicationsRequest;
+import com.openexchange.ajax.publish.actions.AllPublicationsResponse;
+import com.openexchange.ajax.publish.actions.DeletePublicationRequest;
+import com.openexchange.ajax.publish.actions.GetPublicationRequest;
 import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import com.openexchange.ajax.publish.actions.NewPublicationRequest;
+import com.openexchange.ajax.publish.actions.NewPublicationResponse;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.ContactTestManager;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.SimPublicationTargetDiscoveryService;
+import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -75,8 +85,6 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         super(name);
     }
     
-
-    
     public void testShouldNotFindNonExistingPublication() throws AjaxException, IOException, SAXException, JSONException{
         AJAXClient myClient = getClient();
         
@@ -85,9 +93,34 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         
         AllPublicationsRequest req = new AllPublicationsRequest(String.valueOf(testFolder.getObjectID()), Integer.MAX_VALUE, "calendar", new LinkedList<String>());
         
-        GetPublicationResponse res = myClient.execute(req);
+        AllPublicationsResponse res = myClient.execute(req);
         JSONArray data = (JSONArray) res.getData();
         assertEquals("Array should be empty", I(0), I(data.length()));
     }
 
+    public void testShouldFindOneFreshlyCreatedPublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        Contact contact = createDefaultContactFolderWithOneContact();
+        String folderID = String.valueOf(contact.getParentFolderID() );
+        String module = "contacts";
+        
+        // publish
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+
+        Publication expected = generatePublication(module, folderID, discovery);
+        NewPublicationRequest newReq = new NewPublicationRequest(expected);
+        AJAXClient myClient = getClient();
+        NewPublicationResponse newResp = myClient.execute(newReq);
+        expected.setId(newResp.getId());
+
+        //retrieve publications
+        AllPublicationsRequest req = new AllPublicationsRequest(folderID, expected.getId(), module, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
+        AllPublicationsResponse resp = getClient().execute(req);
+        assertFalse("Should work", resp.hasError());
+        assertEquals("Should have exactly one result", 1, resp.getAll().size());
+        JSONArray actual = resp.getAll().get(0);
+        assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
+        assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
+        assertEquals("Should have same module", expected.getModule(), actual.getString(2));
+        assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
+    }
 }
