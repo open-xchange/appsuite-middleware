@@ -103,6 +103,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
         Publication expected = generatePublication(module, folderID, discovery);
+        expected.setDisplayName("This will be changed");
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
@@ -113,10 +114,12 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         AllPublicationsResponse resp = getClient().execute(req);
         assertFalse("Should work", resp.hasError());
         assertEquals("Should have exactly one result", 1, resp.getAll().size());
+        
         JSONArray actual = resp.getAll().get(0);
         assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
         assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
         assertEquals("Should have same module", expected.getModule(), actual.getString(2));
+        assertNotSame("Should change display name", expected.getDisplayName(), actual.getString(3));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
 }
