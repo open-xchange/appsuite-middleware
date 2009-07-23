@@ -167,15 +167,12 @@ public abstract class AbstractPublicationTest extends AbstractAJAXSession {
     }
     
     protected Contact createDefaultContactFolderWithOneContact() throws AjaxException, IOException, SAXException, JSONException{
-        FolderTestManager fMgr = getFolderManager();
         FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
-        fMgr.insertFolderOnServer(folder);
+        getFolderManager().insertFolderOnServer(folder);
 
-        // fill contact folder
-        ContactTestManager cMgr = getContactManager();
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
-        cMgr.insertContactOnServer(contact);
+        getContactManager().insertContactOnServer(contact);
         return contact;
     }
 }
