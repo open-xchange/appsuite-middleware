@@ -6,4 +6,6 @@ Bundle-Version: 6.11.0.0
 Bundle-Activator: com.openexchange.eav.storage.memory.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: org.osgi.framework;version="1.3.0"
+Import-Package: com.openexchange.groupware.contexts,
+ org.osgi.framework;version="1.3.0"
+Require-Bundle: com.openexchange.eav;bundle-version="6.11.0"
