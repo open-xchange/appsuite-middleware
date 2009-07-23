@@ -63,7 +63,7 @@ import com.openexchange.java.Strings;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AllPublicationsRequest extends AbstractPublicationRequest<GetPublicationResponse> {
+public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublicationsResponse> {
 
     private int id;
     
@@ -167,12 +167,12 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<GetPublic
         return params.toArray(new Parameter[0]);
     }
 
-    public AbstractAJAXParser<? extends GetPublicationResponse> getParser() {
-        return new AbstractAJAXParser<GetPublicationResponse>(isFailOnError()) {
+    public AbstractAJAXParser<? extends AllPublicationsResponse> getParser() {
+        return new AbstractAJAXParser<AllPublicationsResponse>(isFailOnError()) {
 
             @Override
-            protected GetPublicationResponse createResponse(final Response response) throws JSONException {
-                return new GetPublicationResponse(response);
+            protected AllPublicationsResponse createResponse(final Response response) throws JSONException {
+                return new AllPublicationsResponse(response);
             }
         };
     }
