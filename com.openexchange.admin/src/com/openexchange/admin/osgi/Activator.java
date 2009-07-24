@@ -63,9 +63,11 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator {
 
@@ -79,11 +81,17 @@ public class Activator implements BundleActivator {
      * {@inheritDoc}
      */
     public void start(BundleContext context) throws Exception {
-
-        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
-        trackers.push(new ServiceTracker(context, MailAccountStorageService.class.getName(), new AdminServiceRegisterer(
-            MailAccountStorageService.class,
-            context)));
+        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new RegistryServiceTrackerCustomizer<ContextService>(
+            context,
+            AdminServiceRegistry.getInstance(),
+            ContextService.class)));
+        trackers.push(new ServiceTracker(
+            context,
+            MailAccountStorageService.class.getName(),
+            new RegistryServiceTrackerCustomizer<MailAccountStorageService>(
+                context,
+                AdminServiceRegistry.getInstance(),
+                MailAccountStorageService.class)));
         trackers.push(new ServiceTracker(context, CreateTableService.class.getName(), new CreateTableCustomizer(context)));
         for (int i = trackers.size() - 1; i >= 0; i--) {
             trackers.get(i).open();
