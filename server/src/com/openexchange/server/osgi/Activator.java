@@ -60,16 +60,17 @@ import com.openexchange.server.osgiservice.CompositeBundleActivator;
  */
 public class Activator extends CompositeBundleActivator {
 
+    private final BundleActivator[] activators = {
+        new com.openexchange.database.osgi.Activator(),
+        new com.openexchange.server.osgi.ServerActivator()
+    };
+
     public Activator() {
         super();
     }
 
     @Override
     protected BundleActivator[] getActivators() {
-        return new BundleActivator[] {
-            new com.openexchange.database.osgi.Activator(),
-            new com.openexchange.server.osgi.ServerActivator()
-        };
+        return activators;
     }
-
 }

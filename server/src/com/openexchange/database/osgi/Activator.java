@@ -77,9 +77,6 @@ public class Activator implements BundleActivator {
 
     private ComponentRegistration dbpoolingComponent;
 
-    /**
-     * {@inheritDoc}
-     */
     public void start(BundleContext context) throws Exception {
         dbpoolingComponent = new ComponentRegistration(
             context,
@@ -95,9 +92,6 @@ public class Activator implements BundleActivator {
         cacheTracker.open();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void stop(BundleContext context) throws Exception {
         cacheTracker.close();
         managementTracker.close();
