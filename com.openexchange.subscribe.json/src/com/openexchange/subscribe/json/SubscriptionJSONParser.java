@@ -49,31 +49,28 @@
 
 package com.openexchange.subscribe.json;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
-
 /**
  * {@link SubscriptionJSONParser}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SubscriptionJSONParser {
 
     private static final FormContentParser formParser = new FormContentParser();
-    
+
     private SubscriptionSourceDiscoveryService discovery;
 
     /**
      * Initializes a new {@link SubscriptionJSONParser}.
+     * 
      * @param discovery
      */
     public SubscriptionJSONParser(SubscriptionSourceDiscoveryService discovery) {
@@ -83,7 +80,7 @@ public class SubscriptionJSONParser {
 
     public Subscription parse(JSONObject object) throws JSONException {
         Subscription subscription = new Subscription();
-        if(object.has("id")) {
+        if (object.has("id")) {
             subscription.setId(object.getInt("id"));
         }
         subscription.setFolderId(object.getString("folder"));
@@ -92,7 +89,7 @@ public class SubscriptionJSONParser {
         JSONObject config = object.getJSONObject(subscription.getSource().getId());
         Map<String, Object> configuration = formParser.parse(config, source.getFormDescription());
         subscription.setConfiguration(configuration);
-        
+
         return subscription;
     }
 
