@@ -47,10 +47,14 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.internal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.folderstorage.FolderStorage;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
@@ -61,18 +65,80 @@ public final class FolderStorageRegistry {
 
     private static final FolderStorageRegistry instance = new FolderStorageRegistry();
 
+    /**
+     * Gets the {@link FolderStorageRegistry} instance.
+     * 
+     * @return The {@link FolderStorageRegistry} instance
+     */
+    public static FolderStorageRegistry getInstance() {
+        return instance;
+    }
+
     /*
      * Member section
      */
 
-    private final ConcurrentMap<String, ConcurrentMap<String, FolderStorage>> registry;
+    private final ConcurrentMap<String, List<FolderStorage>> registry;
 
     /**
      * Initializes a new {@link FolderStorageRegistry}.
      */
     private FolderStorageRegistry() {
         super();
-        registry = new ConcurrentHashMap<String, ConcurrentMap<String, FolderStorage>>();
+        registry = new ConcurrentHashMap<String, List<FolderStorage>>();
+    }
+
+    /**
+     * Associates specified folder storage to given tree identifier.
+     * 
+     * @param treeId The tree identifier
+     * @param folderStorage The folder storage to add
+     */
+    public void addFolderStorage(final String treeId, final FolderStorage folderStorage) {
+        List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
+            storages = registry.putIfAbsent(treeId, new CopyOnWriteArrayList<FolderStorage>());
+            if (null == storages) {
+                storages = tmp;
+            }
+        }
+        storages.add(folderStorage);
+    }
+
+    /**
+     * Gets the specified folder tree's storages which are capable to handle given folder identifier.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The storages which are capable to handle given folder identifier
+     */
+    public FolderStorage[] getFolderStorage(final String treeId, final String folderId) {
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return new FolderStorage[0];
+        }
+        final List<FolderStorage> tmp = new ArrayList<FolderStorage>(storages.size());
+        for (final FolderStorage folderStorage : storages) {
+            if (folderStorage.getFolderType().servesFolderId(folderId)) {
+                tmp.add(folderStorage);
+            }
+        }
+        return tmp.toArray(new FolderStorage[tmp.size()]);
+    }
+
+    /**
+     * Removes specified folder storage bound to given tree identifier.
+     * 
+     * @param treeId The tree identifier
+     * @param folderStorage The folder storage to remove
+     */
+    public void removeFolderStorage(final String treeId, final FolderStorage folderStorage) {
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return;
+        }
+        storages.remove(folderStorage);
     }
 
 }
