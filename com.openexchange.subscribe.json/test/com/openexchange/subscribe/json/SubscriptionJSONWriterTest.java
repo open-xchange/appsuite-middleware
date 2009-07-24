@@ -49,9 +49,11 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.json.JSONAssertion.assertValidates;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,9 +62,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import junit.framework.TestCase;
-
-import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
  * {@link SubscriptionJSONWriterTest}
@@ -168,6 +167,6 @@ public class SubscriptionJSONWriterTest extends TestCase {
         } catch (SubscriptionJSONException x) {
             
         }
-
+        //TODO: Then what?
     }
 }
