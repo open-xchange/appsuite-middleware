@@ -51,8 +51,10 @@ package com.openexchange.json;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -144,14 +146,32 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion isArray() {
+        if(!stack.isEmpty()) {
+            stack.peek().isArray();
+            return this;
+        }
         conditions.add(new IsOfType(JSONArray.class));
         return this;
     }
     
     public JSONAssertion withValues(Object...values) {
+        if(!stack.isEmpty()) {
+            stack.peek().withValues(values);
+            return this;
+        }
         conditions.add(new WithValues(values));
         return this;
     }
+    
+    public JSONAssertion inAnyOrder() {
+        if(!stack.isEmpty()) {
+            stack.peek().inAnyOrder();
+            return this;
+        }
+        ((WithValues)conditions.get(conditions.size()-1)).ignoreOrder = true;
+        return this;
+    }
+    
     
     public JSONAssertion objectEnds() {
         return hasNoMoreKeys();
@@ -308,6 +328,8 @@ public class JSONAssertion implements JSONCondition {
         private Object[] values;
         private String complaint;
         
+        public boolean ignoreOrder = false;
+        
         public WithValues(Object[] values) {
             this.values = values;
         }
@@ -318,18 +340,39 @@ public class JSONAssertion implements JSONCondition {
                 complaint = "Lengths differ: expected "+values.length+" was: "+arr.length();
                 return false;
             }
-            for(int i = 0; i < values.length; i++) {
-                Object expected = values[i];
-                Object actual;
-                try {
-                    actual = arr.get(i);
-                } catch (JSONException e) {
-                    complaint = e.toString();
-                    return false;
+            if(!ignoreOrder) {
+                for(int i = 0; i < values.length; i++) {
+                    Object expected = values[i];
+                    Object actual;
+                    try {
+                        actual = arr.get(i);
+                    } catch (JSONException e) {
+                        complaint = e.toString();
+                        return false;
+                    }
+                    if(!expected.equals(actual)) {
+                        complaint = "Expected "+expected+" got: "+actual+" at index "+i;
+                        return false;
+                    }
                 }
-                if(!expected.equals(actual)) {
-                    complaint = "Expected "+expected+" got: "+actual+" at index "+i;
-                    return false;
+            } else {
+                Set<Object> expectedSet = new HashSet<Object>();
+                for(int i = 0; i < values.length; i++) {
+                    expectedSet.add(values[i]);
+                }
+                
+                for(int i = 0; i < values.length; i++) {
+                    Object v;
+                    try {
+                        v = arr.get(i);
+                    } catch (JSONException e) {
+                        complaint = e.toString();
+                        return false;
+                    }
+                    if(!expectedSet.remove(v)) {
+                        complaint = "Did not expect "+v;
+                        return false;
+                    }
                 }
             }
             return true;
