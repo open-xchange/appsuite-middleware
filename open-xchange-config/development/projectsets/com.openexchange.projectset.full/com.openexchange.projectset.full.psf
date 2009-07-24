@@ -42,5 +42,9 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.crawler,com.openexchange.subscribe.crawler"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.subscribe.linkedin,com.openexchange.subscribe.linkedin"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-config/development/projectsets/com.openexchange.projectset.servergui,com.openexchange.projectset.servergui"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.eav,com.openexchange.eav"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.eav.json,com.openexchange.eav.json"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.eav.storage.memory,com.openexchange.eav.storage.memory"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.folder.json,com.openexchange.folder.json"/>
 </provider>
 </psf>
