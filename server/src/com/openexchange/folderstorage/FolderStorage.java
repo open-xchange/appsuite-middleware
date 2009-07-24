@@ -57,6 +57,13 @@ package com.openexchange.folderstorage;
 public interface FolderStorage {
 
     /**
+     * Gets the storage's folder type.
+     * 
+     * @return The storage's folder type
+     */
+    FolderType getFolderType();
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param folderId The folder ID

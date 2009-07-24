@@ -57,21 +57,12 @@ package com.openexchange.folderstorage;
 public interface FolderType {
 
     /**
-     * Indicates if this folder type serves specified folder identifier and tree identifier.
+     * Indicates if this folder type serves specified folder identifier.
      * 
      * @param folderId The folder identifier
-     * @param treeId The tree identifier
-     * @return <code>true</code> if this folder type serves specified folder identifier and tree identifier; otherwise <code>false</code>
+     * @return <code>true</code> if this folder type serves specified folder identifier; otherwise <code>false</code>
      */
-    boolean servesId(String folderId, String treeId);
-
-    /**
-     * Indicates if this folder type serves specified tree identifier.
-     * 
-     * @param treeId The tree identifier
-     * @return <code>true</code> if this folder type serves specified tree identifier; otherwise <code>false</code>
-     */
-    boolean servesTree(String treeId);
+    boolean servesFolderId(String folderId);
 
     /**
      * Must be implemented according to {@link Object#hashCode()}.
