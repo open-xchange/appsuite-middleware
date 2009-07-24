@@ -50,12 +50,17 @@
 package com.openexchange.folder.json;
 
 /**
- * {@link Constants}
+ * {@link Constants} for the HTTP JSON interface of the folder component.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class Constants {
 
+    public static final String MODULE = "folder";
+
+    /**
+     * TODO Second part of path should use {@link #MODULE}.
+     */
     public static final String SERVLET_PATH = "/ajax/folder2";
 
     private Constants() {

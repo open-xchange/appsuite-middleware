@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.multiple;
 
+import com.openexchange.folder.json.Constants;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 
@@ -60,12 +61,10 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 public final class FolderMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
     public MultipleHandler createMultipleHandler() {
-        // TODO Auto-generated method stub
-        return null;
+        return new FolderMultipleHandler();
     }
 
     public String getSupportedModule() {
-        // TODO Auto-generated method stub
-        return null;
+        return Constants.MODULE;
     }
 }
