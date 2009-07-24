@@ -144,13 +144,14 @@ public final class MailFolderUtility {
         if (fullname == null) {
             return null;
         }
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (fullname.length() == 0)) {
-            return new StringBuilder(fullname.length() + 4).append(fullname).append(accountId).toString();
+        final int length = fullname.length();
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
+            return new StringBuilder(length + 4).append(fullname).append(accountId).toString();
         }
         if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return fullname;
         }
-        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append('/').append(fullname).toString();
+        return new StringBuilder(LEN + length + 1).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append('/').append(fullname).toString();
     }
 
     /**
