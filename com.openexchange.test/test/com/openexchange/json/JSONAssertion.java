@@ -51,6 +51,7 @@ package com.openexchange.json;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -356,9 +357,9 @@ public class JSONAssertion implements JSONCondition {
                     }
                 }
             } else {
-                Set<Object> expectedSet = new HashSet<Object>();
+                List<Object> expectedList = new ArrayList<Object>();
                 for(int i = 0; i < values.length; i++) {
-                    expectedSet.add(values[i]);
+                    expectedList.add(values[i]);
                 }
                 
                 for(int i = 0; i < values.length; i++) {
@@ -369,10 +370,11 @@ public class JSONAssertion implements JSONCondition {
                         complaint = e.toString();
                         return false;
                     }
-                    if(!expectedSet.remove(v)) {
+                    if(!expectedList.contains(v)) {
                         complaint = "Did not expect "+v;
                         return false;
                     }
+                    expectedList.remove(v);
                 }
             }
             return true;
