@@ -57,39 +57,13 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1496492688713194989L;
+    private static final long serialVersionUID = -1496492688713194989L;
 
-	/**
-	 * Checks the session ID supplied as a query parameter in the request URI.
-	 * Intended usage:
-	 * 
-	 * <pre>
-	 * if (isInvalidSession(req, w))
-	 * 	return;
-	 * </pre>
-	 * 
-	 * at the beginning of {@link #doGet}, {@link #doPost} etc.
-	 * 
-	 * @param req
-	 *            The HttpServletRequest object containing the session ID as URI
-	 *            parameter.
-	 * @param w
-	 *            The PrintWriter object returned by
-	 *            {@link HttpServletResponse#getWriter} which is used to send a
-	 *            JSON error object if the session ID is invalid.
-	 * @return true if the session ID is invalid, false if the session ID is
-	 *         valid.
-	 * @throws IOException
-	 */
-	@Override
+    @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // FIXME this needs a major rewrite. Executing everything before
-        // checking permissions isn't useful.
+        // FIXME this needs a major rewrite. Executing everything before checking permissions isn't useful. Simply moving the super call to
+        // behind permission check does not work because we would not have the session.
         super.service(req, resp);
-
         final ServerSession session = getSessionObject(req);
         if (null != session && !hasModulePermission(session)) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
@@ -97,14 +71,11 @@ public abstract class PermissionServlet extends SessionServlet {
         }
     }
 
-	/**
-	 * Indicates if incoming request is allowed to being performed due to
-	 * permission settings
-	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @return <code>true</code> if request is allowed to being performed due to
-	 *         permission settings; otherwise <code>false</code>
-	 */
-	protected abstract boolean hasModulePermission(final ServerSession session);
+    /**
+     * Indicates if incoming request is allowed to being performed due to permission settings.
+     * 
+     * @param session The session providing needed user data
+     * @return <code>true</code> if request is allowed to being performed due to permission settings; <code>false</code> otherwise.
+     */
+    protected abstract boolean hasModulePermission(final ServerSession session);
 }
