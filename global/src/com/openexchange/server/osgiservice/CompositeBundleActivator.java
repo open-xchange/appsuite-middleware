@@ -49,31 +49,54 @@
 
 package com.openexchange.server.osgiservice;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-
 /**
- * {@link CompositeBundleActivator}
- *
+ * With this abstract class multiple activators in a bundle can be composited.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class CompositeBundleActivator implements BundleActivator {
 
-    
+    private static final Log LOG = LogFactory.getLog(CompositeBundleActivator.class);
+
     public void start(BundleContext context) throws Exception {
-        for(BundleActivator activator : getActivators()) {
-            activator.start(context);
+        Exception first = null;
+        for (BundleActivator activator : getActivators()) {
+            try {
+                activator.start(context);
+            } catch (Exception e) {
+                if (null == first) {
+                    first = e;
+                }
+                LOG.error("Exception while running activator " + activator.getClass().getName(), e);
+            }
         }
-     }
+        if (null != first) {
+            throw first;
+        }
+    }
 
     public void stop(BundleContext context) throws Exception {
-        for(BundleActivator activator : getActivators()) {
-            activator.stop(context);
+        Exception first = null;
+        for (BundleActivator activator : getActivators()) {
+            try {
+                activator.stop(context);
+            } catch (Exception e) {
+                if (null == first) {
+                    first = e;
+                }
+                LOG.error("Exception while stopping activator " + activator.getClass().getName(), e);
+            }
+        }
+        if (null != first) {
+            throw first;
         }
     }
 
     protected abstract BundleActivator[] getActivators();
-    
+
 }
