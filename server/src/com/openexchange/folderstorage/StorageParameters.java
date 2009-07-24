@@ -51,6 +51,7 @@ package com.openexchange.folderstorage;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * {@link StorageParameters} - The storage parameters to perform a certain storage operation.
@@ -72,6 +73,13 @@ public interface StorageParameters {
      * @return The user
      */
     User getUser();
+
+    /**
+     * Gets the session.
+     * 
+     * @return The session
+     */
+    Session getSession();
 
     /**
      * Gets the parameter bound to given name.
