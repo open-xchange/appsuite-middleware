@@ -52,10 +52,8 @@ package com.openexchange.json;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -114,6 +112,10 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion withValueObject() {
+        if(!stack.isEmpty()) {
+            stack.peek().withValueObject();
+            return this;
+        }
         JSONAssertion stackElement = new JSONAssertion();
         conditions.add(new ValueObject(key, stackElement));
         stackElement.isObject();
@@ -122,6 +124,10 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion withValueArray() {
+        if(!stack.isEmpty()) {
+            stack.peek().withValueArray();
+            return this;
+        }
         JSONAssertion stackElement = new JSONAssertion();
         conditions.add(new ValueArray(key, stackElement));
         stackElement.isArray();
