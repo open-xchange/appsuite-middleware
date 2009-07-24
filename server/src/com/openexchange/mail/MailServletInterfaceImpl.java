@@ -144,7 +144,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private MailConfig mailConfig;
 
-    private MailAccess<?, ?> mailAccess;
+    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
 
     private int accountId;
 
