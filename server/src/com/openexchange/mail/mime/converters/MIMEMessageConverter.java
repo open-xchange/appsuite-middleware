@@ -93,6 +93,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -497,7 +498,7 @@ public final class MIMEMessageConverter {
                     final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
                     if (null != addrStr) {
                         try {
-                            dispNotTo = InternetAddress.parse(addrStr, true);
+                            dispNotTo = QuotedInternetAddress.parse(addrStr, true);
                         } catch (final AddressException e) {
                             dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
                         }
@@ -682,7 +683,7 @@ public final class MIMEMessageConverter {
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
-                    mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
+                    mailMessage.setDispositionNotification(QuotedInternetAddress.parse(val[0], true)[0]);
                 } else {
                     mailMessage.setDispositionNotification(null);
                 }
@@ -772,7 +773,7 @@ public final class MIMEMessageConverter {
                     final String[] addrStr = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                     if (null != addrStr) {
                         try {
-                            dispNotTo = InternetAddress.parse(addrStr[0], true);
+                            dispNotTo = QuotedInternetAddress.parse(addrStr[0], true);
                         } catch (final AddressException e) {
                             dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
                         }
@@ -979,7 +980,7 @@ public final class MIMEMessageConverter {
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
-                    mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
+                    mailMessage.setDispositionNotification(QuotedInternetAddress.parse(val[0], true)[0]);
                 } else {
                     mailMessage.setDispositionNotification(null);
                 }
@@ -1180,7 +1181,7 @@ public final class MIMEMessageConverter {
                 if (dispNot == null) {
                     mail.setDispositionNotification(null);
                 } else {
-                    mail.setDispositionNotification(InternetAddress.parse(dispNot, true)[0]);
+                    mail.setDispositionNotification(QuotedInternetAddress.parse(dispNot, true)[0]);
                 }
             }
             {
@@ -1766,7 +1767,7 @@ public final class MIMEMessageConverter {
             addresses = addressArray[0];
         }
         try {
-            return InternetAddress.parseHeader(addresses, true);
+            return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(

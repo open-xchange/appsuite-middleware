@@ -115,6 +115,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.parser.HTMLParser;
@@ -309,7 +310,7 @@ public class MIMEMessageFiller {
             InternetAddress sender = null;
             if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                 try {
-                    sender = new InternetAddress(usm.getSendAddr(), true);
+                    sender = new QuotedInternetAddress(usm.getSendAddr(), true);
                 } catch (final AddressException e) {
                     LOG.error("Default send address cannot be parsed", e);
                 }
@@ -351,7 +352,7 @@ public class MIMEMessageFiller {
             }
         } else {
             try {
-                mimeMessage.setReplyTo(InternetAddress.parse(usm.getReplyToAddr(), true));
+                mimeMessage.setReplyTo(QuotedInternetAddress.parse(usm.getReplyToAddr(), true));
             } catch (final AddressException e) {
                 LOG.error("Default Reply-To address cannot be parsed", e);
                 try {

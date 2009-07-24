@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.mail.MessagingException;
 import javax.mail.Part;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -84,6 +83,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -163,7 +163,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
              * Set from
              */
             if (usm.getSendAddr() != null) {
-                mimeMessage.setFrom(new InternetAddress(usm.getSendAddr(), true));
+                mimeMessage.setFrom(new QuotedInternetAddress(usm.getSendAddr(), true));
             }
             /*
              * Create multipart and its nested parts

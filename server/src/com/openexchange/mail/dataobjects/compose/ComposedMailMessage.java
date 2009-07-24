@@ -66,6 +66,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -148,7 +149,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * @return The dedicated recipients
      */
     public InternetAddress[] getRecipients() {
-        return recipients.toArray(new InternetAddress[recipients.size()]);
+        return recipients.toArray(new QuotedInternetAddress[recipients.size()]);
     }
 
     /**

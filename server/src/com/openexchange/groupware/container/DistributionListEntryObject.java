@@ -54,6 +54,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -194,7 +195,7 @@ public class DistributionListEntryObject {
          * Verify email address with JavaMail's InternetAddress class
          */
         try {
-            new InternetAddress(emailaddress);
+            new QuotedInternetAddress(emailaddress);
         } catch (final AddressException e) {
             throw new ContactException(Category.USER_INPUT, ContactException.INVALID_ADDRESS, 99, emailaddress);
         }
@@ -365,7 +366,7 @@ public class DistributionListEntryObject {
                 return false;
             }
             if (ContactConfig.getInstance().getProperty("validate_contact_email").equals("true")) {
-                final InternetAddress ia = new InternetAddress(emailaddress);
+                final InternetAddress ia = new QuotedInternetAddress(emailaddress);
                 ia.validate();
             }
         } catch (final AddressException ae) {

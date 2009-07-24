@@ -103,6 +103,7 @@ import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
@@ -824,7 +825,7 @@ public final class MessageParser {
             return null;
         }
         try {
-            return InternetAddress.parse(addrStr, true)[0];
+            return QuotedInternetAddress.parse(addrStr, true)[0];
         } catch (final AddressException e) {
             return null;
         }

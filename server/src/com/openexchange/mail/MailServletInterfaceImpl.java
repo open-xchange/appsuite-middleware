@@ -91,6 +91,7 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -1508,22 +1509,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 try {
                     final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
                     if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                        validAddrs.add(new InternetAddress(usm.getSendAddr()));
+                        validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                     }
                     final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-                    validAddrs.add(new InternetAddress(user.getMail()));
+                    validAddrs.add(new QuotedInternetAddress(user.getMail()));
                     final String[] aliases = user.getAliases();
                     for (final String alias : aliases) {
-                        validAddrs.add(new InternetAddress(alias));
+                        validAddrs.add(new QuotedInternetAddress(alias));
                     }
-                    if (!validAddrs.contains(new InternetAddress(fromAddr))) {
+                    if (!validAddrs.contains(new QuotedInternetAddress(fromAddr))) {
                         throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
                     }
                 } catch (final AddressException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
             } else {
-                if (!new InternetAddress(ma.getPrimaryAddress()).equals(new InternetAddress(fromAddr))) {
+                if (!new QuotedInternetAddress(ma.getPrimaryAddress()).equals(new QuotedInternetAddress(fromAddr))) {
                     throw new MailException(MailException.Code.INVALID_SENDER, fromAddr);
                 }
             }

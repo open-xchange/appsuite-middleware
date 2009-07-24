@@ -89,6 +89,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -241,7 +242,7 @@ public final class MimeReply {
                     /*
                      * Message holds header 'Reply-To'
                      */
-                    recipientAddrs = InternetAddress.parseHeader(unfold(replyTo[0]), true);
+                    recipientAddrs = QuotedInternetAddress.parseHeader(unfold(replyTo[0]), true);
                 }
             }
             if (replyAll) {

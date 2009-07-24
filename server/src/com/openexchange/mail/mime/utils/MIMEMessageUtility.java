@@ -80,6 +80,7 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -591,7 +592,7 @@ public final class MIMEMessageUtility {
         final String al = replaceWithComma(unfold(addresslist));
         InternetAddress[] addrs = null;
         try {
-            addrs = InternetAddress.parse(al, strict);
+            addrs = QuotedInternetAddress.parse(al, strict);
         } catch (final AddressException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(

@@ -51,7 +51,7 @@ package com.openexchange.resource.internal;
 
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link ResourceTools} - Utility methods for resource module
@@ -99,7 +99,7 @@ public final class ResourceTools {
          * Validate e-mail with InternetAddress class from JavaMail API
          */
         try {
-            new InternetAddress(emailAddress, true).validate();
+            new QuotedInternetAddress(emailAddress, true).validate();
             return true;
         } catch (final AddressException e) {
             return false;

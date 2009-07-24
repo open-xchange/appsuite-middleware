@@ -63,6 +63,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.utils.DateUtils;
 
@@ -487,7 +488,7 @@ public abstract class MailMessage extends MailPart {
                 return EMPTY_ADDRS;
             }
             try {
-                addFrom(InternetAddress.parse(fromStr, true));
+                addFrom(QuotedInternetAddress.parse(fromStr, true));
             } catch (final AddressException e) {
                 LOG.error(e.getMessage(), e);
                 addFrom(new PlainTextAddress(fromStr));
@@ -554,7 +555,7 @@ public abstract class MailMessage extends MailPart {
                 return EMPTY_ADDRS;
             }
             try {
-                addTo(InternetAddress.parse(toStr, true));
+                addTo(QuotedInternetAddress.parse(toStr, true));
             } catch (final AddressException e) {
                 LOG.error(e.getMessage(), e);
                 addTo(new PlainTextAddress(toStr));
@@ -621,7 +622,7 @@ public abstract class MailMessage extends MailPart {
                 return EMPTY_ADDRS;
             }
             try {
-                addCc(InternetAddress.parse(ccStr, true));
+                addCc(QuotedInternetAddress.parse(ccStr, true));
             } catch (final AddressException e) {
                 LOG.error(e.getMessage(), e);
                 addCc(new PlainTextAddress(ccStr));
@@ -688,7 +689,7 @@ public abstract class MailMessage extends MailPart {
                 return EMPTY_ADDRS;
             }
             try {
-                addBcc(InternetAddress.parse(bccStr, true));
+                addBcc(QuotedInternetAddress.parse(bccStr, true));
             } catch (final AddressException e) {
                 LOG.error(e.getMessage(), e);
                 addBcc(new PlainTextAddress(bccStr));
@@ -1158,7 +1159,7 @@ public abstract class MailMessage extends MailPart {
             final String dispNotTo = getFirstHeader(MessageHeaders.HDR_DISP_NOT_TO);
             if (dispNotTo != null) {
                 try {
-                    setDispositionNotification(new InternetAddress(dispNotTo, true));
+                    setDispositionNotification(new QuotedInternetAddress(dispNotTo, true));
                 } catch (final AddressException e) {
                     LOG.error(e.getMessage(), e);
                 }

@@ -139,6 +139,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.parser.HTMLParser;
@@ -1152,13 +1153,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
                 final UserSettingMail usm = session.getUserSettingMail();
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new InternetAddress(usm.getSendAddr()));
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
                 final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new InternetAddress(user.getMail()));
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
-                    validAddrs.add(new InternetAddress(alias));
+                    validAddrs.add(new QuotedInternetAddress(alias));
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
@@ -2650,11 +2651,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final String fromAddr = mm.getHeader(MessageHeaders.HDR_FROM, null);
                 if (isEmpty(fromAddr)) {
                     // Add from address
-                    from = new InternetAddress(getDefaultSendAddress(session), true);
+                    from = new QuotedInternetAddress(getDefaultSendAddress(session), true);
                     mm.setFrom(from);
                     m = MIMEMessageConverter.convertMessage(mm);
                 } else {
-                    from = new InternetAddress(fromAddr, true);
+                    from = new QuotedInternetAddress(fromAddr, true);
                     m = MIMEMessageConverter.convertMessage(mm);
                 }
             }
@@ -2756,13 +2757,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
                         final UserSettingMail usm = session.getUserSettingMail();
                         if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                            validAddrs.add(new InternetAddress(usm.getSendAddr()));
+                            validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                         }
                         final User user = session.getUser();
-                        validAddrs.add(new InternetAddress(user.getMail()));
+                        validAddrs.add(new QuotedInternetAddress(user.getMail()));
                         final String[] aliases = user.getAliases();
                         for (final String alias : aliases) {
-                            validAddrs.add(new InternetAddress(alias));
+                            validAddrs.add(new QuotedInternetAddress(alias));
                         }
                         final List<InternetAddress> froms = Arrays.asList(m.getFrom());
                         if (!validAddrs.containsAll(froms)) {
@@ -3626,7 +3627,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final User user = session.getUser();
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
-                    validAddrs.add(new InternetAddress(alias));
+                    validAddrs.add(new QuotedInternetAddress(alias));
                 }
                 if (!validAddrs.contains(from)) {
                     throw new MailException(MailException.Code.INVALID_SENDER, from.toString());

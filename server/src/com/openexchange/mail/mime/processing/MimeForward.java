@@ -86,6 +86,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.NestedMessageMailPart;
@@ -231,7 +232,7 @@ public final class MimeForward {
              * Set from
              */
             if (usm.getSendAddr() != null) {
-                forwardMsg.setFrom(new InternetAddress(usm.getSendAddr(), true));
+                forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), true));
             }
             if (usm.isForwardAsAttachment() || originalMsgs.length > 1) {
                 /*

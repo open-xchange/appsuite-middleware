@@ -61,6 +61,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link BccTerm}
@@ -79,7 +80,7 @@ public final class BccTerm extends SearchTerm<String> {
     public BccTerm(final String pattern) {
         super();
         try {
-            addr = new InternetAddress(pattern, true).getAddress();
+            addr = new QuotedInternetAddress(pattern, true).getAddress();
         } catch (final AddressException e) {
             addr = pattern;
         }
