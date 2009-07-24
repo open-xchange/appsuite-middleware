@@ -49,46 +49,21 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link AJAXRequestHandler} - Handles an AJAX request.
- * @deprecated use {@link AJAXActionService} instead.
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AJAXActionServiceFactory} a factory for creating action services.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@Deprecated
-public interface AJAXRequestHandler {
+public interface AJAXActionServiceFactory {
 
     /**
-     * Performs the action indicated through given parameter <code>action</code>.
-     * 
-     * @param action The action to perform
-     * @param jsonObject The JSON data object (containing "data", "timestamp", etc.)
-     * @param session The session providing needed user data
-     * @param ctx The context
-     * @return An appropriate result corresponding to request
-     * @throws AbstractOXException If action cannot be performed
-     * @throws JSONException If a JSON error occurs
+     * Creates the action service for performing the request. 
+     * @param action the name of the action
+     * @return the action service implementation and never <code>null</code>.
+     * @throws AjaxException if an action service can not be created for the given name.
      */
-    public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx) throws AbstractOXException, JSONException;
-
-    /**
-     * Gets this request handler's module.
-     * 
-     * @return The module
-     */
-    public String getModule();
-
-    /**
-     * Gets this request handler's supported actions.
-     * 
-     * @return The supported actions
-     */
-    public Set<String> getSupportedActions();
+    AJAXActionService createActionService(String action) throws AjaxException;
 
 }

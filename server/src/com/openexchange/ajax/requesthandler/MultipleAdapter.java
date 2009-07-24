@@ -49,46 +49,47 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.Set;
+import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.session.Session;
+import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AJAXRequestHandler} - Handles an AJAX request.
- * @deprecated use {@link AJAXActionService} instead.
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link MultipleAdapter} maps the {@link MultipleHandler} to several {@link AJAXActionService}s. This class is not thread safe because it
+ * has to remember the {@link AJAXRequestResult} between calling {@link #performRequest(String, JSONObject, ServerSession)} and
+ * {@link #getTimestamp()} methods.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@Deprecated
-public interface AJAXRequestHandler {
+public class MultipleAdapter implements MultipleHandler {
 
-    /**
-     * Performs the action indicated through given parameter <code>action</code>.
-     * 
-     * @param action The action to perform
-     * @param jsonObject The JSON data object (containing "data", "timestamp", etc.)
-     * @param session The session providing needed user data
-     * @param ctx The context
-     * @return An appropriate result corresponding to request
-     * @throws AbstractOXException If action cannot be performed
-     * @throws JSONException If a JSON error occurs
-     */
-    public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx) throws AbstractOXException, JSONException;
+    private final AJAXActionServiceFactory factory;
 
-    /**
-     * Gets this request handler's module.
-     * 
-     * @return The module
-     */
-    public String getModule();
+    private AJAXRequestResult result;
+  
+    public MultipleAdapter(AJAXActionServiceFactory factory) {
+        super();
+        this.factory = factory;
+    }
 
-    /**
-     * Gets this request handler's supported actions.
-     * 
-     * @return The supported actions
-     */
-    public Set<String> getSupportedActions();
+    public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException {
+        AJAXActionService actionService = factory.createActionService(action);
+        if (null == actionService) {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
+        AJAXRequestData request = new AJAXRequestData(jsonObject);
+        result = actionService.perform(request, session);
+        return result.getResultObject();
+    }
 
+    public Date getTimestamp() {
+        return null == result ? null : result.getTimestamp();
+    }
+
+    public void close() {
+        result = null;
+    }
 }

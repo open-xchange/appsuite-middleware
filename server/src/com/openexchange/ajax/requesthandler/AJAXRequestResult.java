@@ -84,10 +84,10 @@ public final class AJAXRequestResult {
         super();
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
-        this.hashCode = _hashCode();
+        this.hashCode = calcCashCode();
     }
 
-    private int _hashCode() {
+    private int calcCashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((resultObject == null) ? 0 : resultObject.hashCode());
