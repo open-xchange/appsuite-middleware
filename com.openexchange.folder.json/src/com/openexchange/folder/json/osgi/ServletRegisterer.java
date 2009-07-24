@@ -56,9 +56,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.servlet.FolderServlet;
+import com.openexchange.folderstorage.FolderService;
 
 /**
  * Registers the {@link FolderServlet} if {@link HttpService} appears.

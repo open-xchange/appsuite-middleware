@@ -47,41 +47,24 @@
  *
  */
 
-package com.openexchange.folder.json.osgi;
+package com.openexchange.folder.json.services;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
-public class Activator implements BundleActivator {
+/**
+ * {@link ServiceRegistry} remembers needed services.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class ServiceRegistry extends AbstractServiceRegistry {
 
-    private ServiceRegistration folderMultipleService;
+    private static final ServiceRegistry SINGLETON = new ServiceRegistry();
 
-    private ServiceTracker httpTracker;
+    private ServiceRegistry() {
+        super();
+    }
 
-    private ServiceTracker folderServiceTracker;
-
-	public void start(BundleContext context) throws Exception {
-	    folderMultipleService = context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null);
-	    folderServiceTracker = new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(context, ServiceRegistry.getInstance(), FolderService.class));
-	    folderServiceTracker.open();
-	    httpTracker = new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context));
-	    httpTracker.open();
-	}
-
-	public void stop(BundleContext context) throws Exception {
-	    httpTracker.close();
-	    httpTracker = null;
-	    folderServiceTracker.close();
-	    folderServiceTracker = null;
-	    folderMultipleService.unregister();
-	    folderMultipleService = null;
-	}
+    public static ServiceRegistry getInstance() {
+        return SINGLETON;
+    }
 }
