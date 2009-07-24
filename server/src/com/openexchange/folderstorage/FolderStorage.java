@@ -67,19 +67,21 @@ public interface FolderStorage {
      * Gets the folder denoted by specified folder ID.
      * 
      * @param folderId The folder ID
+     * @param storageParameters The storage parameters
      * @return The folder
      * @throws FolderException If the folder cannot be returned
      */
-    Folder getFolder(String folderId) throws FolderException;
+    Folder getFolder(String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets this storage's default folder for specified entity identifier.
      * 
      * @param entity The entity identifier
+     * @param storageParameters The storage parameters
      * @return The default folder for specified entity identifier
      * @throws FolderException If the default folder cannot be returned
      */
-    Folder getDefaultFolder(int entity) throws FolderException;
+    Folder getDefaultFolder(int entity, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Deletes the folder denoted by specified folder ID.
@@ -87,34 +89,38 @@ public interface FolderStorage {
      * A {@link FolderException} is thrown if denoted folder contains subfolders.
      * 
      * @param folderId The folder ID
+     * @param storageParameters The storage parameters
      * @throws FolderException If deletion fails
      */
-    void deleteFolder(String folderId) throws FolderException;
+    void deleteFolder(String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Updates the data of the given folder on the storage.
      * 
      * @param folder object containing new folder data.
+     * @param storageParameters The storage parameters
      * @throws FolderException If changing the folder data fails.
      */
-    void updateFolder(Folder folder) throws FolderException;
+    void updateFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Creates the given folder on the storage.
      * 
      * @param folder The object containing the new folder data.
+     * @param storageParameters The storage parameters
      * @throws FolderException if creating the folder fails.
      */
-    void createFolder(Folder folder) throws FolderException;
+    void createFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets the subfolder identifiers for specified parent.
      * 
      * @param parentId The parent identifier
+     * @param storageParameters The storage parameters
      * @return The subfolder identifiers for specified parent
      * @throws FolderException If returning the subfolder identifiers fails
      */
-    SortableId[] getSubfolders(String parentId) throws FolderException;
+    SortableId[] getSubfolders(String parentId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Starts a transaction on folder storage.

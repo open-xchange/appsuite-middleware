@@ -180,4 +180,17 @@ public interface Folder {
      */
     public void setType(Type type);
 
+    /**
+     * Indicates if this folder is subscribed.
+     * 
+     * @return <code>true</code> if this folder is subscribed; otherwise <code>false</code>
+     */
+    public boolean isSubscribed();
+
+    /**
+     * Sets if this folder is subscribed.
+     * 
+     * @param subscribed <code>true</code> if this folder is subscribed; otherwise <code>false</code>
+     */
+    public void setSubscribed(boolean subscribed);
 }
