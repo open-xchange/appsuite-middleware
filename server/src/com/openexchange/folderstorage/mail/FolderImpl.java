@@ -78,6 +78,8 @@ public final class FolderImpl implements Folder {
 
     private String[] subfolders;
 
+    private boolean subscribed;
+
     /**
      * Initializes an empty {@link FolderImpl}.
      */
@@ -103,6 +105,7 @@ public final class FolderImpl implements Folder {
         for (int i = 0; i < mailPermissions.length; i++) {
             this.permissions[i] = new PermissionImpl(mailPermissions[i]);
         }
+        this.subscribed = mailFolder.isSubscribed();
     }
 
     public ContentType getContentType() {
@@ -166,11 +169,19 @@ public final class FolderImpl implements Folder {
     }
 
     public void setTreeID(final String id) {
-        this.treeId = treeId;
+        this.treeId = id;
     }
 
     public void setType(final Type type) {
         // Nothing to do
+    }
+
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    public void setSubscribed(final boolean subscribed) {
+        this.subscribed = subscribed;
     }
 
 }

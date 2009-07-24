@@ -56,11 +56,17 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -100,8 +106,58 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
+        try {
+            final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
+                MailFolderType.getInstance(),
+                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
 
+            if (null == mailServletInterface) {
+                throw new FolderException(new MailException(
+                    MailException.Code.MISSING_PARAM,
+                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+            }
+
+            final MailFolderDescription mfd = new MailFolderDescription();
+            mfd.setExists(false);
+            // Parent
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folder.getParentID());
+            mfd.setParentFullname(arg.getFullname());
+            mfd.setParentAccountId(arg.getAccountId());
+            // Separator
+            {
+                final MailFolder parent = mailServletInterface.getFolder(folder.getParentID(), true);
+                mfd.setSeparator(parent.getSeparator());
+            }
+            // Other
+            mfd.setName(folder.getName());
+            mfd.setSubscribed(folder.isSubscribed());
+            // Permissions
+            final Permission[] permissions = folder.getPermissions();
+            if (null != permissions && permissions.length > 0) {
+                final MailPermission[] mailPermissions = new MailPermission[permissions.length];
+                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(
+                    storageParameters.getSession(),
+                    arg.getAccountId());
+                for (int i = 0; i < permissions.length; i++) {
+                    final Permission permission = permissions[i];
+                    final MailPermission mailPerm = provider.createNewMailPermission();
+                    mailPerm.setEntity(permission.getEntity());
+                    mailPerm.setAllPermission(
+                        permission.getFolderPermission(),
+                        permission.getReadPermission(),
+                        permission.getWritePermission(),
+                        permission.getDeletePermission());
+                    mailPerm.setFolderAdmin(permission.isAdmin());
+                    mailPerm.setGroupPermission(permission.isGroup());
+                    mailPermissions[i] = mailPerm;
+                }
+                mfd.addPermissions(mailPermissions);
+            }
+            mailServletInterface.saveFolder(mfd);
+
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        }
     }
 
     public void deleteFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {

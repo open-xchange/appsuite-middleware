@@ -1805,7 +1805,7 @@ public class Folder extends SessionServlet {
                     mfd.setParentFullname(arg.getFullname());
                     mfd.setParentAccountId(arg.getAccountId());
                     mfd.setSeparator(parent.getSeparator());
-                    com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session, mailInterface.getAccountID());
+                    com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session, arg.getAccountId());
                     mfd.setExists(false);
                     retval = mailInterface.saveFolder(mfd);
                 } finally {
