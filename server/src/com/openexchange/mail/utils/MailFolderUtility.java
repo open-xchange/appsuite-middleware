@@ -151,7 +151,7 @@ public final class MailFolderUtility {
         if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return fullname;
         }
-        return new StringBuilder(LEN + length + 1).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append('/').append(fullname).toString();
+        return new StringBuilder(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append('/').append(fullname).toString();
     }
 
     /**
