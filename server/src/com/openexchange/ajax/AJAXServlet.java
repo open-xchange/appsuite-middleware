@@ -452,17 +452,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 }
             }
         }
-        /*
-         * final InputStream input = req.getInputStream(); final
-         * ByteArrayOutputStream baos = new
-         * ByteArrayOutputStream(input.available()); final byte[] buf = new
-         * byte[8192]; int length = -1; while ((length = input.read(buf)) != -1)
-         * { baos.write(buf, 0, length); } String characterEncoding =
-         * req.getCharacterEncoding(); if (null == characterEncoding) {
-         * characterEncoding =
-         * ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8"; }
-         * return new String(baos.toByteArray(), characterEncoding);
-         */
     }
 
     /**
