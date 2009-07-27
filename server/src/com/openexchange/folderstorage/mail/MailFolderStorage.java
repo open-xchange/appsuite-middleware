@@ -179,7 +179,7 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public Folder getDefaultFolder(final int entity, final StorageParameters storageParameters) throws FolderException {
-        // TODO Which default folder? Trash, Sent, ...
+        // TODO Which default folder? Trash, Sent, ... Or just the INBOX
         return null;
     }
 
@@ -294,8 +294,57 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
+        try {
+            final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
+                MailFolderType.getInstance(),
+                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
 
+            if (null == mailServletInterface) {
+                throw new FolderException(new MailException(
+                    MailException.Code.MISSING_PARAM,
+                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+            }
+
+            final MailFolderDescription mfd = new MailFolderDescription();
+            mfd.setExists(true);
+            // Fullname
+            final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folder.getID());
+            mfd.setFullname(arg.getFullname());
+            mfd.setAccountId(arg.getAccountId());
+            // Separator
+            {
+                final MailFolder mf = mailServletInterface.getFolder(folder.getID(), true);
+                mfd.setSeparator(mf.getSeparator());
+            }
+            // Other
+            mfd.setName(folder.getName());
+            mfd.setSubscribed(folder.isSubscribed());
+            // Permissions
+            final Permission[] permissions = folder.getPermissions();
+            if (null != permissions && permissions.length > 0) {
+                final MailPermission[] mailPermissions = new MailPermission[permissions.length];
+                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(
+                    storageParameters.getSession(),
+                    arg.getAccountId());
+                for (int i = 0; i < permissions.length; i++) {
+                    final Permission permission = permissions[i];
+                    final MailPermission mailPerm = provider.createNewMailPermission();
+                    mailPerm.setEntity(permission.getEntity());
+                    mailPerm.setAllPermission(
+                        permission.getFolderPermission(),
+                        permission.getReadPermission(),
+                        permission.getWritePermission(),
+                        permission.getDeletePermission());
+                    mailPerm.setFolderAdmin(permission.isAdmin());
+                    mailPerm.setGroupPermission(permission.isGroup());
+                    mailPermissions[i] = mailPerm;
+                }
+                mfd.addPermissions(mailPermissions);
+            }
+            mailServletInterface.saveFolder(mfd);
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        }
     }
 
 }
