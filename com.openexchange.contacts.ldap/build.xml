@@ -62,15 +62,18 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-    	<mkdir dir="${destdir}/${prefix}/etc/groupware"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     	<mkdir dir="${destdir}/${prefix}/etc/groupware/contacts-ldap"/>
-    	<copy overwrite="true" todir="${destdir}/${prefix}/etc/groupware/contacts-ldap">
+    	<copy todir="${destdir}/${prefix}/etc/groupware/contacts-ldap" overwrite="true" >
     		<fileset dir="etc/contacts-ldap">
     			<include name="**"/>
     		</fileset>
     	</copy>
+        <chmod perm="640">
+            <fileset dir="${destdir}/${prefix}/etc/grouware/contacts-ldap">
+                <include name="**"/>
+            </fileset>
+        </chmod>
     </target>
 
     <target name="installJar" depends="jar">

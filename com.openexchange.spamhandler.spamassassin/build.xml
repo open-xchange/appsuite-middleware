@@ -75,6 +75,11 @@
     			<include name="**"/>
     		</fileset>
     	</copy>
+        <chmod perm="640">
+            <fileset dir="${destdir}/${prefix}/etc/groupware">
+                <include name="**"/>
+            </fileset>
+        </chmod>
     </target>
 
     <target name="installJar" depends="jar">

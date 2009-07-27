@@ -22,7 +22,7 @@
     </fileset>
 
     <fileset dir="jars" id="log4jFiles">
-        <include name="org.apache.log4j*"/>
+        <include name="org.apache.log4j*.jar"/>
     </fileset>
 
     <!-- Install Constants -->
@@ -39,14 +39,10 @@
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/org.apache.log4j.ini"
-            message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${gwbundle.d}/${bundle.name.gw}.ini"
-            message="${bundlesdir}/${bundle.name.gw}${line.separator}"/>
-        <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini"
-            message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
-        <echo file="${destdir}/${adbundle.d}/${bundle.name.ad}.ini"
-            message="${bundlesdir}/${bundle.name.ad}${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/org.apache.log4j.ini" message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
+        <echo file="${destdir}/${gwbundle.d}/${bundle.name.gw}.ini" message="${bundlesdir}/${bundle.name.gw}${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/org.apache.log4j.ini" message="${bundlesdir}/org.apache.log4j_1.2.13.v200806030600.jar"/>
+        <echo file="${destdir}/${adbundle.d}/${bundle.name.ad}.ini" message="${bundlesdir}/${bundle.name.ad}${line.separator}"/>
     </target>
 
     <target name="installJar">
@@ -69,6 +65,7 @@
             <fileset refid="metainf"/>
         </copy>
         <copy tofile="${destdir}${prefix}/etc/groupware/log4j.xml" file="log4j.xml"/>
+        <chmod perm="640" file="${destdir}${prefix}/etc/groupware/log4j.xml"/>
         <symlink link="${log4jconfigurationdirgw}/log4j.xml" resource="${prefix}/etc/groupware/log4j.xml"/>
     </target>
 
@@ -80,6 +77,7 @@
             <fileset refid="metainf"/>
         </copy>
         <copy tofile="${destdir}${prefix}/etc/admindaemon/log4j.xml" file="log4j-admin.xml"/>
+        <chmod perm="640" file="${destdir}${prefix}/etc/admindaemon/log4j.xml"/>
         <symlink link="${log4jconfigurationdirad}/log4j.xml" resource="${prefix}/etc/admindaemon/log4j.xml"/>
     </target>
 

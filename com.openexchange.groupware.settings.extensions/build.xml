@@ -25,7 +25,7 @@
 
     <!-- Replacements -->
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
-    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -77,13 +77,17 @@
     </target>
 
     <target name="installConfig" depends="prepare">
-        <mkdir dir="${conf.install.copy.dir}"/>
-        <copy todir="${conf.install.copy.dir}" overwrite="true">
+        <mkdir dir="${confInstallCopyDir}"/>
+        <copy todir="${confInstallCopyDir}" overwrite="true">
             <fileset dir="${conf.dir}"/>
         </copy>
+        <chmod perm="640">
+            <fileset dir="${confInstallCopyDir}">
+                <include name="**"/>
+            </fileset>
+        </chmod>
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="install" depends="installJars,installConfig"/>

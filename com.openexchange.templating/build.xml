@@ -18,7 +18,7 @@
 
     <property name="common.conf.install.dir" value="${prefix}/etc"/>
     <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
-    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -77,10 +77,9 @@
 
     <target name="installConfig" depends="patchConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-        <mkdir dir="${conf.install.copy.dir}"/>
-        <copy todir="${conf.install.copy.dir}" overwrite="true">
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${confInstallCopyDir}"/>
+        <copy todir="${confInstallCopyDir}" overwrite="true">
            <fileset dir="${tmp.dir}/${conf.dir}">
               <include name="**" />
               <exclude name="*.in"/>
@@ -88,6 +87,11 @@
               <exclude name="osgi/**"/>
            </fileset>
          </copy>
+        <chmod perm="640">
+            <fileset dir="${confInstallCopyDir}">
+                <include name="**"/>
+            </fileset>
+        </chmod>
     </target>
 
     <target name="installJar" depends="jar">

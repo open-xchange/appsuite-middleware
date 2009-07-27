@@ -41,7 +41,7 @@
     <property name="common.conf.install.dir" value="${prefix}/etc"/>
     <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
     <property name="confInstallDir2" value="${common.conf.install.dir}/common"/>
-    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+    <property name="groupwareConfInstallCopyDir" location="${destdir}${conf.install.dir}"/>
     <property name="commonConfInstallCopyDir" location="${destdir}${confInstallDir2}"/>
     <property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
     <property name="bin.install.dir" value="${prefix}/sbin/"/>
@@ -169,11 +169,9 @@
     <!-- Install targets -->
     <target name="installInclude">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJars" depends="build,installInclude">
@@ -196,8 +194,8 @@
     </target>
 
     <target name="installConfig" depends="patchConfig">
-        <mkdir dir="${conf.install.copy.dir}"/>
-        <copy todir="${conf.install.copy.dir}" overwrite="true">
+        <mkdir dir="${groupwareConfInstallCopyDir}"/>
+        <copy todir="${groupwareConfInstallCopyDir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
                 <include name="**"/>
                 <exclude name="*.in"/>
@@ -205,6 +203,12 @@
                 <exclude name="osgi/**"/>
             </fileset>
         </copy>
+        <chmod perm="640">
+            <fileset dir="${groupwareConfInstallCopyDir}">
+                <include name="**"/>
+                <exclude name="osgi/**"/>
+            </fileset>
+        </chmod>
         <mkdir dir="${commonConfInstallCopyDir}"/>
         <copy todir="${commonConfInstallCopyDir}">
             <fileset dir="${commonConfDir}">
@@ -213,6 +217,11 @@
                 <exclude name="CVS"/>
             </fileset>
         </copy>
+        <chmod perm="640">
+            <fileset dir="${commonConfInstallCopyDir}">
+                <include name="**"/>
+            </fileset>
+        </chmod>
     </target>
 
     <target name="patchScripts" depends="prepare">
@@ -229,12 +238,17 @@
     </target>
 
     <target name="installScripts" depends="patchConfig,patchScripts">
-        <mkdir dir="${conf.install.copy.dir}"/>
-        <copy todir="${conf.install.copy.dir}" overwrite="true">
+        <mkdir dir="${groupwareConfInstallCopyDir}"/>
+        <copy todir="${groupwareConfInstallCopyDir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
                 <include name="osgi/**"/>
             </fileset>
         </copy>
+        <chmod perm="660">
+            <fileset dir="${groupwareConfInstallCopyDir}">
+                <include name="osgi/**"/>
+            </fileset>
+        </chmod>
         <copy todir="${bin.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.bin.dir}"/>
         </copy>
@@ -357,7 +371,7 @@
     <target name="manifest">
         <copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
         <manifest mode="update" file="META-INF/MANIFEST.MF.package">
-                <attribute name="Codename" value="${codename}"/>
+            <attribute name="Codename" value="${codename}"/>
         </manifest>
     </target>
 

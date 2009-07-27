@@ -461,6 +461,9 @@ rm -f /tmp/ox_chown_tmp_$$
 chmod 750 /var/log/open-xchange
 chown open-xchange: /var/log/open-xchange
 chown open-xchange: /opt/open-xchange/etc/groupware/osgi
+chown :open-xchange /opt/open-xchange/etc/common/*
+chown :open-xchange /opt/open-xchange/etc/groupware/*
+chown :open-xchange /opt/open-xchange/etc/groupware/servletmappings/*
 
 update-rc.d open-xchange-groupware defaults > /dev/null
 
