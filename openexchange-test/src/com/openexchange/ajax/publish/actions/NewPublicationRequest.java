@@ -61,13 +61,12 @@ import com.openexchange.publish.json.PublicationWriter;
 /**
  * {@link NewPublicationRequest}
  * 
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class NewPublicationRequest extends AbstractPublicationRequest<NewPublicationResponse> {
 
     private Publication publication;
-    
-    
+
     /**
      * Initializes a new {@link NewPublicationRequest}.
      */
@@ -75,7 +74,7 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
         super();
         this.publication = publication;
     }
-    
+
     public Object getBody() throws JSONException {
         try {
             return new PublicationWriter().write(publication);
@@ -90,14 +89,10 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
 
     public Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
-        params.add( new Parameter( AJAXServlet.PARAMETER_ACTION, "new"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "new"));
         return params.toArray(new Parameter[0]);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     public AbstractAJAXParser<NewPublicationResponse> getParser() {
         return new AbstractAJAXParser<NewPublicationResponse>(isFailOnError()) {
 
@@ -107,7 +102,5 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
             }
         };
     }
-
-
 
 }
