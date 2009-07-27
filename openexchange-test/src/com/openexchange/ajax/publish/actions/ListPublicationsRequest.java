@@ -102,8 +102,8 @@ public class ListPublicationsRequest extends AbstractPublicationRequest<ListPubl
         }
 
         if (getDynamicColumns() != null) {
-            for (String plugin : dynamicColumns.keySet()) {
-                params.add(new Parameter(plugin, Strings.join(dynamicColumns.get(plugin), ",")));
+            for (String plugin : getDynamicColumns().keySet()) {
+                params.add(new Parameter(plugin, Strings.join(getDynamicColumns().get(plugin), ",")));
             }
         }
         return params.toArray(new Parameter[] {});
