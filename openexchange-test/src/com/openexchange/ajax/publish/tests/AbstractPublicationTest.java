@@ -49,19 +49,13 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AbstractPublicationTest}
@@ -101,15 +95,5 @@ AbstractPubSubTest {
         pub.setTarget(target);
         pub.setConfiguration(config);
         return pub;
-    }
-    
-    protected Contact createDefaultContactFolderWithOneContact() throws AjaxException, IOException, SAXException, JSONException{
-        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
-        getFolderManager().insertFolderOnServer(folder);
-
-        Contact contact = generateContact("Herbert", "Meier");
-        contact.setParentFolderID(folder.getObjectID());
-        getContactManager().insertContactOnServer(contact);
-        return contact;
     }
 }

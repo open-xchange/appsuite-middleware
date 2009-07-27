@@ -140,4 +140,20 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return contact;
     }
 
+    protected FolderObject createDefaultContactFolder() throws AjaxException, IOException, SAXException, JSONException {
+        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
+        getFolderManager().insertFolderOnServer(folder);
+        return folder;
+    }
+
+    
+    protected Contact createDefaultContactFolderWithOneContact() throws AjaxException, IOException, SAXException, JSONException {
+        FolderObject folder = createDefaultContactFolder();
+    
+        Contact contact = generateContact("Herbert", "Meier");
+        contact.setParentFolderID(folder.getObjectID());
+        getContactManager().insertContactOnServer(contact);
+        return contact;
+    }
+
 }
