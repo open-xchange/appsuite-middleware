@@ -65,7 +65,7 @@ public class TreeTools {
         copy.setName(original.getName());
         
         if(original.isLeaf()) {
-            copy.copyPayload(original);
+            copy.copyPayloadFromOther(original);
         } else {
             for(T child : original.getChildren()) {
                 T childCopy = copy(child, filter, processor);

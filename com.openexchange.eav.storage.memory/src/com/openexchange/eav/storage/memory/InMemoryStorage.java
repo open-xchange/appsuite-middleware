@@ -143,7 +143,7 @@ public class InMemoryStorage {
         }
         
         for (NodeTuple nodeTuple : updates) {
-            nodeTuple.left.copyPayload(nodeTuple.right);
+            nodeTuple.left.copyPayloadFromOther(nodeTuple.right);
             processIncoming(nodeTuple.left);
         }
         

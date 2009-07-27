@@ -87,7 +87,7 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
 
 
     @Override
-    public void copyPayload(EAVTypeMetadataNode other) {
+    public void copyPayloadFromOther(EAVTypeMetadataNode other) {
         type = other.type;
         options = new HashMap<String, Object>(other.options);
         containerType = other.containerType;

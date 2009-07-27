@@ -178,7 +178,7 @@ public class EAVNode extends AbstractNode<EAVNode> {
         return getRelativePath(relativeNode.getPath());
     }
 
-    public void copyPayload(EAVNode other) {
+    public void copyPayloadFromOther(EAVNode other) {
         this.payload = other.payload;
         this.type = other.type;
         this.containerType = other.containerType;

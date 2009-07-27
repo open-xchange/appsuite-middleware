@@ -115,7 +115,7 @@ public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
     }
     
     @Override
-    public void copyPayload(EAVSetTransformation other) {
+    public void copyPayloadFromOther(EAVSetTransformation other) {
         this.add = other.add;
         this.remove = other.remove;
         this.type = other.type;

@@ -201,7 +201,7 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
     }
     
     
-    public abstract void copyPayload(T other);
+    public abstract void copyPayloadFromOther(T other);
     public abstract T newInstance();
    
     
