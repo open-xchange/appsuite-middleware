@@ -47,20 +47,46 @@
  *
  */
 
-package com.openexchange.folder.json;
+package com.openexchange.folder.json.actions;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link Constants} for the HTTP JSON interface of the folder component.
- * 
+ * {@link FolderActionFactory}
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Constants {
+public final class FolderActionFactory implements AJAXActionServiceFactory {
 
-    public static final String MODULE = "folder2";
+    private static final FolderActionFactory SINGLETON = new FolderActionFactory();
 
-    public static final String SERVLET_PATH = "/ajax/" + MODULE;
+    private final Map<String, AJAXActionService> actions;
 
-    private Constants() {
+    private FolderActionFactory() {
         super();
+        actions = initActions();
+    }
+
+    public static final FolderActionFactory getInstance() {
+        return SINGLETON;
+    }
+
+    public AJAXActionService createActionService(String action) throws AjaxException {
+        AJAXActionService retval = actions.get(action);
+        if (null == retval) {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
+        return retval;
+    }
+
+    private Map<String, AJAXActionService> initActions() {
+        Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        tmp.put(RootAction.ACTION, new RootAction());
+        return Collections.unmodifiableMap(tmp);
     }
 }

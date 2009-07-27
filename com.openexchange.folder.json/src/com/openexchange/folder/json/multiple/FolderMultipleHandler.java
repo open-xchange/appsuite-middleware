@@ -52,6 +52,9 @@ package com.openexchange.folder.json.multiple;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.session.ServerSession;
@@ -63,18 +66,22 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderMultipleHandler implements MultipleHandler {
 
+    private AJAXActionService actionService;
+
+    private AJAXRequestResult result;
+
     public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException {
-        // TODO Auto-generated method stub
-        return null;
+        actionService = FolderActionFactory.getInstance().createActionService(action);
+        result = actionService.perform(null, session);
+        return result.getResultObject();
     }
 
     public Date getTimestamp() {
-        // TODO Auto-generated method stub
-        return null;
+        return null == result ? null : result.getTimestamp();
     }
 
     public void close() {
-        // TODO Auto-generated method stub
-        
+        actionService = null;
+        result = null;
     }
 }

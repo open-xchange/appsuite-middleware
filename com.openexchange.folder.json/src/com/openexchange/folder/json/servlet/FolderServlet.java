@@ -49,15 +49,25 @@
 
 package com.openexchange.folder.json.servlet;
 
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.MultipleAdapterServletNew;
+import com.openexchange.folder.json.actions.FolderActionFactory;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderServlet}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FolderServlet extends SessionServlet {
+public final class FolderServlet extends MultipleAdapterServletNew {
+
+    public FolderServlet() {
+        super(FolderActionFactory.getInstance());
+    }
 
     private static final long serialVersionUID = -5776196227866178935L;
 
+    @Override
+    protected boolean hasModulePermission(ServerSession session) {
+        return true;
+    }
 }

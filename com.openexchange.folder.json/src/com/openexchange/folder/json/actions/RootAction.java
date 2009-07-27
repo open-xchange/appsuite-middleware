@@ -47,20 +47,27 @@
  *
  */
 
-package com.openexchange.folder.json;
+package com.openexchange.folder.json.actions;
+
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Constants} for the HTTP JSON interface of the folder component.
- * 
+ * {@link RootAction} maps the action to a list action with parent 0.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Constants {
+public final class RootAction implements AJAXActionService {
 
-    public static final String MODULE = "folder2";
+    public static final String ACTION = AJAXServlet.ACTION_ROOT;
 
-    public static final String SERVLET_PATH = "/ajax/" + MODULE;
-
-    private Constants() {
-        super();
+    public AJAXRequestResult perform(AJAXRequestData reqest, ServerSession session) throws AbstractOXException {
+        // TODO Auto-generated method stub
+        return null;
     }
+
 }
