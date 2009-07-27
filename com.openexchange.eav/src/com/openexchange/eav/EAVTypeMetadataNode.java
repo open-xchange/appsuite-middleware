@@ -130,9 +130,15 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
     private static final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
     
     public void verifyOptions() throws EAVException {
-        EAVException x = (EAVException) type.doSwitch(verifier, options);
-        if(x != null) {
-            throw x;
+        if(isLeaf()) {
+            EAVException x = (EAVException) type.doSwitch(verifier, options);
+            if(x != null) {
+                throw x;
+            }
+            return;
+        }
+        for(EAVTypeMetadataNode child : children) {
+            child.verifyOptions();
         }
     }
 
