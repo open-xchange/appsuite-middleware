@@ -47,29 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.actions;
+package com.openexchange.ajax.subscribe.test;
 
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.subscribe.actions.GetSubscriptionRequest;
+import com.openexchange.ajax.subscribe.actions.GetSubscriptionResponse;
+import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
+import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.json.SubscriptionJSONParser;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetSubscriptionResponse extends AbstractSubscriptionResponse {
+public class CreateSubscriptionTest extends AbstractSubscriptionTest {
 
-    protected GetSubscriptionResponse(Response response) {
-        super(response);
+    public CreateSubscriptionTest(String name) {
+        super(name);
     }
+    
+    public void testShouldSurviveBasicOXMFSubscriptionCreation() throws AjaxException, IOException, SAXException, JSONException{
+        //setup
+        FolderObject folder = generateFolder("subscriptionTest", FolderObject.CONTACT);
+        getFolderManager().insertFolderOnServer(folder);
+        
+        DynamicFormDescription form = generateFormDescription();        
+        Subscription expected = generateOXMFSubscription(form);
+        expected.setFolderId( String.valueOf( folder.getObjectID() ) );
 
-    public Subscription getSubscription(SubscriptionSourceDiscoveryService discovery) throws JSONException {
-        SubscriptionJSONParser parser = new SubscriptionJSONParser(discovery);
-        JSONObject data = (JSONObject) getData();
-        return parser.parse( data );
+       //new request
+        NewSubscriptionRequest newReq = new NewSubscriptionRequest(expected, form);
+        NewSubscriptionResponse newResp = getClient().execute(newReq);
+        
+        assertFalse("Should succeed creating the subscription", newResp.hasError());
+        expected.setId( newResp.getId() );
+
+        //verify via get request
+        SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
+        discovery.addSource(expected.getSource());
+
+        GetSubscriptionRequest getReq = new GetSubscriptionRequest( newResp.getId() );
+        GetSubscriptionResponse getResp = getClient().execute(getReq);
+        
+        Subscription actual = getResp.getSubscription(discovery);
+        
+        assertEquals("Should have same source ID", expected.getSource().getId(), actual.getSource().getId());
+        assertEquals("Should have same ID", expected.getId(), actual.getId());
+        assertEquals("Should have same user ID", expected.getUserId(), actual.getUserId());
     }
-
 }

@@ -47,29 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.actions;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.json.SubscriptionJSONParser;
+package com.openexchange.ajax.subscribe;
+import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
+ * {@link SubscribeTestSuite}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetSubscriptionResponse extends AbstractSubscriptionResponse {
-
-    protected GetSubscriptionResponse(Response response) {
-        super(response);
+public class SubscribeTestSuite extends TestSuite {
+    private SubscribeTestSuite() {
+        super();
     }
 
-    public Subscription getSubscription(SubscriptionSourceDiscoveryService discovery) throws JSONException {
-        SubscriptionJSONParser parser = new SubscriptionJSONParser(discovery);
-        JSONObject data = (JSONObject) getData();
-        return parser.parse( data );
+    public static Test suite() {
+        final TestSuite suite = new TestSuite();
+        suite.addTestSuite(CreateSubscriptionTest.class);
+        return suite;
+        
     }
-
 }

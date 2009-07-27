@@ -47,29 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.actions;
+package com.openexchange.ajax.subscribe.test;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.json.SubscriptionJSONParser;
-
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetSubscriptionResponse extends AbstractSubscriptionResponse {
+public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
-    protected GetSubscriptionResponse(Response response) {
-        super(response);
+    public AbstractSubscriptionTest(String name) {
+        super(name);
     }
 
-    public Subscription getSubscription(SubscriptionSourceDiscoveryService discovery) throws JSONException {
-        SubscriptionJSONParser parser = new SubscriptionJSONParser(discovery);
-        JSONObject data = (JSONObject) getData();
-        return parser.parse( data );
+    public Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
+        Subscription subscription = new Subscription();
+
+        subscription.setDisplayName("mySubscription");
+        
+        SubscriptionSource source = new SubscriptionSource();
+        source.setId("com.openexchange.subscribe.microformats.contacts.http");
+        source.setFormDescription(formDescription);
+        subscription.setSource(source);
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("username", "My Username");
+        config.put("password", "My Password");
+        subscription.setConfiguration(config);
+
+        return subscription;
+    }
+    
+    public DynamicFormDescription generateFormDescription(){
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
+        return form;
     }
 
 }
