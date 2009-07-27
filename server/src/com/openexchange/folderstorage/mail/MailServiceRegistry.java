@@ -49,68 +49,31 @@
 
 package com.openexchange.folderstorage.mail;
 
-import com.openexchange.folderstorage.FolderType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link MailFolderType} - The folder type for mail.
+ * {@link MailServiceRegistry} - The service registry for database folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderType implements FolderType {
+public final class MailServiceRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderType.class);
-
-    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
-
-    private static final MailFolderType instance = new MailFolderType();
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
     /**
-     * Gets the {@link MailFolderType} instance.
+     * Gets the service registry
      * 
-     * @return The {@link MailFolderType} instance
+     * @return The service registry
      */
-    public static MailFolderType getInstance() {
-        return instance;
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
     }
 
     /**
-     * Initializes a new {@link MailFolderType}.
+     * Initializes a new {@link IMAPServiceRegistry}
      */
-    private MailFolderType() {
+    private MailServiceRegistry() {
         super();
     }
 
-    private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-
-    public boolean servesFolderId(final String folderId) {
-        if (null == folderId) {
-            return false;
-        }
-        if (PRIVATE_FOLDER_ID.equals(folderId)) {
-            return true;
-        }
-        if (!folderId.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-            return false;
-        }
-        final int len = folderId.length();
-        final char separator = '/';
-        int index = LEN;
-        while (index < len && folderId.charAt(index) != separator) {
-            index++;
-        }
-        // Parse account ID
-        if (index != LEN) {
-            try {
-                Integer.parseInt(folderId.substring(LEN, index));
-            } catch (final NumberFormatException e) {
-                final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
-                err.initCause(e);
-                LOG.error(err.getMessage(), err);
-                return false;
-            }
-        }
-        return true;
-    }
 }

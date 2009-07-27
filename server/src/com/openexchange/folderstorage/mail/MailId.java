@@ -52,23 +52,23 @@ package com.openexchange.folderstorage.mail;
 import com.openexchange.folderstorage.SortableId;
 
 /**
- * {@link FullnameId} - TODO Short description of this class' purpose.
+ * {@link MailId} - TODO Short description of this class' purpose.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FullnameId implements SortableId {
+public final class MailId implements SortableId {
 
     private final String fullname;
 
     private final int ordinal;
 
     /**
-     * Initializes a new {@link FullnameId}.
+     * Initializes a new {@link MailId}.
      * 
      * @param fullname The fullname
      * @param ordinal The ordinal
      */
-    public FullnameId(final String fullname, final int ordinal) {
+    public MailId(final String fullname, final int ordinal) {
         super();
         this.fullname = fullname;
         this.ordinal = ordinal;
@@ -84,9 +84,9 @@ public final class FullnameId implements SortableId {
     }
 
     public int compareTo(final SortableId o) {
-        if (o instanceof FullnameId) {
+        if (o instanceof MailId) {
             final int thisVal = this.ordinal;
-            final int anotherVal = ((FullnameId) o).ordinal;
+            final int anotherVal = ((MailId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
         return 0;

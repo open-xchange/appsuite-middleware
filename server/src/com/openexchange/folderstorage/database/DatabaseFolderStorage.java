@@ -51,9 +51,13 @@ package com.openexchange.folderstorage.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -74,12 +78,15 @@ import com.openexchange.folderstorage.database.type.PrivateType;
 import com.openexchange.folderstorage.database.type.PublicType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -276,8 +283,43 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+
+            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(Integer.parseInt(parentId), storageParameters.getContext(), con);
+            final List<FolderObject> subfolders = new ArrayList<FolderObject>(subfolderIds.size());
+            for (final Integer folderId : subfolderIds) {
+                subfolders.add(FolderObject.loadFolderObjectFromDB(folderId.intValue(), storageParameters.getContext(), con, false, false));
+            }
+            final ServerSession session;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    session = (ServerSession) s;
+                } else {
+                    session = new ServerSessionAdapter(s);
+                }
+            }
+            Collections.sort(subfolders, new FolderObjectComparator(session.getUser().getLocale()));
+
+            final int size = subfolders.size();
+            final List<SortableId> list = new ArrayList<SortableId>(size);
+            for (int i = 0; i < size; i++) {
+                list.add(new DatabaseId(subfolders.get(i).getObjectID(), i));
+            }
+            return list.toArray(new SortableId[size]);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw new FolderException(new OXFolderException(
+                OXFolderException.FolderCode.SQL_ERROR,
+                e,
+                Integer.valueOf(storageParameters.getContext().getContextId())));
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public void rollback(final StorageParameters params) {
@@ -427,5 +469,34 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
         return FolderObject.SYSTEM_TYPE;
     }
+
+    private static final class FolderObjectComparator implements Comparator<FolderObject> {
+
+        private final Collator collator;
+
+        public FolderObjectComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final FolderObject o1, final FolderObject o2) {
+            if (o1.isDefaultFolder()) {
+                if (o2.isDefaultFolder()) {
+                    return compareById(o1.getObjectID(), o2.getObjectID());
+                }
+                return -1;
+            } else if (o2.isDefaultFolder()) {
+                return 1;
+            }
+            // Compare by name
+            return collator.compare(o1.getFolderName(), o2.getFolderName());
+        }
+
+        private int compareById(final int id1, final int id2) {
+            return (id1 < id2 ? -1 : (id1 == id2 ? 0 : 1));
+        }
+
+    } // End of MailAccountComparator
 
 }

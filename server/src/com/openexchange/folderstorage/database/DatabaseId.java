@@ -47,70 +47,48 @@
  *
  */
 
-package com.openexchange.folderstorage.mail;
+package com.openexchange.folderstorage.database;
 
-import com.openexchange.folderstorage.FolderType;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.folderstorage.SortableId;
 
 /**
- * {@link MailFolderType} - The folder type for mail.
+ * {@link DatabaseId}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderType implements FolderType {
+public final class DatabaseId implements SortableId {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderType.class);
+    private final int folderId;
 
-    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
-
-    private static final MailFolderType instance = new MailFolderType();
+    private final int ordinal;
 
     /**
-     * Gets the {@link MailFolderType} instance.
+     * Initializes a new {@link DatabaseId}.
      * 
-     * @return The {@link MailFolderType} instance
+     * @param folderId The folder identifier
+     * @param ordinal The ordinal
      */
-    public static MailFolderType getInstance() {
-        return instance;
-    }
-
-    /**
-     * Initializes a new {@link MailFolderType}.
-     */
-    private MailFolderType() {
+    public DatabaseId(final int folderId, final int ordinal) {
         super();
+        this.folderId = folderId;
+        this.ordinal = ordinal;
     }
 
-    private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-
-    public boolean servesFolderId(final String folderId) {
-        if (null == folderId) {
-            return false;
-        }
-        if (PRIVATE_FOLDER_ID.equals(folderId)) {
-            return true;
-        }
-        if (!folderId.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-            return false;
-        }
-        final int len = folderId.length();
-        final char separator = '/';
-        int index = LEN;
-        while (index < len && folderId.charAt(index) != separator) {
-            index++;
-        }
-        // Parse account ID
-        if (index != LEN) {
-            try {
-                Integer.parseInt(folderId.substring(LEN, index));
-            } catch (final NumberFormatException e) {
-                final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
-                err.initCause(e);
-                LOG.error(err.getMessage(), err);
-                return false;
-            }
-        }
-        return true;
+    public String getId() {
+        return String.valueOf(folderId);
     }
+
+    public Priority getPriority() {
+        return Priority.NORMAL;
+    }
+
+    public int compareTo(final SortableId o) {
+        if (o instanceof DatabaseId) {
+            final int thisVal = this.ordinal;
+            final int anotherVal = ((DatabaseId) o).ordinal;
+            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+        }
+        return 0;
+    }
+
 }

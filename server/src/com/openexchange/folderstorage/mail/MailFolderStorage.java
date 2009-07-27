@@ -49,8 +49,13 @@
 
 package com.openexchange.folderstorage.mail;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -61,6 +66,8 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
@@ -71,8 +78,15 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailFolderStorage} - TODO Short description of this class' purpose.
@@ -82,6 +96,8 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 public final class MailFolderStorage implements FolderStorage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderStorage.class);
+
+    private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
     private final String treeId;
 
@@ -232,6 +248,55 @@ public final class MailFolderStorage implements FolderStorage {
 
     public SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
         try {
+            final ServerSession session;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    session = (ServerSession) s;
+                } else {
+                    session = new ServerSessionAdapter(s);
+                }
+            }
+
+            if (PRIVATE_FOLDER_ID.equals(parentId)) {
+                /*
+                 * Get all user mail accounts
+                 */
+                final List<MailAccount> accounts;
+                if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                    final MailAccountStorageService storageService = MailServiceRegistry.getServiceRegistry().getService(
+                        MailAccountStorageService.class,
+                        true);
+                    final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                    final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
+                    tmp.addAll(Arrays.asList(accountsArr));
+                    Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
+                    accounts = tmp;
+                } else {
+                    accounts = new ArrayList<MailAccount>(1);
+                    final MailAccountStorageService storageService = MailServiceRegistry.getServiceRegistry().getService(
+                        MailAccountStorageService.class,
+                        true);
+                    accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+                }
+                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                    /*
+                     * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                     */
+                    final UnifiedINBOXManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
+                    if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
+                        accounts.remove(0);
+                    }
+                }
+                final int size = accounts.size();
+                final List<SortableId> list = new ArrayList<SortableId>(size);
+                for (int j = 0; j < size; j++) {
+                    list.add(new MailId(MailFolderUtility.prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
+
+            // A mail folder denoted by fullname
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -244,10 +309,10 @@ public final class MailFolderStorage implements FolderStorage {
             try {
                 final int size = iter.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
-                for (int i = size; i > 0; i--) {
-                    list.add(new FullnameId(MailFolderUtility.prepareFullname(
+                for (int j = 0; j < size; j++) {
+                    list.add(new MailId(MailFolderUtility.prepareFullname(
                         mailServletInterface.getAccountID(),
-                        iter.next().getFullname()), i));
+                        iter.next().getFullname()), j));
                 }
                 return list.toArray(new SortableId[list.size()]);
             } catch (final SearchIteratorException e) {
@@ -262,6 +327,12 @@ public final class MailFolderStorage implements FolderStorage {
                 }
             }
         } catch (final MailException e) {
+            throw new FolderException(e);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        } catch (final MailAccountException e) {
             throw new FolderException(e);
         }
     }
@@ -342,5 +413,37 @@ public final class MailFolderStorage implements FolderStorage {
             throw new FolderException(e);
         }
     }
+
+    private static final class MailAccountComparator implements Comparator<MailAccount> {
+
+        private final Collator collator;
+
+        public MailAccountComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final MailAccount o1, final MailAccount o2) {
+            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
+                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+                    return 0;
+                }
+                return -1;
+            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
+                return 1;
+            }
+            if (o1.isDefaultAccount()) {
+                if (o2.isDefaultAccount()) {
+                    return 0;
+                }
+                return -1;
+            } else if (o2.isDefaultAccount()) {
+                return 1;
+            }
+            return collator.compare(o1.getName(), o2.getName());
+        }
+
+    } // End of MailAccountComparator
 
 }
