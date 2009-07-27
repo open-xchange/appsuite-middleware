@@ -51,29 +51,11 @@ package com.openexchange.eav;
 
 
 /**
- * {@link AbstractNodeVisitor}
+ * {@link AbstractNodeProcessor}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
-    
-    static RecursionBreak BREAK = new RecursionBreak();
-    static SkipSubtree SKIP = new SkipSubtree();
-    
-    
-
-    public void visit(int index, T node);
-
-
-
-    public static class RecursionBreak extends RuntimeException {
-        private RecursionBreak() {};
-    }
-
-    public class SkipSubtree extends RuntimeException {
-
-    }
-    
-
+public interface AbstractNodeProcessor<T extends AbstractNode<T>> {
+    public T process(T node);
 }

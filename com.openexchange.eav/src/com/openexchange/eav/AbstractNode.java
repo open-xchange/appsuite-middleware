@@ -59,7 +59,7 @@ import java.util.List;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class AbstractNode<T extends AbstractNode<T>> {
+public abstract class AbstractNode<T extends AbstractNode<T>> {
     
     protected T parent;
     protected List<T> children = new ArrayList<T>();
@@ -126,6 +126,10 @@ public class AbstractNode<T extends AbstractNode<T>> {
         this.children = newNodes;
     }
     
+    public void addChild(T child) {
+        addChildren(child);
+    }
+    
     public void replaceChild(T tree) {
         removeChild(tree.getName());
         addChildren(tree);
@@ -144,14 +148,25 @@ public class AbstractNode<T extends AbstractNode<T>> {
     }
     
     public void visit(AbstractNodeVisitor<T> visitor) {
-        visit(0, visitor);
+        try {
+            visit(0, visitor);
+        } catch (AbstractNodeVisitor.RecursionBreak br) {
+            return;
+        }
     }
 
     private void visit(int index, AbstractNodeVisitor<T> visitor) {
-        visitor.visit(index, (T) this);
-        for(T child : children) {
-            child.visit(index+1, visitor);
-        }
+            boolean recurseFurther = true;
+            try {
+                visitor.visit(index, (T) this);
+            } catch (AbstractNodeVisitor.SkipSubtree skip) {
+                recurseFurther = false;
+            }
+            if(recurseFurther) {
+                for(T child : children) {
+                    child.visit(index+1, visitor);
+                }
+            }
     }
 
     public T resolve(EAVPath path) {
@@ -184,7 +199,10 @@ public class AbstractNode<T extends AbstractNode<T>> {
             child.parent = (T)this;
         }
     }
-
+    
+    
+    public abstract void copyPayload(T other);
+    public abstract T newInstance();
    
     
 }

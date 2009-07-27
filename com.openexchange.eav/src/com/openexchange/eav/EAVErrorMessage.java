@@ -49,31 +49,70 @@
 
 package com.openexchange.eav;
 
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
+
 
 /**
- * {@link AbstractNodeVisitor}
+ * {@link EAVErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
-    
-    static RecursionBreak BREAK = new RecursionBreak();
-    static SkipSubtree SKIP = new SkipSubtree();
-    
-    
+public enum EAVErrorMessage implements OXErrorMessage {
 
-    public void visit(int index, T node);
+    NO_OPTIONS(1, "The type %s may not have any options", "", Category.USER_INPUT),
+    UNKNOWN_OPTION(2, "The type %s may not have any options other than %s", "", Category.USER_INPUT), 
+    ILLEGAL_OPTION(3, "Illegal value %s for option %s", "", Category.USER_INPUT),
+    ;
 
+    public static EAVExceptionFactory FACTORY = new EAVExceptionFactory() {
 
+        @Override
+        protected void knownExceptions() {
+            declareAll(EAVErrorMessage.values());
+        }
 
-    public static class RecursionBreak extends RuntimeException {
-        private RecursionBreak() {};
+    };
+
+    private AbstractOXException.Category category;
+
+    private String help;
+
+    private String message;
+
+    private int errorCode;
+
+    EAVErrorMessage(final int errorCode, final String message, final String help, final AbstractOXException.Category category) {
+        this.category = category;
+        this.help = help;
+        this.message = message;
+        this.errorCode = errorCode;
     }
 
-    public class SkipSubtree extends RuntimeException {
-
+    public int getDetailNumber() {
+        return errorCode;
     }
-    
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getHelp() {
+        return help;
+    }
+
+    public AbstractOXException.Category getCategory() {
+        return category;
+    }
+
+    public EAVException create(final Throwable cause, final Object... args) {
+        return FACTORY.create(this, cause, args);
+    }
+
+    public EAVException create(final Object... args) {
+        return FACTORY.create(this, args);
+    }
 
 }

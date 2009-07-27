@@ -49,31 +49,28 @@
 
 package com.openexchange.eav;
 
+import java.util.Set;
+
 
 /**
- * {@link AbstractNodeVisitor}
+ * {@link EAVPathFilter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
+public class EAVPathFilter implements EAVNodeFilter {
+
+    private Set<EAVPath> paths;
+    private EAVPath relativeRoot = null;
     
-    static RecursionBreak BREAK = new RecursionBreak();
-    static SkipSubtree SKIP = new SkipSubtree();
-    
-    
-
-    public void visit(int index, T node);
-
-
-
-    public static class RecursionBreak extends RuntimeException {
-        private RecursionBreak() {};
+    public EAVPathFilter(Set<EAVPath> paths, EAVPath relativeRoot) {
+        super();
+        this.paths = paths;
+        this.relativeRoot = relativeRoot;
     }
 
-    public class SkipSubtree extends RuntimeException {
-
+    public boolean accept(EAVNode node) {
+        return paths.contains(node.getRelativePath(relativeRoot));
     }
-    
 
 }

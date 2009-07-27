@@ -47,33 +47,71 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.memory;
 
+import com.openexchange.eav.EAVException;
+import com.openexchange.eav.EAVExceptionFactory;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link AbstractNodeVisitor}
- *
+ * {@link EAVErrorMessage}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
-    
-    static RecursionBreak BREAK = new RecursionBreak();
-    static SkipSubtree SKIP = new SkipSubtree();
-    
-    
+public enum EAVErrorMessage implements OXErrorMessage {
 
-    public void visit(int index, T node);
+    PATH_TAKEN(1, "The path '%s' has already been taken", "Update the path or save the data elsewhere", AbstractOXException.Category.USER_INPUT), 
+    TYPE_MISMATCH(2, "The type for path '%s' ( %s, %s ) is incompatible with the supplied type (%s, %s ).", "Updates must have correct types", AbstractOXException.Category.USER_INPUT), 
+    UNKNOWN_PATH(3, "The path '%s' does not exist.", "Only update paths that exist. You may want to insert the path, if it is to be created freshly", AbstractOXException.Category.USER_INPUT), 
+    CAN_ONLY_ADD_AND_REMOVE_FROM_SET_OR_MULTISET(4, "Can only add to or remove from a set or multiset. Object at path '%s' is '%s'", "Update arrays only applies to sets and multisets", AbstractOXException.Category.USER_INPUT);
 
+    public static EAVExceptionFactory FACTORY = new EAVExceptionFactory() {
 
+        @Override
+        protected void knownExceptions() {
+            declareAll(EAVErrorMessage.values());
+        }
 
-    public static class RecursionBreak extends RuntimeException {
-        private RecursionBreak() {};
+    };
+
+    private AbstractOXException.Category category;
+
+    private String help;
+
+    private String message;
+
+    private int errorCode;
+
+    EAVErrorMessage(final int errorCode, final String message, final String help, final AbstractOXException.Category category) {
+        this.category = category;
+        this.help = help;
+        this.message = message;
+        this.errorCode = errorCode;
     }
 
-    public class SkipSubtree extends RuntimeException {
-
+    public int getDetailNumber() {
+        return errorCode;
     }
-    
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getHelp() {
+        return help;
+    }
+
+    public AbstractOXException.Category getCategory() {
+        return category;
+    }
+
+    public EAVException create(final Throwable cause, final Object... args) {
+        return FACTORY.create(this, cause, args);
+    }
+
+    public EAVException create(final Object... args) {
+        return FACTORY.create(this, args);
+    }
 
 }

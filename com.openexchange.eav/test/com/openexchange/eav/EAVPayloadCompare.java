@@ -49,6 +49,9 @@
 
 package com.openexchange.eav;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * {@link EAVPayloadCompare}
  * 
@@ -57,7 +60,24 @@ package com.openexchange.eav;
 public class EAVPayloadCompare implements EAVTypeSwitcher {
 
     public Object binary(Object... args) {
-        throw new IllegalArgumentException("Can't compare binaries");
+        InputStream expected = (InputStream) args[0];
+        InputStream actual = (InputStream) args[1];
+        
+        int expectedData;
+        try {
+            while((expectedData = expected.read())!= -1){
+                if(expectedData != actual.read()) {
+                    return false;
+                }
+            }
+            if(actual.read() != -1) {
+                return false;
+            }
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public Object date(Object... args) {
@@ -85,7 +105,7 @@ public class EAVPayloadCompare implements EAVTypeSwitcher {
     }
 
     public Object nullValue(Object... args) {
-        return "NULL";
+        return true;
     }
 
     private boolean equals(Object o1, Object o2) {

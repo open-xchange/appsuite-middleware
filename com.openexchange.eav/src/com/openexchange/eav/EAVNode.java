@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -67,6 +69,10 @@ public class EAVNode extends AbstractNode<EAVNode> {
 
     private EAVContainerType containerType = EAVContainerType.SINGLE;
 
+    public EAVNode newInstance(){
+        return new EAVNode();
+    }
+    
     public EAVNode() {
         super();
     }
@@ -141,6 +147,12 @@ public class EAVNode extends AbstractNode<EAVNode> {
         setPayload(EAVType.NUMBER, EAVContainerType.MULTISET, values);
     }
 
+    public void setPayload(EAVType type, Number value) {
+        this.payload = value;
+        this.type = type;
+        this.containerType = EAVContainerType.SINGLE;
+    }
+
     public void setPayload(EAVType type, Number... values) {
         setPayload(type, EAVContainerType.MULTISET, values);
     }
@@ -190,6 +202,30 @@ public class EAVNode extends AbstractNode<EAVNode> {
         this.payload = collection.toArray((Object[]) type.doSwitch(TYPED_ARRAY, collection.size()));
 
     }
+    
+    public void setPayload(InputStream inputStream) {
+        this.type = EAVType.BINARY;
+        this.containerType = EAVContainerType.SINGLE;
+        this.payload = inputStream;
+    }
+    
+    public void setPayload(InputStream[] inputStreams) {
+        setPayload(EAVContainerType.MULTISET, inputStreams);
+    }
+    
+    public void setPayload(EAVContainerType cType, InputStream[] inputStreams) {
+        this.type = EAVType.BINARY;
+        this.containerType = cType;
+        this.payload = inputStreams;
+    }
+    
+    public void setPayload(EAVType type, EAVContainerType cType,Object payload) {
+        this.type = type;
+        this.containerType  = cType;
+        this.payload = payload;
+    }
+
+
 
     private static final EAVTypeSwitcher TYPED_ARRAY = new EAVTypeSwitcher() {
 
@@ -226,5 +262,7 @@ public class EAVNode extends AbstractNode<EAVNode> {
         }
 
     };
+
+
 
 }

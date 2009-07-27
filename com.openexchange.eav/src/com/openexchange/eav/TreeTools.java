@@ -51,29 +51,46 @@ package com.openexchange.eav;
 
 
 /**
- * {@link AbstractNodeVisitor}
+ * {@link TreeTools}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
-    
-    static RecursionBreak BREAK = new RecursionBreak();
-    static SkipSubtree SKIP = new SkipSubtree();
-    
-    
-
-    public void visit(int index, T node);
-
-
-
-    public static class RecursionBreak extends RuntimeException {
-        private RecursionBreak() {};
+public class TreeTools {
+    public static <T extends AbstractNode<T>> T copy(T original, AbstractNodeFilter<T> filter, AbstractNodeProcessor<T> processor) {
+        if(filter != null && !filter.accept(original)) {
+            return null;
+        }
+        T copy = original.newInstance();
+        copy.setName(original.getName());
+        
+        if(original.isLeaf()) {
+            copy.copyPayload(original);
+        } else {
+            for(T child : original.getChildren()) {
+                T childCopy = copy(child, filter, processor);
+                if(childCopy != null) {
+                    copy.addChild(childCopy);
+                }
+            }
+        }
+        if(processor != null) {
+            copy = processor.process(copy);
+        }
+        return copy;
     }
-
-    public class SkipSubtree extends RuntimeException {
-
+    
+    public static <T extends AbstractNode<T>> T copy(T original, AbstractNodeFilter<T> filter) {
+        return copy(original, filter, null);
     }
     
-
+    public static <T extends AbstractNode<T>> T copy(T original, AbstractNodeProcessor<T> processor) {
+        return copy(original, null, processor);
+    }
+    
+    public static <T extends AbstractNode<T>> T copy(T original) {
+        return copy(original, null, null);
+    }
+    
+    
 }

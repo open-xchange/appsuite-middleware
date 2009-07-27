@@ -63,6 +63,11 @@ public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
     
     private EAVType type;
 
+    @Override
+    public EAVSetTransformation newInstance() {
+        return new EAVSetTransformation();
+    }
+    
     private EAVSetTransformation() {
         super();
     }
@@ -109,6 +114,11 @@ public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
         this.type = type;
     }
     
-    
+    @Override
+    public void copyPayload(EAVSetTransformation other) {
+        this.add = other.add;
+        this.remove = other.remove;
+        this.type = other.type;
+    }
     
 }

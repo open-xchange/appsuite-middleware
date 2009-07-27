@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -216,11 +218,52 @@ public class EAVUnitTest extends TestCase {
         }
         EAVNode node = new EAVNode(name);
         if (values.length == 1) {
-            node.setPayload(values[0]);
+            node.setPayload(type, values[0]);
         } else {
-            node.setPayload(values);
+            node.setPayload(type, values);
         }
         return node;
+    }
+    
+    // Binaries
+    
+    public EAVNode N(String name, byte[]... values) {
+        EAVNode node = new EAVNode(name);
+        if (values.length == 1) {
+            node.setPayload(new ByteArrayInputStream(values[0]));
+        } else {
+            node.setPayload(wrap(values));
+        }
+        return node;
+    }
+
+    public EAVNode MULTISET(String name, byte[]... values) {
+        EAVNode node = new EAVNode(name);
+        node.setPayload(wrap(values));
+        return node;
+    }
+
+    public EAVNode SET(String name, byte[]... values) {
+        EAVNode node = new EAVNode(name);
+        node.setPayload(EAVContainerType.SET, wrap(values));
+        return node;
+    }
+    
+    public TransformList ADD(byte[]... values) {
+        return new TransformList(EAVType.NUMBER, ADD, wrap(values));
+    }
+
+    public TransformList REMOVE(byte[]...values) {
+        return new TransformList(EAVType.NUMBER, REMOVE, wrap(values));
+    }
+    
+    private InputStream[] wrap(byte[]...values) {
+        InputStream[] retval = new InputStream[values.length];
+        int index = 0;
+        for (byte[] bs : values) {
+            retval[index++] = new ByteArrayInputStream(bs);
+        }
+        return retval;
     }
 
     public EAVNode MULTISET(String name, EAVType type, Number... values) {

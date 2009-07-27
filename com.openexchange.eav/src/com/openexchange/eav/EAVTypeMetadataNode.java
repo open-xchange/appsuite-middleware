@@ -49,31 +49,94 @@
 
 package com.openexchange.eav;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
- * {@link AbstractNodeVisitor}
+ * {@link EAVTypeMetadataNode}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AbstractNodeVisitor<T extends AbstractNode<T>> {
+public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
+
+    private EAVType type = null;
+    private Map<String, Object> options = new HashMap<String, Object>();
+    private EAVContainerType containerType = EAVContainerType.SINGLE;
     
-    static RecursionBreak BREAK = new RecursionBreak();
-    static SkipSubtree SKIP = new SkipSubtree();
     
-    
-
-    public void visit(int index, T node);
-
-
-
-    public static class RecursionBreak extends RuntimeException {
-        private RecursionBreak() {};
+    public EAVTypeMetadataNode() {
+        super();
     }
 
-    public class SkipSubtree extends RuntimeException {
 
+    public EAVTypeMetadataNode(EAVTypeMetadataNode parent, String name) {
+        super(parent, name);
+    }
+
+
+    public EAVTypeMetadataNode(EAVTypeMetadataNode parent) {
+        super(parent);
+    }
+
+
+    public EAVTypeMetadataNode(String name) {
+        super(name);
+    }
+
+
+    @Override
+    public void copyPayload(EAVTypeMetadataNode other) {
+        type = other.type;
+        options = new HashMap<String, Object>(other.options);
+        containerType = other.containerType;
+    }
+
+
+    @Override
+    public EAVTypeMetadataNode newInstance() {
+        return new EAVTypeMetadataNode();
     }
     
+    public void setOptions(Map<String, Object> options) {
+        this.options = new HashMap<String, Object>(options);
+    }
+    
+    public void setOption(String option, Object value) {
+        this.options.put(option, value);
+    }
+    
+    public Object getOption(String option) {
+        return options.get(option);
+    }
+    
+    public void setType(EAVType type) {
+        this.type = type;
+    }
+    
+    public void setContainerType(EAVContainerType containerType) {
+        this.containerType = containerType;
+    }
+    
+    public EAVType getType() {
+        return type;
+    }
+ 
+    public EAVContainerType getContainerType() {
+        return containerType;
+    }
+ 
+    private static final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
+    
+    public void verifyOptions() throws EAVException {
+        EAVException x = (EAVException) type.doSwitch(verifier, options);
+        if(x != null) {
+            throw x;
+        }
+    }
+
+
+   
 
 }

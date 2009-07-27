@@ -49,98 +49,97 @@
 
 package com.openexchange.eav;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 
 /**
- * {@link EAVPath}
- *
+ * {@link EAVTypeOptionVerifier}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class EAVPath {
+public class EAVTypeOptionVerifier implements EAVTypeSwitcher {
 
-    private List<String> components;
-
-    public EAVPath(String...components) {
-        this.components = new ArrayList<String>(Arrays.asList(components));   
-    }
-    
-    public EAVPath(List<String> components) {
-        this.components = components;
-    }
-    
-    public EAVPath(EAVPath original) {
-        this.components = new ArrayList<String>(original.components);
+    public Object binary(Object... args) {
+        return noOptions(EAVType.BINARY, args);
     }
 
-    public boolean equals(Object other) {
-        if(EAVPath.class.isInstance(other)) {
-            return ((EAVPath)other).components.equals(components);
+    public Object bool(Object... args) {
+        return noOptions(EAVType.BOOLEAN, args);
+    }
+
+    public Object date(Object... args) {
+        return noOptions(EAVType.DATE, args);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.eav.EAVTypeSwitcher#nullValue(java.lang.Object[])
+     */
+    public Object nullValue(Object... args) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.eav.EAVTypeSwitcher#number(java.lang.Object[])
+     */
+    public Object number(Object... args) {
+        return noOptions(EAVType.NUMBER, args);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.eav.EAVTypeSwitcher#object(java.lang.Object[])
+     */
+    public Object object(Object... args) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Object string(Object... args) {
+        return noOptions(EAVType.STRING, args);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.eav.EAVTypeSwitcher#time(java.lang.Object[])
+     */
+    public Object time(Object... args) {
+        Map<String, Object> options = (Map<String, Object>) args[0];
+        String timezone = (String) options.remove("timezone");
+        if (options.size() != 0) {
+            return EAVErrorMessage.UNKNOWN_OPTION.create(EAVType.TIME, "timezone");
         }
-        return false;
-    }
-    
-    public int hashCode() {
-        return components.hashCode();
-    }
-
-    public EAVPath append(String...names) {
-        EAVPath p = this;
-        for (String name : names) {
-            p = p.append(name);
-        }
-        return p;
-    }
-    
-    public EAVPath append(String name) {
-        ArrayList<String> list = new ArrayList<String>(components);
-        list.add(name);
-        return new EAVPath(list);
-    }
-
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        for(String component : components) {
-            builder.append(component).append('/');
-        }
-        return builder.substring(0, builder.length()-1);
-    }
-
-    public boolean isEmpty() {
-        return components.isEmpty();
-    }
-
-    public String first() {
-        if(components.isEmpty()) {
+        if (timezone == null || isKnownAbbreviation(timezone) || looksLikeGMTTimeZone(timezone)) {
             return null;
         }
-        return components.get(0);
+        return EAVErrorMessage.ILLEGAL_OPTION.create(timezone, "timezone");
+    }
+    
+    private static final Set<String> ABBREVS = new HashSet<String>(){{
+        for(String abbrev : TimeZone.getAvailableIDs()) {
+            add(abbrev);
+        }
+    }};
+    
+    
+    private boolean isKnownAbbreviation(String timezone) {
+        return ABBREVS.contains(timezone);
     }
 
-    public EAVPath shiftLeft() {
-        if(isEmpty()) {
-            return new EAVPath();
-        }
-        return new EAVPath(new ArrayList<String>(components.subList(1, components.size())));
+    private boolean looksLikeGMTTimeZone(String timezone) {
+        return timezone.contains("GMT");
     }
 
-    public EAVPath parent() {
-        if(isEmpty()) {
-            return null;
+    private EAVException noOptions(EAVType type, Object... args) {
+        Map<String, Object> options = (Map<String, Object>) args[0];
+        if (options.size() != 0) {
+            return EAVErrorMessage.NO_OPTIONS.create(type);
         }
-        return new EAVPath(new ArrayList<String>(components.subList(0, components.size()-1)));
+        return null;
     }
 
-    public List<EAVPath> subpaths(String...names) {
-        ArrayList<EAVPath> list = new ArrayList<EAVPath>(names.length);
-        for (String string : names) {
-            list.add(this.append(string));
-        }
-        
-        return list;
-    }
 }
