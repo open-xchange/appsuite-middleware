@@ -1,3 +1,7 @@
+* 2009-07-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+
 * 2009-07-15 - marcus.klein@open-xchange.com
 
  - Bugfix #14128: Context deletion does not fail if some bundle extending the delete mechanism fails or if the remove method of the file

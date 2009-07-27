@@ -58,6 +58,8 @@ case "$1" in
     ;;
 esac
 
+chown :open-xchange /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
+
 #if ox_isrunning; then
 #    invoke-rc.d open-xchange-admin restart
 #fi
