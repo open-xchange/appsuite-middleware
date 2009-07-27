@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
@@ -62,9 +61,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -72,77 +68,13 @@ import com.openexchange.tools.servlet.AjaxException;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractPublicationTest extends AbstractAJAXSession {
-
-    private FolderTestManager folderMgr;
-    private ContactTestManager contactMgr;
-
-    public void setFolderManager(FolderTestManager folderMgr) {
-        this.folderMgr = folderMgr;
-    }
-
-    public FolderTestManager getFolderManager() {
-        return folderMgr;
-    }
-
-    public void setContactManager(ContactTestManager contactMgr) {
-        this.contactMgr = contactMgr;
-    }
-
-    public ContactTestManager getContactManager() {
-        return contactMgr;
-    }
+public abstract class AbstractPublicationTest extends 
+AbstractPubSubTest {
 
     public AbstractPublicationTest(String name) {
         super(name);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        setFolderManager(new FolderTestManager(getClient()));
-        setContactManager(new ContactTestManager(getClient()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        getContactManager().cleanUp();
-        getFolderManager().cleanUp();
-        super.tearDown();
-    }
-
-    protected FolderObject generateFolder(String name, int moduleType) throws AjaxException, IOException, SAXException, JSONException{
-        //create a folder
-        FolderObject folderObject1 = new FolderObject();
-        folderObject1.setFolderName(name);
-        folderObject1.setType(FolderObject.PUBLIC);
-        folderObject1.setParentFolderID(getClient().getValues().getPrivateContactFolder());
-        folderObject1.setModule(moduleType);
-        // create permissions
-        final OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(getClient().getValues().getUserId());
-        perm1.setGroupPermission(false);
-        perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
-        folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1});
-        return folderObject1;
-    }
-    
-    protected Contact generateContact(String firstname, String lastname){
-        Contact contact = new Contact();
-        contact.setGivenName(firstname);
-        contact.setSurName(lastname);
-        contact.setEmail1(firstname + "." + lastname + "@ox-test.invalid");
-        contact.setDisplayName(firstname + " " + lastname);
-        contact.setPosition("Testee");
-        contact.setTitle("Tester");
-        return contact;
-    }
-    
     protected Publication generatePublication(String type, String folder){
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         return generatePublication(type, folder, discovery);
