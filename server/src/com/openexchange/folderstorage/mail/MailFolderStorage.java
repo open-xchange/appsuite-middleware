@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.mail;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.api2.OXException;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
@@ -59,6 +60,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.mail.contentType.MailFolderType;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
@@ -68,6 +70,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -96,7 +99,7 @@ public final class MailFolderStorage implements FolderStorage {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) params.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null != mailServletInterface) {
                 mailServletInterface.close(true);
             }
@@ -109,12 +112,10 @@ public final class MailFolderStorage implements FolderStorage {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
 
             if (null == mailServletInterface) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
@@ -164,12 +165,10 @@ public final class MailFolderStorage implements FolderStorage {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
 
             if (null == mailServletInterface) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             mailServletInterface.deleteFolder(folderId);
@@ -178,21 +177,22 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getDefaultFolder(final int entity, final StorageParameters storageParameters) throws FolderException {
-        // TODO Which default folder? Trash, Sent, ... Or just the INBOX
-        return null;
+    public Folder getDefaultFolder(final int entity, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+        if (!MailContentType.getInstance().equals(contentType)) {
+            // TODO: Throw appropriate folder exception
+        }
+        // Return primary account's INBOX folder
+        return getFolder(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), storageParameters);
     }
 
     public Folder getFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
 
             if (null == mailServletInterface) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final MailFolder mailFolder = mailServletInterface.getFolder(folderId, true);
@@ -234,12 +234,10 @@ public final class MailFolderStorage implements FolderStorage {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
 
             if (null == mailServletInterface) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final SearchIterator<MailFolder> iter = mailServletInterface.getChildFolders(parentId, true);
@@ -272,7 +270,7 @@ public final class MailFolderStorage implements FolderStorage {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) params.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null != mailServletInterface) {
                 mailServletInterface.close(true);
             }
@@ -281,11 +279,11 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public StorageParameters startTransaction(final StorageParameters parameters) throws FolderException {
+    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
         try {
             parameters.putParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS,
+                MailParameterConstants.PARAM_MAIL_ACCESS,
                 MailServletInterface.getInstance(parameters.getSession()));
             return parameters;
         } catch (final MailException e) {
@@ -297,12 +295,10 @@ public final class MailFolderStorage implements FolderStorage {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
-                MailStorageParameterConstants.PARAM_MAIL_ACCESS);
+                MailParameterConstants.PARAM_MAIL_ACCESS);
 
             if (null == mailServletInterface) {
-                throw new FolderException(new MailException(
-                    MailException.Code.MISSING_PARAM,
-                    MailStorageParameterConstants.PARAM_MAIL_ACCESS));
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final MailFolderDescription mfd = new MailFolderDescription();
