@@ -64,6 +64,13 @@ public interface FolderStorage {
     FolderType getFolderType();
 
     /**
+     * Gets the storage's priority.
+     * 
+     * @return The storage's priority
+     */
+    StoragePriority getStoragePriority();
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param folderId The folder ID

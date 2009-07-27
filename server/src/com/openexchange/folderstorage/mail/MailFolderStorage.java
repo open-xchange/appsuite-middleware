@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -310,9 +311,9 @@ public final class MailFolderStorage implements FolderStorage {
                 final int size = iter.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
-                    list.add(new MailId(MailFolderUtility.prepareFullname(
-                        mailServletInterface.getAccountID(),
-                        iter.next().getFullname()), j));
+                    list.add(new MailId(
+                        MailFolderUtility.prepareFullname(mailServletInterface.getAccountID(), iter.next().getFullname()),
+                        j));
                 }
                 return list.toArray(new SortableId[list.size()]);
             } catch (final SearchIteratorException e) {
@@ -445,5 +446,9 @@ public final class MailFolderStorage implements FolderStorage {
         }
 
     } // End of MailAccountComparator
+
+    public StoragePriority getStoragePriority() {
+        return StoragePriority.NORMAL;
+    }
 
 }

@@ -53,11 +53,11 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link PermissionImpl} - A virtual folder permission.
+ * {@link VirtualPermission} - A virtual folder permission.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PermissionImpl implements Permission {
+public final class VirtualPermission implements Permission {
 
     private int system;
 
@@ -76,16 +76,16 @@ public final class PermissionImpl implements Permission {
     private boolean group;
 
     /**
-     * Initializes an empty {@link PermissionImpl}.
+     * Initializes an empty {@link VirtualPermission}.
      */
-    public PermissionImpl() {
+    public VirtualPermission() {
         super();
     }
 
     /**
-     * Initializes an empty {@link PermissionImpl}.
+     * Initializes an empty {@link VirtualPermission}.
      */
-    public PermissionImpl(final OCLPermission oclPermission) {
+    public VirtualPermission(final OCLPermission oclPermission) {
         super();
         this.admin = oclPermission.isFolderAdmin();
         this.deletePermission = oclPermission.getDeletePermission();

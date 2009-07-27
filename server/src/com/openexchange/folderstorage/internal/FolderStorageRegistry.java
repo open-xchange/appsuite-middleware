@@ -50,11 +50,13 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.StoragePriority;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
@@ -123,6 +125,21 @@ public final class FolderStorageRegistry {
         for (final FolderStorage folderStorage : storages) {
             if (folderStorage.getFolderType().servesFolderId(folderId)) {
                 tmp.add(folderStorage);
+            }
+        }
+        boolean hasHighest = false;
+        for (final Iterator<FolderStorage> iter = tmp.iterator(); !hasHighest && iter.hasNext();) {
+            if (StoragePriority.HIGHEST.equals(iter.next().getStoragePriority())) {
+                hasHighest = true;
+            }
+        }
+        if (!hasHighest) {
+            return tmp.toArray(new FolderStorage[tmp.size()]);
+        }
+        // Drop non-highest
+        for (final Iterator<FolderStorage> iter = tmp.iterator(); !hasHighest && iter.hasNext();) {
+            if (StoragePriority.NORMAL.equals(iter.next().getStoragePriority())) {
+                iter.remove();
             }
         }
         return tmp.toArray(new FolderStorage[tmp.size()]);

@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
@@ -498,5 +499,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
 
     } // End of MailAccountComparator
+
+    public StoragePriority getStoragePriority() {
+        return StoragePriority.NORMAL;
+    }
 
 }
