@@ -53,11 +53,11 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.mail.permission.MailPermission;
 
 /**
- * {@link PermissionImpl} - A mail folder permission.
+ * {@link MailPermissionImpl} - A mail folder permission.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PermissionImpl implements Permission {
+public final class MailPermissionImpl implements Permission {
 
     private int system;
 
@@ -76,16 +76,16 @@ public final class PermissionImpl implements Permission {
     private boolean group;
 
     /**
-     * Initializes an empty {@link PermissionImpl}.
+     * Initializes an empty {@link MailPermissionImpl}.
      */
-    public PermissionImpl() {
+    public MailPermissionImpl() {
         super();
     }
 
     /**
-     * Initializes an empty {@link PermissionImpl}.
+     * Initializes an empty {@link MailPermissionImpl}.
      */
-    public PermissionImpl(final MailPermission mailPermission) {
+    public MailPermissionImpl(final MailPermission mailPermission) {
         super();
         this.admin = mailPermission.isFolderAdmin();
         this.deletePermission = mailPermission.getDeletePermission();

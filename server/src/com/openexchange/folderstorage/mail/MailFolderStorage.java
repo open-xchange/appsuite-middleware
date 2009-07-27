@@ -212,7 +212,7 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             final MailFolder mailFolder = mailServletInterface.getFolder(folderId, true);
-            final FolderImpl retval = new FolderImpl(mailFolder, mailServletInterface.getAccountID());
+            final MailFolderImpl retval = new MailFolderImpl(mailFolder, mailServletInterface.getAccountID());
             retval.setTreeID(treeId);
 
             // TODO: Fill subfolder IDs? Or leave to null to force FolderStorage.getSubfolders()?

@@ -47,70 +47,44 @@
  *
  */
 
-package com.openexchange.folderstorage.mail;
+package com.openexchange.folderstorage;
 
 import java.util.Locale;
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.SystemType;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
- * {@link FolderImpl} - A mail folder.
+ * {@link AbstractFolder} - An abstract folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderImpl implements Folder {
+public abstract class AbstractFolder implements Folder {
 
-    private String treeId;
+    protected String treeId;
 
-    private String id;
+    protected String id;
 
-    private String name;
+    protected String name;
 
-    private String parent;
+    protected String parent;
 
-    private Permission[] permissions;
+    protected Permission[] permissions;
 
-    private String[] subfolders;
+    protected String[] subfolders;
 
-    private boolean subscribed;
+    protected boolean subscribed;
 
-    /**
-     * Initializes an empty {@link FolderImpl}.
-     */
-    public FolderImpl() {
-        super();
-    }
+    protected ContentType contentType;
+
+    protected Type type;
 
     /**
-     * Initializes a new {@link FolderImpl} from given mail folder.
-     * <p>
-     * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
-     * @param mailFolder The underlying mail folder
-     * @param accountId The account identifier
+     * Initializes an empty {@link AbstractFolder}.
      */
-    public FolderImpl(final MailFolder mailFolder, final int accountId) {
+    protected AbstractFolder() {
         super();
-        this.id = MailFolderUtility.prepareFullname(accountId, mailFolder.getFullname());
-        this.name = mailFolder.getName();
-        this.parent = MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
-        final MailPermission[] mailPermissions = mailFolder.getPermissions();
-        this.permissions = new Permission[mailPermissions.length];
-        for (int i = 0; i < mailPermissions.length; i++) {
-            this.permissions[i] = new PermissionImpl(mailPermissions[i]);
-        }
-        this.subscribed = mailFolder.isSubscribed();
     }
 
     public ContentType getContentType() {
-        return MailContentType.getInstance();
+        return contentType;
     }
 
     public String getID() {
@@ -142,11 +116,11 @@ public final class FolderImpl implements Folder {
     }
 
     public Type getType() {
-        return SystemType.getInstance();
+        return type;
     }
 
     public void setContentType(final ContentType contentType) {
-        // Nothing to do
+        this.contentType = contentType;
     }
 
     public void setID(final String id) {
@@ -174,7 +148,7 @@ public final class FolderImpl implements Folder {
     }
 
     public void setType(final Type type) {
-        // Nothing to do
+        this.type = type;
     }
 
     public boolean isSubscribed() {

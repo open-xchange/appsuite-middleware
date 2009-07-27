@@ -53,11 +53,11 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link PermissionImpl} - A mail folder permission.
+ * {@link DatabasePermission} - A mail folder permission.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PermissionImpl implements Permission {
+public final class DatabasePermission implements Permission {
 
     private int system;
 
@@ -76,16 +76,16 @@ public final class PermissionImpl implements Permission {
     private boolean group;
 
     /**
-     * Initializes an empty {@link PermissionImpl}.
+     * Initializes an empty {@link DatabasePermission}.
      */
-    public PermissionImpl() {
+    public DatabasePermission() {
         super();
     }
 
     /**
-     * Initializes an empty {@link PermissionImpl}.
+     * Initializes an empty {@link DatabasePermission}.
      */
-    public PermissionImpl(final OCLPermission oclPermission) {
+    public DatabasePermission(final OCLPermission oclPermission) {
         super();
         this.admin = oclPermission.isFolderAdmin();
         this.deletePermission = oclPermission.getDeletePermission();

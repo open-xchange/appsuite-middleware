@@ -253,7 +253,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
 
             final FolderObject fo = FolderObject.loadFolderObjectFromDB(Integer.parseInt(folderId), storageParameters.getContext(), con);
-            final FolderImpl retval = new FolderImpl(fo);
+            final DatabaseFolder retval = new DatabaseFolder(fo);
             retval.setTreeID(treeId);
 
             final List<Integer> subfolderIds = FolderObject.getSubfolderIds(Integer.parseInt(folderId), storageParameters.getContext(), con);

@@ -49,9 +49,8 @@
 
 package com.openexchange.folderstorage.database;
 
-import java.util.Locale;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemType;
 import com.openexchange.folderstorage.Type;
@@ -66,46 +65,28 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link FolderImpl} - A mail folder.
+ * {@link DatabaseFolder} - A database folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderImpl implements Folder {
-
-    private String treeId;
-
-    private String id;
-
-    private String name;
-
-    private String parent;
-
-    private Permission[] permissions;
-
-    private String[] subfolders;
-
-    private boolean subscribed;
-
-    private ContentType contentType;
-
-    private Type type;
+public final class DatabaseFolder extends AbstractFolder {
 
     /**
-     * Initializes an empty {@link FolderImpl}.
+     * Initializes an empty {@link DatabaseFolder}.
      */
-    public FolderImpl() {
+    public DatabaseFolder() {
         super();
     }
 
     /**
-     * Initializes a new {@link FolderImpl} from given database folder.
+     * Initializes a new {@link DatabaseFolder} from given database folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
      * 
      * @param folderObject The underlying database folder
      */
-    public FolderImpl(final FolderObject folderObject) {
+    public DatabaseFolder(final FolderObject folderObject) {
         super();
         this.id = String.valueOf(folderObject.getObjectID());
         this.name = folderObject.getFolderName();
@@ -115,85 +96,9 @@ public final class FolderImpl implements Folder {
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
         this.permissions = new Permission[oclPermissions.length];
         for (int i = 0; i < oclPermissions.length; i++) {
-            this.permissions[i] = new PermissionImpl(oclPermissions[i]);
+            this.permissions[i] = new DatabasePermission(oclPermissions[i]);
         }
         this.subscribed = true;
-    }
-
-    public ContentType getContentType() {
-        return contentType;
-    }
-
-    public String getID() {
-        return id;
-    }
-
-    public String getLocalizedName(final Locale locale) {
-        return name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getParentID() {
-        return parent;
-    }
-
-    public Permission[] getPermissions() {
-        return permissions;
-    }
-
-    public String[] getSubfolderIDs() {
-        return subfolders;
-    }
-
-    public String getTreeID() {
-        return treeId;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public void setContentType(final ContentType contentType) {
-        this.contentType = contentType;
-    }
-
-    public void setID(final String id) {
-        this.id = id;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setParentID(final String parentId) {
-        this.parent = parentId;
-    }
-
-    public void setPermissions(final Permission[] permissions) {
-        this.permissions = permissions;
-    }
-
-    public void setSubfolderIDs(final String[] subfolderIds) {
-        this.subfolders = subfolderIds;
-    }
-
-    public void setTreeID(final String id) {
-        this.treeId = id;
-    }
-
-    public void setType(final Type type) {
-        this.type = type;
-    }
-
-    public boolean isSubscribed() {
-        return subscribed;
-    }
-
-    public void setSubscribed(final boolean subscribed) {
-        this.subscribed = subscribed;
     }
 
     private static Type getType(final int type) {
@@ -226,6 +131,10 @@ public final class FolderImpl implements Folder {
             return UnboundContentType.getInstance();
         }
         return null;
+    }
+
+    public boolean isVirtual() {
+        return false;
     }
 
 }

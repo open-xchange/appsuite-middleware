@@ -59,6 +59,13 @@ import java.util.Locale;
 public interface Folder {
 
     /**
+     * Indicates if this folder is virtual.
+     * 
+     * @return <code>true</code> if this folder is virtual; otherwise <code>false</code>
+     */
+    public boolean isVirtual();
+
+    /**
      * Gets the tree ID.
      * 
      * @return The tree ID or <code>null</code> if not available
