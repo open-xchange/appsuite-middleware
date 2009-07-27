@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.subscribe.actions;
 
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -65,13 +65,13 @@ import com.openexchange.java.JSON;
  */
 public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<DeleteSubscriptionResponse> {
 
-    private List<Integer> IDs;
+    private Collection<Integer> IDs;
     
-    public void setIDs(List<Integer> iDs) {
+    public void setIDs(Collection<Integer> iDs) {
         IDs = iDs;
     }
 
-    public List<Integer> getIDs() {
+    public Collection<Integer> getIDs() {
         return IDs;
     }
     
@@ -85,7 +85,7 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
         IDs.add(Autoboxing.I(id));
     }
 
-    public DeleteSubscriptionRequest(List<Integer> IDs){
+    public DeleteSubscriptionRequest(Collection<Integer> IDs){
         this();
         setIDs(IDs);
     }
