@@ -50,27 +50,25 @@
 package com.openexchange.subscribe;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-
 
 /**
  * {@link SimSubscriptionSourceDiscoveryService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class SimSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService{
+public class SimSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
     private Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>();
+
     private List<String> loadedSources = new LinkedList<String>();
+
     private String lookupIdentifier;
-    
+
     public SubscriptionSource getSource(String identifier) {
         loadedSources.add(identifier);
         return sources.get(identifier);
@@ -83,7 +81,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     public boolean knowsSource(String identifier) {
         return sources.containsKey(identifier);
     }
-    
+
     public void addSource(SubscriptionSource source) {
         sources.put(source.getId(), source);
     }
@@ -91,7 +89,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     public SubscriptionSource getSource(Context context, int subscriptionId) {
         return getSource(lookupIdentifier);
     }
-    
+
     public void setLookupIdentifier(String lookupIdentifier) {
         this.lookupIdentifier = lookupIdentifier;
     }
@@ -99,7 +97,7 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     public List<String> getLoadedSources() {
         return loadedSources;
     }
-    
+
     public void clearSim() {
         loadedSources.clear();
     }
@@ -107,5 +105,5 @@ public class SimSubscriptionSourceDiscoveryService implements SubscriptionSource
     public List<SubscriptionSource> getSources() {
         return getSources(-1);
     }
-    
+
 }
