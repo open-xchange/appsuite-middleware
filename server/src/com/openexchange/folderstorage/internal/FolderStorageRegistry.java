@@ -111,7 +111,8 @@ public final class FolderStorageRegistry {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
-     * @return The storages which are capable to handle given folder identifier
+     * @return The storages which are capable to handle given folder identifier. An array with zero length means no appropriate storage is
+     *         available.
      */
     public FolderStorage[] getFolderStorage(final String treeId, final String folderId) {
         final List<FolderStorage> storages = registry.get(treeId);
