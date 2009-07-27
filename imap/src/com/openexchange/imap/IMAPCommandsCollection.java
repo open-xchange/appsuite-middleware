@@ -677,8 +677,8 @@ public final class IMAPCommandsCollection {
                         final ListInfo[] li = protocol.list("", fullName);
                         if (li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
-                            throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder ").append(fullName).append(
-                                "should hold folders AND messages, but can only hold messages.").toString());
+                            throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder \"").append(fullName).append(
+                                "\" should hold folders AND messages, but can only hold messages.").toString());
                         }
                     }
                     return Boolean.TRUE;
