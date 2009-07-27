@@ -50,6 +50,7 @@
 package com.openexchange.ajax.subscribe;
 import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
+import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -68,7 +69,7 @@ public class SubscribeTestSuite extends TestSuite {
         final TestSuite suite = new TestSuite();
         suite.addTestSuite(CreateSubscriptionTest.class);
         suite.addTestSuite(DeleteSubscriptionTest.class);
+        suite.addTestSuite(ListSubscriptionsTest.class);
         return suite;
-        
     }
 }

@@ -50,62 +50,51 @@
 package com.openexchange.ajax.subscribe.test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
+import com.openexchange.ajax.subscribe.actions.ListSubscriptionsResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.tools.servlet.AjaxException;
 
+
 /**
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
-    protected SubscriptionTestManager subMgr;
-    
-    public AbstractSubscriptionTest(String name) {
+public class ListSubscriptionsTest extends AbstractSubscriptionTest {
+
+    public ListSubscriptionsTest(String name) {
         super(name);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        subMgr = new SubscriptionTestManager(getClient());
-    }
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        subMgr.cleanUp();
-        super.tearDown();
-    }
-
-    public Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
-        Subscription subscription = new Subscription();
-
-        subscription.setDisplayName("mySubscription");
+    public void testShouldSurviveBasicOXMFSubscription() throws AjaxException, IOException, SAXException, JSONException{
+        FolderObject folder = createDefaultContactFolder();
         
-        SubscriptionSource source = new SubscriptionSource();
-        source.setId("com.openexchange.subscribe.microformats.contacts.http");
-        source.setFormDescription(formDescription);
-        subscription.setSource(source);
-
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("username", "My Username");
-        config.put("password", "My Password");
-        subscription.setConfiguration(config);
-
-        return subscription;
-    }
-    
-    public DynamicFormDescription generateFormDescription(){
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
-        return form;
+        DynamicFormDescription formDescription = generateFormDescription();
+        Subscription subscription = generateOXMFSubscription(formDescription);
+        subscription.setFolderId(String.valueOf(folder.getObjectID()));
+        
+        subMgr.newAction(subscription);
+        assertFalse("Precondition: Creation of subscription should work",subMgr.getLastResponse().hasError());
+        
+        List<String> columns = Arrays.asList("id","folder", "source");
+        List<Integer> ids = Arrays.asList(Integer.valueOf( subscription.getId() ) );
+        JSONArray list = subMgr.listAction(ids, columns);
+        
+        ListSubscriptionsResponse listResp = (ListSubscriptionsResponse) subMgr.getLastResponse();
+        assertFalse("List request should have worked flawlessly", listResp.hasError());
+        
+        assertEquals("Should only have one result", 1, list.length());
+        JSONArray elements = list.getJSONArray(0);
+        assertEquals("Should have three elements", 3, elements.length());
+        assertEquals("Should return the same ID", subscription.getId(), elements.getInt(0));
+        assertEquals("Should return the same folder", subscription.getFolderId(), elements.getString(1));
+        assertEquals("Should return the same source ID", subscription.getSource().getId(), elements.getString(2));
     }
 
 }
