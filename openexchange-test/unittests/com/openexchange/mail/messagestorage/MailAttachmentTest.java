@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.messagestorage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,7 +60,6 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -259,18 +261,17 @@ public final class MailAttachmentTest extends MessageStorageTest {
 
 	public void testMailAttachment() {
 		try {
-			final MailAccess<?, ?> mailAccess = getMailAccess();
-			
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = this.mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
-				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
+				MailMessage[] fetchedMails = this.mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
 				}
 
 				final Set<String> hasAttachmentSet = new HashSet<String>(uids.length);
+				final List<Integer> attachmentids = new ArrayList<Integer>();
 				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
@@ -283,8 +284,14 @@ public final class MailAttachmentTest extends MessageStorageTest {
 					}
 					if (fetchedMails[i].hasAttachment()) {
 						hasAttachmentSet.add(fetchedMails[i].getMailId());
+						attachmentids.add(i);
 					}
 				}
+				
+				// This part is added due to Bug #14161 L3: E-Mail lists does not show attachment icons for unopened E-Mail
+                final Integer[] idsWithAttachment = new Integer[]{1,2,3,4,5,7,8,12};
+                final Integer[] attachmentidsarray = attachmentids.toArray(new Integer[attachmentids.size()]);
+                assertTrue("Wrong mails marked with attachments, should be " + Arrays.toString(idsWithAttachment) + " but is " + Arrays.toString(attachmentidsarray), Arrays.equals(attachmentidsarray, idsWithAttachment));
 
 				for (final String id : hasAttachmentSet) {
 					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id, true);
