@@ -699,7 +699,8 @@ public final class IMAPCommandsCollection {
             }
         });
         if (null == ret) {
-            final ProtocolException pex = new ProtocolException("IMAP folder \"" + newFolder.getFullName() + "\" cannot be created.");
+            final ProtocolException pex = new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(
+                newFolder.getFullName()).append("\" cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
         // Set exists, type, and attributes
