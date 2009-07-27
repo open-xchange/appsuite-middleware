@@ -70,7 +70,7 @@
     		</fileset>
     	</copy>
         <chmod perm="640">
-            <fileset dir="${destdir}/${prefix}/etc/grouware/contacts-ldap">
+            <fileset dir="${destdir}/${prefix}/etc/groupware/contacts-ldap">
                 <include name="**"/>
             </fileset>
         </chmod>
