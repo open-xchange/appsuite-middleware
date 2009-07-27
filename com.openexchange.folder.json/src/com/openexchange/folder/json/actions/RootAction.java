@@ -66,7 +66,7 @@ public final class RootAction implements AJAXActionService {
     public static final String ACTION = AJAXServlet.ACTION_ROOT;
 
     public AJAXRequestResult perform(AJAXRequestData reqest, ServerSession session) throws AbstractOXException {
-        // TODO Auto-generated method stub
+        // TODO Implement this action by using a ListAction with parent=0.
         return null;
     }
 
