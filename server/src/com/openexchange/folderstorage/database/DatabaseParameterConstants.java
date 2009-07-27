@@ -71,6 +71,6 @@ public final class DatabaseParameterConstants {
     /**
      * The parameter name for writable connection.
      */
-    public static final String PARAM_WRITABLE = "c~.o~.r~.write";
+    public static final String PARAM_WRITABLE = "c~.o~.r~.Write";
 
 }

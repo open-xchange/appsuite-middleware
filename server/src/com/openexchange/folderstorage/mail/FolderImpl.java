@@ -55,7 +55,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemType;
 import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.mail.type.MailContentType;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;

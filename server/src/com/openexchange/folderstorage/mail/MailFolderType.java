@@ -47,35 +47,61 @@
  *
  */
 
-package com.openexchange.folderstorage.mail.osgi;
+package com.openexchange.folderstorage.mail;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.folderstorage.FolderType;
+import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.
+ * {@link MailFolderType} - The folder type for mail.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderStorageActivator implements BundleActivator {
+public final class MailFolderType implements FolderType {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderType.class);
+
+    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
+
+    private static final MailFolderType instance = new MailFolderType();
 
     /**
-     * Initializes a new {@link MailFolderStorageActivator}.
+     * Gets the {@link MailFolderType} instance.
+     * 
+     * @return The {@link MailFolderType} instance
      */
-    public MailFolderStorageActivator() {
+    public static MailFolderType getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes a new {@link MailFolderType}.
+     */
+    private MailFolderType() {
         super();
     }
 
-    public void start(final BundleContext context) throws Exception {
-        // Register content type
-
-        // Register folder storage
-
+    public boolean servesFolderId(final String folderId) {
+        if (null == folderId || !folderId.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return false;
+        }
+        final int len = folderId.length();
+        final char separator = '/';
+        int index = LEN;
+        while (index < len && folderId.charAt(index) != separator) {
+            index++;
+        }
+        // Parse account ID
+        if (index != LEN) {
+            try {
+                Integer.parseInt(folderId.substring(LEN, index));
+            } catch (final NumberFormatException e) {
+                final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
+                err.initCause(e);
+                LOG.error(err.getMessage(), err);
+                return false;
+            }
+        }
+        return true;
     }
-
-    public void stop(final BundleContext context) throws Exception {
-        // TODO Auto-generated method stub
-
-    }
-
 }

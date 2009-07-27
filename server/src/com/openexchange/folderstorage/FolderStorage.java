@@ -77,11 +77,12 @@ public interface FolderStorage {
      * Gets this storage's default folder for specified entity identifier.
      * 
      * @param entity The entity identifier
+     * @param contentType The content type or the default folder
      * @param storageParameters The storage parameters
      * @return The default folder for specified entity identifier
      * @throws FolderException If the default folder cannot be returned
      */
-    Folder getDefaultFolder(int entity, StorageParameters storageParameters) throws FolderException;
+    Folder getDefaultFolder(int entity, ContentType contentType, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Deletes the folder denoted by specified folder ID.
@@ -126,10 +127,11 @@ public interface FolderStorage {
      * Starts a transaction on folder storage.
      * 
      * @param parameters The parameters
+     * @param modify <code>true</code> if started transaction is supposed to modify storage's content; otherwise <code>false</code>
      * @return The parameters with storage-specific extensions
      * @throws FolderException If storage parameters cannot be returned
      */
-    StorageParameters startTransaction(StorageParameters parameters) throws FolderException;
+    StorageParameters startTransaction(StorageParameters parameters, boolean modify) throws FolderException;
 
     /**
      * Publishes made changes on the storage.

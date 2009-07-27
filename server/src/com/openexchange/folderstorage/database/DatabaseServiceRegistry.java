@@ -47,32 +47,32 @@
  *
  */
 
-package com.openexchange.folderstorage.mail.type;
+package com.openexchange.folderstorage.database;
 
-import com.openexchange.folderstorage.ContentType;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link MailContentType} - The folder storage content type for mail.
+ * {@link DatabaseServiceRegistry} - The service registry for database folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailContentType implements ContentType {
+public final class DatabaseServiceRegistry {
 
-    private static final MailContentType instance = new MailContentType();
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
     /**
-     * Gets the {@link MailContentType} instance.
+     * Gets the service registry
      * 
-     * @return The {@link MailContentType} instance
+     * @return The service registry
      */
-    public static MailContentType getInstance() {
-        return instance;
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
     }
 
     /**
-     * Initializes a new {@link MailContentType}.
+     * Initializes a new {@link IMAPServiceRegistry}
      */
-    private MailContentType() {
+    private DatabaseServiceRegistry() {
         super();
     }
 

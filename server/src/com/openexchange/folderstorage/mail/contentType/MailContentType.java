@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.mail;
+package com.openexchange.folderstorage.mail.contentType;
 
 import com.openexchange.folderstorage.ContentType;
 

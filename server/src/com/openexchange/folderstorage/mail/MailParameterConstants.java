@@ -50,16 +50,16 @@
 package com.openexchange.folderstorage.mail;
 
 /**
- * {@link MailStorageParameterConstants} - Constants for parameter names.
+ * {@link MailParameterConstants} - Constants for parameter names.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailStorageParameterConstants {
+public final class MailParameterConstants {
 
     /**
-     * Initializes a new {@link MailStorageParameterConstants}.
+     * Initializes a new {@link MailParameterConstants}.
      */
-    private MailStorageParameterConstants() {
+    private MailParameterConstants() {
         super();
     }
 

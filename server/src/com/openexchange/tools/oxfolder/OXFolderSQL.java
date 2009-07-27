@@ -143,7 +143,7 @@ public final class OXFolderSQL {
      * @throws DBPoolingException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    static int getUserDefaultFolder(final int userId, final int module, final Connection readCon, final Context ctx) throws DBPoolingException, SQLException {
+    public static int getUserDefaultFolder(final int userId, final int module, final Connection readCon, final Context ctx) throws DBPoolingException, SQLException {
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
