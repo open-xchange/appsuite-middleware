@@ -54,7 +54,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
 
@@ -298,6 +300,23 @@ public class EAVUnitTest extends TestCase {
         return new TransformList(type, REMOVE, values);
     }
 
+    
+    /*
+     * Type Nodes
+     */
+    
+    public EAVTypeMetadataNode TYPE(String name, EAVType type) {
+        EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
+        node.setType(type);
+        return node;
+    }
+
+    public EAVTypeMetadataNode TYPE(String name, EAVType type, Map<String, Object> options) {
+        EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
+        node.setType(type);
+        node.setOptions(options);
+        return node;
+    }
 
     public static void assertEquals(EAVNode expected, EAVNode actual) {
         assertEquals("", expected, actual);
@@ -323,9 +342,9 @@ public class EAVUnitTest extends TestCase {
 
         for (int i = 0, size = serializedExpected.size(); i < size; i++) {
             EAVNode expectedNode = serializedExpected.get(i);
-            EAVNode actualNode = serializedActual.get(i);
+            EAVNode actualNode = actual.resolve(expectedNode.getRelativePath(expected));
 
-            if (!expectedNode.getRelativePath(expected).equals(actualNode.getRelativePath(actual))) {
+            if (actualNode == null) {
                 failComparison(message, expected, actual);
             }
 
@@ -388,6 +407,24 @@ public class EAVUnitTest extends TestCase {
         });
 
         return builder.toString();
+    }
+    
+    protected static Map<String, Object> M(String...strings) {
+        if(strings.length%2 != 0) {
+            throw new IllegalArgumentException("Please provide key value pairs");
+        }
+        
+        Map<String, Object> retval = new HashMap<String, Object>();
+        String key = null;
+        for (String string : strings) {
+            if(key == null) {
+                key = string;
+            } else {
+                retval.put(key, string);
+                key = null;
+            }
+        }
+        return retval;
     }
 
 }
