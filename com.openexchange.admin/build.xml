@@ -1,6 +1,5 @@
 <project name="open-xchange-admin" default="jar" basedir=".">
 
-
     <!-- Customizable values -->
 	<property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
@@ -345,12 +344,15 @@
         <mkdir dir="${destdir}/var/log/open-xchange"/>
         <mkdir dir="${destdir}/${prefix}/libexec"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
-		<chmod perm="700" dir="${destdir}/var/log/open-xchange"/>
+		<chmod perm="750" dir="${destdir}/var/log/open-xchange"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
-            <fileset dir="etc" excludes="**/*.in,**/database-changes/**"/>
+            <fileset dir="etc" excludes="**/*.in"/>
         </copy>
-	    <!-- grrr, unable to exclude a directory, so remove it manually -->
-    	<delete dir="${destdir}/${prefix}/${oxconfdir}/etc/mysql/database-changes"/>
+        <chmod perm="640">
+            <fileset dir="${destdir}/${prefix}/${oxconfdir}">
+                <include name="**"/>
+            </fileset>
+        </chmod>
 		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
     	<mkdir dir="${destdir}/etc/init.d"/>
 		<!-- copy all dist specific files from below system/ to $prefix/ -->
@@ -366,8 +368,7 @@
     	<!-- <antcall target="install-redhat"/> -->
         
     	<mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
 
     	<antcall target="install-plugins"></antcall>
 		<antcall target="install-console"></antcall>
