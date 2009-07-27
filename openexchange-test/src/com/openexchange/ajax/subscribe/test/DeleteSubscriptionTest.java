@@ -52,28 +52,31 @@ package com.openexchange.ajax.subscribe.test;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.subscribe.actions.DeleteSubscriptionRequest;
+import com.openexchange.ajax.subscribe.actions.DeleteSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
+ * {@link DeleteSubscriptionTest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CreateSubscriptionTest extends AbstractSubscriptionTest {
+public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
 
-    public CreateSubscriptionTest(String name) {
+    public DeleteSubscriptionTest(String name) {
         super(name);
     }
-    
-    public void testShouldSurviveBasicOXMFSubscriptionCreation() throws AjaxException, IOException, SAXException, JSONException{
+
+    public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws AjaxException, IOException, SAXException, JSONException{
         //setup
         FolderObject folder = generateFolder("subscriptionTest", FolderObject.CONTACT);
         getFolderManager().insertFolderOnServer(folder);
@@ -89,17 +92,16 @@ public class CreateSubscriptionTest extends AbstractSubscriptionTest {
         assertFalse("Should succeed creating the subscription", newResp.hasError());
         expected.setId( newResp.getId() );
 
-        //verify via get request
-        SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
-        discovery.addSource(expected.getSource());
-
+        //delete subcription
+        DeleteSubscriptionRequest delReq = new DeleteSubscriptionRequest( expected.getId());
+        DeleteSubscriptionResponse delResp = getClient().execute(delReq);
+        assertFalse("Should succeed deleting the subscription", delResp.hasError());
+        
+        //verify absense via get request
         GetSubscriptionRequest getReq = new GetSubscriptionRequest( newResp.getId() );
         GetSubscriptionResponse getResp = getClient().execute(getReq);
         
-        Subscription actual = getResp.getSubscription(discovery);
-        
-        assertEquals("Should have same source ID", expected.getSource().getId(), actual.getSource().getId());
-        assertEquals("Should have same ID", expected.getId(), actual.getId());
-        assertEquals("Should have same user ID", expected.getUserId(), actual.getUserId());
+        assertTrue("Should fail trying to get subcription afte deletion", getResp.hasError());
+        assertEquals("Should return 1 in case of success", Autoboxing.I(1), (Integer) delResp.getData());
     }
 }

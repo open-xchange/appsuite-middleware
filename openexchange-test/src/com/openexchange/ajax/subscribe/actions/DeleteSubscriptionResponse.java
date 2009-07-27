@@ -47,28 +47,20 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.ajax.subscribe.actions;
+
+import com.openexchange.ajax.container.Response;
 
 
 /**
- * {@link SubscribeTestSuite}
+ * {@link DeleteSubscriptionResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
-    private SubscribeTestSuite() {
-        super();
+public class DeleteSubscriptionResponse extends AbstractSubscriptionResponse {
+
+    public DeleteSubscriptionResponse(Response response) {
+        super(response);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(CreateSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        return suite;
-        
-    }
 }

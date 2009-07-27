@@ -47,28 +47,71 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.ajax.subscribe.actions;
+
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.java.Autoboxing;
+import com.openexchange.java.JSON;
 
 
 /**
- * {@link SubscribeTestSuite}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
-    private SubscribeTestSuite() {
+public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<DeleteSubscriptionResponse> {
+
+    private List<Integer> IDs;
+    
+    public void setIDs(List<Integer> iDs) {
+        IDs = iDs;
+    }
+
+    public List<Integer> getIDs() {
+        return IDs;
+    }
+    
+    public DeleteSubscriptionRequest(){
         super();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(CreateSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        return suite;
-        
+    public DeleteSubscriptionRequest(int id){
+        this();
+        IDs = new LinkedList<Integer>();
+        IDs.add(Autoboxing.I(id));
     }
+
+    public DeleteSubscriptionRequest(List<Integer> IDs){
+        this();
+        setIDs(IDs);
+    }
+    
+    public Object getBody() throws JSONException {
+        if(IDs == null)
+            throw new JSONException("Cannot create DeleteRequest: No IDs given for deletion!");
+        return JSON.collection2jsonArray(getIDs());
+    }
+
+    public Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+    }
+
+    public Parameter[] getParameters() {
+        return new Parameter[]{new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE)};
+    }
+
+    public AbstractAJAXParser<DeleteSubscriptionResponse> getParser() {
+        return new AbstractAJAXParser<DeleteSubscriptionResponse>(getFailOnError()) {
+
+            @Override
+            protected DeleteSubscriptionResponse createResponse(final Response response) throws JSONException {
+                return new DeleteSubscriptionResponse(response);
+            }
+        };
+    }
+
 }
