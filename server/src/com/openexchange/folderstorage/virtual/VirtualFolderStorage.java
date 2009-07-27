@@ -67,6 +67,8 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     private final String treeId;
 
+    private final FolderType folderType;
+
     /**
      * Initializes a new {@link VirtualFolderStorage}.
      * 
@@ -75,6 +77,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     public VirtualFolderStorage(final String treeId) {
         super();
         this.treeId = treeId;
+        folderType = new VirtualFolderType(treeId);
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
@@ -100,13 +103,11 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public FolderType getFolderType() {
-        // TODO Auto-generated method stub
-        return null;
+        return folderType;
     }
 
     public StoragePriority getStoragePriority() {
-        // TODO Auto-generated method stub
-        return null;
+        return StoragePriority.NORMAL;
     }
 
     public SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
@@ -115,8 +116,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
-        // TODO Auto-generated method stub
-        
+
     }
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {

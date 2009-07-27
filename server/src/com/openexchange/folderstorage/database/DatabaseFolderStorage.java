@@ -256,14 +256,23 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final FolderObject fo = FolderObject.loadFolderObjectFromDB(Integer.parseInt(folderId), storageParameters.getContext(), con);
             final DatabaseFolder retval = new DatabaseFolder(fo);
             retval.setTreeID(treeId);
-
-            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(Integer.parseInt(folderId), storageParameters.getContext(), con);
-            final List<String> subfolderIdentifies = new ArrayList<String>(subfolderIds.size());
-            for (final Integer id : subfolderIds) {
-                subfolderIdentifies.add(id.toString());
+            /*
+             * Don't set subfolders for private folder to enforce FolderStorage.getSubfolders() invocation
+             */
+            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != Integer.parseInt(folderId)) {
+                /*
+                 * Set subfolder IDs
+                 */
+                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(
+                    Integer.parseInt(folderId),
+                    storageParameters.getContext(),
+                    con);
+                final List<String> subfolderIdentifies = new ArrayList<String>(subfolderIds.size());
+                for (final Integer id : subfolderIds) {
+                    subfolderIdentifies.add(id.toString());
+                }
+                retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
             }
-            retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
-
             // TODO: Subscribed?
 
             return retval;

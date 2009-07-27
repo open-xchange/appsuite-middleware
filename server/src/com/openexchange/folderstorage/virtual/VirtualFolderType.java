@@ -58,16 +58,51 @@ import com.openexchange.folderstorage.FolderType;
  */
 public final class VirtualFolderType implements FolderType {
 
+    private final String treeId;
+
     /**
      * Initializes a new {@link VirtualFolderType}.
+     * 
+     * @param treeId The tree ID
      */
-    public VirtualFolderType() {
+    public VirtualFolderType(final String treeId) {
         super();
+        this.treeId = treeId;
     }
 
     public boolean servesFolderId(final String folderId) {
         // A virtual storage serves every folder ID except null
         return (null != folderId);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((treeId == null) ? 0 : treeId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof VirtualFolderType)) {
+            return false;
+        }
+        final VirtualFolderType other = (VirtualFolderType) obj;
+        if (treeId == null) {
+            if (other.treeId != null) {
+                return false;
+            }
+        } else if (!treeId.equals(other.treeId)) {
+            return false;
+        }
+        return true;
     }
 
 }
