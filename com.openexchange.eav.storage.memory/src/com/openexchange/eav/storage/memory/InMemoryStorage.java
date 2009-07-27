@@ -292,7 +292,7 @@ public class InMemoryStorage {
     }
 
     private EAVNode copyOutgoingWithNamedBinaries(EAVNode original, Set<EAVPath> loadBinaries) {
-        return TreeTools.copy(original, new EAVSelectiveFilter(EnumSet.of(EAVType.BINARY), new EAVPathFilter(loadBinaries,  original.getPath())), new ByteArrayToInputStreamProcessor());
+        return TreeTools.copy(original, new EAVSelectiveFilter(EnumSet.of(EAVType.BINARY), new EAVPathFilter(loadBinaries,  original.getPath().parent())), new ByteArrayToInputStreamProcessor());
     }
 
 

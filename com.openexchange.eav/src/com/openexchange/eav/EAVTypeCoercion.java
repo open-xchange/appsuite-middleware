@@ -49,105 +49,43 @@
 
 package com.openexchange.eav;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.TimeZone;
 
 
 /**
- * {@link EAVTypeMetadataNode}
+ * {@link EAVTypeCoercion}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
+public class EAVTypeCoercion {
 
-    private EAVType type = null;
-    private Map<String, Object> options = new HashMap<String, Object>();
-    private EAVContainerType containerType = EAVContainerType.SINGLE;
-    
-    
-    public EAVTypeMetadataNode() {
-        super();
-    }
-
-
-    public EAVTypeMetadataNode(EAVTypeMetadataNode parent, String name) {
-        super(parent, name);
-    }
-
-
-    public EAVTypeMetadataNode(EAVTypeMetadataNode parent) {
-        super(parent);
-    }
-
-
-    public EAVTypeMetadataNode(String name) {
-        super(name);
-    }
-
-
-    @Override
-    public void copyPayloadFromOther(EAVTypeMetadataNode other) {
-        type = other.type;
-        options = new HashMap<String, Object>(other.options);
-        containerType = other.containerType;
-    }
-
-
-    @Override
-    public EAVTypeMetadataNode newInstance() {
-        return new EAVTypeMetadataNode();
+    public void coerce(EAVNode node, EAVTypeMetadataNode typeInfo) {
+        coerce(node, typeInfo, null);
     }
     
-    public void setOptions(Map<String, Object> options) {
-        this.options = new HashMap<String, Object>(options);
-    }
-    
-    public void setOption(String option, Object value) {
-        this.options.put(option, value);
-    }
-    
-    public Object getOption(String option) {
-        return options.get(option);
-    }
-    
-    public void setType(EAVType type) {
-        this.type = type;
-    }
-    
-    public void setContainerType(EAVContainerType containerType) {
-        this.containerType = containerType;
-    }
-    
-    public EAVType getType() {
-        return type;
-    }
- 
-    public EAVContainerType getContainerType() {
-        return containerType;
-    }
- 
-    private static final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
-    
-    public void verifyOptions() throws EAVException {
-        if(isLeaf()) {
-            EAVException x = (EAVException) type.doSwitch(verifier, options);
-            if(x != null) {
-                throw x;
+    public void coerce(EAVNode node, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) {
+        switch(node.getType()) {
+        case NUMBER:
+            switch(typeInfo.getType()) {
+            case DATE:
+                node.setPayload(typeInfo.getType(), node.getContainerType(), node.getPayload());
+                break;
+            case TIME: {
+                    TimeZone tz = defaultTZ;
+                    if(typeInfo.hasOption("timezone")) {
+                        tz = TimeZone.getTimeZone((String)typeInfo.getOption("timezone"));
+                    }
+                    
+                    long utc = recalculateTime((Long)node.getPayload(), tz);
+                    node.setPayload(EAVType.TIME, node.getContainerType(), utc);
+                }
             }
-            return;
-        }
-        for(EAVTypeMetadataNode child : children) {
-            child.verifyOptions();
         }
     }
 
-
-    public boolean hasOption(String string) {
-        return options.containsKey(string);
+    private long recalculateTime(long time, TimeZone timeZone) {
+        return time - timeZone.getOffset(time);
     }
-
-
-   
 
 }

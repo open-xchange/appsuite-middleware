@@ -60,7 +60,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVTypeOptionVerifierTest extends TestCase {
+public class EAVTypeOptionVerifierTest extends EAVUnitTest {
     private EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
     
     public void testStringsHaveNoOptions() {
@@ -109,22 +109,6 @@ public class EAVTypeOptionVerifierTest extends TestCase {
         assertEquals(expectedMessage.getDetailNumber(), exception.getDetailNumber());
     }
     
-    protected static Map<String, Object> M(String...strings) {
-        if(strings.length%2 != 0) {
-            throw new IllegalArgumentException("Please provide key value pairs");
-        }
-        
-        Map<String, Object> retval = new HashMap<String, Object>();
-        String key = null;
-        for (String string : strings) {
-            if(key == null) {
-                key = string;
-            } else {
-                retval.put(key, string);
-                key = null;
-            }
-        }
-        return retval;
-    }
+    
     
 }

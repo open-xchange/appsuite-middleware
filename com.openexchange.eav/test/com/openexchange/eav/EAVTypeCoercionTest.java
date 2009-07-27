@@ -49,105 +49,97 @@
 
 package com.openexchange.eav;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
 
 
 /**
- * {@link EAVTypeMetadataNode}
+ * {@link EAVTypeCoercionTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
-
-    private EAVType type = null;
-    private Map<String, Object> options = new HashMap<String, Object>();
-    private EAVContainerType containerType = EAVContainerType.SINGLE;
+public class EAVTypeCoercionTest extends EAVUnitTest {
     
+    private EAVTypeCoercion typeCoercion = new EAVTypeCoercion();
     
-    public EAVTypeMetadataNode() {
-        super();
-    }
-
-
-    public EAVTypeMetadataNode(EAVTypeMetadataNode parent, String name) {
-        super(parent, name);
-    }
-
-
-    public EAVTypeMetadataNode(EAVTypeMetadataNode parent) {
-        super(parent);
-    }
-
-
-    public EAVTypeMetadataNode(String name) {
-        super(name);
-    }
-
-
-    @Override
-    public void copyPayloadFromOther(EAVTypeMetadataNode other) {
-        type = other.type;
-        options = new HashMap<String, Object>(other.options);
-        containerType = other.containerType;
-    }
-
-
-    @Override
-    public EAVTypeMetadataNode newInstance() {
-        return new EAVTypeMetadataNode();
+    /*
+     * Coercion 
+     */
+    public void testCoerceNumberToDate() {
+        EAVNode dateNode = N("testDate", 1245715200000l);
+        EAVTypeMetadataNode dateMetadata = TYPE("testDate", EAVType.DATE);
+        
+        EAVNode expected = N("testDate", EAVType.DATE, 1245715200000l);
+        
+        typeCoercion.coerce(dateNode, dateMetadata);
+        
+        assertEquals(expected, dateNode);
     }
     
-    public void setOptions(Map<String, Object> options) {
-        this.options = new HashMap<String, Object>(options);
+    public void testCoerceNumberToTimeWithTimezone() {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = new Date().getTime();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        EAVNode timeNode = N("testTime", nowRarotonga);
+        EAVTypeMetadataNode timeMetadata = TYPE("testTime", EAVType.TIME, M("timezone", "Pacific/Rarotonga"));
+        EAVNode expected = N("testTime", EAVType.TIME, nowUTC);
+        
+        typeCoercion.coerce(timeNode, timeMetadata);
+        
+        assertEquals(expected, timeNode);
     }
     
-    public void setOption(String option, Object value) {
-        this.options.put(option, value);
+    public void testCoerceNumberToTimeWithDefaultTimezone() {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = new Date().getTime();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        EAVNode timeNode = N("testTime", nowRarotonga);
+        EAVTypeMetadataNode timeMetadata = TYPE("testTime", EAVType.TIME);
+        EAVNode expected = N("testTime", EAVType.TIME, nowUTC);
+        
+        typeCoercion.coerce(timeNode, timeMetadata, tz);
+        
+        assertEquals(expected, timeNode);
     }
     
-    public Object getOption(String option) {
-        return options.get(option);
+    public void testCoerceNumberToTimeWithoutTimezoneAssumingUTC() {
+        
     }
     
-    public void setType(EAVType type) {
-        this.type = type;
+    public void testCoerceStringToBinary() {
+        
     }
     
-    public void setContainerType(EAVContainerType containerType) {
-        this.containerType = containerType;
+    public void testCoerceSubtree() {
+        
     }
     
-    public EAVType getType() {
-        return type;
-    }
- 
-    public EAVContainerType getContainerType() {
-        return containerType;
-    }
- 
-    private static final EAVTypeOptionVerifier verifier = new EAVTypeOptionVerifier();
+    /*
+     * Error conditions
+     */
     
-    public void verifyOptions() throws EAVException {
-        if(isLeaf()) {
-            EAVException x = (EAVException) type.doSwitch(verifier, options);
-            if(x != null) {
-                throw x;
-            }
-            return;
-        }
-        for(EAVTypeMetadataNode child : children) {
-            child.verifyOptions();
-        }
+    public void testInvalidDate() {
+        
     }
-
-
-    public boolean hasOption(String string) {
-        return options.containsKey(string);
+    
+    public void testImplicitTypeMismatch() {
+        
     }
-
-
-   
-
+    
+    public void testExplicitTypeMismatch() {
+        
+    }
+    
+    public void testImplicitContainerTypeMismatch() {
+        
+    }
+    
+    public void testExplicitContainerTypeMismatch() {
+        
+    }
+    
 }

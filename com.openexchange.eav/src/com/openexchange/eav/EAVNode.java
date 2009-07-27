@@ -169,7 +169,7 @@ public class EAVNode extends AbstractNode<EAVNode> {
 
     public EAVPath getRelativePath(EAVPath relativePath) {
         if (getPath().equals(relativePath)) {
-            return new EAVPath(name);
+            return new EAVPath();
         }
         return parent.getRelativePath(relativePath).append(name);
     }

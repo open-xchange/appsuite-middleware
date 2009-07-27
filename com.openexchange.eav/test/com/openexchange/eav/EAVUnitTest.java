@@ -342,7 +342,8 @@ public class EAVUnitTest extends TestCase {
 
         for (int i = 0, size = serializedExpected.size(); i < size; i++) {
             EAVNode expectedNode = serializedExpected.get(i);
-            EAVNode actualNode = actual.resolve(expectedNode.getRelativePath(expected));
+            EAVPath relativePath = expectedNode.getRelativePath(expected);
+            EAVNode actualNode = actual.resolve(relativePath);
 
             if (actualNode == null) {
                 failComparison(message, expected, actual);
