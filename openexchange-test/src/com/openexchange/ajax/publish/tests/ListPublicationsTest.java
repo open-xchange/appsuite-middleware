@@ -52,6 +52,7 @@ package com.openexchange.ajax.publish.tests;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Arrays;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.actions.ListPublicationsRequest;
@@ -82,6 +83,7 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         String module = "contacts";
         
         Publication expected = generatePublication(module, folderID );
+        expected.setDisplayName("This will be changed");
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         NewPublicationResponse newResp = getClient().execute(newReq);
         expected.setId(newResp.getId());
@@ -92,5 +94,13 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         ListPublicationsResponse listResp = getClient().execute(listReq);
         
         assertEquals("Should only find one element", 1, listResp.getList().size());
+        
+        JSONArray actual = listResp.getList().get(0);
+        assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
+        assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
+        assertEquals("Should have same module", expected.getModule(), actual.getString(2));
+        assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
+        assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
+
     }
 }
