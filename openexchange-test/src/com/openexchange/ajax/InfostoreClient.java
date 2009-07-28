@@ -40,7 +40,11 @@ public class InfostoreClient {
 	}
 
 	public static int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String, String> fields, final File upload, final String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
-		return test.createNew(webConv, hostname, sessionId, fields, upload, contentType);
+		return createNew(webConv, null, hostname, sessionId, fields, upload, contentType);
+	}
+	
+	public static int createNew(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final Map<String, String> fields, final File upload, final String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
+		return test.createNew(webConv, protocol, hostname, sessionId, fields, upload, contentType);
 	}
 
 	public static int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String, String> fields) throws MalformedURLException, IOException, SAXException, JSONException {

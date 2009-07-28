@@ -330,7 +330,13 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 	}
 	
 	public int createNew(final WebConversation webConv, final String hostname, final String sessionId, final Map<String, String> fields, final File upload, final String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
-		final StringBuffer url = getUrl(sessionId,"new", hostname);
+		return createNew(webConv, null, hostname, sessionId, fields, upload, contentType);
+	}
+	
+	public int createNew(final WebConversation webConv, final String protocol, final String hostname, final String sessionId, final Map<String, String> fields, final File upload, final String contentType) throws MalformedURLException, IOException, SAXException, JSONException {
+
+		final StringBuffer url = getUrl(sessionId,"new", hostname, protocol);
+		
 		final PostMethodWebRequest req = new PostMethodWebRequest(url.toString(), true);
 		
 		final JSONObject obj = toJSONArgs(fields);
