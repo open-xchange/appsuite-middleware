@@ -94,6 +94,10 @@ public class Subscription {
         this.folderId = folderId;
     }
 
+    public void setFolderId(int folderId) {
+        setFolderId(String.valueOf(folderId));
+    }
+    
     public Context getContext() {
         return context;
     }
