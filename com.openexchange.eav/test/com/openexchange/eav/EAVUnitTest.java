@@ -362,7 +362,7 @@ public class EAVUnitTest extends TestCase {
             if (!expectedNode.getType().equals(actualNode.getType())) {
                 failComparison(message, expected, actual);
             }
-            if (expectedNode.isMultiple() != actualNode.isMultiple()) {
+            if (expectedNode.getContainerType() != actualNode.getContainerType()) {
                 failComparison(message, expected, actual);
             }
             EAVTypeSwitcher compare = null;
