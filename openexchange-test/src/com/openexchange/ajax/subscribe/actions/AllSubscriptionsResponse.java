@@ -47,32 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.ajax.subscribe.actions;
+
+import org.json.JSONArray;
+import com.openexchange.ajax.container.Response;
 
 
 /**
- * {@link SubscribeTestSuite}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
-    private SubscribeTestSuite() {
-        super();
+public class AllSubscriptionsResponse extends AbstractSubscriptionResponse {
+
+    public AllSubscriptionsResponse(Response response) {
+        super(response);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        //there is not test for action=get : many tests validate their result using get, so no need for explicit testing
-        suite.addTestSuite(CreateSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        return suite;
+    public JSONArray getAll(){
+        return (JSONArray) getData();
     }
 }

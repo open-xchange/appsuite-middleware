@@ -47,32 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.ajax.subscribe.actions;
 
+import java.util.List;
+import java.util.Map;
+import com.openexchange.ajax.framework.Params;
+import com.openexchange.java.Strings;
 
 /**
- * {@link SubscribeTestSuite}
- *
+ * A superclass for the bulk request type subscriptions that can request different kinds of fields
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
-    private SubscribeTestSuite() {
-        super();
+public abstract class AbstractBulkSubscriptionRequest<T extends AbstractSubscriptionResponse> extends AbstractSubscriptionRequest<T> {
+
+    protected List<String> columns;
+
+    protected Map<String, List<String>> dynamicColumns;
+
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        //there is not test for action=get : many tests validate their result using get, so no need for explicit testing
-        suite.addTestSuite(CreateSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        return suite;
+    public List<String> getColumns() {
+        return columns;
     }
+    
+    public Parameter getColumnsAsParameter(){
+        if(getColumns() == null)
+            return null;
+        return new Parameter("columns", Strings.join(getColumns(), ","));
+    }
+
+    public void setDynamicColumns(Map<String, List<String>> dynamicColumns) {
+        this.dynamicColumns = dynamicColumns;
+    }
+
+    public Map<String, List<String>> getDynamicColumns() {
+        return dynamicColumns;
+    }
+
+    public Params getDynamicColumnsAsParameter(){
+        if(getDynamicColumns() == null)
+            return null;
+        
+        Params params = new Params();
+        for (String plugin : getDynamicColumns().keySet()) {
+            params.add(plugin, Strings.join(getDynamicColumns().get(plugin), ","));
+        }
+        return params;
+    }
+    
+
 }

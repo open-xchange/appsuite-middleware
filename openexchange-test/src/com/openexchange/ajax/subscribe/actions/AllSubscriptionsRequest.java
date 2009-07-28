@@ -47,32 +47,78 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.ajax.subscribe.actions;
 
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Params;
 
 /**
- * {@link SubscribeTestSuite}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
-    private SubscribeTestSuite() {
-        super();
+public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<AllSubscriptionsResponse> {
+
+    private String folderID;
+
+    public void setFolderID(String folderID) {
+        this.folderID = folderID;
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        //there is not test for action=get : many tests validate their result using get, so no need for explicit testing
-        suite.addTestSuite(CreateSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        return suite;
+    public String getFolderID() {
+        return folderID;
     }
+
+    public AllSubscriptionsRequest(){
+    }
+    
+    public AllSubscriptionsRequest(String folder, List<String> columns) {
+        this();
+        setFolderID(folder);
+        setColumns(columns);
+    }
+
+    public AllSubscriptionsRequest(String folder, List<String> columns, Map<String,List<String>> dynamicColumns) {
+        this(folder, columns);
+        setDynamicColumns(dynamicColumns);
+    }
+
+    
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    public Parameter[] getParameters() {
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+
+        params.add("folder",getFolderID());
+        
+        if (getColumns() != null) {
+            params.add(getColumnsAsParameter());
+        }
+
+        if (getDynamicColumns() != null) {
+            params.add(getDynamicColumnsAsParameter());
+        }
+
+        return params.toArray();
+    }
+
+    public AbstractAJAXParser<AllSubscriptionsResponse> getParser() {
+        return new AbstractAJAXParser<AllSubscriptionsResponse>(getFailOnError()) {
+
+            @Override
+            protected AllSubscriptionsResponse createResponse(final Response response) throws JSONException {
+                return new AllSubscriptionsResponse(response);
+            }
+        };
+    }
+
 }

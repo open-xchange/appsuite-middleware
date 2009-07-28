@@ -47,32 +47,49 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.ajax.subscribe.test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link SubscribeTestSuite}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
-    private SubscribeTestSuite() {
-        super();
+public class AllSubscriptionsTest extends AbstractSubscriptionTest {
+
+    public AllSubscriptionsTest(String name) {
+        super(name);
+    }
+    
+    public void testBasicOXMFAllRequest() throws AjaxException, IOException, SAXException, JSONException{
+        FolderObject folder = createDefaultContactFolder();
+        DynamicFormDescription formDescription = generateFormDescription();
+        Subscription subscription = generateOXMFSubscription(formDescription);
+        subscription.setFolderId(folder.getObjectID());
+        
+        subMgr.newAction(subscription);
+        assertFalse("Precondition: Creation of test file should work", subMgr.getLastResponse().hasError());
+        List<String> columns = Arrays.asList("id","folder", "source");
+        JSONArray all = subMgr.allAction(folder.getObjectID(), columns);
+
+        assertFalse("Should be able to handle all request", subMgr.getLastResponse().hasError());
+        assertEquals("Should only have one result", 1, all.length());
+        JSONArray elements = all.getJSONArray(0);
+        assertEquals("Should have three elements", 3, elements.length());
+        assertEquals("Should return the same ID", subscription.getId(), elements.getInt(0));
+        assertEquals("Should return the same folder", subscription.getFolderId(), elements.getString(1));
+        assertEquals("Should return the same source ID", subscription.getSource().getId(), elements.getString(2));
+ 
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        //there is not test for action=get : many tests validate their result using get, so no need for explicit testing
-        suite.addTestSuite(CreateSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        return suite;
-    }
 }
