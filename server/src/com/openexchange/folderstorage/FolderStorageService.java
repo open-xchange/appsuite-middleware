@@ -64,6 +64,16 @@ public interface FolderStorageService {
      * @return The storages which are capable to handle given folder identifier. An array with zero length means no appropriate storage is
      *         available.
      */
-    public FolderStorage[] getFolderStorage(final String treeId, final String folderId);
+    public FolderStorage[] getFolderStorages(final String treeId, final String folderId);
+
+    /**
+     * Gets the specified folder tree's storages which are capable to handle given content type.
+     * 
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @return The storages which are capable to handle given content type. An array with zero length means no appropriate storage is
+     *         available.
+     */
+    public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType);
 
 }

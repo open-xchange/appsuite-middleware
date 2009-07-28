@@ -54,7 +54,7 @@ import java.util.Locale;
 import com.openexchange.folderstorage.SortableId;
 
 /**
- * {@link VirtualId} - A virtual ID.
+ * {@link VirtualId} - A virtual ID which orders subfolder by name in a locale-sensitive way.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,7 +70,7 @@ public final class VirtualId implements SortableId {
      * Initializes a new {@link VirtualId}.
      * 
      * @param id The (real) identifier
-     * @param name The folder name
+     * @param name The folder name to sort by
      * @param locale The locale to perform locale-sensitive <code>String</code> comparison
      */
     public VirtualId(final String id, final String name, final Locale locale) {

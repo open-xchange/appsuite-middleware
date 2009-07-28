@@ -199,4 +199,65 @@ public final class VirtualFolderStorageSQL {
         }
     }
 
+    public static String[][] getSubfolderIds(final int cid, final int tree, final int user, final String parentId) throws FolderException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement(SQL_SELECT_SUBF);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, parentId);
+                rs = stmt.executeQuery();
+                pos = 1;
+                final List<String> subfolderIds = new ArrayList<String>();
+                while (rs.next()) {
+                    subfolderIds.add(rs.getString(pos));
+                }
+                DBUtils.closeSQLStuff(rs, stmt);
+                final String[][] ret = new String[subfolderIds.size()][];
+                // Select names
+                for (int i = 0; i < ret.length; i++) {
+                    final String subfolderId = subfolderIds.get(i);
+                    stmt = con.prepareStatement(SQL_SELECT);
+                    pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, tree);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos, subfolderId);
+                    rs = stmt.executeQuery();
+                    pos = 2;
+                    if (rs.next()) {
+                        ret[i] = new String[] { subfolderId, rs.getString(pos) };
+                    } else {
+                        ret[i] = new String[] { subfolderId, null };
+                    }
+                    DBUtils.closeSQLStuff(rs, stmt);
+                }
+                return ret;
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
 }

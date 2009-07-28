@@ -52,17 +52,22 @@ package com.openexchange.folderstorage.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.folderstorage.FolderExceptionFactory;
 import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
+import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link FolderStorageActivator} - TODO Short description of this class' purpose.
+ * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class);
+
+    private ComponentRegistration componentRegistration;
 
     private ServiceRegistration serviceRegistration;
 
@@ -75,6 +80,13 @@ public final class FolderStorageActivator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
         try {
+            // Register error component
+            componentRegistration = new ComponentRegistration(
+                context,
+                EnumComponent.FOLDER,
+                "com.openexchange.folderstorage",
+                FolderExceptionFactory.getInstance());
+            // Register folder storage service
             serviceRegistration = context.registerService(FolderStorageService.class.getName(), FolderStorageRegistry.getInstance(), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -84,9 +96,14 @@ public final class FolderStorageActivator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
+            // Unregister previously registered services/components
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
+            }
+            if (null != componentRegistration) {
+                componentRegistration.unregister();
+                componentRegistration = null;
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

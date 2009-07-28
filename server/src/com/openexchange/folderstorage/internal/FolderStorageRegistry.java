@@ -126,7 +126,7 @@ public final class FolderStorageRegistry implements FolderStorageService {
         return true;
     }
 
-    public FolderStorage[] getFolderStorage(final String treeId, final String folderId) {
+    public FolderStorage[] getFolderStorages(final String treeId, final String folderId) {
         final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
@@ -153,6 +153,10 @@ public final class FolderStorageRegistry implements FolderStorageService {
             }
         }
         return tmp.toArray(new FolderStorage[tmp.size()]);
+    }
+
+    public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
+        return ContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }
 
     /**
