@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
@@ -80,6 +81,193 @@ public final class VirtualFolderStorageSQL {
         super();
     }
 
+    /**
+     * Updates specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folder The folder
+     * @throws FolderException If update fails
+     */
+    public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws FolderException {
+        deleteFolder(cid, tree, user, folder.getID());
+        insertFolder(cid, tree, user, folder);
+    }
+
+    private static final String SQL_DELETE_SUBS = "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    /**
+     * Deletes specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @throws FolderException If delete fails
+     */
+    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId) throws FolderException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            // Delete subscribe data
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_SUBS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            // Delete permission data
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_PERMS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            // Delete folder data
+            try {
+                stmt = con.prepareStatement(SQL_DELETE);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        } finally {
+            databaseService.backWritable(cid, con);
+        }
+    }
+
+    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name) VALUES (?, ?, ?, ?, ?, ?)";
+
+    private static final String SQL_INSERT_PERM = "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String SQL_INSERT_SUBS = "INSERT INTO virtualSubscription (cid, tree, user, folderId, subscribed) VALUES (?, ?, ?, ?, ?)";
+
+    /**
+     * Inserts specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folder The folder
+     * @throws FolderException If insertion fails
+     */
+    public static void insertFolder(final int cid, final int tree, final int user, final Folder folder) throws FolderException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        final String folderId = folder.getID();
+        try {
+            // Insert folder data
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement(SQL_INSERT);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.setString(pos, folder.getParentID());
+                stmt.setString(pos, folder.getName());
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            // Insert permission data
+            try {
+                stmt = con.prepareStatement(SQL_INSERT_PERM);
+                final Permission[] permissions = folder.getPermissions();
+                for (int i = 0; i < permissions.length; i++) {
+                    final Permission p = permissions[i];
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, tree);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos, folderId);
+                    stmt.setInt(pos++, p.getEntity());
+                    stmt.setInt(pos++, p.isGroup() ? 1 : 0);
+                    stmt.setInt(pos++, p.getFolderPermission());
+                    stmt.setInt(pos++, p.getReadPermission());
+                    stmt.setInt(pos++, p.getWritePermission());
+                    stmt.setInt(pos++, p.getDeletePermission());
+                    stmt.setInt(pos++, p.isAdmin() ? 1 : 0);
+                    stmt.setInt(pos++, p.getSystem());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            // Insert subscription data
+            try {
+                stmt = con.prepareStatement(SQL_INSERT_SUBS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        } finally {
+            databaseService.backWritable(cid, con);
+        }
+    }
+
     private static final String SQL_SELECT = "SELECT parentId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBF = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
@@ -88,6 +276,15 @@ public final class VirtualFolderStorageSQL {
 
     private static final String SQL_SELECT_SUBSCRIPTION = "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    /**
+     * Fills specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param virtualFolder The folder to fill
+     * @throws FolderException If filling the folder fails
+     */
     public static void fillFolder(final int cid, final int tree, final int user, final VirtualFolder virtualFolder) throws FolderException {
         final DatabaseService databaseService;
         try {
@@ -199,6 +396,16 @@ public final class VirtualFolderStorageSQL {
         }
     }
 
+    /**
+     * Gets the identifier-name-pairs of the subfolders located below specified parent.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param parentId The parent identifier
+     * @return The identifier-name-pairs of the subfolders located below specified parent
+     * @throws FolderException If subfolders cannot be detected
+     */
     public static String[][] getSubfolderIds(final int cid, final int tree, final int user, final String parentId) throws FolderException {
         final DatabaseService databaseService;
         try {
