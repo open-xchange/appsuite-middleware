@@ -305,6 +305,12 @@ public class EAVUnitTest extends TestCase {
      * Type Nodes
      */
     
+    public EAVTypeMetadataNode TYPE(String name, EAVTypeMetadataNode...children) {
+        EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
+        node.addChildren(children);
+        return node;
+    }
+
     public EAVTypeMetadataNode TYPE(String name, EAVType type) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.setType(type);
@@ -346,6 +352,10 @@ public class EAVUnitTest extends TestCase {
             EAVNode actualNode = actual.resolve(relativePath);
 
             if (actualNode == null) {
+                failComparison(message, expected, actual);
+            }
+            
+            if (!expectedNode.getName().equals(actual.getName())) {
                 failComparison(message, expected, actual);
             }
 
@@ -408,6 +418,16 @@ public class EAVUnitTest extends TestCase {
         });
 
         return builder.toString();
+    }
+    
+    protected void assertType(EAVTypeMetadataNode types, EAVType type, String...pathElements) {
+        assertType(types, type, EAVContainerType.SINGLE, pathElements);
+    }
+    
+    protected void assertType(EAVTypeMetadataNode types, EAVType type, EAVContainerType cType, String...pathElements) {
+        EAVPath path = new EAVPath(pathElements);
+        assertEquals(type, types.resolve(path).getType());
+        assertEquals(cType, types.resolve(path).getContainerType());
     }
     
     protected static Map<String, Object> M(String...strings) {
