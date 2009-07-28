@@ -85,7 +85,7 @@ public final class UpdateTaskServiceTrackerCustomizer implements ServiceTrackerC
             boolean error = false;
             final int size = collection.size();
             final Iterator<UpdateTask> iter = collection.iterator();
-            for (int i = 0; i < size && !error; i++) {
+            for (int i = 0; !error && i < size; i++) {
                 final UpdateTask task = iter.next();
                 if (!registry.addUpdateTask(task)) {
                     LOG.error(new StringBuilder().append("Update task \"").append(task.getClass().getName()).append(
