@@ -462,8 +462,11 @@ chmod 750 /var/log/open-xchange
 chown open-xchange: /var/log/open-xchange
 chown open-xchange: /opt/open-xchange/etc/groupware/osgi
 chgrp open-xchange /opt/open-xchange/etc/common/*
+chmod 640 /opt/open-xchange/etc/common/*
 chgrp open-xchange /opt/open-xchange/etc/groupware/*
+chmod 640 /opt/open-xchange/etc/groupware/*
 chgrp open-xchange /opt/open-xchange/etc/groupware/servletmappings/*
+chmod 640 /opt/open-xchange/etc/groupware/servletmappings/*
 
 update-rc.d open-xchange-groupware defaults > /dev/null
 

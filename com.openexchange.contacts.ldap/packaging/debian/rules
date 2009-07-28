@@ -59,7 +59,7 @@ binary-arch: build install
 	dh_link
 	dh_strip
 	dh_compress -X.pdf
-	dh_fixperms
+	dh_fixperms -X opt/open-xchange/etc
 #	dh_perl
 #	dh_python
 #	dh_makeshlibs
