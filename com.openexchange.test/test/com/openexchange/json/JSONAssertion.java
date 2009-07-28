@@ -103,9 +103,7 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion withValue(Object value) {
-        if(Integer.class.isInstance(value)) {
-            value = Long.valueOf((Integer) value);
-        } // JSON defaults to longs
+        
         if(!stack.isEmpty()) {
             stack.peek().withValue(value);
         } else {
@@ -179,7 +177,7 @@ public class JSONAssertion implements JSONCondition {
             return this;
         }
         ((WithValues)conditions.get(conditions.size()-1)).ignoreOrder = true;
-        return this;
+        return hasNoMoreKeys();
     }
     
     
@@ -224,16 +222,24 @@ public class JSONAssertion implements JSONCondition {
     
     private static final class HasKey implements JSONCondition {
         private String key;
+        private String complaint;
 
         public HasKey(String key) {
             this.key = key;
         }
         
         public boolean validate(Object o) {
+            if(!JSONObject.class.isInstance(o)) {
+                this.complaint = o.getClass().getName()+" can not have key "+key;
+                return false;
+            }
             return ((JSONObject)o).has(key);
         }
         
         public String getComplaint() {
+            if(complaint != null) {
+                return complaint;
+            }
             return "Missing key: "+key;
         }
         
@@ -269,7 +275,7 @@ public class JSONAssertion implements JSONCondition {
         public boolean validate(Object o) {
             try {
                 Object object = ((JSONObject)o).get(key);
-                if(!object.equals(value)){
+                if(!equals(object, value)){
                     complaint = "Expected value "+value+" of class ("+value.getClass().getName()+") for key "+key+" but got "+object+" of class ("+object.getClass().getName()+")";
                     return false;
                 }
@@ -279,6 +285,24 @@ public class JSONAssertion implements JSONCondition {
             }
         }
         
+        private boolean equals(Object o1, Object o2) {
+            if(Number.class.isInstance(o1) && Number.class.isInstance(o2)) {
+                if(isLongCompatible(o1) && isLongCompatible(o2)) {
+                    return ((Number)o1).longValue() - ((Number)o2).longValue() == 0;
+                }
+            }
+            return o1.equals(o2);
+        }
+
+        private boolean isLongCompatible(Object o1) {
+            for(Class c : new Class[]{Long.class, Integer.class}) {
+                if(c.isInstance(o1)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public String getComplaint() {
             return complaint;
         }
