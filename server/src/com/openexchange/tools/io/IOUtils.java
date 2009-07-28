@@ -90,7 +90,7 @@ public final class IOUtils {
     }
 
     /**
-     * Convenience method for closing streams.
+     * Convenience method for closing readers.
      * 
      * @param reader The reader to close.
      */
