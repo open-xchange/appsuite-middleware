@@ -202,8 +202,8 @@ case "$1" in
     ;;
 esac
 
-chown :open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
-chown :open-xchange /opt/open-xchange/etc/admindaemon/*
+chgrp open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
+chgrp open-xchange /opt/open-xchange/etc/admindaemon/*
 
 update-rc.d open-xchange-admin defaults > /dev/null
 
