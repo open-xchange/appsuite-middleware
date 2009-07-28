@@ -69,9 +69,9 @@ public final class VirtualId implements SortableId {
     /**
      * Initializes a new {@link VirtualId}.
      * 
-     * @param id The identifier
-     * @param name The name
-     * @param locale The locale
+     * @param id The (real) identifier
+     * @param name The folder name
+     * @param locale The locale to perform locale-sensitive <code>String</code> comparison
      */
     public VirtualId(final String id, final String name, final Locale locale) {
         super();

@@ -134,14 +134,15 @@ public interface Folder {
      * Sets the name.
      * 
      * @param name The name to set
+     * @see #getLocalizedName(Locale)
      */
     public void setName(String name);
 
     /**
-     * Gets the localized name.
+     * Gets the locale-sensitive name.
      * 
      * @param locale The locale
-     * @return The localized name or <code>null</code> if not available
+     * @return The locale-sensitive name or <code>null</code> if not available
      */
     public String getLocalizedName(Locale locale);
 

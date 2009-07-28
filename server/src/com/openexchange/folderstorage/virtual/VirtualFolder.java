@@ -79,7 +79,7 @@ public final class VirtualFolder implements Folder {
     /**
      * Initializes a {@link VirtualFolder} with specified real folder.
      * 
-     * @param source The real folder
+     * @param source The real folder which is mapped by this virtual folder
      */
     public VirtualFolder(final Folder source) {
         super();
