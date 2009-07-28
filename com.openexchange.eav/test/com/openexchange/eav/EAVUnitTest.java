@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
-
 import static com.openexchange.eav.TransformList.*;
 
 /**
@@ -70,32 +69,36 @@ import static com.openexchange.eav.TransformList.*;
 public class EAVUnitTest extends TestCase {
 
     // Array Transformations
-    
-    public EAVSetTransformation TRANS(String name, EAVSetTransformation...children) {
+
+    public EAVSetTransformation TRANS(String name, EAVSetTransformation... children) {
         EAVSetTransformation transformation = new EAVSetTransformation(name);
         transformation.addChildren(children);
         return transformation;
     }
-    
-    public EAVSetTransformation TRANS(String name,  TransformList list) {
+
+    public EAVSetTransformation TRANS(String name, TransformList list) {
         return TRANS(name, list, null);
     }
-    
-    public EAVSetTransformation TRANS(String name,  TransformList list1, TransformList list2) {
+
+    public EAVSetTransformation TRANS(String name, TransformList list1, TransformList list2) {
         EAVSetTransformation transformation = new EAVSetTransformation(name);
         transformation.setType(list1.type);
-        for(TransformList transformList : Arrays.asList(list1, list2)) {
-            if(transformList == null) {
+        for (TransformList transformList : Arrays.asList(list1, list2)) {
+            if (transformList == null) {
                 continue;
             }
-            switch(transformList.operation) {
-            case ADD : transformation.setAdd(transformList.payload); break;
-            case REMOVE : transformation.setRemove(transformList.payload); break;
+            switch (transformList.operation) {
+            case ADD:
+                transformation.setAdd(transformList.payload);
+                break;
+            case REMOVE:
+                transformation.setRemove(transformList.payload);
+                break;
             }
         }
         return transformation;
     }
-    
+
     // Objects
 
     public EAVNode N(String name, EAVNode... children) {
@@ -167,15 +170,14 @@ public class EAVUnitTest extends TestCase {
         node.setPayload(EAVContainerType.SET, values);
         return node;
     }
-    
+
     public TransformList ADD(Boolean... values) {
         return new TransformList(EAVType.BOOLEAN, ADD, values);
     }
 
-    public TransformList REMOVE(Boolean...values) {
+    public TransformList REMOVE(Boolean... values) {
         return new TransformList(EAVType.BOOLEAN, REMOVE, values);
     }
-
 
     // Numbers
 
@@ -200,15 +202,14 @@ public class EAVUnitTest extends TestCase {
         node.setPayload(EAVType.NUMBER, EAVContainerType.SET, values);
         return node;
     }
-    
+
     public TransformList ADD(Number... values) {
         return new TransformList(EAVType.NUMBER, ADD, values);
     }
 
-    public TransformList REMOVE(Number...values) {
+    public TransformList REMOVE(Number... values) {
         return new TransformList(EAVType.NUMBER, REMOVE, values);
     }
-
 
     // Other Numbers (Date and Time)
 
@@ -226,9 +227,9 @@ public class EAVUnitTest extends TestCase {
         }
         return node;
     }
-    
+
     // Binaries
-    
+
     public EAVNode N(String name, byte[]... values) {
         EAVNode node = new EAVNode(name);
         if (values.length == 1) {
@@ -250,16 +251,16 @@ public class EAVUnitTest extends TestCase {
         node.setPayload(EAVContainerType.SET, wrap(values));
         return node;
     }
-    
+
     public TransformList ADD(byte[]... values) {
         return new TransformList(EAVType.NUMBER, ADD, wrap(values));
     }
 
-    public TransformList REMOVE(byte[]...values) {
+    public TransformList REMOVE(byte[]... values) {
         return new TransformList(EAVType.NUMBER, REMOVE, wrap(values));
     }
-    
-    private InputStream[] wrap(byte[]...values) {
+
+    private InputStream[] wrap(byte[]... values) {
         InputStream[] retval = new InputStream[values.length];
         int index = 0;
         for (byte[] bs : values) {
@@ -285,7 +286,7 @@ public class EAVUnitTest extends TestCase {
         node.setPayload(type, EAVContainerType.SET, values);
         return node;
     }
-    
+
     public TransformList ADD(EAVType type, Number... values) {
         if (!ACCEPTABLE_NUMBER_TYPES.contains(type)) {
             throw new IllegalArgumentException("Numbers can not be of type " + type.name());
@@ -293,19 +294,18 @@ public class EAVUnitTest extends TestCase {
         return new TransformList(type, ADD, values);
     }
 
-    public TransformList REMOVE(EAVType type, Number...values) {
+    public TransformList REMOVE(EAVType type, Number... values) {
         if (!ACCEPTABLE_NUMBER_TYPES.contains(type)) {
             throw new IllegalArgumentException("Numbers can not be of type " + type.name());
         }
         return new TransformList(type, REMOVE, values);
     }
 
-    
     /*
      * Type Nodes
      */
-    
-    public EAVTypeMetadataNode TYPE(String name, EAVTypeMetadataNode...children) {
+
+    public EAVTypeMetadataNode TYPE(String name, EAVTypeMetadataNode... children) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.addChildren(children);
         return node;
@@ -317,14 +317,14 @@ public class EAVUnitTest extends TestCase {
         return node;
     }
 
-    public EAVTypeMetadataNode TYPE(String name, EAVType type,EAVContainerType cType) {
+    public EAVTypeMetadataNode TYPE(String name, EAVType type, EAVContainerType cType) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.setType(type);
         node.setContainerType(cType);
         return node;
     }
 
-    public EAVTypeMetadataNode TYPE(String name, EAVType type,EAVContainerType cType, Map<String, Object> options) {
+    public EAVTypeMetadataNode TYPE(String name, EAVType type, EAVContainerType cType, Map<String, Object> options) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.setType(type);
         node.setContainerType(cType);
@@ -369,9 +369,15 @@ public class EAVUnitTest extends TestCase {
             if (actualNode == null) {
                 failComparison(message, expected, actual);
             }
-            
-            if (!expectedNode.getName().equals(actualNode.getName())) {
-                failComparison(message, expected, actual);
+
+            if (expectedNode.getName() == null) {
+                if (actualNode.getName() != null) {
+                    failComparison(message, expected, actual);
+                }
+            } else {
+                if (!expectedNode.getName().equals(actualNode.getName())) {
+                    failComparison(message, expected, actual);
+                }
             }
 
             if (!expectedNode.getType().equals(actualNode.getType())) {
@@ -434,26 +440,26 @@ public class EAVUnitTest extends TestCase {
 
         return builder.toString();
     }
-    
-    protected void assertType(EAVTypeMetadataNode types, EAVType type, String...pathElements) {
+
+    protected void assertType(EAVTypeMetadataNode types, EAVType type, String... pathElements) {
         assertType(types, type, EAVContainerType.SINGLE, pathElements);
     }
-    
-    protected void assertType(EAVTypeMetadataNode types, EAVType type, EAVContainerType cType, String...pathElements) {
+
+    protected void assertType(EAVTypeMetadataNode types, EAVType type, EAVContainerType cType, String... pathElements) {
         EAVPath path = new EAVPath(pathElements);
         assertEquals(type, types.resolve(path).getType());
         assertEquals(cType, types.resolve(path).getContainerType());
     }
-    
-    protected static Map<String, Object> M(String...strings) {
-        if(strings.length%2 != 0) {
+
+    protected static Map<String, Object> M(String... strings) {
+        if (strings.length % 2 != 0) {
             throw new IllegalArgumentException("Please provide key value pairs");
         }
-        
+
         Map<String, Object> retval = new HashMap<String, Object>();
         String key = null;
         for (String string : strings) {
-            if(key == null) {
+            if (key == null) {
                 key = string;
             } else {
                 retval.put(key, string);
