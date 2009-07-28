@@ -159,8 +159,8 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         }
         
         if(getDynamicColumns() != null){
-            for (String plugin : dynamicColumns.keySet()) {
-                params.add(new Parameter(plugin, Strings.join(dynamicColumns.get(plugin), ",")));
+            for (String plugin : getDynamicColumns().keySet()) {
+                params.add(new Parameter(plugin, Strings.join(getDynamicColumns().get(plugin), ",")));
             }
         }
         
