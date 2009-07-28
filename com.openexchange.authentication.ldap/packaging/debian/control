@@ -7,7 +7,7 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-authentication-ldap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>=@OXVERSION@), open-xchange-configread (>=@OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>=@OXVERSION@), open-xchange-configread (>=@OXVERSION@)
 Provides: open-xchange-authentication
 Description: The Open-Xchange LDAP Authentication
 Conflicts: open-xchange-authentication-database

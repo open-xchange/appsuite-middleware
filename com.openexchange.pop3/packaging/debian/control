@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 Package: open-xchange-pop3
 Provides: open-xchange-mailstore
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-monitoring (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-timer (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-monitoring (>= @OXVERSION@), open-xchange-cache (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-timer (>= @OXVERSION@)
 Description: The Open-Xchange Server POP3 Bundle
