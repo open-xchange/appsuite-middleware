@@ -47,58 +47,70 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage;
 
-import com.openexchange.folderstorage.FolderType;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * {@link VirtualFolderType} - The virtual folder type.
+ * {@link FolderExceptionErrorMessage} - Error messages for folder exceptions.
+ * <p>
+ * Subclasses are supposed to start at <code>1000</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderType implements FolderType {
-
-    private final int treeId;
+public enum FolderExceptionErrorMessage implements OXErrorMessage {
 
     /**
-     * Initializes a new {@link VirtualFolderType}.
-     * 
-     * @param treeId The tree ID
+     * Unexpected error: %1$s
      */
-    public VirtualFolderType(final int treeId) {
-        super();
-        this.treeId = treeId;
+    UNEXPECTED_ERROR(FolderExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    /**
+     * I/O error: %1$s
+     */
+    IO_ERROR(FolderExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 2),
+    /**
+     * SQL error: %1$s
+     */
+    SQL_ERROR(FolderExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 3);
+
+    private final Category category;
+
+    private final int detailNumber;
+
+    private final String message;
+
+    private FolderExceptionErrorMessage(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.detailNumber = detailNumber;
+        this.category = category;
     }
 
-    public boolean servesFolderId(final String folderId) {
-        // A virtual storage serves every folder ID except null
-        return (null != folderId);
+    public Category getCategory() {
+        return category;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + treeId;
-        return result;
+    public int getDetailNumber() {
+        return detailNumber;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof VirtualFolderType)) {
-            return false;
-        }
-        final VirtualFolderType other = (VirtualFolderType) obj;
-        if (treeId != other.treeId) {
-            return false;
-        }
-        return true;
+    public String getHelp() {
+        return null;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Creates a {@link FolderException} carrying this error message.
+     * 
+     * @param cause The (optional) cause; pass <code>null</code> to ignore
+     * @param messageArguments The (optional) message arguments; pass <code>null</code> to ignore
+     * @return A newly created {@link FolderException} carrying this error message.
+     */
+    public FolderException create(final Throwable cause, final Object... messageArguments) {
+        return FolderExceptionFactory.getInstance().create(this, cause, messageArguments);
     }
 
 }

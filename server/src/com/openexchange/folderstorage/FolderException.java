@@ -103,4 +103,16 @@ public class FolderException extends AbstractOXException {
         super(message, cause);
     }
 
+    /**
+     * Initializes a new {@link FolderException}.
+     * 
+     * @param message The message
+     * @param cause The cause
+     * @param messageArguments The message arguments
+     */
+    public FolderException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
+        super(message, cause);
+        setMessageArgs(messageArguments);
+    }
+
 }

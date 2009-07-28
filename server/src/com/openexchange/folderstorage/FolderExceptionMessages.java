@@ -47,58 +47,37 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage;
 
-import com.openexchange.folderstorage.FolderType;
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link VirtualFolderType} - The virtual folder type.
+ * {@link FolderExceptionMessages} - Locale-sensitive strings for folder exceptions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderType implements FolderType {
-
-    private final int treeId;
+public class FolderExceptionMessages implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link VirtualFolderType}.
-     * 
-     * @param treeId The tree ID
+     * Unexpected error: %1$s
      */
-    public VirtualFolderType(final int treeId) {
+    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+
+    /**
+     * I/O error: %1$s
+     */
+    public static final String IO_ERROR_MSG = "I/O error: %1$s";
+
+    /**
+     * SQL error: %1$s
+     */
+    public static final String SQL_ERROR_MSG = "SQL error: %1$s";
+
+    /**
+     * Initializes a new {@link FolderExceptionMessages}
+     */
+    private FolderExceptionMessages() {
         super();
-        this.treeId = treeId;
-    }
-
-    public boolean servesFolderId(final String folderId) {
-        // A virtual storage serves every folder ID except null
-        return (null != folderId);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + treeId;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof VirtualFolderType)) {
-            return false;
-        }
-        final VirtualFolderType other = (VirtualFolderType) obj;
-        if (treeId != other.treeId) {
-            return false;
-        }
-        return true;
     }
 
 }

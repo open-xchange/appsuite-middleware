@@ -97,6 +97,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         		"parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
         		"name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
         		"PRIMARY KEY (cid, tree, user, folderId), " + 
+        		"INDEX (cid, tree, user, parentId), " + 
         		"FOREIGN KEY (cid, user) REFERENCES user (cid, id) " + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }

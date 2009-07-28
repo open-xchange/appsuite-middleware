@@ -47,58 +47,51 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.osgi;
 
-import com.openexchange.folderstorage.FolderType;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.folderstorage.FolderStorageService;
+import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 
 /**
- * {@link VirtualFolderType} - The virtual folder type.
+ * {@link FolderStorageActivator} - TODO Short description of this class' purpose.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderType implements FolderType {
+public final class FolderStorageActivator implements BundleActivator {
 
-    private final int treeId;
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class);
+
+    private ServiceRegistration serviceRegistration;
 
     /**
-     * Initializes a new {@link VirtualFolderType}.
-     * 
-     * @param treeId The tree ID
+     * Initializes a new {@link FolderStorageActivator}.
      */
-    public VirtualFolderType(final int treeId) {
+    public FolderStorageActivator() {
         super();
-        this.treeId = treeId;
     }
 
-    public boolean servesFolderId(final String folderId) {
-        // A virtual storage serves every folder ID except null
-        return (null != folderId);
+    public void start(final BundleContext context) throws Exception {
+        try {
+            serviceRegistration = context.registerService(FolderStorageService.class.getName(), FolderStorageRegistry.getInstance(), null);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + treeId;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+    public void stop(final BundleContext context) throws Exception {
+        try {
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                serviceRegistration = null;
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof VirtualFolderType)) {
-            return false;
-        }
-        final VirtualFolderType other = (VirtualFolderType) obj;
-        if (treeId != other.treeId) {
-            return false;
-        }
-        return true;
     }
 
 }

@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.StoragePriority;
 
 /**
@@ -64,7 +65,7 @@ import com.openexchange.folderstorage.StoragePriority;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderStorageRegistry {
+public final class FolderStorageRegistry implements FolderStorageService {
 
     private static final FolderStorageRegistry instance = new FolderStorageRegistry();
 
@@ -125,14 +126,6 @@ public final class FolderStorageRegistry {
         return true;
     }
 
-    /**
-     * Gets the specified folder tree's storages which are capable to handle given folder identifier.
-     * 
-     * @param treeId The tree identifier
-     * @param folderId The folder identifier
-     * @return The storages which are capable to handle given folder identifier. An array with zero length means no appropriate storage is
-     *         available.
-     */
     public FolderStorage[] getFolderStorage(final String treeId, final String folderId) {
         final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {

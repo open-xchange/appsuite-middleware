@@ -47,58 +47,23 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
-
-import com.openexchange.folderstorage.FolderType;
+package com.openexchange.folderstorage;
 
 /**
- * {@link VirtualFolderType} - The virtual folder type.
+ * {@link FolderStorageService} - The folder storage service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderType implements FolderType {
-
-    private final int treeId;
+public interface FolderStorageService {
 
     /**
-     * Initializes a new {@link VirtualFolderType}.
+     * Gets the specified folder tree's storages which are capable to handle given folder identifier.
      * 
-     * @param treeId The tree ID
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The storages which are capable to handle given folder identifier. An array with zero length means no appropriate storage is
+     *         available.
      */
-    public VirtualFolderType(final int treeId) {
-        super();
-        this.treeId = treeId;
-    }
-
-    public boolean servesFolderId(final String folderId) {
-        // A virtual storage serves every folder ID except null
-        return (null != folderId);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + treeId;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof VirtualFolderType)) {
-            return false;
-        }
-        final VirtualFolderType other = (VirtualFolderType) obj;
-        if (treeId != other.treeId) {
-            return false;
-        }
-        return true;
-    }
+    public FolderStorage[] getFolderStorage(final String treeId, final String folderId);
 
 }

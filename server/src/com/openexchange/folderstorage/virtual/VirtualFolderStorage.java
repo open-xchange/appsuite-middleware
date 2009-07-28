@@ -53,10 +53,13 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.folderstorage.virtual.sql.VirtualFolderStorageSQL;
+import com.openexchange.server.ServiceException;
 
 /**
  * {@link VirtualFolderStorage} - TODO Short description of this class' purpose.
@@ -65,7 +68,7 @@ import com.openexchange.folderstorage.StoragePriority;
  */
 public final class VirtualFolderStorage implements FolderStorage {
 
-    private final String treeId;
+    private final int treeId;
 
     private final FolderType folderType;
 
@@ -74,22 +77,22 @@ public final class VirtualFolderStorage implements FolderStorage {
      * 
      * @param treeId The tree identifier
      */
-    public VirtualFolderStorage(final String treeId) {
+    public VirtualFolderStorage(final int treeId) {
         super();
         this.treeId = treeId;
         folderType = new VirtualFolderType(treeId);
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
-        
+
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        
+
     }
 
     public void deleteFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
-        
+
     }
 
     public Folder getDefaultFolder(final int entity, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
@@ -98,8 +101,40 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public Folder getFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
+        final VirtualFolder virtualFolder;
+        {
+            // Get real folder
+            final FolderStorageService storageService;
+            try {
+                storageService = VirtualServiceRegistry.getServiceRegistry().getService(FolderStorageService.class, true);
+            } catch (final ServiceException e) {
+                throw new FolderException(e);
+            }
+            final FolderStorage[] realFolderStorages = storageService.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+            if (null == realFolderStorages || realFolderStorages.length == 0) {
+                // TODO: Throw exception about missing folder storage
+                throw new IllegalStateException("Missing folder storage.");
+            }
+            // Select first storage to load folder
+            final FolderStorage realFolderStorage = realFolderStorages[0];
+            realFolderStorage.startTransaction(storageParameters, false);
+            try {
+                final Folder realFolder = realFolderStorages[0].getFolder(folderId, storageParameters);
+                virtualFolder = new VirtualFolder(realFolder);
+                virtualFolder.setTreeID(String.valueOf(treeId));
+                realFolderStorage.commitTransaction(storageParameters);
+            } catch (final FolderException e) {
+                realFolderStorage.rollback(storageParameters);
+                throw e;
+            }
+        }
+        // Load folder data from database
+        VirtualFolderStorageSQL.fillFolder(
+            storageParameters.getContext().getContextId(),
+            treeId,
+            storageParameters.getUser().getId(),
+            virtualFolder);
+        return virtualFolder;
     }
 
     public FolderType getFolderType() {
@@ -126,13 +161,11 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[0];
     }
 
-    
-    
 }

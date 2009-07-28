@@ -47,58 +47,41 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage;
 
-import com.openexchange.folderstorage.FolderType;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 
 /**
- * {@link VirtualFolderType} - The virtual folder type.
+ * {@link FolderExceptionFactory} - Factory for folder exceptions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderType implements FolderType {
+public final class FolderExceptionFactory extends Exceptions<FolderException> {
 
-    private final int treeId;
+    private static final FolderExceptionFactory SINGLETON = new FolderExceptionFactory();
 
     /**
-     * Initializes a new {@link VirtualFolderType}.
-     * 
-     * @param treeId The tree ID
+     * Prevent instantiation.
      */
-    public VirtualFolderType(final int treeId) {
+    private FolderExceptionFactory() {
         super();
-        this.treeId = treeId;
     }
 
-    public boolean servesFolderId(final String folderId) {
-        // A virtual storage serves every folder ID except null
-        return (null != folderId);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + treeId;
-        return result;
+    /**
+     * @return the singleton instance.
+     */
+    public static FolderExceptionFactory getInstance() {
+        return SINGLETON;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof VirtualFolderType)) {
-            return false;
-        }
-        final VirtualFolderType other = (VirtualFolderType) obj;
-        if (treeId != other.treeId) {
-            return false;
-        }
-        return true;
+    protected void knownExceptions() {
+        declareAll(FolderExceptionErrorMessage.values());
     }
 
+    @Override
+    protected FolderException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new FolderException(message, cause, args);
+    }
 }

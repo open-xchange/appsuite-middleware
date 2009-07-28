@@ -64,6 +64,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
@@ -131,10 +132,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             con.commit();
         } catch (final SQLException e) {
-            throw new FolderException(new OXFolderException(
-                OXFolderException.FolderCode.SQL_ERROR,
-                e,
-                Integer.valueOf(params.getContext().getContextId())));
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.autocommit(con);
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
@@ -249,10 +247,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         } catch (final SQLException e) {
-            throw new FolderException(new OXFolderException(
-                OXFolderException.FolderCode.SQL_ERROR,
-                e,
-                Integer.valueOf(context.getContextId())));
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -288,10 +283,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final SQLException e) {
-            throw new FolderException(new OXFolderException(
-                OXFolderException.FolderCode.SQL_ERROR,
-                e,
-                Integer.valueOf(storageParameters.getContext().getContextId())));
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -328,10 +320,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         } catch (final SQLException e) {
-            throw new FolderException(new OXFolderException(
-                OXFolderException.FolderCode.SQL_ERROR,
-                e,
-                Integer.valueOf(storageParameters.getContext().getContextId())));
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final ContextException e) {
@@ -378,10 +367,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         } catch (final SQLException e) {
-            throw new FolderException(new OXFolderException(
-                OXFolderException.FolderCode.SQL_ERROR,
-                e,
-                Integer.valueOf(parameters.getContext().getContextId())));
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
