@@ -642,20 +642,6 @@ public class InMemoryStorageTest extends EAVUnitTest {
             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessage.UNKNOWN_PATH.getDetailNumber());
         }
     }
-    
-    /*
-     * Utilities
-     */
-    
-    private void assertType(EAVTypeMetadataNode types, EAVType type, String...pathElements) {
-        assertType(types, type, EAVContainerType.SINGLE, pathElements);
-    }
-    
-    private void assertType(EAVTypeMetadataNode types, EAVType type, EAVContainerType cType, String...pathElements) {
-        EAVPath path = new EAVPath(pathElements);
-        assertEquals(type, types.resolve(path).getType());
-        assertEquals(cType, types.resolve(path).getContainerType());
-    }
 
 
 }
