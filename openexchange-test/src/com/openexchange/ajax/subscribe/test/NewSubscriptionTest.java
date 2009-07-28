@@ -101,5 +101,7 @@ public class NewSubscriptionTest extends AbstractSubscriptionTest {
         assertEquals("Should have same source ID", expected.getSource().getId(), actual.getSource().getId());
         assertEquals("Should have same ID", expected.getId(), actual.getId());
         assertEquals("Should have same user ID", expected.getUserId(), actual.getUserId());
+        assertEquals("Should have the same URL", expected.getConfiguration().get("url"), actual.getConfiguration().get("url"));
+        assertNotNull("Should still have an url configured", actual.getConfiguration().get("url"));
     }
 }

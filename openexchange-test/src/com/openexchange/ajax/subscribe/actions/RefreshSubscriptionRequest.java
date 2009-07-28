@@ -47,37 +47,58 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
+package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Params;
 
 /**
- * {@link SubscribeTestSuite}
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
+public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<RefreshSubscriptionResponse> {
 
-    private SubscribeTestSuite() {
+    private int subscriptionID;
+
+    public void setSubscriptionID(int subscriptionID) {
+        this.subscriptionID = subscriptionID;
+    }
+
+    public int getSubscriptionID() {
+        return subscriptionID;
+    }
+
+    public RefreshSubscriptionRequest() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        /* there is not test for action=get : many tests validate their result using get, so no need for explicit testing */
-        suite.addTestSuite(NewSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        suite.addTestSuite(UpdateSubscriptionTest.class);
-        suite.addTestSuite(RefreshSubscriptionTest.class);
-        return suite;
+    public RefreshSubscriptionRequest(int id) {
+        this();
+        setSubscriptionID(id);
     }
+
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    public Parameter[] getParameters() {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "refresh", AJAXServlet.PARAMETER_ID, String.valueOf(getSubscriptionID())).toArray();
+    }
+
+    public AbstractAJAXParser<RefreshSubscriptionResponse> getParser() {
+        return new AbstractAJAXParser<RefreshSubscriptionResponse>(getFailOnError()) {
+
+            @Override
+            protected RefreshSubscriptionResponse createResponse(final Response response) throws JSONException {
+                return new RefreshSubscriptionResponse(response);
+            }
+        };
+    }
+
 }

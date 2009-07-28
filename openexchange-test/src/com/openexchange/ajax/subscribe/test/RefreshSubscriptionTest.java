@@ -47,37 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
+package com.openexchange.ajax.subscribe.test;
 
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionResponse;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.tools.servlet.AjaxException;
+
 
 /**
- * {@link SubscribeTestSuite}
+ * This is rather boring. Refresh needs a lot a pre-requisites, so expect
+ * it to be tested in roundtrip tests.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
+public class RefreshSubscriptionTest extends AbstractSubscriptionTest {
 
-    private SubscribeTestSuite() {
-        super();
+    public RefreshSubscriptionTest(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        /* there is not test for action=get : many tests validate their result using get, so no need for explicit testing */
-        suite.addTestSuite(NewSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        suite.addTestSuite(UpdateSubscriptionTest.class);
-        suite.addTestSuite(RefreshSubscriptionTest.class);
-        return suite;
+    public void testShouldFailOnNonExistingSubscription() throws AjaxException, IOException, SAXException, JSONException{
+    }
+    
+    public void testShouldNotFailOnExistingSubscription() throws AjaxException, IOException, SAXException, JSONException{
+        FolderObject folder = createDefaultContactFolder();
+    
+        
+        DynamicFormDescription formDescription = generateFormDescription();
+        Subscription subscription = generateOXMFSubscription(formDescription, String.valueOf(folder.getObjectID() ));
+        
+        SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
+        discovery.addSource(subscription.getSource());
+
+        subMgr.setFormDescription(formDescription);
+        
+        subMgr.setSubscriptionSourceDiscoveryService(discovery);
+        
+        subMgr.newAction(subscription );
+        
+        subMgr.refreshAction( subscription.getId() );
+        
+        assertTrue("Should have been successful", ((RefreshSubscriptionResponse) subMgr.getLastResponse()).wasSuccessful() );
+ 
     }
 }

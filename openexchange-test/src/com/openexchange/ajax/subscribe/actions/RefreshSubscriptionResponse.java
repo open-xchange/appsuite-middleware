@@ -47,37 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.subscribe;
+package com.openexchange.ajax.subscribe.actions;
 
-import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
-import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.container.Response;
+
 
 /**
- * {@link SubscribeTestSuite}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class SubscribeTestSuite extends TestSuite {
+public class RefreshSubscriptionResponse extends AbstractSubscriptionResponse {
 
-    private SubscribeTestSuite() {
-        super();
+    protected RefreshSubscriptionResponse(Response response) {
+        super(response);
     }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        /* there is not test for action=get : many tests validate their result using get, so no need for explicit testing */
-        suite.addTestSuite(NewSubscriptionTest.class);
-        suite.addTestSuite(DeleteSubscriptionTest.class);
-        suite.addTestSuite(ListSubscriptionsTest.class);
-        suite.addTestSuite(AllSubscriptionsTest.class);
-        suite.addTestSuite(UpdateSubscriptionTest.class);
-        suite.addTestSuite(RefreshSubscriptionTest.class);
-        return suite;
+    
+    public boolean wasSuccessful(){
+        try {
+            if (((Integer)getData()).intValue() == 1)
+                return true;
+            return false;
+        } catch(Exception e){
+            return false;
+        }
     }
 }

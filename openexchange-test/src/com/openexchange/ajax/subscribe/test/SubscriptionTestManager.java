@@ -71,6 +71,8 @@ import com.openexchange.ajax.subscribe.actions.ListSubscriptionsRequest;
 import com.openexchange.ajax.subscribe.actions.ListSubscriptionsResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
+import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;
+import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -125,7 +127,7 @@ public class SubscriptionTestManager {
         return formDescription;
     }
 
-    public void setSubscriptionSourceRecoveryService(SubscriptionSourceDiscoveryService service) {
+    public void setSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
         this.subscriptionSourceRecoveryService = service;
     }
 
@@ -224,8 +226,16 @@ public class SubscriptionTestManager {
         lastResponse = updResp;
     }
     
+    public void refreshAction(int id) throws AjaxException, IOException, SAXException, JSONException{
+        RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(id);
+        refreshReq.setFailOnError(getFailOnError());
+        RefreshSubscriptionResponse refreshResponse = getClient().execute(refreshReq);
+        lastResponse = refreshResponse;
+    }
+    
     public void cleanUp() throws AjaxException, IOException, SAXException, JSONException {
-        deleteAction(createdItems);
+        if(createdItems.size() > 0)
+            deleteAction(createdItems);
     }
 
 }

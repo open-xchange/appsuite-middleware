@@ -65,8 +65,9 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
+
     protected SubscriptionTestManager subMgr;
-    
+
     public AbstractSubscriptionTest(String name) {
         super(name);
     }
@@ -77,18 +78,23 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
         subMgr = new SubscriptionTestManager(getClient());
     }
 
-
     @Override
     protected void tearDown() throws Exception {
         subMgr.cleanUp();
         super.tearDown();
     }
 
-    public Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws AjaxException, IOException, SAXException, JSONException {
+        Subscription sub = generateOXMFSubscription(formDescription);
+        sub.setFolderId(folderID);
+        return sub;
+    }
+
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
         Subscription subscription = new Subscription();
 
         subscription.setDisplayName("mySubscription");
-        
+
         SubscriptionSource source = new SubscriptionSource();
         source.setId("com.openexchange.subscribe.microformats.contacts.http");
         source.setFormDescription(formDescription);
@@ -100,10 +106,9 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
 
         return subscription;
     }
-    
-    public DynamicFormDescription generateFormDescription(){
+
+    public DynamicFormDescription generateFormDescription() {
         DynamicFormDescription form = new DynamicFormDescription();
-        //form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
         form.add(FormElement.input("url", "URL", true, null));
         return form;
     }
