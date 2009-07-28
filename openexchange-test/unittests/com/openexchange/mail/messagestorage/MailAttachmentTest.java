@@ -57,11 +57,13 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
@@ -296,6 +298,9 @@ public final class MailAttachmentTest extends MessageStorageTest {
 				for (final String id : hasAttachmentSet) {
 					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id, true);
 					final MailPath mailPath = new MailPath(mailAccess.getAccountId(), mail.getFolder(), mail.getMailId());
+					
+					// This part is added due to Bug #14160 L3: E-Mail Split view does not show size of attachments, is "undefined" in firefox, empty in IE6
+                    checkMailForAttachmentSize(mail);
 
 					final SessionObject session = getSession();
 					final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
@@ -375,5 +380,18 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			fail(e.getMessage());
 		}
 	}
+	
+    private void checkMailForAttachmentSize(final MailPart mail) throws MailException {
+        final int enclosedCount = mail.getEnclosedCount();
+        for (int i = 0; i < enclosedCount; i++) {
+            final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
+            if (!enclosedMailPart.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+                assertTrue("Each mail part must obtain a size", enclosedMailPart.containsSize() && -1 != enclosedMailPart.getSize());
+            }
+            checkMailForAttachmentSize(enclosedMailPart);
+        }
+    }
+
+
 
 }
