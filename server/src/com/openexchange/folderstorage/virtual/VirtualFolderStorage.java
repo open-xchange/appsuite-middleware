@@ -53,6 +53,7 @@ import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.FolderType;
@@ -85,14 +86,23 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
+        
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-
+        VirtualFolderStorageSQL.insertFolder(
+            storageParameters.getContext().getContextId(),
+            treeId,
+            storageParameters.getUser().getId(),
+            folder);
     }
 
     public void deleteFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
-
+        VirtualFolderStorageSQL.deleteFolder(
+            storageParameters.getContext().getContextId(),
+            treeId,
+            storageParameters.getUser().getId(),
+            folderId);
     }
 
     public Folder getDefaultFolder(final int entity, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
@@ -106,6 +116,9 @@ public final class VirtualFolderStorage implements FolderStorage {
                 throw new FolderException(e);
             }
             final FolderStorage realFolderStorage = storageService.getFolderStorageByContentType(FolderStorage.REAL_TREE_ID, contentType);
+            if (null == realFolderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, contentType);
+            }
             realFolderStorage.startTransaction(storageParameters, false);
             try {
                 final Folder realFolder = realFolderStorage.getDefaultFolder(entity, contentType, storageParameters);
@@ -138,8 +151,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
             final FolderStorage[] realFolderStorages = storageService.getFolderStorages(FolderStorage.REAL_TREE_ID, folderId);
             if (null == realFolderStorages || realFolderStorages.length == 0) {
-                // TODO: Throw exception about missing folder storage
-                throw new IllegalStateException("Missing folder storage.");
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
             }
             // Select first storage to load folder
             final FolderStorage realFolderStorage = realFolderStorages[0];
@@ -187,6 +199,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
+        
     }
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
@@ -194,7 +207,11 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
+        VirtualFolderStorageSQL.updateFolder(
+            storageParameters.getContext().getContextId(),
+            treeId,
+            storageParameters.getUser().getId(),
+            folder);
 
     }
 

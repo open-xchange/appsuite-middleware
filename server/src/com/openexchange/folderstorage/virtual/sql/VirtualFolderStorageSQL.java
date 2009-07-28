@@ -68,7 +68,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link VirtualFolderStorageSQL} - TODO Short description of this class' purpose.
+ * {@link VirtualFolderStorageSQL} - SQL related utility methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

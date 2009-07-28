@@ -72,7 +72,15 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * SQL error: %1$s
      */
-    SQL_ERROR(FolderExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 3);
+    SQL_ERROR(FolderExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 3),
+    /**
+     * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
+     */
+    NO_STORAGE_FOR_ID(FolderExceptionMessages.NO_STORAGE_FOR_ID_MSG, Category.CODE_ERROR, 4),
+    /**
+     * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
+     */
+    NO_STORAGE_FOR_CT(FolderExceptionMessages.NO_STORAGE_FOR_CT_MSG, Category.CODE_ERROR, 5);
 
     private final Category category;
 
@@ -100,6 +108,16 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * Creates a {@link FolderException} carrying this error message.
+     * 
+     * @param messageArguments The (optional) message arguments; pass <code>null</code> to ignore
+     * @return A newly created {@link FolderException} carrying this error message.
+     */
+    public FolderException create(final Object... messageArguments) {
+        return FolderExceptionFactory.getInstance().create(this, null, messageArguments);
     }
 
     /**

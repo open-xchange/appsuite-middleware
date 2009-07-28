@@ -74,6 +74,16 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String SQL_ERROR_MSG = "SQL error: %1$s";
 
     /**
+     * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
+     */
+    public static final String NO_STORAGE_FOR_ID_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and folder identifier \"%2$s\".";
+
+    /**
+     * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
+     */
+    public static final String NO_STORAGE_FOR_CT_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and content type \"%2$s\".";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {
