@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.StoragePriority;
 
@@ -95,8 +96,23 @@ public final class FolderStorageRegistry {
      * 
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to add
+     * @return <code>true</code> If registration was successful; otherwise <code>false</code>
      */
-    public void addFolderStorage(final String treeId, final FolderStorage folderStorage) {
+    public boolean addFolderStorage(final String treeId, final FolderStorage folderStorage) {
+        // Register storage's content types
+        final ContentType[] contentTypes = folderStorage.getSupportedContentTypes();
+        if (null != contentTypes && contentTypes.length > 0) {
+            boolean success = true;
+            for (int i = 0; success && i < contentTypes.length; i++) {
+                success = ContentTypeRegistry.getInstance().addContentType(treeId, contentTypes[i], folderStorage);
+            }
+            if (!success) {
+                for (int i = 0; i < contentTypes.length; i++) {
+                    ContentTypeRegistry.getInstance().removeContentType(treeId, contentTypes[i]);
+                }
+                return false;
+            }
+        }
         List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
@@ -106,6 +122,7 @@ public final class FolderStorageRegistry {
             }
         }
         storages.add(folderStorage);
+        return true;
     }
 
     /**

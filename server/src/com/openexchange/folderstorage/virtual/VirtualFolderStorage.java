@@ -129,6 +129,10 @@ public final class VirtualFolderStorage implements FolderStorage {
         
     }
 
+    public ContentType[] getSupportedContentTypes() {
+        return new ContentType[0];
+    }
+
     
     
 }

@@ -50,11 +50,20 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link FolderStorage} - A folder storage bound to a certain folder source; e.g database, email, etc.
+ * {@link FolderStorage} - A folder storage bound to a certain folder source (e.g database, email, etc) and tree.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderStorage {
+
+    /**
+     * Gets the content types supported by this folder storage.
+     * <p>
+     * A zero length array means this folder storage supports all content types for a certain tree identifier.
+     * 
+     * @return The content types supported by this folder storage or a zero length array to indicate no content type limitations
+     */
+    ContentType[] getSupportedContentTypes();
 
     /**
      * Gets the storage's folder type.

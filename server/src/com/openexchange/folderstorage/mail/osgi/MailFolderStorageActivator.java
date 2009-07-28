@@ -49,33 +49,102 @@
 
 package com.openexchange.folderstorage.mail.osgi;
 
+import static com.openexchange.folderstorage.mail.MailServiceRegistry.getServiceRegistry;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.mail.MailFolderStorage;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderStorageActivator implements BundleActivator {
+public final class MailFolderStorageActivator extends DeferredActivator {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderStorageActivator.class);
+
+    private static final String TREE_ID = "0";
+
+    private final Dictionary<String, String> dictionary;
+
+    private ServiceRegistration folderStorageRegistration;
 
     /**
      * Initializes a new {@link MailFolderStorageActivator}.
      */
     public MailFolderStorageActivator() {
         super();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("tree", TREE_ID);
     }
 
-    public void start(final BundleContext context) throws Exception {
-        // Register content type
-
-        // Register folder storage
-
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { MailAccountStorageService.class };
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        // TODO Auto-generated method stub
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().addService(clazz, getService(clazz));
+    }
 
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        getServiceRegistry().removeService(clazz);
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            /*
+             * (Re-)Initialize service registry with available services
+             */
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (int i = 0; i < classes.length; i++) {
+                    final Object service = getService(classes[i]);
+                    if (null != service) {
+                        registry.addService(classes[i], service);
+                    }
+                }
+            }
+            // Register folder storage
+            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new MailFolderStorage(TREE_ID), dictionary);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            if (null != folderStorageRegistration) {
+                folderStorageRegistration.unregister();
+                folderStorageRegistration = null;
+            }
+            /*
+             * Clear service registry
+             */
+            getServiceRegistry().clearRegistry();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
 }

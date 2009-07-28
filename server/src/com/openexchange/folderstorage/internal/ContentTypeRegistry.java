@@ -49,17 +49,20 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 
 /**
- * {@link ContentTypeRegistry} - A registry for content types.
+ * {@link ContentTypeRegistry} - A registry for a tree's content types.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContentTypeRegistry {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContentTypeRegistry.class);
 
     private static final ContentTypeRegistry instance = new ContentTypeRegistry();
 
@@ -76,44 +79,100 @@ public final class ContentTypeRegistry {
      * Member section
      */
 
-    private final ConcurrentMap<ContentType, FolderStorage> registry;
+    private final ConcurrentMap<String, ConcurrentMap<ContentType, FolderStorage>> registry;
 
     /**
      * Initializes a new {@link ContentTypeRegistry}.
      */
     private ContentTypeRegistry() {
         super();
-        registry = new ConcurrentHashMap<ContentType, FolderStorage>();
+        registry = new ConcurrentHashMap<String, ConcurrentMap<ContentType, FolderStorage>>();
     }
 
     /**
      * Associates specified folder storage to given content type.
      * 
+     * @param treeId The tree identifier
      * @param contentType The content type to register
      * @param folderStorage The content type's folder storage
      * @return <code>true</code> if content type was successfully registered; otherwise <code>false</code>
      */
-    public boolean addContentType(final ContentType contentType, final FolderStorage folderStorage) {
-        return (null == registry.putIfAbsent(contentType, folderStorage));
+    public boolean addContentType(final String treeId, final ContentType contentType, final FolderStorage folderStorage) {
+        ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
+        if (null == types) {
+            final ConcurrentMap<ContentType, FolderStorage> inst = new ConcurrentHashMap<ContentType, FolderStorage>();
+            types = registry.putIfAbsent(treeId, inst);
+            if (null == types) {
+                types = inst;
+            }
+        }
+        final boolean added = (null == types.putIfAbsent(contentType, folderStorage));
+        if (!added) {
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append("Could not register content type \"");
+            sb.append(contentType.getClass().getName());
+            sb.append("\" for tree identifier \"").append(treeId).append("\". Duplicate content type detected.");
+            LOG.error(sb.toString());
+        }
+        return added;
     }
 
     /**
      * Gets the specified content type's storage.
      * 
+     * @param treeId The tree identifier
      * @param contentType The content type
      * @return The content type's storage or <code>null</code>
      */
-    public FolderStorage getFolderStorageByContentType(final ContentType contentType) {
-        return registry.get(contentType);
+    public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
+        final ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
+        if (null == types) {
+            return null;
+        }
+        return types.get(contentType);
     }
 
     /**
      * Removes specified content type.
      * 
+     * @param treeId The tree identifier
      * @param contentType The content type
      */
-    public void removeContentType(final ContentType contentType) {
+    public void removeContentType(final String treeId, final ContentType contentType) {
+        final ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
+        if (null == types) {
+            return;
+        }
         registry.remove(contentType);
+    }
+
+    /**
+     * Gets all supported content types for specified tree identifier.
+     * 
+     * @param treeId The tree identifier
+     * @return All supported content types for specified tree identifier
+     */
+    public ContentType[] getContentTypes(final String treeId) {
+        final ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
+        if (null == types) {
+            return new ContentType[0];
+        }
+        final int size = types.size();
+        final ContentType[] ret = new ContentType[size];
+        final Iterator<ContentType> it = types.keySet().iterator();
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = it.next();
+        }
+        return ret;
+    }
+
+    /**
+     * Removes tree's content types.
+     * 
+     * @param treeId The tree identifier
+     */
+    public void removeTreeContentTypes(final String treeId) {
+        registry.remove(treeId);
     }
 
 }

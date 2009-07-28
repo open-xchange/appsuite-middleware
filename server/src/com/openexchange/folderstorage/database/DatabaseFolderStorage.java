@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.folderstorage.database.contentType.UnboundContentType;
 import com.openexchange.folderstorage.database.type.PrivateType;
 import com.openexchange.folderstorage.database.type.PublicType;
 import com.openexchange.groupware.container.FolderObject;
@@ -109,6 +110,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public DatabaseFolderStorage(final String treeId) {
         super();
         this.treeId = treeId;
+    }
+
+    public ContentType[] getSupportedContentTypes() {
+        return new ContentType[] {
+            TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(),
+            InfostoreContentType.getInstance(), UnboundContentType.getInstance() };
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {

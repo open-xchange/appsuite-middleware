@@ -112,6 +112,10 @@ public final class MailFolderStorage implements FolderStorage {
         this.treeId = treeId;
     }
 
+    public ContentType[] getSupportedContentTypes() {
+        return new ContentType[] { MailContentType.getInstance() };
+    }
+
     public void commitTransaction(final StorageParameters params) throws FolderException {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) params.getParameter(
