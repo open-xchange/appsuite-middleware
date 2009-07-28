@@ -203,7 +203,9 @@ case "$1" in
 esac
 
 chgrp open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
+chmod 640 /opt/open-xchange/etc/admindaemon/mysql/*.sql
 chgrp open-xchange /opt/open-xchange/etc/admindaemon/*
+chmod 640 /opt/open-xchange/etc/admindaemon/*
 
 update-rc.d open-xchange-admin defaults > /dev/null
 
