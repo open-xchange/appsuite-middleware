@@ -83,8 +83,16 @@ public class JSONAssertion implements JSONCondition {
 
     private int lastIndex;
     
+    public JSONAssertion() {
+        
+    }
+    
+    private JSONAssertion (Stack<JSONAssertion> stack) {
+        this.stack = stack;
+    }
+    
     public JSONAssertion isObject() {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().isObject();
         } else {
             conditions.add(new IsOfType(JSONObject.class));
@@ -93,7 +101,7 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion hasKey(String key) {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().hasKey(key);
         } else {
             conditions.add(new HasKey(key));
@@ -104,7 +112,7 @@ public class JSONAssertion implements JSONCondition {
     
     public JSONAssertion withValue(Object value) {
         
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().withValue(value);
         } else {
             conditions.add(new KeyValuePair(key, value));
@@ -113,31 +121,31 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion withValueObject() {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().withValueObject();
             return this;
         }
-        JSONAssertion stackElement = new JSONAssertion();
+        JSONAssertion stackElement = new JSONAssertion(stack);
         conditions.add(new ValueObject(key, stackElement));
-        stackElement.isObject();
         stack.push(stackElement);
+        stackElement.isObject();
         return this;
     }
     
     public JSONAssertion withValueArray() {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().withValueArray();
             return this;
         }
-        JSONAssertion stackElement = new JSONAssertion();
+        JSONAssertion stackElement = new JSONAssertion(stack);
         conditions.add(new ValueArray(key, stackElement));
-        stackElement.isArray();
         stack.push(stackElement);
+        stackElement.isArray();
         return this;
     }
 
     public JSONAssertion atIndex(int i) {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().atIndex(i);
             return this;
         }
@@ -154,7 +162,7 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion isArray() {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().isArray();
             return this;
         }
@@ -163,7 +171,7 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion withValues(Object...values) {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().withValues(values);
             return this;
         }
@@ -172,12 +180,25 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion inAnyOrder() {
-        if(!stack.isEmpty()) {
+        if(!topmost()) {
             stack.peek().inAnyOrder();
             return this;
         }
         ((WithValues)conditions.get(conditions.size()-1)).ignoreOrder = true;
-        return hasNoMoreKeys();
+        hasNoMoreKeys();
+        return this;
+    }
+    
+    private boolean topmost() {
+        if(stack.isEmpty()) {
+            return true;
+        }
+        return stack.peek() == this;
+    }
+
+    public JSONAssertion inStrictOrder() {
+        hasNoMoreKeys();
+        return this;
     }
     
     
