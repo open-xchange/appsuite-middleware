@@ -267,7 +267,7 @@ public class JSONAssertion implements JSONCondition {
             try {
                 Object object = ((JSONObject)o).get(key);
                 if(!object.equals(value)){
-                    complaint = "Expected value "+value+" for key "+key+" but got "+object;
+                    complaint = "Expected value "+value+" of class ("+value.getClass().getName()+") for key "+key+" but got "+object+" of class ("+object.getClass().getName()+")";
                     return false;
                 }
                 return true;
