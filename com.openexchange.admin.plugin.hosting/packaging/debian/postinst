@@ -59,6 +59,7 @@ case "$1" in
 esac
 
 chgrp open-xchange /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
+chmod 640 /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
 
 #if ox_isrunning; then
 #    invoke-rc.d open-xchange-admin restart
