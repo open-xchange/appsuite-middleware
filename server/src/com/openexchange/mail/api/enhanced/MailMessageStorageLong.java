@@ -379,7 +379,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null) {
+        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }

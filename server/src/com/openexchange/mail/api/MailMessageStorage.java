@@ -224,7 +224,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null) {
+        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }
@@ -243,8 +243,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     public abstract void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws MailException;
 
     /**
-     * Gets all new and modified messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is
-     * returned.
+     * Gets all new and modified messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
      * 
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
