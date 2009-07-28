@@ -47,65 +47,78 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.test;
+package com.openexchange.ajax.subscribe.actions;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Params;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.subscribe.json.SubscriptionJSONException;
+import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
-    protected SubscriptionTestManager subMgr;
-    
-    public AbstractSubscriptionTest(String name) {
-        super(name);
+public class UpdateSubscriptionRequest extends AbstractSubscriptionRequest<UpdateSubscriptionResponse> {
+
+    private DynamicFormDescription formDescription;
+
+    private Subscription subscription;
+
+    public void setFormDescription(DynamicFormDescription formDescription) {
+        this.formDescription = formDescription;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        subMgr = new SubscriptionTestManager(getClient());
+    public DynamicFormDescription getFormDescription() {
+        return formDescription;
     }
 
-
-    @Override
-    protected void tearDown() throws Exception {
-        subMgr.cleanUp();
-        super.tearDown();
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
     }
 
-    public Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
-        Subscription subscription = new Subscription();
-
-        subscription.setDisplayName("mySubscription");
-        
-        SubscriptionSource source = new SubscriptionSource();
-        source.setId("com.openexchange.subscribe.microformats.contacts.http");
-        source.setFormDescription(formDescription);
-        subscription.setSource(source);
-
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("url", "http://ox.open-xchange.com/1");
-        subscription.setConfiguration(config);
-
+    public Subscription getSubscription() {
         return subscription;
     }
-    
-    public DynamicFormDescription generateFormDescription(){
-        DynamicFormDescription form = new DynamicFormDescription();
-        //form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
-        form.add(FormElement.input("url", "URL", true, null));
-        return form;
+
+    public UpdateSubscriptionRequest() {
+        super();
+    }
+
+    public UpdateSubscriptionRequest(Subscription subscription, DynamicFormDescription formDescription) {
+        this();
+        setFormDescription(formDescription);
+        setSubscription(subscription);
+    }
+
+    public Object getBody() throws JSONException {
+        SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
+        try {
+            return writer.write(subscription, getFormDescription());
+        } catch (SubscriptionJSONException e) {
+            throw new JSONException(e);
+        }
+    }
+
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public Parameter[] getParameters() {
+        return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE).toArray();
+    }
+
+    public AbstractAJAXParser<UpdateSubscriptionResponse> getParser() {
+        return new AbstractAJAXParser<UpdateSubscriptionResponse>(getFailOnError()) {
+
+            @Override
+            protected UpdateSubscriptionResponse createResponse(final Response response) throws JSONException {
+                return new UpdateSubscriptionResponse(response);
+            }
+        };
     }
 
 }

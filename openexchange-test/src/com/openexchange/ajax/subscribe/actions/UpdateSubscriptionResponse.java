@@ -47,65 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.subscribe.test;
+package com.openexchange.ajax.subscribe.actions;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.ajax.container.Response;
+
 
 /**
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
-    protected SubscriptionTestManager subMgr;
-    
-    public AbstractSubscriptionTest(String name) {
-        super(name);
-    }
+public class UpdateSubscriptionResponse extends AbstractSubscriptionResponse {
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        subMgr = new SubscriptionTestManager(getClient());
-    }
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        subMgr.cleanUp();
-        super.tearDown();
-    }
-
-    public Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
-        Subscription subscription = new Subscription();
-
-        subscription.setDisplayName("mySubscription");
-        
-        SubscriptionSource source = new SubscriptionSource();
-        source.setId("com.openexchange.subscribe.microformats.contacts.http");
-        source.setFormDescription(formDescription);
-        subscription.setSource(source);
-
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("url", "http://ox.open-xchange.com/1");
-        subscription.setConfiguration(config);
-
-        return subscription;
+    public UpdateSubscriptionResponse(Response response) {
+        super(response);
     }
     
-    public DynamicFormDescription generateFormDescription(){
-        DynamicFormDescription form = new DynamicFormDescription();
-        //form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
-        form.add(FormElement.input("url", "URL", true, null));
-        return form;
+    public boolean wasSuccessful(){
+        try {
+            if (((Integer)getData()).intValue() == 1)
+                return true;
+            return false;
+        } catch(Exception e){
+            return false;
+        }
     }
 
 }

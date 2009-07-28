@@ -1,0 +1,129 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.subscribe.test;
+
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.SimSubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.tools.servlet.AjaxException;
+
+
+/**
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ */
+public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
+
+    public UpdateSubscriptionTest(String name) {
+        super(name);
+    }
+    
+    public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws AjaxException, IOException, SAXException, JSONException{
+        FolderObject folder = createDefaultContactFolder();
+        
+        DynamicFormDescription formDescription = generateFormDescription();
+        Subscription expected = generateOXMFSubscription(formDescription);
+        expected.setFolderId(folder.getObjectID());
+        subMgr.setFormDescription(formDescription);
+        SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
+        discovery.addSource(expected.getSource());
+        subMgr.setSubscriptionSourceRecoveryService(discovery);
+        
+        //create as pre-requisite
+        subMgr.newAction(expected);
+        assertFalse("Precondition: Creation of subscription should work", subMgr.getLastResponse().hasError());
+        
+        //update
+        expected.getConfiguration().put("url", "http://ox.open-exchange.com/2");
+        subMgr.updateAction(expected);
+        assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse)subMgr.getLastResponse()).wasSuccessful());
+        
+        //verify via get
+
+        Subscription actual = subMgr.getAction(expected.getId());
+        
+        assertEquals("Should contain the same url in the configuration", expected.getConfiguration().get("url"), actual.getConfiguration().get("url"));
+    }
+
+    
+
+    public void testUpdatingAnOMXFSubscriptionWithANewValue() throws AjaxException, IOException, SAXException, JSONException{
+        FolderObject folder = createDefaultContactFolder();
+        
+        DynamicFormDescription formDescription = generateFormDescription();
+        Subscription expected = generateOXMFSubscription(formDescription);
+        expected.setFolderId(folder.getObjectID());
+        subMgr.setFormDescription(formDescription);
+        SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
+        discovery.addSource(expected.getSource());
+        subMgr.setSubscriptionSourceRecoveryService(discovery);
+        
+        //create as pre-requisite
+        subMgr.newAction(expected);
+        assertFalse("Precondition: Creation of subscription should work", subMgr.getLastResponse().hasError());
+        
+        //update
+        expected.getConfiguration().put("username", "Elvis Aaron Presley");
+        subMgr.updateAction(expected);
+        assertTrue("Should return 1 if update worked", ((UpdateSubscriptionResponse)subMgr.getLastResponse()).wasSuccessful());
+        
+        //verify via get
+
+        Subscription actual = subMgr.getAction(expected.getId());
+        
+        assertEquals("Should not take a value that was not defined in the form description", null, actual.getConfiguration().get("username"));
+    }
+
+}

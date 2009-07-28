@@ -71,6 +71,8 @@ import com.openexchange.ajax.subscribe.actions.ListSubscriptionsRequest;
 import com.openexchange.ajax.subscribe.actions.ListSubscriptionsResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
+import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionRequest;
+import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -193,6 +195,7 @@ public class SubscriptionTestManager {
     
     public JSONArray allAction(String folder, List<String> columns) throws AjaxException, IOException, SAXException, JSONException{
         AllSubscriptionsRequest allReq = new AllSubscriptionsRequest(folder, columns);
+        allReq.setFailOnError(getFailOnError());
         AllSubscriptionsResponse allResp = getClient().execute(allReq);
         lastResponse = allResp;
         return allResp.getAll();
@@ -204,6 +207,7 @@ public class SubscriptionTestManager {
     
     public JSONArray allAction(String folder, List<String> columns, Map<String,List<String>> dynamicColumns) throws AjaxException, IOException, SAXException, JSONException{
         AllSubscriptionsRequest allReq = new AllSubscriptionsRequest(folder, columns, dynamicColumns);
+        allReq.setFailOnError(getFailOnError());
         AllSubscriptionsResponse allResp = getClient().execute(allReq);
         lastResponse = allResp;
         return allResp.getAll();
@@ -213,8 +217,15 @@ public class SubscriptionTestManager {
         return allAction(String.valueOf(folder), columns, dynamicColumns);
     }
 
+    public void updateAction(Subscription subscription) throws AjaxException, IOException, SAXException, JSONException {
+        UpdateSubscriptionRequest updReq = new UpdateSubscriptionRequest(subscription, formDescription);
+        updReq.setFailOnError(getFailOnError());
+        UpdateSubscriptionResponse updResp = getClient().execute(updReq);
+        lastResponse = updResp;
+    }
     
     public void cleanUp() throws AjaxException, IOException, SAXException, JSONException {
         deleteAction(createdItems);
     }
+
 }

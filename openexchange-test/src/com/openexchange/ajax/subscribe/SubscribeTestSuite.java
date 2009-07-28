@@ -50,9 +50,10 @@
 package com.openexchange.ajax.subscribe;
 
 import com.openexchange.ajax.subscribe.test.AllSubscriptionsTest;
-import com.openexchange.ajax.subscribe.test.CreateSubscriptionTest;
+import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
+import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -70,10 +71,12 @@ public class SubscribeTestSuite extends TestSuite {
     public static Test suite() {
         final TestSuite suite = new TestSuite();
         /* there is not test for action=get : many tests validate their result using get, so no need for explicit testing */
-        suite.addTestSuite(CreateSubscriptionTest.class);
+        suite.addTestSuite(NewSubscriptionTest.class);
         suite.addTestSuite(DeleteSubscriptionTest.class);
         suite.addTestSuite(ListSubscriptionsTest.class);
         suite.addTestSuite(AllSubscriptionsTest.class);
+        suite.addTestSuite(UpdateSubscriptionTest.class);
+        //TODO: Refresh - maybe only in roundtrip test
         return suite;
     }
 }

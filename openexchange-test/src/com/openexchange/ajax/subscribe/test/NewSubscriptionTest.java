@@ -67,9 +67,9 @@ import com.openexchange.tools.servlet.AjaxException;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CreateSubscriptionTest extends AbstractSubscriptionTest {
+public class NewSubscriptionTest extends AbstractSubscriptionTest {
 
-    public CreateSubscriptionTest(String name) {
+    public NewSubscriptionTest(String name) {
         super(name);
     }
     
