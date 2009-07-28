@@ -317,6 +317,21 @@ public class EAVUnitTest extends TestCase {
         return node;
     }
 
+    public EAVTypeMetadataNode TYPE(String name, EAVType type,EAVContainerType cType) {
+        EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
+        node.setType(type);
+        node.setContainerType(cType);
+        return node;
+    }
+
+    public EAVTypeMetadataNode TYPE(String name, EAVType type,EAVContainerType cType, Map<String, Object> options) {
+        EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
+        node.setType(type);
+        node.setContainerType(cType);
+        node.setOptions(options);
+        return node;
+    }
+
     public EAVTypeMetadataNode TYPE(String name, EAVType type, Map<String, Object> options) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.setType(type);
@@ -355,7 +370,7 @@ public class EAVUnitTest extends TestCase {
                 failComparison(message, expected, actual);
             }
             
-            if (!expectedNode.getName().equals(actual.getName())) {
+            if (!expectedNode.getName().equals(actualNode.getName())) {
                 failComparison(message, expected, actual);
             }
 
