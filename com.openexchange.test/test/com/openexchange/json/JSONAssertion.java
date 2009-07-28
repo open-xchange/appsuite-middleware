@@ -103,6 +103,9 @@ public class JSONAssertion implements JSONCondition {
     }
     
     public JSONAssertion withValue(Object value) {
+        if(Integer.class.isInstance(value)) {
+            value = Long.valueOf((Integer) value);
+        } // JSON defaults to longs
         if(!stack.isEmpty()) {
             stack.peek().withValue(value);
         } else {
