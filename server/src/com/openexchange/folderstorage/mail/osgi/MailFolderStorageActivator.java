@@ -69,8 +69,6 @@ public final class MailFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderStorageActivator.class);
 
-    private static final String TREE_ID = "0";
-
     private final Dictionary<String, String> dictionary;
 
     private ServiceRegistration folderStorageRegistration;
@@ -81,7 +79,7 @@ public final class MailFolderStorageActivator extends DeferredActivator {
     public MailFolderStorageActivator() {
         super();
         dictionary = new Hashtable<String, String>();
-        dictionary.put("tree", TREE_ID);
+        dictionary.put("tree", FolderStorage.REAL_TREE_ID);
     }
 
     @Override
@@ -123,7 +121,8 @@ public final class MailFolderStorageActivator extends DeferredActivator {
                 }
             }
             // Register folder storage
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new MailFolderStorage(TREE_ID), dictionary);
+            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new MailFolderStorage(
+                FolderStorage.REAL_TREE_ID), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

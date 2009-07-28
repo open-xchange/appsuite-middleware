@@ -57,6 +57,11 @@ package com.openexchange.folderstorage;
 public interface FolderStorage {
 
     /**
+     * The reserved tree identifier for real folder tree.
+     */
+    public static final String REAL_TREE_ID = "0";
+
+    /**
      * Gets the content types supported by this folder storage.
      * <p>
      * A zero length array means this folder storage supports all content types for a certain tree identifier.
