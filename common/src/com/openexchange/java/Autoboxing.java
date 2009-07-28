@@ -152,4 +152,56 @@ public final class Autoboxing {
         }
         return longerArray;
     }
+    
+    /**
+     * Conversts an objec-array into a Boolean-array
+     * @param source
+     * @return
+     */
+    public static Boolean[] O2B(Object[] source) {
+        Boolean[] target = new Boolean[source.length];
+        for (int i = 0; i < source.length; i++) {
+            target[i] = (Boolean) source[i];
+        }
+        return target;
+    }
+    
+    /**
+     * Conversta an Object-array into a Number-array
+     * @param source
+     * @return
+     */
+    public static Number[] O2N(Object[] source) {
+        Number[] target = new Number[source.length];
+        for (int i = 0; i < source.length; i++) {
+            target[i] = (Number) source[i];
+        }
+        return target;
+    }
+
+    /**
+     * Converst an Object-array into a String-array
+     * @param source
+     * @return
+     */
+    public static String[] O2S(Object[] source) {
+        String[] target = new String[source.length];
+        for (int i = 0; i < source.length; i++) {
+            target[i] = (String) source[i];
+        }
+        return target;
+    }
+    
+    /**
+     * Converst an Object-array into a Long-array
+     * @param source
+     * @return
+     */
+    public static Long[] O2L(Object[] source) {
+        Long[] target = new Long[source.length];
+        for (int i = 0; i < source.length; i++) {
+            target[i] = (Long) source[i];
+        }
+        return target;
+    }
 }

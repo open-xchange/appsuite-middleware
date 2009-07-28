@@ -47,15 +47,43 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.parse;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.HashSet;
+import org.json.JSONException;
+import com.openexchange.eav.EAVNode;
+import static com.openexchange.java.Autoboxing.O2N;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class NumberParser extends AbstractParser {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    {
+        TYPES = new HashSet<Class<?>>() {
+
+            private static final long serialVersionUID = 1L;
+
+            {
+                add(Number.class);
+                add(Float.class);
+                add(Double.class);
+                add(Integer.class);
+                add(Long.class);
+            }
+        };
+    }
+
+    public void parse(String key, Object value, EAVNode node) throws JSONException {
+        Number v = (Number) value;
+        node.setName(key);
+        node.setPayload(v);
+    }
+
+    public void parseMultiple(String key, Object[] objects, EAVNode node) {
+        Number[] numbers = O2N(objects);
+        node.setName(key);
+        node.setPayload(numbers);
+    }
+
 }

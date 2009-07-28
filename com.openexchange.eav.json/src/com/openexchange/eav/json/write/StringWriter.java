@@ -47,15 +47,29 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.write;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.EnumSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVType;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class StringWriter extends AbstractWriter<String> {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    {
+        TYPES = EnumSet.of(EAVType.STRING);
+    }
+
+    public void write(EAVNode node, JSONObject json) throws JSONException {
+        if (node.isMultiple()) {
+            writeMultiple(node.getName(), (String[]) node.getPayload(), json);
+        } else {
+            writeSingle(node.getName(), (String) node.getPayload(), json);
+        }
+    }
+
 }

@@ -47,15 +47,47 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.parse;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.eav.EAVNode;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class Chain implements ParserChain {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    private List<Parser> parsers = new ArrayList<Parser>();
+
+    public Chain(Parser... parsers) {
+        for (Parser parser : parsers) {
+            this.parsers.add(parser);
+            parser.setChain(this);
+        }
+    }
+
+    public void parse(String key, Object object, EAVNode node) throws JSONException {
+        for (Parser parser : parsers) {
+            if (parser.isResponsibeFor(object)) {
+                parser.parse(key, object, node);
+                return;
+            }
+        }
+    }
+
+    public void parseMultiple(String key, Object[] objects, EAVNode node) {
+        if (objects.length == 0) {
+            return;
+        }
+        for (Parser parser : parsers) {
+            if (parser.isResponsibeFor(objects[0])) {
+                parser.parseMultiple(key, objects, node);
+                return;
+            }
+        }
+
+    }
+
 }

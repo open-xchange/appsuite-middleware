@@ -47,15 +47,27 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.parse;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public abstract class AbstractParser implements Parser {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    protected Set<Class<?>> TYPES = new HashSet<Class<?>>();
+
+    protected ParserChain chain;
+
+    public boolean isResponsibeFor(Object value) {
+        return TYPES.contains(value.getClass());
+
+    }
+
+    public void setChain(ParserChain chain) {
+        this.chain = chain;
+    }
+
 }

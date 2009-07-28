@@ -47,15 +47,49 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.write;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.EnumSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVType;
+import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class DateTimeWriter extends AbstractWriter<Long> {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    {
+        TYPES = EnumSet.of(EAVType.DATE, EAVType.TIME);
+    }
+
+    public void write(EAVNode node, JSONObject json) throws JSONException, EAVJsonException {
+        if (node.isMultiple()) {
+            writeMultiple(node.getName(), convertArray(node.getPayload()), json);
+        } else {
+            writeSingle(node.getName(), convert(node.getPayload()), json);
+        }
+    }
+
+    private Long[] convertArray(Object payload) {
+        Object[] objects = (Object[]) payload;
+        Long[] longs = new Long[objects.length];
+        for (int i = 0; i < objects.length; i++) {
+            longs[i] = convert(objects[i]);
+        }
+        return longs;
+    }
+
+    private Long convert(Object payload) {
+        if (Long.class.isInstance(payload)) {
+            return (Long) payload;
+        } else if (Integer.class.isInstance(payload)) {
+            return ((Integer) payload).longValue();
+        } else {
+            throw new IllegalArgumentException("Unable to convert " + payload.toString() + " into a Long.");
+        }
+    }
+
 }

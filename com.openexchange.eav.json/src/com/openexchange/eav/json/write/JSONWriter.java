@@ -47,15 +47,59 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.write;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class JSONWriter implements JSONWriterInterface {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    private JSONObject json;
+
+    private EAVNode eavNode;
+
+    private Chain writerChain;
+
+    public JSONWriter(EAVNode eavNode) {
+        super();
+
+        this.eavNode = eavNode;
+        this.json = new JSONObject();
+
+        writerChain = new Chain(new ObjectWriter(),
+                                new StringWriter(),
+                                new BooleanWriter(),
+                                new DateTimeWriter(),
+                                new NumberWriter());
+    }
+
+    public JSONObject getJson() throws EAVJsonException {
+        write();
+        return json;
+    }
+
+    public Object getValue() throws EAVJsonException {
+        write();
+        Object retval = null;
+        try {
+            retval = json.get(eavNode.getName());
+        } catch (JSONException e) {
+            throw EAVJsonExceptionMessage.JSONException.create(e);
+        }
+        return retval;
+    }
+
+    private void write() throws EAVJsonException {
+        if (json.has(eavNode.getName())) {
+            return;
+        }
+        writerChain.write(eavNode, json);
+    }
+
 }

@@ -47,15 +47,23 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.eav.json.parse.ParserTest;
+import com.openexchange.eav.json.write.WriterTest;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class UnitTests {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        suite.addTestSuite(ParserTest.class);
+        suite.addTestSuite(WriterTest.class);
+        return suite;
+    }
+    
 }

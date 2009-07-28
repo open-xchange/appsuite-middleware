@@ -47,15 +47,41 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.write;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class Chain implements WriterChain {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    List<Writer<?>> writers;
+
+    public Chain(Writer<?>... writers) {
+        this.writers = new ArrayList<Writer<?>>();
+        for (Writer<?> writer : writers) {
+            this.writers.add(writer);
+            writer.setChain(this);
+        }
+    }
+
+    public void write(EAVNode node, JSONObject json) throws EAVJsonException {
+        for (Writer<?> writer : writers) {
+            if (writer.isResponsibleFor(node.getType())) {
+                try {
+                    writer.write(node, json);
+                } catch (JSONException e) {
+                    throw EAVJsonExceptionMessage.JSONException.create(e);
+                }
+                break;
+            }
+        }
+    }
 }

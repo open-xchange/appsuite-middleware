@@ -47,15 +47,17 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.parse;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import org.json.JSONException;
+import com.openexchange.eav.EAVNode;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public interface ParserChain {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    public void parse(String key, Object object, EAVNode node) throws JSONException;
+
+    public void parseMultiple(String key, Object[] objects, EAVNode node);
 }

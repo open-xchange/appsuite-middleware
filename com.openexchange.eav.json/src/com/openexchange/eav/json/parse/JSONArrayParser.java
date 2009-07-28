@@ -47,15 +47,46 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.parse;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import java.util.HashSet;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.eav.EAVNode;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class JSONArrayParser extends AbstractParser {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    {
+        TYPES = new HashSet<Class<?>>() {
+
+            private static final long serialVersionUID = 1L;
+
+            {
+                add(JSONArray.class);
+            }
+        };
+    }
+
+    public void parse(String key, Object value, EAVNode node) throws JSONException {
+        JSONArray v = (JSONArray) value;
+        chain.parseMultiple(key, toArray(v), node);
+
+    }
+
+    public void parseMultiple(String key, Object[] objects, EAVNode node) {
+        throw new UnsupportedOperationException("Arrays of arrays are not supported.");
+
+    }
+
+    private Object[] toArray(JSONArray json) throws JSONException {
+        Object[] objects = new Object[json.length()];
+        for (int i = 0; i < json.length(); i++) {
+            objects[i] = json.get(i);
+        }
+        return objects;
+    }
+
 }

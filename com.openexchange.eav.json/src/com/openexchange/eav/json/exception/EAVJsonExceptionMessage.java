@@ -56,6 +56,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public enum EAVJsonExceptionMessage implements OXErrorMessage {
+    JSONException(1, Category.CODE_ERROR, EAVJsonExceptionStrings.JSONException, null),
     ;
 
     private int detailNumber;

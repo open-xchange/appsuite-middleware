@@ -47,15 +47,23 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.write;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVType;
+import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public interface Writer<T> {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    public void write(EAVNode node, JSONObject json) throws JSONException, EAVJsonException;
+
+    public boolean isResponsibleFor(EAVType type);
+
+    public void setChain(WriterChain chain);
+
 }

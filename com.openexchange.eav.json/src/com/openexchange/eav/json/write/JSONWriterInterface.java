@@ -50,13 +50,15 @@
 package com.openexchange.eav.json.write;
 
 import org.json.JSONObject;
-import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public interface JSONWriterInterface {
 
-    public JSONObject write(EAVNode eavNode);
+    public JSONObject getJson() throws EAVJsonException;
+
+    public Object getValue() throws EAVJsonException;
 
 }

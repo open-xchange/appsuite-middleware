@@ -47,15 +47,53 @@
  *
  */
 
-package com.openexchange.eav.json.exception;
+package com.openexchange.eav.json.parse;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVJsonExceptionStrings implements LocalizableStrings {
+public class JSONParser implements JSONParserInterface {
 
-    // A JSON exception occurred.
-    public static final String JSONException = "A JSON exception occurred.";
+    private JSONObject json;
+
+    private EAVNode node;
+
+    private ParserChain chain;
+
+    private String key;
+    
+    public JSONParser(JSONObject json) {
+        this(null, json);
+    }
+
+    public JSONParser(String name, JSONObject json) {
+        this.key = name;
+        this.json = json;
+        if (name == null) {
+            this.node = new EAVNode();
+        } else {
+            this.node = new EAVNode(name);
+        }
+        chain = new Chain(new BooleanParser(),
+                          new StringParser(),
+                          new NumberParser(),
+                          new JSONArrayParser(),
+                          new JSONObjectParser());
+    }
+
+    public EAVNode getEAVNode() throws EAVJsonException {
+        try {
+            chain.parse(key, json, node);
+        } catch (JSONException e) {
+            throw EAVJsonExceptionMessage.JSONException.create(e);
+        }
+        return node;
+    }
+
 }
