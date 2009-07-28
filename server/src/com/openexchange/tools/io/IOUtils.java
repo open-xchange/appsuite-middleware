@@ -51,6 +51,7 @@ package com.openexchange.tools.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -74,9 +75,9 @@ public final class IOUtils {
     }
 
     /**
-     * Convenient method for closing streams.
+     * Convenience method for closing streams.
      * 
-     * @param input stream to close.
+     * @param input The stream to close.
      */
     public static void closeStreamStuff(final InputStream input) {
         if (null != input) {
@@ -87,4 +88,20 @@ public final class IOUtils {
             }
         }
     }
+
+    /**
+     * Convenience method for closing streams.
+     * 
+     * @param reader The reader to close.
+     */
+    public static void closeReaderStuff(final Reader reader) {
+        if (null != reader) {
+            try {
+                reader.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
 }

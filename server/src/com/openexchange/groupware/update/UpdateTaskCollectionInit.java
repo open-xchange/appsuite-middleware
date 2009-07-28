@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.tools.io.IOUtils.closeReaderStuff;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -153,13 +154,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
             LOG.error(e.getMessage(), e);
             return null;
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            closeReaderStuff(reader);
         }
     }
 
