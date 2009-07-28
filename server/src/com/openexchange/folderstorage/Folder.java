@@ -134,7 +134,6 @@ public interface Folder {
      * Sets the name.
      * 
      * @param name The name to set
-     * @see #getLocalizedName(Locale)
      */
     public void setName(String name);
 
