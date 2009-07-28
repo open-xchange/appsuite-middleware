@@ -111,11 +111,9 @@ public final class UpdateTaskRegistry {
      */
     public boolean addUpdateTask(final UpdateTask updateTask) {
         final boolean added = (null == registry.putIfAbsent(updateTask.getClass(), updateTask));
-        if (added) {
-            if (!UpdateTaskCollection.addDiscoveredUpdateTask(updateTask)) {
-                LOG.error(new StringBuilder(64).append("Update task \"").append(updateTask.getClass().getName()).append(
-                    "\" could not be successfully added during initialization."));
-            }
+        if (added && !UpdateTaskCollection.addDiscoveredUpdateTask(updateTask)) {
+            LOG.error(new StringBuilder(64).append("Update task \"").append(updateTask.getClass().getName()).append(
+                "\" could not be successfully added during initialization."));
         }
         return added;
     }
