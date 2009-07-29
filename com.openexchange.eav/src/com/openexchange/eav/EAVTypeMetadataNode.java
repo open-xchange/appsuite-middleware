@@ -185,7 +185,7 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
 
 
     public String getTypeDescription() {
-        return type.name()+" "+containerType.name();
+        return type+" "+containerType;
     }
 
 
