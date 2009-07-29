@@ -72,7 +72,7 @@ public final class MIMEDefaultSession {
     private static volatile Session instance;
 
     /**
-     * Applies basic properties to system properties and instantiates the singleton instance of {@link Session}
+     * Applies basic properties to system properties and instantiates the singleton instance of {@link Session}.
      * 
      * @return The default instance of {@link Session}
      */
@@ -85,26 +85,28 @@ public final class MIMEDefaultSession {
                     /*
                      * Define session properties
                      */
-                    System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
-                    System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
-                    System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
-                    System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
-                    final String defaultMimeCharset = MailProperties.getInstance().getDefaultMimeCharset();
+                    final Properties systemProperties = System.getProperties();
+                    systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+                    systemProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+                    systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+                    systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+                    final MailProperties mailProperties = MailProperties.getInstance();
+                    final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
                         }
-                        System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+                        systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
                     } else {
-                        System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
+                        systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
                     }
-                    if (MailProperties.getInstance().getJavaMailProperties() != null) {
+                    if (mailProperties.getJavaMailProperties() != null) {
                         /*
                          * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
                          */
-                        System.getProperties().putAll(MailProperties.getInstance().getJavaMailProperties());
+                        systemProperties.putAll(mailProperties.getJavaMailProperties());
                     }
-                    instance = tmp = Session.getInstance(((Properties) (System.getProperties().clone())), null);
+                    instance = tmp = Session.getInstance(((Properties) (systemProperties.clone())), null);
                 }
             }
         }
