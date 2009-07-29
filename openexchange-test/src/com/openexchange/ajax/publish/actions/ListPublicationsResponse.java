@@ -54,7 +54,6 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.json.PublicationJSONException;
 
@@ -62,7 +61,7 @@ import com.openexchange.publish.json.PublicationJSONException;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ListPublicationsResponse extends AbstractAJAXResponse {
+public class ListPublicationsResponse extends AbstractPublicationResponse {
 
     public ListPublicationsResponse(Response response) {
         super(response);

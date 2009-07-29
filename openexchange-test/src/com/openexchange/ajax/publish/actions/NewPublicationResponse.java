@@ -51,7 +51,6 @@ package com.openexchange.ajax.publish.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class NewPublicationResponse extends AbstractAJAXResponse{
+public class NewPublicationResponse extends AbstractPublicationResponse{
 
     public NewPublicationResponse(Response response) {
         super(response);

@@ -49,30 +49,18 @@
 
 package com.openexchange.ajax.publish.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.publish.json.PublicationParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
- * {@link GetPublicationResponse}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetPublicationResponse extends AbstractPublicationResponse{
+public class AbstractPublicationResponse extends AbstractAJAXResponse {
 
-    public GetPublicationResponse(Response response) {
+    protected AbstractPublicationResponse(Response response) {
         super(response);
-    }
-
-    public Publication getPublication(PublicationTargetDiscoveryService service) throws PublicationException, PublicationJSONException, JSONException {
-        PublicationParser parser = new PublicationParser(service);
-        return parser.parse( (JSONObject) getData() );
     }
 
 }

@@ -52,8 +52,8 @@ package com.openexchange.ajax.publish.actions;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -67,7 +67,7 @@ import com.openexchange.java.JSON;
  */
 public class DeletePublicationRequest extends AbstractPublicationRequest<DeletePublicationResponse> {
 
-    private List<Integer> ids;
+    private Collection<Integer> ids;
 
     public Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
@@ -88,6 +88,11 @@ public class DeletePublicationRequest extends AbstractPublicationRequest<DeleteP
     public DeletePublicationRequest(int... id) {
         this();
         ids = Arrays.asList(i2I(id));
+    }
+    
+    public DeletePublicationRequest(Collection<Integer> ids) {
+        this();
+        this.ids = ids;
     }
 
     public Object getBody() throws JSONException {
