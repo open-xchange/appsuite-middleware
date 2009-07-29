@@ -87,6 +87,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         AJAXClient myClient = getClient();
         NewPublicationResponse newResp = myClient.execute(newReq);
+        assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
         expected.setId(newResp.getId());
 
         // delete folder of publication

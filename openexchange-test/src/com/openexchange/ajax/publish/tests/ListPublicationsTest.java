@@ -86,6 +86,7 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         expected.setDisplayName("This will be changed");
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         NewPublicationResponse newResp = getClient().execute(newReq);
+        assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
         expected.setId(newResp.getId());
         
         ListPublicationsRequest listReq = new ListPublicationsRequest(
