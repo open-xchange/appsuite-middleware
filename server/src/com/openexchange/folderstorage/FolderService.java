@@ -50,7 +50,9 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * {@link FolderService} - The folder service.
@@ -109,10 +111,23 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param parentId The parent identifier
+     * @param user The user
+     * @param context The context
      * @return The subfolders
      * @throws FolderException If subfolders cannot be returned
      */
-    Folder[] getSubfolders(String treeId, String parentId) throws FolderException;
+    Folder[] getSubfolders(String treeId, String parentId, User user, Context context) throws FolderException;
+
+    /**
+     * Gets the subfolders of specified parent in given tree.
+     * 
+     * @param treeId The tree identifier
+     * @param parentId The parent identifier
+     * @param session The session
+     * @return The subfolders
+     * @throws FolderException If subfolders cannot be returned
+     */
+    Folder[] getSubfolders(String treeId, String parentId, Session session) throws FolderException;
 
     /**
      * Gets the changed folders since specified time stamp.

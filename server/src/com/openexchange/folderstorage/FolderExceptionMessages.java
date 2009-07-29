@@ -84,6 +84,11 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String NO_STORAGE_FOR_CT_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and content type \"%2$s\".";
 
     /**
+     * Missing session.
+     */
+    public static final String MISSING_SESSION_MSG = "Missing session.";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

@@ -59,7 +59,6 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.FolderExceptionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -94,7 +93,8 @@ public final class FolderStorageActivator implements BundleActivator {
                 FolderExceptionFactory.getInstance());
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+            // TODO: Register folder service
+            serviceRegistrations.add(context.registerService(FolderService.class.getName(), null, null));
             // Register service trackers
             serviceTrackers = new ArrayList<ServiceTracker>(4);
             serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));

@@ -145,6 +145,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
             final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
             final long millis = System.currentTimeMillis();
 
             final FolderObject createMe = new FolderObject();
@@ -209,8 +212,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final FolderObject fo = new FolderObject();
             fo.setObjectID(Integer.parseInt(folderId));
-
-            final OXFolderManager folderManager = OXFolderManager.getInstance(storageParameters.getSession());
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
         } catch (final OXFolderException e) {
             throw new FolderException(e);
@@ -224,6 +230,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
             final int folderId;
             if (TaskContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.TASK, con, context);
@@ -299,6 +308,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final ServerSession session;
             {
                 final Session s = storageParameters.getSession();
+                if (null == s) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
                 if (s instanceof ServerSession) {
                     session = (ServerSession) s;
                 } else {
@@ -370,6 +382,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
             final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
             final long millis = System.currentTimeMillis();
 
             final FolderObject updateMe = new FolderObject();

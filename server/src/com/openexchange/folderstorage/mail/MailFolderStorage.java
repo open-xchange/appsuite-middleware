@@ -60,6 +60,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
@@ -153,9 +154,11 @@ public final class MailFolderStorage implements FolderStorage {
             final Permission[] permissions = folder.getPermissions();
             if (null != permissions && permissions.length > 0) {
                 final MailPermission[] mailPermissions = new MailPermission[permissions.length];
-                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(
-                    storageParameters.getSession(),
-                    arg.getAccountId());
+                final Session session = storageParameters.getSession();
+                if (null == session) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
+                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, arg.getAccountId());
                 for (int i = 0; i < permissions.length; i++) {
                     final Permission permission = permissions[i];
                     final MailPermission mailPerm = provider.createNewMailPermission();
@@ -252,6 +255,9 @@ public final class MailFolderStorage implements FolderStorage {
             final ServerSession session;
             {
                 final Session s = storageParameters.getSession();
+                if (null == s) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
                 if (s instanceof ServerSession) {
                     session = (ServerSession) s;
                 } else {
@@ -353,10 +359,14 @@ public final class MailFolderStorage implements FolderStorage {
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
         try {
+            final Session session = parameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
             parameters.putParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS,
-                MailServletInterface.getInstance(parameters.getSession()));
+                MailServletInterface.getInstance(session));
             return parameters;
         } catch (final MailException e) {
             throw new FolderException(e);
@@ -391,9 +401,11 @@ public final class MailFolderStorage implements FolderStorage {
             final Permission[] permissions = folder.getPermissions();
             if (null != permissions && permissions.length > 0) {
                 final MailPermission[] mailPermissions = new MailPermission[permissions.length];
-                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(
-                    storageParameters.getSession(),
-                    arg.getAccountId());
+                final Session session = storageParameters.getSession();
+                if (null == session) {
+                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+                }
+                final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, arg.getAccountId());
                 for (int i = 0; i < permissions.length; i++) {
                     final Permission permission = permissions[i];
                     final MailPermission mailPerm = provider.createNewMailPermission();

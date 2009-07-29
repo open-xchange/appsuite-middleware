@@ -59,7 +59,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
-import com.openexchange.folderstorage.StoragePriority;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
@@ -141,13 +140,13 @@ public final class FolderStorageRegistry {
     }
 
     /**
-     * Gets the folder storages for specified tree-folder-pair.
+     * Gets the folder storage for specified tree-folder-pair.
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
-     * @return The folder storages for specified tree-folder-pair
+     * @return The folder storage for specified tree-folder-pair or <code>null</code>
      */
-    public FolderStorage[] getFolderStorages(final String treeId, final String folderId) {
+    public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
              * Check general storages first
@@ -155,7 +154,7 @@ public final class FolderStorageRegistry {
             for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 if (folderStorage.getFolderType().servesTreeId(treeId)) {
-                    return new FolderStorage[] { folderStorage };
+                    return folderStorage;
                 }
             }
         }
@@ -164,30 +163,15 @@ public final class FolderStorageRegistry {
          */
         final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
-            return new FolderStorage[0];
+            return null;
         }
         final List<FolderStorage> tmp = new ArrayList<FolderStorage>(storages.size());
         for (final FolderStorage folderStorage : storages) {
             if (folderStorage.getFolderType().servesFolderId(folderId)) {
-                tmp.add(folderStorage);
+                return folderStorage;
             }
         }
-        boolean hasHighest = false;
-        for (final Iterator<FolderStorage> iter = tmp.iterator(); !hasHighest && iter.hasNext();) {
-            if (StoragePriority.HIGHEST.equals(iter.next().getStoragePriority())) {
-                hasHighest = true;
-            }
-        }
-        if (!hasHighest) {
-            return tmp.toArray(new FolderStorage[tmp.size()]);
-        }
-        // Drop non-highest
-        for (final Iterator<FolderStorage> iter = tmp.iterator(); !hasHighest && iter.hasNext();) {
-            if (StoragePriority.NORMAL.equals(iter.next().getStoragePriority())) {
-                iter.remove();
-            }
-        }
-        return tmp.toArray(new FolderStorage[tmp.size()]);
+        return null;
     }
 
     /**

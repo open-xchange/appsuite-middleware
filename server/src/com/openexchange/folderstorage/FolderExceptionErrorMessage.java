@@ -80,7 +80,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
      */
-    NO_STORAGE_FOR_CT(FolderExceptionMessages.NO_STORAGE_FOR_CT_MSG, Category.CODE_ERROR, 5);
+    NO_STORAGE_FOR_CT(FolderExceptionMessages.NO_STORAGE_FOR_CT_MSG, Category.CODE_ERROR, 5),
+    /**
+     * Missing session.
+     */
+    MISSING_SESSION(FolderExceptionMessages.MISSING_SESSION_MSG, Category.CODE_ERROR, 6);
 
     private final Category category;
 

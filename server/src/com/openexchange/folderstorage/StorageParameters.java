@@ -93,6 +93,8 @@ public interface StorageParameters {
     /**
      * Puts given parameter. Any existing parameters bound to given name are replaced. A <code>null</code> value means to remove the
      * parameter.
+     * <p>
+     * A <code>null</code> value removes the parameter.
      * 
      * @param folderType The folder type
      * @param name The parameter name
