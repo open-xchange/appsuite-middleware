@@ -204,8 +204,8 @@ esac
 
 chgrp open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
 chmod 640 /opt/open-xchange/etc/admindaemon/mysql/*.sql
-chgrp open-xchange /opt/open-xchange/etc/admindaemon/*
-chmod 640 /opt/open-xchange/etc/admindaemon/*
+chgrp open-xchange /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
+chmod 640 /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
 
 update-rc.d open-xchange-admin defaults > /dev/null
 
