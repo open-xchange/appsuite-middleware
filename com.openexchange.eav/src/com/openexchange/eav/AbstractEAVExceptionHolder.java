@@ -49,42 +49,29 @@
 
 package com.openexchange.eav;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 
 /**
- * {@link EAVContainerType}
+ * {@link AbstractEAVExceptionHolder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
+public abstract class AbstractEAVExceptionHolder {
+    private EAVException exception;
     
-    public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
-        switch(this){
-        case SINGLE: return switcher.single(args);
-        case SET: return switcher.set(args);
-        case MULTISET: return switcher.multiset(args);
-        }
-        throw new IllegalArgumentException(this.name());
+    
+    
+    protected void setException(EAVException exception) {
+        this.exception = exception;
     }
     
-    public boolean isMultiple() {
-        switch(this) {
-        case SINGLE: return false;
-        default: return true;
+    public void throwException() throws EAVException {
+        if(exception != null) {
+            throw exception;
         }
     }
 
-    public Object[] applyRestrictions(EAVType type, Object[] values) {
-        switch(this) {
-        case SET: {
-                HashSet<Object> asSet = new HashSet<Object>(Arrays.asList(values));
-                return asSet.toArray(type.getArray(asSet.size()));
-            }
-        }
-        return values;
+    public EAVException getException() {
+        return exception;
     }
 }

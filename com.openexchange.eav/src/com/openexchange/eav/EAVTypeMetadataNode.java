@@ -50,7 +50,9 @@
 package com.openexchange.eav;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -145,6 +147,50 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
 
     public boolean hasOption(String string) {
         return options.containsKey(string);
+    }
+
+
+    public EAVTypeMetadataNode mergeWith(EAVTypeMetadataNode other) throws EAVException {
+        EAVTypeMetadataNode node = new EAVTypeMetadataNode(getName());
+        Set<String> alreadyHandled = new HashSet<String>();
+        for(EAVTypeMetadataNode child : getChildren()) {
+            EAVTypeMetadataNode otherChild = other.resolve(child.getRelativePath(this));
+            if(otherChild != null) {
+                alreadyHandled.add(otherChild.getName());
+            }
+            if(child.isLeaf()) {
+                if(otherChild != null && ! child.hasEqualPayloadAs(otherChild)) {
+                    throw EAVErrorMessage.WRONG_TYPES.create(child.getPath().toString(), child.getTypeDescription(), otherChild.getTypeDescription());
+                }
+                node.addChild(TreeTools.copy(child));
+            } else {
+                EAVTypeMetadataNode toAdd = null;
+                if(otherChild != null) {
+                    toAdd = child.mergeWith(otherChild);
+                } else {
+                    toAdd = TreeTools.copy(child);
+                }
+                node.addChild(toAdd);
+            }
+        }
+        
+        for(EAVTypeMetadataNode child : other.getChildren()) {
+            if(!alreadyHandled.contains(child.getName())) {
+                node.addChild(child);
+            }
+        }
+        
+        return node;
+    }
+
+
+    public String getTypeDescription() {
+        return type.name()+" "+containerType.name();
+    }
+
+
+    public boolean hasEqualPayloadAs(EAVTypeMetadataNode other) {
+        return type == other.type && containerType == other.containerType;
     }
 
 

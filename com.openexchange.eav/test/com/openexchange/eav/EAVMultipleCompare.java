@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +63,35 @@ import java.util.List;
 public class EAVMultipleCompare implements EAVTypeSwitcher {
 
     public Object binary(Object... args) {
-        return multisetWiseComparison(args[0], args[1]);
+        List<List<Byte>> list1 = convert((InputStream[]) args[0]);
+        List<List<Byte>> list2 = convert((InputStream[]) args[1]);
+        
+        if(list1.size() != list2.size()) {
+            return false;
+        }
+        
+        list1.removeAll(list2);
+        
+        return list1.isEmpty();
+    }
+
+    private List<List<Byte>> convert(InputStream[] inputStreams) {
+        try {
+            List<List<Byte>> retval = new ArrayList<List<Byte>>(inputStreams.length);
+            for (InputStream inputStream : inputStreams) {
+                List<Byte> bytes = new ArrayList<Byte>();
+                int b = -1;
+                while((b = inputStream.read()) != -1) {
+                    bytes.add((byte)b);
+                }
+                inputStream.close();
+                retval.add(bytes);
+            }
+            return retval;
+        } catch (IOException x) {
+            x.printStackTrace();
+            return null;
+        }
     }
 
     public Object bool(Object... args) {

@@ -112,6 +112,19 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
         return parent.getPath().append(name);
     }
     
+    public EAVPath getRelativePath(EAVPath relativePath) {
+        if (getPath().equals(relativePath)) {
+            return new EAVPath();
+        }
+        return parent.getRelativePath(relativePath).append(name);
+    }
+
+    public EAVPath getRelativePath(T relativeNode) {
+        return getRelativePath(relativeNode.getPath());
+    }
+
+
+    
     public T getParent() {
         return parent;
     }

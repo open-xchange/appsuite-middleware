@@ -64,7 +64,10 @@ public enum EAVErrorMessage implements OXErrorMessage {
 
     NO_OPTIONS(1, "The type %s may not have any options", "", Category.USER_INPUT),
     UNKNOWN_OPTION(2, "The type %s may not have any options other than %s", "", Category.USER_INPUT), 
-    ILLEGAL_OPTION(3, "Illegal value %s for option %s", "", Category.USER_INPUT),
+    ILLEGAL_OPTION(3, "Illegal value %s for option %s", "", Category.USER_INPUT), 
+    ILLEGAL_VALUE(4, "Illegal value %s for type %s", "Please specify only legal values for a given type", Category.USER_INPUT), 
+    INCOMPATIBLE_TYPES(5, "Can not coerce from type %s to type %s", "Please specify only legal values for a given type", Category.USER_INPUT), 
+    WRONG_TYPES(6, "Incompatible types for path %s. Found %s and %s", "Type leafs must match", Category.USER_INPUT)
     ;
 
     public static EAVExceptionFactory FACTORY = new EAVExceptionFactory() {

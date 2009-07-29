@@ -50,41 +50,42 @@
 package com.openexchange.eav;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedList;
 
 
 /**
- * {@link EAVContainerType}
+ * {@link EAVContainerTypeTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
-    
-    public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
-        switch(this){
-        case SINGLE: return switcher.single(args);
-        case SET: return switcher.set(args);
-        case MULTISET: return switcher.multiset(args);
-        }
-        throw new IllegalArgumentException(this.name());
-    }
-    
-    public boolean isMultiple() {
-        switch(this) {
-        case SINGLE: return false;
-        default: return true;
-        }
-    }
+public class EAVContainerTypeTest extends EAVUnitTest {
 
-    public Object[] applyRestrictions(EAVType type, Object[] values) {
-        switch(this) {
-        case SET: {
-                HashSet<Object> asSet = new HashSet<Object>(Arrays.asList(values));
-                return asSet.toArray(type.getArray(asSet.size()));
-            }
+    public void testEnforceSetCriterium() {
+        Number[] numbers = new Number[]{1,2,3,3,4,5,5,5,6,7};
+        
+        Number[] restricted = (Number[]) EAVContainerType.SET.applyRestrictions(EAVType.NUMBER, numbers);
+        
+        LinkedList<Number> asList = new LinkedList<Number>(Arrays.asList(restricted));
+        for(int i = 1; i < 8; i++) {
+            assertTrue(i+" was not in list", asList.contains(i));
+            asList.remove((Integer)i);
         }
-        return values;
+        assertTrue(asList.toString()+" remained", asList.isEmpty());
     }
+    
+    public void testPassThroughMultisets() {
+        Number[] numbers = new Number[]{1,2,3,3,4,5,5,5,6,7};
+        
+        Number[] restricted = (Number[]) EAVContainerType.MULTISET.applyRestrictions(EAVType.NUMBER, numbers);
+        
+        
+        LinkedList<Number> asList = new LinkedList<Number>(Arrays.asList(restricted));
+        for(Number i : numbers) {
+            assertTrue(i+" was not in list", asList.contains(i));
+            asList.remove((Number)i);
+        }
+        assertTrue(asList.toString()+" remained", asList.isEmpty());
+    }
+    
 }

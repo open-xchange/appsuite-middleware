@@ -49,42 +49,51 @@
 
 package com.openexchange.eav;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 
 /**
- * {@link EAVContainerType}
+ * {@link EAVNodeTypeCoercionVisitor}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
+public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder implements AbstractNodeVisitor<EAVNode> {
+
+    private EAVTypeMetadataNode metadata;
+    private EAVTypeCoercion coercion = new EAVTypeCoercion();
     
-    public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
-        switch(this){
-        case SINGLE: return switcher.single(args);
-        case SET: return switcher.set(args);
-        case MULTISET: return switcher.multiset(args);
-        }
-        throw new IllegalArgumentException(this.name());
-    }
-    
-    public boolean isMultiple() {
-        switch(this) {
-        case SINGLE: return false;
-        default: return true;
-        }
+    public EAVNodeTypeCoercionVisitor(EAVTypeMetadataNode metadata) {
+        this.metadata = metadata;
     }
 
-    public Object[] applyRestrictions(EAVType type, Object[] values) {
-        switch(this) {
-        case SET: {
-                HashSet<Object> asSet = new HashSet<Object>(Arrays.asList(values));
-                return asSet.toArray(type.getArray(asSet.size()));
-            }
+    public void visit(int index, EAVNode node) {
+        if(!node.isLeaf()) {
+            return;
         }
-        return values;
+        EAVTypeMetadataNode metadataNode = metadata.resolve(node.getPath().shiftLeft());
+        if(metadataNode == null) {
+            return;
+        }
+        
+        try {
+            if(node.getContainerType().isMultiple() != metadataNode.getContainerType().isMultiple()) {
+                setException( EAVErrorMessage.WRONG_TYPES.create(node.getPath(), node.getTypeDescription(), metadataNode.getTypeDescription()) );
+                throw BREAK;
+            }
+            if(node.isMultiple()) {
+                Object[] origPayload = (Object[]) node.getPayload();
+                Object[] coercedPayload = coercion.coerceMultiple(node.getType(), origPayload, metadataNode);
+                Object[] restrictedPayload = metadata.getContainerType().applyRestrictions(metadataNode.getType(), coercedPayload);
+                node.setPayload(metadataNode.getType(), node.getContainerType(), restrictedPayload);
+            } else {
+                Object payload = coercion.coerce(node.getType(), node.getPayload(), metadataNode);
+                node.setPayload(metadataNode.getType(), node.getContainerType(), payload);
+            }
+        } catch (EAVException e) {
+            setException( e );
+            throw BREAK;
+        }
     }
+    
+    
+
 }

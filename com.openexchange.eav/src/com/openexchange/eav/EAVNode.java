@@ -95,6 +95,10 @@ public class EAVNode extends AbstractNode<EAVNode> {
         }
         return type;
     }
+    
+    public String getTypeDescription() {
+        return type.name()+" "+containerType.name();
+    }
 
     public Object getPayload() {
         return payload;
@@ -167,17 +171,6 @@ public class EAVNode extends AbstractNode<EAVNode> {
         return containerType.isMultiple();
     }
 
-    public EAVPath getRelativePath(EAVPath relativePath) {
-        if (getPath().equals(relativePath)) {
-            return new EAVPath();
-        }
-        return parent.getRelativePath(relativePath).append(name);
-    }
-
-    public EAVPath getRelativePath(EAVNode relativeNode) {
-        return getRelativePath(relativeNode.getPath());
-    }
-
     public void copyPayloadFromOther(EAVNode other) {
         this.payload = other.payload;
         this.type = other.type;
@@ -199,7 +192,7 @@ public class EAVNode extends AbstractNode<EAVNode> {
         this.type = type;
         this.containerType = containerType;
 
-        this.payload = collection.toArray((Object[]) type.doSwitch(TYPED_ARRAY, collection.size()));
+        this.payload = collection.toArray((Object[]) type.getArray(collection.size()));
 
     }
     
@@ -227,42 +220,6 @@ public class EAVNode extends AbstractNode<EAVNode> {
 
 
 
-    private static final EAVTypeSwitcher TYPED_ARRAY = new EAVTypeSwitcher() {
-
-        public Object binary(Object... args) {
-            throw new UnsupportedOperationException("Implement me ;)");
-        }
-
-        public Object bool(Object... args) {
-            return new Boolean[(Integer) args[0]];
-        }
-
-        public Object date(Object... args) {
-            return new Number[(Integer) args[0]];
-        }
-
-        public Object nullValue(Object... args) {
-            throw new IllegalArgumentException("There are no sets of type NULL");
-        }
-
-        public Object number(Object... args) {
-            return new Number[(Integer) args[0]];
-        }
-
-        public Object object(Object... args) {
-            throw new IllegalArgumentException("There are no sets of type OBJECT");
-        }
-
-        public Object string(Object... args) {
-            return new String[(Integer) args[0]];
-        }
-
-        public Object time(Object... args) {
-            return new Number[(Integer) args[0]];
-        }
-
-    };
-
-
+    
 
 }

@@ -67,7 +67,11 @@ public final class UnitTests {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(EAVNodeTest.class);
         suite.addTestSuite(EAVPathTest.class);
-        suite.addTestSuite(EAVUnitTest.class);
+        suite.addTestSuite(EAVContainerTypeTest.class);
+        suite.addTestSuite(EAVTypeCoercionTest.class);
+        suite.addTestSuite(EAVTypeMetadataMergeTest.class);
+        suite.addTestSuite(EAVTypeOptionVerifierTest.class);
+        suite.addTestSuite(EAVTypeTest.class);
         return suite;
     }
 }

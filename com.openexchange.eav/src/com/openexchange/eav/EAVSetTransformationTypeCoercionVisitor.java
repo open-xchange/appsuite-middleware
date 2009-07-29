@@ -49,42 +49,47 @@
 
 package com.openexchange.eav;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 
 /**
- * {@link EAVContainerType}
+ * {@link EAVSetTransformationTypeCoercionVisitor}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
+public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptionHolder implements EAVSetTransformationVisitor {
+
+    private EAVTypeMetadataNode metadata;
+    private EAVTypeCoercion coercion = new EAVTypeCoercion();
     
-    public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
-        switch(this){
-        case SINGLE: return switcher.single(args);
-        case SET: return switcher.set(args);
-        case MULTISET: return switcher.multiset(args);
-        }
-        throw new IllegalArgumentException(this.name());
-    }
-    
-    public boolean isMultiple() {
-        switch(this) {
-        case SINGLE: return false;
-        default: return true;
-        }
+    public EAVSetTransformationTypeCoercionVisitor(EAVTypeMetadataNode metadata) {
+        this.metadata = metadata;
     }
 
-    public Object[] applyRestrictions(EAVType type, Object[] values) {
-        switch(this) {
-        case SET: {
-                HashSet<Object> asSet = new HashSet<Object>(Arrays.asList(values));
-                return asSet.toArray(type.getArray(asSet.size()));
-            }
+    public void visit(int index, EAVSetTransformation node) {
+        if(!node.isLeaf()) {
+            return;
         }
-        return values;
+        EAVTypeMetadataNode metadataNode = metadata.resolve(node.getPath().shiftLeft());
+        if(metadataNode == null) {
+            return;
+        }
+        
+        if(!metadataNode.getContainerType().isMultiple()) {
+            setException( EAVErrorMessage.WRONG_TYPES.create(node.getPath(), node.getType().toString()+", MULTIPLE", metadataNode.getTypeDescription()) );
+            throw BREAK;
+        }
+        
+        try {
+            node.setAdd(coercion.coerceMultiple(node.getType(), node.getAdd(), metadataNode));
+            node.setRemove(coercion.coerceMultiple(node.getType(), node.getRemove(), metadataNode));
+            node.setType(metadataNode.getType());
+        } catch (EAVException e) {
+            setException( e );
+            throw BREAK;
+        }
     }
+    
+    
+    
+    
 }

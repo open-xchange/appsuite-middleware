@@ -450,6 +450,28 @@ public class EAVUnitTest extends TestCase {
         assertEquals(type, types.resolve(path).getType());
         assertEquals(cType, types.resolve(path).getContainerType());
     }
+    
+    protected void assertTransformation(EAVSetTransformation transformation,EAVType type, TransformList...lists) {
+        assertSame(transformation.getType(), type);
+        EAVMultipleCompare compare = new EAVMultipleCompare();
+        
+        for (TransformList transformList : lists) {
+            Object[] payload = null;
+            switch(transformList.operation) {
+            case ADD: 
+                payload = transformation.getAdd();
+                break;
+            case REMOVE:
+                payload = transformation.getRemove();
+                break;
+            }
+            
+            if(! (Boolean) transformation.getType().doSwitch(compare, transformList.payload, payload)) {
+                fail("Payloads differ");
+            }
+        }
+    }
+
 
     protected static Map<String, Object> M(String... strings) {
         if (strings.length % 2 != 0) {

@@ -49,39 +49,83 @@
 
 package com.openexchange.eav;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.TimeZone;
-
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link EAVTypeCoercion}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class EAVTypeCoercion {
 
-    public void coerce(EAVNode node, EAVTypeMetadataNode typeInfo) {
-        coerce(node, typeInfo, null);
+    private static final Log LOG = LogFactory.getLog(EAVTypeCoercion.class);
+
+    public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo) throws EAVException {
+        return coerce(origType, payload, typeInfo, null);
     }
-    
-    public void coerce(EAVNode node, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) {
-        switch(node.getType()) {
+
+    public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws EAVException {
+        typeInfo.getType().checkCoercible(origType, payload);
+
+        switch (origType) {
         case NUMBER:
-            switch(typeInfo.getType()) {
+            switch (typeInfo.getType()) {
             case DATE:
-                node.setPayload(typeInfo.getType(), node.getContainerType(), node.getPayload());
-                break;
+                return payload;
             case TIME: {
-                    TimeZone tz = defaultTZ;
-                    if(typeInfo.hasOption("timezone")) {
-                        tz = TimeZone.getTimeZone((String)typeInfo.getOption("timezone"));
-                    }
-                    
-                    long utc = recalculateTime((Long)node.getPayload(), tz);
-                    node.setPayload(EAVType.TIME, node.getContainerType(), utc);
+                TimeZone tz = defaultTZ;
+                if (typeInfo.hasOption("timezone")) {
+                    tz = TimeZone.getTimeZone((String) typeInfo.getOption("timezone"));
                 }
+
+                long utc = (Long) payload;
+                if (tz != null) {
+                    utc = recalculateTime(utc, tz);
+                }
+                return utc;
+            }
+            }
+            break;
+        case STRING:
+            switch (typeInfo.getType()) {
+            case BINARY: {
+                return decodeBase64((String) payload);
+            }
             }
         }
+
+        return payload;
+    }
+
+    public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo) throws EAVException {
+        return coerceMultiple(origType, payload, typeInfo, null);
+    }
+
+    public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws EAVException {
+        Object[] coerced = typeInfo.getType().getArray(payload.length);
+        int index = 0;
+        for (Object origElement : payload) {
+            Object coercedElement = coerce(origType, origElement, typeInfo, defaultTZ);
+            coerced[index++] = coercedElement;
+        }
+
+        return coerced;
+    }
+
+    private InputStream decodeBase64(String payload) {
+        Base64 base64 = new Base64();
+        try {
+            return new ByteArrayInputStream(base64.decode(payload.getBytes("ASCII")));
+        } catch (UnsupportedEncodingException e) {
+            LOG.fatal(e.getMessage(), e);
+        }
+        return null;
     }
 
     private long recalculateTime(long time, TimeZone timeZone) {

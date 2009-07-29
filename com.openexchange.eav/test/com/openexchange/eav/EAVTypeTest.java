@@ -49,42 +49,77 @@
 
 package com.openexchange.eav;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
- * {@link EAVContainerType}
- *
+ * {@link EAVTypeTest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
-    
-    public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
-        switch(this){
-        case SINGLE: return switcher.single(args);
-        case SET: return switcher.set(args);
-        case MULTISET: return switcher.multiset(args);
-        }
-        throw new IllegalArgumentException(this.name());
-    }
-    
-    public boolean isMultiple() {
-        switch(this) {
-        case SINGLE: return false;
-        default: return true;
+public class EAVTypeTest extends EAVUnitTest {
+
+    /*
+     * #isCompatible
+     */
+
+    public void testInvalidDate() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR, 23);
+
+        long notMidnightUTC = calendar.getTimeInMillis();
+
+        try {
+            EAVType.DATE.checkCoercible(EAVType.NUMBER, notMidnightUTC);
+            fail("Validate non date value");
+        } catch (EAVException x) {
+            assertEquals(EAVErrorMessage.ILLEGAL_VALUE.getDetailNumber(), x.getDetailNumber());
         }
     }
 
-    public Object[] applyRestrictions(EAVType type, Object[] values) {
-        switch(this) {
-        case SET: {
-                HashSet<Object> asSet = new HashSet<Object>(Arrays.asList(values));
-                return asSet.toArray(type.getArray(asSet.size()));
+    public void testEAVTypeMismatch() {
+        for (EAVType type1 : EAVType.values()) {
+            for (EAVType type2 : EAVType.values()) {
+                if (type1 == type2) {
+                    assertCoercible(type1, type2);
+                } else if (type1 == EAVType.NULL) {
+                    assertCoercible(type1, type2);
+                } else {
+                    switch (type1) {
+                    case NUMBER:
+                        switch (type2) {
+                        case DATE:
+                        case TIME:
+                            assertCoercible(type1, type2);
+                            break;
+                        default:
+                            assertNotCoercible(type1, type2);
+                        }
+                        break;
+                    case STRING:
+                        if (type2 == EAVType.BINARY) {
+                            assertCoercible(type1, type2);
+                        } else {
+                            assertNotCoercible(type1, type2);
+                        }
+                        break;
+                    default:
+                        assertNotCoercible(type1, type2);
+                    }
+                }
+
             }
         }
-        return values;
     }
+
+    private void assertNotCoercible(EAVType t1, EAVType t2) {
+        assertFalse("Should not be able to coerce from " + t1.name() + " to " + t2.name(), t2.isCoercibleFrom(t1));
+    }
+
+    private void assertCoercible(EAVType t1, EAVType t2) {
+        assertTrue("Should be able to coerce from " + t1.name() + " to " + t2.name(), t2.isCoercibleFrom(t1));
+    }
+
 }

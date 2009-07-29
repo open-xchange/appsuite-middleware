@@ -47,44 +47,22 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.memory;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link EAVContainerType}
- *
+ * {@link UnitTests}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
-    
-    public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
-        switch(this){
-        case SINGLE: return switcher.single(args);
-        case SET: return switcher.set(args);
-        case MULTISET: return switcher.multiset(args);
-        }
-        throw new IllegalArgumentException(this.name());
-    }
-    
-    public boolean isMultiple() {
-        switch(this) {
-        case SINGLE: return false;
-        default: return true;
-        }
-    }
+public class UnitTests {
 
-    public Object[] applyRestrictions(EAVType type, Object[] values) {
-        switch(this) {
-        case SET: {
-                HashSet<Object> asSet = new HashSet<Object>(Arrays.asList(values));
-                return asSet.toArray(type.getArray(asSet.size()));
-            }
-        }
-        return values;
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(InMemoryStorageTest.class);
+        tests.addTestSuite(SetUpdaterTest.class);
+        return tests;
     }
 }

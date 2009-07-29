@@ -642,6 +642,4 @@ public class InMemoryStorageTest extends EAVUnitTest {
             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessage.UNKNOWN_PATH.getDetailNumber());
         }
     }
-
-
 }
