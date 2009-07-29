@@ -68,7 +68,7 @@ public class EAVSetTransformation extends AbstractNode<EAVSetTransformation>{
         return new EAVSetTransformation();
     }
     
-    private EAVSetTransformation() {
+    public EAVSetTransformation() {
         super();
     }
 
