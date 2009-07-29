@@ -47,46 +47,16 @@
  *
  */
 
-package com.openexchange.eav.json.parse;
+package com.openexchange.eav.json.parse.metadata.type;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class JSONObjectParser extends AbstractParser {
+public interface JSONTypeMetadataParserInterface {
 
-    {
-        TYPES = new HashSet<Class<?>>() {
-
-            private static final long serialVersionUID = 1L;
-
-            {
-                add(JSONObject.class);
-            }
-        };
-    }
-
-    public void parse(String key, Object value, EAVNode node) throws JSONException, EAVJsonException {
-        node.setName(key);
-        JSONObject v = (JSONObject) value;
-        Iterator<?> iter = v.keys();
-        while (iter.hasNext()) {
-            EAVNode childNode = new EAVNode();
-            String childKey = (String) iter.next();
-            chain.parse(childKey, v.get(childKey), childNode);
-            node.addChildren(childNode);
-        }
-    }
-
-    public void parseMultiple(String key, Object[] objects, EAVNode node) {
-        throw new UnsupportedOperationException("Arrays of objects are not supported.");
-
-    }
+    EAVTypeMetadataNode getEAVNode() throws EAVJsonException;
 
 }

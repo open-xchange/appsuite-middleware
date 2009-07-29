@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -68,7 +70,7 @@ public class Chain implements ParserChain {
         }
     }
 
-    public void parse(String key, Object object, EAVNode node) throws JSONException {
+    public void parse(String key, Object object, EAVNode node) throws JSONException, EAVJsonException {
         for (Parser parser : parsers) {
             if (parser.isResponsibeFor(object)) {
                 parser.parse(key, object, node);
@@ -77,13 +79,17 @@ public class Chain implements ParserChain {
         }
     }
 
-    public void parseMultiple(String key, Object[] objects, EAVNode node) {
+    public void parseMultiple(String key, Object[] objects, EAVNode node) throws EAVJsonException {
         if (objects.length == 0) {
             return;
         }
         for (Parser parser : parsers) {
             if (parser.isResponsibeFor(objects[0])) {
-                parser.parseMultiple(key, objects, node);
+                try {
+                    parser.parseMultiple(key, objects, node);
+                } catch (ClassCastException e) {
+                    throw EAVJsonExceptionMessage.DifferentTypesInArray.create(e);
+                }
                 return;
             }
         }

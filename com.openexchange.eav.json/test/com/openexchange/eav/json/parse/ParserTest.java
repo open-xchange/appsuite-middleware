@@ -53,6 +53,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVUnitTest;
+import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 import com.openexchange.eav.json.parse.JSONParser;
 
 /**
@@ -70,7 +72,8 @@ public class ParserTest extends EAVUnitTest {
                        multiLong,
                        multiFloat,
                        multiBoolean,
-                       complex;
+                       complex,
+                       badArray;
     
     private EAVNode singleStringEAV,
                     singleIntegerEAV,
@@ -109,6 +112,8 @@ public class ParserTest extends EAVUnitTest {
                 .put("exampleBooleans", jsonArray(true, false, true, false, false, true))
             )
             .put("exampleBoolean", true);
+        
+        badArray = new JSONObject().put("exampleBad", jsonArray("Hello", 12, 12.1));
         
         singleStringEAV = new EAVNode("exampleString");
         singleStringEAV.setPayload("Hello");
@@ -162,6 +167,16 @@ public class ParserTest extends EAVUnitTest {
         JSONParser parser = new JSONParser(complex);
         EAVNode node = parser.getEAVNode();
         assertEquals(complexEAV, node);
+    }
+    
+    public void testBad() throws Exception {
+        JSONParser parser = new JSONParser(badArray);
+        try {
+            parser.getEAVNode();
+            fail("Exception expected.");
+        } catch(EAVJsonException e) {
+            assertEquals("Wrong exception.", EAVJsonExceptionMessage.DifferentTypesInArray.getDetailNumber(), e.getDetailNumber());
+        }
     }
 
     private void compare(EAVNode expected, JSONObject json) throws Exception {

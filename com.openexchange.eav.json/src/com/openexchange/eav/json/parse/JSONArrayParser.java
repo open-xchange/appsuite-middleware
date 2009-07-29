@@ -53,6 +53,7 @@ import java.util.HashSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -70,7 +71,7 @@ public class JSONArrayParser extends AbstractParser {
         };
     }
 
-    public void parse(String key, Object value, EAVNode node) throws JSONException {
+    public void parse(String key, Object value, EAVNode node) throws JSONException, EAVJsonException {
         JSONArray v = (JSONArray) value;
         chain.parseMultiple(key, toArray(v), node);
 

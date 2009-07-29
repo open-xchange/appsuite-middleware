@@ -51,13 +51,14 @@ package com.openexchange.eav.json.parse;
 
 import org.json.JSONException;
 import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public interface Parser {
 
-    public void parse(String key, Object value, EAVNode node) throws JSONException;
+    public void parse(String key, Object value, EAVNode node) throws JSONException, EAVJsonException;
 
     public void parseMultiple(String key, Object[] objects, EAVNode node);
 
