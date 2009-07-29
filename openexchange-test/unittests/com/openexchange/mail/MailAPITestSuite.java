@@ -90,6 +90,7 @@ public final class MailAPITestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailMoveTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSaveDraftTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSearchTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSortTest.class);
 		/*
 		 * Reply/forward
 		 */

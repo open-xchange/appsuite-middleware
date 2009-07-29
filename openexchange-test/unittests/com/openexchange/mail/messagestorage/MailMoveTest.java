@@ -51,18 +51,10 @@ package com.openexchange.mail.messagestorage;
 
 import java.io.IOException;
 import javax.mail.MessagingException;
-import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailProviderRegistry;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailMoveTest}
@@ -70,7 +62,7 @@ import com.openexchange.sessiond.impl.SessionObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailMoveTest extends AbstractMailTest {
+public final class MailMoveTest extends MessageStorageTest {
 
 	/**
 	 * 
@@ -99,43 +91,11 @@ public final class MailMoveTest extends AbstractMailTest {
 	private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
 	public void testMailMove() throws MailException, MessagingException, IOException {
-			final SessionObject session = getSession();
-			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-
-			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
 			try {
 
-				final String fullname;
-				{
-					final String parentFullname;
-					final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								"TemporaryFolder").toString();
-						parentFullname = "INBOX";
-					} else {
-						fullname = "TemporaryFolder";
-						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-					}
-
-					final MailFolderDescription mfd = new MailFolderDescription();
-					mfd.setExists(false);
-					mfd.setParentFullname(parentFullname);
-					mfd.setSeparator(inbox.getSeparator());
-					mfd.setName("TemporaryFolder");
-
-					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-							.createNewMailPermission();
-					p.setEntity(getUser());
-					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-					p.setFolderAdmin(true);
-					p.setGroupPermission(false);
-					mfd.addPermission(p);
-					mailAccess.getFolderStorage().createFolder(mfd);
-				}
+				final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
 
 				try {
 

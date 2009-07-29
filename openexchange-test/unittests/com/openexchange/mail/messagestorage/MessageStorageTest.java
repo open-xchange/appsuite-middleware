@@ -47,6 +47,10 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         super();
     }
 
+    protected MessageStorageTest(final String name) {
+        super(name);
+    }
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -521,6 +525,52 @@ public abstract class MessageStorageTest extends AbstractMailTest {
     private String getFullFolderName(final MailFolder inbox, final String tempFolderName) {
         return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
         		tempFolderName).toString();
+    }
+
+    /**
+     * Creates a folder with tempFolderName under the inbox
+     * 
+     * @param session
+     * @param mailAccess
+     * @param tempFolderName
+     * @return
+     * @throws MailException
+     */
+    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, String tempFolderName) throws MailException {
+        final String fullname;
+        {
+            final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+        	final String parentFullname;
+        	if (inbox.isHoldsFolders()) {
+        		fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+        				tempFolderName).toString();
+        		parentFullname = "INBOX";
+        	} else {
+        		fullname = tempFolderName;
+        		parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+        	}
+    
+        	final MailFolderDescription mfd = new MailFolderDescription();
+        	mfd.setExists(false);
+        	mfd.setParentFullname(parentFullname);
+        	mfd.setSeparator(inbox.getSeparator());
+        	mfd.setName(tempFolderName);
+    
+        	mfd.addPermission(getPermission(session));
+        	mailAccess.getFolderStorage().createFolder(mfd);
+        }
+        return fullname;
+    }
+
+    private MailPermission getPermission(final SessionObject session) throws MailException {
+        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
+        		.createNewMailPermission();
+        p.setEntity(getUser());
+        p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+        		OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        p.setFolderAdmin(true);
+        p.setGroupPermission(false);
+        return p;
     }
 
 }
