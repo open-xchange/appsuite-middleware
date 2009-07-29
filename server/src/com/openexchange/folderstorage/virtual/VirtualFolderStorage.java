@@ -60,7 +60,10 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
-import com.openexchange.folderstorage.virtual.sql.VirtualFolderStorageSQL;
+import com.openexchange.folderstorage.virtual.sql.Delete;
+import com.openexchange.folderstorage.virtual.sql.Insert;
+import com.openexchange.folderstorage.virtual.sql.Select;
+import com.openexchange.folderstorage.virtual.sql.Update;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -86,23 +89,15 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
-        
+
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        VirtualFolderStorageSQL.insertFolder(
-            storageParameters.getContext().getContextId(),
-            treeId,
-            storageParameters.getUser().getId(),
-            folder);
+        Insert.insertFolder(storageParameters.getContext().getContextId(), treeId, storageParameters.getUser().getId(), folder);
     }
 
     public void deleteFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
-        VirtualFolderStorageSQL.deleteFolder(
-            storageParameters.getContext().getContextId(),
-            treeId,
-            storageParameters.getUser().getId(),
-            folderId);
+        Delete.deleteFolder(storageParameters.getContext().getContextId(), treeId, storageParameters.getUser().getId(), folderId);
     }
 
     public Folder getDefaultFolder(final int entity, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
@@ -131,11 +126,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
         }
         // Load folder data from database
-        VirtualFolderStorageSQL.fillFolder(
-            storageParameters.getContext().getContextId(),
-            treeId,
-            storageParameters.getUser().getId(),
-            virtualFolder);
+        Select.fillFolder(storageParameters.getContext().getContextId(), treeId, storageParameters.getUser().getId(), virtualFolder);
         return virtualFolder;
     }
 
@@ -167,11 +158,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
         }
         // Load folder data from database
-        VirtualFolderStorageSQL.fillFolder(
-            storageParameters.getContext().getContextId(),
-            treeId,
-            storageParameters.getUser().getId(),
-            virtualFolder);
+        Select.fillFolder(storageParameters.getContext().getContextId(), treeId, storageParameters.getUser().getId(), virtualFolder);
         return virtualFolder;
     }
 
@@ -184,7 +171,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
-        final String[][] idNamePairs = VirtualFolderStorageSQL.getSubfolderIds(
+        final String[][] idNamePairs = Select.getSubfolderIds(
             storageParameters.getContext().getContextId(),
             treeId,
             storageParameters.getUser().getId(),
@@ -199,7 +186,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
-        
+
     }
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
@@ -207,11 +194,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        VirtualFolderStorageSQL.updateFolder(
-            storageParameters.getContext().getContextId(),
-            treeId,
-            storageParameters.getUser().getId(),
-            folder);
+        Update.updateFolder(storageParameters.getContext().getContextId(), treeId, storageParameters.getUser().getId(), folder);
 
     }
 
