@@ -61,7 +61,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CalculatePermission} - TODO Short description of this class' purpose.
+ * {@link CalculatePermission} - Utility class to obtain an effective permission.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
