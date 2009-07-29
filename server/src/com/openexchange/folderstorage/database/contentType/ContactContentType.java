@@ -81,4 +81,9 @@ public final class ContactContentType implements ContentType {
         return "contact";
     }
 
+    public int getModule() {
+        // From FolderObject.CONTACT
+        return 3;
+    }
+
 }

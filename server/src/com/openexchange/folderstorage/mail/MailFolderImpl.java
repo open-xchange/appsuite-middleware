@@ -93,6 +93,7 @@ public final class MailFolderImpl extends AbstractFolder {
         for (int i = 0; i < mailPermissions.length; i++) {
             this.permissions[i] = new MailPermissionImpl(mailPermissions[i]);
         }
+        type = SystemType.getInstance();
         this.subscribed = mailFolder.isSubscribed();
     }
 

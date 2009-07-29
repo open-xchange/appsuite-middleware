@@ -79,6 +79,7 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.database.contentType.UnboundContentType;
 import com.openexchange.folderstorage.database.type.PrivateType;
 import com.openexchange.folderstorage.database.type.PublicType;
+import com.openexchange.folderstorage.database.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -281,6 +282,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
             }
             // TODO: Subscribed?
+
+            // Check for shared folder, that is folder is of type private and requesting user is different from folder's owner
+            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getOwner()) {
+                retval.setType(SharedType.getInstance());
+            }
 
             return retval;
         } catch (final DBPoolingException e) {

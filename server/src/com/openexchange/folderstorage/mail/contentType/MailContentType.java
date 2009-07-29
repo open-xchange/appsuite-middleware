@@ -81,4 +81,9 @@ public final class MailContentType implements ContentType {
         return "mail";
     }
 
+    public int getModule() {
+        // From FolderObject.MAIL
+        return 7;
+    }
+
 }

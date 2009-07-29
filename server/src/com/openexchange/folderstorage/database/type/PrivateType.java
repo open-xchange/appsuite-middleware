@@ -76,4 +76,9 @@ public final class PrivateType implements Type {
         super();
     }
 
+    public int getType() {
+        // Taken from FolderObject.PRIVATE
+        return 1;
+    }
+
 }

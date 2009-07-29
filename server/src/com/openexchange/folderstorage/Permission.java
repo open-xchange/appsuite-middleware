@@ -54,7 +54,7 @@ package com.openexchange.folderstorage;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Permission {
+public interface Permission extends Cloneable {
 
     /**
      * The constant for no permission at all.
@@ -115,6 +115,13 @@ public interface Permission {
     /*-
      * #################### METHODS ####################
      */
+
+    /**
+     * Creates and returns a copy of this object.
+     * 
+     * @return A clone of this instance.
+     */
+    public Object clone();
 
     /**
      * Gets this folder permission's system bit mask.

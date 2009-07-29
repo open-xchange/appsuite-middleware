@@ -184,4 +184,13 @@ public final class VirtualPermission implements Permission {
         this.writePermission = permission;
     }
 
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
+    }
+
 }

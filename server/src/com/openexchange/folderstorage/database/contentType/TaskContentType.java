@@ -81,4 +81,9 @@ public final class TaskContentType implements ContentType {
         return "task";
     }
 
+    public int getModule() {
+        // From FolderObject.TASK
+        return 1;
+    }
+
 }

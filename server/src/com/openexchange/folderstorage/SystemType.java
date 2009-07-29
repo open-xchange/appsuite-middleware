@@ -74,4 +74,9 @@ public final class SystemType implements Type {
         super();
     }
 
+    public int getType() {
+        // Taken from FolderObject.SYSTEM_TYPE
+        return 5;
+    }
+
 }

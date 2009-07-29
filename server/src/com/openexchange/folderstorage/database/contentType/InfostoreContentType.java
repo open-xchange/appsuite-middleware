@@ -81,4 +81,9 @@ public final class InfostoreContentType implements ContentType {
         return "infostore";
     }
 
+    public int getModule() {
+        // From FolderObject.INFOSTORE
+        return 8;
+    }
+
 }

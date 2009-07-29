@@ -81,4 +81,9 @@ public final class UnboundContentType implements ContentType {
         return "unbound";
     }
 
+    public int getModule() {
+        // From FolderObject.UNBOUND
+        return 4;
+    }
+
 }

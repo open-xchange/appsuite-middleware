@@ -81,4 +81,9 @@ public final class CalendarContentType implements ContentType {
         return "calendar";
     }
 
+    public int getModule() {
+        // From FolderObject.CALENDAR
+        return 2;
+    }
+
 }

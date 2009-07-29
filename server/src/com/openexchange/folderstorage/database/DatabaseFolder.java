@@ -73,6 +73,8 @@ public final class DatabaseFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -4035221612481906228L;
 
+    private int owner;
+
     /**
      * Initializes an empty {@link DatabaseFolder}.
      */
@@ -100,7 +102,26 @@ public final class DatabaseFolder extends AbstractFolder {
         for (int i = 0; i < oclPermissions.length; i++) {
             this.permissions[i] = new DatabasePermission(oclPermissions[i]);
         }
+        this.owner = folderObject.getCreatedBy();
         this.subscribed = true;
+    }
+
+    /**
+     * Gets the owner
+     * 
+     * @return The owner
+     */
+    public int getOwner() {
+        return owner;
+    }
+
+    /**
+     * Sets the owner
+     * 
+     * @param owner The owner to set
+     */
+    public void setOwner(final int owner) {
+        this.owner = owner;
     }
 
     private static Type getType(final int type) {

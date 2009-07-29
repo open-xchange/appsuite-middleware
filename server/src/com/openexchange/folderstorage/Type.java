@@ -56,4 +56,14 @@ package com.openexchange.folderstorage;
  */
 public interface Type {
 
+    /**
+     * Gets this type's former identifier.
+     * <p>
+     * This method is for migration convenience only. It is supposed to be removed when new folder API is completed.
+     * 
+     * @return The type's former identifier
+     */
+    @Deprecated
+    int getType();
+
 }

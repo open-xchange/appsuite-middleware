@@ -52,33 +52,33 @@ package com.openexchange.folderstorage.database.type;
 import com.openexchange.folderstorage.Type;
 
 /**
- * {@link PublicType} - The public type for a database folder.
+ * {@link SharedType} - The shared type for a database folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PublicType implements Type {
+public final class SharedType implements Type {
 
-    private static final PublicType instance = new PublicType();
+    private static final SharedType instance = new SharedType();
 
     /**
-     * Gets the {@link PublicType} instance.
+     * Gets the {@link SharedType} instance.
      * 
-     * @return The {@link PublicType} instance
+     * @return The {@link SharedType} instance
      */
-    public static PublicType getInstance() {
+    public static SharedType getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link PublicType}.
+     * Initializes a new {@link SharedType}.
      */
-    private PublicType() {
+    private SharedType() {
         super();
     }
 
     public int getType() {
-        // Taken from FolderObject.PUBLIC
-        return 2;
+        // Taken from FolderObject.SHARED
+        return 3;
     }
 
 }
