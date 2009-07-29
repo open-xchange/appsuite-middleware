@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -60,7 +62,19 @@ import java.util.HashSet;
  *
  */
 public enum EAVContainerType {
-    SINGLE,SET,MULTISET;
+    SINGLE("single"),
+    SET("set"),
+    MULTISET("multiset");
+    
+    public static final String KEY = "containerType";
+
+    private static Map<String, EAVContainerType> types;
+    
+    static {
+        types = new TreeMap<String, EAVContainerType>(String.CASE_INSENSITIVE_ORDER);
+    }
+
+    private String keyword;
     
     public Object doSwitch(EAVContainerSwitcher switcher, Object...args) {
         switch(this){
@@ -86,5 +100,21 @@ public enum EAVContainerType {
             }
         }
         return values;
+    }
+    
+    private EAVContainerType(String keyword) {
+        this.keyword = keyword;
+    }
+    
+    public static EAVContainerType getType(Object keyword) {
+        return types.get(keyword);
+    }
+    
+    public static boolean containsType(Object keyword) {
+        return types.containsKey(keyword);
+    }
+    
+    public String getKeyword() {
+        return keyword;
     }
 }

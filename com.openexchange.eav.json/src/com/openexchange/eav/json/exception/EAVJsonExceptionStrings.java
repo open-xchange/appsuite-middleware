@@ -58,4 +58,13 @@ public class EAVJsonExceptionStrings implements LocalizableStrings {
 
     // A JSON exception occurred.
     public static final String JSONException = "A JSON exception occurred.";
+    
+    // Invalid type: %1$s.
+    public static final String InvalidType = "Invalid type: %1$s.";
+    
+    // Different types in array.
+    public static final String DifferentTypesInArray = "Different types in array.";
+    
+    // Invalid tree structure.
+    public static final String InvalidTreeStructure = "Invalid tree structure.";
 }

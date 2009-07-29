@@ -57,6 +57,9 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum EAVJsonExceptionMessage implements OXErrorMessage {
     JSONException(1, Category.CODE_ERROR, EAVJsonExceptionStrings.JSONException, null),
+    InvalidType(2, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidType, null),
+    DifferentTypesInArray(3, Category.USER_INPUT, EAVJsonExceptionStrings.DifferentTypesInArray, null),
+    InvalidTreeStructure(4, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidTreeStructure, null)
     ;
 
     private int detailNumber;

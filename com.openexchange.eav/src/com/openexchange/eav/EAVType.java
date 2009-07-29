@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.util.Map;
+import java.util.TreeMap;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.EnumMap;
@@ -61,7 +63,25 @@ import java.util.TimeZone;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum EAVType {
-    OBJECT, STRING, DATE, TIME, BINARY, NUMBER, BOOLEAN, NULL;
+    OBJECT("object"),
+    STRING("string"),
+    DATE("date"),
+    TIME("time"),
+    BINARY("binary"),
+    NUMBER("number"),
+    BOOLEAN("boolean"),
+    NULL("null");
+    
+    public static final String KEY = "t";
+    
+    private static Map<String, EAVType> types;
+    
+    static {
+        types =  new TreeMap<String, EAVType>(String.CASE_INSENSITIVE_ORDER);
+        for (EAVType type : EAVType.values()) {
+            types.put(type.getKeyword(), type);
+        }
+    }
 
     private static final EnumMap<EAVType, EnumSet<EAVType>> COERCIBLE = new EnumMap<EAVType, EnumSet<EAVType>>(EAVType.class);
     static {
@@ -73,6 +93,8 @@ public enum EAVType {
             }
         }
     }
+
+    private String keyword;
     
     public Object doSwitch(EAVTypeSwitcher switcher, Object... args) {
         switch (this) {
@@ -199,7 +221,21 @@ public enum EAVType {
         }
 
     };
-
-
     
+    
+    private EAVType(String keyword) {
+        this.keyword = keyword;
+    }
+    
+    public static EAVType getType(Object keyword) {
+        return types.get(keyword);
+    }
+    
+    public static boolean containsType(Object keyword) {
+        return types.containsKey(keyword);
+    }
+    
+    public String getKeyword() {
+        return keyword;
+    }
 }
