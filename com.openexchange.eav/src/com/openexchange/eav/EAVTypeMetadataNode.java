@@ -194,6 +194,11 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
     }
 
 
+    public Map<String, Object> getOptions() {
+        return options;
+    }
+
+
    
 
 }

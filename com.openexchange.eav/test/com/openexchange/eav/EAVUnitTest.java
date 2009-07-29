@@ -343,7 +343,10 @@ public class EAVUnitTest extends TestCase {
         assertEquals("", expected, actual);
     }
 
-    public static void assertEquals(String message, EAVNode expected, EAVNode actual) {
+    public static <T extends AbstractNode<T>> void assertEquals(String message, AbstractNode<T> expected, AbstractNode<T> actual) {
+        if(expected.getClass() != actual.getClass()) {
+            fail("Classes don't match: "+expected.getClass()+" != "+actual.getClass());
+        }
         if (expected == actual) {
             return;
         }
@@ -354,17 +357,17 @@ public class EAVUnitTest extends TestCase {
             fail(message + ": " + treeString(expected) + " expected, but was null");
         }
 
-        List<EAVNode> serializedExpected = serialize(expected);
-        List<EAVNode> serializedActual = serialize(actual);
+        List<T> serializedExpected = serialize(expected);
+        List<T> serializedActual = serialize(actual);
 
         if (serializedExpected.size() != serializedActual.size()) {
             failComparison(message, expected, actual);
         }
 
         for (int i = 0, size = serializedExpected.size(); i < size; i++) {
-            EAVNode expectedNode = serializedExpected.get(i);
-            EAVPath relativePath = expectedNode.getRelativePath(expected);
-            EAVNode actualNode = actual.resolve(relativePath);
+            T expectedNode = serializedExpected.get(i);
+            EAVPath relativePath = expectedNode.getRelativePath(expected.getPath());
+            T actualNode = actual.resolve(relativePath);
 
             if (actualNode == null) {
                 failComparison(message, expected, actual);
@@ -380,66 +383,50 @@ public class EAVUnitTest extends TestCase {
                 }
             }
 
-            if (!expectedNode.getType().equals(actualNode.getType())) {
-                failComparison(message, expected, actual);
-            }
-            if (expectedNode.getContainerType() != actualNode.getContainerType()) {
-                failComparison(message, expected, actual);
-            }
-            EAVTypeSwitcher compare = null;
-            if (expectedNode.isMultiple()) {
-                compare = new EAVMultipleCompare();
-            } else {
-                compare = new EAVPayloadCompare();
-            }
-            boolean equalPayloads = (Boolean) expectedNode.getType().doSwitch(compare, expectedNode.getPayload(), actualNode.getPayload());
-            if (!equalPayloads) {
+            if(!comparePayloads(expectedNode, actualNode)) {
                 failComparison(message, expected, actual);
             }
         }
 
     }
+    
+   
 
-    private static List<EAVNode> serialize(EAVNode node) {
-        final List<EAVNode> collected = new ArrayList<EAVNode>();
-        node.visit(new EAVNodeVisitor() {
+    private static <T extends AbstractNode<T>>  List<T> serialize(AbstractNode<T> node) {
+        final List<T> collected = new ArrayList<T>();
+        node.visit(new AbstractNodeVisitor<T>() {
 
-            public void visit(int index, EAVNode node) {
+            public void visit(int index, T node) {
                 collected.add(node);
             }
         });
         return collected;
     }
 
-    private static void failComparison(String message, EAVNode expected, EAVNode actual) {
+    private static <T extends AbstractNode<T>>  void failComparison(String message, AbstractNode<T> expected, AbstractNode<T> actual) {
         assertEquals(message, treeString(expected), treeString(actual));
         fail(message);
     }
 
-    private static String treeString(EAVNode node) {
+    private static <T extends AbstractNode<T>> String treeString(AbstractNode<T> node) {
         final StringBuilder builder = new StringBuilder("\n");
-        final EAVValuePrettyPrint prettyPrinter = new EAVValuePrettyPrint();
-        final EAVMultiplePrettyPrint prettyPrinterMultiple = new EAVMultiplePrettyPrint();
+       
+        node.visit(new AbstractNodeVisitor<T>() {
 
-        node.visit(new EAVNodeVisitor() {
-
-            public void visit(int index, EAVNode node) {
+            public void visit(int index, T node) {
                 for (int i = 0; i < index; i++) {
                     builder.append("    ");
                 }
                 builder.append(node.getName());
-                String pretty = (String) node.getType().doSwitch(
-                    node.isMultiple() ? prettyPrinterMultiple : prettyPrinter,
-                    node.getPayload());
-                if (pretty != null) {
-                    builder.append(" : ").append(pretty);
-                }
+                builder.append(printPayload(node));
                 builder.append('\n');
             }
         });
 
         return builder.toString();
     }
+    
+    
 
     protected void assertType(EAVTypeMetadataNode types, EAVType type, String... pathElements) {
         assertType(types, type, EAVContainerType.SINGLE, pathElements);
@@ -490,5 +477,82 @@ public class EAVUnitTest extends TestCase {
         }
         return retval;
     }
+    
+    // Pluggable
+    
+    private static <T extends AbstractNode<T>> boolean comparePayloads(AbstractNode<T> node1, AbstractNode<T> node2) {
+        return COMPARISON_STRATEGIES.get(node1.getClass()).comparePayloads(node1, node2);
+    }
+    
+    
+    private static <T extends AbstractNode<T>> String printPayload(AbstractNode<T> node) {
+        return COMPARISON_STRATEGIES.get(node.getClass()).printPayload(node);
+    }
+    
+    private static Map<Class, ComparisonStrategy> COMPARISON_STRATEGIES = new HashMap<Class, ComparisonStrategy>() {{
+        put(EAVNode.class, new EAVNodeComparisonStrategy());
+        put(EAVTypeMetadataNode.class, new EAVTypeMetadataComparisonStrategy());
+    }};
+    
+    private static interface ComparisonStrategy<T extends AbstractNode<T>> {
+        public String printPayload(T node);
+        public boolean comparePayloads(T node1, T node2);
+    }
+    
+    private static class EAVNodeComparisonStrategy implements ComparisonStrategy<EAVNode> {
+
+        public boolean comparePayloads(EAVNode expectedNode, EAVNode actualNode) {
+            if (!expectedNode.getType().equals(actualNode.getType())) {
+                return false;
+            }
+            if (expectedNode.getContainerType() != actualNode.getContainerType()) {
+                return false;
+            }
+            EAVTypeSwitcher compare = null;
+            if (expectedNode.isMultiple()) {
+                compare = new EAVMultipleCompare();
+            } else {
+                compare = new EAVPayloadCompare();
+            }
+            boolean equalPayloads = (Boolean) expectedNode.getType().doSwitch(compare, expectedNode.getPayload(), actualNode.getPayload());
+            if (!equalPayloads) {
+                return false;
+            }
+            return true;
+            
+        }
+
+        public String printPayload(EAVNode node) {
+            EAVTypeSwitcher pp = null;
+            if(node.isMultiple()) {
+                pp = new EAVMultiplePrettyPrint();
+            } else {
+                pp = new EAVValuePrettyPrint();
+            }
+            return (String) node.getType().doSwitch(pp, node.getPayload());
+        }
+        
+    }
+    
+    private static class EAVTypeMetadataComparisonStrategy implements ComparisonStrategy<EAVTypeMetadataNode> {
+
+        public boolean comparePayloads(EAVTypeMetadataNode node1, EAVTypeMetadataNode node2) {
+            boolean optionsMatch = node1.getOptions() == node2.getOptions();
+            if(!optionsMatch && (node1.getOptions() == null || node2.getOptions() == null)) {
+                optionsMatch = false;
+            } else {
+                optionsMatch = node1.getOptions().equals(node2.getOptions());
+            }
+            
+            
+            return node1.getContainerType() == node2.getContainerType() && node1.getType() == node2.getType() && optionsMatch;
+        }
+
+        public String printPayload(EAVTypeMetadataNode node) {
+            return node.getTypeDescription()+"  "+node.getOptions();
+        }
+        
+    }
+    
 
 }
