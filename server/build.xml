@@ -244,11 +244,6 @@
                 <include name="osgi/**"/>
             </fileset>
         </copy>
-        <chmod perm="660">
-            <fileset dir="${groupwareConfInstallCopyDir}">
-                <include name="osgi/**"/>
-            </fileset>
-        </chmod>
         <copy todir="${bin.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.bin.dir}"/>
         </copy>
