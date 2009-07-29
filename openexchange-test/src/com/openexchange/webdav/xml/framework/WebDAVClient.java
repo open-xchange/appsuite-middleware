@@ -101,8 +101,7 @@ public class WebDAVClient {
 
     public final void setAuth(final String login, final String password) {
         final HttpClient client = session.getClient();
-        client.getState().setCredentials(AuthScope.ANY,
-            new UsernamePasswordCredentials(login, password));
+        client.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
     }
 
     public enum User {

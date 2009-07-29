@@ -52,6 +52,7 @@ package com.openexchange.webdav.xml.framework;
 import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.auth.BasicScheme;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.jdom.JDOMException;
@@ -75,16 +76,13 @@ public final class Executor {
         super();
     }
 
-    public static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client,
-        final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
-        return execute(client, WebDAVConfig.getProperty(Property.PROTOCOL)
-            + "://" + WebDAVConfig.getProperty(Property.HOSTNAME), request);
+    public static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
+        return execute(client, WebDAVConfig.getProperty(Property.PROTOCOL) + "://" + WebDAVConfig.getProperty(Property.HOSTNAME), request);
     }
 
-    static <T extends AbstractWebDAVResponse> T execute(final WebDAVClient client, final String host,
-        final WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
-        final String urlString = host + request.getServletPath();
-        final HttpMethodBase method;
+    static <T extends AbstractWebDAVResponse> T execute(WebDAVClient client, String host, WebDAVRequest<T> request) throws IOException, JDOMException, OXException, TestException {
+        String urlString = host + request.getServletPath();
+        HttpMethodBase method;
         switch (request.getMethod()) {
         case PROPFIND:
             final EntityEnclosingMethod propFind = new PropFindMethod(urlString);
@@ -100,6 +98,7 @@ public final class Executor {
             throw new TestException("Unknown method.");
         }
         method.setDoAuthentication(true);
+        method.getHostAuthState().setAuthScheme(new BasicScheme());
         final int status = client.getSession().getClient().executeMethod(method);
         final AbstractWebDAVParser<T> parser = request.getParser();
         parser.checkResponse(status);
