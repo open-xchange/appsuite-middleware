@@ -53,6 +53,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -339,7 +341,7 @@ public class EAVUnitTest extends TestCase {
         return node;
     }
 
-    public static void assertEquals(EAVNode expected, EAVNode actual) {
+    public static <T extends AbstractNode<T>>  void assertEquals(AbstractNode<T> expected, AbstractNode<T> actual) {
         assertEquals("", expected, actual);
     }
 
@@ -410,7 +412,7 @@ public class EAVUnitTest extends TestCase {
 
     private static <T extends AbstractNode<T>> String treeString(AbstractNode<T> node) {
         final StringBuilder builder = new StringBuilder("\n");
-       
+        sortChildren(node);
         node.visit(new AbstractNodeVisitor<T>() {
 
             public void visit(int index, T node) {
@@ -418,12 +420,32 @@ public class EAVUnitTest extends TestCase {
                     builder.append("    ");
                 }
                 builder.append(node.getName());
+                builder.append(" : ");
                 builder.append(printPayload(node));
                 builder.append('\n');
             }
         });
 
         return builder.toString();
+    }
+    
+    private static <T extends AbstractNode<T>> void sortChildren(AbstractNode<T> node) {
+        if(node.isLeaf()) {
+            return;
+        }
+        Collections.sort(node.getChildren(), new Comparator<AbstractNode<T>>() {
+
+            public int compare(AbstractNode<T> o1, AbstractNode<T> o2) {
+                if(o1 == null) {
+                    return 1;
+                }
+                return o1.getName().compareTo(o2.getName());
+            }
+            
+        });
+        for(AbstractNode<T> child : node.getChildren()) {
+            sortChildren(child);
+        }
     }
     
     
