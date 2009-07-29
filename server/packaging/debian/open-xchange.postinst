@@ -428,6 +428,13 @@ postFix() {
   # run checkconfigconsistency once
   /opt/open-xchange/sbin/checkconfigconsistency
 
+  # Restrict permissions on configuration files.
+  chgrp open-xchange /opt/open-xchange/etc/common/*
+  chmod 640 /opt/open-xchange/etc/common/*
+  chgrp open-xchange /opt/open-xchange/etc/groupware/*.properties /opt/open-xchange/etc/groupware/*.ccf /opt/open-xchange/etc/groupware/*.xml /opt/open-xchange/etc/groupware/mime.types /opt/open-xchange/etc/groupware/*.sh /opt/open-xchange/etc/groupware/*.cfg
+  chmod 640 /opt/open-xchange/etc/groupware/*.properties /opt/open-xchange/etc/groupware/*.ccf /opt/open-xchange/etc/groupware/*.xml /opt/open-xchange/etc/groupware/mime.types /opt/open-xchange/etc/groupware/*.sh /opt/open-xchange/etc/groupware/*.cfg
+  chgrp open-xchange /opt/open-xchange/etc/groupware/servletmappings/*
+  chmod 640 /opt/open-xchange/etc/groupware/servletmappings/*
 }
 
 case "$1" in
@@ -461,12 +468,6 @@ rm -f /tmp/ox_chown_tmp_$$
 chmod 750 /var/log/open-xchange
 chown open-xchange: /var/log/open-xchange
 chown open-xchange: /opt/open-xchange/etc/groupware/osgi
-chgrp open-xchange /opt/open-xchange/etc/common/*
-chmod 640 /opt/open-xchange/etc/common/*
-chgrp open-xchange /opt/open-xchange/etc/groupware/*.properties /opt/open-xchange/etc/groupware/*.ccf /opt/open-xchange/etc/groupware/*.xml /opt/open-xchange/etc/groupware/mime.types /opt/open-xchange/etc/groupware/*.sh /opt/open-xchange/etc/groupware/*.cfg
-chmod 640 /opt/open-xchange/etc/groupware/*.properties /opt/open-xchange/etc/groupware/*.ccf /opt/open-xchange/etc/groupware/*.xml /opt/open-xchange/etc/groupware/mime.types /opt/open-xchange/etc/groupware/*.sh /opt/open-xchange/etc/groupware/*.cfg
-chgrp open-xchange /opt/open-xchange/etc/groupware/servletmappings/*
-chmod 640 /opt/open-xchange/etc/groupware/servletmappings/*
 
 update-rc.d open-xchange-groupware defaults > /dev/null
 
