@@ -113,16 +113,15 @@ public class TypeMetadateTest extends EAVUnitTest {
                     createNode("joinedDate", EAVType.TIME, null, "timezone", "Europe/Berlin"),
                     createNode("favoriteColors", EAVType.STRING, EAVContainerType.SET, null, null),
                     createNode("creditCardInformation", null, null, null, null,
-                        createNode("type", EAVType.NUMBER, null, null, null),
+                        createNode("type", EAVType.STRING, null, null, null),
                         createNode("number", EAVType.STRING, null, null, null)),
                     createNode("t", EAVType.STRING, EAVContainerType.MULTISET, "option123", "optionValue123")));
     }
     
-    // TODO: assertEquals(EAVTypeMetadataNode node, EAVTypeMetadataNode node)
-    public void no_testParsing() throws Exception {
+    public void testParsing() throws Exception {
         JSONTypeMetadataParser parser = new JSONTypeMetadataParser("types", json);
         EAVTypeMetadataNode result = parser.getEAVNode();
-        assertEquals(node, result);
+        assertEquals("bumm", node, result);
     }
     
     public void testBad() throws Exception {
