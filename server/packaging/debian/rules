@@ -33,7 +33,7 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 	ANT_OPTS=-Xmx80m ant -Ddestdir=$(serverroot) installJars
-	ANT_OPTS=-Xmx80m ant -Ddestdir=$(scriptroot) installExceptJars installConfig
+	ANT_OPTS=-Xmx80m ant -Ddestdir=$(scriptroot) installConfig installExceptJars
 	
 # Build architecture-independent files here.
 binary-indep: build install
