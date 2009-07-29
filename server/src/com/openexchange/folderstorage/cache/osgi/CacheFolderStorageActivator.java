@@ -56,6 +56,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -93,8 +94,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         }
         getServiceRegistry().addService(clazz, getService(clazz));
         if (CacheService.class.equals(clazz)) {
-            // TODO: Register folder storage
-            folderStorageRegistration = null;
+            // Register folder storage
+            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new CacheFolderStorage(), dictionary);
         }
     }
 
@@ -129,8 +130,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
             }
-            // TODO: Register folder storage
-            folderStorageRegistration = null;
+            // Register folder storage
+            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new CacheFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
