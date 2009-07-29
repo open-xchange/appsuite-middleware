@@ -179,6 +179,12 @@ postFix() {
 	  ox_set_property ACCESS_COMBINATIONS_FILE '$PWD/etc/admindaemon/ModuleAccessDefinitions.properties' $pfile
       }
   fi
+
+  # Restrict permissions on configuration files.
+  chgrp open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
+  chmod 640 /opt/open-xchange/etc/admindaemon/mysql/*.sql
+  chgrp open-xchange /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
+  chmod 640 /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
 }
 
 
@@ -201,11 +207,6 @@ case "$1" in
         exit 1
     ;;
 esac
-
-chgrp open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
-chmod 640 /opt/open-xchange/etc/admindaemon/mysql/*.sql
-chgrp open-xchange /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
-chmod 640 /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
 
 update-rc.d open-xchange-admin defaults > /dev/null
 
