@@ -50,10 +50,13 @@
 package com.openexchange.folderstorage.cache.osgi;
 
 import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
@@ -75,6 +78,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     private ServiceRegistration folderStorageRegistration;
 
     private CacheFolderStorage cacheFolderStorage;
+
+    private List<ServiceTracker> serviceTrackers;
 
     /**
      * Initializes a new {@link CacheFolderStorageActivator}.
@@ -140,6 +145,12 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
             }
             initCacheFolderStorage();
+            // Register service trackers
+            serviceTrackers = new ArrayList<ServiceTracker>(4);
+            serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new CacheFolderStorageServiceTracker(context)));
+            for (final ServiceTracker serviceTracker : serviceTrackers) {
+                serviceTracker.open();
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -149,6 +160,14 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            // Drop service trackers
+            if (null != serviceTrackers) {
+                for (final ServiceTracker serviceTracker : serviceTrackers) {
+                    serviceTracker.close();
+                }
+                serviceTrackers.clear();
+                serviceTrackers = null;
+            }
             disposeCacheFolderStorage();
             /*
              * Clear service registry

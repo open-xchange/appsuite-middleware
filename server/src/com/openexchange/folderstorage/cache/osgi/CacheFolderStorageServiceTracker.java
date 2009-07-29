@@ -47,28 +47,26 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.folderstorage.cache.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 
 /**
- * {@link FolderStorageTracker} - TODO Short description of this class' purpose.
+ * {@link CacheFolderStorageServiceTracker} - A {@link ServiceTrackerCustomizer customizer} for cache folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderStorageTracker implements ServiceTrackerCustomizer {
+public final class CacheFolderStorageServiceTracker implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderStorageTracker.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageServiceTracker.class);
 
     private final BundleContext context;
 
-    /**
-     * Initializes a new {@link FolderStorageTracker}.
-     */
-    public FolderStorageTracker(final BundleContext context) {
+    public CacheFolderStorageServiceTracker(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -89,11 +87,9 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
             treeId = obj.toString();
         }
         // Add to registry
-        if (FolderStorageRegistry.getInstance().addFolderStorage(treeId, (FolderStorage) addedService)) {
+        if (CacheFolderStorageRegistry.getInstance().addFolderStorage(treeId, (FolderStorage) addedService)) {
             return addedService;
         }
-        LOG.error(new StringBuilder(32).append("Failed registration to tree identifier \"").append(treeId).append("\" for ").append(
-            addedService.getClass().getName()).toString());
         // Nothing to track, return null
         context.ungetService(reference);
         return null;
@@ -117,7 +113,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
                     }
                     treeId = obj.toString();
                 }
-                FolderStorageRegistry.getInstance().removeFolderStorage(treeId, (FolderStorage) service);
+                CacheFolderStorageRegistry.getInstance().removeFolderStorage(treeId, (FolderStorage) service);
             } finally {
                 context.ungetService(reference);
             }

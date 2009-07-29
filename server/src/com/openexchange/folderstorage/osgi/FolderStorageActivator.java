@@ -49,10 +49,17 @@
 
 package com.openexchange.folderstorage.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.FolderExceptionFactory;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -65,6 +72,10 @@ public final class FolderStorageActivator implements BundleActivator {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class);
 
     private ComponentRegistration componentRegistration;
+
+    private List<ServiceRegistration> serviceRegistrations;
+
+    private List<ServiceTracker> serviceTrackers;
 
     /**
      * Initializes a new {@link FolderStorageActivator}.
@@ -81,6 +92,15 @@ public final class FolderStorageActivator implements BundleActivator {
                 EnumComponent.FOLDER,
                 "com.openexchange.folderstorage",
                 FolderExceptionFactory.getInstance());
+            // Register services
+            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+            // Register service trackers
+            serviceTrackers = new ArrayList<ServiceTracker>(4);
+            serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));
+            for (final ServiceTracker serviceTracker : serviceTrackers) {
+                serviceTracker.open();
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -89,6 +109,22 @@ public final class FolderStorageActivator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
+            // Drop service trackers
+            if (null != serviceTrackers) {
+                for (final ServiceTracker serviceTracker : serviceTrackers) {
+                    serviceTracker.close();
+                }
+                serviceTrackers.clear();
+                serviceTrackers = null;
+            }
+            // Unregister previously registered services
+            if (null != serviceRegistrations) {
+                for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
+                    serviceRegistration.unregister();
+                }
+                serviceRegistrations.clear();
+                serviceRegistrations = null;
+            }
             // Unregister previously registered component
             if (null != componentRegistration) {
                 componentRegistration.unregister();
