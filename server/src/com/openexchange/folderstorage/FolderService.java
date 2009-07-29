@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link FolderService} - The folder service.
@@ -67,6 +68,17 @@ public interface FolderService {
      * @throws FolderException If folder cannot be returned
      */
     Folder getFolder(String treeId, String folderId) throws FolderException;
+
+    /**
+     * Gets this storage's default folder for specified user.
+     * 
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param contentType The content type or the default folder
+     * @return The default folder for specified user
+     * @throws FolderException If the default folder cannot be returned
+     */
+    Folder getDefaultFolder(User user, String treeId, ContentType contentType) throws FolderException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.

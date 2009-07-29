@@ -59,7 +59,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
-import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.StoragePriority;
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.folderstorage.StoragePriority;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderStorageRegistry implements FolderStorageService {
+public final class FolderStorageRegistry {
 
     private static final FolderStorageRegistry instance = new FolderStorageRegistry();
 
@@ -141,6 +140,13 @@ public final class FolderStorageRegistry implements FolderStorageService {
         return true;
     }
 
+    /**
+     * Gets the folder storages for specified tree-folder-pair.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The folder storages for specified tree-folder-pair
+     */
     public FolderStorage[] getFolderStorages(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -184,6 +190,13 @@ public final class FolderStorageRegistry implements FolderStorageService {
         return tmp.toArray(new FolderStorage[tmp.size()]);
     }
 
+    /**
+     * Gets the folder storage capable to handle given content type in specified tree.
+     * 
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @return The folder storage capable to handle given content type in specified tree
+     */
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         return ContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }

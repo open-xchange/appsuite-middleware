@@ -103,13 +103,13 @@ public interface FolderStorage {
     Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
-     * Gets this storage's default folder for specified entity identifier.
+     * Gets this storage's default folder for specified user.
      * 
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param contentType The content type or the default folder
      * @param storageParameters The storage parameters
-     * @return The default folder for specified entity identifier
+     * @return The default folder for specified user
      * @throws FolderException If the default folder cannot be returned
      */
     Folder getDefaultFolder(User user, String treeId, ContentType contentType, StorageParameters storageParameters) throws FolderException;

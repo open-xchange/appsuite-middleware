@@ -57,8 +57,8 @@ import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.virtual.VirtualFolderDeleteListener;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask;
@@ -91,7 +91,7 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, FolderStorageService.class };
+        return new Class<?>[] { DatabaseService.class, FolderService.class };
     }
 
     @Override

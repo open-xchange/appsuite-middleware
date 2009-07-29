@@ -51,11 +51,8 @@ package com.openexchange.folderstorage.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.FolderExceptionFactory;
-import com.openexchange.folderstorage.FolderStorageService;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -68,8 +65,6 @@ public final class FolderStorageActivator implements BundleActivator {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class);
 
     private ComponentRegistration componentRegistration;
-
-    private ServiceRegistration serviceRegistration;
 
     /**
      * Initializes a new {@link FolderStorageActivator}.
@@ -86,8 +81,6 @@ public final class FolderStorageActivator implements BundleActivator {
                 EnumComponent.FOLDER,
                 "com.openexchange.folderstorage",
                 FolderExceptionFactory.getInstance());
-            // Register folder storage service
-            serviceRegistration = context.registerService(FolderStorageService.class.getName(), FolderStorageRegistry.getInstance(), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -96,11 +89,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
-            // Unregister previously registered services/components
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
+            // Unregister previously registered component
             if (null != componentRegistration) {
                 componentRegistration.unregister();
                 componentRegistration = null;

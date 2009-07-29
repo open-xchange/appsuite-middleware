@@ -53,9 +53,8 @@ import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -108,30 +107,15 @@ public final class VirtualFolderStorage implements FolderStorage {
         final VirtualFolder virtualFolder;
         {
             // Get real folder
-            final FolderStorageService storageService;
+            final FolderService folderService;
             try {
-                storageService = VirtualServiceRegistry.getServiceRegistry().getService(FolderStorageService.class, true);
+                folderService = VirtualServiceRegistry.getServiceRegistry().getService(FolderService.class, true);
             } catch (final ServiceException e) {
                 throw new FolderException(e);
             }
-            final FolderStorage realFolderStorage = storageService.getFolderStorageByContentType(FolderStorage.REAL_TREE_ID, contentType);
-            if (null == realFolderStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, contentType);
-            }
-            realFolderStorage.startTransaction(storageParameters, false);
-            try {
-                final Folder realFolder = realFolderStorage.getDefaultFolder(
-                    user,
-                    FolderStorage.REAL_TREE_ID,
-                    contentType,
-                    storageParameters);
-                virtualFolder = new VirtualFolder(realFolder);
-                virtualFolder.setTreeID(String.valueOf(treeId));
-                realFolderStorage.commitTransaction(storageParameters);
-            } catch (final FolderException e) {
-                realFolderStorage.rollback(storageParameters);
-                throw e;
-            }
+            final Folder realFolder = folderService.getDefaultFolder(user, FolderStorage.REAL_TREE_ID, contentType);
+            virtualFolder = new VirtualFolder(realFolder);
+            virtualFolder.setTreeID(treeId);
         }
         // Load folder data from database
         Select.fillFolder(
@@ -146,28 +130,15 @@ public final class VirtualFolderStorage implements FolderStorage {
         final VirtualFolder virtualFolder;
         {
             // Get real folder
-            final FolderStorageService storageService;
+            final FolderService folderService;
             try {
-                storageService = VirtualServiceRegistry.getServiceRegistry().getService(FolderStorageService.class, true);
+                folderService = VirtualServiceRegistry.getServiceRegistry().getService(FolderService.class, true);
             } catch (final ServiceException e) {
                 throw new FolderException(e);
             }
-            final FolderStorage[] realFolderStorages = storageService.getFolderStorages(FolderStorage.REAL_TREE_ID, folderId);
-            if (null == realFolderStorages || realFolderStorages.length == 0) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
-            }
-            // Select first storage to load folder
-            final FolderStorage realFolderStorage = realFolderStorages[0];
-            realFolderStorage.startTransaction(storageParameters, false);
-            try {
-                final Folder realFolder = realFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
-                virtualFolder = new VirtualFolder(realFolder);
-                virtualFolder.setTreeID(String.valueOf(treeId));
-                realFolderStorage.commitTransaction(storageParameters);
-            } catch (final FolderException e) {
-                realFolderStorage.rollback(storageParameters);
-                throw e;
-            }
+            final Folder realFolder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId);
+            virtualFolder = new VirtualFolder(realFolder);
+            virtualFolder.setTreeID(treeId);
         }
         // Load folder data from database
         Select.fillFolder(
