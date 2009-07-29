@@ -76,4 +76,9 @@ public final class InfostoreContentType implements ContentType {
         super();
     }
 
+    @Override
+    public String toString() {
+        return "infostore";
+    }
+
 }

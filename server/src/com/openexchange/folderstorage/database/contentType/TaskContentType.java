@@ -76,4 +76,9 @@ public final class TaskContentType implements ContentType {
         super();
     }
 
+    @Override
+    public String toString() {
+        return "task";
+    }
+
 }

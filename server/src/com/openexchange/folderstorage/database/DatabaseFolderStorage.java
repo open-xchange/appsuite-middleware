@@ -219,7 +219,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         final Context context = storageParameters.getContext();
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
@@ -239,7 +239,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     contentType.toString(),
                     Integer.valueOf(context.getContextId())));
             }
-            return getFolder(treeId, String.valueOf(folderId), storageParameters);
+            return String.valueOf(folderId);
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         } catch (final SQLException e) {

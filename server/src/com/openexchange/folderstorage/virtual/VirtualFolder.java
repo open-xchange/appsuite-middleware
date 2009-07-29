@@ -62,6 +62,8 @@ import com.openexchange.folderstorage.Type;
  */
 public final class VirtualFolder implements Folder {
 
+    private static final long serialVersionUID = 1076412172524386127L;
+
     private final Folder realFolder;
 
     private String treeId;
@@ -164,6 +166,10 @@ public final class VirtualFolder implements Folder {
 
     public boolean isVirtual() {
         return true;
+    }
+
+    public boolean isGlobalID() {
+        return realFolder.isGlobalID();
     }
 
 }

@@ -76,4 +76,9 @@ public final class MailContentType implements ContentType {
         super();
     }
 
+    @Override
+    public String toString() {
+        return "mail";
+    }
+
 }

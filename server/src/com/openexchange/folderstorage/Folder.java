@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 /**
@@ -56,7 +57,7 @@ import java.util.Locale;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Folder {
+public interface Folder extends Serializable {
 
     /**
      * Indicates if this folder is virtual.
@@ -64,6 +65,13 @@ public interface Folder {
      * @return <code>true</code> if this folder is virtual; otherwise <code>false</code>
      */
     public boolean isVirtual();
+
+    /**
+     * Indicates whether this folder's identifier is globally unique, meaning not bound to a certain user.
+     * 
+     * @return <code>true</code> if this folder's identifier is globally unique; otherwise <code>false</code>
+     */
+    public boolean isGlobalID();
 
     /**
      * Gets the tree ID.
@@ -134,6 +142,7 @@ public interface Folder {
      * Sets the name.
      * 
      * @param name The name to set
+     * @see #getLocalizedName(Locale)
      */
     public void setName(String name);
 

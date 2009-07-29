@@ -49,12 +49,12 @@
 
 package com.openexchange.folderstorage.cache;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.StoragePriority;
 
@@ -104,6 +104,24 @@ public final class CacheFolderStorageRegistry {
         if (StoragePriority.HIGHEST == folderStorage.getStoragePriority()) {
             return false;
         }
+        // Register storage's content types
+        final ContentType[] contentTypes = folderStorage.getSupportedContentTypes();
+        if (null != contentTypes && contentTypes.length > 0) {
+            boolean success = true;
+            for (int i = 0; success && i < contentTypes.length; i++) {
+                success = CacheContentTypeRegistry.getInstance().addContentType(treeId, contentTypes[i], folderStorage);
+            }
+            if (!success) {
+                for (int i = 0; i < contentTypes.length; i++) {
+                    CacheContentTypeRegistry.getInstance().removeContentType(treeId, contentTypes[i]);
+                }
+                return false;
+            }
+        } else {
+            if (!CacheContentTypeRegistry.getInstance().addGeneralContentType(treeId, folderStorage)) {
+                return false;
+            }
+        }
         // Register by tree identifier
         if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
             genStorages.add(folderStorage);
@@ -122,13 +140,13 @@ public final class CacheFolderStorageRegistry {
     }
 
     /**
-     * Gets the folder storages for specified tree-folder-pair.
+     * Gets the folder storage for specified tree-folder-pair.
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
-     * @return The folder storages for specified tree-folder-pair
+     * @return The folder storage for specified tree-folder-pair
      */
-    public FolderStorage[] getFolderStorages(final String treeId, final String folderId) {
+    public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
              * Check general storages first
@@ -136,7 +154,7 @@ public final class CacheFolderStorageRegistry {
             for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 if (folderStorage.getFolderType().servesTreeId(treeId)) {
-                    return new FolderStorage[] { folderStorage };
+                    return null;
                 }
             }
         }
@@ -145,15 +163,25 @@ public final class CacheFolderStorageRegistry {
          */
         final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
-            return new FolderStorage[0];
+            return null;
         }
-        final List<FolderStorage> tmp = new ArrayList<FolderStorage>(storages.size());
         for (final FolderStorage folderStorage : storages) {
             if (folderStorage.getFolderType().servesFolderId(folderId)) {
-                tmp.add(folderStorage);
+                return folderStorage;
             }
         }
-        return tmp.toArray(new FolderStorage[tmp.size()]);
+        return null;
+    }
+
+    /**
+     * Gets the folder storage capable to handle given content type in specified tree.
+     * 
+     * @param treeId The tree identifier
+     * @param contentType The content type
+     * @return The folder storage capable to handle given content type in specified tree
+     */
+    public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
+        return CacheContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }
 
     /**
@@ -174,6 +202,15 @@ public final class CacheFolderStorageRegistry {
                 return;
             }
             storages.remove(folderStorage);
+        }
+        // Delete from content type registry
+        final ContentType[] contentTypes = folderStorage.getSupportedContentTypes();
+        if (null != contentTypes && contentTypes.length > 0) {
+            for (final ContentType contentType : contentTypes) {
+                CacheContentTypeRegistry.getInstance().removeContentType(treeId, contentType);
+            }
+        } else {
+            CacheContentTypeRegistry.getInstance().removeGeneralContentType(treeId, folderStorage);
         }
     }
 

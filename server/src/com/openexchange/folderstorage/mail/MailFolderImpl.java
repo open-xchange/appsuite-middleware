@@ -66,6 +66,8 @@ import com.openexchange.mail.utils.MailFolderUtility;
  */
 public final class MailFolderImpl extends AbstractFolder {
 
+    private static final long serialVersionUID = 6445442372690458946L;
+
     /**
      * Initializes an empty {@link MailFolderImpl}.
      */
@@ -114,7 +116,7 @@ public final class MailFolderImpl extends AbstractFolder {
         // Nothing to do
     }
 
-    public boolean isVirtual() {
+    public boolean isGlobalID() {
         return false;
     }
 

@@ -76,4 +76,9 @@ public final class ContactContentType implements ContentType {
         super();
     }
 
+    @Override
+    public String toString() {
+        return "contact";
+    }
+
 }

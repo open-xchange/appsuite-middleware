@@ -194,12 +194,12 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         if (!MailContentType.getInstance().equals(contentType)) {
             // TODO: Throw appropriate folder exception
         }
         // Return primary account's INBOX folder
-        return getFolder(treeId, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), storageParameters);
+        return MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {

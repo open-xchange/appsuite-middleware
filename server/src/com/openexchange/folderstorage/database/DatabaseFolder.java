@@ -71,6 +71,8 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public final class DatabaseFolder extends AbstractFolder {
 
+    private static final long serialVersionUID = -4035221612481906228L;
+
     /**
      * Initializes an empty {@link DatabaseFolder}.
      */
@@ -133,8 +135,8 @@ public final class DatabaseFolder extends AbstractFolder {
         return null;
     }
 
-    public boolean isVirtual() {
-        return false;
+    public boolean isGlobalID() {
+        return true;
     }
 
 }

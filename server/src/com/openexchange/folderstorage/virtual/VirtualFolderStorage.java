@@ -103,27 +103,15 @@ public final class VirtualFolderStorage implements FolderStorage {
             folderId);
     }
 
-    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
-        final VirtualFolder virtualFolder;
-        {
-            // Get real folder
-            final FolderService folderService;
-            try {
-                folderService = VirtualServiceRegistry.getServiceRegistry().getService(FolderService.class, true);
-            } catch (final ServiceException e) {
-                throw new FolderException(e);
-            }
-            final Folder realFolder = folderService.getDefaultFolder(user, FolderStorage.REAL_TREE_ID, contentType);
-            virtualFolder = new VirtualFolder(realFolder);
-            virtualFolder.setTreeID(treeId);
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+        // Get real folder
+        final FolderService folderService;
+        try {
+            folderService = VirtualServiceRegistry.getServiceRegistry().getService(FolderService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
         }
-        // Load folder data from database
-        Select.fillFolder(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
-            storageParameters.getUser().getId(),
-            virtualFolder);
-        return virtualFolder;
+        return folderService.getDefaultFolder(user, FolderStorage.REAL_TREE_ID, contentType).getID();
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {

@@ -56,6 +56,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
@@ -71,11 +72,15 @@ import com.openexchange.server.ServiceException;
  */
 public final class CacheFolderStorage implements FolderStorage {
 
-    private static final String FOLDER_CACHE_REGION_NAME = "FolderCache";
+    private static final String GLOBAL_FOLDER_CACHE_REGION_NAME = "GlobalFolderCache";
+
+    private static final String USER_FOLDER_CACHE_REGION_NAME = "UserFolderCache";
 
     private CacheService cacheService;
 
-    private Cache cache;
+    private Cache globalCache;
+
+    private Cache userCache;
 
     /**
      * Initializes a new {@link CacheFolderStorage}.
@@ -93,7 +98,8 @@ public final class CacheFolderStorage implements FolderStorage {
         try {
             cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
             // TODO: cacheService.loadConfiguration();
-            cache = cacheService.getCache(FOLDER_CACHE_REGION_NAME);
+            globalCache = cacheService.getCache(GLOBAL_FOLDER_CACHE_REGION_NAME);
+            userCache = cacheService.getCache(USER_FOLDER_CACHE_REGION_NAME);
         } catch (final ServiceException e) {
             throw new FolderException(e);
         } catch (final CacheException e) {
@@ -107,16 +113,28 @@ public final class CacheFolderStorage implements FolderStorage {
      * @throws FolderException If disposal of this folder cache fails
      */
     public void onCacheAbsent() throws FolderException {
-        if (cache != null) {
+        if (globalCache != null) {
             try {
-                cache.clear();
+                globalCache.clear();
                 if (null != cacheService) {
-                    cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
+                    cacheService.freeCache(GLOBAL_FOLDER_CACHE_REGION_NAME);
                 }
             } catch (final CacheException e) {
                 throw new FolderException(e);
             } finally {
-                cache = null;
+                globalCache = null;
+            }
+        }
+        if (userCache != null) {
+            try {
+                userCache.clear();
+                if (null != cacheService) {
+                    cacheService.freeCache(USER_FOLDER_CACHE_REGION_NAME);
+                }
+            } catch (final CacheException e) {
+                throw new FolderException(e);
+            } finally {
+                userCache = null;
             }
         }
         if (cacheService != null) {
@@ -129,31 +147,121 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-
+        final String treeId = folder.getTreeID();
+        final String parentId = folder.getParentID();
+        final Folder createdFolder;
+        {
+            final FolderStorage storage = CacheFolderStorageRegistry.getInstance().getFolderStorage(treeId, parentId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
+            }
+            storage.startTransaction(storageParameters, true);
+            try {
+                storage.createFolder(folder, storageParameters);
+                createdFolder = storage.getFolder(treeId, folder.getID(), storageParameters);
+                storage.commitTransaction(storageParameters);
+            } catch (final FolderException e) {
+                storage.rollback(storageParameters);
+                throw e;
+            }
+        }
+        /*
+         * Put to cache
+         */
+        try {
+            final CacheKey key;
+            final String id = createdFolder.getID();
+            if (createdFolder.isGlobalID()) {
+                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
+                globalCache.put(key, createdFolder);
+            } else {
+                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
+                userCache.put(key, createdFolder);
+            }
+        } catch (final CacheException e) {
+            throw new FolderException(e);
+        }
     }
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-
+        final FolderStorage storage = CacheFolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        storage.startTransaction(storageParameters, true);
+        try {
+            storage.deleteFolder(treeId, folderId, storageParameters);
+            storage.commitTransaction(storageParameters);
+        } catch (final FolderException e) {
+            storage.rollback(storageParameters);
+            throw e;
+        }
     }
 
-    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
+    public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+        final FolderStorage storage = CacheFolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
+        }
+        final String folderId;
+        storage.startTransaction(storageParameters, false);
+        try {
+            folderId = storage.getDefaultFolderID(user, treeId, contentType, storageParameters);
+            storage.commitTransaction(storageParameters);
+        } catch (final FolderException e) {
+            storage.rollback(storageParameters);
+            throw e;
+        }
+        return folderId;
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        return null;
+        // Try global cache key
+        final int contextId = storageParameters.getContext().getContextId();
+        CacheKey key = newCacheKey(folderId, treeId, contextId);
+        Folder folder = (Folder) globalCache.get(key);
+        if (null == folder) {
+            // Try user cache key
+            key = newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId());
+            folder = (Folder) userCache.get(key);
+        }
+        if (null == folder) {
+            final FolderStorage storage = CacheFolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+            }
+            storage.startTransaction(storageParameters, false);
+            try {
+                folder = storage.getFolder(treeId, folderId, storageParameters);
+                storage.commitTransaction(storageParameters);
+            } catch (final FolderException e) {
+                storage.rollback(storageParameters);
+                throw e;
+            }
+            /*
+             * Put to cache
+             */
+            try {
+                if (folder.isGlobalID()) {
+                    key = newCacheKey(folderId, treeId, contextId);
+                    globalCache.put(key, folder);
+                } else {
+                    key = newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId());
+                    userCache.put(key, folder);
+                }
+            } catch (final CacheException e) {
+                throw new FolderException(e);
+            }
+        }
+        return folder;
     }
 
     public FolderType getFolderType() {
-        // TODO Auto-generated method stub
-        return null;
+        return CacheFolderType.getInstance();
     }
 
     public StoragePriority getStoragePriority() {
-        // TODO Auto-generated method stub
-        return null;
+        return StoragePriority.HIGHEST;
     }
 
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
@@ -162,8 +270,7 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public ContentType[] getSupportedContentTypes() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ContentType[0];
     }
 
     public void rollback(final StorageParameters params) {
@@ -175,11 +282,54 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
+        final String treeId = folder.getTreeID();
+        final String folderId = folder.getID();
+        final Folder updatedFolder;
+        {
+            final FolderStorage storage = CacheFolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folder);
+            }
+            storage.startTransaction(storageParameters, true);
+            try {
+                storage.updateFolder(folder, storageParameters);
+                updatedFolder = storage.getFolder(treeId, folderId, storageParameters);
+                storage.commitTransaction(storageParameters);
+            } catch (final FolderException e) {
+                storage.rollback(storageParameters);
+                throw e;
+            }
+        }
+        /*
+         * Put to cache
+         */
+        try {
+            final CacheKey key;
+            final String id = updatedFolder.getID();
+            if (updatedFolder.isGlobalID()) {
+                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
+                globalCache.put(key, updatedFolder);
+            } else {
+                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
+                userCache.put(key, updatedFolder);
+            }
+        } catch (final CacheException e) {
+            throw new FolderException(e);
+        }
 
     }
 
-    private static CacheKey newCacheKey(final CacheService cacheService, final String folderId, final String treeId, final int cid) {
+    /**
+     * Creates a key.
+     */
+    private CacheKey newCacheKey(final String folderId, final String treeId, final int cid) {
         return cacheService.newCacheKey(cid, treeId, folderId);
+    }
+
+    /**
+     * Creates a user-bound key.
+     */
+    private CacheKey newCacheKey(final String folderId, final String treeId, final int cid, final int user) {
+        return cacheService.newCacheKey(cid, Integer.valueOf(user), treeId, folderId);
     }
 }

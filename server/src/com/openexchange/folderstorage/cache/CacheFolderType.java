@@ -58,10 +58,21 @@ import com.openexchange.folderstorage.FolderType;
  */
 public final class CacheFolderType implements FolderType {
 
+    private static final CacheFolderType instance = new CacheFolderType();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance.
+     */
+    public static CacheFolderType getInstance() {
+        return instance;
+    }
+
     /**
      * Initializes a new {@link CacheFolderType}.
      */
-    public CacheFolderType() {
+    private CacheFolderType() {
         super();
     }
 

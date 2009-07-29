@@ -76,4 +76,9 @@ public final class CalendarContentType implements ContentType {
         super();
     }
 
+    @Override
+    public String toString() {
+        return "calendar";
+    }
+
 }

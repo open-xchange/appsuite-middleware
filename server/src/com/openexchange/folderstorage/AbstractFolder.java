@@ -159,4 +159,7 @@ public abstract class AbstractFolder implements Folder {
         this.subscribed = subscribed;
     }
 
+    public boolean isVirtual() {
+        return false;
+    }
 }

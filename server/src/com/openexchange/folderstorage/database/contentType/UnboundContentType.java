@@ -76,4 +76,9 @@ public final class UnboundContentType implements ContentType {
         super();
     }
 
+    @Override
+    public String toString() {
+        return "unbound";
+    }
+
 }
