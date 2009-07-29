@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.pop3" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -83,7 +84,7 @@
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJar,installInclude,installConfig"/>
+    <target name="install" depends="installJar,installConfig,installInclude"/>
 	
 	<target name="installConfig">
         <mkdir dir="${confInstallCopyDir}"/>

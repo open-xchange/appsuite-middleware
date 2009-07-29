@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.templating" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -76,22 +77,22 @@
     <target name="install" depends="installJar,installConfig,createTemplatingDir"/>
 
     <target name="installConfig" depends="patchConfig">
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${confInstallCopyDir}"/>
         <copy todir="${confInstallCopyDir}" overwrite="true">
-           <fileset dir="${tmp.dir}/${conf.dir}">
-              <include name="**" />
-              <exclude name="*.in"/>
-              <exclude name="CVS"/>
-              <exclude name="osgi/**"/>
-           </fileset>
-         </copy>
+            <fileset dir="${tmp.dir}/${conf.dir}">
+                <include name="**" />
+                <exclude name="*.in"/>
+                <exclude name="CVS"/>
+                <exclude name="osgi/**"/>
+            </fileset>
+        </copy>
         <chmod perm="640">
             <fileset dir="${confInstallCopyDir}">
                 <include name="**"/>
             </fileset>
         </chmod>
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
