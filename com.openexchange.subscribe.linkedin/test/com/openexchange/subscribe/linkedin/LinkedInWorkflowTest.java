@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.linkedin;
 
 import java.util.ArrayList;
+import java.util.Date;
+
 import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -66,6 +68,8 @@ public class LinkedInWorkflowTest extends TestCase {
 	
 	public void testLinkedInByCreatingStepsManually() {
 		
+		Date dateBefore = new Date();
+		
 		// insert valid credentials here
 		String username ="roxyexchanger@ox.io";
 		String password ="secret";
@@ -81,6 +85,8 @@ public class LinkedInWorkflowTest extends TestCase {
 			e.printStackTrace();
 		}
 		
+		Date dateAfter = new Date();
+		
 		assertTrue("There should be some contacts", contacts.length != 0);
 		for (Contact contact: contacts) {
 			System.out.println("contact retrieved is : " + contact.getDisplayName());
@@ -92,6 +98,8 @@ public class LinkedInWorkflowTest extends TestCase {
 	        System.out.println("----------");
 		}
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
+        System.out.println("Started import at : " + dateBefore.toString());
+        System.out.println("Finished import at : " + dateAfter.toString());
 	}
 	
 	public static void testInvalidWorkflow() {
@@ -99,7 +107,7 @@ public class LinkedInWorkflowTest extends TestCase {
 		try {
 			// insert valid location for the yml-file here
 			// insert valid credentials in the file
-			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
+			xingWorkflow = WorkflowFactory.createWorkflow("");
 			fail("Exception expected");
 		} catch (SubscriptionException e) {
 			assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());

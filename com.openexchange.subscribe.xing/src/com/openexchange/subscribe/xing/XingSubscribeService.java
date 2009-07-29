@@ -108,9 +108,9 @@ public class XingSubscribeService extends AbstractSubscribeService {
         return Arrays.asList(xingWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
     }
 
-    private Workflow getWorkflow() {
+    public Workflow getWorkflow() {
         List<Step> steps = new LinkedList<Step>(); 
-        steps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", "", "", "loginform", "login_user_name", "login_password","Home | XING"));
+        steps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", "", "", "loginform", "login_user_name", "login_password","/app/contact"));
         steps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
         steps.add(new ContactObjectsByVcardTextPagesStep());
         return new Workflow(steps);

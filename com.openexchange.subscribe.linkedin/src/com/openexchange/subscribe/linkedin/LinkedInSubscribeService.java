@@ -123,7 +123,7 @@ public class LinkedInSubscribeService extends AbstractSubscribeService  {
             "login",
             "session_key",
             "session_password",
-            "LinkedIn | Home"));
+            "/connections?trk=hb_side_cnts"));
         listOfSteps.add(new PageByUrlStep(
             "Get to the contacts list", 
             "http://www.linkedin.com/connections?trk=hb_side_cnts"));

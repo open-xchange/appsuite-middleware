@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.xing;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.Contact;
@@ -67,25 +68,25 @@ import junit.framework.TestCase;
 public class XingWorkflowTest extends TestCase {
 	
 	public void testXingByCreatingStepsManually() {
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
+		Date dateBefore = new Date();
 		
 		// insert valid credentials here
-		String username ="roxyexchanger@ox.io";
-		String password ="secret";
+		String username ="";
+		String password ="";
 		
-		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password","Home | XING"));
-		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
-		listOfSteps.add(new ContactObjectsByVcardTextPagesStep());
+		XingSubscribeService service = new XingSubscribeService();
 		
-		Workflow xingWorkflow = new Workflow(listOfSteps);
+		Workflow xingWorkflow = service.getWorkflow();
 		
 		Contact[] contacts = new Contact[0];
 		try {
-			contacts = xingWorkflow.execute();
+			contacts = xingWorkflow.execute(username, password);
 		} catch (SubscriptionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		Date dateAfter = new Date();
 		
 		assertTrue("There should be some contacts", contacts.length != 0);
 		Contact firstContact = contacts[0];
@@ -93,6 +94,9 @@ public class XingWorkflowTest extends TestCase {
 		Contact lastContact = contacts[contacts.length-1];
         System.out.println("last contact retrieved is : " + lastContact.getDisplayName());
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
+        
+        System.out.println("Started import at : " + dateBefore.toString());
+        System.out.println("Finished import at : " + dateAfter.toString());
 	}
 	
 	public void testXingByCreatingStepsViaYaml() {
@@ -101,7 +105,7 @@ public class XingWorkflowTest extends TestCase {
 		try {
 			// insert valid location for the yml-file here
 			// insert valid credentials in the file
-			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/XingWorkflow.yml");		
+			xingWorkflow = WorkflowFactory.createWorkflow("");		
 			contacts = xingWorkflow.execute();
 		} catch (SubscriptionException e) {
 			System.out.println(e.getMessage());
@@ -125,11 +129,17 @@ public class XingWorkflowTest extends TestCase {
 		String username ="someone@example.com";
 		String password ="invalid";
 		
-		listOfSteps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", username, password, "loginform", "login_user_name", "login_password", "Home | XING"));
-		listOfSteps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/vcard"));
-		listOfSteps.add(new ContactObjectsByVcardTextPagesStep());
+		XingSubscribeService service = new XingSubscribeService();
 		
-		Workflow xingWorkflow = new Workflow(listOfSteps);
+		Workflow xingWorkflow = service.getWorkflow();
+		
+		Contact[] contacts = new Contact[0];
+		try {
+			contacts = xingWorkflow.execute(username, password);
+			fail("Exception expected");
+		} catch (SubscriptionException e) {
+			assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_LOGIN.getDetailNumber(), e.getDetailNumber());
+		}
 		
 	}
 	
@@ -138,7 +148,7 @@ public class XingWorkflowTest extends TestCase {
 		try {
 			// insert valid location for the yml-file here
 			// insert valid credentials in the file
-			xingWorkflow = WorkflowFactory.createWorkflow("/Users/karstenwill/Desktop/InvalidWorkflow.yml");
+			xingWorkflow = WorkflowFactory.createWorkflow("");
 			fail("Exception expected");
 		} catch (SubscriptionException e) {
 			assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
