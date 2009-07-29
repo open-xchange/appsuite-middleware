@@ -84,8 +84,7 @@ public class JSONTypeMetadataParser implements JSONTypeMetadataParserInterface {
         try {
             parseJson(json, node);
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw EAVJsonExceptionMessage.JSONException.create(e);
         }
         return node;
     }
