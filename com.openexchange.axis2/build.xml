@@ -117,8 +117,6 @@
     <target name="install" depends="installJar,installConfig,installAxis2Resources"/>
 
     <target name="installConfig" depends="replacer">
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
         <copy todir="${destdir}/${axis2dir}">
             <fileset refid="metainf"/>
         </copy>
@@ -130,6 +128,8 @@
                 <include name="**"/>
             </fileset>
         </chmod>
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
 	</target>
 
     <target name="installAxis2Resources">
