@@ -36,6 +36,10 @@ postFix() {
 	  ox_set_property NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME webmail_plus $pfile
       }
   fi
+
+  # Restrict permissions of configuration files.
+  chgrp open-xchange /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
+  chmod 640 /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
 }
 
 case "$1" in
@@ -57,9 +61,6 @@ case "$1" in
         exit 1
     ;;
 esac
-
-chgrp open-xchange /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
-chmod 640 /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
 
 #if ox_isrunning; then
 #    invoke-rc.d open-xchange-admin restart
