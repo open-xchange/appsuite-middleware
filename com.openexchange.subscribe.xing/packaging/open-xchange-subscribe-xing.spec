@@ -4,7 +4,7 @@
 Name:           open-xchange-subscribe-xing
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf open-xchange-subscribe-crawler
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Subscriptions for XING address book
-Requires:       open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf
+Requires:       open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf open-xchange-subscribe-crawler
 
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
