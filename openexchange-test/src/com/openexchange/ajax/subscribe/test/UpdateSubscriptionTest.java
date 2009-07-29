@@ -79,7 +79,7 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         subMgr.setFormDescription(formDescription);
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(expected.getSource());
-        subMgr.setSubscriptionSourceRecoveryService(discovery);
+        subMgr.setSubscriptionSourceDiscoveryService(discovery);
         
         //create as pre-requisite
         subMgr.newAction(expected);
@@ -108,7 +108,7 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
         subMgr.setFormDescription(formDescription);
         SimSubscriptionSourceDiscoveryService discovery = new SimSubscriptionSourceDiscoveryService();
         discovery.addSource(expected.getSource());
-        subMgr.setSubscriptionSourceRecoveryService(discovery);
+        subMgr.setSubscriptionSourceDiscoveryService(discovery);
         
         //create as pre-requisite
         subMgr.newAction(expected);
