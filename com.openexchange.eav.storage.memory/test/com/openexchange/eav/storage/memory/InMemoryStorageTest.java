@@ -50,7 +50,6 @@
 package com.openexchange.eav.storage.memory;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.HashSet;
 import com.openexchange.eav.EAVContainerType;
 import com.openexchange.eav.EAVException;
@@ -365,7 +364,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
 
         storage.insert(ctx, PARENT, tree);
         
-        EAVPath subObjectPath = tree.getChildByName("subObject").getPath();
+        EAVPath subObjectPath = new EAVPath("subObject");
         
         EAVNode loaded = storage.get(ctx, PARENT.append("com.openexchange.test"), new HashSet<EAVPath>(subObjectPath.subpaths("smallBinary", "smallBinary2")));
 

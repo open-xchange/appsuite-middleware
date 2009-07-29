@@ -58,6 +58,7 @@ import com.openexchange.eav.EAVUnitTest;
 import com.openexchange.eav.json.write.JSONWriter;
 import com.openexchange.eav.json.write.JSONWriterInterface;
 import com.openexchange.json.JSONAssertion;
+import com.openexchange.tools.encoding.Base64;
 
 
 public class WriterTest extends EAVUnitTest {
@@ -74,6 +75,8 @@ public class WriterTest extends EAVUnitTest {
                     multiDate,
                     singleTime,
                     multiTime,
+                    singleBinary,
+                    multiBinary,
                     complex;
 
     public void setUp() throws Exception {
@@ -127,6 +130,15 @@ public class WriterTest extends EAVUnitTest {
             N("exampleTimes", EAVType.TIME, 1230814800000L, 1233493200000L)
         );
         
+        byte[] bytes = "Hello World".getBytes("UTF-8");
+        singleBinary = N("com.openexchange.test",
+            N("exampleBinary", bytes)
+        );
+        
+        multiBinary = N("com.openexchange.test",
+            N("exampleBinaries", bytes, bytes)
+        );
+        
         complex = N("com.openexchange.test", 
             N("exampleString", "Hallo"),
             N("exampleBoolean", true),
@@ -174,6 +186,13 @@ public class WriterTest extends EAVUnitTest {
         json = writer.getJson();
         assertion = prepareSingleAssertion("exampleTime", 1230814800000L);
         assertValidates(assertion, json);
+        
+        writer = new JSONWriter(singleBinary);
+        json = writer.getJson();
+        assertion = prepareSingleAssertion("exampleBinary", Base64.encode("Hello World".getBytes("UTF-8")));
+        assertValidates(assertion, json);
+        
+        
     }
     
     public void testMultiple() throws Exception {
@@ -205,6 +224,12 @@ public class WriterTest extends EAVUnitTest {
         writer = new JSONWriter(multiTime);
         json = writer.getJson();
         assertion = prepareMultipleAssertion("exampleTimes", 1230814800000L, 1233493200000L);
+        assertValidates(assertion, json);
+        
+        writer = new JSONWriter(multiBinary);
+        json = writer.getJson();
+        String encoded = Base64.encode("Hello World".getBytes("UTF-8"));
+        assertion = prepareMultipleAssertion("exampleBinaries", encoded, encoded);
         assertValidates(assertion, json);
     }
     

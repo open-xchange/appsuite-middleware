@@ -58,7 +58,10 @@ public class EAVJsonExceptionStrings implements LocalizableStrings {
 
     // A JSON exception occurred.
     public static final String JSONException = "A JSON exception occurred.";
-    
+
+    // An IO Exception occurred
+    public static final String IOException = "An IO Exception occurred";
+
     // Invalid type: %1$s.
     public static final String InvalidType = "Invalid type: %1$s.";
     

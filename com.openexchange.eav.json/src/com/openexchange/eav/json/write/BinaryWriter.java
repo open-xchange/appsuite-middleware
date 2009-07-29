@@ -47,34 +47,79 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.json.write;
 
-import junit.framework.TestCase;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVType;
+import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
+import com.openexchange.tools.encoding.Base64;
 
 
 /**
- * {@link EAVPathTest}
+ * {@link BinaryWriter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVPathTest extends TestCase {
-    
-    public void testAppend() {
-        assertEquals(new EAVPath("1", "2"), new EAVPath("1").append("2"));
+public class BinaryWriter extends AbstractWriter<String>{
+    {
+        TYPES = EnumSet.of(EAVType.BINARY);
     }
     
-    public void testShiftLeft() {
-        assertEquals(new EAVPath("2", "3", "4"), new EAVPath("1","2", "3", "4").shiftLeft());
+    private static final Log LOG = LogFactory.getLog(BinaryWriter.class);
+    
+    public void write(EAVNode node, JSONObject json) throws JSONException, EAVJsonException {
+        if (node.isMultiple()) {
+            writeMultiple(node.getName(), encode((InputStream[]) node.getPayload()), json);
+        } else {
+            writeSingle(node.getName(), encode((InputStream) node.getPayload()), json);
+        }
     }
     
-    public void testParse() {
-        EAVPath path = EAVPath.parse("/contacts/12/13/com.openexchange.test/attribute");
-        assertEquals(new EAVPath("contacts", "12", "13", "com.openexchange.test", "attribute"), path);
+    private String[] encode(InputStream[] payload) throws EAVJsonException {
+        String[] retval = new String[payload.length];
+        int index = 0;
+        for (InputStream inputStream : payload) {
+            retval[index++] = encode(inputStream);
+        }
+        return retval;
     }
-    
-    public void testParseEmpty() {
-        EAVPath path = EAVPath.parse("");
-        assertEquals(new EAVPath(), path);
+
+    private String encode(InputStream payload) throws EAVJsonException {
+        BufferedInputStream inputStream = new BufferedInputStream(payload);
+        try {
+            List<Byte> bytes = new ArrayList<Byte>(1024);
+            int read = -1;
+            while((read = inputStream.read()) != -1) {
+                bytes.add((byte)read);
+            }
+            byte[] byteArr = new byte[bytes.size()];
+            int index = 0;
+            for (Byte byte1 : bytes) {
+                byteArr[index++] = byte1;
+            }
+            
+            return Base64.encode(byteArr);
+        } catch (IOException x) {
+            throw EAVJsonExceptionMessage.IOException.create(x);
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } 
     }
+
 }

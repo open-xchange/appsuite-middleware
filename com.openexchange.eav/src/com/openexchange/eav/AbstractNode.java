@@ -86,7 +86,10 @@ public abstract class AbstractNode<T extends AbstractNode<T>> {
     public boolean isRoot() {
         return parent == null;
     }
-
+    
+    public void setParent(T parent) {
+        this.parent = parent;
+    }
 
     public List<T> getChildren() {
         return children;

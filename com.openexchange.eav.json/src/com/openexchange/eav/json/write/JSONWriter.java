@@ -76,7 +76,8 @@ public class JSONWriter implements JSONWriterInterface {
                                 new StringWriter(),
                                 new BooleanWriter(),
                                 new DateTimeWriter(),
-                                new NumberWriter());
+                                new NumberWriter(),
+                                new BinaryWriter());
     }
 
     public JSONObject getJson() throws EAVJsonException {

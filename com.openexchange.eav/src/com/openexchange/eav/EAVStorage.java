@@ -49,32 +49,33 @@
 
 package com.openexchange.eav;
 
-import junit.framework.TestCase;
-
+import java.util.Set;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link EAVPathTest}
+ * {@link EAVStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVPathTest extends TestCase {
-    
-    public void testAppend() {
-        assertEquals(new EAVPath("1", "2"), new EAVPath("1").append("2"));
-    }
-    
-    public void testShiftLeft() {
-        assertEquals(new EAVPath("2", "3", "4"), new EAVPath("1","2", "3", "4").shiftLeft());
-    }
-    
-    public void testParse() {
-        EAVPath path = EAVPath.parse("/contacts/12/13/com.openexchange.test/attribute");
-        assertEquals(new EAVPath("contacts", "12", "13", "com.openexchange.test", "attribute"), path);
-    }
-    
-    public void testParseEmpty() {
-        EAVPath path = EAVPath.parse("");
-        assertEquals(new EAVPath(), path);
-    }
+public interface EAVStorage {
+
+    void insert(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException;
+
+    void update(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException;
+
+    void updateArrays(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException;
+
+    void replace(Context ctx, EAVPath path, EAVNode tree) throws EAVException;
+
+    EAVNode get(Context ctx, EAVPath path) throws EAVException;
+
+    EAVNode get(Context ctx, EAVPath path, boolean allBinaries) throws EAVException;
+
+    EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws EAVException;
+
+    void delete(Context ctx, EAVPath path) throws EAVException;
+
+    EAVTypeMetadataNode getTypes(Context ctx, EAVPath parent, EAVNode node) throws EAVException;
+
 }

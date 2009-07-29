@@ -120,6 +120,14 @@ public class EAVPath {
         }
         return components.get(0);
     }
+    
+    public String last() {
+        if(components.isEmpty()) {
+            return null;
+        }
+        return components.get(components.size()-1);
+    }
+
 
     public EAVPath shiftLeft() {
         if(isEmpty()) {
@@ -143,4 +151,16 @@ public class EAVPath {
         
         return list;
     }
+
+    public static EAVPath parse(String string) {
+        if(string.length() == 0) {
+            return new EAVPath();
+        }
+        List<String> elements = new ArrayList<String>(Arrays.asList(string.split("/")));
+        if(string.charAt(0) == '/') {
+            elements = elements.subList(1, elements.size());
+        }
+        return new EAVPath(elements);
+    }
+
 }

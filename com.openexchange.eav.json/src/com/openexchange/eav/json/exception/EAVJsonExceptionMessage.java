@@ -59,7 +59,8 @@ public enum EAVJsonExceptionMessage implements OXErrorMessage {
     JSONException(1, Category.CODE_ERROR, EAVJsonExceptionStrings.JSONException, null),
     InvalidType(2, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidType, null),
     DifferentTypesInArray(3, Category.USER_INPUT, EAVJsonExceptionStrings.DifferentTypesInArray, null),
-    InvalidTreeStructure(4, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidTreeStructure, null)
+    InvalidTreeStructure(4, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidTreeStructure, null),
+    IOException(5, Category.INTERNAL_ERROR, EAVJsonExceptionStrings.IOException, null);
     ;
 
     private int detailNumber;

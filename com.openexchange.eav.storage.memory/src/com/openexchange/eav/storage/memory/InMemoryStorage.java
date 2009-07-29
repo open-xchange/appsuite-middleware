@@ -67,6 +67,7 @@ import com.openexchange.eav.EAVPathFilter;
 import com.openexchange.eav.EAVSelectiveFilter;
 import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVSetTransformationVisitor;
+import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeFilter;
 import com.openexchange.eav.EAVTypeMetadataNode;
@@ -78,7 +79,7 @@ import com.openexchange.groupware.contexts.Context;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InMemoryStorage {
+public class InMemoryStorage implements EAVStorage {
 
     private Map<Integer, EAVNode> roots = new HashMap<Integer, EAVNode>();
     
@@ -292,7 +293,7 @@ public class InMemoryStorage {
     }
 
     private EAVNode copyOutgoingWithNamedBinaries(EAVNode original, Set<EAVPath> loadBinaries) {
-        return TreeTools.copy(original, new EAVSelectiveFilter(EnumSet.of(EAVType.BINARY), new EAVPathFilter(loadBinaries,  original.getPath().parent())), new ByteArrayToInputStreamProcessor());
+        return TreeTools.copy(original, new EAVSelectiveFilter(EnumSet.of(EAVType.BINARY), new EAVPathFilter(loadBinaries,  original.getPath())), new ByteArrayToInputStreamProcessor());
     }
 
 
