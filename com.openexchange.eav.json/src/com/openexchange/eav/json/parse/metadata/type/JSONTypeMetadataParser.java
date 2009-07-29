@@ -68,7 +68,7 @@ public class JSONTypeMetadataParser implements JSONTypeMetadataParserInterface {
     private EAVTypeMetadataNode node;
 
     public JSONTypeMetadataParser(JSONObject json) {
-
+        this(null, json);
     }
 
     public JSONTypeMetadataParser(String name, JSONObject json) {
