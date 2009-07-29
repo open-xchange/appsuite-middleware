@@ -49,10 +49,10 @@
 
 package com.openexchange.eav;
 
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
 
 
 /**
@@ -72,6 +72,9 @@ public enum EAVContainerType {
     
     static {
         types = new TreeMap<String, EAVContainerType>(String.CASE_INSENSITIVE_ORDER);
+        for (EAVContainerType type : EAVContainerType.values()) {
+            types.put(type.getKeyword(), type);
+        }
     }
 
     private String keyword;

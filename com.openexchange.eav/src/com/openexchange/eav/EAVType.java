@@ -75,19 +75,15 @@ public enum EAVType {
     public static final String KEY = "t";
     
     private static Map<String, EAVType> types;
+
+    private static final EnumMap<EAVType, EnumSet<EAVType>> COERCIBLE = new EnumMap<EAVType, EnumSet<EAVType>>(EAVType.class);
     
     static {
         types =  new TreeMap<String, EAVType>(String.CASE_INSENSITIVE_ORDER);
-        for (EAVType type : EAVType.values()) {
-            types.put(type.getKeyword(), type);
-        }
-    }
-
-    private static final EnumMap<EAVType, EnumSet<EAVType>> COERCIBLE = new EnumMap<EAVType, EnumSet<EAVType>>(EAVType.class);
-    static {
         COERCIBLE.put(EAVType.STRING, EnumSet.of(EAVType.BINARY));
         COERCIBLE.put(EAVType.NUMBER, EnumSet.of(EAVType.TIME, EAVType.DATE));
-        for(EAVType type : EAVType.values()) {
+        for (EAVType type : EAVType.values()) {
+            types.put(type.getKeyword(), type);
             if(!COERCIBLE.containsKey(type)) {
                 COERCIBLE.put(type, EnumSet.noneOf(EAVType.class));
             }
