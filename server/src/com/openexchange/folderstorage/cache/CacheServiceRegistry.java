@@ -47,40 +47,33 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.cache;
 
-import java.util.Comparator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link FolderStorageComparator} - A {@link Comparator} for folder storages which orders according to {@link StoragePriority storage's
- * priority}.
+ * {@link CacheServiceRegistry} - The service registry for cache folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderStorageComparator implements Comparator<FolderStorage> {
+public final class CacheServiceRegistry {
 
-    private static final FolderStorageComparator instance = new FolderStorageComparator();
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
     /**
-     * Gets the {@link FolderStorageComparator} instance.
+     * Gets the service registry
      * 
-     * @return The {@link FolderStorageComparator} instance
+     * @return The service registry
      */
-    public static FolderStorageComparator getInstance() {
-        return instance;
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
     }
 
     /**
-     * Initializes a new {@link FolderStorageComparator}.
+     * Initializes a new {@link IMAPServiceRegistry}
      */
-    private FolderStorageComparator() {
+    private CacheServiceRegistry() {
         super();
-    }
-
-    public int compare(final FolderStorage o1, final FolderStorage o2) {
-        final int firstOrdinal = o1.getStoragePriority().ordinal();
-        final int secondOrdinal = o2.getStoragePriority().ordinal();
-        return (firstOrdinal > secondOrdinal ? -1 : (firstOrdinal == secondOrdinal ? 0 : 1));
     }
 
 }

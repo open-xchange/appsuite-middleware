@@ -53,34 +53,45 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.FolderType;
-import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.folderstorage.StoragePriority;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 
 /**
- * {@link CacheFolderStorage} - The cache folder storage.
+ * {@link FolderCache} - TODO Short description of this class' purpose.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements FolderStorage {
+public final class FolderCache {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderCache.class);
 
     private static final String FOLDER_CACHE_REGION_NAME = "FolderCache";
 
-    private CacheService cacheService;
+    private static final FolderCache instance = new FolderCache();
+
+    /**
+     * Gets the {@link FolderCache} instance.
+     * 
+     * @return The {@link FolderCache} instance.
+     */
+    public static FolderCache getInstance() {
+        return instance;
+    }
+
+    private static CacheKey newCacheKey(final CacheService cacheService, final String folderId, final String treeId, final int cid) {
+        return cacheService.newCacheKey(cid, treeId, folderId);
+    }
+
+    /*-
+     * Member section
+     */
 
     private Cache cache;
 
     /**
-     * Initializes a new {@link CacheFolderStorage}.
+     * Initializes a new {@link FolderCache}.
      */
-    public CacheFolderStorage() {
+    private FolderCache() {
         super();
     }
 
@@ -89,9 +100,9 @@ public final class CacheFolderStorage implements FolderStorage {
      * 
      * @throws FolderException If initialization of this folder cache fails
      */
-    public void onCacheAvailable() throws FolderException {
+    void onCacheAvailable() throws FolderException {
         try {
-            cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
+            final CacheService cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
             // TODO: cacheService.loadConfiguration();
             cache = cacheService.getCache(FOLDER_CACHE_REGION_NAME);
         } catch (final ServiceException e) {
@@ -106,80 +117,22 @@ public final class CacheFolderStorage implements FolderStorage {
      * 
      * @throws FolderException If disposal of this folder cache fails
      */
-    public void onCacheAbsent() throws FolderException {
-        if (cache != null) {
-            try {
-                cache.clear();
-                if (null != cacheService) {
-                    cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
-                }
-            } catch (final CacheException e) {
-                throw new FolderException(e);
-            } finally {
-                cache = null;
+    void onCacheAbsent() throws FolderException {
+        if (cache == null) {
+            return;
+        }
+        try {
+            cache.clear();
+            final CacheService cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class);
+            if (null != cacheService) {
+                cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
             }
+        } catch (final CacheException e) {
+            throw new FolderException(e);
+        } finally {
+            cache = null;
         }
-        if (cacheService != null) {
-            cacheService = null;
-        }
     }
 
-    public void commitTransaction(final StorageParameters params) throws FolderException {
-        // Nothing to do
-    }
-
-    public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-
-    }
-
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-
-    }
-
-    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        return null;
-    }
-
-    public FolderType getFolderType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public StoragePriority getStoragePriority() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public ContentType[] getSupportedContentTypes() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public void rollback(final StorageParameters params) {
-        // Nothing to do
-    }
-
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
-        return parameters;
-    }
-
-    public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-
-    }
-
-    private static CacheKey newCacheKey(final CacheService cacheService, final String folderId, final String treeId, final int cid) {
-        return cacheService.newCacheKey(cid, treeId, folderId);
-    }
+    
 }

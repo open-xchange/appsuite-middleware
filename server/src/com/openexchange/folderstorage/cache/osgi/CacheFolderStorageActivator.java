@@ -49,12 +49,13 @@
 
 package com.openexchange.folderstorage.cache.osgi;
 
-import static com.openexchange.folderstorage.database.DatabaseServiceRegistry.getServiceRegistry;
+import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
+import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -72,6 +73,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     private final Dictionary<String, String> dictionary;
 
     private ServiceRegistration folderStorageRegistration;
+
+    private CacheFolderStorage cacheFolderStorage;
 
     /**
      * Initializes a new {@link CacheFolderStorageActivator}.
@@ -94,8 +97,12 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         }
         getServiceRegistry().addService(clazz, getService(clazz));
         if (CacheService.class.equals(clazz)) {
-            // Register folder storage
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new CacheFolderStorage(), dictionary);
+            try {
+                initCacheFolderStorage();
+            } catch (final FolderException e) {
+                LOG.error(e.getMessage(), e);
+                unregisterCacheFolderStorage();
+            }
         }
     }
 
@@ -105,9 +112,11 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             LOG.warn("Absent service: " + clazz.getName());
         }
         if (CacheService.class.equals(clazz)) {
-            if (null != folderStorageRegistration) {
-                folderStorageRegistration.unregister();
-                folderStorageRegistration = null;
+            try {
+                disposeCacheFolderStorage();
+            } catch (final FolderException e) {
+                LOG.error(e.getMessage(), e);
+                unregisterCacheFolderStorage();
             }
         }
         getServiceRegistry().removeService(clazz);
@@ -130,8 +139,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
             }
-            // Register folder storage
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new CacheFolderStorage(), dictionary);
+            initCacheFolderStorage();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -141,10 +149,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != folderStorageRegistration) {
-                folderStorageRegistration.unregister();
-                folderStorageRegistration = null;
-            }
+            disposeCacheFolderStorage();
             /*
              * Clear service registry
              */
@@ -152,6 +157,32 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        }
+    }
+
+    private void disposeCacheFolderStorage() throws FolderException {
+        // Unregister folder storage
+        unregisterCacheFolderStorage();
+        // Shut-down folder storage
+        if (null != cacheFolderStorage) {
+            cacheFolderStorage.onCacheAbsent();
+            cacheFolderStorage = null;
+        }
+    }
+
+    private void initCacheFolderStorage() throws FolderException {
+        // Start-up folder storage
+        cacheFolderStorage = new CacheFolderStorage();
+        cacheFolderStorage.onCacheAvailable();
+        // Register folder storage
+        folderStorageRegistration = context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary);
+    }
+
+    private void unregisterCacheFolderStorage() {
+        // Unregister folder storage
+        if (null != folderStorageRegistration) {
+            folderStorageRegistration.unregister();
+            folderStorageRegistration = null;
         }
     }
 
