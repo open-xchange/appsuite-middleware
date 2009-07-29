@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
@@ -100,16 +101,11 @@ public final class MailFolderStorage implements FolderStorage {
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
-    private final String treeId;
-
     /**
      * Initializes a new {@link MailFolderStorage}.
-     * 
-     * @param treeId The tree identifier
      */
-    public MailFolderStorage(final String treeId) {
+    public MailFolderStorage() {
         super();
-        this.treeId = treeId;
     }
 
     public ContentType[] getSupportedContentTypes() {
@@ -182,7 +178,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public void deleteFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
@@ -198,15 +194,15 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getDefaultFolder(final int entity, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         if (!MailContentType.getInstance().equals(contentType)) {
             // TODO: Throw appropriate folder exception
         }
         // Return primary account's INBOX folder
-        return getFolder(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), storageParameters);
+        return getFolder(treeId, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), storageParameters);
     }
 
-    public Folder getFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
                 MailFolderType.getInstance(),
@@ -251,7 +247,7 @@ public final class MailFolderStorage implements FolderStorage {
         return MailFolderType.getInstance();
     }
 
-    public SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
         try {
             final ServerSession session;
             {

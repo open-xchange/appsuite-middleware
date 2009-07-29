@@ -49,8 +49,10 @@
 
 package com.openexchange.folderstorage;
 
+import com.openexchange.groupware.ldap.User;
+
 /**
- * {@link FolderStorage} - A folder storage bound to a certain folder source (e.g database, email, etc) and tree.
+ * {@link FolderStorage} - A folder storage bound to a certain folder source (e.g database, email, etc).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -60,6 +62,11 @@ public interface FolderStorage {
      * The reserved tree identifier for real folder tree.
      */
     public static final String REAL_TREE_ID = "0";
+
+    /**
+     * The reserved tree identifier for all folder trees.
+     */
+    public static final String ALL_TREE_ID = "*";
 
     /**
      * Gets the content types supported by this folder storage.
@@ -87,34 +94,37 @@ public interface FolderStorage {
     /**
      * Gets the folder denoted by specified folder ID.
      * 
-     * @param folderId The folder ID
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
      * @param storageParameters The storage parameters
      * @return The folder
      * @throws FolderException If the folder cannot be returned
      */
-    Folder getFolder(String folderId, StorageParameters storageParameters) throws FolderException;
+    Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets this storage's default folder for specified entity identifier.
      * 
-     * @param entity The entity identifier
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
      * @param contentType The content type or the default folder
      * @param storageParameters The storage parameters
      * @return The default folder for specified entity identifier
      * @throws FolderException If the default folder cannot be returned
      */
-    Folder getDefaultFolder(int entity, ContentType contentType, StorageParameters storageParameters) throws FolderException;
+    Folder getDefaultFolder(User user, String treeId, ContentType contentType, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Deletes the folder denoted by specified folder ID.
      * <p>
      * A {@link FolderException} is thrown if denoted folder contains subfolders.
      * 
+     * @param treeId The tree identifier
      * @param folderId The folder ID
      * @param storageParameters The storage parameters
      * @throws FolderException If deletion fails
      */
-    void deleteFolder(String folderId, StorageParameters storageParameters) throws FolderException;
+    void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Updates the data of the given folder on the storage.
@@ -137,12 +147,13 @@ public interface FolderStorage {
     /**
      * Gets the subfolder identifiers for specified parent.
      * 
+     * @param treeId The tree identifier
      * @param parentId The parent identifier
      * @param storageParameters The storage parameters
      * @return The subfolder identifiers for specified parent
      * @throws FolderException If returning the subfolder identifiers fails
      */
-    SortableId[] getSubfolders(String parentId, StorageParameters storageParameters) throws FolderException;
+    SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Starts a transaction on folder storage.

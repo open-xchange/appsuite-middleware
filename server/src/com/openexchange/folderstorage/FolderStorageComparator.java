@@ -49,37 +49,39 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Comparator;
+
 /**
- * {@link FolderType} - The folder type of a certain folder storage.
+ * {@link FolderStorageComparator} - A {@link Comparator} for folder storages which orders according to {@link StoragePriority storage's
+ * priority}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FolderType {
+public final class FolderStorageComparator implements Comparator<FolderStorage> {
+
+    private static final FolderStorageComparator instance = new FolderStorageComparator();
 
     /**
-     * Indicates if this folder type serves specified tree identifier.
+     * Gets the {@link FolderStorageComparator} instance.
      * 
-     * @param treeId The tree identifier
-     * @return <code>true</code> if this folder type serves specified tree identifier; otherwise <code>false</code>
+     * @return The {@link FolderStorageComparator} instance
      */
-    boolean servesTreeId(String treeId);
+    public static FolderStorageComparator getInstance() {
+        return instance;
+    }
 
     /**
-     * Indicates if this folder type serves specified folder identifier.
-     * 
-     * @param folderId The folder identifier
-     * @return <code>true</code> if this folder type serves specified folder identifier; otherwise <code>false</code>
+     * Initializes a new {@link FolderStorageComparator}.
      */
-    boolean servesFolderId(String folderId);
+    private FolderStorageComparator() {
+        super();
+    }
 
-    /**
-     * Must be implemented according to {@link Object#hashCode()}.
-     */
-    int hashCode();
+    public int compare(final FolderStorage o1, final FolderStorage o2) {
+        final int firstOrdinal = o1.getStoragePriority().ordinal();
+        final int secondOrdinal = o2.getStoragePriority().ordinal();
+        return (firstOrdinal < secondOrdinal ? -1 : (firstOrdinal == secondOrdinal ? 0 : 1));
 
-    /**
-     * Must be implemented according to {@link Object#equals(Object)}.
-     */
-    boolean equals(Object obj);
+    }
 
 }

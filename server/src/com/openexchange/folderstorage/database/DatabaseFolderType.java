@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 
 /**
@@ -74,6 +75,10 @@ public final class DatabaseFolderType implements FolderType {
      */
     private DatabaseFolderType() {
         super();
+    }
+
+    public boolean servesTreeId(final String treeId) {
+        return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
     public boolean servesFolderId(final String folderId) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.virtual;
 
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 
 /**
@@ -58,16 +59,11 @@ import com.openexchange.folderstorage.FolderType;
  */
 public final class VirtualFolderType implements FolderType {
 
-    private final int treeId;
-
     /**
      * Initializes a new {@link VirtualFolderType}.
-     * 
-     * @param treeId The tree ID
      */
-    public VirtualFolderType(final int treeId) {
+    public VirtualFolderType() {
         super();
-        this.treeId = treeId;
     }
 
     public boolean servesFolderId(final String folderId) {
@@ -75,30 +71,8 @@ public final class VirtualFolderType implements FolderType {
         return (null != folderId);
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + treeId;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof VirtualFolderType)) {
-            return false;
-        }
-        final VirtualFolderType other = (VirtualFolderType) obj;
-        if (treeId != other.treeId) {
-            return false;
-        }
-        return true;
+    public boolean servesTreeId(final String treeId) {
+        return !FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
 }

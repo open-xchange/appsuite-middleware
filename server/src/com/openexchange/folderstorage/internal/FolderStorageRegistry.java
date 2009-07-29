@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageComparator;
 import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.StoragePriority;
 
@@ -84,12 +86,15 @@ public final class FolderStorageRegistry implements FolderStorageService {
 
     private final ConcurrentMap<String, List<FolderStorage>> registry;
 
+    private final List<FolderStorage> genStorages;
+
     /**
      * Initializes a new {@link FolderStorageRegistry}.
      */
     private FolderStorageRegistry() {
         super();
         registry = new ConcurrentHashMap<String, List<FolderStorage>>();
+        genStorages = new CopyOnWriteArrayList<FolderStorage>();
     }
 
     /**
@@ -113,20 +118,44 @@ public final class FolderStorageRegistry implements FolderStorageService {
                 }
                 return false;
             }
-        }
-        List<FolderStorage> storages = registry.get(treeId);
-        if (null == storages) {
-            final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
-            storages = registry.putIfAbsent(treeId, new CopyOnWriteArrayList<FolderStorage>());
-            if (null == storages) {
-                storages = tmp;
+        } else {
+            if (!ContentTypeRegistry.getInstance().addGeneralContentType(treeId, folderStorage)) {
+                return false;
             }
         }
-        storages.add(folderStorage);
+        // Register by tree identifier
+        if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
+            genStorages.add(folderStorage);
+            Collections.sort(genStorages, FolderStorageComparator.getInstance());
+        } else {
+            List<FolderStorage> storages = registry.get(treeId);
+            if (null == storages) {
+                final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
+                storages = registry.putIfAbsent(treeId, new CopyOnWriteArrayList<FolderStorage>());
+                if (null == storages) {
+                    storages = tmp;
+                }
+            }
+            storages.add(folderStorage);
+        }
         return true;
     }
 
     public FolderStorage[] getFolderStorages(final String treeId, final String folderId) {
+        if (!genStorages.isEmpty()) {
+            /*
+             * Check general storages first
+             */
+            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+                final FolderStorage folderStorage = iterator.next();
+                if (folderStorage.getFolderType().servesTreeId(treeId)) {
+                    return new FolderStorage[] { folderStorage };
+                }
+            }
+        }
+        /*
+         * Obtain candidates by tree identifier
+         */
         final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
@@ -166,11 +195,25 @@ public final class FolderStorageRegistry implements FolderStorageService {
      * @param folderStorage The folder storage to remove
      */
     public void removeFolderStorage(final String treeId, final FolderStorage folderStorage) {
-        final List<FolderStorage> storages = registry.get(treeId);
-        if (null == storages) {
-            return;
+        if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
+            genStorages.remove(folderStorage);
+            Collections.sort(genStorages, FolderStorageComparator.getInstance());
+        } else {
+            final List<FolderStorage> storages = registry.get(treeId);
+            if (null == storages) {
+                return;
+            }
+            storages.remove(folderStorage);
         }
-        storages.remove(folderStorage);
+        // Delete from content type registry
+        final ContentType[] contentTypes = folderStorage.getSupportedContentTypes();
+        if (null != contentTypes && contentTypes.length > 0) {
+            for (final ContentType contentType : contentTypes) {
+                ContentTypeRegistry.getInstance().removeContentType(treeId, contentType);
+            }
+        } else {
+            ContentTypeRegistry.getInstance().removeGeneralContentType(treeId, folderStorage);
+        }
     }
 
 }

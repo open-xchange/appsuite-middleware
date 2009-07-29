@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -80,6 +81,10 @@ public final class MailFolderType implements FolderType {
      */
     private MailFolderType() {
         super();
+    }
+
+    public boolean servesTreeId(final String treeId) {
+        return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);

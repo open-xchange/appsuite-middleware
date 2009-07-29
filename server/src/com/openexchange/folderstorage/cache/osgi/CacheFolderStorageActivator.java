@@ -47,44 +47,43 @@
  *
  */
 
-package com.openexchange.folderstorage.mail.osgi;
+package com.openexchange.folderstorage.cache.osgi;
 
-import static com.openexchange.folderstorage.mail.MailServiceRegistry.getServiceRegistry;
+import static com.openexchange.folderstorage.database.DatabaseServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.caching.CacheService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.mail.MailFolderStorage;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.
+ * {@link CacheFolderStorageActivator} - {@link BundleActivator Activator} for cache folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderStorageActivator extends DeferredActivator {
+public final class CacheFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderStorageActivator.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class);
 
     private final Dictionary<String, String> dictionary;
 
     private ServiceRegistration folderStorageRegistration;
 
     /**
-     * Initializes a new {@link MailFolderStorageActivator}.
+     * Initializes a new {@link CacheFolderStorageActivator}.
      */
-    public MailFolderStorageActivator() {
+    public CacheFolderStorageActivator() {
         super();
         dictionary = new Hashtable<String, String>();
-        dictionary.put("tree", FolderStorage.REAL_TREE_ID);
+        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+        return new Class<?>[] { CacheService.class };
     }
 
     @Override
@@ -93,12 +92,22 @@ public final class MailFolderStorageActivator extends DeferredActivator {
             LOG.info("Re-available service: " + clazz.getName());
         }
         getServiceRegistry().addService(clazz, getService(clazz));
+        if (CacheService.class.equals(clazz)) {
+            // TODO: Register folder storage
+            folderStorageRegistration = null;
+        }
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
+        }
+        if (CacheService.class.equals(clazz)) {
+            if (null != folderStorageRegistration) {
+                folderStorageRegistration.unregister();
+                folderStorageRegistration = null;
+            }
         }
         getServiceRegistry().removeService(clazz);
     }
@@ -120,8 +129,8 @@ public final class MailFolderStorageActivator extends DeferredActivator {
                     }
                 }
             }
-            // Register folder storage
-            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new MailFolderStorage(), dictionary);
+            // TODO: Register folder storage
+            folderStorageRegistration = null;
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

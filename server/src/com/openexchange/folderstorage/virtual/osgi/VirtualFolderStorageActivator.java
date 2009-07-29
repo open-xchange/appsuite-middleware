@@ -51,12 +51,16 @@ package com.openexchange.folderstorage.virtual.osgi;
 
 import static com.openexchange.folderstorage.virtual.VirtualServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageService;
 import com.openexchange.folderstorage.virtual.VirtualFolderDeleteListener;
+import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTask;
@@ -74,11 +78,15 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
 
     private List<ServiceRegistration> serviceRegistrations;
 
+    private final Dictionary<String, String> dictionary;
+
     /**
      * Initializes a new {@link VirtualFolderStorageActivator}.
      */
     public VirtualFolderStorageActivator() {
         super();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
     }
 
     @Override
@@ -125,7 +133,7 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
             serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new VirtualFolderDeleteListener(), null));
             serviceRegistrations.add(context.registerService(UpdateTask.class.getName(), new VirtualTreeCreateTableTask(), null));
 
-            // TODO Register storage
+            serviceRegistrations.add(context.registerService(FolderStorage.class.getName(), new VirtualFolderStorage(), dictionary));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

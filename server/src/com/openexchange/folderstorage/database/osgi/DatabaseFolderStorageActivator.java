@@ -121,10 +121,7 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
                 }
             }
             // Register folder storage
-            folderStorageRegistration = context.registerService(
-                FolderStorage.class.getName(),
-                new DatabaseFolderStorage(FolderStorage.REAL_TREE_ID),
-                dictionary);
+            folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new DatabaseFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

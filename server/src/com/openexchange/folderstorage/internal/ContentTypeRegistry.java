@@ -49,11 +49,14 @@
 
 package com.openexchange.folderstorage.internal;
 
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageComparator;
 
 /**
  * {@link ContentTypeRegistry} - A registry for a tree's content types.
@@ -75,37 +78,69 @@ public final class ContentTypeRegistry {
         return instance;
     }
 
+    private static final class Element {
+
+        private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
+
+        private final List<FolderStorage> generalStorages;
+
+        public Element() {
+            super();
+            concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
+            generalStorages = new CopyOnWriteArrayList<FolderStorage>();
+        }
+
+        public ConcurrentMap<ContentType, FolderStorage> getConcreteStorages() {
+            return concreteStorages;
+        }
+
+        public List<FolderStorage> getGeneralStorages() {
+            return generalStorages;
+        }
+
+    }
+
     /*
      * Member section
      */
 
-    private final ConcurrentMap<String, ConcurrentMap<ContentType, FolderStorage>> registry;
+    private final ConcurrentMap<String, Element> registry;
 
     /**
      * Initializes a new {@link ContentTypeRegistry}.
      */
     private ContentTypeRegistry() {
         super();
-        registry = new ConcurrentHashMap<String, ConcurrentMap<ContentType, FolderStorage>>();
+        registry = new ConcurrentHashMap<String, Element>();
+    }
+
+    private Element getElementForTreeId(final String treeId) {
+        return getElementForTreeId(treeId, true);
+    }
+
+    private Element getElementForTreeId(final String treeId, final boolean createIfAbsent) {
+        Element element = registry.get(treeId);
+        if (null == element && createIfAbsent) {
+            final Element inst = new Element();
+            element = registry.putIfAbsent(treeId, inst);
+            if (null == element) {
+                element = inst;
+            }
+        }
+        return element;
     }
 
     /**
      * Associates specified folder storage to given content type.
      * 
-     * @param treeId The tree identifier
+     * @param treeId The folder storage's tree identifier
      * @param contentType The content type to register
      * @param folderStorage The content type's folder storage
      * @return <code>true</code> if content type was successfully registered; otherwise <code>false</code>
      */
     public boolean addContentType(final String treeId, final ContentType contentType, final FolderStorage folderStorage) {
-        ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
-        if (null == types) {
-            final ConcurrentMap<ContentType, FolderStorage> inst = new ConcurrentHashMap<ContentType, FolderStorage>();
-            types = registry.putIfAbsent(treeId, inst);
-            if (null == types) {
-                types = inst;
-            }
-        }
+        final Element element = getElementForTreeId(treeId);
+        final ConcurrentMap<ContentType, FolderStorage> types = element.getConcreteStorages();
         final boolean added = (null == types.putIfAbsent(contentType, folderStorage));
         if (!added) {
             final StringBuilder sb = new StringBuilder(32);
@@ -118,6 +153,22 @@ public final class ContentTypeRegistry {
     }
 
     /**
+     * Adds a general-purpose folder storage (capable to serve every content type) to this registry.
+     * 
+     * @param treeId The folder storage's tree identifier
+     * @param folderStorage The general-purpose folder storage
+     * @return <code>true</code> if folder storage was successfully registered; otherwise <code>false</code>
+     */
+    public boolean addGeneralContentType(final String treeId, final FolderStorage folderStorage) {
+        final Element element = getElementForTreeId(treeId);
+        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        generalStorages.add(folderStorage);
+        // Order by storage priority
+        Collections.sort(generalStorages, FolderStorageComparator.getInstance());
+        return true;
+    }
+
+    /**
      * Gets the specified content type's storage.
      * 
      * @param treeId The tree identifier
@@ -125,7 +176,16 @@ public final class ContentTypeRegistry {
      * @return The content type's storage or <code>null</code>
      */
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
-        final ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
+        final Element element = getElementForTreeId(treeId, false);
+        if (null == element) {
+            return null;
+        }
+        // Look-up in general-purpose folder storages
+        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        if (!generalStorages.isEmpty()) {
+            return generalStorages.get(0);
+        }
+        final ConcurrentMap<ContentType, FolderStorage> types = element.getConcreteStorages();
         if (null == types) {
             return null;
         }
@@ -139,31 +199,29 @@ public final class ContentTypeRegistry {
      * @param contentType The content type
      */
     public void removeContentType(final String treeId, final ContentType contentType) {
-        final ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
-        if (null == types) {
+        final Element element = getElementForTreeId(treeId, false);
+        if (null == element) {
             return;
         }
-        registry.remove(contentType);
+        // Remove from concrete storages
+        element.getConcreteStorages().remove(contentType);
     }
 
     /**
-     * Gets all supported content types for specified tree identifier.
+     * Removes specified general-purpose folder storage.
      * 
      * @param treeId The tree identifier
-     * @return All supported content types for specified tree identifier
+     * @param folderStorage The general-purpose folder storage
      */
-    public ContentType[] getContentTypes(final String treeId) {
-        final ConcurrentMap<ContentType, FolderStorage> types = registry.get(treeId);
-        if (null == types) {
-            return new ContentType[0];
+    public void removeGeneralContentType(final String treeId, final FolderStorage folderStorage) {
+        final Element element = getElementForTreeId(treeId, false);
+        if (null == element) {
+            return;
         }
-        final int size = types.size();
-        final ContentType[] ret = new ContentType[size];
-        final Iterator<ContentType> it = types.keySet().iterator();
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = it.next();
-        }
-        return ret;
+        // Remove from general storages
+        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        generalStorages.remove(folderStorage);
+        Collections.sort(generalStorages, FolderStorageComparator.getInstance());
     }
 
     /**

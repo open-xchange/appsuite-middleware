@@ -82,6 +82,7 @@ import com.openexchange.folderstorage.database.type.PublicType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -101,16 +102,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class);
 
-    private final String treeId;
-
     /**
      * Initializes a new {@link DatabaseFolderStorage}.
-     * 
-     * @param treeId The tree identifier
      */
-    public DatabaseFolderStorage(final String treeId) {
+    public DatabaseFolderStorage() {
         super();
-        this.treeId = treeId;
     }
 
     public ContentType[] getSupportedContentTypes() {
@@ -209,7 +205,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public void deleteFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final FolderObject fo = new FolderObject();
             fo.setObjectID(Integer.parseInt(folderId));
@@ -223,7 +219,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getDefaultFolder(final int entity, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
+    public Folder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         final Context context = storageParameters.getContext();
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
@@ -243,7 +239,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     contentType.toString(),
                     Integer.valueOf(context.getContextId())));
             }
-            return getFolder(String.valueOf(folderId), storageParameters);
+            return getFolder(treeId, String.valueOf(folderId), storageParameters);
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         } catch (final SQLException e) {
@@ -251,7 +247,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public Folder getFolder(final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
 
@@ -291,7 +287,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return DatabaseFolderType.getInstance();
     }
 
-    public SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters) throws FolderException {
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
 

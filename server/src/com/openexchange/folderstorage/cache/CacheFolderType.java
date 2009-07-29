@@ -47,39 +47,32 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.cache;
+
+import com.openexchange.folderstorage.FolderType;
 
 /**
- * {@link FolderType} - The folder type of a certain folder storage.
+ * {@link CacheFolderType} - The folder type for cache folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FolderType {
+public final class CacheFolderType implements FolderType {
 
     /**
-     * Indicates if this folder type serves specified tree identifier.
-     * 
-     * @param treeId The tree identifier
-     * @return <code>true</code> if this folder type serves specified tree identifier; otherwise <code>false</code>
+     * Initializes a new {@link CacheFolderType}.
      */
-    boolean servesTreeId(String treeId);
+    public CacheFolderType() {
+        super();
+    }
 
-    /**
-     * Indicates if this folder type serves specified folder identifier.
-     * 
-     * @param folderId The folder identifier
-     * @return <code>true</code> if this folder type serves specified folder identifier; otherwise <code>false</code>
-     */
-    boolean servesFolderId(String folderId);
+    public boolean servesFolderId(final String folderId) {
+        // Cache folder storage serves every folder identifier
+        return true;
+    }
 
-    /**
-     * Must be implemented according to {@link Object#hashCode()}.
-     */
-    int hashCode();
-
-    /**
-     * Must be implemented according to {@link Object#equals(Object)}.
-     */
-    boolean equals(Object obj);
+    public boolean servesTreeId(final String treeId) {
+        // Cache folder storage serves every tree identifier
+        return true;
+    }
 
 }
