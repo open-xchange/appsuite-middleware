@@ -50,6 +50,7 @@
 package com.openexchange.eav.json.multiple;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -466,18 +467,49 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
         expectException(EAVJsonExceptionMessage.InvalidLoadBinaries.getDetailNumber());
         
         runRequest();
-        
     }
     
-    public void testGetWithConflictingBinaryOptions() {
+    public void testGetWithConflictingBinaryOptions() throws AbstractOXException, JSONException {
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries", "allBinaries", "true"), BODY("{loadBinaries : [\"binary1\", \"binary2\", \"binary3\"] }"));
         
+        expectException(EAVJsonExceptionMessage.ConflictingParameters.getDetailNumber());
+        
+        runRequest();
     }
     
-    public void testGetWithInvalidBinaryEncodingSwitch() {
+    public void testGetWithInvalidBinaryEncodingSwitchRawWhenLoadingTree() throws AbstractOXException, JSONException, UnsupportedEncodingException {
+        byte[] bytes = "Hello World".getBytes("UTF-8");
+        
+        EAVNode tree = 
+        N("myBinaries", 
+            N("binary1", bytes),
+            N("binary2", bytes),
+            N("binary3", bytes)
+        );
+        
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries", "binaryEncoding", "raw", "allBinaries", "true"));
+        expectStorageCall("get", ctx, new EAVPath("contacts","12","13","com.openexchange.test", "myBinaries"), true);
+        andReturn(tree);
+        
+        expectException(EAVJsonExceptionMessage.BinariesInTreesMustBeBase64Encoded.getDetailNumber());
+        
+        runRequest();
+    }
+
+    public void testGetWithUnknownBinaryEncodingSwitch() throws JSONException, AbstractOXException {
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries", "binaryEncoding", "neatoNiceEncoding"));
+    
+        expectException(EAVJsonExceptionMessage.UnknownBinaryEncoding.getDetailNumber());
+        
+        runRequest();
         
     }
 
-    public void testUnknownAction() {
+    public void testUnknownAction() throws AbstractOXException, JSONException {
+        duringRequest("unknownAction", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries"));
         
+        expectException(EAVJsonExceptionMessage.UnknownAction.getDetailNumber());
+        
+        runRequest();
     }
 }

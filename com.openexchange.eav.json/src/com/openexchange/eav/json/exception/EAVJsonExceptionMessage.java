@@ -62,7 +62,11 @@ public enum EAVJsonExceptionMessage implements OXErrorMessage {
     InvalidTreeStructure(4, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidTreeStructure, null),
     IOException(5, Category.INTERNAL_ERROR, EAVJsonExceptionStrings.IOException, null), 
     MissingParameter(6, Category.USER_INPUT, EAVJsonExceptionStrings.MISSING_PARAMETER, "Please supply all mandatory parameters"),
-    InvalidLoadBinaries(7, Category.USER_INPUT, EAVJsonExceptionStrings.INVALID_LOAD_BINARIES, "Please supply a list of paths in the loadBinaries metadatum")
+    InvalidLoadBinaries(7, Category.USER_INPUT, EAVJsonExceptionStrings.INVALID_LOAD_BINARIES, "Please supply a list of paths in the loadBinaries metadatum"),
+    ConflictingParameters(8, Category.USER_INPUT, EAVJsonExceptionStrings.CONFLICTING_PARAMETERS, "Please supply only one of the parameters"), 
+    UnknownAction(9, Category.USER_INPUT, EAVJsonExceptionStrings.UNKNOWN_ACTION, "Please check the spelling of the action parameter"), 
+    BinariesInTreesMustBeBase64Encoded(10, Category.USER_INPUT, EAVJsonExceptionStrings.BINARIES_IN_TREE_MUST_BE_BASE64_ENCODED, ""), 
+    UnknownBinaryEncoding(11, Category.USER_INPUT, EAVJsonExceptionStrings.UNKNOWN_BINARY_ENCODING, "Please specify one of 'raw' and 'base64'")
     ;
 
     private int detailNumber;

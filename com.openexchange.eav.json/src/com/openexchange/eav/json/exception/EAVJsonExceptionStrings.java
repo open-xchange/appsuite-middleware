@@ -77,4 +77,16 @@ public class EAVJsonExceptionStrings implements LocalizableStrings {
     
     // loadBinaries must be an array of paths
     public static final String INVALID_LOAD_BINARIES = "loadBinaries must be an array of paths";
+
+    // The parameters ( %s ) are conflicting. Please supply only one of those.
+    public static final String CONFLICTING_PARAMETERS = "The parameters ( %s ) are conflicting. Please supply only one of those.";
+
+    // The action %s is not known.
+    public static final String UNKNOWN_ACTION = "The action %s is not known.";
+
+    // Binaries that are part of trees must be base64 encoded. Only directly accessed binaries can be encoded freely.
+    public static final String BINARIES_IN_TREE_MUST_BE_BASE64_ENCODED = "Binaries that are part of trees must be base64 encoded. Only directly accessed binaries can be encoded freely.";
+
+    // Unknown binaryEncoding %s
+    public static final String UNKNOWN_BINARY_ENCODING = "Unknown binaryEncoding %s.";
 }

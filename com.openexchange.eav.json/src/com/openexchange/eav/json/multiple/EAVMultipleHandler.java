@@ -120,6 +120,7 @@ public class EAVMultipleHandler implements MultipleHandler {
                 throw EAVJsonExceptionMessage.MissingParameter.create("body");
             }
             storage.insert(ctx, path.parent(), parsedNodes);
+            return 1;
         } else if (action.equals("update")){
             if(parsedNodes == null) {
                 throw EAVJsonExceptionMessage.MissingParameter.create("body");
@@ -138,6 +139,9 @@ public class EAVMultipleHandler implements MultipleHandler {
             return 1;
         } else if (action.equals("get")) {
             EAVNode loaded = (loadBinaries == null) ? storage.get(ctx, path, allBinaries) : storage.get(ctx, path, loadBinaries);
+            if(jsonObject.has("binaryEncoding") && raw && !loaded.isLeaf()) {
+                throw EAVJsonExceptionMessage.BinariesInTreesMustBeBase64Encoded.create();
+            }
             if(loaded.getType() == EAVType.BINARY && !loaded.isMultiple() && raw) {
                 return loaded.getPayload();
             }
@@ -148,7 +152,7 @@ public class EAVMultipleHandler implements MultipleHandler {
         }
         
         
-        return 1;
+        throw EAVJsonExceptionMessage.UnknownAction.create(action);
         
     }
 
@@ -206,8 +210,19 @@ public class EAVMultipleHandler implements MultipleHandler {
                 }
             }
         }
-        if(jsonObject.has("binaryEncoding") && "base64".equalsIgnoreCase(jsonObject.getString("binaryEncoding"))) {
-            raw = false;
+        if(jsonObject.has("binaryEncoding")) {
+            String binEncoding = jsonObject.getString("binaryEncoding");
+            if("base64".equalsIgnoreCase(binEncoding)) {
+                raw = false;
+            } else if ("raw".equalsIgnoreCase(binEncoding)) {
+                raw = true;
+            } else {
+                throw EAVJsonExceptionMessage.UnknownBinaryEncoding.create(binEncoding);
+            }
+        }
+        
+        if(loadBinaries != null && jsonObject.has("allBinaries")) {
+            throw EAVJsonExceptionMessage.ConflictingParameters.create("allBinaries", "loadBinaries");
         }
     }
 
