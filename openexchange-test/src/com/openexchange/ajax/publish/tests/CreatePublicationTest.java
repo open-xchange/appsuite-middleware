@@ -50,28 +50,19 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.publish.actions.GetPublicationRequest;
 import com.openexchange.ajax.publish.actions.GetPublicationResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.ContactObjectTest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
-import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -88,12 +79,10 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         //create contact folder
-        FolderTestManager fMgr = getFolderManager();
         FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
         fMgr.insertFolderOnServer( folder );
         
         //fill contact folder
-        ContactTestManager cMgr = getContactManager();
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
         cMgr.insertContactOnServer(contact);
@@ -117,4 +106,31 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should return the same user as sent to the server", expected.getUserId(), actual.getUserId());
         assertEquals("Should return the same target id as sent to the server", expected.getTarget().getId(), actual.getTarget().getId());
     }
+
+    public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        //create contact folder
+        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
+        fMgr.insertFolderOnServer( folder );
+        
+        //fill contact folder
+        Contact contact = generateContact("Herbert", "Meier");
+        contact.setParentFolderID(folder.getObjectID());
+        cMgr.insertContactOnServer(contact);
+        
+        //publish
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+
+        Publication expected = generatePublication("contacts", String.valueOf(folder.getObjectID() ), discovery );
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
+        pubMgr.newAction(expected);
+        
+        //verify
+        Publication actual = pubMgr.getAction(expected.getId());
+        
+        assertEquals("Should return the same folder as sent to the server", expected.getEntityId(), actual.getEntityId());
+        assertEquals("Should return the same module as sent to the server", expected.getModule(), actual.getModule());
+        assertEquals("Should return the same user as sent to the server", expected.getUserId(), actual.getUserId());
+        assertEquals("Should return the same target id as sent to the server", expected.getTarget().getId(), actual.getTarget().getId());
+    }
+
 }

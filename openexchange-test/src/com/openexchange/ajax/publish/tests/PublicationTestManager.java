@@ -81,9 +81,8 @@ import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link PublicationTestManager}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublicationTestManager {
 
@@ -146,8 +145,8 @@ public class PublicationTestManager {
 
         public Publication newAction(Publication publication) throws AjaxException, IOException, SAXException, JSONException {
             NewPublicationRequest newReq = new NewPublicationRequest(publication);
-            NewPublicationResponse newResp = getClient().execute(newReq);
             newReq.setFailOnError(getFailOnError());
+            NewPublicationResponse newResp = getClient().execute(newReq);
             lastResponse = newResp;
             createdItems.add(I(newResp.getId()));
             publication.setId(newResp.getId());

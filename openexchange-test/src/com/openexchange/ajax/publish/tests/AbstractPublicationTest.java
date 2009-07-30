@@ -56,39 +56,70 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
+import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link AbstractPublicationTest}
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractPublicationTest extends 
-AbstractPubSubTest {
+public abstract class AbstractPublicationTest extends AbstractPubSubTest {
+
+    protected FolderTestManager fMgr;
+    
+    protected ContactTestManager cMgr;
+    
+    protected PublicationTestManager pubMgr;
+    
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        pubMgr = new PublicationTestManager(getClient());
+        cMgr = new ContactTestManager(getClient());
+        fMgr = new FolderTestManager(getClient());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        pubMgr.cleanUp();
+        cMgr.cleanUp();
+        fMgr.cleanUp();
+        super.tearDown();
+    }
 
     public AbstractPublicationTest(String name) {
         super(name);
     }
 
-    protected Publication generatePublication(String type, String folder){
+    protected PublicationTarget generateTarget(DynamicFormDescription form, String type){
+        PublicationTarget target = new PublicationTarget();
+        target.setFormDescription(form);
+        target.setId("com.openexchange.publish.microformats." + type+ ".online");
+        return target;
+    }
+    
+    protected Publication generatePublication(String type, String folder) {
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
         return generatePublication(type, folder, discovery);
     }
-    
-    protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery){
-        //create publication
+
+    protected DynamicFormDescription generateOXMFFormDescription(){
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
+        return form;
+    }
+    
+    protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery) {
+        DynamicFormDescription form = generateOXMFFormDescription();
+        PublicationTarget target = generateTarget(form, type);
         
-        PublicationTarget target = new PublicationTarget();
-        target.setFormDescription(form);
-        target.setId("com.openexchange.publish.microformats."+type+".online");
- 
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("siteName", "publication");
-        config.put("protected", Boolean.valueOf(true) );
-        
+        config.put("protected", Boolean.valueOf(true));
+
         discovery.addTarget(target);
-        
+
         Publication pub = new Publication();
         pub.setModule(type);
         pub.setEntityId(folder);

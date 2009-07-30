@@ -51,6 +51,7 @@ package com.openexchange.ajax.publish.tests;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
+import java.util.Collection;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
@@ -60,6 +61,8 @@ import com.openexchange.ajax.publish.actions.UpdatePublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -94,6 +97,36 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         assertFalse("Should contain no error after updating", updResp.hasError());
         assertEquals("Should return 1 in case of success", I(1), (Integer) updResp.getData());
     }
+
+    public void testShouldBeAbleToUpdateExistingPublicationsURL() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+
+        final Contact contact = createDefaultContactFolderWithOneContact();
+        String folderID = String.valueOf(contact.getParentFolderID() );
+        
+        Publication pub1 = generatePublication("contacts", folderID, discovery );
+        pub1.getConfiguration().put("siteName","oldName");
+        pubMgr.setPublicationTargetDiscoveryService( discovery );
+        
+        pubMgr.newAction(pub1);
+        assertFalse("Should contain no error after creating", pubMgr.getLastResponse().hasError());
+        
+        Publication pub2 = pubMgr.getAction(pub1.getId());
+        assertEquals("Should have set the siteName", "oldName", pub2.getConfiguration().get("siteName"));
+        
+        Publication pub3 = generatePublication("contacts", folderID);
+        pub3.setId(pub1.getId());
+        pub3.getConfiguration().put("siteName", "newName");
+        pubMgr.updateAction(pub3);
+        
+        UpdatePublicationResponse updResp = (UpdatePublicationResponse) pubMgr.getLastResponse();
+        assertFalse("Should contain no error after updating", updResp.hasError());
+        assertTrue("Should return 1 in case of success", updResp.wasSuccessful());
+        
+        Publication pub4 = pubMgr.getAction(pub3.getId());
+        assertEquals("Should have updated the siteName", "newName", pub4.getConfiguration().get("siteName"));
+    }
+
     
     /*
     public void testUpdatingTargetShouldCallForNewConfiguration(){

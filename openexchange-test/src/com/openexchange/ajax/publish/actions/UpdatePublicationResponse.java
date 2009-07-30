@@ -60,5 +60,14 @@ public class UpdatePublicationResponse extends AbstractPublicationResponse {
     protected UpdatePublicationResponse(Response response) {
         super(response);
     }
+    
+    public boolean wasSuccessful(){
+        try {
+            return (((Integer)getData()).intValue() == 1);
+        } catch(Exception e){
+            return false;
+        }
+
+    }
 
 }
