@@ -1,3 +1,8 @@
+* 2009-07-30 - choeger@open-xchange.com
+
+ - Bugfix ID#14207 [L3] wrong exit code from init script if you stop an
+   already stopped service
+
 * 2009-07-29 - choeger@open-xchange.com
 
  - Bugfix ID#14241 missing common shell functions file on update from RC3 to
