@@ -600,7 +600,7 @@ public class EAVUnitTest extends TestCase {
         }
 
         public String printPayload(EAVSetTransformation node) {
-            if(node.isLeaf()) {
+            if(!node.isLeaf()) {
                 return "";
             }
             EAVMultiplePrettyPrint multiplePrettyPrint = new EAVMultiplePrettyPrint();
