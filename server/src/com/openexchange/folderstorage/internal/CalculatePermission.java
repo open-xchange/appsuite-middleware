@@ -245,10 +245,10 @@ public final class CalculatePermission {
         }
 
         public void setNoPermissions() {
-            this.folderPermission = Permission.MAX_PERMISSION;
-            this.readPermission = Permission.MAX_PERMISSION;
-            this.deletePermission = Permission.MAX_PERMISSION;
-            this.writePermission = Permission.MAX_PERMISSION;
+            this.folderPermission = Permission.NO_PERMISSIONS;
+            this.readPermission = Permission.NO_PERMISSIONS;
+            this.deletePermission = Permission.NO_PERMISSIONS;
+            this.writePermission = Permission.NO_PERMISSIONS;
             this.admin = false;
         }
 
