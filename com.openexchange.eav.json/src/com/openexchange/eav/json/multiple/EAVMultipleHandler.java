@@ -117,12 +117,12 @@ public class EAVMultipleHandler implements MultipleHandler {
                 parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.INCOMING));            
             }
             if(parsedNodes == null) {
-                throw EAVJsonExceptionMessage.MISSING_PARAMETER.create("body");
+                throw EAVJsonExceptionMessage.MissingParameter.create("body");
             }
             storage.insert(ctx, path.parent(), parsedNodes);
         } else if (action.equals("update")){
             if(parsedNodes == null) {
-                throw EAVJsonExceptionMessage.MISSING_PARAMETER.create("body");
+                throw EAVJsonExceptionMessage.MissingParameter.create("body");
             }
             EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), parsedNodes);
             if(types != null) {
@@ -154,7 +154,7 @@ public class EAVMultipleHandler implements MultipleHandler {
 
     private void parse(JSONObject jsonObject) throws JSONException, EAVJsonException {
         if(!jsonObject.has("path")) {
-            throw EAVJsonExceptionMessage.MISSING_PARAMETER.create("path");
+            throw EAVJsonExceptionMessage.MissingParameter.create("path");
         }
         path = EAVPath.parse(jsonObject.getString("path"));
         parsedNodes = null;
@@ -195,7 +195,11 @@ public class EAVMultipleHandler implements MultipleHandler {
         if(action.equals("get") && jsonObject.has(ResponseFields.DATA)) {
             JSONObject metadata = jsonObject.getJSONObject(ResponseFields.DATA);
             if(metadata.has("loadBinaries")) {
-                JSONArray namedBinaries = metadata.getJSONArray("loadBinaries");
+                Object loadBin = metadata.get("loadBinaries");
+                if(!JSONArray.class.isInstance(loadBin)) {
+                    throw EAVJsonExceptionMessage.InvalidLoadBinaries.create();
+                }
+                JSONArray namedBinaries = (JSONArray) loadBin;
                 loadBinaries = new HashSet<EAVPath>();
                 for(int i = 0, size = namedBinaries.length(); i < size; i++) {
                     loadBinaries.add(EAVPath.parse(namedBinaries.getString(i)));

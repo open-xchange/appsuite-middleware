@@ -414,7 +414,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testNewWithoutPath() throws JSONException, AbstractOXException {
         duringRequest("new", PARAMS());
         
-        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.MissingParameter.getDetailNumber());
         
         runRequest();
         
@@ -423,7 +423,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testNewWithoutBody() throws AbstractOXException, JSONException {
         duringRequest("new", PARAMS("path" , "/contacts/12/13/com.openexchange.test"));
         
-        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.MissingParameter.getDetailNumber());
         
         runRequest();
     }
@@ -431,7 +431,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testUpdateWithoutPath() throws AbstractOXException, JSONException {
         duringRequest("update", PARAMS());
         
-        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.MissingParameter.getDetailNumber());
         
         runRequest();
     }
@@ -439,7 +439,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testUpdateWithoutBody() throws JSONException, AbstractOXException {
         duringRequest("update", PARAMS("path" , "/contacts/12/13/com.openexchange.test"));
         
-        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.MissingParameter.getDetailNumber());
         
         runRequest();
     }
@@ -447,7 +447,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testDeleteWithoutPath() throws JSONException, AbstractOXException {
         duringRequest("delete", PARAMS());
      
-        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.MissingParameter.getDetailNumber());
         
         runRequest();
     }
@@ -455,7 +455,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testGetWithoutPath() throws AbstractOXException, JSONException {
         duringRequest("get", PARAMS());
         
-        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.MissingParameter.getDetailNumber());
         
         runRequest();
     }
@@ -463,7 +463,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     public void testGetCertainBinariesWithInvalidLoadBinariesMetadata() throws JSONException, AbstractOXException {
         duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries"), BODY("{loadBinaries : {someKey : 12} }"));
         
-        expectException(EAVJsonExceptionMessage.InvalidTreeStructure.getDetailNumber());
+        expectException(EAVJsonExceptionMessage.InvalidLoadBinaries.getDetailNumber());
         
         runRequest();
         

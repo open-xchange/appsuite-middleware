@@ -61,7 +61,8 @@ public enum EAVJsonExceptionMessage implements OXErrorMessage {
     DifferentTypesInArray(3, Category.USER_INPUT, EAVJsonExceptionStrings.DifferentTypesInArray, null),
     InvalidTreeStructure(4, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidTreeStructure, null),
     IOException(5, Category.INTERNAL_ERROR, EAVJsonExceptionStrings.IOException, null), 
-    MISSING_PARAMETER(6, Category.USER_INPUT, EAVJsonExceptionStrings.MISSING_PARAMETER, "Please supply all mandatory parameters");
+    MissingParameter(6, Category.USER_INPUT, EAVJsonExceptionStrings.MISSING_PARAMETER, "Please supply all mandatory parameters"),
+    InvalidLoadBinaries(7, Category.USER_INPUT, EAVJsonExceptionStrings.INVALID_LOAD_BINARIES, "Please supply a list of paths in the loadBinaries metadatum")
     ;
 
     private int detailNumber;
