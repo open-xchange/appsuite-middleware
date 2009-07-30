@@ -121,7 +121,7 @@ public class TypeMetadateTest extends EAVUnitTest {
     public void testParsing() throws Exception {
         JSONTypeMetadataParser parser = new JSONTypeMetadataParser("types", json);
         EAVTypeMetadataNode result = parser.getEAVNode();
-        assertEquals("bumm", node, result);
+        assertEquals(node, result);
     }
     
     public void testBad() throws Exception {
