@@ -55,7 +55,6 @@ import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.AbstractPublicationResponse;
 import com.openexchange.ajax.publish.actions.ListPublicationsRequest;
 import com.openexchange.ajax.publish.actions.ListPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
