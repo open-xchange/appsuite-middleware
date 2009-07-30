@@ -50,6 +50,7 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -121,5 +122,12 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         GetPublicationRequest getReq = new GetPublicationRequest(expected.getId());
         GetPublicationResponse getResp = myClient.execute(getReq);
         assertTrue("Reading deleted publication should produce exception", getResp.hasError());
+    }
+    
+
+    public void testDeletionOfNonExistingPublicationShouldFail() throws AjaxException, IOException, SAXException, JSONException {
+        // delete publication
+        pubMgr.deleteAction(Arrays.asList(Integer.valueOf(Integer.MAX_VALUE)));
+        assertTrue("Deletion of non-existing publication should produce errors", pubMgr.getLastResponse().hasError());
     }
 }
