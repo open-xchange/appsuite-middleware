@@ -98,6 +98,10 @@ fi
 %clean
 %{__rm} -rf %{buildroot}
 
+%pre
+/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
+/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
