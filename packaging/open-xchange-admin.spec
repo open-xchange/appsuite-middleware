@@ -196,6 +196,10 @@ if [ ${1:-0} -eq 2 ]; then
       fi
    done
 
+   for i in $(find /opt/open-xchange/etc/groupware/ -maxdepth 1 -regex ".*\.\(properties\|ccf\|sh\)"); do
+        ox_update_permissions "$i" root:open-xchange 640
+   done
+   ox_update_permissions /opt/open-xchange/etc/admindaemon/mpasswd root:root 600
 fi
 
 
@@ -207,10 +211,10 @@ fi
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 /etc/init.d/*
 /sbin/*
-%config(noreplace) /opt/open-xchange/etc/admindaemon/*.properties
-%config(noreplace) /opt/open-xchange/etc/admindaemon/*.ccf
-%config(noreplace) /opt/open-xchange/etc/admindaemon/mpasswd
-%config(noreplace) /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/*.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/*.ccf
+%config(noreplace) %attr(600,root,root) /opt/open-xchange/etc/admindaemon/mpasswd
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
 /opt/open-xchange/etc/admindaemon/mysql
 /opt/open-xchange/etc/admindaemon/osgi/config.ini.template
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
