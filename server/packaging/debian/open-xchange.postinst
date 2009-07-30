@@ -448,7 +448,6 @@ case "$1" in
                 postFix "$2"
                 exit 0
         }
-        fixConfigFilePermissions
 
     ;;
 
@@ -473,6 +472,8 @@ rm -f /tmp/ox_chown_tmp_$$
 chmod 750 /var/log/open-xchange
 chown open-xchange: /var/log/open-xchange
 chown open-xchange: /opt/open-xchange/etc/groupware/osgi
+
+fixConfigFilePermissions
 
 update-rc.d open-xchange-groupware defaults > /dev/null
 
