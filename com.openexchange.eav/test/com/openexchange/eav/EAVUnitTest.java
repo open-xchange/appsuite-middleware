@@ -525,12 +525,6 @@ public class EAVUnitTest extends TestCase {
     private static class EAVNodeComparisonStrategy implements ComparisonStrategy<EAVNode> {
 
         public boolean comparePayloads(EAVNode expectedNode, EAVNode actualNode) {
-            if(expectedNode.getType() == actualNode.getType()) {
-                return true;
-            }
-            if(expectedNode.getType() == null) {
-                return false;
-            }
             if (!expectedNode.getType().equals(actualNode.getType())) {
                 return false;
             }
