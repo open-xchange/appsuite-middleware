@@ -150,14 +150,12 @@ ox_stop_daemon() {
 	rm -f /var/run/${name}.pid
     elif [ $(( $type & $LSB )) -eq $LSB ]; then
 	if [ ! -f /var/run/${name}.pid ]; then
-	    # LSB not running
-	    return 7
+	    return 0
 	fi
 	read PID < /var/run/${name}.pid
 	test -z "$PID" && { echo "unable to read pid"; return 1; }
 	if ! ps $PID > /dev/null; then
-	    # LSB not running
-	    return 7
+	    return 0
 	fi
 	kill -TERM $PID
     else
