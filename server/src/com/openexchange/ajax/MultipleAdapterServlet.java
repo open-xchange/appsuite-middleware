@@ -163,8 +163,10 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
         if(requiresBody(action)) {
             String body = getBody(req);
-            Object value = toJSONConformantValue(body);
-            request.put(ResponseFields.DATA, value);
+            if(body != null && ! body.equals("")) {
+                Object value = toJSONConformantValue(body);
+                request.put(ResponseFields.DATA, value);
+            }
         }
         return modify(req, action, request);
     }

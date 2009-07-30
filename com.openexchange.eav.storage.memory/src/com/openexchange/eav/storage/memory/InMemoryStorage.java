@@ -94,7 +94,7 @@ public class InMemoryStorage implements EAVStorage {
     }
     
     public void insert(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException {
-        assertNotSet(getRoot(ctx), parentPath);
+        assertNotSet(getRoot(ctx), parentPath.append(tree.getName()));
         EAVNode node = getContainerAndAppendMissing(getRoot(ctx), parentPath);
         node.addChildren(copyIncoming(tree));
     }

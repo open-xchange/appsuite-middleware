@@ -487,8 +487,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
        assertEquals(tree2, storage.get(ctx, PARENT.append(tree2.getName())));
        
     }
-
-
+    
     /*
      * Error conditions
      */

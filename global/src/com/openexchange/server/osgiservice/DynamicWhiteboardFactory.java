@@ -50,6 +50,7 @@
 package com.openexchange.server.osgiservice;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
@@ -105,12 +106,13 @@ public class DynamicWhiteboardFactory implements OXCloseable {
     private static final class ServiceTrackerInvocationHandler implements InvocationHandler, OXCloseable {
 
         private static final String TO_STRING = "toString";
-        
+
         private ServiceTracker tracker;
 
         private boolean adding = false;
+
         private Object override = null;
-        
+
         private Class klass;
 
         public ServiceTrackerInvocationHandler(BundleContext context, Class klass, final DynamicServiceStateListener listener) {
@@ -121,10 +123,10 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                 public Object addingService(ServiceReference reference) {
                     Object retval = super.addingService(reference);
                     if (listener != null) {
-                        synchronized(this) {
+                        synchronized (this) {
                             adding = true;
 
-                            if(supercedes(reference, tracker.getServiceReference())) {
+                            if (supercedes(reference, tracker.getServiceReference())) {
                                 override = retval;
                             }
                             listener.stateChanged();
@@ -136,18 +138,18 @@ public class DynamicWhiteboardFactory implements OXCloseable {
                 }
 
                 private boolean supercedes(ServiceReference reference, ServiceReference otherReference) {
-                    if(null == otherReference) {
+                    if (null == otherReference) {
                         return true;
                     }
                     Integer p1 = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-                    if(p1 == null) {
+                    if (p1 == null) {
                         return false;
                     }
                     Integer p2 = (Integer) otherReference.getProperty(Constants.SERVICE_RANKING);
-                    if(p2 == null) {
+                    if (p2 == null) {
                         return true;
                     }
-                    if(p1 == p2) {
+                    if (p1 == p2) {
                         p1 = (Integer) reference.getProperty(Constants.SERVICE_ID);
                         p2 = (Integer) otherReference.getProperty(Constants.SERVICE_ID);
                     }
@@ -169,11 +171,18 @@ public class DynamicWhiteboardFactory implements OXCloseable {
             if(args == null || args.length == 0 && TO_STRING.equals(method.getName())) {
                 return "OSGi Proxy ( "+klass.getName()+" ) "+hashCode();
             }
-            return method.invoke(getDelegate(), args);
+            try {
+                return method.invoke(getDelegate(), args);
+            } catch (InvocationTargetException x) {
+                if(null == x.getCause()) {
+                    throw x;
+                }
+                throw x.getCause();
+            }
         }
 
         private Object getDelegate() {
-            if(override != null) {
+            if (override != null) {
                 return override;
             }
             if (tracker.size() == 0) {
@@ -205,8 +214,8 @@ public class DynamicWhiteboardFactory implements OXCloseable {
             return true;
         }
         InvocationHandler invocationHandler = Proxy.getInvocationHandler(o);
-        if(ServiceTrackerInvocationHandler.class.isInstance(invocationHandler)) {
-            ServiceTrackerInvocationHandler handler = (ServiceTrackerInvocationHandler)invocationHandler;
+        if (ServiceTrackerInvocationHandler.class.isInstance(invocationHandler)) {
+            ServiceTrackerInvocationHandler handler = (ServiceTrackerInvocationHandler) invocationHandler;
             return handler.isActive();
         }
         return true;
