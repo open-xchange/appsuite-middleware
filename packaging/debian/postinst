@@ -180,13 +180,16 @@ postFix() {
       }
   fi
 
+  fixConfigFilePermissions
+}
+
+fixConfigFilePermissions() {
   # Restrict permissions on configuration files.
   chgrp open-xchange /opt/open-xchange/etc/admindaemon/mysql/*.sql
   chmod 640 /opt/open-xchange/etc/admindaemon/mysql/*.sql
   chgrp open-xchange /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
   chmod 640 /opt/open-xchange/etc/admindaemon/*.properties /opt/open-xchange/etc/admindaemon/*.ccf /opt/open-xchange/etc/admindaemon/*.sh
 }
-
 
 case "$1" in
     configure)
@@ -195,6 +198,7 @@ case "$1" in
                 postFix "$2"
                 exit 0
         }
+        fixConfigFilePermissions
 
     ;;
 
