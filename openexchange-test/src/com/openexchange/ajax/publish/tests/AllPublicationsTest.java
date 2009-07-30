@@ -57,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.publish.actions.AbstractPublicationResponse;
 import com.openexchange.ajax.publish.actions.AllPublicationsRequest;
 import com.openexchange.ajax.publish.actions.AllPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
@@ -113,6 +114,35 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         //retrieve publications
         AllPublicationsRequest req = new AllPublicationsRequest(folderID, expected.getId(), module, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
         AllPublicationsResponse resp = getClient().execute(req);
+        assertFalse("Should work", resp.hasError());
+        assertEquals("Should have exactly one result", 1, resp.getAll().size());
+        
+        JSONArray actual = resp.getAll().get(0);
+        assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
+        assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
+        assertEquals("Should have same module", expected.getModule(), actual.getString(2));
+        assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
+        assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
+    }
+    
+    public void testShouldFindOneFreshlyCreatedPublicationForEmptyFolder() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        FolderObject folder = createDefaultContactFolder();
+        String folderID = String.valueOf(folder.getParentFolderID() );
+        String module = "contacts";
+        
+        // publish
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
+        
+        Publication expected = generatePublication(module, folderID, discovery);
+        expected.setDisplayName("This will be changed");
+        
+        pubMgr.newAction(expected);
+        assertFalse("Precondition: Should be able to create a publication", pubMgr.getLastResponse().hasError());
+
+        //retrieve publications
+        pubMgr.allAction(folderID, expected.getId(), module, Arrays.asList(new String[]{"id","entity", "entityModule", "displayName", "target"}));
+        AllPublicationsResponse resp = (AllPublicationsResponse) pubMgr.getLastResponse();
         assertFalse("Should work", resp.hasError());
         assertEquals("Should have exactly one result", 1, resp.getAll().size());
         
