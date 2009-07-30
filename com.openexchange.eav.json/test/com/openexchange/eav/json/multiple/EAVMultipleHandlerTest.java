@@ -51,11 +51,16 @@ package com.openexchange.eav.json.multiple;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.TimeZone;
+import org.json.JSONException;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVPath;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeMetadataNode;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.json.JSONAssertion;
 
 
@@ -94,10 +99,46 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
         
     }
     
+    public void testNewWithMetadata() throws Exception {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        duringRequest("new", PARAMS("path", "/contacts/12/13/com.openexchange.test"), BODY("{data : {strings : [\"a\",\"b\",\"c\", \"c\"], time : "+nowRarotonga+"}, types : { strings : {containerType : \"set\"}, time : {t : \"Time\", timezone : \""+tz.getID()+"\"} }}"));
+        
+        EAVNode stored = 
+        N("com.openexchange.test",
+            SET("strings", "a", "b", "c"),
+            N("time", EAVType.TIME, nowUTC)
+        );
+        
+        expectStorageCall("insert", ctx, new EAVPath("contacts", "12", "13"), stored);
+
+        expectResponseData(1);
+        
+        runRequest();
+    }
+    
     public void testNewAttribute() throws Exception {
         duringRequest("new", PARAMS("path", "/contacts/12/13/com.openexchange.test/string"), BODY("\"Hello World\""));
         
         expectStorageCall("insert", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"), N("string", "Hello World"));
+        
+        expectResponseData(1);
+        
+        runRequest();
+    }
+    
+    public void testNewAttributeWithMetadata() throws Exception {
+        
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        
+        duringRequest("new", PARAMS("path", "/contacts/12/13/com.openexchange.test/time"), BODY("{data : "+nowRarotonga+", types : {t : \"Time\", timezone : \""+tz.getID()+"\"}}"));
+        
+        expectStorageCall("insert", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"), N("time", EAVType.TIME, nowUTC));
         
         expectResponseData(1);
         
@@ -128,6 +169,35 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
     
     }
     
+    public void testUpdateWithSuppliedMetadata() throws Exception {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long someDay = 1245715200000l;
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        duringRequest("update", PARAMS("path", "/contacts/12/13/com.openexchange.test"), BODY("{data : {date : "+someDay+", time : "+nowRarotonga+"}, types : {time : {timezone : \""+tz.getID()+"\"}}}"));
+        
+        EAVPath parent = new EAVPath("contacts", "12", "13");
+        EAVNode parsed = N("com.openexchange.test", N("date", EAVType.NUMBER, someDay), N("time", EAVType.NUMBER, nowRarotonga));
+        
+        EAVTypeMetadataNode metadata = TYPE("com.openexchange.test",
+                                            TYPE("date", EAVType.DATE),
+                                            TYPE("time", EAVType.TIME)
+                                        );
+        
+        
+        expectStorageCall("getTypes", ctx, parent, parsed);
+        andReturn(metadata);
+        
+        EAVNode update = N("com.openexchange.test", N("date", EAVType.DATE, someDay), N("time", EAVType.TIME, nowUTC));
+        expectStorageCall("update", ctx, parent, update);
+        
+        expectResponseData(1);
+        
+        runRequest();
+    
+    }
+    
     public void testUpdateAttribute() throws Exception {
         duringRequest("update", PARAMS("path", "/contacts/12/13/com.openexchange.test/attribute"), BODY("12"));
         
@@ -144,6 +214,26 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
    
         runRequest();
     }
+    
+    public void testUpdateAttributeWithMetadata() throws Exception {
+        duringRequest("update", PARAMS("path", "/contacts/12/13/com.openexchange.test/attribute"), BODY("{data : 1245715200000, types : {t : \"Date\"}}"));
+        
+        EAVNode parsed = N("attribute", 1245715200000l);
+        EAVNode update = N("attribute", EAVType.DATE, 1245715200000l);
+        
+        EAVTypeMetadataNode metadata = TYPE("attribute", EAVType.DATE);
+        EAVPath parent = new EAVPath("contacts", "12", "13", "com.openexchange.test");
+        
+        expectStorageCall("getTypes", ctx, parent, parsed);
+        andReturn(metadata);
+        
+        expectStorageCall("update", ctx, parent, update);
+        
+        expectResponseData(1);
+   
+        runRequest();
+    }
+
     
     //TODO: updateArray
     
@@ -242,7 +332,7 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
             .hasKey("binary3").withValue(encoded)
         .objectEnds();
         
-        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries", "allBinaries", true), BODY("{loadBinaries : [\"binary1\", \"binary2\", \"binary3\"] }"));
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries"), BODY("{loadBinaries : [\"binary1\", \"binary2\", \"binary3\"] }"));
         expectStorageCall("get", ctx, new EAVPath("contacts","12","13","com.openexchange.test", "myBinaries"), new HashSet<EAVPath>(Arrays.asList(new EAVPath("binary1"), new EAVPath("binary2"), new EAVPath("binary3"))));
         andReturn(tree);
         
@@ -298,8 +388,21 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
         
         runRequest();
         
+    }
+    
+    public void testGetAttributeWithMetadata() throws Exception {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
         
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myTime"), BODY("{types : {timezone : \"Pacific/Rarotonga\"}}"));
         
+        expectStorageCall("get", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test", "myTime"), false);
+        andReturn(N("myTime", EAVType.TIME, nowUTC));
+        
+        expectResponseData(nowRarotonga);
+        
+        runRequest();
     }
     
     
@@ -308,31 +411,61 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
      */
     
    
-    public void testNewWithoutPath() {
+    public void testNewWithoutPath() throws JSONException, AbstractOXException {
+        duringRequest("new", PARAMS());
+        
+        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        
+        runRequest();
         
     }
     
-    public void testNewWithoutBody() {
+    public void testNewWithoutBody() throws AbstractOXException, JSONException {
+        duringRequest("new", PARAMS("path" , "/contacts/12/13/com.openexchange.test"));
         
+        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        
+        runRequest();
     }
     
-    public void testUpdateWithoutPath() {
+    public void testUpdateWithoutPath() throws AbstractOXException, JSONException {
+        duringRequest("update", PARAMS());
         
+        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        
+        runRequest();
     }
     
-    public void testUpdateWithoutBody() {
+    public void testUpdateWithoutBody() throws JSONException, AbstractOXException {
+        duringRequest("update", PARAMS("path" , "/contacts/12/13/com.openexchange.test"));
         
+        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        
+        runRequest();
     }
     
-    public void testDeleteWithoutPath() {
+    public void testDeleteWithoutPath() throws JSONException, AbstractOXException {
+        duringRequest("delete", PARAMS());
+     
+        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
         
+        runRequest();
     }
     
-    public void testGetWithoutPath() {
+    public void testGetWithoutPath() throws AbstractOXException, JSONException {
+        duringRequest("get", PARAMS());
         
+        expectException(EAVJsonExceptionMessage.MISSING_PARAMETER.getDetailNumber());
+        
+        runRequest();
     }
     
-    public void testGetCertainBinariesWithInvalidLoadBinariesMetadata() {
+    public void testGetCertainBinariesWithInvalidLoadBinariesMetadata() throws JSONException, AbstractOXException {
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myBinaries"), BODY("{loadBinaries : {someKey : 12} }"));
+        
+        expectException(EAVJsonExceptionMessage.InvalidTreeStructure.getDetailNumber());
+        
+        runRequest();
         
     }
     

@@ -64,43 +64,64 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EAVTypeCoercion {
 
+    public static enum Mode { INCOMING, OUTGOING }
+    
     private static final Log LOG = LogFactory.getLog(EAVTypeCoercion.class);
 
+    private Mode mode = Mode.INCOMING;
+    
+    public EAVTypeCoercion(Mode mode) {
+        this.mode = mode;
+    }
+    
     public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo) throws EAVException {
         return coerce(origType, payload, typeInfo, null);
     }
 
     public Object coerce(EAVType origType, Object payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws EAVException {
-        typeInfo.getType().checkCoercible(origType, payload);
+        EAVType type = typeInfo.getType();
+        if(type == null) {
+            type = origType;
+        }
+        type.checkCoercible(origType, payload);
 
         switch (origType) {
         case NUMBER:
-            switch (typeInfo.getType()) {
+            switch (type) {
             case DATE:
                 return payload;
             case TIME: {
-                TimeZone tz = defaultTZ;
-                if (typeInfo.hasOption("timezone")) {
-                    tz = TimeZone.getTimeZone((String) typeInfo.getOption("timezone"));
-                }
-
-                long utc = (Long) payload;
-                if (tz != null) {
-                    utc = recalculateTime(utc, tz);
-                }
+                long utc = coerceTime(payload, typeInfo, defaultTZ);
                 return utc;
             }
             }
             break;
         case STRING:
-            switch (typeInfo.getType()) {
+            switch (type) {
             case BINARY: {
                 return decodeBase64((String) payload);
             }
             }
+            break;
+        case TIME :
+            long utc = coerceTime(payload, typeInfo, defaultTZ);
+            return utc;
         }
 
         return payload;
+    }
+
+    private long coerceTime(Object payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) {
+        TimeZone tz = defaultTZ;
+        if (typeInfo.hasOption("timezone")) {
+            tz = TimeZone.getTimeZone((String) typeInfo.getOption("timezone"));
+        }
+
+        long utc = (Long) payload;
+        if (tz != null) {
+            utc = recalculateTime(utc, tz);
+        }
+        return utc;
     }
 
     public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo) throws EAVException {
@@ -108,7 +129,11 @@ public class EAVTypeCoercion {
     }
 
     public Object[] coerceMultiple(EAVType origType, Object[] payload, EAVTypeMetadataNode typeInfo, TimeZone defaultTZ) throws EAVException {
-        Object[] coerced = typeInfo.getType().getArray(payload.length);
+        EAVType type = typeInfo.getType();
+        if(type == null) {
+            type = origType;
+        }
+        Object[] coerced = type.getArray(payload.length);
         int index = 0;
         for (Object origElement : payload) {
             Object coercedElement = coerce(origType, origElement, typeInfo, defaultTZ);
@@ -129,7 +154,11 @@ public class EAVTypeCoercion {
     }
 
     private long recalculateTime(long time, TimeZone timeZone) {
-        return time - timeZone.getOffset(time);
+        switch(mode) {
+        case INCOMING: return time - timeZone.getOffset(time);
+        case OUTGOING : return time + timeZone.getOffset(time);
+        }
+        return -1; 
     }
 
 }

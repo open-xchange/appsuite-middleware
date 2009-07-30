@@ -61,9 +61,12 @@ import com.openexchange.eav.EAVNodeTypeCoercionVisitor;
 import com.openexchange.eav.EAVPath;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.EAVType;
+import com.openexchange.eav.EAVTypeCoercion;
 import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.json.exception.EAVJsonException;
+import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 import com.openexchange.eav.json.parse.JSONParser;
+import com.openexchange.eav.json.parse.metadata.type.JSONTypeMetadataParser;
 import com.openexchange.eav.json.write.JSONWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -84,6 +87,8 @@ public class EAVMultipleHandler implements MultipleHandler {
     private EAVPath path = null;
 
     private EAVNode parsedNodes;
+    
+    private EAVTypeMetadataNode types = null;
 
     private boolean allBinaries;
     
@@ -108,10 +113,24 @@ public class EAVMultipleHandler implements MultipleHandler {
         Context ctx = session.getContext();
         
         if(action.equals("new")) {
+            if(types != null) {
+                parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.INCOMING));            
+            }
+            if(parsedNodes == null) {
+                throw EAVJsonExceptionMessage.MISSING_PARAMETER.create("body");
+            }
             storage.insert(ctx, path.parent(), parsedNodes);
         } else if (action.equals("update")){
-            EAVTypeMetadataNode types = storage.getTypes(ctx, path.parent(), parsedNodes);
-            parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types));            
+            if(parsedNodes == null) {
+                throw EAVJsonExceptionMessage.MISSING_PARAMETER.create("body");
+            }
+            EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), parsedNodes);
+            if(types != null) {
+                types = types.mergeWith(savedTypes);
+            } else {
+                types = savedTypes;
+            }
+            parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.INCOMING));            
             storage.update(ctx, path.parent(), parsedNodes);
             return 1;
         } else if (action.equals("delete")) {
@@ -122,6 +141,9 @@ public class EAVMultipleHandler implements MultipleHandler {
             if(loaded.getType() == EAVType.BINARY && !loaded.isMultiple() && raw) {
                 return loaded.getPayload();
             }
+            if(types != null) {
+                loaded.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.OUTGOING));            
+            }
             return new JSONWriter(loaded).getJson().get(path.last());
         }
         
@@ -131,12 +153,34 @@ public class EAVMultipleHandler implements MultipleHandler {
     }
 
     private void parse(JSONObject jsonObject) throws JSONException, EAVJsonException {
+        if(!jsonObject.has("path")) {
+            throw EAVJsonExceptionMessage.MISSING_PARAMETER.create("path");
+        }
         path = EAVPath.parse(jsonObject.getString("path"));
         parsedNodes = null;
         if(jsonObject.has(ResponseFields.DATA)) {
             Object payload = jsonObject.get(ResponseFields.DATA);
+            
             if(JSONObject.class.isInstance(payload)) {
-                parsedNodes = new JSONParser(path.last(), (JSONObject) payload).getEAVNode();
+                JSONObject data = (JSONObject) payload;
+                if(data.has("data") || data.has("types")) {
+                    types = new JSONTypeMetadataParser(data.getJSONObject("types")).getEAVNode();
+                    
+                    if(data.has("data")) {
+                        Object definitiveData = data.get("data");
+                        if(JSONObject.class.isInstance(definitiveData)) {
+                            parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getEAVNode();
+                        } else {
+                            JSONObject toParse = new JSONObject();
+                            toParse.put(path.last(), definitiveData);
+                            parsedNodes = new JSONParser(path.last(), toParse).getEAVNode().getChildByName(path.last());
+                            parsedNodes.setParent(null);
+                        }
+                    }
+                    
+                } else {
+                    parsedNodes = new JSONParser(path.last(), data).getEAVNode();
+                }
             } else {
                 JSONObject toParse = new JSONObject();
                 toParse.put(path.last(), payload);

@@ -151,6 +151,20 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
 
 
     public EAVTypeMetadataNode mergeWith(EAVTypeMetadataNode other) throws EAVException {
+        if(isLeaf()) {
+            if(other != null && ! hasEqualPayloadAs(other)) {
+                throw EAVErrorMessage.WRONG_TYPES.create(getPath().toString(), getTypeDescription(), other.getTypeDescription());
+            }
+            if(containerType == null) {
+                containerType = other.containerType;
+            }
+            if(type == null) {
+                type = other.type;
+            }
+            return TreeTools.copy(this);
+        }
+        
+        
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(getName());
         Set<String> alreadyHandled = new HashSet<String>();
         for(EAVTypeMetadataNode child : getChildren()) {
@@ -161,6 +175,12 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
             if(child.isLeaf()) {
                 if(otherChild != null && ! child.hasEqualPayloadAs(otherChild)) {
                     throw EAVErrorMessage.WRONG_TYPES.create(child.getPath().toString(), child.getTypeDescription(), otherChild.getTypeDescription());
+                }
+                if(child.containerType == null) {
+                    child.containerType = otherChild.containerType;
+                }
+                if(child.type == null) {
+                    child.type = otherChild.type;
                 }
                 node.addChild(TreeTools.copy(child));
             } else {
@@ -190,7 +210,7 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
 
 
     public boolean hasEqualPayloadAs(EAVTypeMetadataNode other) {
-        return type == other.type && containerType == other.containerType;
+        return (type == null || other.type == null || type == other.type) && (containerType == null || other.containerType == null || containerType == other.containerType);
     }
 
 

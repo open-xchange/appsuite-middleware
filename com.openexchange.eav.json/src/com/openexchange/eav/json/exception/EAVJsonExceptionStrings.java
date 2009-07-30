@@ -70,4 +70,11 @@ public class EAVJsonExceptionStrings implements LocalizableStrings {
     
     // Invalid tree structure.
     public static final String InvalidTreeStructure = "Invalid tree structure.";
+
+    
+    // Missing parameter %s
+    public static final String MISSING_PARAMETER = "Missing parameter %s";
+    
+    // loadBinaries must be an array of paths
+    public static final String INVALID_LOAD_BINARIES = "loadBinaries must be an array of paths";
 }

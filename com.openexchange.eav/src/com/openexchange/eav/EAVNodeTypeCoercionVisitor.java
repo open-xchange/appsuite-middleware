@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.util.TimeZone;
+
 
 /**
  * {@link EAVNodeTypeCoercionVisitor}
@@ -59,10 +61,13 @@ package com.openexchange.eav;
 public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder implements AbstractNodeVisitor<EAVNode> {
 
     private EAVTypeMetadataNode metadata;
-    private EAVTypeCoercion coercion = new EAVTypeCoercion();
+    private EAVTypeCoercion coercion = null;
+    private TimeZone defaultTZ;
     
-    public EAVNodeTypeCoercionVisitor(EAVTypeMetadataNode metadata) {
+    public EAVNodeTypeCoercionVisitor(EAVTypeMetadataNode metadata, TimeZone defaultTZ, EAVTypeCoercion.Mode mode) {
         this.metadata = metadata;
+        this.defaultTZ = defaultTZ;
+        this.coercion = new EAVTypeCoercion(mode);
     }
 
     public void visit(int index, EAVNode node) {
@@ -79,14 +84,22 @@ public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder imple
                 setException( EAVErrorMessage.WRONG_TYPES.create(node.getPath(), node.getTypeDescription(), metadataNode.getTypeDescription()) );
                 throw BREAK;
             }
+            EAVType type = metadataNode.getType();
+            if(type == null) {
+                type = node.getType();
+            }
             if(node.isMultiple()) {
+                EAVContainerType containerType = metadataNode.getContainerType();
+                if(containerType == null) {
+                    containerType = node.getContainerType();
+                }
                 Object[] origPayload = (Object[]) node.getPayload();
-                Object[] coercedPayload = coercion.coerceMultiple(node.getType(), origPayload, metadataNode);
-                Object[] restrictedPayload = metadata.getContainerType().applyRestrictions(metadataNode.getType(), coercedPayload);
-                node.setPayload(metadataNode.getType(), node.getContainerType(), restrictedPayload);
+                Object[] coercedPayload = coercion.coerceMultiple(node.getType(), origPayload, metadataNode, defaultTZ);
+                Object[] restrictedPayload = containerType.applyRestrictions(type, coercedPayload);
+                node.setPayload(type, containerType, restrictedPayload);
             } else {
-                Object payload = coercion.coerce(node.getType(), node.getPayload(), metadataNode);
-                node.setPayload(metadataNode.getType(), node.getContainerType(), payload);
+                Object payload = coercion.coerce(node.getType(), node.getPayload(), metadataNode, defaultTZ);
+                node.setPayload(type, node.getContainerType(), payload);
             }
         } catch (EAVException e) {
             setException( e );

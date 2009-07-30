@@ -60,7 +60,8 @@ public enum EAVJsonExceptionMessage implements OXErrorMessage {
     InvalidType(2, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidType, null),
     DifferentTypesInArray(3, Category.USER_INPUT, EAVJsonExceptionStrings.DifferentTypesInArray, null),
     InvalidTreeStructure(4, Category.USER_INPUT, EAVJsonExceptionStrings.InvalidTreeStructure, null),
-    IOException(5, Category.INTERNAL_ERROR, EAVJsonExceptionStrings.IOException, null);
+    IOException(5, Category.INTERNAL_ERROR, EAVJsonExceptionStrings.IOException, null), 
+    MISSING_PARAMETER(6, Category.USER_INPUT, EAVJsonExceptionStrings.MISSING_PARAMETER, "Please supply all mandatory parameters");
     ;
 
     private int detailNumber;

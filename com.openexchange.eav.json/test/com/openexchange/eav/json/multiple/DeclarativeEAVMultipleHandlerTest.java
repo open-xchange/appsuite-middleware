@@ -82,6 +82,7 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
     
     private List<DynamicSim> dynamicSims = new LinkedList<DynamicSim>();
     protected Object response;
+    private Integer expectedException = null;
     
     @Override
     protected void setUp() throws Exception {
@@ -110,8 +111,18 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
     protected void runRequest() throws AbstractOXException, JSONException {
         EAVMultipleHandler multipleHandler = new EAVMultipleHandler();
         multipleHandler.setStorage(DynamicSim.compose(EAVStorage.class, dynamicSims));
-    
-        response = multipleHandler.performRequest(action, request, new ServerSessionAdapter(null, ctx));
+        
+        try {
+            response = multipleHandler.performRequest(action, request, new ServerSessionAdapter(null, ctx));
+            if(expectedException != null) {
+                fail("Expected Exception with detailNumber: "+expectedException);
+            }
+        } catch (AbstractOXException x) {
+            if(expectedException == null) {
+                throw x;
+            }
+            assertEquals((int)expectedException, x.getDetailNumber());
+        }
         
         if(expectedResponse != null) {
             if(JSONAssertion.class.isInstance(expectedResponse)) {
@@ -128,6 +139,10 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
     
     }
 
+    protected void expectException(int detailNumber) {
+        this.expectedException = detailNumber;
+    }
+    
     protected void expectResponseData(Object data) {
         this.expectedResponse = data;
     }

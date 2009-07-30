@@ -66,7 +66,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class EAVTypeCoercionTest extends EAVUnitTest {
     
-    private EAVTypeCoercion typeCoercion = new EAVTypeCoercion();
+    private EAVTypeCoercion typeCoercion = new EAVTypeCoercion(EAVTypeCoercion.Mode.INCOMING);
     
     /*
      * Coercion 
@@ -224,7 +224,7 @@ public class EAVTypeCoercionTest extends EAVUnitTest {
                                              )
                                         );
         
-        EAVNodeTypeCoercionVisitor visitor = new EAVNodeTypeCoercionVisitor(metadata);
+        EAVNodeTypeCoercionVisitor visitor = new EAVNodeTypeCoercionVisitor(metadata, null, EAVTypeCoercion.Mode.INCOMING);
         tree.visit(visitor);
         
         assertNoError(visitor);
@@ -240,7 +240,7 @@ public class EAVTypeCoercionTest extends EAVUnitTest {
                                            TYPE("attribute", EAVType.DATE, EAVContainerType.MULTISET)
                                        );
         
-        EAVNodeTypeCoercionVisitor visitor = new EAVNodeTypeCoercionVisitor(metadata);
+        EAVNodeTypeCoercionVisitor visitor = new EAVNodeTypeCoercionVisitor(metadata, null, EAVTypeCoercion.Mode.INCOMING);
         tree.visit(visitor);
         
         assertError(visitor, EAVErrorMessage.WRONG_TYPES);
@@ -270,7 +270,7 @@ public class EAVTypeCoercionTest extends EAVUnitTest {
                                             
                                        );
         
-        EAVSetTransformationTypeCoercionVisitor visitor = new EAVSetTransformationTypeCoercionVisitor(metadata);
+        EAVSetTransformationTypeCoercionVisitor visitor = new EAVSetTransformationTypeCoercionVisitor(metadata, null,EAVTypeCoercion.Mode.INCOMING);
         transformation.visit(visitor);
         
         assertNoError(visitor);
@@ -290,7 +290,7 @@ public class EAVTypeCoercionTest extends EAVUnitTest {
                                             TYPE("date", EAVType.DATE, EAVContainerType.SINGLE)
                                        );
     
-        EAVSetTransformationTypeCoercionVisitor visitor = new EAVSetTransformationTypeCoercionVisitor(metadata);
+        EAVSetTransformationTypeCoercionVisitor visitor = new EAVSetTransformationTypeCoercionVisitor(metadata, null, EAVTypeCoercion.Mode.INCOMING);
         transformation.visit(visitor);
         
         assertError(visitor, EAVErrorMessage.WRONG_TYPES);

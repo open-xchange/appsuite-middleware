@@ -125,4 +125,13 @@ public class EAVTypeMetadataMergeTest extends EAVUnitTest {
             assertEquals(EAVErrorMessage.WRONG_TYPES.getDetailNumber(), x.getDetailNumber());
         }
     }
+    
+    public void testMergeLeaf() throws EAVException {
+        EAVTypeMetadataNode node1 = TYPE("attribute", EAVType.DATE, (EAVContainerType) null);
+        EAVTypeMetadataNode node2 = TYPE("attribute", (EAVType) null, EAVContainerType.SET);
+        
+        EAVTypeMetadataNode merged = node1.mergeWith(node2);
+        
+        assertType(merged, EAVType.DATE, EAVContainerType.SET);
+    }
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.eav;
 
+import java.util.TimeZone;
+
 
 /**
  * {@link EAVSetTransformationTypeCoercionVisitor}
@@ -59,10 +61,13 @@ package com.openexchange.eav;
 public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptionHolder implements EAVSetTransformationVisitor {
 
     private EAVTypeMetadataNode metadata;
-    private EAVTypeCoercion coercion = new EAVTypeCoercion();
+    private EAVTypeCoercion coercion = null;
+    private TimeZone defaultTZ;
     
-    public EAVSetTransformationTypeCoercionVisitor(EAVTypeMetadataNode metadata) {
+    public EAVSetTransformationTypeCoercionVisitor(EAVTypeMetadataNode metadata, TimeZone defaultTZ, EAVTypeCoercion.Mode mode) {
         this.metadata = metadata;
+        this.defaultTZ = defaultTZ;
+        this.coercion = new EAVTypeCoercion(mode);
     }
 
     public void visit(int index, EAVSetTransformation node) {
@@ -80,8 +85,8 @@ public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptio
         }
         
         try {
-            node.setAdd(coercion.coerceMultiple(node.getType(), node.getAdd(), metadataNode));
-            node.setRemove(coercion.coerceMultiple(node.getType(), node.getRemove(), metadataNode));
+            node.setAdd(coercion.coerceMultiple(node.getType(), node.getAdd(), metadataNode, defaultTZ));
+            node.setRemove(coercion.coerceMultiple(node.getType(), node.getRemove(), metadataNode, defaultTZ));
             node.setType(metadataNode.getType());
         } catch (EAVException e) {
             setException( e );
