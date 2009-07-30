@@ -80,6 +80,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.tools.AdminCache;
@@ -138,6 +139,11 @@ public class AdminDaemon {
                 bundlelist.add(bundle);
                 if (log.isInfoEnabled()) {
                     log.info(bundle.getSymbolicName() + " already started before admin.");
+                }
+            } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
+                bundlelist.add(bundle);
+                if (log.isInfoEnabled()) {
+                    log.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
                 }
             }
         }
