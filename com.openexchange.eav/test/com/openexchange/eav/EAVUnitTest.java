@@ -576,5 +576,36 @@ public class EAVUnitTest extends TestCase {
         
     }
     
+    private static class EAVSetTransformationComparisonStrategy implements ComparisonStrategy<EAVSetTransformation> {
+
+        public boolean comparePayloads(EAVSetTransformation expectedNode, EAVSetTransformation actualNode) {
+            if (!expectedNode.getType().equals(actualNode.getType())) {
+                return false;
+            }
+            EAVMultipleCompare compare = new EAVMultipleCompare();
+            return (Boolean) expectedNode.getType().doSwitch(compare, expectedNode.getAdd(), actualNode.getAdd()) && (Boolean) expectedNode.getType().doSwitch(compare, expectedNode.getRemove(), actualNode.getRemove());
+        }
+
+        public String printPayload(EAVSetTransformation node) {
+            EAVMultiplePrettyPrint multiplePrettyPrint = new EAVMultiplePrettyPrint();
+            StringBuilder builder = new StringBuilder();
+            
+            if(null != node.getAdd()) {
+                builder.append("ADD: [");
+                builder.append(node.getType().doSwitch(multiplePrettyPrint, (Object)node.getAdd()));
+                builder.append("]");
+            }
+            if(null != node.getRemove()) {
+                builder.append(" REMOVE: [");
+                builder.append(node.getType().doSwitch(multiplePrettyPrint, (Object)node.getRemove()));
+                builder.append("] ");
+            }
+            builder.append(node.getType());
+            
+            return builder.toString();
+        }
+        
+    }
+    
 
 }
