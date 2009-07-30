@@ -104,7 +104,7 @@ ox_start_daemon() {
     test -n "$group"  && runasgroup="--group $group"
     ox_system_type
     local type=$?
-    if [ $type -eq $DEBIAN ]; then
+    if [ $type -eq $DEBIAN -o $type -eq $UCS ]; then
 	start-stop-daemon $runasuser $runasgroup \
 	    --background --start --oknodo --startas $path \
 	    --make-pidfile --pidfile /var/run/${name}.pid
@@ -145,7 +145,7 @@ ox_stop_daemon() {
     test -x $path ||   die "ox_stop_daemon: $path is not executable"
     ox_system_type
     local type=$?
-    if [ $type -eq $DEBIAN ] ; then
+    if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
 	start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
 	rm -f /var/run/${name}.pid
     elif [ $(( $type & $LSB )) -eq $LSB ]; then
@@ -212,7 +212,7 @@ ox_set_property() {
 
     ox_system_type
     local type=$?
-    if [ $type -eq $DEBIAN ]; then
+    if [ $type -eq $DEBIAN -o $type -eq $UCS ]; then
 	local origfile="${propfile}.dpkg-dist"
     else
 	local origfile="${propfile}.rpmnew"
