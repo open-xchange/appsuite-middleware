@@ -449,6 +449,7 @@ case "$1" in
                 exit 0
         }
         fixConfigFilePermissions
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
