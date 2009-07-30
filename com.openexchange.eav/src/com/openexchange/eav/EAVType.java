@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 /**
@@ -74,16 +75,21 @@ public enum EAVType {
     
     public static final String KEY = "t";
     
-    private static Map<String, EAVType> types;
+    private static Map<String, EAVType> types = new TreeMap<String, EAVType>(String.CASE_INSENSITIVE_ORDER);;
+    
+    private static Map<Class<?>, EAVType> guessedTypes = new HashMap<Class<?>, EAVType>();
 
     private static final EnumMap<EAVType, EnumSet<EAVType>> COERCIBLE = new EnumMap<EAVType, EnumSet<EAVType>>(EAVType.class);
     
     static {
-        types =  new TreeMap<String, EAVType>(String.CASE_INSENSITIVE_ORDER);
+        EAVTypeSwitcher guessSwitcher = getGuessSwitcher();
         COERCIBLE.put(EAVType.STRING, EnumSet.of(EAVType.BINARY));
         COERCIBLE.put(EAVType.NUMBER, EnumSet.of(EAVType.TIME, EAVType.DATE));
         for (EAVType type : EAVType.values()) {
             types.put(type.getKeyword(), type);
+            for (Class<?> clazz : (Class[])type.doSwitch(guessSwitcher)) {
+                guessedTypes.put(clazz, type);
+            }
             if(!COERCIBLE.containsKey(type)) {
                 COERCIBLE.put(type, EnumSet.noneOf(EAVType.class));
             }
@@ -124,6 +130,10 @@ public enum EAVType {
         }
     }
     
+    public static EAVType guessType(Class<?> clazz) {
+        return guessedTypes.get(clazz);
+    }
+    
     public boolean isCoercibleFrom(EAVType origType) {
         if(origType == NULL) {
             return true;
@@ -133,6 +143,44 @@ public enum EAVType {
         }
         
         return COERCIBLE.get(origType).contains(this);
+    }
+    
+    private static EAVTypeSwitcher getGuessSwitcher() {
+        return new EAVTypeSwitcher() {
+
+            public Object binary(Object... args) {
+                return new Class[0];
+            }
+
+            public Object bool(Object... args) {
+                return new Class[]{Boolean.class};
+            }
+
+            public Object date(Object... args) {
+                return new Class[0];
+            }
+
+            public Object nullValue(Object... args) {
+                return new Class[0];
+            }
+
+            public Object number(Object... args) {
+                return new Class[]{Integer.class, Long.class, Float.class, Double.class};
+            }
+
+            public Object object(Object... args) {
+                return new Class[0];
+            }
+
+            public Object string(Object... args) {
+                return new Class[]{String.class};
+            }
+
+            public Object time(Object... args) {
+                return new Class[0];
+            }
+            
+        };
     }
 
     private static final EAVTypeSwitcher validationSwitch = new EAVTypeSwitcher() {
