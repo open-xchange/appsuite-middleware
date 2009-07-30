@@ -600,6 +600,9 @@ public class EAVUnitTest extends TestCase {
         }
 
         public String printPayload(EAVSetTransformation node) {
+            if(node.isLeaf()) {
+                return "";
+            }
             EAVMultiplePrettyPrint multiplePrettyPrint = new EAVMultiplePrettyPrint();
             StringBuilder builder = new StringBuilder();
             
