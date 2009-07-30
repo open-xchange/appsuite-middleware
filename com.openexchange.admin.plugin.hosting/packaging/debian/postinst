@@ -37,6 +37,10 @@ postFix() {
       }
   fi
 
+  fixConfigFilePermissions
+}
+
+fixConfigFilePermissions() {
   # Restrict permissions of configuration files.
   chgrp open-xchange /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
   chmod 640 /opt/open-xchange/etc/admindaemon/plugin/hosting.properties
@@ -49,6 +53,7 @@ case "$1" in
                 postFix "$2"
                 exit 0
         }
+        fixConfigFilePermissions
 
     ;;
 
