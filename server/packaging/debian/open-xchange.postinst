@@ -428,6 +428,10 @@ postFix() {
   # run checkconfigconsistency once
   /opt/open-xchange/sbin/checkconfigconsistency
 
+  fixConfigFilePermissions
+}
+
+fixConfigFilePermissions() {
   # Restrict permissions on configuration files.
   chgrp open-xchange /opt/open-xchange/etc/common/*
   chmod 640 /opt/open-xchange/etc/common/*
@@ -444,7 +448,7 @@ case "$1" in
                 postFix "$2"
                 exit 0
         }
-
+        fixConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
