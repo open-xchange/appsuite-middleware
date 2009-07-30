@@ -49,6 +49,10 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.publish.json.FieldNames.ENTITY;
+import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
+import static com.openexchange.publish.json.FieldNames.ID;
+import static com.openexchange.publish.json.FieldNames.TARGET;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
@@ -59,12 +63,8 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.publish.json.types.FolderType;
-import com.openexchange.publish.json.types.IDType;
-import static com.openexchange.publish.json.FieldNames.*;
 
 /**
- * {@link PublicationParser}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
