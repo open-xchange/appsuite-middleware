@@ -55,11 +55,13 @@ import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.publish.actions.AbstractPublicationResponse;
 import com.openexchange.ajax.publish.actions.ListPublicationsRequest;
 import com.openexchange.ajax.publish.actions.ListPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.json.PublicationJSONException;
@@ -102,6 +104,32 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         assertEquals("Should have same module", expected.getModule(), actual.getString(2));
         assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
         assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
-
+    }
+    
+    public void testListExistingPublicationOfEmptyFolder() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+        final FolderObject contact = createDefaultContactFolder();
+        String folderID = String.valueOf(contact.getObjectID() );
+        String module = "contacts";
+        
+        Publication expected = generatePublication(module, folderID );
+        expected.setDisplayName("This will be changed");
+        pubMgr.newAction(expected);
+        NewPublicationResponse newResp = (NewPublicationResponse) pubMgr.getLastResponse();
+        assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
+        expected.setId(newResp.getId());
+        
+        pubMgr.listAction(
+            Arrays.asList(I(expected.getId())), 
+            Arrays.asList("id","entity", "entityModule", "displayName", "target"));
+        ListPublicationsResponse listResp = (ListPublicationsResponse) pubMgr.getLastResponse();
+        
+        assertEquals("Should only find one element", 1, listResp.getList().size());
+        
+        JSONArray actual = listResp.getList().get(0);
+        assertEquals("Should have same publication ID", expected.getId(), actual.getInt(0));
+        assertEquals(expected.getEntityId(), actual.getJSONObject(1).get("folder"));
+        assertEquals("Should have same module", expected.getModule(), actual.getString(2));
+        assertFalse("Should change display name", expected.getDisplayName().equals(actual.getString(3)));
+        assertEquals("Should have same target ID", expected.getTarget().getId(), actual.getString(4));
     }
 }

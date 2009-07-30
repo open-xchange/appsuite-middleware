@@ -57,7 +57,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.publish.actions.AbstractPublicationResponse;
 import com.openexchange.ajax.publish.actions.AllPublicationsRequest;
 import com.openexchange.ajax.publish.actions.AllPublicationsResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
@@ -127,7 +126,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
     
     public void testShouldFindOneFreshlyCreatedPublicationForEmptyFolder() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         FolderObject folder = createDefaultContactFolder();
-        String folderID = String.valueOf(folder.getParentFolderID() );
+        String folderID = String.valueOf(folder.getObjectID() );
         String module = "contacts";
         
         // publish
