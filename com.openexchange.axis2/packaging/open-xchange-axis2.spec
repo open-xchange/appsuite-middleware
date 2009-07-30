@@ -67,8 +67,20 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   ox_update_permissions "/opt/open-xchange/etc/groupware/axis2.properties" root:open-xchange 640
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
+
+%pre
+/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
+/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %files
 %defattr(-,root,root)
@@ -82,7 +94,7 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install doc
 %dir /opt/open-xchange/bundles/com.openexchange.axis2/services
 /opt/open-xchange/bundles/com.openexchange.axis2/META-INF
 /opt/open-xchange/bundles/com.openexchange.axis2/com.openexchange.axis2.jar
-%config(noreplace) /opt/open-xchange/etc/groupware/axis2.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/axis2.properties
 %doc docs
 %changelog
 * Thu Nov 13 2008 - dennis.sieben@open-xchange.com

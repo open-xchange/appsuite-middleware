@@ -121,7 +121,7 @@ rm -f %{configfiles}
 find %{buildroot}/opt/open-xchange/etc/groupware %{buildroot}/opt/open-xchange/etc/common \
 	-maxdepth 1 -type f \
 	-not -name oxfunctions.sh \
-	-printf "%%%config(noreplace) %p\n" > %{configfiles}
+	-printf "%%%config(noreplace) %%%attr(640,root,open-xchange) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 
 ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-groupware
@@ -334,6 +334,9 @@ if [ ${1:-0} -eq 2 ]; then
 	ox_remove_property com.openexchange.mail.credSrc $pfile
    fi
 
+   for i in $(find /opt/open-xchange/etc/groupware/ -maxdepth 1 -regex ".*\.\(properties\|ccf\|sh\|xml\)"); do
+	ox_update_permissions "$i" root:open-xchange 640
+   done
    # run checkconfigconsistency once
    /opt/open-xchange/sbin/checkconfigconsistency
 fi

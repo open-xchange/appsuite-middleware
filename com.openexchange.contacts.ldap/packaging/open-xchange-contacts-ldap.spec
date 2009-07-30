@@ -65,6 +65,16 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap -name ".example"); do
+        ox_update_permissions "$i" root:open-xchange 640
+   done
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -75,8 +85,10 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/bundles/com.openexchange.contacts.ldap.jar
-%dir /opt/open-xchange/etc/groupware/contacts-ldap
-/opt/open-xchange/etc/groupware/contacts-ldap/*
+%dir %attr(750,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap
+%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*.example
+%attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*/*.example
+
 %changelog
 * Mon Jun 22 2009 - dennis.sieben@open-xchange.com
   - Bugfix #13920 Unable to get public LDAP folders to Outlook

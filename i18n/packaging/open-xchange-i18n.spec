@@ -67,8 +67,20 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   ox_update_permissions "/opt/open-xchange/etc/common/i18n.properties" root:open-xchange 640
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
+
+%pre
+/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
+/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %files
 %defattr(-,root,root)
@@ -80,4 +92,4 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
 /opt/open-xchange/i18n/*
-%config(noreplace) /opt/open-xchange/etc/common/*.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/common/*.properties

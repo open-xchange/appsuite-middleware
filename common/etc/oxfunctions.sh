@@ -208,7 +208,7 @@ ox_set_property() {
     test -z "$propfile" && die "ox_set_property: missing propfile argument (arg 3)"
     test -e "$propfile" || die "ox_set_property: $propfile does not exist"
     local tmp=${propfile}.tmp$$
-    rm -f $tmp
+    cp -a --remove-destination $propfile $tmp
 
     ox_system_type
     local type=$?
@@ -222,6 +222,7 @@ ox_set_property() {
 	export propfile
 	export prop
 	export val
+
 	perl -e '
 use strict;
 
@@ -297,14 +298,14 @@ if ( $end > 0 ) {
 	    cat<<EOF | sed -f - $propfile > $tmp
 s;\(^$prop[:=]\).*$;\1${val};
 EOF
-           if [ $? -gt 0 ]; then
-	       rm -f $tmp
-	       die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
-	   else
-	       mv $tmp $propfile
-	   fi
 	else
-	    echo "${prop}=$val" >> $propfile
+	    echo "${prop}=$val" >> $tmp
+	fi
+        if [ $? -gt 0 ]; then
+	    rm -f $tmp
+	    die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
+	else
+	    mv $tmp $propfile
 	fi
     fi
 }
@@ -346,7 +347,8 @@ ox_remove_property() {
     test -e "$propfile" || die "ox_remove_property: $propfile does not exist"
 
     local tmp=${propfile}.tmp$$
-    rm -f $tmp
+    cp -a --remove-destination $propfile $tmp
+
     export propfile
     export prop
     perl -e '
@@ -403,7 +405,7 @@ ox_comment(){
     test -z "$propfile" && die "ox_comment: missing propfile argument (arg 3)"
     test -e "$propfile" || die "ox_comment: $propfile does not exist"
     local tmp=${propfile}.tmp$$
-    rm -f $tmp;
+    cp -a --remove-destination $propfile $tmp
     if [ "$action" == "add" ]; then
 	sed "s/^$prop/# $prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
@@ -425,6 +427,18 @@ ox_comment(){
     fi
 }
 
+ox_update_permissions(){
+    local pfile="$1"
+    local owner="$2"
+    local mode="$3"
+    test -z "$pfile" && die "ox_update_permissions: missing pfile argument"
+    test -z "$owner" && die "ox_update_permissions: missing owner argument"
+    test -z "$mode" && die "ox_update_permissions: missing mode argument"
+    test -e "$pfile" || die "ox_update_permissions: $pfile does not exist"
+
+    chmod $mode "$pfile"
+    chown $owner "$pfile"
+}
 
 # common functions
 
@@ -488,6 +502,10 @@ ox_update_config_init() {
     cp $cinitemplate $cini
     echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;g')" >> $cini
 }
+
+#
+# legacy functions (OXEE)
+#
 
 ox_add_hosts_hostip() {
     local fqhn=$1
