@@ -98,7 +98,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         assertEquals("Should return 1 in case of success", I(1), (Integer) updResp.getData());
     }
 
-    public void testShouldBeAbleToUpdateExistingPublicationsURL() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
+    public void testShouldBeAbleToUpdateExistingPublicationsSiteName() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
 
         final Contact contact = createDefaultContactFolderWithOneContact();
