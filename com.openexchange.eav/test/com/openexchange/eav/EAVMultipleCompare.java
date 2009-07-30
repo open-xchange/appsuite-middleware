@@ -123,6 +123,15 @@ public class EAVMultipleCompare implements EAVTypeSwitcher {
     }
 
     private boolean multisetWiseComparison(Object object, Object object2) {
+        if(object == object2) {
+            return true;
+        }
+        if(object == null) {
+            return false;
+        }
+        if(object2 == null) {
+            return false;
+        }
         List<Object> list1 = new ArrayList<Object>(Arrays.asList((Object[])object));
         List<Object> list2 = new ArrayList<Object>(Arrays.asList((Object[])object2));
         

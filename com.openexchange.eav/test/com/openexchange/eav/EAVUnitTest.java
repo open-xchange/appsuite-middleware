@@ -514,6 +514,7 @@ public class EAVUnitTest extends TestCase {
     private static Map<Class, ComparisonStrategy> COMPARISON_STRATEGIES = new HashMap<Class, ComparisonStrategy>() {{
         put(EAVNode.class, new EAVNodeComparisonStrategy());
         put(EAVTypeMetadataNode.class, new EAVTypeMetadataComparisonStrategy());
+        put(EAVSetTransformation.class, new EAVSetTransformationComparisonStrategy());
     }};
     
     private static interface ComparisonStrategy<T extends AbstractNode<T>> {
@@ -524,6 +525,12 @@ public class EAVUnitTest extends TestCase {
     private static class EAVNodeComparisonStrategy implements ComparisonStrategy<EAVNode> {
 
         public boolean comparePayloads(EAVNode expectedNode, EAVNode actualNode) {
+            if(expectedNode.getType() == actualNode.getType()) {
+                return true;
+            }
+            if(expectedNode.getType() == null) {
+                return false;
+            }
             if (!expectedNode.getType().equals(actualNode.getType())) {
                 return false;
             }
