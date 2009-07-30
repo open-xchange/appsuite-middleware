@@ -146,8 +146,8 @@ public class SubscriptionTestManager {
 
     public Subscription newAction(Subscription sub) throws AjaxException, IOException, SAXException, JSONException {
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(sub, getFormDescription());
-        NewSubscriptionResponse newResp = getClient().execute(newReq);
         newReq.setFailOnError(getFailOnError());
+        NewSubscriptionResponse newResp = getClient().execute(newReq);
         lastResponse = newResp;
         createdItems.add(I(newResp.getId()));
         sub.setId(newResp.getId());
