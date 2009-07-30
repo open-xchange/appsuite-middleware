@@ -52,17 +52,12 @@ package com.openexchange.publish;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 
-
 /**
- * {@link SimPublicationTargetDiscoveryService}
- *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
@@ -85,8 +80,8 @@ public class SimPublicationTargetDiscoveryService implements PublicationTargetDi
     }
 
     public PublicationTarget getTarget(Context context, int publicationId) throws PublicationException {
-        for(PublicationTarget target : targets.values()) {
-            if(target.getPublicationService().knows(context, publicationId)) {
+        for (PublicationTarget target : targets.values()) {
+            if (target.getPublicationService().knows(context, publicationId)) {
                 return target;
             }
         }
@@ -95,8 +90,8 @@ public class SimPublicationTargetDiscoveryService implements PublicationTargetDi
 
     public Collection<PublicationTarget> getTargetsForEntityType(String module) {
         List<PublicationTarget> targets = new ArrayList<PublicationTarget>();
-        for(PublicationTarget target : this.targets.values()) {
-            if(target.isResponsibleFor(module)) {
+        for (PublicationTarget target : this.targets.values()) {
+            if (target.isResponsibleFor(module)) {
                 targets.add(target);
             }
         }
