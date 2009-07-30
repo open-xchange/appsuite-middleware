@@ -70,6 +70,14 @@ ant -Ddestdir=%{buildroot} \
 	-Ddochostinglink=/usr/share/doc/packages/open-xchange-admin-plugin-hosting-doc/javadoc/doc \
 	install doc
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   ox_update_permissions "/opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties" root:open-xchange 640
+fi
+
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -83,7 +91,7 @@ ant -Ddestdir=%{buildroot} \
 %dir /opt/open-xchange/lib
 /opt/open-xchange/bundles/com.openexchange.axis2/services/*
 /opt/open-xchange/lib/soaprmimapper.jar
-%config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
 %doc docs
 %changelog
 * Tue Jun 02 2009 - dennis.sieben@open-xchange.com
