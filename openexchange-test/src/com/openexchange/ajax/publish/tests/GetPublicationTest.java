@@ -50,11 +50,8 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.publish.actions.AllPublicationsRequest;
 import com.openexchange.ajax.publish.actions.GetPublicationRequest;
 import com.openexchange.ajax.publish.actions.GetPublicationResponse;
 import com.openexchange.groupware.AbstractOXException;
@@ -80,7 +77,6 @@ public class GetPublicationTest extends AbstractPublicationTest {
         
         GetPublicationResponse res = getClient().execute(req);
         AbstractOXException exception = res.getException();
-        Object data = res.getData();
         assertNotNull("Should contain an exception" , exception);
     }
 
