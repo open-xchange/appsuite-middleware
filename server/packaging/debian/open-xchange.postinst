@@ -433,12 +433,16 @@ postFix() {
 
 fixConfigFilePermissions() {
   # Restrict permissions on configuration files.
-  chgrp open-xchange /opt/open-xchange/etc/common/*
-  chmod 640 /opt/open-xchange/etc/common/*
-  chgrp open-xchange /opt/open-xchange/etc/groupware/*.properties /opt/open-xchange/etc/groupware/*.ccf /opt/open-xchange/etc/groupware/*.xml /opt/open-xchange/etc/groupware/mime.types /opt/open-xchange/etc/groupware/*.sh /opt/open-xchange/etc/groupware/*.cfg
-  chmod 640 /opt/open-xchange/etc/groupware/*.properties /opt/open-xchange/etc/groupware/*.ccf /opt/open-xchange/etc/groupware/*.xml /opt/open-xchange/etc/groupware/mime.types /opt/open-xchange/etc/groupware/*.sh /opt/open-xchange/etc/groupware/*.cfg
-  chgrp open-xchange /opt/open-xchange/etc/groupware/servletmappings/*
-  chmod 640 /opt/open-xchange/etc/groupware/servletmappings/*
+  for I in $(find /opt/open-xchange/etc/common/ -maxdepth 1 -type f)
+  do
+    ox_update_permissions "$I" root:open-xchange 640
+  done
+  for I in $(find /opt/open-xchange/etc/groupware/ -maxdepth 1 -type f); do
+    ox_update_permissions "$i" root:open-xchange 640
+  done
+  for I in $(find /opt/open-xchange/etc/groupware/servletmappings/ -maxdepth 1 -type f); do
+    ox_update_permissions "$i" root:open-xchange 640
+  done
 }
 
 case "$1" in
