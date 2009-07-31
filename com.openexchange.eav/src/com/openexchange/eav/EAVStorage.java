@@ -64,7 +64,7 @@ public interface EAVStorage {
 
     void update(Context ctx, EAVPath parentPath, EAVNode tree) throws EAVException;
 
-    void updateArrays(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException;
+    void updateSets(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException;
 
     void replace(Context ctx, EAVPath path, EAVNode tree) throws EAVException;
 

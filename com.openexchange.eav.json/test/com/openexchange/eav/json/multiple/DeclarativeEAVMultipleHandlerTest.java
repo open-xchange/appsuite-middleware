@@ -52,9 +52,11 @@ package com.openexchange.eav.json.multiple;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.eav.AbstractNode;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.EAVUnitTest;
@@ -65,7 +67,7 @@ import com.openexchange.json.JSONAssertion;
 import com.openexchange.sim.DynamicSim;
 import com.openexchange.sim.Expectation;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
+import com.openexchange.groupware.ldap.MockUser;
 
 /**
  * {@link DeclarativeEAVMultipleHandlerTest}
@@ -83,6 +85,7 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
     private List<DynamicSim> dynamicSims = new LinkedList<DynamicSim>();
     protected Object response;
     private Integer expectedException = null;
+    private String timezone = TimeZone.getDefault().getID();
     
     @Override
     protected void setUp() throws Exception {
@@ -108,12 +111,18 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
         return body.toString();
     }
     
+    public void setUserTimeZone(String tz) {
+        this.timezone = tz;
+    }
+    
     protected void runRequest() throws AbstractOXException, JSONException {
         EAVMultipleHandler multipleHandler = new EAVMultipleHandler();
         multipleHandler.setStorage(DynamicSim.compose(EAVStorage.class, dynamicSims));
         
         try {
-            response = multipleHandler.performRequest(action, request, new ServerSessionAdapter(null, ctx));
+            MockUser user = new MockUser();
+            user.setTimeZone(timezone);
+            response = multipleHandler.performRequest(action, request, new ServerSessionAdapter(null, ctx, user));
             if(expectedException != null) {
                 fail("Expected Exception with detailNumber: "+expectedException);
             }
@@ -204,8 +213,8 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
             
             for(Object arg : args) {
                 Object expectedArg = getArgument(index++);
-                if(EAVNode.class.isInstance(arg)) {
-                    assertEquals(methodName, (EAVNode) expectedArg, (EAVNode) arg);
+                if(AbstractNode.class.isInstance(arg)) {
+                    assertEquals(methodName, (AbstractNode) expectedArg, (AbstractNode) arg);
                 } else {
                     assertEquals(methodName, expectedArg, arg);
                 }

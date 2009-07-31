@@ -218,6 +218,20 @@ public class EAVNode extends AbstractNode<EAVNode> {
         this.payload = payload;
     }
 
+    public EAVTypeMetadataNode extractTypeData() {
+        EAVTypeMetadataNode typeData = new EAVTypeMetadataNode(getName());
+        if(isLeaf()) {
+            typeData.setContainerType(getContainerType());
+            typeData.setType(getType());
+            return typeData;
+        }
+        for(EAVNode child : children) {
+            typeData.addChild(child.extractTypeData());
+        }
+        
+        return typeData;
+    }
+
 
 
 

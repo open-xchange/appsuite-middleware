@@ -102,6 +102,10 @@ public class EAVUnitTest extends TestCase {
     }
 
     // Objects
+    
+    public EAVNode N(String name) {
+        return new EAVNode(name);
+    }
 
     public EAVNode N(String name, EAVNode... children) {
         EAVNode node = new EAVNode(name);
@@ -316,6 +320,7 @@ public class EAVUnitTest extends TestCase {
     public EAVTypeMetadataNode TYPE(String name, EAVType type) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.setType(type);
+        node.setContainerType(EAVContainerType.SINGLE);
         return node;
     }
 
@@ -337,6 +342,7 @@ public class EAVUnitTest extends TestCase {
     public EAVTypeMetadataNode TYPE(String name, EAVType type, Map<String, Object> options) {
         EAVTypeMetadataNode node = new EAVTypeMetadataNode(name);
         node.setType(type);
+        node.setContainerType(EAVContainerType.SINGLE);
         node.setOptions(options);
         return node;
     }
@@ -525,8 +531,8 @@ public class EAVUnitTest extends TestCase {
     private static class EAVNodeComparisonStrategy implements ComparisonStrategy<EAVNode> {
 
         public boolean comparePayloads(EAVNode expectedNode, EAVNode actualNode) {
-            if(expectedNode.getType() == actualNode.getType()) {
-                return true;
+            if(expectedNode.getType() != actualNode.getType()) {
+                return false;
             }
             if(expectedNode.getType() == null) {
                 return false;

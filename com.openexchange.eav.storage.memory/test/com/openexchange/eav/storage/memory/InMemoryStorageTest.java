@@ -246,7 +246,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
                             );
         
         storage.insert(ctx, PARENT, tree);
-        storage.updateArrays(ctx, PARENT, update);
+        storage.updateSets(ctx, PARENT, update);
         EAVNode loaded = storage.get(ctx, PARENT.append(tree.getName()));
         
         assertEquals(expected, loaded);
@@ -557,7 +557,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
         
         storage.insert(ctx, PARENT, tree);
         try {
-            storage.updateArrays(ctx, PARENT.append("com.openexchange.test"), update);
+            storage.updateSets(ctx, PARENT.append("com.openexchange.test"), update);
             fail("Could update set of Strings adding a Number");
         } catch (EAVException x){
             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessage.TYPE_MISMATCH.getDetailNumber());
@@ -573,7 +573,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
         
         storage.insert(ctx, PARENT, tree);
         try {
-            storage.updateArrays(ctx, PARENT.append("com.openexchange.test"), update);
+            storage.updateSets(ctx, PARENT.append("com.openexchange.test"), update);
             fail("Could update a scalar adding a value");
         } catch (EAVException x){
             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessage.CAN_ONLY_ADD_AND_REMOVE_FROM_SET_OR_MULTISET.getDetailNumber());
@@ -583,7 +583,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
     
     public void testUpdatingArraysAtUnknownPathShouldFail() throws EAVException{
         try {
-            storage.updateArrays(ctx, new EAVPath("unknown"), TRANS("someAttribute", ADD(12)));
+            storage.updateSets(ctx, new EAVPath("unknown"), TRANS("someAttribute", ADD(12)));
             fail("Could add to nonexisting list");
         } catch (EAVException x) {
             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessage.UNKNOWN_PATH.getDetailNumber());
@@ -602,7 +602,7 @@ public class InMemoryStorageTest extends EAVUnitTest {
         storage.insert(ctx, PARENT, tree);
         
         try {
-            storage.updateArrays(ctx, PARENT, update);
+            storage.updateSets(ctx, PARENT, update);
             fail("Could add to non existing element");
         } catch (EAVException x) {
             assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVErrorMessage.UNKNOWN_PATH.getDetailNumber());

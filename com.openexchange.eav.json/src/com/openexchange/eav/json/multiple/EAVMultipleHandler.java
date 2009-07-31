@@ -52,6 +52,7 @@ package com.openexchange.eav.json.multiple;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,20 +60,26 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVNodeTypeCoercionVisitor;
 import com.openexchange.eav.EAVPath;
+import com.openexchange.eav.EAVSetTransformation;
+import com.openexchange.eav.EAVSetTransformationTypeCoercionVisitor;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeCoercion;
 import com.openexchange.eav.EAVTypeMetadataNode;
+import com.openexchange.eav.TreeTools;
 import com.openexchange.eav.json.exception.EAVJsonException;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 import com.openexchange.eav.json.parse.JSONParser;
+import com.openexchange.eav.json.parse.arrayupdate.JSONArrayUpdateParser;
 import com.openexchange.eav.json.parse.metadata.type.JSONTypeMetadataParser;
 import com.openexchange.eav.json.write.JSONWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.session.ServerSession;
 
+// TODO: Refactor me! I'm a bit ugly.
 
 /**
  * {@link EAVMultipleHandler}
@@ -97,6 +104,12 @@ public class EAVMultipleHandler implements MultipleHandler {
     private boolean raw = true;
 
     private String action;
+
+    private EAVSetTransformation setTransformation;
+
+    private TimeZone timezone;
+
+    private boolean overwrite;
     
     public void close() {
     
@@ -108,16 +121,16 @@ public class EAVMultipleHandler implements MultipleHandler {
 
     public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException {
         this.action = action;
-        parse(jsonObject);
+        parse(jsonObject, session.getUser());
         
         Context ctx = session.getContext();
         
         if(action.equals("new")) {
-            if(types != null) {
-                parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.INCOMING));            
-            }
             if(parsedNodes == null) {
                 throw EAVJsonExceptionMessage.MissingParameter.create("body");
+            }
+            if(types != null) {
+                parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, timezone, EAVTypeCoercion.Mode.INCOMING));            
             }
             storage.insert(ctx, path.parent(), parsedNodes);
             return 1;
@@ -127,13 +140,36 @@ public class EAVMultipleHandler implements MultipleHandler {
             }
             EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), parsedNodes);
             if(types != null) {
-                types = types.mergeWith(savedTypes);
+                types = savedTypes.mergeWith(types);
             } else {
                 types = savedTypes;
             }
-            parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.INCOMING));            
-            storage.update(ctx, path.parent(), parsedNodes);
+            parsedNodes.visit(new EAVNodeTypeCoercionVisitor(types, timezone, EAVTypeCoercion.Mode.INCOMING));            
+            if(overwrite) {
+                storage.replace(ctx, path.parent(), parsedNodes);
+            } else {
+                storage.update(ctx, path.parent(), parsedNodes);
+            }
             return 1;
+        } else if (action.equals("updateSets")) {
+            if(setTransformation == null) {
+                throw EAVJsonExceptionMessage.MissingParameter.create("body");
+            }
+            EAVNode structure = TreeTools.copyStructure(new EAVNode(), setTransformation);
+            
+            EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), structure);
+            if(types != null) {
+                types = savedTypes.mergeWith(types);
+            } else {
+                types = savedTypes;
+            }
+            
+            setTransformation.visit(new EAVSetTransformationTypeCoercionVisitor(types, timezone, EAVTypeCoercion.Mode.INCOMING));
+                       
+            storage.updateSets(ctx, path.parent(), setTransformation);
+            
+            return 1;
+            
         } else if (action.equals("delete")) {
             storage.delete(ctx, path);
             return 1;
@@ -145,9 +181,14 @@ public class EAVMultipleHandler implements MultipleHandler {
             if(loaded.getType() == EAVType.BINARY && !loaded.isMultiple() && raw) {
                 return loaded.getPayload();
             }
-            if(types != null) {
-                loaded.visit(new EAVNodeTypeCoercionVisitor(types, null, EAVTypeCoercion.Mode.OUTGOING));            
+            
+            if(types == null) {
+                types = loaded.extractTypeData();
             }
+            
+            
+            loaded.visit(new EAVNodeTypeCoercionVisitor(types, timezone, EAVTypeCoercion.Mode.OUTGOING));            
+            
             return new JSONWriter(loaded).getJson().get(path.last());
         }
         
@@ -156,7 +197,7 @@ public class EAVMultipleHandler implements MultipleHandler {
         
     }
 
-    private void parse(JSONObject jsonObject) throws JSONException, EAVJsonException {
+    private void parse(JSONObject jsonObject, User user) throws JSONException, EAVJsonException {
         if(!jsonObject.has("path")) {
             throw EAVJsonExceptionMessage.MissingParameter.create("path");
         }
@@ -173,6 +214,11 @@ public class EAVMultipleHandler implements MultipleHandler {
                     if(data.has("data")) {
                         Object definitiveData = data.get("data");
                         if(JSONObject.class.isInstance(definitiveData)) {
+                            if(!action.equals("updateSets")) {
+                                parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getNode();
+                            } else {
+                                setTransformation = new JSONArrayUpdateParser(path.last(), (JSONObject) definitiveData).getNode();
+                            }
                             parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getNode();
                         } else {
                             JSONObject toParse = new JSONObject();
@@ -183,11 +229,23 @@ public class EAVMultipleHandler implements MultipleHandler {
                     }
                     
                 } else {
+                    if(!action.equals("updateSets")) {
+                        parsedNodes = new JSONParser(path.last(), data).getNode();
+                    } else {
+                        setTransformation = new JSONArrayUpdateParser(path.last(), (JSONObject) data).getNode();
+                    }
                     parsedNodes = new JSONParser(path.last(), data).getNode();
                 }
             } else {
                 JSONObject toParse = new JSONObject();
                 toParse.put(path.last(), payload);
+                if(!action.equals("updateSets")) {
+                    parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
+                    parsedNodes.setParent(null);
+                } else {
+                    setTransformation = new JSONArrayUpdateParser(path.last(), (JSONObject) toParse).getNode().getChildByName(path.last());
+                    setTransformation.setParent(null);
+                }
                 parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
                 parsedNodes.setParent(null);
             }
@@ -223,6 +281,16 @@ public class EAVMultipleHandler implements MultipleHandler {
         
         if(loadBinaries != null && jsonObject.has("allBinaries")) {
             throw EAVJsonExceptionMessage.ConflictingParameters.create("allBinaries", "loadBinaries");
+        }
+        
+        if(jsonObject.has("timezone")) {
+            timezone = TimeZone.getTimeZone(jsonObject.getString("timezone"));
+        } else {
+            timezone = TimeZone.getTimeZone(user.getTimeZone());
+        }
+        
+        if(jsonObject.has("overwrite")) {
+            overwrite = jsonObject.getBoolean("overwrite");
         }
     }
 

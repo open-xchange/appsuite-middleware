@@ -171,7 +171,7 @@ public class InMemoryStorage implements EAVStorage {
         }
     }
 
-    public void updateArrays(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException{
+    public void updateSets(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException{
         final EAVNode parent = resolveStrict(getRoot(ctx), path);
         
         final List<SetUpdate> setUpdates = new ArrayList<SetUpdate>();

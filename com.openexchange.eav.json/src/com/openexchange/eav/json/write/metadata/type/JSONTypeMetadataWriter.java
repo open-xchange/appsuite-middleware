@@ -106,7 +106,7 @@ public class JSONTypeMetadataWriter implements JSONWriterInterface {
     private void handleLeaf(EAVTypeMetadataNode node, JSONObject json) throws JSONException {
         JSONObject leafJson = new JSONObject();
         leafJson.put(EAVType.KEY, node.getType().getKeyword());
-        leafJson.put(EAVContainerType.KEY, node.getContainerType().getKeyword());
+        leafJson.put(EAVContainerType.KEY, node.getContainerType().getKeyword()); 
         for (String optionKey : node.getOptions().keySet()) {
             leafJson.put(optionKey, node.getOption(optionKey));
         }

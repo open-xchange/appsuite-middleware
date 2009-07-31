@@ -80,7 +80,7 @@ public class EAVNodeTypeCoercionVisitor extends AbstractEAVExceptionHolder imple
         }
         
         try {
-            if(node.getContainerType().isMultiple() != metadataNode.getContainerType().isMultiple()) {
+            if(node.getContainerType() != null && metadataNode.getContainerType() != null && node.getContainerType().isMultiple() != metadataNode.getContainerType().isMultiple()) {
                 setException( EAVErrorMessage.WRONG_TYPES.create(node.getPath(), node.getTypeDescription(), metadataNode.getTypeDescription()) );
                 throw BREAK;
             }

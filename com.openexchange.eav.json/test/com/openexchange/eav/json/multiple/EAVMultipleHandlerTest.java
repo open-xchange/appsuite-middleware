@@ -56,8 +56,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
 import org.json.JSONException;
+import com.openexchange.eav.EAVContainerType;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVPath;
+import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
@@ -234,9 +236,144 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
    
         runRequest();
     }
+    
+    public void testOverwrite() throws AbstractOXException, JSONException {
+        long someDay = 1245715200000l;
+        duringRequest("update", PARAMS("path", "/contacts/12/13/com.openexchange.test", "overwrite", "true"), BODY("{date : "+someDay+"}"));
+        
+        EAVPath parent = new EAVPath("contacts", "12", "13");
+        EAVNode parsed = N("com.openexchange.test", N("date", EAVType.NUMBER, someDay));
+        
+        EAVTypeMetadataNode metadata = TYPE("com.openexchange.test",
+                                            TYPE("date", EAVType.DATE)
+                                        );
+        
+        
+        expectStorageCall("getTypes", ctx, parent, parsed);
+        andReturn(metadata);
+        
+        EAVNode update = N("com.openexchange.test", N("date", EAVType.DATE, someDay));
+        expectStorageCall("replace", ctx, parent, update);
+        
+        expectResponseData(1);
+        
+        runRequest();
+    }
 
     
-    //TODO: updateArray
+    public void testUpdateSetsWithoutMetadata() throws Exception {
+        EAVPath parent = new EAVPath("contacts","12","13");
+        
+        EAVNode typeRequest = N("com.openexchange.test", 
+            N("favoriteColors")
+        );
+        
+        EAVTypeMetadataNode metadata = TYPE("com.openexchange.test", 
+            TYPE("favoriteColors", EAVType.STRING, EAVContainerType.SET)
+        );
+    
+        EAVSetTransformation setTransformation = TRANS("com.openexchange.test", 
+            TRANS("favoriteColors", ADD("pink", "obscenely pink"), REMOVE("red"))
+        );
+        
+        duringRequest("updateSets", PARAMS("path", "/contacts/12/13/com.openexchange.test"), BODY("{favoriteColors : { add : [\"pink\", \"obscenely pink\"], remove : [\"red\"]}}"));
+        
+        
+        expectStorageCall("getTypes", ctx, parent, typeRequest);
+        andReturn(metadata);
+        
+        expectStorageCall("updateSets", ctx, parent, setTransformation);
+        
+        expectResponseData(1);
+    
+    
+        runRequest();
+    
+    }
+    
+    public void testUpdateSingleSetWithoutMetadata() throws Exception {
+        EAVPath parent = new EAVPath("contacts","12","13", "com.openexchange.test");
+        
+        EAVNode typeRequest = N("favoriteColors");
+        
+        EAVTypeMetadataNode metadata = TYPE("favoriteColors", EAVType.STRING, EAVContainerType.SET);
+    
+        EAVSetTransformation setTransformation = TRANS("favoriteColors", ADD("pink", "obscenely pink"), REMOVE("red"));
+        
+        duringRequest("updateSets", PARAMS("path", "/contacts/12/13/com.openexchange.test/favoriteColors"), BODY("{ add : [\"pink\", \"obscenely pink\"], remove : [\"red\"]}"));
+        
+        
+        expectStorageCall("getTypes", ctx, parent, typeRequest);
+        andReturn(metadata);
+        
+        expectStorageCall("updateSets", ctx, parent, setTransformation);
+        
+        expectResponseData(1);
+    
+    
+        runRequest();
+    }
+    
+    public void testUpdateSetsWithMetadata() throws Exception {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        EAVPath parent = new EAVPath("contacts","12","13");
+        
+        EAVNode typeRequest = N("com.openexchange.test", 
+            N("favoriteTimes")
+        );
+        
+        EAVTypeMetadataNode metadata = TYPE("com.openexchange.test", 
+            TYPE("favoriteTimes", EAVType.TIME, EAVContainerType.SET)
+        );
+    
+        EAVSetTransformation setTransformation = TRANS("com.openexchange.test", 
+            TRANS("favoriteTimes", ADD(EAVType.TIME, nowUTC, nowUTC), REMOVE(EAVType.TIME,  nowUTC))
+        );
+        
+        duringRequest("updateSets", PARAMS("path", "/contacts/12/13/com.openexchange.test"), BODY("{ data : {favoriteTimes : { add : ["+nowRarotonga+", "+nowRarotonga+"], remove : ["+nowRarotonga+"]}}, types : {favoriteTimes : {timezone : \""+tz.getID()+"\"}}}"));
+        
+        
+        expectStorageCall("getTypes", ctx, parent, typeRequest);
+        andReturn(metadata);
+        
+        expectStorageCall("updateSets", ctx, parent, setTransformation);
+        
+        expectResponseData(1);
+    
+    
+        runRequest();
+    }
+    
+    public void testUpdateSingleSetWithMetadata() throws Exception {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        EAVPath parent = new EAVPath("contacts","12","13", "com.openexchange.test");
+        
+        EAVNode typeRequest = N("favoriteTimes");
+        
+        EAVTypeMetadataNode metadata = TYPE("favoriteTimes", EAVType.TIME, EAVContainerType.SET);
+    
+        EAVSetTransformation setTransformation = TRANS("favoriteTimes", ADD(EAVType.TIME, nowUTC, nowUTC), REMOVE(EAVType.TIME,  nowUTC));
+        
+        duringRequest("updateSets", PARAMS("path", "/contacts/12/13/com.openexchange.test/favoriteTimes"), BODY("{ data : { add : ["+nowRarotonga+", "+nowRarotonga+"], remove : ["+nowRarotonga+"]}, types :  {timezone : \""+tz.getID()+"\"}}"));
+        
+        
+        expectStorageCall("getTypes", ctx, parent, typeRequest);
+        andReturn(metadata);
+        
+        expectStorageCall("updateSets", ctx, parent, setTransformation);
+        
+        expectResponseData(1);
+    
+    
+        runRequest();
+    }
+    
     
     public void testDelete() throws Exception {
         duringRequest("delete", PARAMS("path", "/contacts/12/13/com.openexchange.test/subtree"));
@@ -404,6 +541,107 @@ public class EAVMultipleHandlerTest extends DeclarativeEAVMultipleHandlerTest {
         expectResponseData(nowRarotonga);
         
         runRequest();
+    }
+    
+    
+    /*
+     * Timezone
+     */
+    
+    public void testSuppliedDefaultTimezoneOnCreate() throws JSONException, AbstractOXException {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        
+        duringRequest("new", PARAMS("path", "/contacts/12/13/com.openexchange.test/myTime",  "timezone" , "Pacific/Rarotonga"), BODY("{data : "+nowRarotonga+", types : {t : \"time\"}}"));
+    
+        expectStorageCall("insert", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"), N("myTime", EAVType.TIME, nowUTC));
+        
+        expectResponseData(1);
+        
+        runRequest();
+    
+    }
+    
+    public void testSuppliedDefaultTimezoneOnUpdate() throws AbstractOXException, JSONException {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+    
+        EAVNode parsed = N("myTime",  nowRarotonga);
+        EAVTypeMetadataNode metadata = TYPE("myTime", EAVType.TIME);
+        
+        EAVNode update = N("myTime",EAVType.TIME, nowUTC);
+        
+        duringRequest("update", PARAMS("path", "/contacts/12/13/com.openexchange.test/myTime",  "timezone" , "Pacific/Rarotonga"), BODY(""+nowRarotonga));
+        
+        expectStorageCall("getTypes", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"),parsed);
+        andReturn(metadata);
+        
+        expectStorageCall("update", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"), update);
+        
+        expectResponseData(1);
+        
+        runRequest();
+        
+    }
+
+    public void testSuppliedDefaultTimezoneOnUpdateSets() throws AbstractOXException, JSONException {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+
+        
+        EAVNode structure = N("myTime");
+        EAVTypeMetadataNode metadata = TYPE("myTime", EAVType.TIME);
+        
+        EAVSetTransformation update = TRANS("myTime",ADD(EAVType.TIME, nowUTC));
+        
+        duringRequest("updateSets", PARAMS("path", "/contacts/12/13/com.openexchange.test/myTime",  "timezone" , "Pacific/Rarotonga"), BODY("{ add : ["+nowRarotonga+"]}"));
+        
+        expectStorageCall("getTypes", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"),structure);
+        andReturn(metadata);
+        
+        expectStorageCall("updateSets", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"), update);
+        
+        expectResponseData(1);
+        
+        
+
+    }
+
+    public void testSuppliedDefaultTimezoneOnGet() throws AbstractOXException, JSONException {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        duringRequest("get", PARAMS("path", "/contacts/12/13/com.openexchange.test/myTime", "timezone", tz.getID()));
+        
+        expectStorageCall("get", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test", "myTime"), false);
+        andReturn(N("myTime", EAVType.TIME, nowUTC));
+        
+        expectResponseData(nowRarotonga);
+        
+        runRequest();
+        
+    }
+
+    public void testDefaultUserTimezoneOnCreate() throws AbstractOXException, JSONException {
+        TimeZone tz = TimeZone.getTimeZone("Pacific/Rarotonga");
+        long nowUTC = System.currentTimeMillis();
+        long nowRarotonga = nowUTC + tz.getOffset(nowUTC);
+        
+        setUserTimeZone(tz.getID());
+        
+        duringRequest("new", PARAMS("path", "/contacts/12/13/com.openexchange.test/myTime"), BODY("{data : "+nowRarotonga+", types : {t : \"time\"}}"));
+    
+        expectStorageCall("insert", ctx, new EAVPath("contacts", "12", "13", "com.openexchange.test"), N("myTime", EAVType.TIME, nowUTC));
+        
+        expectResponseData(1);
+        
+        runRequest();
+        
     }
     
     

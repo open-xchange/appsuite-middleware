@@ -64,8 +64,8 @@ import java.util.Set;
 public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
 
     private EAVType type = null;
+    private EAVContainerType containerType = null;
     private Map<String, Object> options = new HashMap<String, Object>();
-    private EAVContainerType containerType = EAVContainerType.SINGLE;
     
     
     public EAVTypeMetadataNode() {
@@ -176,11 +176,14 @@ public class EAVTypeMetadataNode extends AbstractNode<EAVTypeMetadataNode> {
                 if(otherChild != null && ! child.hasEqualPayloadAs(otherChild)) {
                     throw EAVErrorMessage.WRONG_TYPES.create(child.getPath().toString(), child.getTypeDescription(), otherChild.getTypeDescription());
                 }
-                if(child.containerType == null) {
-                    child.containerType = otherChild.containerType;
-                }
-                if(child.type == null) {
-                    child.type = otherChild.type;
+                if(null != otherChild) {
+                    if(child.containerType == null) {
+                        child.containerType = otherChild.containerType; 
+                    }
+                    if(child.type == null) {
+                        child.type = otherChild.type;
+                    }
+                    child.options.putAll(otherChild.options);
                 }
                 node.addChild(TreeTools.copy(child));
             } else {

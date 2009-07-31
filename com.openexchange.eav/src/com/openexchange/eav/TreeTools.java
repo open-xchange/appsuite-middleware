@@ -92,5 +92,17 @@ public class TreeTools {
         return copy(original, null, null);
     }
     
+    public static <A extends AbstractNode<A>, B extends AbstractNode<B>> A copyStructure(AbstractNode<A> copyAs, AbstractNode<B> original) {
+        
+        A retval = copyAs.newInstance();
+        retval.setName(original.getName());
+        
+        for(B child : original.getChildren()) {
+            retval.addChild(copyStructure(copyAs, child));
+        }
+        return retval;
+        
+    }
+    
     
 }
