@@ -52,6 +52,7 @@ package com.openexchange.eav.json.parse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.eav.EAVNode;
+import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.EAVUnitTest;
 import com.openexchange.eav.json.exception.EAVJsonException;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
@@ -164,15 +165,15 @@ public class ParserTest extends EAVUnitTest {
     }
 
     public void testComplex() throws Exception {
-        JSONParser parser = new JSONParser(complex);
-        EAVNode node = parser.getEAVNode();
+        JSONParserInterface<EAVNode> parser = new JSONParser(complex);
+        EAVNode node = parser.getNode();
         assertEquals(complexEAV, node);
     }
     
     public void testBad() throws Exception {
-        JSONParser parser = new JSONParser(badArray);
+        JSONParserInterface<EAVNode> parser = new JSONParser(badArray);
         try {
-            parser.getEAVNode();
+            parser.getNode();
             fail("Exception expected.");
         } catch(EAVJsonException e) {
             assertEquals("Wrong exception.", EAVJsonExceptionMessage.DifferentTypesInArray.getDetailNumber(), e.getDetailNumber());
@@ -180,8 +181,8 @@ public class ParserTest extends EAVUnitTest {
     }
 
     private void compare(EAVNode expected, JSONObject json) throws Exception {
-        JSONParser parser = new JSONParser(json);
-        EAVNode node = parser.getEAVNode();
+        JSONParserInterface<EAVNode> parser = new JSONParser(json);
+        EAVNode node = parser.getNode();
         EAVNode wrappedEAV = eavNode(expected);
         assertEquals(wrappedEAV, node);
     }

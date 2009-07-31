@@ -168,27 +168,27 @@ public class EAVMultipleHandler implements MultipleHandler {
             if(JSONObject.class.isInstance(payload)) {
                 JSONObject data = (JSONObject) payload;
                 if(data.has("data") || data.has("types")) {
-                    types = new JSONTypeMetadataParser(data.getJSONObject("types")).getEAVNode();
+                    types = new JSONTypeMetadataParser(data.getJSONObject("types")).getNode();
                     
                     if(data.has("data")) {
                         Object definitiveData = data.get("data");
                         if(JSONObject.class.isInstance(definitiveData)) {
-                            parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getEAVNode();
+                            parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getNode();
                         } else {
                             JSONObject toParse = new JSONObject();
                             toParse.put(path.last(), definitiveData);
-                            parsedNodes = new JSONParser(path.last(), toParse).getEAVNode().getChildByName(path.last());
+                            parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
                             parsedNodes.setParent(null);
                         }
                     }
                     
                 } else {
-                    parsedNodes = new JSONParser(path.last(), data).getEAVNode();
+                    parsedNodes = new JSONParser(path.last(), data).getNode();
                 }
             } else {
                 JSONObject toParse = new JSONObject();
                 toParse.put(path.last(), payload);
-                parsedNodes = new JSONParser(path.last(), toParse).getEAVNode().getChildByName(path.last());
+                parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
                 parsedNodes.setParent(null);
             }
         }

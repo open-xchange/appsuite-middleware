@@ -51,11 +51,13 @@ package com.openexchange.eav.json.parse.metadata.type;
 
 import org.json.JSONObject;
 import com.openexchange.eav.EAVContainerType;
+import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.EAVUnitTest;
 import com.openexchange.eav.json.exception.EAVJsonException;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
+import com.openexchange.eav.json.parse.JSONParserInterface;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -119,15 +121,15 @@ public class TypeMetadateTest extends EAVUnitTest {
     }
     
     public void testParsing() throws Exception {
-        JSONTypeMetadataParser parser = new JSONTypeMetadataParser("types", json);
-        EAVTypeMetadataNode result = parser.getEAVNode();
+        JSONParserInterface<EAVTypeMetadataNode> parser = new JSONTypeMetadataParser("types", json);
+        EAVTypeMetadataNode result = parser.getNode();
         assertEquals(node, result);
     }
     
     public void testBad() throws Exception {
-        JSONTypeMetadataParser parser = new JSONTypeMetadataParser("types", badJson);
+        JSONParserInterface<EAVTypeMetadataNode> parser = new JSONTypeMetadataParser("types", badJson);
         try {
-            parser.getEAVNode();
+            parser.getNode();
             fail("Exception expected");
         } catch (EAVJsonException e) {
             assertEquals("Wrong exception", EAVJsonExceptionMessage.InvalidTreeStructure.getDetailNumber(), e.getDetailNumber());

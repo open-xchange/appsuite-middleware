@@ -57,11 +57,12 @@ import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.json.exception.EAVJsonException;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
+import com.openexchange.eav.json.parse.JSONParserInterface;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class JSONTypeMetadataParser implements JSONTypeMetadataParserInterface {
+public class JSONTypeMetadataParser implements JSONParserInterface<EAVTypeMetadataNode> {
 
     private JSONObject json;
 
@@ -80,7 +81,7 @@ public class JSONTypeMetadataParser implements JSONTypeMetadataParserInterface {
         this.json = json;
     }
 
-    public EAVTypeMetadataNode getEAVNode() throws EAVJsonException {
+    public EAVTypeMetadataNode getNode() throws EAVJsonException {
         try {
             parseJson(json, node);
         } catch (JSONException e) {

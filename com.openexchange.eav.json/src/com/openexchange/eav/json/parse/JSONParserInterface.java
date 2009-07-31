@@ -49,12 +49,13 @@
 
 package com.openexchange.eav.json.parse;
 
+import com.openexchange.eav.AbstractNode;
 import com.openexchange.eav.json.exception.EAVJsonException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public interface JSONParserInterface<T> {
+public interface JSONParserInterface<T extends AbstractNode<T>> {
 
     public T getNode() throws EAVJsonException;
 

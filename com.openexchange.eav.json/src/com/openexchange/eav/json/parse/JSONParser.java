@@ -58,7 +58,7 @@ import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class JSONParser implements JSONParserInterface {
+public class JSONParser implements JSONParserInterface<EAVNode> {
 
     private JSONObject json;
 
@@ -87,7 +87,7 @@ public class JSONParser implements JSONParserInterface {
                           new JSONObjectParser());
     }
 
-    public EAVNode getEAVNode() throws EAVJsonException {
+    public EAVNode getNode() throws EAVJsonException {
         try {
             chain.parse(key, json, node);
         } catch (JSONException e) {

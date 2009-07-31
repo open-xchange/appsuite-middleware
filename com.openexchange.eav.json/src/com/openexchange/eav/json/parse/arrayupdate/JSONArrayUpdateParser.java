@@ -56,11 +56,12 @@ import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.json.exception.EAVJsonException;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
+import com.openexchange.eav.json.parse.JSONParserInterface;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class JSONArrayUpdateParser implements JSONArrayUpdateParserInterface {
+public class JSONArrayUpdateParser implements JSONParserInterface<EAVSetTransformation> {
     
     private static final String ADD = "add";
     
@@ -83,7 +84,7 @@ public class JSONArrayUpdateParser implements JSONArrayUpdateParserInterface {
         this(null, json);
     }
 
-    public EAVSetTransformation getEAVNode() throws EAVJsonException {
+    public EAVSetTransformation getNode() throws EAVJsonException {
         try {
             parse(json, node);
         } catch (JSONException e) {

@@ -56,6 +56,7 @@ import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVUnitTest;
 import com.openexchange.eav.json.exception.EAVJsonException;
 import com.openexchange.eav.json.exception.EAVJsonExceptionMessage;
+import com.openexchange.eav.json.parse.JSONParserInterface;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -105,19 +106,19 @@ public class ArrayUpdateTest extends EAVUnitTest {
     }
     
     public void testParsing() throws Exception {
-        JSONArrayUpdateParserInterface parser = new JSONArrayUpdateParser("updates", jsonSimple);
-        EAVSetTransformation node = parser.getEAVNode();
+        JSONParserInterface<EAVSetTransformation> parser = new JSONArrayUpdateParser("updates", jsonSimple);
+        EAVSetTransformation node = parser.getNode();
         assertEquals(nodeSimple, node);
         
         parser = new JSONArrayUpdateParser("updates", jsonComplex);
-        node = parser.getEAVNode();
+        node = parser.getNode();
         assertEquals(nodeComplex, node);
     }
     
     public void testBad() throws Exception {
-        JSONArrayUpdateParserInterface parser = new JSONArrayUpdateParser("updates", jsonBadKey);
+        JSONParserInterface<EAVSetTransformation> parser = new JSONArrayUpdateParser("updates", jsonBadKey);
         try {
-            parser.getEAVNode();
+            parser.getNode();
             fail("Exception expected");
         } catch (EAVJsonException e) {
             assertEquals("Wrong exception", EAVJsonExceptionMessage.InvalidTreeStructure.getDetailNumber(), e.getDetailNumber());
@@ -125,7 +126,7 @@ public class ArrayUpdateTest extends EAVUnitTest {
 
         parser = new JSONArrayUpdateParser("updates", jsonBadType);
         try {
-            parser.getEAVNode();
+            parser.getNode();
             fail("Exception expected");
         } catch (EAVJsonException e) {
             assertEquals("Wrong exception", EAVJsonExceptionMessage.DifferentTypesInArray.getDetailNumber(), e.getDetailNumber());
