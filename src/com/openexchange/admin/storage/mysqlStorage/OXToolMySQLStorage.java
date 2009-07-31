@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -231,32 +232,40 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return selectwithint(-1, "SELECT name FROM db_pool WHERE db_pool_id = ?", db_id);
     }
 
-    
-
     @Override
-    public boolean existsDisplayName(final Context ctx, final User usr) throws StorageException {
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public boolean existsDisplayName(Context ctx, User user) throws StorageException {
+        final int contextId = ctx.getId().intValue();
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(ctx.getId());
-            ps = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid = ? AND field01 = ? AND fid = ?;");
-            ps.setInt(1, ctx.getId());
-            ps.setString(2, usr.getDisplay_name());
-            ps.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            rs = ps.executeQuery();
-            return rs.next();
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e.toString());
-        } catch (final PoolException e) {
-            log.error("SQL Error",e);
+            con = cache.getConnectionForContext(contextId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        boolean foundOther = false;
+        try {
+            stmt = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid=? AND field01=? AND fid=?");
+            stmt.setInt(1, contextId);
+            stmt.setString(2, user.getDisplay_name());
+            stmt.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            result = stmt.executeQuery();
+            while (!foundOther && result.next()) {
+                foundOther = user.getDisplay_name().equals(result.getString(1));
+            }
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(ps);
-            returnConnection(ctx.getId(), con);
+            closeSQLStuff(result, stmt);
+            try {
+                cache.pushConnectionForContext(contextId, con);
+            } catch (PoolException e) {
+                log.error("Error pushing context connection to pool.", e);
+            }
         }
+        return foundOther;
     }
 
     @Override
@@ -2085,37 +2094,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
     
     @Override
-    public boolean existsUserName(final Context ctx, final User usr) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        
+    public boolean existsUserName(Context ctx, User user) throws StorageException {
+        final int contextId = ctx.getId().intValue();
+        final Connection con;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(ctx.getId());
-            prep_check = con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ? AND id != ?");
-            prep_check.setInt(1, ctx.getId());
-            prep_check.setString(2, usr.getName());
-            prep_check.setInt(3, usr.getId());
-            
-            rs = prep_check.executeQuery();
-            
-            return rs.next();
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
+            con = cache.getConnectionForContext(contextId);
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e.toString());
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        boolean foundOther = false;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM login2user WHERE cid=? AND uid=? AND id!=?");
+            stmt.setInt(1, contextId);
+            stmt.setString(2, user.getName());
+            stmt.setInt(3, user.getId().intValue());
+            result = stmt.executeQuery();
+            while (!foundOther && result.next()) {
+                foundOther = user.getName().equals(result.getString(1));
+            }
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(prep_check);
-
+            closeSQLStuff(result, stmt);
             try {
-               cache.pushConnectionForContext(ctx.getId(), con);
+                cache.pushConnectionForContext(contextId, con);
             } catch (final PoolException e) {
-                log.error("Error pushing connection to pool!", e);
+                log.error("Error pushing context connection to pool.", e);
             }
         }
+        return foundOther;
     }
     
     @Override
