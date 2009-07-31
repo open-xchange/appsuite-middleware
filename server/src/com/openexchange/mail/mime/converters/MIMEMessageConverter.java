@@ -1475,7 +1475,7 @@ public final class MIMEMessageConverter {
      * @param mailMessage The mail to apply the flags to
      * @throws MailException If a mail error occurs
      */
-    static void parseFlags(final Flags flags, final MailMessage mailMessage) throws MailException {
+    public static void parseFlags(final Flags flags, final MailMessage mailMessage) throws MailException {
         int retval = 0;
         if (flags.contains(Flags.Flag.ANSWERED)) {
             retval |= MailMessage.FLAG_ANSWERED;
