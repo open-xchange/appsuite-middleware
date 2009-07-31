@@ -120,20 +120,6 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
         			values.put("display_name", givenName);
         		}
         	}
-        	
-//            String last = "";
-//            if(values.containsKey("sur_name")){
-//            	last = (String) values.get("sur_name").toString();
-//            }
-//            
-//            String first = "";
-//            if(values.containsKey("given_name")) {
-//            	first = (String) values.get("given_name").toString();
-//            }
-//
-//            if(!values.containsKey("display_name")) {
-//                values.put("display_name", last+", "+first);
-//            }
         }
     }
 }
