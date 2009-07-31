@@ -62,7 +62,7 @@ import com.openexchange.eav.json.parse.JSONParserInterface;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class TypeMetadateTest extends EAVUnitTest {
+public class TypeMetadataTest extends EAVUnitTest {
     
     private JSONObject json, badJson;
     

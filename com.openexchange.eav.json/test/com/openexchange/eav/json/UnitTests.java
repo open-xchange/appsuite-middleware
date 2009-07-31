@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 import com.openexchange.eav.json.multiple.EAVMultipleHandlerTest;
 import com.openexchange.eav.json.parse.ParserTest;
 import com.openexchange.eav.json.parse.arrayupdate.ArrayUpdateTest;
-import com.openexchange.eav.json.parse.metadata.type.TypeMetadateTest;
+import com.openexchange.eav.json.parse.metadata.type.TypeMetadataTest;
 import com.openexchange.eav.json.write.WriterTest;
 
 /**
@@ -66,7 +66,7 @@ public class UnitTests {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(ParserTest.class);
         suite.addTestSuite(WriterTest.class);
-        suite.addTestSuite(TypeMetadateTest.class);
+        suite.addTestSuite(TypeMetadataTest.class);
         suite.addTestSuite(ArrayUpdateTest.class);
         suite.addTestSuite(EAVMultipleHandlerTest.class);
         return suite;
