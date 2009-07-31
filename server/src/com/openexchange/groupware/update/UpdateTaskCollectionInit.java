@@ -326,6 +326,10 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Due to a bug, there are several appointments with the String "null" in the recurrence pattern
             // instead of sql NULL. This update task repairs these broken lines in the database.
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.RepairRecurrencePatternNullValue());
+            // Version 60
+            // The collation of column uid in table login2user must be changed to utf8_bin to prevent a collision of login
+            // names that are equal except some accent or some german umlaut.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");

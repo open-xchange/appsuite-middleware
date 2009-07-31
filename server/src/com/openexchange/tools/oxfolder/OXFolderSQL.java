@@ -307,7 +307,7 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_LOOKUPFOLDER = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ? AND fname = ? AND module = ?";
+    private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
 
     /**
      * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal.
@@ -332,7 +332,7 @@ public final class OXFolderSQL {
      * @throws DBPoolingException
      * @throws SQLException
      */
-    public static int lookUpFolderOnUpdate(final int folderId, final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
+    public static int lookUpFolderOnUpdate(int folderId, int parent, String folderName, int module, Connection readConArg, Context ctx) throws DBPoolingException, SQLException {
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -342,16 +342,23 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(folderId > 0 ? new StringBuilder(SQL_LOOKUPFOLDER).append(" AND fuid != ").append(folderId).toString() : SQL_LOOKUPFOLDER);
+            stmt = readCon.prepareStatement(folderId > 0 ? new StringBuilder(SQL_LOOKUPFOLDER).append(" AND fuid!=").append(folderId).toString() : SQL_LOOKUPFOLDER);
             stmt.setInt(1, ctx.getContextId()); // cid
             stmt.setInt(2, parent); // parent
             stmt.setString(3, folderName); // fname
             stmt.setInt(4, module); // module
             rs = stmt.executeQuery();
-            return rs.next() ? rs.getInt(1) : -1;
+            while (rs.next()) {
+                int fuid = rs.getInt(1);
+                String fname = rs.getString(2);
+                if (folderName.equals(fname)) {
+                    return fuid;
+                }
+            }
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
+        return -1;
     }
 
     private static final String SQL_EXISTS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?";
