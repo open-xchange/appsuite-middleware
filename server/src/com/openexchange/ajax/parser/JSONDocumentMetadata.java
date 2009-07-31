@@ -327,6 +327,8 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 		}
 		try {
 			final JSONArray arr = jsonObject.getJSONArray(Metadata.CATEGORIES_LITERAL.getName());
+			if(arr.length() == 0)
+			    return "";
 			final StringBuffer list = new StringBuffer();
 			for(int i = 0; i < arr.length(); i++) {
 				list.append(arr.get(i));
