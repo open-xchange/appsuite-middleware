@@ -51,7 +51,6 @@ package com.openexchange.eav.json.parse.metadata.type;
 
 import org.json.JSONObject;
 import com.openexchange.eav.EAVContainerType;
-import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVType;
 import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.EAVUnitTest;
@@ -106,18 +105,18 @@ public class TypeMetadataTest extends EAVUnitTest {
                     .put("number", new JSONObject()
                         .put("t", "String"))));
         
-        node = createNode("types", null, null, null, null,
-                    createNode("com.shoefactory.crm", null, null, null, null,
-                    createNode("shoeSize", EAVType.NUMBER, null, null, null),
-                    createNode("favoriteModel", EAVType.STRING, null, null, null),
-                    createNode("married", EAVType.BOOLEAN, null, null, null),
-                    createNode("birthday", EAVType.DATE, null, null, null),
-                    createNode("joinedDate", EAVType.TIME, null, "timezone", "Europe/Berlin"),
-                    createNode("favoriteColors", EAVType.STRING, EAVContainerType.SET, null, null),
-                    createNode("creditCardInformation", null, null, null, null,
-                        createNode("type", EAVType.STRING, null, null, null),
-                        createNode("number", EAVType.STRING, null, null, null)),
-                    createNode("t", EAVType.STRING, EAVContainerType.MULTISET, "option123", "optionValue123")));
+        node = createMetadataNode("types", null, null, null, null,
+                    createMetadataNode("com.shoefactory.crm", null, null, null, null,
+                    createMetadataNode("shoeSize", EAVType.NUMBER, null, null, null),
+                    createMetadataNode("favoriteModel", EAVType.STRING, null, null, null),
+                    createMetadataNode("married", EAVType.BOOLEAN, null, null, null),
+                    createMetadataNode("birthday", EAVType.DATE, null, null, null),
+                    createMetadataNode("joinedDate", EAVType.TIME, null, "timezone", "Europe/Berlin"),
+                    createMetadataNode("favoriteColors", EAVType.STRING, EAVContainerType.SET, null, null),
+                    createMetadataNode("creditCardInformation", null, null, null, null,
+                        createMetadataNode("type", EAVType.STRING, null, null, null),
+                        createMetadataNode("number", EAVType.STRING, null, null, null)),
+                    createMetadataNode("t", EAVType.STRING, EAVContainerType.MULTISET, "option123", "optionValue123")));
     }
     
     public void testParsing() throws Exception {
@@ -135,31 +134,5 @@ public class TypeMetadataTest extends EAVUnitTest {
             assertEquals("Wrong exception", EAVJsonExceptionMessage.InvalidTreeStructure.getDetailNumber(), e.getDetailNumber());
         }
     }
-    
-    private EAVTypeMetadataNode createNode(String key, EAVType type, EAVContainerType containerType, String optionKey, String option, EAVTypeMetadataNode... children) {
-        EAVTypeMetadataNode retval;
-        if (key == null) {
-            retval = new EAVTypeMetadataNode();
-        } else {
-            retval = new EAVTypeMetadataNode(key);
-        }
-        
-        if (type != null) {
-            retval.setType(type);
-        }
-        
-        if (containerType != null) {
-            retval.setContainerType(containerType);
-        }
-        
-        if (optionKey != null) {
-            retval.setOption(optionKey, option);
-        }
-        
-        if (children.length > 0) {
-            retval.addChildren(children);
-        }
-        
-        return retval;
-    }
+
 }

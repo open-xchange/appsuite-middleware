@@ -623,5 +623,31 @@ public class EAVUnitTest extends TestCase {
         
     }
     
+    public EAVTypeMetadataNode createMetadataNode(String key, EAVType type, EAVContainerType containerType, String optionKey, String option, EAVTypeMetadataNode... children) {
+        EAVTypeMetadataNode retval;
+        if (key == null) {
+            retval = new EAVTypeMetadataNode();
+        } else {
+            retval = new EAVTypeMetadataNode(key);
+        }
+        
+        if (type != null) {
+            retval.setType(type);
+        }
+        
+        if (containerType != null) {
+            retval.setContainerType(containerType);
+        }
+        
+        if (optionKey != null) {
+            retval.setOption(optionKey, option);
+        }
+        
+        if (children.length > 0) {
+            retval.addChildren(children);
+        }
+        
+        return retval;
+    }
 
 }
