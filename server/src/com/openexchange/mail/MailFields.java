@@ -52,7 +52,9 @@ package com.openexchange.mail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link MailFields} - Container for instances of {@link MailField} providing common set-specific methods.
@@ -172,6 +174,21 @@ public final class MailFields {
             }
         }
         return l.toArray(new MailField[l.size()]);
+    }
+
+    /**
+     * Returns a newly created {@link Set set} of {@link MailField} constants.
+     * 
+     * @return A newly created {@link Set set} of {@link MailField} constants
+     */
+    public Set<MailField> toSet() {
+        final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i]) {
+                set.add(VALUES[i]);
+            }
+        }
+        return set;
     }
 
     @Override
