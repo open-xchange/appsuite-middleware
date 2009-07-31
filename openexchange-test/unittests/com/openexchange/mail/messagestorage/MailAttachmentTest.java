@@ -49,25 +49,17 @@
 
 package com.openexchange.mail.messagestorage;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
@@ -85,9 +77,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailAttachmentTest extends MessageStorageTest {
 
-	private static final String INBOX = "INBOX";
-
-    private static final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n"
+	private static final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n"
 			+ "Received: from ox.netline-is.de ([unix socket])\n"
 			+ "	by ox (Cyrus v2.2.3) with LMTP; Fri, 04 Apr 2008 00:12:36 +0200\n" + "X-Sieve: CMU Sieve 2.2\n"
 			+ "Received: by ox.netline-is.de (Postfix, from userid 65534)\n"
@@ -259,9 +249,6 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			+ "Content-Transfer-Encoding: base64\n" + "Content-Disposition: attachment;\n"
 			+ "	filename*=utf-8''%EC%84%9C%EC%98%81%EC%A7%84%2Etxt\n" + "\n" + "7ISc7JiB7KeE\n" + "\n"
 			+ "--Boundary-00=_mtJhHd7H54sG6XG--\n";
-	
-	private static MailField[] GUI_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.PRIORITY, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM,
-	    MailField.THREAD_LEVEL, MailField.SUBJECT, MailField.RECEIVED_DATE, MailField.SIZE, MailField.COLOR_LABEL };
 
 	/**
 	 * 
@@ -271,72 +258,71 @@ public final class MailAttachmentTest extends MessageStorageTest {
 	}
 
 	public void testMailAttachment() {
-	    try {
-	        final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-	        final String[] uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, mails);
-	        try {
-	            final Set<String> hasAttachmentSet = new HashSet<String>(uids.length);
-	            final List<Integer> attachmentids = new ArrayList<Integer>();
-	            final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids, FIELDS_MORE);
-	            for (int i = 0; i < fetchedMails.length; i++) {
-	                assertTrue("Missing content type", fetchedMails[i].containsContentType());
-	                if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
-	                    assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == MailPart.NO_ENCLOSED_PARTS);
-	                } else {
-	                    assertFalse("Content is null", fetchedMails[i].getContent() == null);
-	                }
-	                if (fetchedMails[i].hasAttachment()) {
-	                    hasAttachmentSet.add(fetchedMails[i].getMailId());
-	                    attachmentids.add(i);
-	                }
-	            }
-	            
-	            // This part is added due to Bug #14161 L3: E-Mail lists does not show attachment icons for unopened E-Mail
-	            final Integer[] idsWithAttachment = new Integer[]{1,2,3,4,5,7,8,12};
-	            final Integer[] attachmentidsarray = attachmentids.toArray(new Integer[attachmentids.size()]);
-	            assertTrue("Wrong mails marked with attachments, should be " + Arrays.toString(idsWithAttachment) + " but is " + Arrays.toString(attachmentidsarray), Arrays.equals(attachmentidsarray, idsWithAttachment));
-	            
-	        } finally {
-	            mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-	            
-	            /*
-	             * close
-	             */
-	            mailAccess.close(false);
-	        }
-	        
-	    } catch (final Exception e) {
-	        e.printStackTrace();
-	        fail(e.getMessage());
-	    }
-	}
-	
-	/**
-	 * Tests if the attachments are provided if the bundle is called with parameters like a list request from the gui
-	 */
-	public void testMailAttachmentListRequest() {
 		try {
+			final MailAccess<?, ?> mailAccess = getMailAccess();
+			
 			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-			final String[] uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, mails);
+			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-				final Set<String> hasAttachmentSet = new HashSet<String>(uids.length);
-				final List<Integer> attachmentids = new ArrayList<Integer>();
-				final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids, GUI_FIELDS);
+
+				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
+					assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
+				}
+
+				final Set<String> hasAttachmentSet = new HashSet<String>(uids.length);
+				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
+					assertTrue("Missing flags", fetchedMails[i].containsFlags());
+					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
+						assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
+					} else {
+						assertFalse("Content is null", fetchedMails[i].getContent() == null);
+					}
 					if (fetchedMails[i].hasAttachment()) {
 						hasAttachmentSet.add(fetchedMails[i].getMailId());
-						attachmentids.add(i);
 					}
 				}
-				
-				// This part is added due to Bug #14161 L3: E-Mail lists does not show attachment icons for unopened E-Mail
-                final Integer[] idsWithAttachment = new Integer[]{1,2,3,4,5,7,8,12};
-                final Integer[] attachmentidsarray = attachmentids.toArray(new Integer[attachmentids.size()]);
-                assertTrue("Wrong mails marked with attachments, should be " + Arrays.toString(idsWithAttachment) + " but is " + Arrays.toString(attachmentidsarray), Arrays.equals(attachmentidsarray, idsWithAttachment));
+
+				for (final String id : hasAttachmentSet) {
+					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id, true);
+					final MailPath mailPath = new MailPath(mailAccess.getAccountId(), mail.getFolder(), mail.getMailId());
+
+					final SessionObject session = getSession();
+					final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
+							DisplayMode.DISPLAY, session, UserSettingMailStorage.getInstance().getUserSettingMail(
+									session.getUserId(), session.getContextId()));
+					new MailMessageParser().parseMailMessage(mail, messageHandler);
+					final JSONObject jObject = messageHandler.getJSONObject();
+					if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
+						final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+						final int len = jArray.length();
+						assertTrue("Missing attachments although existence indicated through 'hasAttachments()'",
+								len > 0);
+						for (int i = 0; i < len; i++) {
+							final String sequenceId = jArray.getJSONObject(i).getString(MailListField.ID.getKey());
+							final MailPart part = mailAccess.getMessageStorage().getAttachment("INBOX", id,
+									sequenceId);
+							assertFalse("No mail part found for sequence ID: " + sequenceId, null == part);
+						}
+					} else {
+						fail("Missing attachments although existence indicated through 'hasAttachments()'");
+					}
+				}
+
+				MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes("US-ASCII"));
+				assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
+				assertFalse("A message w/o attachments is marked to hold attachments", testMail.hasAttachment());
+
+				testMail = MIMEMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes("US-ASCII"));
+				assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
+				assertTrue("A message with attachments is marked to NOT hold attachments", testMail.hasAttachment());
 
 			} finally {
-				mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
+
+				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 
 				/*
 				 * close
@@ -348,93 +334,6 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-	}
-	
-	/**
-     * Tests if the attachments are provided if the bundle is called with parameters like a get mail request from the gui
-     */
-	public void testMailAttachmentGetRequestWithAttachment() {
-        try {
-            final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-            final String[] uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, mails);
-            try {
-                // These mails must have an attachment...
-                final String[] mailIdsHavingAttachment = new String[]{uids[1],uids[2],uids[3], uids[4], uids[5], uids[7], uids[8], uids[12]};
-                
-                for (final String mailIdHavingAttachment : mailIdsHavingAttachment) {
-                    final MailMessage mail = mailAccess.getMessageStorage().getMessage(INBOX, mailIdHavingAttachment, true);
-                    assertTrue("Missing content type", mail.containsContentType());
-                    if (mail.getContentType().isMimeType("multipart/*")) {
-                        assertFalse("Enclosed count returned -1", mail.getEnclosedCount() == -1);
-                    } else {
-                        assertFalse("Content is null", mail.getContent() == null);
-                    }
-                    assertTrue("The mail [" + mailIdHavingAttachment + "] must signal an attachment.", mail.hasAttachment());
-                    // This part is added due to Bug #14160 L3: E-Mail Split view does not show size of attachments, is "undefined" in firefox, empty in IE6
-                    checkMailForAttachmentSize(mail);
-                    testMailPartAndAttachment(mailIdHavingAttachment, mail);
-                }
-            } finally {
-                mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-
-                /*
-                 * close
-                 */
-                mailAccess.close(false);
-            }
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-	}
-	
-	public void testMailAttachmentGetRequestWithoutAttachment() {
-        try {
-            final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-            final String[] uids = this.mailAccess.getMessageStorage().appendMessages(INBOX, mails);
-            try {
-                // These mails must not have an attachment...
-                final String[] mailIdsNotHavingAttachments = new String[]{uids[0], uids[6], uids[9], uids[10], uids[11], uids[13], uids[14], uids[15]};
-                
-                for (final String mailIdNotHavingAttachment : mailIdsNotHavingAttachments) {
-                    final MailMessage mail = mailAccess.getMessageStorage().getMessage(INBOX, mailIdNotHavingAttachment, true);
-                    assertTrue("Missing content type", mail.containsContentType());
-                    if (mail.getContentType().isMimeType("multipart/*")) {
-                        assertFalse("Enclosed count returned -1", mail.getEnclosedCount() == -1);
-                    } else {
-                        assertFalse("Content is null", mail.getContent() == null);
-                    }
-                    assertFalse("The mail [" + mailIdNotHavingAttachment + "] must not signal an attachment.", mail.hasAttachment());
-                }
-
-            } finally {
-                mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
-
-                /*
-                 * close
-                 */
-                mailAccess.close(false);
-            }
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-	}
-
-	    // TODO: Should not be part of "real" MAL tests
-    public void testNoAttachmentMIMEMessageConverter() throws MailException, UnsupportedEncodingException {
-        final MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes("US-ASCII"));
-        assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
-        assertFalse("A message w/o attachments is marked to hold attachments", testMail.hasAttachment());
-	}
-
-    // TODO: Should not be part of "real" MAL tests
-	public void testHasAttachmentMIMEMessageConverter() throws MailException, UnsupportedEncodingException {
-	    final MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes("US-ASCII"));
-        assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
-        assertTrue("A message with attachments is marked to NOT hold attachments", testMail.hasAttachment());
 	}
 
 	public void testRFC2231() {
@@ -469,42 +368,5 @@ public final class MailAttachmentTest extends MessageStorageTest {
 			fail(e.getMessage());
 		}
 	}
-	
-    private void checkMailForAttachmentSize(final MailPart mail) throws MailException {
-        final int enclosedCount = mail.getEnclosedCount();
-        for (int i = 0; i < enclosedCount; i++) {
-            final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
-            if (!enclosedMailPart.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-                assertTrue("Each mail part must obtain a size", enclosedMailPart.containsSize() && -1 != enclosedMailPart.getSize());
-            }
-            checkMailForAttachmentSize(enclosedMailPart);
-        }
-    }
-
-    private void testMailPartAndAttachment(final String mailIdHavingAttachment, final MailMessage mail) throws MailException, UserConfigurationException, JSONException {
-        final SessionObject session = getSession();
-        final MailPath mailPath = new MailPath(mailAccess.getAccountId(), mail.getFolder(), mail.getMailId());
-        final JSONMessageHandler messageHandler = new JSONMessageHandler(MailAccount.DEFAULT_ID, mailPath, mail,
-            DisplayMode.DISPLAY, session, UserSettingMailStorage.getInstance().getUserSettingMail(
-                session.getUserId(), session.getContextId()));
-        new MailMessageParser().parseMailMessage(mail, messageHandler);
-        final JSONObject jObject = messageHandler.getJSONObject();
-        if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
-            final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-            final int len = jArray.length();
-            assertTrue("Missing attachments although existence indicated through 'hasAttachments()'",
-                len > 0);
-            for (int i = 0; i < len; i++) {
-                final String sequenceId = jArray.getJSONObject(i).getString(MailListField.ID.getKey());
-                final MailPart part = mailAccess.getMessageStorage().getAttachment(INBOX, mailIdHavingAttachment,
-                    sequenceId);
-                assertFalse("No mail part found for sequence ID: " + sequenceId, null == part);
-            }
-        } else {
-            fail("Missing attachments although existence indicated through 'hasAttachments()'");
-        }
-    }
-
-
 
 }
