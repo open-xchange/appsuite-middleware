@@ -12,9 +12,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpURL;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
 
@@ -57,7 +59,7 @@ public class WebdavClientTest extends TestCase {
 		return res;
 	}
 	
-    private String getUrl(String url) {
+    protected String getUrl(String url) {
         return "http://"+hostname+"/servlet/webdav.infostore/"+path+"/"+url;
     }
 
@@ -133,15 +135,11 @@ public class WebdavClientTest extends TestCase {
 		final String authData =  new String(Base64.encode(login + ":" + password)); 
 		req.setHeaderField("authorization", "Basic " + authData);
 	}
-	
-	public void setAuth(final HttpMethodBase method) {
-		if (password == null) {
-			password = "";
-		}
-		
-		final String authData =  new String(Base64.encode(login + ":" + password)); 
-		
-		method.setDoAuthentication(true);
-		method.setRequestHeader("authorization", "Basic " + authData);
+
+	public void setAuth(HttpClient client) {
+        if (password == null) {
+            password = "";
+        }
+	    client.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 	}
 }

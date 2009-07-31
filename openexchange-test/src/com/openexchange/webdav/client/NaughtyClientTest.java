@@ -51,69 +51,84 @@ package com.openexchange.webdav.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.Random;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.HttpURL;
+import org.apache.commons.httpclient.auth.BasicScheme;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
 
 import com.openexchange.webdav.WebdavClientTest;
 
 public class NaughtyClientTest extends WebdavClientTest {
 
     // Bug 7642
-    // Defunct with HTTP Client 3+
-    public void _testContentLengthTooLarge() throws Exception{
-		contentLengthTest(20, 30);
-	}
+    // TODO Rewrite this test to get it working again.
+    public void testContentLengthTooLarge() throws Exception{
+        contentLengthTest(20, 30);
+    }
 
-	// Bug 7642
-	// This doesn't work, as the webserver faithfully closes the stream after receiving content-length bytes. 
-	// In this case the file would be truncated to the claimed length.
-	//public void testContentLengthTooSmall() throws Exception {
-	//	contentLengthTest(20,10);
-	//}
-	
-	public void contentLengthTest(final int size, final int pretendSize) throws MalformedURLException, IOException, InterruptedException {
-		final byte[] data = new byte[size];
-		final Random r = new Random();
-		for(int i = 0; i < data.length; i++) { data[i] = (byte) r.nextInt(); }
-		
-		final String url = "http://"+hostname+"/servlet/webdav.infostore/Sebastian%20Kauss/testFile.bin";
-		
-		final PutMethod put = new PutMethod(url);
-		put.setRequestEntity(new ByteArrayRequestEntity(data));
-		setAuth(put);
-		
-		final HttpClient client = new HttpClient();
-		
-		try {
-			client.executeMethod(put);
-		} catch (final IOException x) {
-			// This exception is expected, because we don't provide all the data (or more) than we claim.
-		}
-		clean.add("/Sebastian Kauss/testFile.bin");
-		
-		// The invalid request mucks up synchronization between client and server, so the file is not
-		// necessarily saved at this point (The stream is closed but server processing continues anyway.
-		// We'll try to load it a few times, and see, if we can succeed.
-		
-		GetMethod get = new GetMethod(url);
-		int i = 0;
-		do {
-			Thread.sleep(100);
-			get =  new GetMethod(url);
-			setAuth(get);
-		
-			client.executeMethod(get);
-			i++;
-		} while(i < 10 && get.getStatusCode() != 200);
-		
-		assertEquals(200, get.getStatusCode());
-		assertEquals(String.valueOf(size), get.getResponseHeader("content-length").getValue());
-		assertEqualContent(get.getResponseBodyAsStream(), new ByteArrayInputStream(data));
+    // Bug 7642
+    // This doesn't work, as the webserver faithfully closes the stream after receiving content-length bytes.
+    // In this case the file would be truncated to the claimed length.
+    //public void testContentLengthTooSmall() throws Exception {
+    //    contentLengthTest(20,10);
+    //}
 
-	}
+    public void contentLengthTest(final int size, final int pretendSize) throws MalformedURLException, IOException, InterruptedException {
+        final byte[] data = new byte[size];
+        final Random r = new Random();
+        for(int i = 0; i < data.length; i++) { data[i] = (byte) r.nextInt(); }
+
+        HttpURL url = new HttpURL(getUrl("testFile.bin"));
+
+        final PutMethod put = new PutMethod(url.getEscapedURI());
+        put.getHostAuthState().setAuthScheme(new BasicScheme());
+        put.setRequestEntity(new RequestEntity() {
+            public long getContentLength() {
+                return pretendSize;
+            }
+            public String getContentType() {
+                return "application/octet-stream";
+            }
+            public boolean isRepeatable() {
+                return false;
+            }
+            public void writeRequest(OutputStream out) throws IOException {
+                out.write(data);
+            }
+        });
+
+        final HttpClient client = new HttpClient();
+        setAuth(client);
+
+        try {
+            client.executeMethod(put);
+        } catch (final IOException x) {
+            // This exception is expected, because we don't provide all the data (or more) than we claim.
+        }
+        clean.add("testFile.bin");
+
+        // The invalid request mucks up synchronization between client and server, so the file is not
+        // necessarily saved at this point (The stream is closed but server processing continues anyway.
+        // We'll try to load it a few times, and see, if we can succeed.
+
+        GetMethod get = new GetMethod(url.getEscapedURI());
+        int i = 0;
+        do {
+            Thread.sleep(100);
+            get =  new GetMethod(url.getEscapedURI());
+
+            client.executeMethod(get);
+            i++;
+        } while(i < 10 && get.getStatusCode() != 200);
+
+        assertEquals(200, get.getStatusCode());
+        assertEquals(String.valueOf(size), get.getResponseHeader("content-length").getValue());
+        assertEqualContent(get.getResponseBodyAsStream(), new ByteArrayInputStream(data));
+    }
 }
