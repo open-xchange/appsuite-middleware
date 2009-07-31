@@ -92,7 +92,7 @@ public class JSONTypeMetadataWriter implements JSONWriterInterface {
     }
     
     private void write(EAVTypeMetadataNode node, JSONObject json) throws JSONException {
-        if (json.has(node.getName())) {
+        if (this.json.has(node.getName())) {
             return;
         }
         
