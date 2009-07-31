@@ -244,6 +244,7 @@ public class JSONAssertion implements JSONCondition {
     private static final class HasKey implements JSONCondition {
         private String key;
         private String complaint;
+        private JSONObject object;
 
         public HasKey(String key) {
             this.key = key;
@@ -254,6 +255,7 @@ public class JSONAssertion implements JSONCondition {
                 this.complaint = o.getClass().getName()+" can not have key "+key;
                 return false;
             }
+            this.object = ((JSONObject)o);
             return ((JSONObject)o).has(key);
         }
         
@@ -261,7 +263,7 @@ public class JSONAssertion implements JSONCondition {
             if(complaint != null) {
                 return complaint;
             }
-            return "Missing key: "+key;
+            return "Missing key: "+key+" in "+object;
         }
         
     }
