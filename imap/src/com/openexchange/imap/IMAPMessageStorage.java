@@ -57,9 +57,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -374,6 +376,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (imapFolder.getMessageCount() == 0) {
                 return EMPTY_RETVAL;
             }
+            final MailFields usedFields = new MailFields();
+            // Add desired fields
+            usedFields.addAll(mailFields);
+            // Add sort field
+            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             /*
              * Shall a search be performed?
              */
@@ -386,8 +393,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
-                if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyFolderAndID(mailFields)) {
-                    return performAllFetch(fullname, order, indexRange);
+                if (MailSortField.RECEIVED_DATE.equals(sortField) && onlyLowCostFields(usedFields)) {
+                    return performLowCostFetch(fullname, usedFields, order, indexRange);
                 }
                 /*
                  * Proceed with common handling
@@ -403,11 +410,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             MailMessage[] mails = null;
-            final MailFields usedFields = new MailFields();
-            // Add desired fields
-            usedFields.addAll(mailFields);
-            // Add sort field
-            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, sortField, order, getLocale(), imapConfig);
             if (null != msgs) {
                 /*
@@ -1505,21 +1507,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
      * 
      * @param fullname The IMAP folder's fullname
+     * @param lowCostFields The low-cost fields
      * @param order The order direction (needed to possibly flip the results)
      * @return The fetched mail messages with only ID and folder ID set.
      * @throws MessagingException If a messaging error occurs
      * @throws MailException If a mail error occurs
      */
-    private MailMessage[] performAllFetch(final String fullname, final OrderDirection order, final IndexRange indexRange) throws MessagingException, MailException {
+    private MailMessage[] performLowCostFetch(final String fullname, final MailFields lowCostFields, final OrderDirection order, final IndexRange indexRange) throws MessagingException, MailException {
         /*
          * Perform simple fetch
          */
-        final long start = System.currentTimeMillis();
-        MailMessage[] retval = IMAPCommandsCollection.fetchAll(imapFolder, OrderDirection.ASC.equals(order));
-        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (UID INTERNALDATE)<<< took ").append(
-                (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+        MailMessage[] retval;
+        {
+            final String lowCostItems = getFetchCommand(lowCostFields);
+            final long start = System.currentTimeMillis();
+            retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order));
+            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (").append(lowCostItems).append(
+                    ")<<< took ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            }
         }
         if (retval == null || retval.length == 0) {
             return EMPTY_RETVAL;
@@ -1547,16 +1554,41 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return retval;
     }
 
-    private static boolean onlyFolderAndID(final MailField[] fields) {
-        if (fields.length > 2) {
+    private static String getFetchCommand(final MailFields fields) {
+        final StringBuilder command = new StringBuilder(128);
+        if (fields.contains(MailField.RECEIVED_DATE)) {
+            command.append("INTERNALDATE ");
+        }
+        if (fields.contains(MailField.ID)) {
+            command.append("UID ");
+        }
+        if (fields.contains(MailField.FLAGS) || fields.contains(MailField.COLOR_LABEL)) {
+            command.append("FLAGS ");
+        }
+        if (fields.contains(MailField.CONTENT_TYPE)) {
+            command.append("BODYSTRUCTURE ");
+        }
+        if (fields.contains(MailField.SIZE)) {
+            command.append("RFC822.SIZE ");
+        }
+        return command.deleteCharAt(command.length() - 1).toString();
+    }
+
+    private static final EnumSet<MailField> LOW_COST = EnumSet.of(
+        MailField.ID,
+        MailField.FOLDER_ID,
+        MailField.RECEIVED_DATE,
+        MailField.FLAGS,
+        MailField.COLOR_LABEL,
+        MailField.SIZE,
+        MailField.CONTENT_TYPE);
+
+    private static boolean onlyLowCostFields(final MailFields fields) {
+        final Set<MailField> set = fields.toSet();
+        if (!set.removeAll(LOW_COST)) {
             return false;
         }
-        for (final MailField mailField : fields) {
-            if (!MailField.ID.equals(mailField) && !MailField.FOLDER_ID.equals(mailField)) {
-                return false;
-            }
-        }
-        return true;
+        return set.isEmpty();
     }
 
     private static int applyThreadLevel(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {

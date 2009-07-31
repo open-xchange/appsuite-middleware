@@ -54,8 +54,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -86,7 +84,6 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -107,7 +104,6 @@ import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
-import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.ListInfo;
 import com.sun.mail.imap.protocol.RFC822DATA;
@@ -1739,12 +1735,12 @@ public final class IMAPCommandsCollection {
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_FETCH,
+                        COMMAND_FETCH_UID_FLAGS,
                         response.toString()));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_FETCH,
+                        COMMAND_FETCH_UID_FLAGS,
                         response.toString()));
                 } else {
                     p.handleResult(response);
@@ -1802,99 +1798,6 @@ public final class IMAPCommandsCollection {
          */
         return new HashSet<String>(Arrays.asList(userFlags));
     }
-
-    private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
-
-    /**
-     * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date.
-     * 
-     * @param imapFolder The IMAP folder
-     * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
-     * @return All messages from given IMAP folder
-     * @throws MessagingException If an error occurs in underlying protocol
-     */
-    public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
-            /*
-             * Empty folder...
-             */
-            return new MailMessage[0];
-        }
-        return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                /*-
-                 * Arguments:  sequence set
-                 * message data item names or macro
-                 * 
-                 * Responses:  untagged responses: FETCH
-                 * 
-                 * Result:     OK - fetch completed
-                 *             NO - fetch error: can't fetch that data
-                 *             BAD - command unknown or arguments invalid
-                 */
-                final Response[] r = p.command(COMMAND_FETCH, null);
-                final int len = r.length - 1;
-                final Response response = r[len];
-                final List<MailMessage> l = new ArrayList<MailMessage>(len);
-                if (response.isOK()) {
-                    final String fullname = imapFolder.getFullName();
-                    final String internaldate = "INTERNALDATE";
-                    for (int j = 0; j < len; j++) {
-                        if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            final FetchResponse fr = (FetchResponse) r[j];
-                            final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, STR_UID).uid), fullname);
-                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, internaldate).getDate());
-                            l.add(m);
-                            r[j] = null;
-                        }
-                    }
-                    p.notifyResponseHandlers(r);
-                } else if (response.isBAD()) {
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_FETCH,
-                        response.toString()));
-                } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_FETCH,
-                        response.toString()));
-                } else {
-                    p.handleResult(response);
-                }
-                Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
-                return l.toArray(new MailMessage[l.size()]);
-            }
-
-        }));
-    }
-
-    /**
-     * A {@link Comparator} comparing instances of {@link MailMessage} by their received date in ascending order.
-     */
-    static final Comparator<MailMessage> ASC_COMP = new Comparator<MailMessage>() {
-
-        public int compare(final MailMessage m1, final MailMessage m2) {
-            final Date d1 = m1.getReceivedDate();
-            final Date d2 = m2.getReceivedDate();
-            final Integer refComp = compareReferences(d1, d2);
-            return (refComp == null ? d1.compareTo(d2) : refComp.intValue());
-        }
-    };
-
-    /**
-     * A {@link Comparator} comparing instances of {@link MailMessage} by their received date in descending order.
-     */
-    static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
-
-        public int compare(final MailMessage m1, final MailMessage m2) {
-            final Date d1 = m1.getReceivedDate();
-            final Date d2 = m2.getReceivedDate();
-            final Integer refComp = compareReferences(d1, d2);
-            return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (-1);
-        }
-    };
 
     /**
      * Compares given object references being <code>null</code>.
