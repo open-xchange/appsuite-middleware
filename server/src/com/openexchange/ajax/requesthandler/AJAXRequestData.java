@@ -59,25 +59,83 @@ import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AJAXRequestData} contains the parameters and the payload of the request.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestData {
 
-    private Map<String, String> params = new HashMap<String, String>();
+    private final Map<String, String> params;
 
     private JSONValue data;
 
-    public AJAXRequestData(JSONObject json) throws AjaxException {
-        super();
+    /**
+     * Initializes a new {@link AJAXRequestData}.
+     * 
+     * @param json The JSON data
+     * @throws AjaxException If an AJAX error occurs
+     */
+    public AJAXRequestData(final JSONObject json) throws AjaxException {
+        this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
     }
 
+    /**
+     * Initializes a new {@link AJAXRequestData}.
+     */
     public AJAXRequestData() {
         super();
+        params = new HashMap<String, String>();
     }
 
-    public void putParameter(String name, String value) {
-        params.put(name, value);
+    /**
+     * Puts given name-value-pair into this data's parameters.
+     * <p>
+     * A <code>null</code> value removes the mapping.
+     * 
+     * @param name The parameter name
+     * @param value The parameter value
+     */
+    public void putParameter(final String name, final String value) {
+        if (null == name) {
+            return;
+        }
+        if (null == value) {
+            params.remove(name);
+        } else {
+            params.put(name, value);
+        }
     }
+
+    /**
+     * Gets the value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The value mapped to given parameter name or <code>null</code> if not present
+     */
+    public String getParameter(final String name) {
+        if (null == name) {
+            return null;
+        }
+        return params.get(name);
+    }
+
+    /**
+     * Gets the JSON data.
+     * 
+     * @return The JSON data
+     */
+    public JSONValue getData() {
+        return data;
+    }
+
+    /**
+     * Sets the JSON data.
+     * 
+     * @param data The JSON data to set
+     */
+    public void setData(final JSONValue data) {
+        this.data = data;
+    }
+
 }
