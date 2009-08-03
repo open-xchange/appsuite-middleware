@@ -146,7 +146,7 @@ public interface Cache {
     public void put(Serializable key, Serializable val, ElementAttributes attr) throws CacheException;
 
     /**
-     * Allows the user to put an object into a group within a particular cache cache. This method allows the object's attributes to be
+     * Allows the user to put an object into a group within a particular cache. This method allows the object's attributes to be
      * individually specified.
      * 
      * @param key The key
@@ -158,7 +158,7 @@ public interface Cache {
     public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr) throws CacheException;
 
     /**
-     * Allows the user to put an object into a group within a particular cache cache. This method sets the object's attributes to the
+     * Allows the user to put an object into a group within a particular cache. This method sets the object's attributes to the
      * default for the cache.
      * 
      * @param key The key
