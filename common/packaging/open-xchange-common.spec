@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -83,6 +83,9 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Thu Jul 30 2009 - choeger@open-xchange.com
+ - Bugfix ID#14207 [L3] wrong exit code from init script if you stop an
+   already stopped service
 * Wed Jul 15 2009 - choeger@open-xchange.com
  - Bugfix ID#14177 missing common shell functions file on update from RC3 to
    RC4
