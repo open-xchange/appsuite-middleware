@@ -167,7 +167,14 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValue jsonValue, final UserizedFolder folder, final Locale locale, final boolean withKey) throws JSONException, AbstractOXException {
-                // TODO!!!!
+                final Date d = folder.getLastModifiedUTC();
+                if (withKey) {
+                    if (null != d) {
+                        ((JSONObject) jsonValue).put(FolderField.LAST_MODIFIED_UTC.getName(), d.getTime());
+                    }
+                    return;
+                }
+                ((JSONArray) jsonValue).put(d == null ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
         m.put(Integer.valueOf(FolderField.FOLDER_ID.getColumn()), new FolderFieldWriter() {

@@ -70,6 +70,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Permission ownPermission;
 
+    private Date lastModifiedUTC;
+
     /**
      * Initializes a new {@link UserizedFolderImpl}.
      */
@@ -216,6 +218,14 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     public void setOwnPermission(final Permission ownPermission) {
         this.ownPermission = ownPermission;
+    }
+
+    public Date getLastModifiedUTC() {
+        return lastModifiedUTC == null ? null : new Date(lastModifiedUTC.getTime());
+    }
+
+    public void setLastModifiedUTC(final Date lastModifiedUTC) {
+        this.lastModifiedUTC = lastModifiedUTC == null ? null : new Date(lastModifiedUTC.getTime());
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Date;
+
 /**
  * {@link UserizedFolder} - Extends {@link Folder} interface by user-sensitive methods.
  * 
@@ -69,5 +71,19 @@ public interface UserizedFolder extends Folder {
      * @param ownPermission The permission for requesting user
      */
     void setOwnPermission(Permission ownPermission);
+
+    /**
+     * Gets the last-modified date in UTC.
+     * 
+     * @return The last-modified date in UTC
+     */
+    Date getLastModifiedUTC();
+
+    /**
+     * Sets the last-modified date in UTC.
+     * 
+     * @param lastModifiedUTC The last-modified date in UTC
+     */
+    void setLastModifiedUTC(Date lastModifiedUTC);
 
 }
