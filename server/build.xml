@@ -205,8 +205,7 @@
         </copy>
         <chmod perm="640">
             <fileset dir="${groupwareConfInstallCopyDir}">
-                <include name="**"/>
-                <exclude name="osgi/**"/>
+                <include name="mail.properties,configdb.properties,server.properties"/>
             </fileset>
         </chmod>
         <mkdir dir="${commonConfInstallCopyDir}"/>
@@ -217,11 +216,11 @@
                 <exclude name="CVS"/>
             </fileset>
         </copy>
-        <chmod perm="640">
+<!--        <chmod perm="640">
             <fileset dir="${commonConfInstallCopyDir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod> -->
     </target>
 
     <target name="patchScripts" depends="prepare">

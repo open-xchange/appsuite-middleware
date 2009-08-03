@@ -428,25 +428,17 @@ postFix() {
   # run checkconfigconsistency once
   /opt/open-xchange/sbin/checkconfigconsistency
 
-  fixConfigFilePermissions
 }
 
-fixConfigFilePermissions() {
-  # Restrict permissions on configuration files.
-  for I in $(find /opt/open-xchange/etc/common/ -maxdepth 1 -type f)
-  do
-    ox_update_permissions "$I" root:open-xchange 640
-  done
-  for I in $(find /opt/open-xchange/etc/groupware/ -maxdepth 1 -type f); do
-    ox_update_permissions "$I" root:open-xchange 640
-  done
-  for I in $(find /opt/open-xchange/etc/groupware/servletmappings/ -maxdepth 1 -type f); do
-    ox_update_permissions "$I" root:open-xchange 640
-  done
+setConfigFilePermissions() {
+    ox_update_permissions "/opt/open-xchange/etc/groupware/mail.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/groupware/configdb.properties" root:open-xchange 640
+    ox_update_permissions "/opt/open-xchange/etc/groupware/server.properties" root:open-xchange 640
 }
 
 case "$1" in
     configure)
+	setConfigFilePermissions
         test -n "$2" && {
                 # we are in update mode, run postFix to apply fixes
                 postFix "$2"
@@ -477,7 +469,6 @@ chmod 750 /var/log/open-xchange
 chown open-xchange: /var/log/open-xchange
 chown open-xchange: /opt/open-xchange/etc/groupware/osgi
 
-fixConfigFilePermissions
 
 update-rc.d open-xchange-groupware defaults > /dev/null
 
