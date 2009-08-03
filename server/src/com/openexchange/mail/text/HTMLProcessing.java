@@ -61,8 +61,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -180,12 +182,14 @@ public final class HTMLProcessing {
             // }
         } else {
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
-                retval = htmlFormat(retval);
                 if (DisplayMode.DISPLAY.equals(mode)) {
+                    retval = htmlFormat(retval, true, getHrefPositions(retval));
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
                     retval = formatHrefLinks(retval);
+                } else {
+                    retval = htmlFormat(retval);
                 }
             }
         }
@@ -198,8 +202,29 @@ public final class HTMLProcessing {
      * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link is too large. Usages should handle this case.
      */
     public static final Pattern PATTERN_HREF = Pattern.compile(
-        "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-A-Z0-9+@#/%?=~_|!:,.;]|&amp;|&(?!\\w+;))*(?:[-A-Z0-9+@#/%=~_|]|&amp;|&(?!\\w+;)))",
+        "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
         Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
+    private static int[][] getHrefPositions(final String content) {
+        try {
+            final Matcher m = PATTERN_HREF.matcher(content);
+            if (m.find()) {
+                final List<int[]> positions = new ArrayList<int[]>();
+                do {
+                    final String nonHtmlLink = m.group(1);
+                    if (null != nonHtmlLink) {
+                        positions.add(new int[] { m.start(1), m.end(1) });
+                    }
+                } while (m.find());
+                return positions.toArray(new int[positions.size()][]);
+            }
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final StackOverflowError error) {
+            LOG.error(StackOverflowError.class.getName(), error);
+        }
+        return new int[0][];
+    }
 
     /**
      * Searches for non-HTML links and convert them to valid HTML links.
@@ -742,7 +767,7 @@ public final class HTMLProcessing {
         return null;
     }
 
-    private static String escape(final String s, final boolean withQuote) {
+    private static String escape(final String s, final boolean withQuote, final int[][] ignoreRanges) {
         final int len = s.length();
         final StringBuilder sb = new StringBuilder(len);
         /*
@@ -750,17 +775,23 @@ public final class HTMLProcessing {
          */
         final char[] chars = s.toCharArray();
         if (withQuote) {
-            for (final char c : chars) {
-                final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
-                if (entity == null) {
+            for (int i = 0; i < chars.length; i++) {
+                final char c = chars[i];
+                if (ignore(i, ignoreRanges)) {
                     sb.append(c);
                 } else {
-                    sb.append('&').append(entity).append(';');
+                    final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
+                    if (entity == null) {
+                        sb.append(c);
+                    } else {
+                        sb.append('&').append(entity).append(';');
+                    }
                 }
             }
         } else {
-            for (final char c : chars) {
-                if ('"' == c) {
+            for (int i = 0; i < chars.length; i++) {
+                final char c = chars[i];
+                if (ignore(i, ignoreRanges) || ('"' == c)) {
                     sb.append(c);
                 } else {
                     final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
@@ -775,6 +806,21 @@ public final class HTMLProcessing {
         return sb.toString();
     }
 
+    private static boolean ignore(final int index, final int[][] ignoreRanges) {
+        if (null == ignoreRanges) {
+            return false;
+        }
+        boolean ignore = false;
+        for (int i = 0; !ignore && i < ignoreRanges.length; i++) {
+            final int[] ignoreRange = ignoreRanges[i];
+            if (index < ignoreRange[0]) {
+                return false;
+            }
+            ignore = index < ignoreRange[1];
+        }
+        return ignore;
+    }
+
     private static final String HTML_BR = "<br />";
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
@@ -785,10 +831,23 @@ public final class HTMLProcessing {
      * 
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
+     * @param ignoreRanges The ranges to ignore; leave to <code>null</code> to format whole text
+     * @return properly escaped HTML content
+     */
+    private static String htmlFormat(final String plainText, final boolean withQuote, final int[][] ignoreRanges) {
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, ignoreRanges)).replaceAll(HTML_BR);
+    }
+
+    /**
+     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>.
+     * 
+     * @param plainText The plain text
+     * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @return properly escaped HTML content
      */
     public static String htmlFormat(final String plainText, final boolean withQuote) {
-        return PATTERN_CRLF.matcher(escape(plainText, withQuote)).replaceAll(HTML_BR);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
     }
 
     /**
