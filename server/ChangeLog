@@ -2,6 +2,7 @@
 
  - Bugfix #14246: Allowing any letter character in an URL
  - Bugfix #14271: Fixed StringIndexOutOfBoundsException when un-quoting an email address
+ - Bugfix #14269: Setting proper "Date" header in user's time zone when sending an email
 
 * 2009-07-31 - marcus.klein@open-xchange.com
 

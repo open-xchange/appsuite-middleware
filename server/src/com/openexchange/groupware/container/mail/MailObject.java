@@ -62,6 +62,7 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -85,6 +86,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -469,7 +471,8 @@ public class MailObject {
              * Set sent date in UTC time
              */
             if (msg.getSentDate() == null) {
-                msg.setSentDate(new Date());
+                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                msg.setHeader("Date", mdf.format(new Date()));
             }
             /*
              * X-Open-Xchange-Module

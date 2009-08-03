@@ -75,6 +75,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -112,6 +113,7 @@ import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -301,8 +303,9 @@ public class MIMEMessageFiller {
      * @param mail The composed mail
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
+     * @throws MailException If a mail error occurs
      */
-    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MessagingException {
+    public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MessagingException, MailException {
         /*
          * Set from/sender
          */
@@ -378,7 +381,8 @@ public class MIMEMessageFiller {
          * Set sent date
          */
         if (mail.containsSentDate()) {
-            mimeMessage.setSentDate(mail.getSentDate());
+            final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+            mimeMessage.setHeader("Date", mdf.format(mail.getSentDate()));
         }
         /*
          * Set flags
@@ -509,32 +513,38 @@ public class MIMEMessageFiller {
      * 
      * @param mail The source mail
      * @param mimeMessage The MIME message
-     * @throws AddressException
-     * @throws MessagingException
+     * @throws MailException If a mail error occurs
      */
-    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws AddressException, MessagingException {
-        /*
-         * Set the Reply-To header for future replies to this new message
-         */
-        final InternetAddress[] ia;
-        if (usm.getReplyToAddr() == null) {
-            ia = mail.getFrom();
-        } else {
-            ia = MIMEMessageUtility.parseAddressList(usm.getReplyToAddr(), false);
-        }
-        mimeMessage.setReplyTo(ia);
-        /*
-         * Set sent date if not done, yet
-         */
-        if (mimeMessage.getSentDate() == null) {
-            mimeMessage.setSentDate(new Date());
-        }
-        /*
-         * Set default subject if none set
-         */
-        final String subject;
-        if ((subject = mimeMessage.getSubject()) == null || subject.length() == 0) {
-            mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+    public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws MailException {
+        try {
+            /*
+             * Set the Reply-To header for future replies to this new message
+             */
+            final InternetAddress[] ia;
+            if (usm.getReplyToAddr() == null) {
+                ia = mail.getFrom();
+            } else {
+                ia = MIMEMessageUtility.parseAddressList(usm.getReplyToAddr(), false);
+            }
+            mimeMessage.setReplyTo(ia);
+            /*
+             * Set sent date if not done, yet
+             */
+            if (mimeMessage.getSentDate() == null) {
+                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                mimeMessage.setHeader("Date", mdf.format(new Date()));
+            }
+            /*
+             * Set default subject if none set
+             */
+            final String subject;
+            if ((subject = mimeMessage.getSubject()) == null || subject.length() == 0) {
+                mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+            }
+        } catch (final AddressException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
         }
     }
 

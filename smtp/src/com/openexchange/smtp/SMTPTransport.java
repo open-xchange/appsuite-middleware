@@ -69,6 +69,7 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.groupware.contexts.Context;
@@ -86,6 +87,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
@@ -363,7 +365,10 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Sent date in UTC time
              */
-            smtpMessage.setSentDate(new Date());
+            {
+                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                smtpMessage.setHeader("Date", mdf.format(new Date()));
+            }
             /*
              * Set common headers
              */

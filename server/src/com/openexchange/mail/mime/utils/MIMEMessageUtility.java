@@ -59,6 +59,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.BodyPart;
@@ -66,9 +73,12 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageService;
 import com.openexchange.image.internal.ImageData;
 import com.openexchange.mail.MailException;
@@ -83,6 +93,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -106,11 +117,65 @@ public final class MIMEMessageUtility {
         ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
     }
 
+    private static final ConcurrentMap<String, Future<MailDateFormat>> MDF_MAP = new ConcurrentHashMap<String, Future<MailDateFormat>>();
+
     /**
      * No instantiation
      */
     private MIMEMessageUtility() {
         super();
+    }
+
+    /**
+     * Gets the {@link MailDateFormat} for specified session.
+     * 
+     * @param session The user session
+     * @return The {@link MailDateFormat} for specified session
+     * @throws MailException If {@link MailDateFormat} cannot be returned
+     */
+    public static MailDateFormat getMailDateFormat(final Session session) throws MailException {
+        final User user;
+        if (session instanceof ServerSession) {
+            user = ((ServerSession) session).getUser();
+        } else {
+            user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+        }
+        return getMailDateFormat(user.getTimeZone());
+    }
+
+    /**
+     * Gets the {@link MailDateFormat} for specified time zone identifier.
+     * 
+     * @param timeZoneId The time zone identifier
+     * @return The {@link MailDateFormat} for specified time zone identifier
+     * @throws MailException If {@link MailDateFormat} cannot be returned
+     */
+    public static MailDateFormat getMailDateFormat(final String timeZoneId) throws MailException {
+        Future<MailDateFormat> future = MDF_MAP.get(timeZoneId);
+        if (null == future) {
+            final FutureTask<MailDateFormat> ft = new FutureTask<MailDateFormat>(new Callable<MailDateFormat>() {
+
+                public MailDateFormat call() throws Exception {
+                    final MailDateFormat mdf = new MailDateFormat();
+                    mdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
+                    return mdf;
+                }
+            });
+            future = MDF_MAP.putIfAbsent(timeZoneId, ft);
+            if (null == future) {
+                future = ft;
+                ft.run();
+            }
+        }
+        try {
+            return future.get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, cause, cause.getMessage());
+        }
     }
 
     /**
