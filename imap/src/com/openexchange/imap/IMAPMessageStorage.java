@@ -1435,7 +1435,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Check for draft-edit operation: Delete old version
              */
             final MailPath msgref = composedMail.getMsgref();
-            if (msgref != null) {
+            if (msgref != null && draftFullname.equals(msgref.getFolder())) {
                 if (accountId != msgref.getAccountId()) {
                     LOG.warn(
                         new StringBuilder("Differing account ID in msgref attribute.\nMessage storage account ID: ").append(accountId).append(

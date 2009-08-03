@@ -1069,7 +1069,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailPath msgref = draftMail.getMsgref();
         final MailMessage origMail;
-        if (null == msgref) {
+        if (null == msgref || !draftFullname.equals(msgref.getFolder())) {
             origMail = null;
         } else {
             origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);

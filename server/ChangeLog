@@ -1,6 +1,7 @@
 * 2009-08-03 - thorben.betten@open-xchange.com
 
  - Bugfix #14211: Using static delimiter character '/' to separate mail account part form fullname part within a mail folder identifier
+ - Bugfix #14232: Checking for Drafts folder prior to deleting old draft version
 
 * 2009-07-31 - marcus.klein@open-xchange.com
 
