@@ -142,11 +142,11 @@
     	<copy todir="${destdir}/${configdir}" overwrite="true">
             <fileset file="conf/${configfile}"/>
         </copy>
-        <chmod perm="640">
+        <!-- <chmod perm="640">
             <fileset dir="${destdir}/${configdir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod>-->
     </target>
 	
 </project>
