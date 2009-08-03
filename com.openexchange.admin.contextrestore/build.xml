@@ -195,11 +195,11 @@
         <copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
             <fileset dir="etc" excludes="**/*.in"/>
         </copy>
-        <chmod perm="640">
+        <!--<chmod perm="640">
             <fileset dir="${destdir}/${prefix}/${oxconfdir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod>-->
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
             <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
         </copy>
