@@ -92,9 +92,6 @@ public class JSONTypeMetadataWriter implements JSONWriterInterface {
     }
     
     private void write(EAVTypeMetadataNode node, JSONObject json) throws JSONException {
-        if (this.json.has(node.getName())) {
-            return;
-        }
         
         if (node.getChildren().size() > 0) {
             handleObject(node, json);

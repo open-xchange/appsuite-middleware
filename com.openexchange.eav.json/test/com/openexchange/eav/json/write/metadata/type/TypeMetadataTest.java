@@ -71,15 +71,15 @@ public class TypeMetadataTest extends EAVUnitTest {
         
         node = createMetadataNode("types", null, null, null, null,
                     createMetadataNode("com.shoefactory.crm", null, null, null, null,
-                        createMetadataNode("shoeSize", EAVType.NUMBER, null, null, null),
-                        createMetadataNode("favoriteModel", EAVType.STRING, null, null, null),
-                        createMetadataNode("married", EAVType.BOOLEAN, null, null, null),
-                        createMetadataNode("birthday", EAVType.DATE, null, null, null),
-                        createMetadataNode("joinedDate", EAVType.TIME, null, "timezone", "Europe/Berlin"),
+                        createMetadataNode("shoeSize", EAVType.NUMBER, EAVContainerType.SINGLE, null, null),
+                        createMetadataNode("favoriteModel", EAVType.STRING, EAVContainerType.SINGLE, null, null),
+                        createMetadataNode("married", EAVType.BOOLEAN, EAVContainerType.SINGLE, null, null),
+                        createMetadataNode("birthday", EAVType.DATE, EAVContainerType.SINGLE, null, null),
+                        createMetadataNode("joinedDate", EAVType.TIME, EAVContainerType.SINGLE, "timezone", "Europe/Berlin"),
                         createMetadataNode("favoriteColors", EAVType.STRING, EAVContainerType.SET, null, null),
                         createMetadataNode("creditCardInformation", null, null, null, null,
-                            createMetadataNode("type", EAVType.STRING, null, null, null),
-                            createMetadataNode("number", EAVType.STRING, null, null, null)
+                            createMetadataNode("type", EAVType.STRING, EAVContainerType.SINGLE, null, null),
+                            createMetadataNode("number", EAVType.STRING, EAVContainerType.SINGLE, null, null)
                         ),
                         createMetadataNode("t", EAVType.STRING, EAVContainerType.MULTISET, "option123", "optionValue123")
                     )
