@@ -47,38 +47,38 @@
  *
  */
 
-package com.openexchange.folderstorage.database.type;
+package com.openexchange.folderstorage.type;
 
 import com.openexchange.folderstorage.Type;
 
 /**
- * {@link PublicType} - The public type for a database folder.
+ * {@link PrivateType} - The private type for a database folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PublicType implements Type {
+public final class PrivateType implements Type {
 
-    private static final PublicType instance = new PublicType();
+    private static final PrivateType instance = new PrivateType();
 
     /**
-     * Gets the {@link PublicType} instance.
+     * Gets the {@link PrivateType} instance.
      * 
-     * @return The {@link PublicType} instance
+     * @return The {@link PrivateType} instance
      */
-    public static PublicType getInstance() {
+    public static PrivateType getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link PublicType}.
+     * Initializes a new {@link PrivateType}.
      */
-    private PublicType() {
+    private PrivateType() {
         super();
     }
 
     public int getType() {
-        // Taken from FolderObject.PUBLIC
-        return 2;
+        // Taken from FolderObject.PRIVATE
+        return 1;
     }
 
 }

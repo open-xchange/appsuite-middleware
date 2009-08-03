@@ -60,6 +60,8 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -151,8 +153,15 @@ public final class List {
                     }
                     if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
                         final UserizedFolder userizedFolder = new UserizedFolderImpl(subfolder);
+                        // Permissions
                         userizedFolder.setOwnPermission(subfolderPermission);
                         CalculatePermission.calculateUserPermissions(userizedFolder, context);
+                        // Type 
+                        if (userizedFolder.getCreatedBy() != user.getId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
+                            userizedFolder.setType(SharedType.getInstance());
+                            userizedFolder.setSubfolderIDs(new String[0]);
+                        }
+                        
                         subfolders.add(userizedFolder);
                     }
 

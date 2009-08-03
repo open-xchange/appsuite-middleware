@@ -47,38 +47,38 @@
  *
  */
 
-package com.openexchange.folderstorage.database.type;
+package com.openexchange.folderstorage.type;
 
 import com.openexchange.folderstorage.Type;
 
 /**
- * {@link PrivateType} - The private type for a database folder.
+ * {@link SharedType} - The shared type for a database folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PrivateType implements Type {
+public final class SharedType implements Type {
 
-    private static final PrivateType instance = new PrivateType();
+    private static final SharedType instance = new SharedType();
 
     /**
-     * Gets the {@link PrivateType} instance.
+     * Gets the {@link SharedType} instance.
      * 
-     * @return The {@link PrivateType} instance
+     * @return The {@link SharedType} instance
      */
-    public static PrivateType getInstance() {
+    public static SharedType getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link PrivateType}.
+     * Initializes a new {@link SharedType}.
      */
-    private PrivateType() {
+    private SharedType() {
         super();
     }
 
     public int getType() {
-        // Taken from FolderObject.PRIVATE
-        return 1;
+        // Taken from FolderObject.SHARED
+        return 3;
     }
 
 }
