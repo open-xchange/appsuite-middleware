@@ -70,7 +70,7 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 if [ ${1:-0} -eq 2 ]; then
    . /opt/open-xchange/etc/oxfunctions.sh
 
-   for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap -name ".example"); do
+   for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap -name "*.example"); do
         ox_update_permissions "$i" root:open-xchange 640
    done
 fi
