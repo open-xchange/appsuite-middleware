@@ -115,14 +115,6 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     doc install install-client install-bundle
 mv doc javadoc
 
-%post
-
-if [ ${1:-0} -eq 2 ]; then
-   . /opt/open-xchange/etc/oxfunctions.sh
-
-   ox_update_permissions "/opt/open-xchange/etc/admindaemon/plugin/hosting.properties" root:open-xchange 640
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -133,7 +125,7 @@ fi
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 %dir /opt/open-xchange/etc/admindaemon/plugin
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/plugin/*
+%config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %files -n open-xchange-admin-plugin-hosting-client
 %defattr(-,root,root)
