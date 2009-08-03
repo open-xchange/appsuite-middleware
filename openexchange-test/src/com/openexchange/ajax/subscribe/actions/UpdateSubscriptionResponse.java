@@ -64,9 +64,7 @@ public class UpdateSubscriptionResponse extends AbstractSubscriptionResponse {
     
     public boolean wasSuccessful(){
         try {
-            if (((Integer)getData()).intValue() == 1)
-                return true;
-            return false;
+            return (((Integer)getData()).intValue() == 1);
         } catch(Exception e){
             return false;
         }
