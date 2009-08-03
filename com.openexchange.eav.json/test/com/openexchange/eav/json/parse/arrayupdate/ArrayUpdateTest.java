@@ -94,15 +94,15 @@ public class ArrayUpdateTest extends EAVUnitTest {
                 .put("favoriteColors", new JSONObject()
                     .put("add", new JSONArray().put("red").put(2))));
         
-        nodeSimple = createNode("updates", null, null, null,
-            createNode("com.shoefactory.crm", null, null, null,
-                createNode("favoriteColors", EAVType.STRING, new String[]{"red", "blue"}, null)));
+        nodeSimple = createSetTransformation("updates", null, null, null,
+            createSetTransformation("com.shoefactory.crm", null, null, null,
+                createSetTransformation("favoriteColors", EAVType.STRING, new String[]{"red", "blue"}, null)));
         
-        nodeComplex = createNode("updates", null, null, null,
-            createNode("com.shoefactory.crm", null, null, null,
-                createNode("favoriteNumbers", EAVType.NUMBER, new Integer[]{1, 3}, null),
-                createNode("subValues", null, null, null,
-                    createNode("favoriteMovies", EAVType.STRING, new String[]{"Titanic", "Spiderman 3"}, new String[]{"In Bruges", "The Fifth Element"}))));
+        nodeComplex = createSetTransformation("updates", null, null, null,
+            createSetTransformation("com.shoefactory.crm", null, null, null,
+                createSetTransformation("favoriteNumbers", EAVType.NUMBER, new Integer[]{1, 3}, null),
+                createSetTransformation("subValues", null, null, null,
+                    createSetTransformation("favoriteMovies", EAVType.STRING, new String[]{"Titanic", "Spiderman 3"}, new String[]{"In Bruges", "The Fifth Element"}))));
     }
     
     public void testParsing() throws Exception {
@@ -131,31 +131,5 @@ public class ArrayUpdateTest extends EAVUnitTest {
         } catch (EAVJsonException e) {
             assertEquals("Wrong exception", EAVJsonExceptionMessage.DifferentTypesInArray.getDetailNumber(), e.getDetailNumber());
         }
-    }
-    
-    protected EAVSetTransformation createNode(String name, EAVType type, Object[] add, Object[] remove, EAVSetTransformation... children) {
-        EAVSetTransformation retval = new EAVSetTransformation();
-        
-        if (name != null) {
-            retval.setName(name);
-        }
-        
-        if (type != null) {
-            retval.setType(type);
-        }
-        
-        if (add != null && add.length > 0) {
-            retval.setAdd(add);
-        }
-        
-        if (remove != null && remove.length > 0) {
-            retval.setRemove(remove);
-        }
-        
-        if (children != null && children.length > 0) {
-            retval.addChildren(children);
-        }
-        
-        return retval;
     }
 }

@@ -655,5 +655,31 @@ public class EAVUnitTest extends TestCase {
         
         return retval;
     }
+    
+    protected EAVSetTransformation createSetTransformation(String name, EAVType type, Object[] add, Object[] remove, EAVSetTransformation... children) {
+        EAVSetTransformation retval = new EAVSetTransformation();
+        
+        if (name != null) {
+            retval.setName(name);
+        }
+        
+        if (type != null) {
+            retval.setType(type);
+        }
+        
+        if (add != null && add.length > 0) {
+            retval.setAdd(add);
+        }
+        
+        if (remove != null && remove.length > 0) {
+            retval.setRemove(remove);
+        }
+        
+        if (children != null && children.length > 0) {
+            retval.addChildren(children);
+        }
+        
+        return retval;
+    }
 
 }

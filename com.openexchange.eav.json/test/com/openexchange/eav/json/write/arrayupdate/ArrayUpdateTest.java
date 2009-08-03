@@ -47,29 +47,53 @@
  *
  */
 
-package com.openexchange.eav.json;
+package com.openexchange.eav.json.write.arrayupdate;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.eav.json.multiple.EAVMultipleHandlerTest;
-import com.openexchange.eav.json.parse.ParserTest;
-import com.openexchange.eav.json.write.WriterTest;
+import org.json.JSONObject;
+import com.openexchange.eav.EAVSetTransformation;
+import com.openexchange.eav.EAVType;
+import com.openexchange.eav.EAVUnitTest;
+import com.openexchange.eav.json.write.JSONWriterInterface;
+import com.openexchange.json.JSONAssertion;
+import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UnitTests {
+public class ArrayUpdateTest extends EAVUnitTest {
+    
+    private EAVSetTransformation node;
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite();
-        suite.addTestSuite(ParserTest.class);
-        suite.addTestSuite(WriterTest.class);
-        suite.addTestSuite(com.openexchange.eav.json.parse.metadata.type.TypeMetadataTest.class);
-        suite.addTestSuite(com.openexchange.eav.json.write.metadata.type.TypeMetadataTest.class);
-        suite.addTestSuite(com.openexchange.eav.json.parse.arrayupdate.ArrayUpdateTest.class);
-        suite.addTestSuite(com.openexchange.eav.json.write.arrayupdate.ArrayUpdateTest.class);
-        suite.addTestSuite(EAVMultipleHandlerTest.class);
-        return suite;
+    public void setUp() throws Exception {
+        super.setUp();
+        
+        node = createSetTransformation("updates", null, null, null,
+            createSetTransformation("com.shoefactory.crm", null, null, null,
+                createSetTransformation("favoriteNumbers", EAVType.NUMBER, new Integer[]{1, 3}, null),
+                createSetTransformation("subValues", null, null, null,
+                    createSetTransformation("favoriteMovies", EAVType.STRING, new String[]{"Titanic", "Spiderman 3"}, new String[]{"In Bruges", "The Fifth Element"}))));
     }
     
+    public void testParser() throws Exception {
+        JSONWriterInterface writer = new JSONArrayUpdateWriter(node);
+        JSONObject json = writer.getJson();
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+            .hasKey("updates").withValueObject()
+                .hasKey("com.shoefactory.crm").withValueObject()
+                    .hasKey("favoriteNumbers").withValueObject()
+                        .hasKey("add").withValueArray().withValues(1, 3).inAnyOrder()
+                    .objectEnds()
+                    .hasKey("subValues").withValueObject()
+                        .hasKey("favoriteMovies").withValueObject()
+                            .hasKey("add").withValueArray().withValues("Titanic", "Spiderman 3").inAnyOrder()
+                            .hasKey("remove").withValueArray().withValues("In Bruges", "The Fifth Element").inAnyOrder()
+                        .objectEnds()
+                    .objectEnds()
+                .objectEnds()
+            .objectEnds();
+        
+        assertValidates(assertion, json);
+    }
 }
