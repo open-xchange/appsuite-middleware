@@ -974,11 +974,12 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static String unquote(final String str) {
         String s = str;
-        final int length = s.length();
+        int length = s.length();
         if ('"' == s.charAt(0) && '"' == s.charAt(length - 1)) {
             s = s.substring(1, length - 1);
             // check for any escaped characters
             if (s.indexOf('\\') >= 0) {
+                length = length - 2;
                 final StringBuilder sb = new StringBuilder(length); // approx
                 for (int i = 0; i < length; i++) {
                     char c = s.charAt(i);
