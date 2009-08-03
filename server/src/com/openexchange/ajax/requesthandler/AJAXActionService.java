@@ -56,9 +56,18 @@ import com.openexchange.tools.session.ServerSession;
  * {@link AJAXActionService} implements a single action.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface AJAXActionService {
 
+    /**
+     * Performs given request.
+     * 
+     * @param request The request to perform
+     * @param session The session providing needed user data
+     * @return The result yielded from given request
+     * @throws AbstractOXException If an error occurs
+     */
     AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException;
 
 }
