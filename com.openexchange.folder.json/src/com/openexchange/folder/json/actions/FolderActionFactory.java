@@ -76,8 +76,8 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         return SINGLETON;
     }
 
-    public AJAXActionService createActionService(String action) throws AjaxException {
-        AJAXActionService retval = actions.get(action);
+    public AJAXActionService createActionService(final String action) throws AjaxException {
+        final AJAXActionService retval = actions.get(action);
         if (null == retval) {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -85,8 +85,9 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions() {
-        Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
         tmp.put(RootAction.ACTION, new RootAction());
+        tmp.put(ListAction.ACTION, new ListAction());
         return Collections.unmodifiableMap(tmp);
     }
 }

@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -80,7 +81,7 @@ public final class Select {
         super();
     }
 
-    private static final String SQL_SELECT = "SELECT parentId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT = "SELECT parentId, name, modifiedBy, lastModified FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBF = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
@@ -126,7 +127,9 @@ public final class Select {
                 rs = stmt.executeQuery();
                 pos = 1;
                 virtualFolder.setParentID(rs.getString(pos++));
-                virtualFolder.setName(rs.getString(pos));
+                virtualFolder.setName(rs.getString(pos++));
+                virtualFolder.setModifiedBy(rs.getInt(pos++));
+                virtualFolder.setLastModified(new Date(rs.getLong(pos)));
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {

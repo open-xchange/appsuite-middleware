@@ -47,47 +47,46 @@
  *
  */
 
-package com.openexchange.folderstorage.cache;
+package com.openexchange.folderstorage.database;
 
-import com.openexchange.folderstorage.FolderType;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link CacheFolderType} - The folder type for cache folder storage.
+ * {@link DatabaseFolderStorageUtility} - Utility methods for database folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderType implements FolderType {
-
-    private static final CacheFolderType instance = new CacheFolderType();
+public final class DatabaseFolderStorageUtility {
 
     /**
-     * Gets the instance.
-     * 
-     * @return The instance.
+     * Initializes a new {@link DatabaseFolderStorageUtility}.
      */
-    public static CacheFolderType getInstance() {
-        return instance;
-    }
-
-    /**
-     * Initializes a new {@link CacheFolderType}.
-     */
-    private CacheFolderType() {
+    private DatabaseFolderStorageUtility() {
         super();
     }
 
-    public boolean servesFolderId(final String folderId) {
-        // Cache folder storage serves every folder identifier
-        return true;
+    /**
+     * Parses specified string into an unsigned <code>int</code> value.
+     * 
+     * @param str The string to parse
+     * @return The parsed unsigned <code>int</code> value or a value less than zero if string does not denote an unsigned integer.
+     */
+    public static int getUnsignedInteger(final String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (final NumberFormatException e) {
+            return -1;
+        }
     }
 
-    public boolean servesTreeId(final String treeId) {
-        // Cache folder storage serves every tree identifier
-        return true;
-    }
-
-    public boolean servesParentId(final String parentId) {
-        return true;
+    /**
+     * Checks if passed <code>String</code> starts with shared prefix.
+     * 
+     * @param str The string to check
+     * @return <code>true</code> if passed <code>String</code> starts with shared prefix; otherwise <code>false</code>
+     */
+    public static boolean hasSharedPrefix(final String str) {
+        return null != str && str.startsWith(FolderObject.SHARED_PREFIX, 0);
     }
 
 }

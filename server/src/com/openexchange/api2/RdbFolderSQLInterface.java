@@ -699,7 +699,14 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                     getUserName(session),
                     Integer.valueOf(ctx.getContextId()));
             }
-            return OXFolderIteratorSQL.getVisibleSharedFolders(userId, groups, userConfiguration.getAccessibleModules(), owner, ctx, since);
+            return OXFolderIteratorSQL.getVisibleSharedFolders(
+                userId,
+                groups,
+                userConfiguration.getAccessibleModules(),
+                owner,
+                ctx,
+                since,
+                null);
         } catch (final SearchIteratorException e) {
             throw new OXException(e);
         }

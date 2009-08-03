@@ -50,22 +50,29 @@
 package com.openexchange.folder.json.actions;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RootAction} maps the action to a list action with parent 0.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class RootAction implements AJAXActionService {
 
     public static final String ACTION = AJAXServlet.ACTION_ROOT;
 
-    public AJAXRequestResult perform(AJAXRequestData reqest, ServerSession session) throws AbstractOXException {
+    /**
+     * Initializes a new {@link RootAction}.
+     */
+    public RootAction() {
+        super();
+    }
+
+    public AJAXRequestResult perform(final AJAXRequestData reqest, final ServerSession session) throws AbstractOXException {
         // TODO Implement this action by using a ListAction with parent=0.
         return null;
     }

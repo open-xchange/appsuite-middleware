@@ -59,6 +59,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
+import com.openexchange.folderstorage.FolderType;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
@@ -153,7 +154,8 @@ public final class FolderStorageRegistry {
              */
             for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
-                if (folderStorage.getFolderType().servesTreeId(treeId)) {
+                final FolderType folderType = folderStorage.getFolderType();
+                if (folderType.servesTreeId(treeId) && folderType.servesFolderId(folderId)) {
                     return folderStorage;
                 }
             }
@@ -165,13 +167,48 @@ public final class FolderStorageRegistry {
         if (null == storages) {
             return null;
         }
-        final List<FolderStorage> tmp = new ArrayList<FolderStorage>(storages.size());
         for (final FolderStorage folderStorage : storages) {
             if (folderStorage.getFolderType().servesFolderId(folderId)) {
                 return folderStorage;
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the folder storages for specified tree-parent-pair.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The folder storages for specified tree-parent-pair or an empty array if none available
+     */
+    public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
+        if (!genStorages.isEmpty()) {
+            /*
+             * Check general storages first
+             */
+            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+                final FolderStorage folderStorage = iterator.next();
+                final FolderType folderType = folderStorage.getFolderType();
+                if (folderType.servesTreeId(treeId) && folderType.servesParentId(parentId)) {
+                    return new FolderStorage[] { folderStorage };
+                }
+            }
+        }
+        /*
+         * Obtain candidates by tree identifier
+         */
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return null;
+        }
+        final List<FolderStorage> l = new ArrayList<FolderStorage>(4);
+        for (final FolderStorage folderStorage : storages) {
+            if (folderStorage.getFolderType().servesFolderId(parentId)) {
+                l.add(folderStorage);
+            }
+        }
+        return l.toArray(new FolderStorage[l.size()]);
     }
 
     /**

@@ -73,6 +73,15 @@ public interface FolderType {
     boolean servesFolderId(String folderId);
 
     /**
+     * Indicates if this folder type serves specified parent identifier. If <code>true</code> the
+     * {@link FolderStorage#getSubfolders(String, String, StorageParameters)} delivers a non-empty array for this parent identifier.
+     * 
+     * @param parentId The parent identifier
+     * @return <code>true</code> if this folder type serves specified parent identifier; otherwise <code>false</code>
+     */
+    boolean servesParentId(String parentId);
+
+    /**
      * Must be implemented according to {@link Object#hashCode()}.
      */
     int hashCode();

@@ -75,4 +75,8 @@ public final class VirtualFolderType implements FolderType {
         return !FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
+    public boolean servesParentId(final String parentId) {
+        return servesFolderId(parentId);
+    }
+
 }

@@ -47,47 +47,111 @@
  *
  */
 
-package com.openexchange.folderstorage.cache;
-
-import com.openexchange.folderstorage.FolderType;
+package com.openexchange.folder.json.writer;
 
 /**
- * {@link CacheFolderType} - The folder type for cache folder storage.
+ * {@link FolderField} - Enumeration for folder fields.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderType implements FolderType {
-
-    private static final CacheFolderType instance = new CacheFolderType();
+public enum FolderField {
 
     /**
-     * Gets the instance.
+     * The folder identifier
+     */
+    ID(1, "id"),
+    /**
+     * The entity which created this folder
+     */
+    CREATED_BY(2, "created_by"),
+    /**
+     * The entity which modified this folder last time
+     */
+    MODIFIED_BY(3, "modified_by"),
+    /**
+     * The creation time stamp in requesting session's user time zone
+     */
+    CREATION_DATE(4, "creation_date"),
+    /**
+     * The last-modified time stamp in requesting session's user time zone
+     */
+    LAST_MODIFIED(5, "last_modified"),
+    /**
+     * The last-modified time stamp in UTC
+     */
+    LAST_MODIFIED_UTC(6, "last_modified_utc"),
+    /**
+     * The folder's parent folder identifier
+     */
+    FOLDER_ID(20, "folder_id"),
+    /**
+     * The folder name
+     */
+    FOLDER_NAME(300, "title"),
+    /**
+     * The folder module
+     */
+    MODULE(301, "module"),
+    /**
+     * The folder type
+     */
+    TYPE(302, "type"),
+    /**
+     * A boolean to indicate if folder contains subfolders
+     */
+    SUBFOLDERS(304, "subfolders"),
+    /**
+     * The rights for requesting session's user
+     */
+    OWN_RIGHTS(305, "own_rights"),
+    /**
+     * The permissions added to folder
+     */
+    PERMISSIONS_BITS(306, "permissions"),
+    /**
+     * The summary string
+     */
+    SUMMARY(307, "summary"),
+    /**
+     * A boolean indicating if this folder is a default folder
+     */
+    STANDARD_FOLDER(308, "standard_folder"),
+    /**
+     * The total number of objects held by this folder
+     */
+    TOTAL(309, "total"),
+    NEW(310, "new"),
+    UNREAD(311, "unread"),
+    DELETED(312, "deleted"),
+    CAPABILITIES(313, "capabilities"),
+    SUBSCRIBED(314, "subscribed"),
+    SUBSCR_SUBFLDS(315, "subscr_subflds");
+
+    private final int column;
+
+    private final String name;
+
+    private FolderField(final int column, final String name) {
+        this.column = column;
+        this.name = name;
+    }
+
+    /**
+     * Gets the column
      * 
-     * @return The instance.
+     * @return The column
      */
-    public static CacheFolderType getInstance() {
-        return instance;
+    public int getColumn() {
+        return column;
     }
 
     /**
-     * Initializes a new {@link CacheFolderType}.
+     * Gets the name
+     * 
+     * @return The name
      */
-    private CacheFolderType() {
-        super();
-    }
-
-    public boolean servesFolderId(final String folderId) {
-        // Cache folder storage serves every folder identifier
-        return true;
-    }
-
-    public boolean servesTreeId(final String treeId) {
-        // Cache folder storage serves every tree identifier
-        return true;
-    }
-
-    public boolean servesParentId(final String parentId) {
-        return true;
+    public String getName() {
+        return name;
     }
 
 }

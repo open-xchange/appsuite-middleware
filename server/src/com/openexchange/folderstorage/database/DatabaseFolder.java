@@ -69,17 +69,37 @@ import com.openexchange.server.impl.OCLPermission;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolder extends AbstractFolder {
+public class DatabaseFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -4035221612481906228L;
 
-    private int owner;
+    private final boolean cacheable;
+
+    protected boolean global;
+
+    protected int owner;
 
     /**
      * Initializes an empty {@link DatabaseFolder}.
+     * 
+     * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
      */
-    public DatabaseFolder() {
+    public DatabaseFolder(final boolean cacheable) {
         super();
+        this.cacheable = cacheable;
+        global = true;
+    }
+
+    /**
+     * Initializes a new cacheable {@link DatabaseFolder} from given database folder.
+     * <p>
+     * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
+     * subscribed.
+     * 
+     * @param folderObject The underlying database folder
+     */
+    public DatabaseFolder(final FolderObject folderObject) {
+        this(folderObject, true);
     }
 
     /**
@@ -89,9 +109,12 @@ public final class DatabaseFolder extends AbstractFolder {
      * subscribed.
      * 
      * @param folderObject The underlying database folder
+     * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
      */
-    public DatabaseFolder(final FolderObject folderObject) {
+    public DatabaseFolder(final FolderObject folderObject, final boolean cacheable) {
         super();
+        this.cacheable = cacheable;
+        global = true;
         this.id = String.valueOf(folderObject.getObjectID());
         this.name = folderObject.getFolderName();
         this.parent = String.valueOf(folderObject.getParentFolderID());
@@ -104,6 +127,11 @@ public final class DatabaseFolder extends AbstractFolder {
         }
         this.owner = folderObject.getCreatedBy();
         this.subscribed = true;
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return cacheable;
     }
 
     /**
@@ -157,7 +185,16 @@ public final class DatabaseFolder extends AbstractFolder {
     }
 
     public boolean isGlobalID() {
-        return true;
+        return global;
+    }
+
+    /**
+     * Sets whether this database folder is globally valid or per-user valid.
+     * 
+     * @param global <code>true</code> if this database folder is globally valid; otherwise <code>false</code> if per-user valid
+     */
+    public void setGlobal(final boolean global) {
+        this.global = global;
     }
 
 }

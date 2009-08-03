@@ -58,7 +58,7 @@ import com.openexchange.folderstorage.SortableId;
  */
 public final class DatabaseId implements SortableId {
 
-    private final int folderId;
+    private final String folderId;
 
     private final int ordinal;
 
@@ -70,12 +70,24 @@ public final class DatabaseId implements SortableId {
      */
     public DatabaseId(final int folderId, final int ordinal) {
         super();
+        this.folderId = String.valueOf(folderId);
+        this.ordinal = ordinal;
+    }
+
+    /**
+     * Initializes a new {@link DatabaseId}.
+     * 
+     * @param folderId The folder identifier
+     * @param ordinal The ordinal
+     */
+    public DatabaseId(final String folderId, final int ordinal) {
+        super();
         this.folderId = folderId;
         this.ordinal = ordinal;
     }
 
     public String getId() {
-        return String.valueOf(folderId);
+        return folderId;
     }
 
     public Priority getPriority() {

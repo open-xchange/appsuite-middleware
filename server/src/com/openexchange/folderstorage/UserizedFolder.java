@@ -47,47 +47,27 @@
  *
  */
 
-package com.openexchange.folderstorage.cache;
-
-import com.openexchange.folderstorage.FolderType;
+package com.openexchange.folderstorage;
 
 /**
- * {@link CacheFolderType} - The folder type for cache folder storage.
+ * {@link UserizedFolder} - Extends {@link Folder} interface by user-sensitive methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderType implements FolderType {
-
-    private static final CacheFolderType instance = new CacheFolderType();
+public interface UserizedFolder extends Folder {
 
     /**
-     * Gets the instance.
+     * Gets the permission for requesting user.
      * 
-     * @return The instance.
+     * @return The permission for requesting user
      */
-    public static CacheFolderType getInstance() {
-        return instance;
-    }
+    Permission getOwnPermission();
 
     /**
-     * Initializes a new {@link CacheFolderType}.
+     * Sets the permission for requesting user.
+     * 
+     * @param ownPermission The permission for requesting user
      */
-    private CacheFolderType() {
-        super();
-    }
-
-    public boolean servesFolderId(final String folderId) {
-        // Cache folder storage serves every folder identifier
-        return true;
-    }
-
-    public boolean servesTreeId(final String treeId) {
-        // Cache folder storage serves every tree identifier
-        return true;
-    }
-
-    public boolean servesParentId(final String parentId) {
-        return true;
-    }
+    void setOwnPermission(Permission ownPermission);
 
 }

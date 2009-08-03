@@ -93,6 +93,33 @@ public final class MailFolderType implements FolderType {
         if (null == folderId) {
             return false;
         }
+        if (!folderId.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return false;
+        }
+        final int len = folderId.length();
+        final char separator = '/';
+        int index = LEN;
+        while (index < len && folderId.charAt(index) != separator) {
+            index++;
+        }
+        // Parse account ID
+        if (index != LEN) {
+            try {
+                Integer.parseInt(folderId.substring(LEN, index));
+            } catch (final NumberFormatException e) {
+                final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
+                err.initCause(e);
+                LOG.error(err.getMessage(), err);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean servesParentId(final String folderId) {
+        if (null == folderId) {
+            return false;
+        }
         if (PRIVATE_FOLDER_ID.equals(folderId)) {
             return true;
         }
@@ -118,4 +145,5 @@ public final class MailFolderType implements FolderType {
         }
         return true;
     }
+
 }

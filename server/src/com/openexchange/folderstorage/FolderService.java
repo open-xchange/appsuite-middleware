@@ -69,7 +69,7 @@ public interface FolderService {
      * @return The folder
      * @throws FolderException If folder cannot be returned
      */
-    Folder getFolder(String treeId, String folderId) throws FolderException;
+    UserizedFolder getFolder(String treeId, String folderId) throws FolderException;
 
     /**
      * Gets this storage's default folder for specified user.
@@ -80,7 +80,7 @@ public interface FolderService {
      * @return The default folder for specified user
      * @throws FolderException If the default folder cannot be returned
      */
-    Folder getDefaultFolder(User user, String treeId, ContentType contentType) throws FolderException;
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType) throws FolderException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -111,23 +111,27 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param parentId The parent identifier
+     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     *            subscribed folders only.
      * @param user The user
      * @param context The context
      * @return The subfolders
      * @throws FolderException If subfolders cannot be returned
      */
-    Folder[] getSubfolders(String treeId, String parentId, User user, Context context) throws FolderException;
+    UserizedFolder[] getSubfolders(String treeId, String parentId, boolean all, User user, Context context) throws FolderException;
 
     /**
      * Gets the subfolders of specified parent in given tree.
      * 
      * @param treeId The tree identifier
      * @param parentId The parent identifier
+     * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
+     *            subscribed folders only.
      * @param session The session
      * @return The subfolders
      * @throws FolderException If subfolders cannot be returned
      */
-    Folder[] getSubfolders(String treeId, String parentId, Session session) throws FolderException;
+    UserizedFolder[] getSubfolders(String treeId, String parentId, boolean all, Session session) throws FolderException;
 
     /**
      * Gets the changed folders since specified time stamp.
@@ -137,7 +141,7 @@ public interface FolderService {
      * @return The changed folders since specified time stamp
      * @throws FolderException If changed folders cannot be returned
      */
-    Folder[] getSubfolders(String treeId, Date since) throws FolderException;
+    UserizedFolder[] getSubfolders(String treeId, Date since) throws FolderException;
 
     /**
      * Gets the path from given folder to specified tree's root folder.
@@ -147,7 +151,7 @@ public interface FolderService {
      * @return The path from given folder to specified tree's root folder
      * @throws FolderException If path cannot be returned
      */
-    Folder[] getPath(String treeId, String folderId) throws FolderException;
+    UserizedFolder[] getPath(String treeId, String folderId) throws FolderException;
 
     /**
      * Deletes the specified folder in given tree.

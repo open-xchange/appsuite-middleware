@@ -66,4 +66,11 @@ public interface Type {
     @Deprecated
     int getType();
 
+    /**
+     * Returns a string representation of this type.
+     * 
+     * @return A string representation of this type
+     */
+    String toString();
+
 }

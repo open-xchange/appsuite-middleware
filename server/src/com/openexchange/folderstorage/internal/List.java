@@ -49,12 +49,17 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -101,24 +106,61 @@ public final class List {
         storageParameters = new StorageParametersImpl(user, context);
     };
 
-    public Folder[] doList(final String treeId, final String parentId) throws FolderException {
+    public UserizedFolder[] doList(final String treeId, final String parentId, final boolean all) throws FolderException {
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, parentId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
         folderStorage.startTransaction(storageParameters, false);
-        final Folder[] ret;
+        final UserizedFolder[] ret;
         try {
             final Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
+            {
+                /*
+                 * Check folder permission for parent folder
+                 */
+                final Permission parentPermission;
+                if (null == session) {
+                    parentPermission = CalculatePermission.calculate(parent, user, context);
+                } else {
+                    parentPermission = CalculatePermission.calculate(parent, session);
+                }
+                if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                    // TODO: Throw exception
+                }
+            }
+
             final String[] subfolderIds = parent.getSubfolderIDs();
             if (null == subfolderIds) {
-                final SortableId[] sortableIds = folderStorage.getSubfolders(treeId, parentId, storageParameters);
-                // TODO continue
                 ret = null;
             } else {
-                
-                
-                ret = null;
+                /*
+                 * The subfolders can be completely fetched from parent's folder storage
+                 */
+                final java.util.List<UserizedFolder> subfolders = new ArrayList<UserizedFolder>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    final Folder subfolder = folderStorage.getFolder(treeId, subfolderIds[i], storageParameters);
+                    /*
+                     * Check for access rights and subscribed status dependent on parameter "all"
+                     */
+                    final Permission subfolderPermission;
+                    if (null == session) {
+                        subfolderPermission = CalculatePermission.calculate(subfolder, user, context);
+                    } else {
+                        subfolderPermission = CalculatePermission.calculate(subfolder, session);
+                    }
+                    if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
+                        final UserizedFolder userizedFolder = new UserizedFolderImpl(subfolder);
+                        userizedFolder.setOwnPermission(subfolderPermission);
+                        CalculatePermission.calculateUserPermissions(userizedFolder, context);
+                        subfolders.add(userizedFolder);
+                    }
+
+                }
+                /*
+                 * TODO: Sort subfolder list or expect them in proper order?
+                 */
+                ret = subfolders.toArray(new UserizedFolder[subfolders.size()]);
             }
             folderStorage.commitTransaction(storageParameters);
         } catch (final FolderException e) {
@@ -128,7 +170,97 @@ public final class List {
             folderStorage.rollback(storageParameters);
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+        if (null == ret) {
+            return getSubfoldersFromMultipleStorages(treeId, parentId, all);
+        }
         return ret;
     }
 
+    private UserizedFolder[] getSubfoldersFromMultipleStorages(final String treeId, final String parentId, final boolean all) throws FolderException {
+        final FolderStorage[] parentStorages = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, parentId);
+        for (final FolderStorage ps : parentStorages) {
+            ps.startTransaction(storageParameters, false);
+        }
+        final java.util.List<FolderStorage> additionalStorages = new ArrayList<FolderStorage>(4);
+        try {
+            final java.util.List<SortableId> allSubfolderIds = new ArrayList<SortableId>(parentStorages.length * 8);
+            for (final FolderStorage ps : parentStorages) {
+                allSubfolderIds.addAll(Arrays.asList(ps.getSubfolders(treeId, parentId, storageParameters)));
+            }
+            Collections.sort(allSubfolderIds);
+            final java.util.List<UserizedFolder> subfolders = new ArrayList<UserizedFolder>(allSubfolderIds.size());
+            for (final SortableId sortableId : allSubfolderIds) {
+                final String id = sortableId.getId();
+                /*
+                 * Get folder storage to serve subfolder: First check already opened storages, then obtain foreign storage if none
+                 * appropriate.
+                 */
+                FolderStorage tmp = null;
+                for (final FolderStorage ps : parentStorages) {
+                    if (ps.getFolderType().servesFolderId(id)) {
+                        tmp = ps;
+                    }
+                }
+                if (null == tmp) {
+                    tmp = FolderStorageRegistry.getInstance().getFolderStorage(treeId, id);
+                    if (null == tmp) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
+                    }
+                    additionalStorages.add(tmp);
+                    tmp.startTransaction(storageParameters, false);
+                }
+                /*
+                 * Get subfolder from appropriate storage
+                 */
+                final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
+                /*
+                 * Check for access rights and subscribed status dependent on parameter "all"
+                 */
+                final Permission subfolderPermission;
+                if (null == session) {
+                    subfolderPermission = CalculatePermission.calculate(subfolder, user, context);
+                } else {
+                    subfolderPermission = CalculatePermission.calculate(subfolder, session);
+                }
+                if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
+                    final UserizedFolder userizedFolder = new UserizedFolderImpl(subfolder);
+                    userizedFolder.setOwnPermission(subfolderPermission);
+                    CalculatePermission.calculateUserPermissions(userizedFolder, context);
+                    subfolders.add(userizedFolder);
+                }
+            }
+            /*
+             * Commit all used storages
+             */
+            if (!additionalStorages.isEmpty()) {
+                for (final FolderStorage as : additionalStorages) {
+                    as.commitTransaction(storageParameters);
+                }
+            }
+            for (final FolderStorage ps : parentStorages) {
+                ps.commitTransaction(storageParameters);
+            }
+            return subfolders.toArray(new UserizedFolder[subfolders.size()]);
+        } catch (final FolderException e) {
+            if (!additionalStorages.isEmpty()) {
+                for (final FolderStorage as : additionalStorages) {
+                    as.rollback(storageParameters);
+                }
+            }
+            for (final FolderStorage storage : parentStorages) {
+                storage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (!additionalStorages.isEmpty()) {
+                for (final FolderStorage as : additionalStorages) {
+                    as.rollback(storageParameters);
+                }
+            }
+            for (final FolderStorage storage : parentStorages) {
+                storage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 }

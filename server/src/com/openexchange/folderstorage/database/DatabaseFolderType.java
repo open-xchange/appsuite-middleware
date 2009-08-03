@@ -82,21 +82,11 @@ public final class DatabaseFolderType implements FolderType {
     }
 
     public boolean servesFolderId(final String folderId) {
-        return getUnsignedInteger(folderId) >= 0;
+        return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0 || DatabaseFolderStorageUtility.hasSharedPrefix(folderId);
     }
 
-    /**
-     * Parses specified string into an unsigned <code>int</code> value.
-     * 
-     * @param str The string to parse
-     * @return The parsed unsigned <code>int</code> value or a value less than zero if string does not denote an unsigned integer.
-     */
-    private static final int getUnsignedInteger(final String str) {
-        try {
-            return Integer.parseInt(str);
-        } catch (final NumberFormatException e) {
-            return -1;
-        }
+    public boolean servesParentId(final String parentId) {
+        return servesFolderId(parentId);
     }
 
 }

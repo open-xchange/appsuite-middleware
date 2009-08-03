@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.virtual;
 
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -64,7 +65,11 @@ public final class VirtualFolder implements Folder {
 
     private static final long serialVersionUID = 1076412172524386127L;
 
-    private final Folder realFolder;
+    private Folder realFolder;
+
+    private Date lastModified;
+
+    private int modifiedBy;
 
     private String treeId;
 
@@ -86,6 +91,66 @@ public final class VirtualFolder implements Folder {
     public VirtualFolder(final Folder source) {
         super();
         this.realFolder = source;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            final VirtualFolder clone = (VirtualFolder) super.clone();
+            clone.realFolder = (Folder) (realFolder == null ? null : realFolder.clone());
+            clone.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
+            if (permissions != null) {
+                final Permission[] thisPermissions = this.permissions;
+                final Permission[] clonePermissions = new Permission[thisPermissions.length];
+                for (int i = 0; i < thisPermissions.length; i++) {
+                    clonePermissions[i] = (Permission) thisPermissions[i].clone();
+                }
+                clone.permissions = clonePermissions;
+            }
+            if (subfolders != null) {
+                final String[] thisSub = subfolders;
+                final String[] cloneSub = new String[thisSub.length];
+                for (int i = 0; i < cloneSub.length; i++) {
+                    cloneSub[i] = thisSub[i];
+                }
+                clone.subfolders = cloneSub;
+            }
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
+    }
+
+    public int getCreatedBy() {
+        return realFolder.getCreatedBy();
+    }
+
+    public Date getCreationDate() {
+        return realFolder.getCreationDate();
+    }
+
+    public Date getLastModified() {
+        return lastModified == null ? null : new Date(lastModified.getTime());
+    }
+
+    public int getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setCreatedBy(final int createdBy) {
+        // Nothing to do
+    }
+
+    public void setCreationDate(final Date creationDate) {
+        // Nothing to do
+    }
+
+    public void setLastModified(final Date lastModified) {
+        this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
+    }
+
+    public void setModifiedBy(final int modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     public ContentType getContentType() {
@@ -170,6 +235,10 @@ public final class VirtualFolder implements Folder {
 
     public boolean isGlobalID() {
         return realFolder.isGlobalID();
+    }
+
+    public boolean isCacheable() {
+        return true;
     }
 
 }

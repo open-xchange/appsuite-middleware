@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.virtual.sql;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.Folder;
@@ -76,7 +78,7 @@ public final class Insert {
         super();
     }
 
-    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_INSERT_PERM = "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -115,9 +117,21 @@ public final class Insert {
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
                 stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.setString(pos, folder.getParentID());
-                stmt.setString(pos, folder.getName());
+                stmt.setString(pos++, folderId);
+                stmt.setString(pos++, folder.getParentID());
+                stmt.setString(pos++, folder.getName());
+                final int modifiedBy = folder.getModifiedBy();
+                if (modifiedBy == -1) {
+                    stmt.setNull(pos++, Types.INTEGER);
+                } else {
+                    stmt.setInt(pos++, modifiedBy);
+                }
+                final Date lastModified = folder.getLastModified();
+                if (lastModified == null) {
+                    stmt.setNull(pos, Types.BIGINT);
+                } else {
+                    stmt.setLong(pos, lastModified.getTime());
+                }
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -170,5 +184,4 @@ public final class Insert {
             databaseService.backWritable(cid, con);
         }
     }
-
 }

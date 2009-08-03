@@ -165,21 +165,23 @@ public final class CacheFolderStorage implements FolderStorage {
                 throw e;
             }
         }
-        /*
-         * Put to cache
-         */
-        try {
-            final CacheKey key;
-            final String id = createdFolder.getID();
-            if (createdFolder.isGlobalID()) {
-                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
-                globalCache.put(key, createdFolder);
-            } else {
-                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
-                userCache.put(key, createdFolder);
+        if (createdFolder.isCacheable()) {
+            /*
+             * Put to cache
+             */
+            try {
+                final CacheKey key;
+                final String id = createdFolder.getID();
+                if (createdFolder.isGlobalID()) {
+                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
+                    globalCache.put(key, createdFolder);
+                } else {
+                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
+                    userCache.put(key, createdFolder);
+                }
+            } catch (final CacheException e) {
+                throw new FolderException(e);
             }
-        } catch (final CacheException e) {
-            throw new FolderException(e);
         }
     }
 
@@ -238,22 +240,27 @@ public final class CacheFolderStorage implements FolderStorage {
                 storage.rollback(storageParameters);
                 throw e;
             }
-            /*
-             * Put to cache
-             */
-            try {
-                if (folder.isGlobalID()) {
-                    key = newCacheKey(folderId, treeId, contextId);
-                    globalCache.put(key, folder);
-                } else {
-                    key = newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId());
-                    userCache.put(key, folder);
+            if (folder.isCacheable()) {
+                /*
+                 * Put to cache
+                 */
+                try {
+                    if (folder.isGlobalID()) {
+                        key = newCacheKey(folderId, treeId, contextId);
+                        globalCache.put(key, folder);
+                    } else {
+                        key = newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId());
+                        userCache.put(key, folder);
+                    }
+                } catch (final CacheException e) {
+                    throw new FolderException(e);
                 }
-            } catch (final CacheException e) {
-                throw new FolderException(e);
             }
         }
-        return folder;
+        /*
+         * Return a cloned version
+         */
+        return (Folder) folder.clone();
     }
 
     public FolderType getFolderType() {
@@ -300,23 +307,24 @@ public final class CacheFolderStorage implements FolderStorage {
                 throw e;
             }
         }
-        /*
-         * Put to cache
-         */
-        try {
-            final CacheKey key;
-            final String id = updatedFolder.getID();
-            if (updatedFolder.isGlobalID()) {
-                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
-                globalCache.put(key, updatedFolder);
-            } else {
-                key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
-                userCache.put(key, updatedFolder);
+        if (updatedFolder.isCacheable()) {
+            /*
+             * Put to cache
+             */
+            try {
+                final CacheKey key;
+                final String id = updatedFolder.getID();
+                if (updatedFolder.isGlobalID()) {
+                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
+                    globalCache.put(key, updatedFolder);
+                } else {
+                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
+                    userCache.put(key, updatedFolder);
+                }
+            } catch (final CacheException e) {
+                throw new FolderException(e);
             }
-        } catch (final CacheException e) {
-            throw new FolderException(e);
         }
-
     }
 
     /**

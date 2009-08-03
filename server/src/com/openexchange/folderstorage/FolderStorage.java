@@ -140,7 +140,7 @@ public interface FolderStorage {
      * 
      * @param folder The object containing the new folder data.
      * @param storageParameters The storage parameters
-     * @throws FolderException if creating the folder fails.
+     * @throws FolderException If creating the folder fails.
      */
     void createFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
 
@@ -150,7 +150,7 @@ public interface FolderStorage {
      * @param treeId The tree identifier
      * @param parentId The parent identifier
      * @param storageParameters The storage parameters
-     * @return The subfolder identifiers for specified parent
+     * @return The subfolder identifiers for specified parent or an empty array if parent identifier cannot be served
      * @throws FolderException If returning the subfolder identifiers fails
      */
     SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws FolderException;
@@ -168,16 +168,16 @@ public interface FolderStorage {
     /**
      * Publishes made changes on the storage.
      * 
-     * @param params the storage parameters.
-     * @throws FolderException if committing the made changes fails.
+     * @param params The storage parameters.
+     * @throws FolderException If committing the made changes fails.
      */
     void commitTransaction(StorageParameters params) throws FolderException;
 
     /**
      * Discards made changes on the storage. This method does not throw an exception because a rollback should only be used if already some
-     * problem or exception occurred. Problems executing this method should only be logged.
+     * problem or exception occurred. Problems occurred while executing this method should only be logged.
      * 
-     * @param params the storage parameters.
+     * @param params The storage parameters.
      */
     void rollback(StorageParameters params);
 

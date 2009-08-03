@@ -47,77 +47,43 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.internal;
 
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
- * {@link AbstractFolder} - An abstract folder.
+ * {@link UserizedFolderImpl} - The {@link UserizedFolder} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractFolder implements Folder {
+public final class UserizedFolderImpl implements UserizedFolder {
 
-    protected int createdBy;
+    private static final long serialVersionUID = 5090343231211791986L;
 
-    protected int modifiedBy;
+    private Folder folder;
 
-    protected Date creationDate;
-
-    protected Date lastModified;
-
-    protected String treeId;
-
-    protected String id;
-
-    protected String name;
-
-    protected String parent;
-
-    protected Permission[] permissions;
-
-    protected String[] subfolders;
-
-    protected boolean subscribed;
-
-    protected ContentType contentType;
-
-    protected Type type;
+    private Permission ownPermission;
 
     /**
-     * Initializes an empty {@link AbstractFolder}.
+     * Initializes a new {@link UserizedFolderImpl}.
      */
-    protected AbstractFolder() {
+    public UserizedFolderImpl(final Folder folder) {
         super();
+        this.folder = folder;
     }
 
     @Override
     public Object clone() {
         try {
-            final AbstractFolder clone = (AbstractFolder) super.clone();
-            if (creationDate != null) {
-                clone.creationDate = new Date(creationDate.getTime());
-            }
-            if (lastModified != null) {
-                clone.lastModified = new Date(lastModified.getTime());
-            }
-            if (permissions != null) {
-                final Permission[] thisPermissions = this.permissions;
-                final Permission[] clonePermissions = new Permission[thisPermissions.length];
-                for (int i = 0; i < thisPermissions.length; i++) {
-                    clonePermissions[i] = (Permission) thisPermissions[i].clone();
-                }
-                clone.permissions = clonePermissions;
-            }
-            if (subfolders != null) {
-                final String[] thisSub = subfolders;
-                final String[] cloneSub = new String[thisSub.length];
-                for (int i = 0; i < cloneSub.length; i++) {
-                    cloneSub[i] = thisSub[i];
-                }
-                clone.subfolders = cloneSub;
-            }
+            final UserizedFolderImpl clone = (UserizedFolderImpl) super.clone();
+            clone.folder = (Folder) clone.folder.clone();
+            clone.ownPermission = (Permission) clone.ownPermission.clone();
             return clone;
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
@@ -125,119 +91,131 @@ public abstract class AbstractFolder implements Folder {
     }
 
     public int getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(final int createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public int getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(final int modifiedBy) {
-        this.modifiedBy = modifiedBy;
+        return folder.getCreatedBy();
     }
 
     public Date getCreationDate() {
-        return creationDate == null ? null : new Date(creationDate.getTime());
-    }
-
-    public void setCreationDate(final Date creationDate) {
-        this.creationDate = null == creationDate ? null : new Date(creationDate.getTime());
+        return folder.getCreationDate();
     }
 
     public Date getLastModified() {
-        return lastModified == null ? null : new Date(lastModified.getTime());
+        return folder.getLastModified();
+    }
+
+    public int getModifiedBy() {
+        return folder.getModifiedBy();
+    }
+
+    public void setCreatedBy(final int createdBy) {
+        folder.setCreatedBy(createdBy);
+    }
+
+    public void setCreationDate(final Date creationDate) {
+        folder.setCreationDate(creationDate);
     }
 
     public void setLastModified(final Date lastModified) {
-        this.lastModified = null == lastModified ? null : new Date(lastModified.getTime());
+        folder.setLastModified(lastModified);
+    }
+
+    public void setModifiedBy(final int modifiedBy) {
+        folder.setModifiedBy(modifiedBy);
     }
 
     public ContentType getContentType() {
-        return contentType;
+        return folder.getContentType();
     }
 
     public String getID() {
-        return id;
+        return folder.getID();
     }
 
     public String getLocalizedName(final Locale locale) {
-        return name;
+        return folder.getLocalizedName(locale);
     }
 
     public String getName() {
-        return name;
+        return folder.getName();
     }
 
     public String getParentID() {
-        return parent;
+        return folder.getParentID();
     }
 
     public Permission[] getPermissions() {
-        return permissions;
+        return folder.getPermissions();
     }
 
     public String[] getSubfolderIDs() {
-        return subfolders;
+        return folder.getSubfolderIDs();
     }
 
     public String getTreeID() {
-        return treeId;
+        return folder.getTreeID();
     }
 
     public Type getType() {
-        return type;
-    }
-
-    public void setContentType(final ContentType contentType) {
-        this.contentType = contentType;
-    }
-
-    public void setID(final String id) {
-        this.id = id;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setParentID(final String parentId) {
-        this.parent = parentId;
-    }
-
-    public void setPermissions(final Permission[] permissions) {
-        this.permissions = permissions;
-    }
-
-    public void setSubfolderIDs(final String[] subfolderIds) {
-        this.subfolders = subfolderIds;
-    }
-
-    public void setTreeID(final String id) {
-        this.treeId = id;
-    }
-
-    public void setType(final Type type) {
-        this.type = type;
-    }
-
-    public boolean isSubscribed() {
-        return subscribed;
-    }
-
-    public void setSubscribed(final boolean subscribed) {
-        this.subscribed = subscribed;
-    }
-
-    public boolean isVirtual() {
-        return false;
+        return folder.getType();
     }
 
     public boolean isCacheable() {
-        return true;
+        return folder.isCacheable();
+    }
+
+    public boolean isGlobalID() {
+        return folder.isGlobalID();
+    }
+
+    public boolean isSubscribed() {
+        return folder.isSubscribed();
+    }
+
+    public boolean isVirtual() {
+        return folder.isVirtual();
+    }
+
+    public void setContentType(final ContentType contentType) {
+        folder.setContentType(contentType);
+    }
+
+    public void setID(final String id) {
+        folder.setID(id);
+    }
+
+    public void setName(final String name) {
+        folder.setName(name);
+    }
+
+    public void setParentID(final String parentId) {
+        folder.setParentID(parentId);
+    }
+
+    public void setPermissions(final Permission[] permissions) {
+        folder.setPermissions(permissions);
+    }
+
+    public void setSubfolderIDs(final String[] subfolderIds) {
+        folder.setSubfolderIDs(subfolderIds);
+    }
+
+    public void setSubscribed(final boolean subscribed) {
+        folder.setSubscribed(subscribed);
+    }
+
+    public void setTreeID(final String id) {
+        folder.setTreeID(id);
+    }
+
+    public void setType(final Type type) {
+        folder.setType(type);
+    }
+
+    public Permission getOwnPermission() {
+        return ownPermission;
+    }
+
+    public void setOwnPermission(final Permission ownPermission) {
+        this.ownPermission = ownPermission;
     }
 
 }

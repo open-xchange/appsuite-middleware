@@ -96,12 +96,12 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         		"folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
         		"parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
         		"name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
-        		"lastModified BIGINT(64) NOT NULL, " + 
-        		"modifiedBy INT4 unsigned NOT NULL," + 
+        		"lastModified BIGINT(64) DEFAULT NULL, " + 
+        		"modifiedBy INT4 unsigned DEFAULT NULL," + 
         		"PRIMARY KEY (cid, tree, user, folderId), " + 
         		"INDEX (cid, tree, user, parentId), " + 
         		"FOREIGN KEY (cid, user) REFERENCES user (cid, id), " + 
-        		"FOREIGN KEY (cid, lastModified) REFERENCES user (cid, id)" + 
+        		"FOREIGN KEY (cid, modifiedBy) REFERENCES user (cid, id)" + 
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 

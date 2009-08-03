@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -72,6 +73,45 @@ public final class CalculatePermission {
      */
     private CalculatePermission() {
         super();
+    }
+
+    /**
+     * Calculates the effective user permissions for given folder.
+     * 
+     * @param folder The folder whose effective user permissions shall be calculated
+     * @param context The context
+     * @throws FolderException If calculating effective user permissions fails
+     */
+    public static void calculateUserPermissions(final Folder folder, final Context context) throws FolderException {
+        final Permission[] staticPermissions = folder.getPermissions();
+        if (null == staticPermissions || 0 == staticPermissions.length) {
+            return;
+        }
+        try {
+            final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
+            final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
+            for (int i = 0; i < staticPermissions.length; i++) {
+                final Permission staticPermission = staticPermissions[i];
+                if (0 == staticPermission.getSystem()) {
+                    // A non-system permission
+                    final Permission userizedPermission;
+                    if (staticPermission.isGroup()) {
+                        userizedPermission = staticPermission;
+                    } else {
+                        userizedPermission = new EffectivePermission(
+                            staticPermission,
+                            folder.getID(),
+                            folder.getType(),
+                            folder.getContentType(),
+                            userConfStorage.getUserConfiguration(staticPermission.getEntity(), context));
+                    }
+                    userizedPermissions.add(userizedPermission);
+                }
+            }
+            folder.setPermissions(userizedPermissions.toArray(new Permission[userizedPermissions.size()]));
+        } catch (final UserConfigurationException e) {
+            throw new FolderException(e);
+        }
     }
 
     /**

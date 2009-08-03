@@ -47,47 +47,60 @@
  *
  */
 
-package com.openexchange.folderstorage.cache;
+package com.openexchange.folder.json.actions;
 
-import com.openexchange.folderstorage.FolderType;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CacheFolderType} - The folder type for cache folder storage.
+ * {@link ListAction} - Maps the action to a list action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderType implements FolderType {
+public final class ListAction implements AJAXActionService {
 
-    private static final CacheFolderType instance = new CacheFolderType();
-
-    /**
-     * Gets the instance.
-     * 
-     * @return The instance.
-     */
-    public static CacheFolderType getInstance() {
-        return instance;
-    }
+    public static final String ACTION = AJAXServlet.ACTION_LIST;
 
     /**
-     * Initializes a new {@link CacheFolderType}.
+     * Initializes a new {@link ListAction}.
      */
-    private CacheFolderType() {
+    public ListAction() {
         super();
     }
 
-    public boolean servesFolderId(final String folderId) {
-        // Cache folder storage serves every folder identifier
-        return true;
-    }
-
-    public boolean servesTreeId(final String treeId) {
-        // Cache folder storage serves every tree identifier
-        return true;
-    }
-
-    public boolean servesParentId(final String parentId) {
-        return true;
+    public AJAXRequestResult perform(final AJAXRequestData reqest, final ServerSession session) throws AbstractOXException {
+        /*
+         * Parse parameters
+         */
+        String treeId = reqest.getParameter("tree");
+        if (null == treeId) {
+            // Fallback to default tree identifier
+            treeId = FolderStorage.REAL_TREE_ID;
+        }
+        final String parentId = reqest.getParameter("parent");
+        if (null == parentId) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "parent");
+        }
+        final boolean all = Boolean.parseBoolean(reqest.getParameter(AJAXServlet.PARAMETER_ALL));
+        /*
+         * Request subfolders from folder service
+         */
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        final Folder[] subfolders = folderService.getSubfolders(treeId, parentId, all, session);
+        
+        
+        
+        
+        return null;
     }
 
 }

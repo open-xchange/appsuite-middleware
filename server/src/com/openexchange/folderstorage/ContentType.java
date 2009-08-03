@@ -65,4 +65,12 @@ public interface ContentType {
      */
     @Deprecated
     int getModule();
+
+    /**
+     * Returns a string representation of this content type.
+     * 
+     * @return A string representation of this content type
+     */
+    String toString();
+
 }
