@@ -1,6 +1,7 @@
 package com.openexchange.ajax.infostore;
 
 
+import com.openexchange.ajax.infostore.test.InfostoreManagedTests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -22,7 +23,7 @@ public class InfostoreAJAXSuite extends TestSuite{
 		tests.addTestSuite( LockTest.class );
 		tests.addTestSuite( SaveAsTest.class );
 		tests.addTestSuite( SearchTest.class );
-		
+		tests.addTest ( new InfostoreManagedTests() );
 		
 		return tests;
 	}
