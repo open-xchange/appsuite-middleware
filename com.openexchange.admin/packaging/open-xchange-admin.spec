@@ -1,5 +1,6 @@
 
 # norootforbuild
+%define         configfiles     configfiles.list
 
 Name:           open-xchange-admin
 BuildArch:	noarch
@@ -120,6 +121,14 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install
 mv doc javadoc
 ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 
+rm -f %{configfiles}
+find %{buildroot}/opt/open-xchange/etc/admindaemon \
+        -maxdepth 1 -type f \
+        -not -name mpasswd \
+        -printf "%%%config(noreplace) %p\n" > %{configfiles}
+perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/configdb\.properties)$;$1 %%%attr(640,root,root) $2;' %{configfiles}
+cat %{configfiles}
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -196,25 +205,20 @@ if [ ${1:-0} -eq 2 ]; then
       fi
    done
 
-   for i in $(find /opt/open-xchange/etc/groupware/ -maxdepth 1 -regex ".*\.\(properties\|ccf\|sh\)"); do
-        ox_update_permissions "$i" root:open-xchange 640
-   done
-   ox_update_permissions /opt/open-xchange/etc/admindaemon/mpasswd root:root 600
+   ox_update_permissions "/opt/open-xchange/etc/admindaemon/configdb.properties" root:root 640
+   ox_update_permissions "/opt/open-xchange/etc/admindaemon/mpasswd" root:root 640
 fi
 
 
 
-%files
+%files -f %{configfiles}
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/admindaemon
 %dir /opt/open-xchange/etc/admindaemon/osgi
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
 /etc/init.d/*
 /sbin/*
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/*.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/*.ccf
 %config(noreplace) %attr(600,root,root) /opt/open-xchange/etc/admindaemon/mpasswd
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
 /opt/open-xchange/etc/admindaemon/mysql
 /opt/open-xchange/etc/admindaemon/osgi/config.ini.template
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*

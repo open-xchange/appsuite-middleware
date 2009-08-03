@@ -350,10 +350,10 @@
         </copy>
         <chmod perm="640">
             <fileset dir="${destdir}/${prefix}/${oxconfdir}">
-                <include name="**"/>
+                <include name="configdb.properties"/>
             </fileset>
         </chmod>
-		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
+		<chmod perm="640" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
     	<mkdir dir="${destdir}/etc/init.d"/>
 		<!-- copy all dist specific files from below system/ to $prefix/ -->
     	<copy todir="${destdir}/" overwrite="true">
