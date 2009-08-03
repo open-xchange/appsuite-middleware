@@ -63,11 +63,11 @@
                 <exclude name="**CVS/**"/>
             </fileset>
         </copy>
-        <chmod perm="640">
+        <!--<chmod perm="640">
             <fileset dir="${destdir}/${commonConfigDir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod>-->
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
