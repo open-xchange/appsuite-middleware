@@ -68,14 +68,6 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
-%post
-
-if [ ${1:-0} -eq 2 ]; then
-   . /opt/open-xchange/etc/oxfunctions.sh
-
-   ox_update_permissions "/opt/open-xchange/etc/groupware/pop3.properties" root:open-xchange 640
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -85,4 +77,4 @@ fi
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/pop3.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/pop3.properties

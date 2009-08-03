@@ -160,11 +160,11 @@
     	<copy todir="${destdir}/${prefix}/${serverconfdir}" overwrite="true">
             <fileset dir="conf" excludes="**/*.in"/>
         </copy>
-        <chmod perm="640">
+        <!-- <chmod perm="640">
             <fileset dir="${destdir}/${prefix}/${serverconfdir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod>-->
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
 		<!-- generate config.ini registry snippet -->

@@ -67,20 +67,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
-%post
-
-if [ ${1:-0} -eq 2 ]; then
-   . /opt/open-xchange/etc/oxfunctions.sh
-
-   ox_update_permissions "/opt/open-xchange/etc/groupware/dataretention.properties" root:open-xchange 640
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
-
-%pre
-/usr/sbin/groupadd -r open-xchange 2> /dev/null || :
-/usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
 %files
 %defattr(-,root,root)
@@ -89,4 +77,4 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/dataretention.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/dataretention.properties

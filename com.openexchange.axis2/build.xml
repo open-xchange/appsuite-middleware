@@ -123,11 +123,11 @@
     	<copy todir="${destdir}/${confdir}" overwrite="true">
             <fileset dir="conf" excludes="*.in"/>
         </copy>
-        <chmod perm="640">
+        <!-- <chmod perm="640">
             <fileset dir="${destdir}/${confdir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod> -->
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
 	</target>

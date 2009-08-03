@@ -68,11 +68,11 @@
         <copy todir="${confInstallCopyDir}" overwrite="true">
             <fileset dir="${conf.dir}"/>
         </copy>
-        <chmod perm="640">
+        <!-- <chmod perm="640">
             <fileset dir="${confInstallCopyDir}">
                 <include name="**"/>
             </fileset>
-        </chmod>
+        </chmod>-->
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
