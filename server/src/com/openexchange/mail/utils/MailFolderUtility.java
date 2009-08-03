@@ -50,8 +50,6 @@
 package com.openexchange.mail.utils;
 
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -74,8 +72,8 @@ public final class MailFolderUtility {
     /**
      * Parses specified fullname argument to an appropriate instance of {@link FullnameArgument}.
      * <p>
-     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder fullname argument only if
-     * fullname argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
+     * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the static separator character <code>'/'</code> from specified folder
+     * fullname argument only if fullname argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
      * Example:
      * 
      * <pre>
@@ -93,7 +91,7 @@ public final class MailFolderUtility {
             return new FullnameArgument(fullnameArgument);
         }
         final int len = fullnameArgument.length();
-        final char separator = MailProperties.getInstance().getDefaultSeparator();
+        final char separator = '/';
         int index = LEN;
         while (index < len && fullnameArgument.charAt(index) != separator) {
             index++;
@@ -131,8 +129,7 @@ public final class MailFolderUtility {
     }
 
     /**
-     * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator (obtained by {@link MailConfig#getDefaultSeparator()}) to
-     * given folder fullname. <br>
+     * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the static separator character <code>'/'</code> to given folder fullname. <br>
      * Example:
      * 
      * <pre>
@@ -153,8 +150,7 @@ public final class MailFolderUtility {
         if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return fullname;
         }
-        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
-            MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
+        return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append('/').append(fullname).toString();
     }
 
     /**
