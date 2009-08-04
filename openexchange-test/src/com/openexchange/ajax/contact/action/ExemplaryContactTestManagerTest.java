@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.contact.action;
 
-import java.util.Calendar;
 import java.util.Date;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;

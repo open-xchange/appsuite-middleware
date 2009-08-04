@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
+import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -69,6 +70,7 @@ public class ContactAJAXSuite extends TestSuite {
 		tests.addTestSuite(NewListTest.class);
 		tests.addTestSuite(SearchInAllContactFoldersTest.class);
 		tests.addTestSuite(ManagedContactTests.class);
+		tests.addTestSuite(ExemplaryContactTestManagerTest.class);
 		
 		tests.addTest(ContactBugTestSuite.suite());
 		return tests;
