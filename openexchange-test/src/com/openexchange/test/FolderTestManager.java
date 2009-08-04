@@ -169,12 +169,10 @@ public class FolderTestManager extends TestCase {
      * Deletes a folder via HTTP-API
      */
     public void deleteFolderOnServer(final int folderID, final Date lastModified) throws AjaxException, IOException, SAXException, JSONException {
-        deleteFolderOnServer(new FolderObject() {
-            {
-                setObjectID(folderID);
-                setLastModified(lastModified);
-            }
-        });
+        FolderObject fo = new FolderObject();
+        fo.setObjectID(folderID);
+        fo.setLastModified(lastModified);
+        deleteFolderOnServer(fo);
     }
 
     /**
