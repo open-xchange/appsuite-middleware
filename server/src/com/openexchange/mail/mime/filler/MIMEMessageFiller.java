@@ -532,9 +532,18 @@ public class MIMEMessageFiller {
             /*
              * Set sent date if not done, yet
              */
-            if (mimeMessage.getSentDate() == null) {
+            final Date sentDate = mimeMessage.getSentDate();
+            if (sentDate == null) {
                 final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
-                mimeMessage.setHeader("Date", mdf.format(new Date()));
+                synchronized (mdf) {
+                    mimeMessage.setHeader("Date", mdf.format(new Date()));
+                }
+            } else {
+                // Ensure proper time zone
+                final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+                synchronized (mdf) {
+                    mimeMessage.setHeader("Date", mdf.format(sentDate));
+                }
             }
             /*
              * Set default subject if none set
