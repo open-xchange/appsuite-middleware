@@ -534,9 +534,7 @@ public class MIMEMessageFiller {
              */
             if (mimeMessage.getSentDate() == null) {
                 final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
-                synchronized (mdf) {
-                    mimeMessage.setHeader("Date", mdf.format(new Date()));
-                }
+                mimeMessage.setHeader("Date", mdf.format(new Date()));
             }
             /*
              * Set default subject if none set
