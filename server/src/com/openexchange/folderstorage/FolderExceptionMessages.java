@@ -89,6 +89,16 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String MISSING_SESSION_MSG = "Missing session.";
 
     /**
+     * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
+     */
+    public static final String FOLDER_NOT_VISIBLE_MSG = "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\"";
+
+    /**
+     * JSON error: %1$s
+     */
+    public static final String JSON_ERROR_MSG = "JSON error: %1$s";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

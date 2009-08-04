@@ -82,8 +82,9 @@ public final class MailFolderImpl extends AbstractFolder {
      * 
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
+     * @param capabilities The capabilities
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId) {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities) {
         super();
         this.id = MailFolderUtility.prepareFullname(accountId, mailFolder.getFullname());
         this.name = mailFolder.getName();
@@ -95,6 +96,17 @@ public final class MailFolderImpl extends AbstractFolder {
         }
         type = SystemType.getInstance();
         this.subscribed = mailFolder.isSubscribed();
+        this.capabilities = capabilities;
+        {
+            final String value = mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append(
+            '/').append(mailFolder.getUnreadMessageCount()).append(')').toString();
+            this.summary = value;
+        }
+        this.deefault = /*mailFolder.isDefaultFolder();*/0 == accountId && "INBOX".equals(mailFolder.getFullname());
+        this.total = mailFolder.getMessageCount();
+        this.nu = mailFolder.getNewMessageCount();
+        this.unread = mailFolder.getUnreadMessageCount();
+        this.deleted = mailFolder.getDeletedMessageCount();
     }
 
     @Override

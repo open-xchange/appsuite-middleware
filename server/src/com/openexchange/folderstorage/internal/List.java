@@ -114,7 +114,7 @@ public final class List {
 
     private TimeZone getTimeZone() {
         if (null == timeZone) {
-            timeZone = TimeZone.getTimeZone(user.getTimeZone());
+            timeZone = Tools.getTimeZone(user.getTimeZone());
         }
         return timeZone;
     }
@@ -141,7 +141,10 @@ public final class List {
                     parentPermission = CalculatePermission.calculate(parent, session);
                 }
                 if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
-                    // TODO: Throw exception
+                    throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                        parentId,
+                        user.getDisplayName(),
+                        Integer.valueOf(context.getContextId()));
                 }
             }
 
@@ -251,13 +254,18 @@ public final class List {
 
     private UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final java.util.List<FolderStorage> openedStorages) throws FolderException {
         final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
+        userizedFolder.setLocale(user.getLocale());
         // Permissions
         userizedFolder.setOwnPermission(ownPermission);
         CalculatePermission.calculateUserPermissions(userizedFolder, context);
         // Type
+        final boolean isShared;
         if (userizedFolder.getCreatedBy() != user.getId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
             userizedFolder.setType(SharedType.getInstance());
             userizedFolder.setSubfolderIDs(new String[0]);
+            isShared = true;
+        } else {
+            isShared = false;
         }
         // Time zone offset and last-modified in UTC
         {
@@ -273,6 +281,13 @@ public final class List {
                 userizedFolder.setLastModifiedUTC(new Date(lm.getTime()));
             }
         }
+        if (!isShared) {
+            getVisibleSubfolderIDs(folder, treeId, all, userizedFolder, openedStorages);
+        }
+        return userizedFolder;
+    }
+
+    private void getVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final java.util.List<FolderStorage> openedStorages) throws FolderException {
         // Subfolders
         final String[] subfolders = folder.getSubfolderIDs();
         final java.util.List<String> visibleSubfolderIds;
@@ -344,21 +359,23 @@ public final class List {
             }
         }
         userizedFolder.setSubfolderIDs(visibleSubfolderIds.toArray(new String[visibleSubfolderIds.size()]));
-        return userizedFolder;
     }
 
     private FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.List<FolderStorage> openedStorages) throws FolderException {
         FolderStorage tmp = null;
         for (final FolderStorage ps : openedStorages) {
             if (ps.getFolderType().servesFolderId(id)) {
+                // Found an already opened storage which is capable to server given folderId-treeId-pair
                 tmp = ps;
             }
         }
         if (null == tmp) {
+            // None opened storage is capable to server given folderId-treeId-pair
             tmp = FolderStorageRegistry.getInstance().getFolderStorage(treeId, id);
             if (null == tmp) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
             }
+            // Open storage and add to list of opened storages
             tmp.startTransaction(storageParameters, false);
             openedStorages.add(tmp);
         }

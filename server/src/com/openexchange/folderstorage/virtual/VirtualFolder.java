@@ -241,4 +241,60 @@ public final class VirtualFolder implements Folder {
         return true;
     }
 
+    public int getCapabilities() {
+        return realFolder.getCapabilities();
+    }
+
+    public int getDeleted() {
+        return realFolder.getDeleted();
+    }
+
+    public int getNew() {
+        return realFolder.getNew();
+    }
+
+    public String getSummary() {
+        return realFolder.getSummary();
+    }
+
+    public int getTotal() {
+        return realFolder.getTotal();
+    }
+
+    public int getUnread() {
+        return realFolder.getUnread();
+    }
+
+    public boolean isDefault() {
+        return realFolder.isDefault();
+    }
+
+    public void setCapabilities(final int capabilities) {
+        // Nothing to do
+    }
+
+    public void setDefault(final boolean deefault) {
+        // Nothing to do
+    }
+
+    public void setDeleted(final int deleted) {
+        // Nothing to do
+    }
+
+    public void setNew(final int nu) {
+        // Nothing to do
+    }
+
+    public void setSummary(final String summary) {
+        // Nothing to do
+    }
+
+    public void setTotal(final int total) {
+        // Nothing to do
+    }
+
+    public void setUnread(final int unread) {
+        // Nothing to do
+    }
+
 }

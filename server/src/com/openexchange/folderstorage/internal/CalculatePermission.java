@@ -51,9 +51,11 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -89,6 +91,10 @@ public final class CalculatePermission {
         }
         try {
             final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
+            final String id = folder.getID();
+            final Type type = folder.getType();
+            final ContentType contentType = folder.getContentType();
+
             final java.util.List<Permission> userizedPermissions = new ArrayList<Permission>(staticPermissions.length);
             for (int i = 0; i < staticPermissions.length; i++) {
                 final Permission staticPermission = staticPermissions[i];
@@ -98,12 +104,8 @@ public final class CalculatePermission {
                     if (staticPermission.isGroup()) {
                         userizedPermission = staticPermission;
                     } else {
-                        userizedPermission = new EffectivePermission(
-                            staticPermission,
-                            folder.getID(),
-                            folder.getType(),
-                            folder.getContentType(),
-                            userConfStorage.getUserConfiguration(staticPermission.getEntity(), context));
+                        final UserConfiguration userConfig = userConfStorage.getUserConfiguration(staticPermission.getEntity(), context);
+                        userizedPermission = new EffectivePermission(staticPermission, id, type, contentType, userConfig);
                     }
                     userizedPermissions.add(userizedPermission);
                 }

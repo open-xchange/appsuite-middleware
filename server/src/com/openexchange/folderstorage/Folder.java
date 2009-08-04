@@ -275,6 +275,104 @@ public interface Folder extends Serializable, Cloneable {
     void setSubscribed(boolean subscribed);
 
     /**
+     * Gets the summary.
+     * 
+     * @return The summary
+     */
+    String getSummary();
+
+    /**
+     * Sets the summary.
+     * 
+     * @param summary The summary
+     */
+    void setSummary(String summary);
+
+    /**
+     * Gets the total number of elements held by this folder.
+     * 
+     * @return The total number of elements or <code>-1</code> if not supported
+     */
+    int getTotal();
+
+    /**
+     * Sets the total number of elements held by this folder.
+     * 
+     * @param total The total number of elements
+     */
+    void setTotal(int total);
+
+    /**
+     * Gets the number of elements held by this folder which are marked as new.
+     * 
+     * @return The number of elements held by this folder which are marked as new or <code>-1</code> if not supported
+     */
+    int getNew();
+
+    /**
+     * Sets the number of elements held by this folder which are marked as new.
+     * 
+     * @param nu The number of elements held by this folder which are marked as new
+     */
+    void setNew(int nu);
+
+    /**
+     * Gets the number of elements held by this folder which are marked as unread.
+     * 
+     * @return The number of elements held by this folder which are marked as unread or <code>-1</code> if not supported
+     */
+    int getUnread();
+
+    /**
+     * Sets the number of elements held by this folder which are marked as unread.
+     * 
+     * @param unread The number of elements held by this folder which are marked as unread
+     */
+    void setUnread(int unread);
+
+    /**
+     * Gets the number of elements held by this folder which are marked as deleted.
+     * 
+     * @return The number of elements held by this folder which are marked as deleted or <code>-1</code> if not supported
+     */
+    int getDeleted();
+
+    /**
+     * Sets the number of elements held by this folder which are marked as deleted.
+     * 
+     * @param deleted The number of elements held by this folder which are marked as deleted
+     */
+    void setDeleted(int deleted);
+
+    /**
+     * Indicates if this folder is a default folder.
+     * 
+     * @return <code>true</code> if this folder is a default folder; otherwise <code>false</code>
+     */
+    boolean isDefault();
+
+    /**
+     * Sets if this folder is a default folder.
+     * 
+     * @param deefault <code>true</code> if this folder is a default folder; otherwise <code>false</code>
+     */
+    void setDefault(boolean deefault);
+
+    /**
+     * Gets the capabilities.
+     * 
+     * @return The capabilities or <code>-1</code> if not supported
+     */
+    int getCapabilities();
+
+    /**
+     * Sets the capabilities.
+     * 
+     * @param capabilities The capabilities
+     */
+    void setCapabilities(int capabilities);
+
+    /**
      * Creates and returns a copy of this object.
      * 
      * @return A clone of this instance.

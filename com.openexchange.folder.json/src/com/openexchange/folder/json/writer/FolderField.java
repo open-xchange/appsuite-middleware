@@ -125,7 +125,10 @@ public enum FolderField {
     DELETED(312, "deleted"),
     CAPABILITIES(313, "capabilities"),
     SUBSCRIBED(314, "subscribed"),
-    SUBSCR_SUBFLDS(315, "subscr_subflds");
+    SUBSCR_SUBFLDS(315, "subscr_subflds"),
+    BITS(-1, "bits"),
+    ENTITY(-1, "entity"),
+    GROUP(-1, "group");
 
     private final int column;
 
@@ -137,9 +140,9 @@ public enum FolderField {
     }
 
     /**
-     * Gets the column
+     * Gets the column or <code>-1</code> if none available
      * 
-     * @return The column
+     * @return The column or <code>-1</code> if none available
      */
     public int getColumn() {
         return column;

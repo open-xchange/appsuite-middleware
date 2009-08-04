@@ -85,11 +85,30 @@ public abstract class AbstractFolder implements Folder {
 
     protected Type type;
 
+    protected String summary;
+
+    protected int total;
+
+    protected int nu;
+
+    protected int unread;
+
+    protected int deleted;
+
+    protected int capabilities;
+
+    protected boolean deefault;
+
     /**
      * Initializes an empty {@link AbstractFolder}.
      */
     protected AbstractFolder() {
         super();
+        total = -1;
+        nu = -1;
+        unread = -1;
+        deleted = -1;
+        capabilities = -1;
     }
 
     @Override
@@ -238,6 +257,62 @@ public abstract class AbstractFolder implements Folder {
 
     public boolean isCacheable() {
         return true;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(final String summary) {
+        this.summary = summary;
+    }
+
+    public int getTotal() {
+        return total;
+    }
+
+    public void setTotal(final int total) {
+        this.total = total;
+    }
+
+    public int getNew() {
+        return nu;
+    }
+
+    public void setNew(final int nu) {
+        this.nu = nu;
+    }
+
+    public int getUnread() {
+        return unread;
+    }
+
+    public void setUnread(final int unread) {
+        this.unread = unread;
+    }
+
+    public int getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final int deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isDefault() {
+        return deefault;
+    }
+
+    public void setDefault(final boolean deefault) {
+        this.deefault = deefault;
+    }
+
+    public int getCapabilities() {
+        return capabilities;
+    }
+
+    public void setCapabilities(final int capabilities) {
+        this.capabilities = capabilities;
     }
 
 }

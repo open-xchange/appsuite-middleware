@@ -72,11 +72,16 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Date lastModifiedUTC;
 
+    private Locale locale;
+
     /**
-     * Initializes a new {@link UserizedFolderImpl}.
+     * Initializes a new {@link UserizedFolderImpl} from specified folder.
+     * 
+     * @param folder The underlying folder
      */
     public UserizedFolderImpl(final Folder folder) {
         super();
+        // TODO: clone folder?
         this.folder = folder;
     }
 
@@ -226,6 +231,70 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     public void setLastModifiedUTC(final Date lastModifiedUTC) {
         this.lastModifiedUTC = lastModifiedUTC == null ? null : new Date(lastModifiedUTC.getTime());
+    }
+
+    public int getCapabilities() {
+        return folder.getCapabilities();
+    }
+
+    public int getDeleted() {
+        return folder.getDeleted();
+    }
+
+    public int getNew() {
+        return folder.getNew();
+    }
+
+    public String getSummary() {
+        return folder.getSummary();
+    }
+
+    public int getTotal() {
+        return folder.getTotal();
+    }
+
+    public int getUnread() {
+        return folder.getUnread();
+    }
+
+    public boolean isDefault() {
+        return folder.isDefault();
+    }
+
+    public void setCapabilities(final int capabilities) {
+        folder.setCapabilities(capabilities);
+    }
+
+    public void setDefault(final boolean deefault) {
+        folder.setDefault(deefault);
+    }
+
+    public void setDeleted(final int deleted) {
+        folder.setDeleted(deleted);
+    }
+
+    public void setNew(final int nu) {
+        folder.setNew(nu);
+    }
+
+    public void setSummary(final String summary) {
+        folder.setSummary(summary);
+    }
+
+    public void setTotal(final int total) {
+        folder.setTotal(total);
+    }
+
+    public void setUnread(final int unread) {
+        folder.setUnread(unread);
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(final Locale locale) {
+        this.locale = locale;
     }
 
 }

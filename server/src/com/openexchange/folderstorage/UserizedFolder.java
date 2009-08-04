@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * {@link UserizedFolder} - Extends {@link Folder} interface by user-sensitive methods.
@@ -86,4 +87,17 @@ public interface UserizedFolder extends Folder {
      */
     void setLastModifiedUTC(Date lastModifiedUTC);
 
+    /**
+     * Gets the locale for this user-sensitive folder.
+     * 
+     * @return The locale for this user-sensitive folder
+     */
+    Locale getLocale();
+
+    /**
+     * Sets the locale for this user-sensitive folder.
+     * 
+     * @param locale The locale for this user-sensitive folder
+     */
+    void setLocale(Locale locale);
 }

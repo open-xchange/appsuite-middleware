@@ -84,7 +84,17 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Missing session.
      */
-    MISSING_SESSION(FolderExceptionMessages.MISSING_SESSION_MSG, Category.CODE_ERROR, 6);
+    MISSING_SESSION(FolderExceptionMessages.MISSING_SESSION_MSG, Category.CODE_ERROR, 6),
+    /**
+     * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
+     * <p>
+     * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
+     */
+    FOLDER_NOT_VISIBLE(FolderExceptionMessages.FOLDER_NOT_VISIBLE_MSG, Category.PERMISSION, 7),
+    /**
+     * JSON error: %1$s
+     */
+    JSON_ERROR(FolderExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 8);
 
     private final Category category;
 
