@@ -367,7 +367,9 @@ public final class SMTPTransport extends MailTransport {
              */
             {
                 final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
-                smtpMessage.setHeader("Date", mdf.format(new Date()));
+                synchronized (mdf) {
+                    smtpMessage.setHeader("Date", mdf.format(new Date()));
+                }
             }
             /*
              * Set common headers

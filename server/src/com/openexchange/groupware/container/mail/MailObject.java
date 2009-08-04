@@ -472,7 +472,9 @@ public class MailObject {
              */
             if (msg.getSentDate() == null) {
                 final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
-                msg.setHeader("Date", mdf.format(new Date()));
+                synchronized (mdf) {
+                    msg.setHeader("Date", mdf.format(new Date()));
+                }
             }
             /*
              * X-Open-Xchange-Module
