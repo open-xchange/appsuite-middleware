@@ -67,20 +67,20 @@ import com.openexchange.custom.audit.logging.AuditFileHandler;
 import com.openexchange.custom.audit.logging.AuditFilter;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * @author Benjamin Otterbach
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 public class AuditEventHandler implements EventHandler {
 
@@ -133,7 +133,7 @@ public class AuditEventHandler implements EventHandler {
 	        ModuleSwitch: switch (commonEvent.getModule()) {
 	        default: break ModuleSwitch;
 	        case Types.APPOINTMENT:	        	
-	        	AppointmentObject appointment = (AppointmentObject)commonEvent.getActionObj();
+	        	Appointment appointment = (Appointment)commonEvent.getActionObj();
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					LOG.info("Title222: " + appointment.getTitle());
 					LOG.info("Folder id: " + appointment.getParentFolderID());
@@ -141,7 +141,7 @@ public class AuditEventHandler implements EventHandler {
 				}
 	        	break ModuleSwitch;
 	        case Types.CONTACT:
-	        	ContactObject contact = (ContactObject)commonEvent.getActionObj();
+	        	Contact contact = (Contact)commonEvent.getActionObj();
 	        	LOG.info(contact.getGivenName() + ", " + contact.getSurName());
 	        	break ModuleSwitch;
 	        case Types.TASK:
@@ -169,7 +169,7 @@ public class AuditEventHandler implements EventHandler {
 		String retval = "";
 		
 		try {
-			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj, new RdbContextStorage().loadContext(contextId));
+			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId)).asQueue();
 			final int size = q.size();
 			final Iterator<FolderObject> iter = q.iterator();
