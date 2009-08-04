@@ -52,6 +52,8 @@ package com.openexchange.test;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import junit.framework.TestCase;
 import org.json.JSONArray;
@@ -71,24 +73,33 @@ import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * This class and FolderObject should be all that is needed to write folder-related tests. If multiple users are needed use multiple
  * instances of this class. Examples of tests using this class can be found in ExemplaryFolderTestManagerTest.java.
  * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring
  */
 public class FolderTestManager extends TestCase {
 
-    private Vector<FolderObject> insertedOrUpdatedFolders;
+    private List<FolderObject> createdItems;
 
     private AJAXClient client;
 
-    public boolean isIgnoreMailFolders() {
+    private boolean failOnError;
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean getFailOnError() {
+        return failOnError;
+    }
+
+    public boolean getIgnoreMailFolders() {
         return ignoreMailFolders;
     }
 
@@ -100,7 +111,7 @@ public class FolderTestManager extends TestCase {
 
     public FolderTestManager(AJAXClient client) {
         this.client = client;
-        insertedOrUpdatedFolders = new Vector<FolderObject>();
+        createdItems = new LinkedList<FolderObject>();
     }
 
     /**
@@ -112,17 +123,12 @@ public class FolderTestManager extends TestCase {
         CommonInsertResponse response = null;
         try {
             response = client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during folder creation: " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException during folder creation: " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException during folder creation: " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException during folder creation: " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "NewRequest");
         }
+
         response.fillObject(folderToCreate);
-        insertedOrUpdatedFolders.add(folderToCreate);
+        createdItems.add(folderToCreate);
         return folderToCreate;
     }
 
@@ -143,15 +149,10 @@ public class FolderTestManager extends TestCase {
         try {
             client.execute(request);
             remember(folder);
-        } catch (AjaxException e) {
-            fail("AjaxException while updating folder with ID " + folder.getObjectID() + ": " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException while updating folder with ID " + folder.getObjectID() + ": " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException while updating folder with ID " + folder.getObjectID() + ": " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException while updating folder with ID " + folder.getObjectID() + ": " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "UpdateRequest");
         }
+
         return folder;
     }
 
@@ -167,43 +168,30 @@ public class FolderTestManager extends TestCase {
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(int folderID, Date lastModified) throws AjaxException, IOException, SAXException, JSONException {
-        DeleteRequest request = new DeleteRequest(folderID, lastModified);
-        client.execute(request);
-        removeNonMailFolderFromCleanupList(folderID);
+    public void deleteFolderOnServer(final int folderID, final Date lastModified) throws AjaxException, IOException, SAXException, JSONException {
+        deleteFolderOnServer(new FolderObject() {
+            {
+                setObjectID(folderID);
+                setLastModified(lastModified);
+            }
+        });
     }
 
     /**
-     * Removes a folder form the cleanup list.
+     * Removes a folder form the cleanup list. This is somewhat complicated, because FolderObject lacks a proper #equals() and because
+     * identifying folders is different for normal folders and mail folders
      */
     private void removeFolderFromCleanupList(FolderObject folderToDelete) {
-        /*
-         * Once someone implements a proper equals on FolderObject, this can be replaced by a simple
-         * insertedOrUpdatedFolders.remove(folderToDelete);
-         */
-        for (int i = 0, length = insertedOrUpdatedFolders.size(); i < length; i++) {
-            FolderObject folder = insertedOrUpdatedFolders.get(i);
-            // normal folder:
-            if (folder.getObjectID() == folderToDelete.getObjectID() && folder.getParentFolderID() == folderToDelete.getParentFolderID() && !folder.containsFullName() && !folderToDelete.containsFullName()){
-                insertedOrUpdatedFolders.remove(i);
+        LinkedList<FolderObject> createdItemsCopy = new LinkedList<FolderObject>(createdItems);
+        for (FolderObject folder : createdItemsCopy) {
+            // normal folder
+            if (folder.getObjectID() == folderToDelete.getObjectID() && !folder.containsFullName() && !folderToDelete.containsFullName()) {
+                createdItems.remove(folder);
             }
             // mail folder:
             if (folder.containsFullName() && folderToDelete.containsFullName() && !folder.containsObjectID() && !folderToDelete.containsObjectID() && folder.getFullName().equals(
-                folderToDelete.getFullName())){
-                insertedOrUpdatedFolders.remove(i);
-            }
-        }
-    }
-    
-    /**
-     * Removes a non-mail folder form the cleanup list.
-     */
-    private void removeNonMailFolderFromCleanupList(int folderID) {
-        for (int i = 0, length = insertedOrUpdatedFolders.size(); i < length; i++) {
-            FolderObject folder = insertedOrUpdatedFolders.get(i);
-            // normal folder:
-            if (folder.getObjectID() == folderID){
-                insertedOrUpdatedFolders.remove(i);
+                folderToDelete.getFullName())) {
+                createdItemsCopy.remove(folder);
             }
         }
     }
@@ -211,22 +199,8 @@ public class FolderTestManager extends TestCase {
     public void deleteFolderOnServer(FolderObject folderToDelete, boolean failOnError) {
         try {
             deleteFolderOnServer(folderToDelete);
-        } catch (AjaxException e) {
-            if (failOnError)
-                fail("AjaxException while deleting folder with ID " + folderToDelete.getObjectID() + ": " + e.getMessage());
-            e.printStackTrace();
-        } catch (IOException e) {
-            if (failOnError)
-                fail("IOException while deleting folder with ID " + folderToDelete.getObjectID() + ": " + e.getMessage());
-            e.printStackTrace();
-        } catch (SAXException e) {
-            if (failOnError)
-                fail("SAXException while deleting folder with ID " + folderToDelete.getObjectID() + ": " + e.getMessage());
-            e.printStackTrace();
-        } catch (JSONException e) {
-            if (failOnError)
-                fail("JSONException while deleting folder with ID " + folderToDelete.getObjectID() + ": " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception e) {
+            doExceptionHandling(e, "DeleteRequest for folder with ID " + folderToDelete.getObjectID());
         }
     }
 
@@ -263,19 +237,8 @@ public class FolderTestManager extends TestCase {
         try {
             response = (GetResponse) client.execute(request);
             returnedFolder = response.getFolder();
-        } catch (AjaxException e) {
-            fail("AjaxException while getting folder with name " + name + ": " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException while getting folder with name " + name + ": " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException while getting folder with name " + name + ": " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException while getting folder with name " + name + ": " + e.getMessage());
-        } catch (OXException e) {
-            e.printStackTrace();
-            fail("OXException while getting folder with name " + name + ": " + e.getMessage());
-        } catch (OXJSONException e) {
-            fail("OXJSONException while getting folder with name " + name + ": " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "GetRequest");
         }
         return returnedFolder;
     }
@@ -284,30 +247,17 @@ public class FolderTestManager extends TestCase {
      * Get a folder via HTTP-API with no existing FolderObject and the folders id as identifier
      */
     public FolderObject getFolderFromServer(final int folderId, boolean failOnError) {
+        boolean oldValue = getFailOnError();
+        setFailOnError(failOnError);
         FolderObject returnedFolder = null;
         GetRequest request = new GetRequest(folderId, FolderObject.ALL_COLUMNS);
         GetResponse response = null;
         try {
             response = (GetResponse) client.execute(request);
             returnedFolder = response.getFolder();
-        } catch (AjaxException e) {
-            if (failOnError)
-                fail("AjaxException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
-        } catch (IOException e) {
-            if (failOnError)
-                fail("IOException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
-        } catch (SAXException e) {
-            if (failOnError)
-                fail("SAXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
-        } catch (JSONException e) {
-            if (failOnError)
-                fail("JSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
-        } catch (OXException e) {
-            if (failOnError)
-                fail("OXException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
-        } catch (OXJSONException e) {
-            if (failOnError)
-                fail("OXJSONException while getting folder with id " + Integer.toString(folderId) + ": " + e.getMessage());
+            setFailOnError(oldValue);
+        } catch (Exception e) {
+            doExceptionHandling(e, "GetRequest for folder with id " + folderId);
         }
         return returnedFolder;
     }
@@ -320,21 +270,17 @@ public class FolderTestManager extends TestCase {
      * removes all folders inserted or updated by this Manager
      */
     public void cleanUp() {
-        Vector<FolderObject> deleteMe = new Vector<FolderObject>(insertedOrUpdatedFolders);
+        Vector<FolderObject> deleteMe = new Vector<FolderObject>(createdItems);
         try {
             for (FolderObject folder : deleteMe) {
                 folder.setLastModified(new Date(Long.MAX_VALUE));
                 deleteFolderOnServer(folder);
             }
-        } catch (AjaxException e) {
-            fail("AjaxException occured during clean-up: " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException occured during clean-up: " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException occured during clean-up: " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException occured during clean-up: " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "clean-up");
         }
+
+        createdItems = new LinkedList<FolderObject>();
     }
 
     /**
@@ -350,17 +296,10 @@ public class FolderTestManager extends TestCase {
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (AjaxException e) {
-            fail("AjaxException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
-        } catch (OXException e) {
-            fail("OXException occured while getting all folders (List-Request) for parent folder with id: " + Integer.toString(parentFolderId) + ": " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "ListRequest");
         }
+
         FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
@@ -382,17 +321,10 @@ public class FolderTestManager extends TestCase {
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (AjaxException e) {
-            fail("AjaxException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
-        } catch (OXException e) {
-            fail("OXException occured while getting all folders for parent folder with id: " + folder.getFullName() + ": " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "ListRequest");
         }
+
         FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
@@ -408,17 +340,10 @@ public class FolderTestManager extends TestCase {
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
-        } catch (AjaxException e) {
-            fail("AjaxException occured while getting all root folders." + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException occured while getting all root folders." + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException occured while getting all root folders." + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException occured while getting all root folders." + e.getMessage());
-        } catch (OXException e) {
-            fail("OXException occured while getting all root folders." + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "ListRequest for root folders");
         }
+
         FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
@@ -439,57 +364,24 @@ public class FolderTestManager extends TestCase {
                 fo = this.getFolderFromServer(tempArray.getInt(0), true);
                 allFolders.add(fo);
             }
-        } catch (AjaxException e) {
-            fail("AjaxException occured while getting folders updated since date: " + lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException occured while getting folders updated since date: " + lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException occured while getting folders updated since date: " + lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException occured while getting folders updated since date: " + lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
         } catch (Exception e) {
-            fail("Exception occured while getting folders updated since date: " + lastModified + ", in parent folder: " + Integer.toString(folderId) + e.getMessage());
+            doExceptionHandling(e, "AllRequest");
         }
+
         FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
 
     private void remember(FolderObject folder) {
-        for (FolderObject tempFolder : insertedOrUpdatedFolders) {
+        for (FolderObject tempFolder : createdItems) {
             if (tempFolder.getObjectID() == folder.getObjectID()) {
-                insertedOrUpdatedFolders.set(insertedOrUpdatedFolders.indexOf(tempFolder), folder);
+                createdItems.set(createdItems.indexOf(tempFolder), folder);
             } else {
-                insertedOrUpdatedFolders.add(folder);
+                createdItems.add(folder);
             }
         }
     }
-
-    // /**
-    // * get all folders specified by multiple int-arrays with 2 slots each (1st slot: folderId, 2nd slot objectId) via the HTTP-API
-    // */
-    // public FolderObject[] listFoldersOnServer (final int[]... folderAndObjectIds) {
-    // Vector <FolderObject> allFolders = new Vector<FolderObject>();
-    // CommonListRequest request = new CommonListRequest(AbstractFolderRequest.FOLDER_URL, folderAndObjectIds, FolderObject.ALL_COLUMNS);
-    // try {
-    // CommonListResponse response = client.execute(request);
-    // final JSONArray data = (JSONArray) response.getResponse().getData();
-    // this.convertJSONArray2Vector(data, allFolders);
-    // } catch (AjaxException e) {
-    // fail("AjaxException occured while getting a list of folders : " + e.getMessage());
-    // } catch (IOException e) {
-    // fail("IOException occured while getting a list of folders : " + e.getMessage());
-    // } catch (SAXException e) {
-    // fail("SAXException occured while getting a list of folders : " + e.getMessage());
-    // } catch (JSONException e) {
-    // fail("JSONException occured while getting a list of folders : " + e.getMessage());
-    // } catch (Exception e) {
-    // fail("Exception occured while getting a list of folders : " + e.getMessage());
-    // }
-    // FolderObject[] folderArray = new FolderObject[allFolders.size()];
-    // allFolders.copyInto(folderArray);
-    // return folderArray;
-    // }
 
     /**
      * get all folders in one parent folder via the HTTP-API (All-Request)
@@ -508,90 +400,32 @@ public class FolderTestManager extends TestCase {
                 FolderObject tempFolder = getFolderFromServer(tempFolderId);
                 allFolders.add(tempFolder);
             }
-        } catch (AjaxException e) {
-            fail("AjaxException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
-        } catch (IOException e) {
-            fail("IOException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
-        } catch (SAXException e) {
-            fail("SAXException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
-        } catch (JSONException e) {
-            fail("JSONException occured while getting all folders (All-Request) for parent folder with id: " + folderId + ": " + e.getMessage());
+        } catch (Exception e) {
+            doExceptionHandling(e, "AllRequest");
         }
         FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
     }
 
-    // private void convertJSONArray2Vector(JSONArray data, Vector allFolders) throws JSONException, OXException {
-    // for (int i=0; i < data.length(); i++) {
-    // final JSONArray jsonArray = data.getJSONArray(i);
-    // JSONObject jsonObject = new JSONObject();
-    // for (int a=0; a < jsonArray.length(); a++){
-    // if (!"null".equals(jsonArray.getString(a))){
-    // String fieldname = FolderMapping.columnToFieldName(FolderObject.ALL_COLUMNS[a]);
-    // jsonObject.put(fieldname, jsonArray.getString(a));
-    // }
-    // }
-    // FolderObject folderObject = new FolderObject();
-    // folderParser.parse(folderObject, jsonObject);
-    // allFolders.add(folderObject);
-    // }
-    // }
-    //	
-    //	
-    // }
-    // final class FolderMapping extends TestCase{
-    //	
-    // private static HashMap columns2fields;
-    // private static HashMap fields2columns;
-    //	
-    // static {
-    // fields2columns = new HashMap();
-    // columns2fields = new HashMap();
-    //		
-    // try {
-    // put(FolderFields.TITLE, FolderObject.FOLDER_NAME);
-    // put(FolderFields.MODULE, FolderObject.MODULE);
-    // put(FolderFields.TYPE, FolderObject.TYPE);
-    // put(FolderFields.SUBFOLDERS, FolderObject.SUBFOLDERS);
-    // put(FolderFields.OWN_RIGHTS, FolderObject.OWN_RIGHTS);
-    // put(FolderFields.PERMISSIONS, FolderObject.PERMISSIONS_BITS);
-    // put(FolderFields.SUMMARY, FolderObject.SUMMARY);
-    // put(FolderFields.STANDARD_FOLDER, FolderObject.STANDARD_FOLDER);
-    // put(FolderFields.TOTAL, FolderObject.TOTAL);
-    // put(FolderFields.NEW, FolderObject.NEW);
-    // put(FolderFields.UNREAD, FolderObject.UNREAD);
-    // put(FolderFields.DELETED, FolderObject.DELETED);
-    // put(FolderFields.CAPABILITIES, FolderObject.CAPABILITIES);
-    // put(FolderFields.SUBSCRIBED, FolderObject.SUBSCRIBED);
-    // put(FolderFields.FOLDER_ID, FolderObject.FOLDER_ID);
-    // put(FolderFields.ID, FolderObject.OBJECT_ID);
-    // put(FolderFields.CREATED_BY, FolderObject.CREATED_BY);
-    // put(FolderFields.MODIFIED_BY, FolderObject.MODIFIED_BY);
-    // put(FolderFields.CREATION_DATE, FolderObject.CREATION_DATE);
-    // put(FolderFields.LAST_MODIFIED, FolderObject.LAST_MODIFIED);
-    // put(FolderFields.LAST_MODIFIED_UTC, FolderObject.LAST_MODIFIED_UTC);
-    //			
-    //			
-    //			
-    // } catch (Exception e) {
-    // fail(e.getMessage());
-    // }
-    // }
-    //	
-    // private static void put(String fieldname, int column) throws Exception {
-    // if (!fields2columns.containsKey(fieldname) && !columns2fields.containsKey(column)) {
-    // fields2columns.put(fieldname, column);
-    // columns2fields.put(column, fieldname);
-    // }
-    // else throw (new Exception("One Part of this combination is also mapped to something else!"));
-    // }
-    //	
-    // public static String columnToFieldName (int column) {
-    // return (String)columns2fields.get(column);
-    // }
-    //	
-    // public static int fieldNameToColumn (String fieldname) {
-    // return Integer.valueOf((Integer)fields2columns.get(fieldname));
-    // }
+    protected void doExceptionHandling(Exception exception, String action) {
+        try {
+            throw exception;
+        } catch (AjaxException e) {
+            if (getFailOnError())
+                fail("AjaxException occured during " + action + ": " + e.getMessage());
+        } catch (IOException e) {
+            if (getFailOnError())
+                fail("IOException occured during " + action + ": " + e.getMessage());
+        } catch (SAXException e) {
+            if (getFailOnError())
+                fail("SAXException occured during " + action + ": " + e.getMessage());
+        } catch (JSONException e) {
+            if (getFailOnError())
+                fail("JSONException occured during " + action + ": " + e.getMessage());
+        } catch (Exception e) {
+            fail("Unexpected error occured during " + action + ".");
+            e.printStackTrace();
+        }
+    }
 }
