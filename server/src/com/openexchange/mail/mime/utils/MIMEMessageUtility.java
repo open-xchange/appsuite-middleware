@@ -128,6 +128,18 @@ public final class MIMEMessageUtility {
 
     /**
      * Gets the {@link MailDateFormat} for specified session.
+     * <p>
+     * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
+     * safety:
+     * 
+     * <pre>
+     * ...
+     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+     * synchronized(mdf) {
+     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     * }
+     * ...
+     * </pre>
      * 
      * @param session The user session
      * @return The {@link MailDateFormat} for specified session
@@ -145,6 +157,18 @@ public final class MIMEMessageUtility {
 
     /**
      * Gets the {@link MailDateFormat} for specified time zone identifier.
+     * <p>
+     * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
+     * safety:
+     * 
+     * <pre>
+     * ...
+     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(timeZoneId);
+     * synchronized(mdf) {
+     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     * }
+     * ...
+     * </pre>
      * 
      * @param timeZoneId The time zone identifier
      * @return The {@link MailDateFormat} for specified time zone identifier
