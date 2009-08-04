@@ -50,30 +50,34 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * {@link AbstractPubSubTest}
- *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
     private FolderTestManager folderMgr;
+
     private ContactTestManager contactMgr;
 
-    /**
-     * Initializes a new {@link AbstractPubSubTest}.
-     * @param name
-     */
     public AbstractPubSubTest(String name) {
         super(name);
     }
@@ -109,7 +113,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject generateFolder(String name, int moduleType) throws AjaxException, IOException, SAXException, JSONException {
-        //create a folder
+        // create a folder
         FolderObject folderObject1 = new FolderObject();
         folderObject1.setFolderName(name);
         folderObject1.setType(FolderObject.PUBLIC);
@@ -125,7 +129,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1});
+        folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
         return folderObject1;
     }
 
@@ -140,16 +144,74 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return contact;
     }
 
+    protected PublicationTarget generateTarget(DynamicFormDescription form, String type) {
+        PublicationTarget target = new PublicationTarget();
+        target.setFormDescription(form);
+        target.setId("com.openexchange.publish.microformats." + type + ".online");
+        return target;
+    }
+
+    protected Publication generatePublication(String type, String folder) {
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        return generatePublication(type, folder, discovery);
+    }
+
+    protected DynamicFormDescription generateOXMFFormDescription() {
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
+        return form;
+    }
+
+    protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery) {
+        DynamicFormDescription form = generateOXMFFormDescription();
+        PublicationTarget target = generateTarget(form, type);
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("siteName", "publication");
+        config.put("protected", Boolean.valueOf(true));
+
+        discovery.addTarget(target);
+
+        Publication pub = new Publication();
+        pub.setModule(type);
+        pub.setEntityId(folder);
+        pub.setTarget(target);
+        pub.setConfiguration(config);
+        return pub;
+    }
+
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws AjaxException, IOException, SAXException, JSONException {
+        Subscription sub = generateOXMFSubscription(formDescription);
+        sub.setFolderId(folderID);
+        return sub;
+    }
+
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
+        Subscription subscription = new Subscription();
+
+        subscription.setDisplayName("mySubscription");
+
+        SubscriptionSource source = new SubscriptionSource();
+        source.setId("com.openexchange.subscribe.microformats.contacts.http");
+        source.setFormDescription(formDescription);
+        subscription.setSource(source);
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("url", "http://ox.open-xchange.com/1");
+        subscription.setConfiguration(config);
+
+        return subscription;
+    }
+
     protected FolderObject createDefaultContactFolder() throws AjaxException, IOException, SAXException, JSONException {
         FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
         getFolderManager().insertFolderOnServer(folder);
         return folder;
     }
 
-    
     protected Contact createDefaultContactFolderWithOneContact() throws AjaxException, IOException, SAXException, JSONException {
         FolderObject folder = createDefaultContactFolder();
-    
+
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
         getContactManager().insertContactOnServer(contact);
