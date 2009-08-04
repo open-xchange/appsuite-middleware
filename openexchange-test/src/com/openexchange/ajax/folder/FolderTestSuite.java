@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import com.openexchange.ajax.folder.actions.ExemplaryFolderTestManagerTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -77,6 +78,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(GetMailInboxTest.class);
         tests.addTestSuite(GetVirtualTest.class);
         tests.addTestSuite(GetSortedMailFolderTest.class);
+        tests.addTestSuite(ExemplaryFolderTestManagerTest.class);
 
         // Nodes
 
