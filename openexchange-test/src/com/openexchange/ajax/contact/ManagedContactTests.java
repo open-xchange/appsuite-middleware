@@ -52,7 +52,6 @@ package com.openexchange.ajax.contact;
 import java.util.Date;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
 
 
