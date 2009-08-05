@@ -93,9 +93,9 @@ public class ManagedContactTests extends AbstractAJAXSession {
     public void testCreateAndGetContact(){
         Contact expected = generateContact();
         
-        manager.insertContactOnServer(expected);
+        manager.newAction(expected);
         
-        Contact actual = manager.getContactFromServer(folderID, expected.getObjectID());
+        Contact actual = manager.getAction(folderID, expected.getObjectID());
         
         assertEquals("Surname should match", expected.getSurName(), actual.getSurName());
         assertEquals("Given name should match", expected.getGivenName(), actual.getGivenName());
@@ -104,12 +104,12 @@ public class ManagedContactTests extends AbstractAJAXSession {
     public void testDeleteContact(){
         Contact expected = generateContact();
         
-        manager.insertContactOnServer(expected);
+        manager.newAction(expected);
         
-        manager.deleteContactOnServer(expected);
+        manager.deleteAction(expected);
         
         try {
-            manager.getContactFromServer(folderID, expected.getObjectID(), true);
+            manager.getAction(folderID, expected.getObjectID());
             fail("Should throw assertion exception");
         } catch(AssertionError e) {
             
@@ -117,26 +117,26 @@ public class ManagedContactTests extends AbstractAJAXSession {
     }
     
     public void testGetAllContacts(){
-        int numberBefore = manager.getAllContactsOnServer(folderID).length;
+        int numberBefore = manager.allAction(folderID).length;
         
         Contact expected = generateContact();
         
-        manager.insertContactOnServer(expected);
+        manager.newAction(expected);
         
-        Contact[] allContactsOnServer = manager.getAllContactsOnServer(folderID);
+        Contact[] allContactsOnServer = manager.allAction(folderID);
         
         assertEquals("Should find exactly one more contact", numberBefore+ 1, allContactsOnServer.length);
     }
     
     
     public void testGetAllContactsWithColumns(){
-        int numberBefore = manager.getAllContactsOnServer(folderID).length;
+        int numberBefore = manager.allAction(folderID).length;
 
         Contact expected = generateContact();
         
-        manager.insertContactOnServer(expected);
+        manager.newAction(expected);
         
-        Contact[] allContactsOnServer = manager.getAllContactsOnServer(folderID, new int[]{1,4,5,20});
+        Contact[] allContactsOnServer = manager.allAction(folderID, new int[]{1,4,5,20});
         
         assertEquals("Should find exactly one more contact", numberBefore+ 1, allContactsOnServer.length);
         
@@ -150,14 +150,14 @@ public class ManagedContactTests extends AbstractAJAXSession {
     public void testUpdateContactAndGetUpdates(){
         Contact expected = generateContact();
         
-        manager.insertContactOnServer(expected);
+        manager.newAction(expected);
         
         Date updateDate = new Date();
         expected.setDisplayName("Display name");
         
-        manager.updateContactOnServer(expected);
+        manager.updateAction(expected);
         
-        Contact[] updated = manager.getUpdatedContactsOnServer(folderID, updateDate);
+        Contact[] updated = manager.updatesAction(folderID, updateDate);
         
         assertEquals("Only one contact should have been updated", 1, updated.length);
         

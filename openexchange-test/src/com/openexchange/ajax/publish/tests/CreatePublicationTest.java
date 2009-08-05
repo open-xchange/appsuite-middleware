@@ -85,7 +85,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         //fill contact folder
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
-        cMgr.insertContactOnServer(contact);
+        cMgr.newAction(contact);
 
         //publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
@@ -115,7 +115,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
         //fill contact folder
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
-        cMgr.insertContactOnServer(contact);
+        cMgr.newAction(contact);
         
         //publish
         SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();

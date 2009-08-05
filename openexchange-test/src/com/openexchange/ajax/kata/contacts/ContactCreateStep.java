@@ -78,7 +78,8 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
     public void cleanUp() throws Exception {
         if( inserted ){
             entry.setLastModified(new Date(Long.MAX_VALUE));
-            manager.deleteContactOnServer(entry, false);
+            manager.setFailOnError(false);
+            manager.deleteAction(entry);
         }
     }
 

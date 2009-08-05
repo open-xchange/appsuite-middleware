@@ -214,7 +214,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
-        getContactManager().insertContactOnServer(contact);
+        getContactManager().newAction(contact);
         return contact;
     }
 

@@ -76,7 +76,7 @@ public class OXMFLifeCycleTest extends AbstractPubSubRoundtripTest {
         super(name);
     }
 
-    public void testTripping() throws AjaxException, IOException, SAXException, JSONException{
+    public void testContactTripping() throws AjaxException, IOException, SAXException, JSONException{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
@@ -88,7 +88,7 @@ public class OXMFLifeCycleTest extends AbstractPubSubRoundtripTest {
         //setup contact
         Contact contact1 = generateContact("Herbert", "Meier");
         contact1.setParentFolderID(pubFolder.getObjectID());
-        cMgr.insertContactOnServer(contact1);
+        cMgr.newAction(contact1);
         
         //prepare pubsub
         PublicationTestManager pubMgr = getPublishManager();
@@ -106,29 +106,29 @@ public class OXMFLifeCycleTest extends AbstractPubSubRoundtripTest {
         
         //refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.getAllContactsOnServer(pubFolder.getObjectID());
+        contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
         
         //publish another contact
         Contact contact2 = generateContact("Hubert", "Meier");
         contact2.setParentFolderID(pubFolder.getObjectID());
-        cMgr.insertContactOnServer(contact2);
+        cMgr.newAction(contact2);
         
         //refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.getAllContactsOnServer(pubFolder.getObjectID());
+        contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should have two contacts after update", 2, contacts.length);
         
         //delete first contact
-        cMgr.deleteContactOnServer(contact1);
+        cMgr.deleteAction(contact1);
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.getAllContactsOnServer(pubFolder.getObjectID());
+        contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should have one contact after deleting one", 1, contacts.length);
 
         //delete second contact
-        cMgr.deleteContactOnServer(contact2);
+        cMgr.deleteAction(contact2);
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.getAllContactsOnServer(pubFolder.getObjectID());
+        contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should have no contacts after deleting them all", 0, contacts.length);
     }
 }

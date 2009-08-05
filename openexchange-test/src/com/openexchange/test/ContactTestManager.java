@@ -101,45 +101,77 @@ public class ContactTestManager {
 
     private ContactParser contactParser;
 
-    public ContactTestManager(AJAXClient client) {
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean getFailOnError() {
+        return failOnError;
+    }
+
+    public void setCreatedEntities(List<Contact> createdEntities) {
+        this.createdEntities = createdEntities;
+    }
+
+    public List<Contact> getCreatedEntities() {
+        return createdEntities;
+    }
+
+    public void setClient(AJAXClient client) {
         this.client = client;
-        createdEntities = new LinkedList<Contact>();
-        contactParser = new ContactParser();
+    }
+
+    public AJAXClient getClient() {
+        return client;
+    }
+
+    public void setContactParser(ContactParser contactParser) {
+        this.contactParser = contactParser;
+    }
+
+    public ContactParser getContactParser() {
+        return contactParser;
+    }
+
+    public ContactTestManager(AJAXClient client) {
+        this.setClient(client);
+        setCreatedEntities(new LinkedList<Contact>());
+        setContactParser(new ContactParser());
     }
 
     /**
      * Creates a contact via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      * Remembers this contact for cleanup later.
      */
-    public Contact insertContactOnServer(Contact contactToCreate) {
+    public Contact newAction(Contact contactToCreate) {
         InsertRequest request = new InsertRequest(contactToCreate);
         InsertResponse response = null;
         try {
-            response = client.execute(request);
+            response = getClient().execute(request);
         } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
         response.fillObject(contactToCreate);
-        createdEntities.add(contactToCreate);
+        getCreatedEntities().add(contactToCreate);
         return contactToCreate;
     }
 
     /**
      * Create multiple contacts via the HTTP-API at once
      */
-    public void insertContactsOnServer(Contact[] contacts) {
+    public void newAction(Contact[] contacts) {
         for (int i = 0; i < contacts.length; i++) {
-            this.insertContactOnServer(contacts[i]);
+            this.newAction(contacts[i]);
         }
     }
 
     /**
      * Updates a contact via HTTP-API and returns the same contact for convenience
      */
-    public Contact updateContactOnServer(Contact contact) {
+    public Contact updateAction(Contact contact) {
         UpdateRequest request = new UpdateRequest(contact);
         try {
-            client.execute(request);
+            getClient().execute(request);
             remember(contact);
         } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest for folder " + contact.getParentFolderID() + " and object " + contact.getObjectID());
@@ -150,69 +182,44 @@ public class ContactTestManager {
     /**
      * Deletes a contact via HTTP-API
      */
-    public void deleteContactOnServer(Contact contactToDelete) {
-        deleteContactOnServer(contactToDelete, true);
-    }
-
-    /**
-     * Deletes a contact via HTTP-API
-     */
-    public void deleteContactOnServer(Contact contactToDelete, boolean failOnError) {
-        boolean oldValue = this.failOnError;
-        this.failOnError = failOnError;
+    public void deleteAction(Contact contactToDelete) {
+        boolean oldValue = this.getFailOnError();
+        this.setFailOnError(failOnError);
         try {
             contactToDelete.setLastModified(new Date(Long.MAX_VALUE));
-            DeleteRequest request = new DeleteRequest(contactToDelete, failOnError);
-            client.execute(request);
+            DeleteRequest request = new DeleteRequest(contactToDelete, getFailOnError());
+            getClient().execute(request);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
                 "DeleteRequest for folder " + contactToDelete.getParentFolderID() + " and object " + contactToDelete.getObjectID());
         } finally {
-            this.failOnError = oldValue;
+            this.setFailOnError(oldValue);
         }
-        createdEntities.remove(contactToDelete); // TODO: does this find the right contact, or does equals() suck, too?
+        getCreatedEntities().remove(contactToDelete); // TODO: does this find the right contact, or does equals() suck, too?
     }
 
     /**
      * Get a contact via HTTP-API with an existing ContactObject
      */
-    public Contact getContactFromServer(Contact contact) {
-        return getContactFromServer(contact.getParentFolderID(), contact.getObjectID(), true);
-    }
-
-    /**
-     * Get a contact via HTTP-API with an existing ContactObject
-     */
-    public Contact getContactFromServer(Contact contact, boolean failOnError) {
-        return getContactFromServer(contact.getParentFolderID(), contact.getObjectID(), failOnError);
+    public Contact getAction(Contact contact) {
+        return getAction(contact.getParentFolderID(), contact.getObjectID());
     }
 
     /**
      * Get a contact via HTTP-API with no existing ContactObject
      */
-    public Contact getContactFromServer(final int folderId, final int objectId) {
-        return getContactFromServer(folderId, objectId, true);
-    }
-
-    /**
-     * Get a contact via HTTP-API with no existing ContactObject
-     */
-    public Contact getContactFromServer(final int folderId, final int objectId, boolean failOnError) {
-        boolean oldValue = this.failOnError;
-        this.failOnError = failOnError;
+    public Contact getAction(final int folderId, final int objectId) {
         Contact returnedContact = null;
         GetRequest request = new GetRequest(folderId, objectId);
         GetResponse response = null;
         try {
-            response = (GetResponse) client.execute(request);
+            response = (GetResponse) getClient().execute(request);
             returnedContact = response.getContact();
         } catch (Exception e) {
             doExceptionHandling(e, "GetRequest for folder " + folderId + " and object " + objectId);
-        } finally {
-            this.failOnError = oldValue;
-        }
-
+            return null;
+        } 
         return returnedContact;
     }
 
@@ -220,22 +227,25 @@ public class ContactTestManager {
      * removes all contacts inserted or updated by this Manager
      */
     public void cleanUp() {
-        for (Contact contact : new Vector<Contact>(createdEntities)) {
-            deleteContactOnServer(contact, false);
+        for (Contact contact : new Vector<Contact>(getCreatedEntities())) {
+            boolean old = getFailOnError();
+            setFailOnError(false);
+            deleteAction(contact);
+            setFailOnError(old);
         }
     }
 
-    public Contact[] getAllContactsOnServer(int folderId, int[] columns) {
+    public Contact[] allAction(int folderId, int[] columns) {
         Vector<Contact> allContacts = new Vector<Contact>();
         AllRequest request = new AllRequest(folderId, columns);
         try {
-            CommonAllResponse response = client.execute(request);
+            CommonAllResponse response = getClient().execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             for (int i = 0; i < data.length(); i++) {
                 JSONArray temp = (JSONArray) data.optJSONArray(i);
                 int tempObjectId = temp.getInt(0);
                 int tempFolderId = temp.getInt(1);
-                Contact tempContact = getContactFromServer(tempFolderId, tempObjectId);
+                Contact tempContact = getAction(tempFolderId, tempObjectId);
                 allContacts.add(tempContact);
             }
         } catch (Exception e) {
@@ -250,18 +260,18 @@ public class ContactTestManager {
     /**
      * get all contacts in one folder via the HTTP-API
      */
-    public Contact[] getAllContactsOnServer(int folderId) {
-        return getAllContactsOnServer(folderId, new int[] { Contact.OBJECT_ID });
+    public Contact[] allAction(int folderId) {
+        return allAction(folderId, new int[] { Contact.OBJECT_ID });
     }
 
     /**
      * get all contacts specified by multiple int-arrays with 2 slots each (1st slot: folderId, 2nd slot objectId) via the HTTP-API
      */
-    public Contact[] listContactsOnServer(final int[]... folderAndObjectIds) {
+    public Contact[] listAction(final int[]... folderAndObjectIds) {
         Vector<Contact> allContacts = new Vector<Contact>();
         ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), Contact.ALL_COLUMNS, true);
         try {
-            CommonListResponse response = client.execute(request);
+            CommonListResponse response = getClient().execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -275,11 +285,11 @@ public class ContactTestManager {
     /**
      * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
      */
-    public Contact[] searchForContactsOnServer(String pattern, int folderId) {
+    public Contact[] searchAction(String pattern, int folderId) {
         Vector<Contact> allContacts = new Vector<Contact>();
         SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
         try {
-            SearchResponse response = client.execute(request);
+            SearchResponse response = getClient().execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -295,11 +305,11 @@ public class ContactTestManager {
     /**
      * Get contacts in a folder that were updated since a specific date via the HTTP-API
      */
-    public Contact[] getUpdatedContactsOnServer(int folderId, Date lastModified) {
+    public Contact[] updatesAction(int folderId, Date lastModified) {
         Vector<Contact> allContacts = new Vector<Contact>();
         UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
         try {
-            CommonUpdatesResponse response = (CommonUpdatesResponse) client.execute(request);
+            CommonUpdatesResponse response = (CommonUpdatesResponse) getClient().execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -314,29 +324,30 @@ public class ContactTestManager {
         try {
             throw exception;
         } catch (AjaxException e) {
-            if (failOnError)
+            if (getFailOnError())
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
         } catch (IOException e) {
-            if (failOnError)
+            if (getFailOnError())
                 fail("IOException occured during " + action + ": " + e.getMessage());
         } catch (SAXException e) {
-            if (failOnError)
+            if (getFailOnError())
                 fail("SAXException occured during " + action + ": " + e.getMessage());
         } catch (JSONException e) {
-            if (failOnError)
+            if (getFailOnError())
                 fail("JSONException occured during " + action + ": " + e.getMessage());
         } catch (Exception e) {
-            fail("Unexpected exception occuredduring " + action + ": " + e.getMessage());
+            if (getFailOnError())
+                fail("Unexpected exception occuredduring " + action + ": " + e.getMessage());
         }
 
     }
 
     private void remember(Contact contact) {
-        for (Contact tempContact : createdEntities) {
+        for (Contact tempContact : getCreatedEntities()) {
             if (tempContact.getObjectID() == contact.getObjectID()) {
-                createdEntities.set(createdEntities.indexOf(tempContact), contact);
+                getCreatedEntities().set(getCreatedEntities().indexOf(tempContact), contact);
             } else {
-                createdEntities.add(contact);
+                getCreatedEntities().add(contact);
             }
         }
     }
@@ -353,7 +364,7 @@ public class ContactTestManager {
                 }
             }
             Contact contactObject = new Contact();
-            contactParser.parse(contactObject, jsonObject);
+            getContactParser().parse(contactObject, jsonObject);
             allContacts.add(contactObject);
         }
     }

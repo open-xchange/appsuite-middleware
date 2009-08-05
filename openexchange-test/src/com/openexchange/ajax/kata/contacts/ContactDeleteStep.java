@@ -73,9 +73,10 @@ public class ContactDeleteStep extends NeedExistingStep<Contact> {
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         ContactTestManager manager = new ContactTestManager(client);
-        Assert.assertNotNull("Should have found contact before deletion" , manager.getContactFromServer(this.entry , false) );        
-        manager.deleteContactOnServer(this.entry, false);
-        Assert.assertNull("Should not have found contact after deletion" , manager.getContactFromServer(this.entry , false) );
+        manager.setFailOnError(false);
+        Assert.assertNotNull("Should have found contact before deletion" , manager.getAction(this.entry) );
+        manager.deleteAction(this.entry);
+        Assert.assertNull("Should not have found contact after deletion" , manager.getAction(this.entry) );
         forgetIdentity(entry);
     }
 

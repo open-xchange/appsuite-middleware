@@ -126,7 +126,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
     }
 
     private void checkViaGet(Contact contact) throws OXException, JSONException {
-        Contact loaded = manager.getContactFromServer(expectedFolderId, contact.getObjectID());
+        Contact loaded = manager.getAction(expectedFolderId, contact.getObjectID());
         compare(contact, loaded);
     }
 
