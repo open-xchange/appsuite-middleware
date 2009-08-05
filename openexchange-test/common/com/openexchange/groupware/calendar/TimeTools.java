@@ -159,4 +159,10 @@ public final class TimeTools {
         }
     }
 
+    public static Date removeMilliseconds(final Date roundme){
+        long timestamp = roundme.getTime();
+        timestamp /= 1000;
+        timestamp *= 1000;
+        return new Date(timestamp);
+    }
 }
