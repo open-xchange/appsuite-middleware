@@ -65,10 +65,13 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
+import com.openexchange.ajax.appointment.action.UpdatesRequest;
+import com.openexchange.ajax.appointment.action.UpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.servlet.AjaxException;
@@ -152,13 +155,6 @@ public class CalendarTestManager {
         return client.getValues().getPrivateAppointmentFolder();
     }
 
-    /**
-     * @param parentFolderID
-     * @param objectID
-     * @return
-     * @throws JSONException
-     * @throws OXException
-     */
     public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
         GetRequest get = new GetRequest(parentFolderID, objectID);
         GetResponse response = execute(get);
@@ -197,10 +193,20 @@ public class CalendarTestManager {
         }
     }
     
-    /**
-     * @param appointment
-     * @return
-     */
+    public List<Appointment> getUpdates(final int folderId,final Date timestamp, final boolean recurrenceMaster){
+        return getUpdates(folderId, Appointment.ALL_COLUMNS, timestamp, recurrenceMaster);
+    }
+    
+    public List<Appointment> getUpdates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster){
+        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster);
+        UpdatesResponse resp = execute(req);
+        try {
+            return resp.getAppointments(timezone);
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
     public Appointment createIdentifyingCopy(Appointment appointment) {
         Appointment copy = new Appointment();
         copy.setObjectID(appointment.getObjectID());
