@@ -60,7 +60,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -68,6 +70,7 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
@@ -91,7 +94,7 @@ public class TaskTestManager {
 
     protected List<Task> createdEntities;
 
-    protected AJAXClient client;
+    private AJAXClient client;
 
     protected TimeZone timezone;
 
@@ -99,9 +102,11 @@ public class TaskTestManager {
 
     private boolean failOnError;
 
+    private AbstractAJAXResponse lastResponse;
+
     public TaskTestManager(AJAXClient client) {
-        failOnError = true;
-        this.client = client;
+        setFailOnError(true);
+        this.setClient(client);
         createdEntities = new LinkedList<Task>();
         try {
             taskFolderId = client.getValues().getPrivateTaskFolder();
@@ -129,7 +134,8 @@ public class TaskTestManager {
         InsertRequest request = new InsertRequest(taskToCreate, timezone);
         InsertResponse response = null;
         try {
-            response = client.execute(request);
+            response = getClient().execute(request);
+            setLastResponse(response);
             response.fillTask(taskToCreate);
         } catch (Exception e) {
             doHandleExeption(e, "NewRequest on folder " + taskToCreate.getParentFolderID());
@@ -142,7 +148,8 @@ public class TaskTestManager {
         UpdateRequest request = new UpdateRequest(taskToUpdate, timezone);
         UpdateResponse response = null;
         try {
-            response = client.execute(request);
+            response = getClient().execute(request);
+            setLastResponse(response);
         } catch (Exception e) {
             doHandleExeption(e, "UpdateRequest for task ID " + taskToUpdate.getObjectID());
         }
@@ -160,36 +167,27 @@ public class TaskTestManager {
         UpdateRequest request = new UpdateRequest(sourceFolder, taskToMove, timezone);
         UpdateResponse response = null;
         try {
-            response = client.execute(request);
+            response = getClient().execute(request);
+            setLastResponse(response);
         } catch (Exception e) {
             doHandleExeption(e, "MoveRequest");
         }
         taskToMove.setLastModified(response.getTimestamp());
         return taskToMove;
     }
-    
+
     public void deleteTaskOnServer(Task taskToDelete) {
         deleteTaskOnServer(taskToDelete, true);
     }
-    
+
     public void deleteTaskOnServer(Task taskToDelete, boolean failOnError) {
-        DeleteRequest request = new DeleteRequest(taskToDelete,failOnError);
+        DeleteRequest request = new DeleteRequest(taskToDelete, failOnError);
         try {
-            client.execute(request);
-        } catch (AjaxException e) {
-            if(failOnError)
-                fail("AjaxException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            if(failOnError)
-                fail("IOException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            if(failOnError)
-                fail("SAXException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            if(failOnError)
-                fail("JSONException during deletion of task " + taskToDelete.getObjectID() + ": " + e.getLocalizedMessage());
+            setLastResponse(getClient().execute(request));
+        } catch (Exception e) {
+            doHandleExeption(e, "DeleteRequest for " + taskToDelete.getObjectID());
         }
-        createdEntities.remove(taskToDelete); //TODO matches the right task?
+        createdEntities.remove(taskToDelete); // TODO matches the right task?
     }
 
     public Task getTaskFromServer(int folder, int objectId) {
@@ -200,7 +198,8 @@ public class TaskTestManager {
         GetRequest request = new GetRequest(folder, objectId, failOnError);
         GetResponse response = null;
         try {
-            response = client.execute(request);
+            response = getClient().execute(request);
+            setLastResponse(response);
             return response.getTask(timezone);
         } catch (Exception e) {
             doHandleExeption(e, "TaskRequest for task id " + objectId);
@@ -216,44 +215,16 @@ public class TaskTestManager {
         return getTaskFromServer(task.getParentFolderID(), task.getObjectID(), failOnError);
     }
 
-    
-    public Task[] getUpdatedTasksOnServer(int folder, int[] columns, Date lastModified){
-        UpdatesRequest req = new UpdatesRequest(folder, columns,-1, null, lastModified);
+    public Task[] getUpdatedTasksOnServer(int folder, int[] columns, Date lastModified) {
+        UpdatesRequest req = new UpdatesRequest(folder, columns, -1, null, lastModified);
         TaskUpdatesResponse resp = null;
         try {
-            resp = client.execute(req);
+            resp = getClient().execute(req);
+            setLastResponse(resp);
         } catch (Exception e) {
             doHandleExeption(e, "UpdatesRequest");
         }
-        return resp.getTasks().toArray(new Task[]{});
-    }
-
-    
-
-    private void doHandleExeption(Exception exc, String action) {
-        try {
-            throw exc;
-        } catch (AjaxException e) {
-            if (failOnError)
-                fail("AJAXException during " + action + ": " + e.getMessage());
-        } catch (IOException e) {
-            if (failOnError)
-                fail("IOException during " + action + ": " + e.getMessage());
-        } catch (SAXException e) {
-            if (failOnError)
-                fail("SAXException during " + action + ": " + e.getMessage());
-        } catch (JSONException e) {
-            if (failOnError)
-                fail("JSONException during " + action + ": " + e.getMessage());
-        } catch (OXJSONException e) {
-            if (failOnError)
-                fail("OXJSONException during " + action + ": " + e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (failOnError)
-                fail("Unexpected exception during " + action + ": " + e.getMessage());
-        }
-        
+        return resp.getTasks().toArray(new Task[] {});
     }
 
     /**
@@ -262,22 +233,23 @@ public class TaskTestManager {
     public Task[] getAllTasksOnServer(int folderID, int[] columns) {
         AllRequest allTasksRequest = new AllRequest(folderID, columns, Task.OBJECT_ID, Order.ASCENDING);
         try {
-            CommonAllResponse allTasksResponse = client.execute(allTasksRequest);
+            CommonAllResponse allTasksResponse = getClient().execute(allTasksRequest);
+            setLastResponse(allTasksResponse);
             JSONArray jsonTasks = (JSONArray) allTasksResponse.getData();
             List<Task> tasks = new LinkedList<Task>();
             for (int j = 0; j < jsonTasks.length(); j++) {
                 JSONArray taskAsArray = (JSONArray) jsonTasks.get(j);
-                Task task = transformAllRequestArrayToTask(taskAsArray);
+                Task task = transformArrayToTask(taskAsArray);
                 tasks.add(task);
             }
             return tasks.toArray(new Task[tasks.size()]);
 
         } catch (Exception e) {
-            doHandleExeption(e, "AllRequest for folder "+ folderID);
+            doHandleExeption(e, "AllRequest for folder " + folderID);
         }
         return null;
     }
-    
+
     /**
      * Performs an AllRequest for all columns on the server and returns the tasks in a requested folder.
      * 
@@ -286,6 +258,24 @@ public class TaskTestManager {
      */
     public Task[] getAllTasksOnServer(int folderID) {
         return getAllTasksOnServer(folderID, Task.ALL_COLUMNS);
+    }
+
+    public Task[] listContactsOnServer(final int[][] folderAndTaskIds, final int[] columns) {
+        ListRequest req = new ListRequest(folderAndTaskIds, columns);
+        CommonListResponse resp = null;
+        List<Task> tasks = null;
+        try {
+            resp = getClient().execute(req);
+            setLastResponse(resp);
+            tasks = transformArrayToTasks((JSONArray) resp.getData());
+        } catch (Exception e) {
+            doHandleExeption(e, "ListRequest");
+        }
+        return (tasks == null) ? null : tasks.toArray(new Task[]{});        
+    }
+
+    public Task searchForTasksOnServer() {
+        return null;
     }
 
     /**
@@ -326,14 +316,21 @@ public class TaskTestManager {
         return retval;
     }
 
+    protected List<Task> transformArrayToTasks(JSONArray tasks) throws JSONException{
+        LinkedList<Task> results = new LinkedList<Task>();
+        for(int i = 0, length = tasks.length(); i < length; i++){
+            results.add(transformArrayToTask( tasks.getJSONArray(i)));
+        }
+        return results;
+    }
     /**
-     * An AllRequest answers with a JSONArray of JSONArrays, each of which contains a field belonging to a task. This method assembles a task
-     * from this array.
+     * An AllRequest answers with a JSONArray of JSONArrays, each of which contains a field belonging to a task. This method assembles a
+     * task from this array.
      * 
      * @return
      * @throws JSONException
      */
-    protected static Task transformAllRequestArrayToTask(JSONArray taskAsArray) throws JSONException {
+    protected static Task transformArrayToTask(JSONArray taskAsArray) throws JSONException {
         Task resultingTask = new Task();
 
         for (int i = 0; i < Task.ALL_COLUMNS.length; i++) {
@@ -347,16 +344,6 @@ public class TaskTestManager {
         }
 
         return resultingTask;
-    }
-
-    public Task listContactsOnServer() {
-        return null;
-
-    }
-
-    public Task searchForTasksOnServer() {
-        return null;
-
     }
 
     /**
@@ -400,12 +387,61 @@ public class TaskTestManager {
         TestTask task = new TestTask();
         task.setTitle(title);
 
-        UserValues values = client.getValues();
+        UserValues values = getClient().getValues();
         task.setTimezone(values.getTimeZone());
         task.setParentFolderID(values.getPrivateTaskFolder());
         task.setCreatedBy(values.getUserId());
         task.setModifiedBy(values.getUserId());
 
         return task;
+    }
+
+    private void doHandleExeption(Exception exc, String action) {
+        try {
+            throw exc;
+        } catch (AjaxException e) {
+            if (getFailOnError())
+                fail("AJAXException during " + action + ": " + e.getMessage());
+        } catch (IOException e) {
+            if (getFailOnError())
+                fail("IOException during " + action + ": " + e.getMessage());
+        } catch (SAXException e) {
+            if (getFailOnError())
+                fail("SAXException during " + action + ": " + e.getMessage());
+        } catch (JSONException e) {
+            if (getFailOnError())
+                fail("JSONException during " + action + ": " + e.getMessage());
+        } catch (OXJSONException e) {
+            if (getFailOnError())
+                fail("OXJSONException during " + action + ": " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (getFailOnError())
+                fail("Unexpected exception during " + action + ": " + e.getMessage());
+        }
+    }
+
+    public void setLastResponse(AbstractAJAXResponse lastResponse) {
+        this.lastResponse = lastResponse;
+    }
+
+    public AbstractAJAXResponse getLastResponse() {
+        return lastResponse;
+    }
+
+    public void setClient(AJAXClient client) {
+        this.client = client;
+    }
+
+    public AJAXClient getClient() {
+        return client;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean getFailOnError() {
+        return failOnError;
     }
 }
