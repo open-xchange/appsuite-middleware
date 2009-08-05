@@ -50,19 +50,9 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.GroupParticipant;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.tasks.ExternalParticipant;
 import com.openexchange.groupware.tasks.Task;
 
 /**

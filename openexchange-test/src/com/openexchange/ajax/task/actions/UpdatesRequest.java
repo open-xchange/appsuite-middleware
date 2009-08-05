@@ -51,7 +51,6 @@ package com.openexchange.ajax.task.actions;
 
 import java.util.Date;
 import java.util.TimeZone;
-import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
