@@ -68,8 +68,10 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.search.Order;
@@ -95,19 +97,16 @@ public class TaskTestManager {
 
     protected int taskFolderId;
 
+    private boolean failOnError;
+
     public TaskTestManager(AJAXClient client) {
+        failOnError = true;
         this.client = client;
         createdEntities = new LinkedList<Task>();
         try {
             taskFolderId = client.getValues().getPrivateTaskFolder();
-        } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JSONException during task creation: " + e.getLocalizedMessage());
+        } catch (Exception e) {
+            doHandleExeption(e, "getting private task folder from user values");
         }
         try {
             timezone = client.getValues().getTimeZone();
@@ -132,14 +131,8 @@ public class TaskTestManager {
         try {
             response = client.execute(request);
             response.fillTask(taskToCreate);
-        } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JSONException during task creation: " + e.getLocalizedMessage());
+        } catch (Exception e) {
+            doHandleExeption(e, "NewRequest on folder " + taskToCreate.getParentFolderID());
         }
 
         return taskToCreate;
@@ -150,14 +143,8 @@ public class TaskTestManager {
         UpdateResponse response = null;
         try {
             response = client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during task update: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task update: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task update: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JSONException during task update: " + e.getLocalizedMessage());
+        } catch (Exception e) {
+            doHandleExeption(e, "UpdateRequest for task ID " + taskToUpdate.getObjectID());
         }
         taskToUpdate.setLastModified(response.getTimestamp());
         for (CalendarObject co : createdEntities) {
@@ -174,14 +161,8 @@ public class TaskTestManager {
         UpdateResponse response = null;
         try {
             response = client.execute(request);
-        } catch (AjaxException e) {
-            fail("AjaxException during task update: " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            fail("IOException during task update: " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            fail("SAXException during task update: " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            fail("JSONException during task update: " + e.getLocalizedMessage());
+        } catch (Exception e) {
+            doHandleExeption(e, "MoveRequest");
         }
         taskToMove.setLastModified(response.getTimestamp());
         return taskToMove;
@@ -221,21 +202,8 @@ public class TaskTestManager {
         try {
             response = client.execute(request);
             return response.getTask(timezone);
-        } catch (AjaxException e) {
-            if (failOnError)
-                fail("AjaxException while getting task with ID " + objectId + ": " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            if (failOnError)
-                fail("IOException while getting task with ID " + objectId + ": " + e.getLocalizedMessage());
-        } catch (SAXException e) {
-            if (failOnError)
-                fail("SAXException while getting task with ID " + objectId + ": " + e.getLocalizedMessage());
-        } catch (JSONException e) {
-            if (failOnError)
-                fail("JSONException while getting task with ID " + objectId + ": " + e.getLocalizedMessage());
-        } catch (OXJSONException e) {
-            if (failOnError)
-                fail("OXJSONException while getting task with ID " + objectId + ": " + e.getLocalizedMessage());
+        } catch (Exception e) {
+            doHandleExeption(e, "TaskRequest for task id " + objectId);
         }
         return null;
     }
@@ -247,14 +215,52 @@ public class TaskTestManager {
     public Task getTaskFromServer(Task task, boolean failOnError) {
         return getTaskFromServer(task.getParentFolderID(), task.getObjectID(), failOnError);
     }
+
+    
+    public Task[] getUpdatedTasksOnServer(int folder, int[] columns, Date lastModified){
+        UpdatesRequest req = new UpdatesRequest(folder, columns,-1, null, lastModified);
+        TaskUpdatesResponse resp = null;
+        try {
+            resp = client.execute(req);
+        } catch (Exception e) {
+            doHandleExeption(e, "UpdatesRequest");
+        }
+        return resp.getTasks().toArray(new Task[]{});
+    }
+
+    
+
+    private void doHandleExeption(Exception exc, String action) {
+        try {
+            throw exc;
+        } catch (AjaxException e) {
+            if (failOnError)
+                fail("AJAXException during " + action + ": " + e.getMessage());
+        } catch (IOException e) {
+            if (failOnError)
+                fail("IOException during " + action + ": " + e.getMessage());
+        } catch (SAXException e) {
+            if (failOnError)
+                fail("SAXException during " + action + ": " + e.getMessage());
+        } catch (JSONException e) {
+            if (failOnError)
+                fail("JSONException during " + action + ": " + e.getMessage());
+        } catch (OXJSONException e) {
+            if (failOnError)
+                fail("OXJSONException during " + action + ": " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (failOnError)
+                fail("Unexpected exception during " + action + ": " + e.getMessage());
+        }
+        
+    }
+
     /**
      * Performs an AllRequest for all columns on the server and returns the tasks in a requested folder.
-     * 
-     * @param folderID
-     * @return
      */
-    public Task[] getAllTasksOnServer(int folderID) {
-        AllRequest allTasksRequest = new AllRequest(folderID, Task.ALL_COLUMNS, Task.OBJECT_ID, Order.ASCENDING);
+    public Task[] getAllTasksOnServer(int folderID, int[] columns) {
+        AllRequest allTasksRequest = new AllRequest(folderID, columns, Task.OBJECT_ID, Order.ASCENDING);
         try {
             CommonAllResponse allTasksResponse = client.execute(allTasksRequest);
             JSONArray jsonTasks = (JSONArray) allTasksResponse.getData();
@@ -266,16 +272,20 @@ public class TaskTestManager {
             }
             return tasks.toArray(new Task[tasks.size()]);
 
-        } catch (AjaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            doHandleExeption(e, "AllRequest for folder "+ folderID);
         }
         return null;
+    }
+    
+    /**
+     * Performs an AllRequest for all columns on the server and returns the tasks in a requested folder.
+     * 
+     * @param folderID
+     * @return
+     */
+    public Task[] getAllTasksOnServer(int folderID) {
+        return getAllTasksOnServer(folderID, Task.ALL_COLUMNS);
     }
 
     /**
@@ -298,11 +308,17 @@ public class TaskTestManager {
             break;
         case Task.ACTUAL_DURATION:
         case Task.TARGET_DURATION:
-            retval = new Long((String) value);
+            retval = new Long(((Integer) value).longValue());
             break;
         case Task.ACTUAL_COSTS:
         case Task.TARGET_COSTS:
-            retval = new Float((String) value);
+            retval = new Float(((Long) value).floatValue());
+            break;
+        case Task.PERCENT_COMPLETED:
+            retval = (Integer.valueOf(((Long) value).intValue()));
+            break;
+        case Task.BILLING_INFORMATION:
+            retval = String.valueOf(((Integer) value).intValue());
             break;
         default:
             retval = value;
@@ -339,11 +355,6 @@ public class TaskTestManager {
     }
 
     public Task searchForTasksOnServer() {
-        return null;
-
-    }
-
-    public Task getUpdatedTasksOnServer() {
         return null;
 
     }
