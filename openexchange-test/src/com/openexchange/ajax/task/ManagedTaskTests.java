@@ -129,7 +129,8 @@ public class ManagedTaskTests extends AbstractAJAXSession {
 
         manager.updateTaskOnServer(updated);
 
-        Task[] updates = manager.getUpdatedTasksOnServer(folderID, new int[] { 1, 4, 5, 209 }, expected.getLastModified());
+        Date aMillisecondEarlier = new Date(expected.getLastModified().getTime()-1);
+        Task[] updates = manager.getUpdatedTasksOnServer(folderID, new int[] { 1, 4, 5, 209 }, aMillisecondEarlier);
         assertEquals("Should find one update only", 1, updates.length);
 
         actual = updates[0];
