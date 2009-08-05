@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -169,11 +170,37 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
         Appointment reload = manager.getAppointmentFromServer(appointment);
         
         assertEquals(23000, reload.getStartDate().getTime());
-        assertEquals(25000, reload.getEndDate().getTime());
-        
+        assertEquals(25000, reload.getEndDate().getTime());   
     }
     
-    public void testListAllInFolder() throws Exception {
+    public void testUpdates() throws Exception {
+        Appointment appointment = new Appointment();
+        appointment.setParentFolderID( manager.getPrivateFolder() );
+        appointment.setTitle(getName());
+        appointment.setStartDate(new Date());
+        appointment.setEndDate(new Date());
+        
+        manager.insertAppointmentOnServer(appointment);
+    
+        Date beforeUpdate = new Date();
+        Appointment update = manager.createIdentifyingCopy( appointment );
+        String updatedTitle = getName()+"2";
+        update.setTitle(updatedTitle);
+
+        assertEquals(update.getObjectID(), appointment.getObjectID());
+        assertEquals(update.getParentFolderID(), appointment.getParentFolderID());
+        assertEquals(update.getLastModified(), appointment.getLastModified());
+        assertNotSame(appointment, update);
+                
+        manager.updateAppointmentOnServer( update );
+        
+        List<Appointment> updates = manager.getUpdates(appointment.getParentFolderID(), beforeUpdate, true);
+        
+        assertEquals("Should have one new update", 1, updates.size());
+        assertEquals("Should contain the updated title", updatedTitle, updates.get(0).getTitle());
+    }
+    
+    public void testGetAllInFolder() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID( manager.getPrivateFolder() );
         appointment.setTitle(getName());
