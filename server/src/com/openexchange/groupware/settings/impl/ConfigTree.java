@@ -173,7 +173,7 @@ public final class ConfigTree {
         }
     }
 
-    private static void addElementWithoutOverwriting(Setting actual, Setting subSetting) throws SettingException {
+    private static void addElementWithoutOverwriting(final Setting actual, final Setting subSetting) throws SettingException {
         if(actual.getElement(subSetting.getName()) != null) {
             throw new SettingException(Code.DUPLICATE_PATH, actual.getPath()+"/"+subSetting.getName());
         }
@@ -263,6 +263,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.AppendMailText.class,
             com.openexchange.groupware.settings.tree.modules.mail.Colorquoted.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
+            com.openexchange.groupware.settings.tree.modules.mail.DefaultSeparator.class,
             com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
             com.openexchange.groupware.settings.tree.modules.mail.UnifiedINBOXEnablement.class,
             com.openexchange.groupware.settings.tree.modules.mail.Emoticons.class,
