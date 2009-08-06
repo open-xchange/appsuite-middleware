@@ -145,7 +145,7 @@ public interface FolderStorage {
     void createFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
 
     /**
-     * Gets the subfolder identifiers for specified parent.
+     * Gets the subfolder identifiers for specified parent which are visible to storage parameter's entity.
      * 
      * @param treeId The tree identifier
      * @param parentId The parent identifier
