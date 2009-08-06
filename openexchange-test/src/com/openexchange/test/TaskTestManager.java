@@ -191,11 +191,7 @@ public class TaskTestManager {
     }
 
     public Task getTaskFromServer(int folder, int objectId) {
-        return getTaskFromServer(folder, objectId, true);
-    }
-
-    public Task getTaskFromServer(int folder, int objectId, boolean failOnError) {
-        GetRequest request = new GetRequest(folder, objectId, failOnError);
+        GetRequest request = new GetRequest(folder, objectId, getFailOnError());
         GetResponse response = null;
         try {
             response = getClient().execute(request);
@@ -211,10 +207,6 @@ public class TaskTestManager {
         return getTaskFromServer(task.getParentFolderID(), task.getObjectID());
     }
 
-    public Task getTaskFromServer(Task task, boolean failOnError) {
-        return getTaskFromServer(task.getParentFolderID(), task.getObjectID(), failOnError);
-    }
-
     public Task[] getUpdatedTasksOnServer(int folder, int[] columns, Date lastModified) {
         UpdatesRequest req = new UpdatesRequest(folder, columns, -1, null, lastModified);
         TaskUpdatesResponse resp = null;
@@ -223,6 +215,7 @@ public class TaskTestManager {
             setLastResponse(resp);
         } catch (Exception e) {
             doHandleExeption(e, "UpdatesRequest");
+            return null;
         }
         return resp.getTasks().toArray(new Task[] {});
     }
