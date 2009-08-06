@@ -260,7 +260,7 @@ public final class List {
                     } else if (t instanceof Error) {
                         throw (Error) t;
                     } else {
-                        throw new IllegalStateException("Not unchecked", t);
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
                     }
                 }
                 ret = subfolders;
@@ -332,7 +332,7 @@ public final class List {
                     } else if (t instanceof Error) {
                         throw (Error) t;
                     } else {
-                        throw new IllegalStateException("Not unchecked", t);
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
                     }
                 }
             }
