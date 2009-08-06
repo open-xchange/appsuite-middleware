@@ -49,69 +49,40 @@
 
 package com.openexchange.folderstorage;
 
-import java.util.Date;
-import java.util.Locale;
 
 /**
- * {@link UserizedFolder} - Extends/overwrites {@link Folder} interface methods with user-sensitive methods.
+ * {@link SystemContentType} - The folder storage content type for system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface UserizedFolder extends Folder {
+public final class SystemContentType implements ContentType {
+
+    private static final SystemContentType instance = new SystemContentType();
 
     /**
-     * Gets the subfolder IDs.
-     * <p>
-     * <b>Note</b>: In opposite to {@link Folder#getSubfolderIDs()} this method does not return complete list of subfolder identifiers.
-     * Since a user-sensitive folder is only meant to indicate if it contains any subfolder at all, it only serves the condition:
+     * Gets the {@link SystemContentType} instance.
      * 
-     * <pre>
-     * final boolean hasSubfolders = userizedFolder.getSubfolderIDs() &gt; 0
-     * </pre>
-     * 
-     * @return The subfolder IDs or <code>null</code> if not available
+     * @return The {@link SystemContentType} instance
      */
-    String[] getSubfolderIDs();
+    public static SystemContentType getInstance() {
+        return instance;
+    }
 
     /**
-     * Gets the permission for requesting user.
-     * 
-     * @return The permission for requesting user
+     * Initializes a new {@link SystemContentType}.
      */
-    Permission getOwnPermission();
+    private SystemContentType() {
+        super();
+    }
 
-    /**
-     * Sets the permission for requesting user.
-     * 
-     * @param ownPermission The permission for requesting user
-     */
-    void setOwnPermission(Permission ownPermission);
+    @Override
+    public String toString() {
+        return "unbound";
+    }
 
-    /**
-     * Gets the last-modified date in UTC.
-     * 
-     * @return The last-modified date in UTC
-     */
-    Date getLastModifiedUTC();
+    public int getModule() {
+        // From FolderObject.SYSTEM_MODULE
+        return 5;
+    }
 
-    /**
-     * Sets the last-modified date in UTC.
-     * 
-     * @param lastModifiedUTC The last-modified date in UTC
-     */
-    void setLastModifiedUTC(Date lastModifiedUTC);
-
-    /**
-     * Gets the locale for this user-sensitive folder.
-     * 
-     * @return The locale for this user-sensitive folder
-     */
-    Locale getLocale();
-
-    /**
-     * Sets the locale for this user-sensitive folder.
-     * 
-     * @param locale The locale for this user-sensitive folder
-     */
-    void setLocale(Locale locale);
 }

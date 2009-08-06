@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.database;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.SystemType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -135,7 +136,7 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     /**
-     * Gets the owner
+     * Gets the owner.
      * 
      * @return The owner
      */
@@ -144,7 +145,7 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     /**
-     * Sets the owner
+     * Sets the owner.
      * 
      * @param owner The owner to set
      */
@@ -181,7 +182,7 @@ public class DatabaseFolder extends AbstractFolder {
         if (FolderObject.UNBOUND == module) {
             return UnboundContentType.getInstance();
         }
-        return null;
+        return SystemContentType.getInstance();
     }
 
     public boolean isGlobalID() {
