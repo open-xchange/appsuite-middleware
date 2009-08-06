@@ -77,18 +77,24 @@ public class TaskDeleteStep extends NeedExistingStep<Task> {
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         TaskTestManager manager = new TaskTestManager(client);
-        if(!expectsError()) {
-            Assert.assertNotNull("Should have found task before deletion", manager.getTaskFromServer(this.entry, false));
+        manager.setFailOnError(!expectsError());
+
+        if (!expectsError()) {
+            Assert.assertNotNull("Should have found task before deletion", manager.getTaskFromServer(this.entry));
         }
-        
+
         DeleteRequest request = new DeleteRequest(entry, !expectsError());
         CommonDeleteResponse response = client.execute(request);
         checkError(response);
-        
-        if(!expectsError()) {
-            Assert.assertNull("Should not have found task after deletion", manager.getTaskFromServer(this.entry, false));
+
+        if (!expectsError()) {
+            boolean old = manager.getFailOnError();
+            manager.setFailOnError(false);
+            Assert.assertNull("Should not have found task after deletion", manager.getTaskFromServer(this.entry));
+            manager.setFailOnError(old);
         }
-        if(!response.hasError()) {
+        
+        if (!response.hasError()) {
             forgetIdentity(entry);
         }
     }
