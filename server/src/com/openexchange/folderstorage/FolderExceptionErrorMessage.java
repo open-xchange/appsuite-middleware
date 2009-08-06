@@ -94,7 +94,23 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * JSON error: %1$s
      */
-    JSON_ERROR(FolderExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 8);
+    JSON_ERROR(FolderExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 8),
+    /**
+     * Missing tree identifier.
+     */
+    MISSING_TREE_ID(FolderExceptionMessages.MISSING_TREE_ID_MSG, Category.CODE_ERROR, 9),
+    /**
+     * Missing parent folder identifier.
+     */
+    MISSING_PARENT_ID(FolderExceptionMessages.MISSING_PARENT_ID_MSG, Category.CODE_ERROR, 10),
+    /**
+     * Missing folder identifier.
+     */
+    MISSING_FOLDER_ID(FolderExceptionMessages.MISSING_FOLDER_ID_MSG, Category.CODE_ERROR, 11),
+    /**
+     * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
+     */
+    INVALID_CONTENT_TYPE(FolderExceptionMessages.INVALID_CONTENT_TYPE_MSG, Category.CODE_ERROR, 12);
 
     private final Category category;
 

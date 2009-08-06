@@ -176,8 +176,8 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 mfd.addPermissions(mailPermissions);
             }
-            mailServletInterface.saveFolder(mfd);
-
+            final String fullname = mailServletInterface.saveFolder(mfd);
+            folder.setID(MailFolderUtility.prepareFullname(arg.getAccountId(), fullname));
         } catch (final MailException e) {
             throw new FolderException(e);
         }

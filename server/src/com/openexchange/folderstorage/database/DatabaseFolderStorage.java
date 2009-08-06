@@ -215,6 +215,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session);
             folderManager.createFolder(createMe, true, millis);
+            folder.setID(String.valueOf(createMe.getObjectID()));
         } catch (final OXException e) {
             throw new FolderException(e);
         }
@@ -561,7 +562,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
             con.setAutoCommit(false);
             // Put to parameters
             parameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, con);
-            parameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
+            parameters.putParameterIfAbsent(
+                DatabaseFolderType.getInstance(),
+                DatabaseParameterConstants.PARAM_WRITABLE,
+                Boolean.valueOf(modify));
             return parameters;
         } catch (final ServiceException e) {
             throw new FolderException(e);

@@ -137,6 +137,8 @@ public interface FolderStorage {
 
     /**
      * Creates the given folder on the storage.
+     * <p>
+     * Implementation is expected to set the identifier of created folder in passed folder instance through {@link Folder#setID(String)}.
      * 
      * @param folder The object containing the new folder data.
      * @param storageParameters The storage parameters

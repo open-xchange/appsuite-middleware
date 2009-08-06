@@ -49,21 +49,163 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.virtual.VirtualFolder;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Create} - TODO Short description of this class' purpose.
- *
+ * {@link Create} - Serves the create request.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Create {
+public final class Create extends AbstractAction {
 
     /**
      * Initializes a new {@link Create}.
+     * 
+     * @param session The session
      */
-    public Create() {
-        super();
-        // TODO Auto-generated constructor stub
+    public Create(final ServerSession session) {
+        super(session);
+    }
 
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     */
+    public Create(final User user, final Context context) {
+        super(user, context);
+    }
+
+    public void doCreate(final Folder toCreate) throws FolderException {
+        final String parentId = toCreate.getParentID();
+        if (null == parentId) {
+            throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
+        }
+        final String treeId = toCreate.getTreeID();
+        if (null == treeId) {
+            throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
+        }
+        final FolderStorage parentStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, parentId);
+        if (null == parentStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
+        }
+        parentStorage.startTransaction(storageParameters, true);
+        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+        openedStorages.add(parentStorage);
+        try {
+            final Folder parent = parentStorage.getFolder(treeId, parentId, storageParameters);
+            /*
+             * Check folder permission for parent folder
+             */
+            final Permission parentPermission;
+            if (null == getSession()) {
+                parentPermission = CalculatePermission.calculate(parent, getUser(), getContext());
+            } else {
+                parentPermission = CalculatePermission.calculate(parent, getSession());
+            }
+            if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                    parentId,
+                    getUser().getDisplayName(),
+                    Integer.valueOf(getContext().getContextId()));
+            }
+            /*
+             * Create folder dependent on folder is virtual or not
+             */
+            if (toCreate.isVirtual()) {
+
+            } else {
+                doCreateReal(toCreate, parentId, treeId, parentStorage);
+            }
+            for (final FolderStorage folderStorage : openedStorages) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+        } catch (final FolderException e) {
+            for (final FolderStorage folderStorage : openedStorages) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            for (final FolderStorage folderStorage : openedStorages) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws FolderException {
+        final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
+        boolean supported = false;
+        final ContentType folderContentType = toCreate.getContentType();
+        for (final ContentType contentType : contentTypes) {
+            if (contentType.equals(folderContentType)) {
+                supported = true;
+                break;
+            }
+        }
+        if (!supported) {
+            /*
+             * Real tree is not capable to create a folder of an unsupported content type
+             */
+            throw FolderExceptionErrorMessage.INVALID_CONTENT_TYPE.create(
+                parentId,
+                folderContentType.toString(),
+                treeId,
+                Integer.valueOf(user.getId()),
+                Integer.valueOf(context.getContextId()));
+        }
+        parentStorage.createFolder(toCreate, storageParameters);
+    }
+
+    private void doCreateVirtual(final VirtualFolder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
+        final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+        checkOpenedStorage(realStorage, openedStorages);
+
+        final ContentType folderContentType = toCreate.getContentType();
+        if (supportsContentType(folderContentType, realStorage)) {
+            
+        } else {
+            
+        }
+
+    }
+
+    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
+        for (final FolderStorage openedStorage : openedStorages) {
+            if (openedStorage.equals(storage)) {
+                return;
+            }
+        }
+        storage.startTransaction(storageParameters, true);
+        openedStorages.add(storage);
+    }
+
+    private static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {
+        final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
+        if (null == supportedContentTypes) {
+            return false;
+        }
+        if (0 == supportedContentTypes.length) {
+            return true;
+        }
+        for (final ContentType supportedContentType : supportedContentTypes) {
+            if (supportedContentType.equals(folderContentType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

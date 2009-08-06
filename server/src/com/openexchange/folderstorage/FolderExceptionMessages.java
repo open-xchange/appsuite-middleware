@@ -99,6 +99,26 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String JSON_ERROR_MSG = "JSON error: %1$s";
 
     /**
+     * Missing tree identifier.
+     */
+    public static final String MISSING_TREE_ID_MSG = "Missing tree identifier.";
+
+    /**
+     * Missing parent folder identifier.
+     */
+    public static final String MISSING_PARENT_ID_MSG = "Missing parent folder identifier.";
+
+    /**
+     * Missing folder identifier.
+     */
+    public static final String MISSING_FOLDER_ID_MSG = "Missing folder identifier.";
+
+    /**
+     * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
+     */
+    public static final String INVALID_CONTENT_TYPE_MSG = "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%3$s\" for user %4$s in context %5$s.";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {
