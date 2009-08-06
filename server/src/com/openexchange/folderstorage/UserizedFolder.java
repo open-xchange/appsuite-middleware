@@ -60,6 +60,20 @@ import java.util.Locale;
 public interface UserizedFolder extends Folder {
 
     /**
+     * Gets the subfolder IDs.
+     * <p>
+     * <b>Note</b>: In opposite to {@link Folder#getSubfolderIDs()} this method does not return complete list of subfolder identifiers.
+     * Since a user-sensitive folder is only meant to indicate if it contains any subfolder at all, it only serves the condition:
+     * 
+     * <pre>
+     * final boolean hasSubfolders = userizedFolder.getSubfolderIDs() &gt; 0
+     * </pre>
+     * 
+     * @return The subfolder IDs or <code>null</code> if not available
+     */
+    String[] getSubfolderIDs();
+
+    /**
      * Gets the permission for requesting user.
      * 
      * @return The permission for requesting user
