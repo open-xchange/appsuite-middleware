@@ -47,71 +47,89 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.internal;
 
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StorageParameters} - The storage parameters to perform a certain storage operation.
+ * {@link AbstractAction} - Abstract action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface StorageParameters {
+public abstract class AbstractAction {
+
+    protected final ServerSession session;
+
+    protected final User user;
+
+    protected final Context context;
+
+    protected final StorageParameters storageParameters;
+
+    /**
+     * Initializes a new {@link AbstractAction} from given session.
+     * 
+     * @param session The session
+     */
+    protected AbstractAction(final ServerSession session) {
+        super();
+        this.session = session;
+        user = session.getUser();
+        context = session.getContext();
+        storageParameters = new StorageParametersImpl(session);
+    }
+
+    /**
+     * Initializes a new {@link AbstractAction} from given user-context-pair.
+     * 
+     * @param user The user
+     * @param context The context
+     */
+    protected AbstractAction(final User user, final Context context) {
+        super();
+        session = null;
+        this.user = user;
+        this.context = context;
+        storageParameters = new StorageParametersImpl(user, context);
+    };
 
     /**
      * Gets the context.
      * 
      * @return The context
      */
-    Context getContext();
+    public Context getContext() {
+        return context;
+    }
+
+    /**
+     * Gets the storage parameters.
+     * 
+     * @return The storage parameters
+     */
+    public StorageParameters getStorageParameters() {
+        return storageParameters;
+    }
 
     /**
      * Gets the user.
      * 
      * @return The user
      */
-    User getUser();
+    public User getUser() {
+        return user;
+    }
 
     /**
      * Gets the session.
      * 
      * @return The session
      */
-    Session getSession();
-
-    /**
-     * Gets the parameter bound to given name.
-     * 
-     * @param folderType The folder type
-     * @param name The parameter name
-     * @return The parameter bound to given name
-     */
-    Object getParameter(FolderType folderType, String name);
-
-    /**
-     * Puts given parameter. Any existing parameters bound to given name are replaced. A <code>null</code> value means to remove the
-     * parameter.
-     * <p>
-     * A <code>null</code> value removes the parameter.
-     * 
-     * @param folderType The folder type
-     * @param name The parameter name
-     * @param value The parameter value
-     */
-    void putParameter(FolderType folderType, String name, Object value);
-
-    /**
-     * (Atomically) Puts given parameter only if the specified name is not already associated with a value.
-     * <p>
-     * A <code>null</code> value is not permitted.
-     * 
-     * @param folderType The folder type
-     * @param name The parameter name
-     * @param value The parameter value
-     * @throws IllegalArgumentException If value is <code>null</code>
-     */
-    void putParameterIfAbsent(FolderType folderType, String name, Object value);
+    public ServerSession getSession() {
+        return session;
+    }
 
 }

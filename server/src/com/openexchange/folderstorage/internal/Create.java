@@ -47,71 +47,23 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.internal;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
 
 /**
- * {@link StorageParameters} - The storage parameters to perform a certain storage operation.
- * 
+ * {@link Create} - TODO Short description of this class' purpose.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface StorageParameters {
+public final class Create {
 
     /**
-     * Gets the context.
-     * 
-     * @return The context
+     * Initializes a new {@link Create}.
      */
-    Context getContext();
+    public Create() {
+        super();
+        // TODO Auto-generated constructor stub
 
-    /**
-     * Gets the user.
-     * 
-     * @return The user
-     */
-    User getUser();
-
-    /**
-     * Gets the session.
-     * 
-     * @return The session
-     */
-    Session getSession();
-
-    /**
-     * Gets the parameter bound to given name.
-     * 
-     * @param folderType The folder type
-     * @param name The parameter name
-     * @return The parameter bound to given name
-     */
-    Object getParameter(FolderType folderType, String name);
-
-    /**
-     * Puts given parameter. Any existing parameters bound to given name are replaced. A <code>null</code> value means to remove the
-     * parameter.
-     * <p>
-     * A <code>null</code> value removes the parameter.
-     * 
-     * @param folderType The folder type
-     * @param name The parameter name
-     * @param value The parameter value
-     */
-    void putParameter(FolderType folderType, String name, Object value);
-
-    /**
-     * (Atomically) Puts given parameter only if the specified name is not already associated with a value.
-     * <p>
-     * A <code>null</code> value is not permitted.
-     * 
-     * @param folderType The folder type
-     * @param name The parameter name
-     * @param value The parameter value
-     * @throws IllegalArgumentException If value is <code>null</code>
-     */
-    void putParameterIfAbsent(FolderType folderType, String name, Object value);
+    }
 
 }

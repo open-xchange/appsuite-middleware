@@ -149,6 +149,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con);
                 }
             }
+            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, null);
         }
     }
 
@@ -547,6 +549,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con);
                 }
             }
+            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, null);
         }
     }
 
@@ -556,8 +560,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = modify ? databaseService.getWritable(parameters.getContext()) : databaseService.getReadOnly(parameters.getContext());
             con.setAutoCommit(false);
             // Put to parameters
-            parameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, con);
-            parameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
+            parameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, con);
+            parameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
             return parameters;
         } catch (final ServiceException e) {
             throw new FolderException(e);

@@ -123,6 +123,8 @@ public final class MailFolderStorage implements FolderStorage {
             }
         } catch (final MailException e) {
             throw new FolderException(e);
+        } finally {
+            params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
         }
     }
 
@@ -358,6 +360,8 @@ public final class MailFolderStorage implements FolderStorage {
             }
         } catch (final MailException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
         }
     }
 
@@ -367,7 +371,7 @@ public final class MailFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            parameters.putParameter(
+            parameters.putParameterIfAbsent(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS,
                 MailServletInterface.getInstance(session));

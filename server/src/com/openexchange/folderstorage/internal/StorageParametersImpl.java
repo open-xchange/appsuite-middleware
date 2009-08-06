@@ -72,7 +72,7 @@ public final class StorageParametersImpl implements StorageParameters {
 
     private final Context context;
 
-    private final ConcurrentMap<FolderType, Map<String, Object>> parameters;
+    private final ConcurrentMap<FolderType, ConcurrentMap<String, Object>> parameters;
 
     /**
      * Initializes a new {@link List} from given session.
@@ -84,7 +84,7 @@ public final class StorageParametersImpl implements StorageParameters {
         this.session = session;
         user = session.getUser();
         context = session.getContext();
-        parameters = new ConcurrentHashMap<FolderType, Map<String, Object>>();
+        parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
     }
 
     /**
@@ -98,13 +98,13 @@ public final class StorageParametersImpl implements StorageParameters {
         session = null;
         this.user = user;
         this.context = context;
-        parameters = new ConcurrentHashMap<FolderType, Map<String, Object>>();
+        parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
     };
 
-    private Map<String, Object> getFolderTypeMap(final FolderType folderType, final boolean createIfAbsent) {
-        Map<String, Object> m = parameters.get(folderType);
+    private ConcurrentMap<String, Object> getFolderTypeMap(final FolderType folderType, final boolean createIfAbsent) {
+        ConcurrentMap<String, Object> m = parameters.get(folderType);
         if (createIfAbsent && null == m) {
-            final Map<String, Object> inst = new ConcurrentHashMap<String, Object>();
+            final ConcurrentMap<String, Object> inst = new ConcurrentHashMap<String, Object>();
             m = parameters.putIfAbsent(folderType, inst);
             if (null == m) {
                 m = inst;
@@ -144,6 +144,14 @@ public final class StorageParametersImpl implements StorageParameters {
             final Map<String, Object> m = getFolderTypeMap(folderType, true);
             m.put(name, value);
         }
+    }
+
+    public void putParameterIfAbsent(final FolderType folderType, final String name, final Object value) {
+        if (null == value) {
+            throw new IllegalArgumentException("value is null");
+        }
+        final ConcurrentMap<String, Object> m = getFolderTypeMap(folderType, true);
+        m.putIfAbsent(name, value);
     }
 
 }

@@ -67,7 +67,6 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -81,17 +80,9 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class List {
+public final class List extends AbstractAction {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(List.class);
-
-    private final ServerSession session;
-
-    private final User user;
-
-    private final Context context;
-
-    private final StorageParameters storageParameters;
 
     private TimeZone timeZone;
 
@@ -101,11 +92,7 @@ public final class List {
      * @param session The session
      */
     public List(final ServerSession session) {
-        super();
-        this.session = session;
-        user = session.getUser();
-        context = session.getContext();
-        storageParameters = new StorageParametersImpl(session);
+        super(session);
     }
 
     /**
@@ -115,47 +102,7 @@ public final class List {
      * @param context The context
      */
     public List(final User user, final Context context) {
-        super();
-        session = null;
-        this.user = user;
-        this.context = context;
-        storageParameters = new StorageParametersImpl(user, context);
-    };
-
-    /**
-     * Gets the context.
-     * 
-     * @return The context
-     */
-    public Context getContext() {
-        return context;
-    }
-
-    /**
-     * Gets the storage parameters.
-     * 
-     * @return The storage parameters
-     */
-    public StorageParameters getStorageParameters() {
-        return storageParameters;
-    }
-
-    /**
-     * Gets the user.
-     * 
-     * @return The user
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * Gets the session.
-     * 
-     * @return The session
-     */
-    public ServerSession getSession() {
-        return session;
+        super(user, context);
     }
 
     private TimeZone getTimeZone() {
