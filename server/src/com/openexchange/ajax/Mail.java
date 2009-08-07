@@ -926,14 +926,21 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     public void actionGetMessage(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws JSONException {
-        ResponseWriter.write(actionGetMessage(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
+        final Response response = actionGetMessage(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi);
+        if (null != response) {
+            ResponseWriter.write(response, writer);
+        }
     }
 
     private final void actionGetMessage(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            ResponseWriter.write(
-                actionGetMessage(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null),
-                resp.getWriter());
+            final Response response = actionGetMessage(
+                getSessionObject(req),
+                ParamContainer.getInstance(req, EnumComponent.MAIL, resp),
+                null);
+            if (null != response) {
+                ResponseWriter.write(response, resp.getWriter());
+            }
         } catch (final JSONException e) {
             final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
             LOG.error(oxe.getMessage(), oxe);
@@ -1025,9 +1032,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                         httpResponse.setHeader("Content-disposition", new StringBuilder(64).append("attachment; filename=\"").append(
                             fileName).append('"').toString());
                         httpResponse.setContentType(contentType.toString());
-                        // Write output stream
+                        // Write output stream in max. 8K chunks
                         final OutputStream out = httpResponse.getOutputStream();
-                        out.write(baos.toByteArray());
+                        final byte[] bytes = baos.toByteArray();
+                        int offset = 0;
+                        while (offset < bytes.length) {
+                            final int len = Math.min(0xFFFF, bytes.length - offset);
+                            out.write(bytes, offset, len);
+                            offset += len;
+                        }
+                        out.flush();
                         /*
                          * ... and return
                          */
