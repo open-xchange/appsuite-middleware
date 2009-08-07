@@ -746,4 +746,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
 
     }
+
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

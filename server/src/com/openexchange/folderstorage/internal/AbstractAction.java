@@ -77,6 +77,8 @@ public abstract class AbstractAction {
     protected AbstractAction(final ServerSession session) {
         super();
         this.session = session;
+        // Pre-Initialize session
+        session.getUserConfiguration();
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);

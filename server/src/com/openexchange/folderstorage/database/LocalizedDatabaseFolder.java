@@ -125,6 +125,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
             future = localizedNames.putIfAbsent(locale, ft);
             if (null == future) {
                 future = ft;
+                ft.run();
             }
         }
         try {

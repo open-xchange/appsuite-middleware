@@ -77,7 +77,7 @@ public final class SystemContentType implements ContentType {
 
     @Override
     public String toString() {
-        return "unbound";
+        return "system";
     }
 
     public int getModule() {

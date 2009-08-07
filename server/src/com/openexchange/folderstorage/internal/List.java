@@ -117,6 +117,7 @@ public final class List extends AbstractAction {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
+        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         folderStorage.startTransaction(getStorageParameters(), false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(folderStorage);
@@ -227,7 +228,19 @@ public final class List extends AbstractAction {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         if (null == ret) {
-            return getSubfoldersFromMultipleStorages(treeId, parentId, all);
+            if (!LOG.isDebugEnabled()) {
+                return getSubfoldersFromMultipleStorages(treeId, parentId, all);
+            }
+            final UserizedFolder[] mulRet = getSubfoldersFromMultipleStorages(treeId, parentId, all);
+            final long duration = System.currentTimeMillis() - start;
+            LOG.debug(new StringBuilder().append("List.doList() with multiple storages took ").append(duration).append(
+                "msec for parent folder: ").append(parentId).toString());
+            return mulRet;
+        }
+        if (LOG.isDebugEnabled()) {
+            final long duration = System.currentTimeMillis() - start;
+            LOG.debug(new StringBuilder().append("List.doList() with single storage took ").append(duration).append(
+                "msec for parent folder: ").append(parentId).toString());
         }
         return ret;
     }

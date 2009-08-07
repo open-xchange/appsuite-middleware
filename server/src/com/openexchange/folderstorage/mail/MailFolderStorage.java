@@ -471,4 +471,9 @@ public final class MailFolderStorage implements FolderStorage {
         return StoragePriority.NORMAL;
     }
 
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

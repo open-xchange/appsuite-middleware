@@ -170,17 +170,43 @@ public final class Create extends AbstractAction {
     }
 
     private void doCreateVirtual(final VirtualFolder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
-        final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-        checkOpenedStorage(realStorage, openedStorages);
-
         final ContentType folderContentType = toCreate.getContentType();
+        final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+        /*
+         * Check if real storage supports folder's content types
+         */
         if (supportsContentType(folderContentType, realStorage)) {
-            
+            checkOpenedStorage(realStorage, openedStorages);
+            // 1. Create in real storage
+            realStorage.createFolder(toCreate, storageParameters);
+            // 2. Create in virtual storage
+            // TODO: Pass this one? final Folder created = realStorage.getFolder(treeId, toCreate.getID(), storageParameters);
+            virtualStorage.createFolder(toCreate, storageParameters);
         } else {
+            /*
+             * Find the real storage which is capable to create the folder
+             */
+            final FolderStorage capStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(
+                FolderStorage.REAL_TREE_ID,
+                folderContentType);
+            if (null == capStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
+            }
+            checkOpenedStorage(capStorage, openedStorages);
+            /*
+             * Determine where to create the folder in real storage
+             */
+            String pId = parentId;
+            while (!capStorage.getFolderType().servesFolderId(pId) || capStorage.containsFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters)) {
+                pId = virtualStorage.getFolder(treeId, pId, storageParameters).getParentID();
+            }
+            
             
         }
 
     }
+
+    
 
     private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
         for (final FolderStorage openedStorage : openedStorages) {

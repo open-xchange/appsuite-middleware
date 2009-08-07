@@ -340,4 +340,9 @@ public final class CacheFolderStorage implements FolderStorage {
     private CacheKey newCacheKey(final String folderId, final String treeId, final int cid, final int user) {
         return cacheService.newCacheKey(cid, Integer.valueOf(user), treeId, folderId);
     }
+
+    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -92,6 +92,17 @@ public interface FolderStorage {
     StoragePriority getStoragePriority();
 
     /**
+     * Checks if the folder denoted by specified folder ID exists in this folder storage.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageParameters The storage parameters
+     * @return <code>true</code> if the folder denoted by specified folder ID exists in this folder storage; otherwise <code>false</code>
+     * @throws FolderException If the folder existence cannot be checked
+     */
+    boolean containsFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param treeId The tree identifier
