@@ -130,7 +130,7 @@ public final class FolderStorageRegistry {
             List<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
                 final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
-                storages = registry.putIfAbsent(treeId, new CopyOnWriteArrayList<FolderStorage>());
+                storages = registry.putIfAbsent(treeId, tmp);
                 if (null == storages) {
                     storages = tmp;
                 }
@@ -204,7 +204,7 @@ public final class FolderStorageRegistry {
         }
         final List<FolderStorage> l = new ArrayList<FolderStorage>(4);
         for (final FolderStorage folderStorage : storages) {
-            if (folderStorage.getFolderType().servesFolderId(parentId)) {
+            if (folderStorage.getFolderType().servesParentId(parentId)) {
                 l.add(folderStorage);
             }
         }

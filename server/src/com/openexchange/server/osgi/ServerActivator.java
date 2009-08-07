@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
@@ -96,6 +97,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
@@ -207,6 +209,8 @@ public final class ServerActivator extends DeferredActivator {
 
     private final List<EventHandlerRegistration> eventHandlerList;
 
+    private final List<BundleActivator> activators;
+
     private final Starter starter;
 
     private final AtomicBoolean started;
@@ -224,6 +228,7 @@ public final class ServerActivator extends DeferredActivator {
         serviceTrackerList = new ArrayList<ServiceTracker>();
         componentRegistrationList = new ArrayList<ComponentRegistration>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
+        activators = new ArrayList<BundleActivator>(8);
     }
 
     /**
@@ -341,7 +346,7 @@ public final class ServerActivator extends DeferredActivator {
             ICalParser.class){ 
             
             @Override
-            protected ICalParser customize(ICalParser service) {
+            protected ICalParser customize(final ICalParser service) {
                 return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
             }
             
@@ -539,6 +544,12 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
+        
+        // Fake bundle start
+        activators.add(new FolderStorageActivator());
+        for (final BundleActivator activator : activators) {
+            activator.start(context);
+        }
 
         /*
          * Register components
@@ -565,6 +576,13 @@ public final class ServerActivator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.server");
         try {
+            /*
+             * Fake bundle stop
+             */
+            for (final BundleActivator activator : activators) {
+                activator.stop(context);
+            }
+            activators.clear();
             /*
              * Unregister components
              */

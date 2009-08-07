@@ -100,7 +100,9 @@ public final class DatabaseId implements SortableId {
             final int anotherVal = ((DatabaseId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
-        return 0;
+        final int thisPrio = Priority.NORMAL.ordinal();
+        final int anotherPrio = (o).getPriority().ordinal();
+        return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
 
 }

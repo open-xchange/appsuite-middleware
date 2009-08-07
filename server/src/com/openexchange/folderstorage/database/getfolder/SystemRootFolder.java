@@ -47,67 +47,71 @@
  *
  */
 
-package com.openexchange.folder.json.actions;
+package com.openexchange.folderstorage.database.getfolder;
 
-import org.json.JSONArray;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folder.json.writer.FolderWriter;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.database.DatabaseFolder;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link ListAction} - Maps the action to a list action.
+ * {@link SystemRootFolder} - Gets the system shared folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ListAction extends AbstractFolderAction {
-
-    public static final String ACTION = AJAXServlet.ACTION_LIST;
+public final class SystemRootFolder {
 
     /**
-     * Initializes a new {@link ListAction}.
+     * Initializes a new {@link SystemRootFolder}.
      */
-    public ListAction() {
+    private SystemRootFolder() {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+    /**
+     * Gets the database folder representing system root folder.
+     * 
+     * @param fo The folder object fetched from database
+     * @return The database folder representing system root folder
+     */
+    public static DatabaseFolder getSystemRootFolder() {
         /*
-         * Parse parameters
+         * The system root folder
          */
-        String treeId = request.getParameter("tree");
-        if (null == treeId) {
-            /*
-             * Fallback to default tree identifier
-             */
-            treeId = FolderStorage.REAL_TREE_ID;
-        }
-        final String parentId = request.getParameter("parent");
-        if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "parent");
-        }
-        final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-        final boolean all = Boolean.parseBoolean(request.getParameter(AJAXServlet.PARAMETER_ALL));
+        final FolderObject fo = FolderObject.createVirtualFolderObject(
+            FolderObject.SYSTEM_ROOT_FOLDER_ID,
+            "root",
+            FolderObject.SYSTEM_MODULE,
+            true,
+            FolderObject.SYSTEM_TYPE);
+        final DatabaseFolder retval = new DatabaseFolder(fo);
+        // Enforce getSubfolders() from storage
+        final List<String> list = new ArrayList<String>(4);
+        list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        retval.setSubfolderIDs(list.toArray(new String[list.size()]));
+        return retval;
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system root folder for given user.
+     * 
+     * @return The subfolder identifiers of database folder representing system root folder for given user
+     * @throws FolderException If the database folder cannot be returned
+     */
+    public static String[] getSystemRootFolderSubfolder() throws FolderException {
         /*
-         * Request subfolders from folder service
+         * The system root folder
          */
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[] subfolders = folderService.getSubfolders(treeId, parentId, all, session);
-        /*
-         * Write subfolders as JSON arrays to JSON array
-         */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders);
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(jsonArray);
+        final List<String> list = new ArrayList<String>(4);
+        list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        return list.toArray(new String[list.size()]);
     }
 
 }

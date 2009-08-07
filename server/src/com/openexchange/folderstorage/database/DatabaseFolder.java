@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import java.util.Date;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -72,13 +73,13 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class DatabaseFolder extends AbstractFolder {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabaseFolder.class);
+
     private static final long serialVersionUID = -4035221612481906228L;
 
     private final boolean cacheable;
 
     protected boolean global;
-
-    protected int owner;
 
     /**
      * Initializes an empty {@link DatabaseFolder}.
@@ -126,7 +127,16 @@ public class DatabaseFolder extends AbstractFolder {
         for (int i = 0; i < oclPermissions.length; i++) {
             this.permissions[i] = new DatabasePermission(oclPermissions[i]);
         }
-        this.owner = folderObject.getCreatedBy();
+        this.createdBy = folderObject.getCreatedBy();
+        this.modifiedBy = folderObject.getModifiedBy();
+        {
+            final Date d = folderObject.getCreationDate();
+            this.creationDate = null == d ? null : new Date(d.getTime());
+        }
+        {
+            final Date d = folderObject.getLastModified();
+            this.lastModified = null == d ? null : new Date(d.getTime());
+        }
         this.subscribed = true;
     }
 
@@ -135,25 +145,10 @@ public class DatabaseFolder extends AbstractFolder {
         return cacheable;
     }
 
-    /**
-     * Gets the owner.
-     * 
-     * @return The owner
-     */
-    public int getOwner() {
-        return owner;
-    }
-
-    /**
-     * Sets the owner.
-     * 
-     * @param owner The owner to set
-     */
-    public void setOwner(final int owner) {
-        this.owner = owner;
-    }
-
     private static Type getType(final int type) {
+        if (FolderObject.SYSTEM_TYPE == type) {
+            return SystemType.getInstance();
+        }
         if (FolderObject.PRIVATE == type) {
             return PrivateType.getInstance();
         }
@@ -167,6 +162,9 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     private static ContentType getContentType(final int module) {
+        if (FolderObject.SYSTEM_MODULE == module) {
+            return SystemContentType.getInstance();
+        }
         if (FolderObject.CALENDAR == module) {
             return CalendarContentType.getInstance();
         }
@@ -181,6 +179,9 @@ public class DatabaseFolder extends AbstractFolder {
         }
         if (FolderObject.UNBOUND == module) {
             return UnboundContentType.getInstance();
+        }
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Unknown database folder content type: " + module);
         }
         return SystemContentType.getInstance();
     }

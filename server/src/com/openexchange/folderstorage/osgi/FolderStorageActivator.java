@@ -59,6 +59,10 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.folderstorage.FolderExceptionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
+import com.openexchange.folderstorage.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
+import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -75,6 +79,8 @@ public final class FolderStorageActivator implements BundleActivator {
     private List<ServiceRegistration> serviceRegistrations;
 
     private List<ServiceTracker> serviceTrackers;
+
+    private List<BundleActivator> activators;
 
     /**
      * Initializes a new {@link FolderStorageActivator}.
@@ -93,14 +99,26 @@ public final class FolderStorageActivator implements BundleActivator {
                 FolderExceptionFactory.getInstance());
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            // TODO: Register folder service
-            serviceRegistrations.add(context.registerService(FolderService.class.getName(), null, null));
+            // Register folder service
+            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
             // Register service trackers
             serviceTrackers = new ArrayList<ServiceTracker>(4);
             serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));
             for (final ServiceTracker serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
+
+            // Start other activators
+            activators = new ArrayList<BundleActivator>(4);
+            activators.add(new DatabaseFolderStorageActivator()); // Database impl
+            activators.add(new MailFolderStorageActivator()); // Mail impl
+            // activators.add(new CacheFolderStorageActivator()); // Cache impl
+            activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
+            for (final BundleActivator activator : activators) {
+                activator.start(context);
+            }
+
+            LOG.info("Bundle \"" + FolderStorageActivator.class.getName() + "\" successfully started!");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -109,6 +127,14 @@ public final class FolderStorageActivator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
+            // Drop activators
+            if (null != activators) {
+                for (final BundleActivator activator : activators) {
+                    activator.stop(context);
+                }
+                activators.clear();
+                activators = null;
+            }
             // Drop service trackers
             if (null != serviceTrackers) {
                 for (final ServiceTracker serviceTracker : serviceTrackers) {
@@ -130,6 +156,8 @@ public final class FolderStorageActivator implements BundleActivator {
                 componentRegistration.unregister();
                 componentRegistration = null;
             }
+
+            LOG.info("Bundle \"" + FolderStorageActivator.class.getName() + "\" successfully stopped!");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

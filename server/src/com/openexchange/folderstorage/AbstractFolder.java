@@ -59,6 +59,8 @@ import java.util.Locale;
  */
 public abstract class AbstractFolder implements Folder {
 
+    private static final long serialVersionUID = 11110622220507954L;
+
     protected int createdBy;
 
     protected int modifiedBy;
@@ -104,6 +106,8 @@ public abstract class AbstractFolder implements Folder {
      */
     protected AbstractFolder() {
         super();
+        createdBy = -1;
+        modifiedBy = -1;
         total = -1;
         nu = -1;
         unread = -1;

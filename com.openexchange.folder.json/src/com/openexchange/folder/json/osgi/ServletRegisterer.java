@@ -56,15 +56,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.servlet.FolderServlet;
-import com.openexchange.folderstorage.FolderService;
 
 /**
  * Registers the {@link FolderServlet} if {@link HttpService} appears.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class ServletRegisterer implements ServiceTrackerCustomizer {
@@ -73,30 +71,36 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
 
-    public ServletRegisterer(BundleContext context) {
+    /**
+     * Initializes a new {@link ServletRegisterer}.
+     * 
+     * @param context The bundle context
+     */
+    public ServletRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        HttpService service = (HttpService) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final HttpService service = (HttpService) context.getService(reference);
         try {
             service.registerServlet(Constants.SERVLET_PATH, new FolderServlet(), null, null);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NamespaceException e) {
+        } catch (final NamespaceException e) {
             LOG.error(e.getMessage(), e);
         }
         return service;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
-        HttpService httpService = (HttpService) service;
+    public void removedService(final ServiceReference reference, final Object service) {
+        final HttpService httpService = (HttpService) service;
         httpService.unregister(Constants.SERVLET_PATH);
         context.ungetService(reference);
     }
+
 }

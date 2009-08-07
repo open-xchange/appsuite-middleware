@@ -82,6 +82,7 @@ import com.openexchange.folderstorage.database.getfolder.SharedPrefixFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPrivateFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
+import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -297,7 +298,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * A numeric folder identifier
                  */
                 final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
-                if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                    retval = SystemRootFolder.getSystemRootFolder();
+                } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
                     /*
                      * A virtual database folder
                      */
@@ -333,7 +336,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                          * Check for shared folder, that is folder is of type private and requesting user is different from folder's owner
                          */
                         retval = new DatabaseFolder(fo);
-                        if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getOwner()) {
+                        if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getCreatedBy()) {
                             retval.setType(SharedType.getInstance());
                             /*
                              * A shared folder has no subfolders in real tree
@@ -376,6 +379,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
 
             final int parentId = Integer.parseInt(parentIdentifier);
+
+            if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
+                final String[] subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder();
+                final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.length);
+                for (int i = 0; i < subfolderIds.length; i++) {
+                    list.add(new DatabaseId(subfolderIds[i], i));
+                }
+                return list.toArray(new SortableId[list.size()]);
+            }
 
             if (Arrays.binarySearch(VIRTUAL_IDS, parentId) >= 0) {
                 /*

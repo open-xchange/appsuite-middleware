@@ -94,7 +94,9 @@ public final class VirtualId implements SortableId {
         if (o instanceof VirtualId) {
             return collator.compare(name, ((VirtualId) o).name);
         }
-        return 0;
+        final int thisPrio = Priority.HIGH.ordinal();
+        final int anotherPrio = (o).getPriority().ordinal();
+        return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
 
 }

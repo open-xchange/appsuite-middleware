@@ -86,10 +86,18 @@ public final class FolderWriter {
 
     private static final class JSONArrayPutter implements JSONValuePutter {
 
-        private final JSONArray jsonArray;
+        private JSONArray jsonArray;
+
+        public JSONArrayPutter() {
+            super();
+        }
 
         public JSONArrayPutter(final JSONArray jsonArray) {
-            super();
+            this();
+            this.jsonArray = jsonArray;
+        }
+
+        public void setJSONArray(final JSONArray jsonArray) {
             this.jsonArray = jsonArray;
         }
 
@@ -101,10 +109,18 @@ public final class FolderWriter {
 
     private static final class JSONObjectPutter implements JSONValuePutter {
 
-        private final JSONObject jsonObject;
+        private JSONObject jsonObject;
+
+        public JSONObjectPutter() {
+            super();
+        }
 
         public JSONObjectPutter(final JSONObject jsonObject) {
-            super();
+            this();
+            this.jsonObject = jsonObject;
+        }
+
+        public void setJSONObject(final JSONObject jsonObject) {
             this.jsonObject = jsonObject;
         }
 
@@ -122,6 +138,13 @@ public final class FolderWriter {
 
         void writeField(JSONValuePutter jsonValue, UserizedFolder folder) throws JSONException;
     }
+
+    private static final FolderFieldWriter UNKNOWN_FIELD_FFW = new FolderFieldWriter() {
+
+        public void writeField(final JSONValuePutter jsonValue, final UserizedFolder folder) throws JSONException {
+            jsonValue.put("unknown_field", JSONObject.NULL);
+        }
+    };
 
     private static final Map<Integer, FolderFieldWriter> STATIC_WRITERS_MAP;
 
@@ -303,20 +326,60 @@ public final class FolderWriter {
      * @return The JSON array carrying requested fields of given folder
      * @throws FolderException If writing JSON array fails
      */
-    public static JSONArray write2Array(final int[] fields, final UserizedFolder folder) throws FolderException {
+    public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder) throws FolderException {
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        for (int i = 0; i < ffws.length; i++) {
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            if (null == ffw) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                }
+                ffw = UNKNOWN_FIELD_FFW;
+            }
+            ffws[i] = ffw;
+        }
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONValuePutter jsonPutter = new JSONArrayPutter(jsonArray);
-            for (int i = 0; i < fields.length; i++) {
-                final FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
-                if (null == ffw) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown field: " + fields[i], new Throwable());
-                    }
-                    jsonArray.put(JSONObject.NULL);
-                } else {
+            for (final FolderFieldWriter ffw : ffws) {
+                ffw.writeField(jsonPutter, folder);
+            }
+            return jsonArray;
+        } catch (final JSONException e) {
+            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
+     * 
+     * @param fields The fields to write to each JSON array
+     * @param folders The folders
+     * @return The JSON array carrying JSON arrays of given folders
+     * @throws FolderException If writing JSON array fails
+     */
+    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders) throws FolderException {
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        for (int i = 0; i < ffws.length; i++) {
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            if (null == ffw) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                }
+                ffw = UNKNOWN_FIELD_FFW;
+            }
+            ffws[i] = ffw;
+        }
+        try {
+            final JSONArray jsonArray = new JSONArray();
+            final JSONArrayPutter jsonPutter = new JSONArrayPutter();
+            for (final UserizedFolder folder : folders) {
+                final JSONArray folderArray = new JSONArray();
+                jsonPutter.setJSONArray(folderArray);
+                for (final FolderFieldWriter ffw : ffws) {
                     ffw.writeField(jsonPutter, folder);
                 }
+                jsonArray.put(folderArray);
             }
             return jsonArray;
         } catch (final JSONException e) {
@@ -332,21 +395,62 @@ public final class FolderWriter {
      * @return The JSON object carrying requested fields of given folder
      * @throws FolderException If writing JSON object fails
      */
-    public static JSONObject write2Object(final int[] fields, final UserizedFolder folder) throws FolderException {
+    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder) throws FolderException {
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        for (int i = 0; i < ffws.length; i++) {
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            if (null == ffw) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                }
+                ffw = UNKNOWN_FIELD_FFW;
+            }
+            ffws[i] = ffw;
+        }
         try {
             final JSONObject jsonObject = new JSONObject();
             final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject);
-            for (int i = 0; i < fields.length; i++) {
-                final FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
-                if (null == ffw) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown field: " + fields[i], new Throwable());
-                    }
-                } else {
-                    ffw.writeField(jsonPutter, folder);
-                }
+            for (final FolderFieldWriter ffw : ffws) {
+                ffw.writeField(jsonPutter, folder);
             }
             return jsonObject;
+        } catch (final JSONException e) {
+            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Writes requested fields of given folders into a JSON array consisting of JSON objects.
+     * 
+     * @param fields The fields to write to each JSON object
+     * @param folders The folders
+     * @return The JSON array carrying JSON objects of given folders
+     * @throws FolderException If writing JSON array fails
+     */
+    public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders) throws FolderException {
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        for (int i = 0; i < ffws.length; i++) {
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            if (null == ffw) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                }
+                ffw = UNKNOWN_FIELD_FFW;
+            }
+            ffws[i] = ffw;
+        }
+        try {
+            final JSONArray jsonArray = new JSONArray();
+            final JSONObjectPutter jsonPutter = new JSONObjectPutter();
+            for (final UserizedFolder folder : folders) {
+                final JSONObject folderObject = new JSONObject();
+                jsonPutter.setJSONObject(folderObject);
+                for (final FolderFieldWriter ffw : ffws) {
+                    ffw.writeField(jsonPutter, folder);
+                }
+                jsonArray.put(folderObject);
+            }
+            return jsonArray;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         }

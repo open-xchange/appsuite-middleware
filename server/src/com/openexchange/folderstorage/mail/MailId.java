@@ -52,7 +52,7 @@ package com.openexchange.folderstorage.mail;
 import com.openexchange.folderstorage.SortableId;
 
 /**
- * {@link MailId} - TODO Short description of this class' purpose.
+ * {@link MailId} - A mail ID.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -89,7 +89,9 @@ public final class MailId implements SortableId {
             final int anotherVal = ((MailId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
-        return 0;
+        final int thisPrio = Priority.HIGH.ordinal();
+        final int anotherPrio = (o).getPriority().ordinal();
+        return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
 
 }

@@ -49,65 +49,66 @@
 
 package com.openexchange.folder.json.actions;
 
-import org.json.JSONArray;
-import com.openexchange.ajax.AJAXServlet;
+import java.util.regex.Pattern;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folder.json.writer.FolderWriter;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ListAction} - Maps the action to a list action.
+ * {@link AbstractFolderAction} - An abstract folder action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ListAction extends AbstractFolderAction {
-
-    public static final String ACTION = AJAXServlet.ACTION_LIST;
+public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
-     * Initializes a new {@link ListAction}.
+     * Initializes a new {@link AbstractFolderAction}.
      */
-    public ListAction() {
+    protected AbstractFolderAction() {
         super();
     }
 
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
-        /*
-         * Parse parameters
-         */
-        String treeId = request.getParameter("tree");
-        if (null == treeId) {
-            /*
-             * Fallback to default tree identifier
-             */
-            treeId = FolderStorage.REAL_TREE_ID;
+    private static final Pattern PAT = Pattern.compile(" *, *");
+
+    /**
+     * Parses specified parameter into an array of <code>int</code>.
+     * 
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed array of <code>int</code>
+     * @throws AjaxException If parameter is not present in given request
+     */
+    protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
         }
-        final String parentId = request.getParameter("parent");
-        if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "parent");
+        final String[] sa = PAT.split(tmp, 0);
+        final int[] columns = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            columns[i] = Integer.parseInt(sa[i]);
         }
-        final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-        final boolean all = Boolean.parseBoolean(request.getParameter(AJAXServlet.PARAMETER_ALL));
-        /*
-         * Request subfolders from folder service
-         */
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[] subfolders = folderService.getSubfolders(treeId, parentId, all, session);
-        /*
-         * Write subfolders as JSON arrays to JSON array
-         */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders);
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(jsonArray);
+        return columns;
+    }
+
+    /**
+     * Parses specified optional parameter into an array of <code>int</code>.
+     * 
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing
+     */
+    protected static int[] parseOptionalIntArrayParameter(final String parameterName, final AJAXRequestData request) {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return new int[0];
+        }
+        final String[] sa = PAT.split(tmp, 0);
+        final int[] columns = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            columns[i] = Integer.parseInt(sa[i]);
+        }
+        return columns;
     }
 
 }
