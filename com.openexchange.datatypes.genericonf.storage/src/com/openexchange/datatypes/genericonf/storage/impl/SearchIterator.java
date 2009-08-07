@@ -55,10 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormIterator;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.IterationBreak;
-import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 
 
 /**

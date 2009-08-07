@@ -49,8 +49,6 @@
 
 package com.openexchange.datatypes.genericonf;
 
-import java.util.Collection;
-import com.openexchange.datatypes.genericonf.json.ValueWriterSwitch;
 
 /**
  * {@link FormElement}

@@ -51,7 +51,6 @@ package com.openexchange.datatypes.genericonf.storage;
 
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.tx.TransactionException;
 
 
 /**

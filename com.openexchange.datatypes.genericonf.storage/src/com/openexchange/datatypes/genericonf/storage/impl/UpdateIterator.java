@@ -53,15 +53,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormIterator;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.IterationBreak;
-import com.openexchange.datatypes.genericonf.FormElement.Widget;
 
 
 /**
