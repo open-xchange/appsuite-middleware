@@ -69,6 +69,7 @@ public class ManagedContactTests extends AbstractAJAXSession {
     public void setUp() throws Exception {
         super.setUp();
         manager = new ContactTestManager(getClient());
+        manager.setFailOnError(false);
         folderID = getClient().getValues().getPrivateContactFolder();
     }
 
