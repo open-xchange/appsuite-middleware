@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -58,10 +59,10 @@ import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.tools.servlet.AjaxException;
-
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * {@link CalendarTestManagerTest}
@@ -71,7 +72,9 @@ import static com.openexchange.groupware.calendar.TimeTools.D;
  */
 public class CalendarTestManagerTest extends AbstractAJAXSession{
 
-    private CalendarTestManager manager;
+    private CalendarTestManager contactMgr;
+    private FolderTestManager folderMgr;
+    private FolderObject testFolder;
 
     /**
      * Initializes a new {@link CalendarTestManagerTest}.
@@ -83,27 +86,31 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
     
     public void setUp() throws Exception {
         super.setUp();
-        this.manager = new CalendarTestManager(getClient());
+        contactMgr = new CalendarTestManager(getClient());
+        folderMgr = new FolderTestManager(getClient());
+        testFolder = folderMgr.generateFolder("Calendar Manager Tests", FolderObject.CALENDAR, getClient().getValues().getPrivateAppointmentFolder(), getClient().getValues().getUserId());
+        folderMgr.insertFolderOnServer(testFolder);
     }
     
     public void tearDown() throws Exception {
-        manager.cleanUp();
+        contactMgr.cleanUp();
+        folderMgr.cleanUp();
         super.tearDown();
     }
     
     public void testCreate() throws Exception {
         Appointment appointment = new Appointment();
-        appointment.setParentFolderID( manager.getPrivateFolder());
+        appointment.setParentFolderID( testFolder.getObjectID());
         appointment.setTitle(getName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         
-        manager.insertAppointmentOnServer(appointment);
+        contactMgr.insertAppointmentOnServer(appointment);
         
         assertNotNull( appointment.getLastModified() );
         assertExists( appointment );
         
-        manager.cleanUp();
+        contactMgr.cleanUp();
         
         assertDoesNotExist( appointment );
         
@@ -111,36 +118,36 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
     
     public void testRemove() throws Exception {
         Appointment appointment = new Appointment();
-        appointment.setParentFolderID( manager.getPrivateFolder() );
+        appointment.setParentFolderID( testFolder.getObjectID() );
         appointment.setTitle(getName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         
-        manager.insertAppointmentOnServer(appointment);
+        contactMgr.insertAppointmentOnServer(appointment);
         
         assertExists( appointment );
         
-        manager.deleteAppointmentOnServer(appointment);
+        contactMgr.deleteAppointmentOnServer(appointment);
         
         assertDoesNotExist(appointment);
     }
     
     public void testGet() throws Exception {
         Appointment appointment = new Appointment();
-        appointment.setParentFolderID( manager.getPrivateFolder() );
+        appointment.setParentFolderID( testFolder.getObjectID() );
         appointment.setTitle(getName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         
-        manager.insertAppointmentOnServer(appointment);
+        contactMgr.insertAppointmentOnServer(appointment);
         
         
-        Appointment reload = manager.getAppointmentFromServer(appointment.getParentFolderID(), appointment.getObjectID());
+        Appointment reload = contactMgr.getAppointmentFromServer(appointment.getParentFolderID(), appointment.getObjectID());
         
         assertEquals(appointment.getObjectID(), reload.getObjectID());
         assertEquals(appointment.getTitle(), reload.getTitle());
         
-        reload = manager.getAppointmentFromServer( appointment );
+        reload = contactMgr.getAppointmentFromServer( appointment );
         
         assertEquals(appointment.getObjectID(), reload.getObjectID());
         assertEquals(appointment.getTitle(), reload.getTitle());
@@ -148,14 +155,14 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
     
     public void testUpdate() throws Exception {
         Appointment appointment = new Appointment();
-        appointment.setParentFolderID( manager.getPrivateFolder() );
+        appointment.setParentFolderID( testFolder.getObjectID() );
         appointment.setTitle(getName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         
-        manager.insertAppointmentOnServer(appointment);
+        contactMgr.insertAppointmentOnServer(appointment);
     
-        Appointment update = manager.createIdentifyingCopy( appointment );
+        Appointment update = contactMgr.createIdentifyingCopy( appointment );
         
         assertEquals(update.getObjectID(), appointment.getObjectID());
         assertEquals(update.getParentFolderID(), appointment.getParentFolderID());
@@ -165,9 +172,9 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
         update.setStartDate(new Date(23000));
         update.setEndDate(new Date(25000));
         
-        manager.updateAppointmentOnServer( update );
+        contactMgr.updateAppointmentOnServer( update );
         
-        Appointment reload = manager.getAppointmentFromServer(appointment);
+        Appointment reload = contactMgr.getAppointmentFromServer(appointment);
         
         assertEquals(23000, reload.getStartDate().getTime());
         assertEquals(25000, reload.getEndDate().getTime());   
@@ -175,15 +182,15 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
     
     public void testUpdates() throws Exception {
         Appointment appointment = new Appointment();
-        appointment.setParentFolderID( manager.getPrivateFolder() );
+        appointment.setParentFolderID( testFolder.getObjectID() );
         appointment.setTitle(getName());
         appointment.setStartDate(new Date());
         appointment.setEndDate(new Date());
         
-        manager.insertAppointmentOnServer(appointment);
+        contactMgr.insertAppointmentOnServer(appointment);
     
         Date beforeUpdate = new Date();
-        Appointment update = manager.createIdentifyingCopy( appointment );
+        Appointment update = contactMgr.createIdentifyingCopy( appointment );
         String updatedTitle = getName()+"2";
         update.setTitle(updatedTitle);
 
@@ -192,9 +199,9 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
         assertEquals(update.getLastModified(), appointment.getLastModified());
         assertNotSame(appointment, update);
                 
-        manager.updateAppointmentOnServer( update );
+        contactMgr.updateAppointmentOnServer( update );
         
-        List<Appointment> updates = manager.getUpdates(appointment.getParentFolderID(), beforeUpdate, true);
+        List<Appointment> updates = contactMgr.getUpdates(appointment.getParentFolderID(), beforeUpdate, true);
         
         assertEquals("Should have one new update", 1, updates.size());
         assertEquals("Should contain the updated title", updatedTitle, updates.get(0).getTitle());
@@ -202,14 +209,14 @@ public class CalendarTestManagerTest extends AbstractAJAXSession{
     
     public void testGetAllInFolder() throws Exception {
         Appointment appointment = new Appointment();
-        appointment.setParentFolderID( manager.getPrivateFolder() );
+        appointment.setParentFolderID( testFolder.getObjectID() );
         appointment.setTitle(getName());
         appointment.setStartDate(D("12/02/1999 10:00"));
         appointment.setEndDate(D("12/02/1999 12:00"));
         
-        manager.insertAppointmentOnServer(appointment);
+        contactMgr.insertAppointmentOnServer(appointment);
     
-        Appointment[] appointments = manager.getAllAppointmentsOnServer( appointment.getParentFolderID(), D("01/01/1999 00:00"), D("01/03/1999 00:00") );
+        Appointment[] appointments = contactMgr.getAllAppointmentsOnServer( appointment.getParentFolderID(), D("01/01/1999 00:00"), D("01/03/1999 00:00") );
         
         assertNotNull( appointments );
         assertInList(appointments, appointment);
