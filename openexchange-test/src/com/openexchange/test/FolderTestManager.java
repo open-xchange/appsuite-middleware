@@ -74,6 +74,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -425,5 +426,26 @@ public class FolderTestManager extends TestCase {
             fail("Unexpected error occured during " + action + ".");
             e.printStackTrace();
         }
+    }
+    
+    public FolderObject generateFolder(String name, int moduleID, int parentID, int userID){
+        //create a folder
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setType(FolderObject.PUBLIC);
+        folder.setParentFolderID(parentID);
+        folder.setModule(moduleID);
+        // create permissions
+        final OCLPermission permissions = new OCLPermission();
+        permissions.setEntity(userID);
+        permissions.setGroupPermission(false);
+        permissions.setFolderAdmin(true);
+        permissions.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { permissions});
+        return folder;
     }
 }
