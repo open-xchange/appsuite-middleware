@@ -47,26 +47,74 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.db.balancing;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import java.util.List;
+import com.openexchange.eav.storage.db.exception.EAVStorageException;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link EAVException}
+ * {@link BalancedTableManager}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVException extends AbstractOXException{
-    public EAVException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
-        setMessageArgs(args);
+public class BalancedTableManager {
+
+    private TableManagerStrategy strategy;
+    private int capacity = 1000000;
+
+    /**
+     * Initializes a new {@link BalancedTableManager}.
+     * @param sim
+     */
+    public BalancedTableManager(TableManagerStrategy strategy) {
+        super();
+        this.strategy = strategy;
     }
-    
-    public EAVException(AbstractOXException cause) {
-        super(cause);
+
+    public String getTable(Context ctx, int module, int oid) throws EAVStorageException {
+        String predefinedTable = strategy.getPredefinedTable(ctx, module, oid);
+        if(predefinedTable != null) {
+            return predefinedTable;
+        }
+        return strategy.register(ctx, module, oid, getLeastUsedTable(ctx));
+    }
+    private String getLeastUsedTable(Context ctx) throws EAVStorageException {
+        List<TableMetadata> tables = strategy.getTableMetadataForAllTables(ctx);
+        if(tables.size() == 0) {
+            return strategy.createNewTable(ctx);
+        }
+        
+        TableMetadata leastUsed = null;
+        
+        for (TableMetadata tableMetadata : tables) {
+            if(leastUsed == null || leastUsed.getObjectCount() > tableMetadata.getObjectCount()) {
+                leastUsed = tableMetadata;
+            }
+        }
+        int threshold = calculateThreshold(capacity, tables.size());
+        if(leastUsed.getObjectCount() >= threshold) {
+            return strategy.createNewTable(ctx);
+        }
+        return leastUsed.getName();
+    }
+
+    public static int calculateThreshold(int capacity, int tableCount) {
+        int threshold = 0;
+        for(int i = 0; i < tableCount; i++) {
+            int toAdd = capacity;
+            for(int j = 0; j <= i; j++) {
+                toAdd = toAdd / 2;
+            }
+            threshold += toAdd;
+        }
+        return threshold;
+    }
+
+    public void setCapacity(int i) {
+        capacity = i;
     }
 
 }

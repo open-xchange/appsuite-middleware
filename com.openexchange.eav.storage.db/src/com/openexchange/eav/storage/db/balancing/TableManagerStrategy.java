@@ -47,26 +47,34 @@
  *
  */
 
-package com.openexchange.eav;
+package com.openexchange.eav.storage.db.balancing;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+import java.util.List;
+import com.openexchange.eav.storage.db.exception.EAVStorageException;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link EAVException}
+ * {@link TableManagerStrategy}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVException extends AbstractOXException{
-    public EAVException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
-        setMessageArgs(args);
-    }
-    
-    public EAVException(AbstractOXException cause) {
-        super(cause);
-    }
+public interface TableManagerStrategy {
+
+    /**
+     * @param ctx The Context
+     * @param module The Module ID
+     * @param oid the ObjectID
+     * @return the predefined table for the given object or null, if no table is predefined for this object.
+     * @throws EAVStorageException 
+     */
+    String getPredefinedTable(Context ctx, int module, int oid) throws EAVStorageException;
+
+    List<TableMetadata> getTableMetadataForAllTables(Context ctx) throws EAVStorageException;
+
+    String createNewTable(Context ctx) throws EAVStorageException;
+
+    String register(Context ctx, int module, int oid, String table) throws EAVStorageException;
 
 }

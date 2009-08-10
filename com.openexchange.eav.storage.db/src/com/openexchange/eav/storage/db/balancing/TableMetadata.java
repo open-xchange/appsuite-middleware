@@ -47,26 +47,36 @@
  *
  */
 
-package com.openexchange.eav;
-
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
+package com.openexchange.eav.storage.db.balancing;
 
 
 /**
- * {@link EAVException}
+ * {@link TableMetadata}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class EAVException extends AbstractOXException{
-    public EAVException(final ErrorMessage message, final Throwable cause, final Object... args) {
-        super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
-        setMessageArgs(args);
+public class TableMetadata {
+
+    private String name;
+    private long objectCount;
+
+    public void setName(String name) {
+        this.name = name;
     }
     
-    public EAVException(AbstractOXException cause) {
-        super(cause);
+    public String getName() {
+        return name;
     }
+    
+    public void setObjectCount(long objectCount) {
+        this.objectCount = objectCount;
+    }
+    
+    
+    public long getObjectCount() {
+        return objectCount;
+    }
+    
 
 }

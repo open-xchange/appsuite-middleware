@@ -49,18 +49,24 @@
 
 package com.openexchange.eav.storage.db.exception;
 
+import com.openexchange.eav.EAVException;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class EAVStorageException extends AbstractOXException {
+public class EAVStorageException extends EAVException {
 
     private static final long serialVersionUID = 4285759584912687003L;
 
     public EAVStorageException(ErrorMessage message, Throwable cause, Object[] args) {
         super(message, cause);
         setMessageArgs(args);
+    }
+    
+    
+    public EAVStorageException(AbstractOXException cause) {
+        super(cause);
     }
 }

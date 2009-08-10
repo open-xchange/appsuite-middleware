@@ -61,4 +61,7 @@ public class EAVStorageExceptionStrings implements LocalizableStrings {
 
     // SQL Exception
     public static final String SQLException = "An SQL Exception has occurred.";
+    
+    // Could not create table %s
+    public static final String CouldNotCreateTable = "Could not create table %s";
 }
