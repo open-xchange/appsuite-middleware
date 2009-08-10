@@ -124,6 +124,11 @@ public interface Permission extends Cloneable {
     public Object clone();
 
     /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    public boolean equals(Object obj);
+
+    /**
      * Gets this folder permission's system bit mask.
      * 
      * @return This folder permission's system bit mask

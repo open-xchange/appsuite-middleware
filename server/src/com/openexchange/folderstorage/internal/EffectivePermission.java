@@ -107,6 +107,50 @@ public final class EffectivePermission implements Permission {
         this.userConfig = userConfig;
     }
 
+    @Override
+    public int hashCode() {
+        return underlyingPerm.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Permission)) {
+            return false;
+        }
+        final Permission other = (Permission) obj;
+        if (isAdmin() != other.isAdmin()) {
+            return false;
+        }
+        if (getDeletePermission() != other.getDeletePermission()) {
+            return false;
+        }
+        if (getEntity() != other.getEntity()) {
+            return false;
+        }
+        if (getFolderPermission() != other.getFolderPermission()) {
+            return false;
+        }
+        if (isGroup() != other.isGroup()) {
+            return false;
+        }
+        if (getReadPermission() != other.getReadPermission()) {
+            return false;
+        }
+        if (getSystem() != other.getSystem()) {
+            return false;
+        }
+        if (getWritePermission() != other.getWritePermission()) {
+            return false;
+        }
+        return true;
+    }
+
     private boolean hasModuleAccess() {
         return userConfig.hasModuleAccess(getModule());
     }
