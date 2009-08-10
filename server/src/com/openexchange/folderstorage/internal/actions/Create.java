@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,8 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.virtual.VirtualFolder;
+import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -125,7 +126,7 @@ public final class Create extends AbstractAction {
              * Create folder dependent on folder is virtual or not
              */
             if (toCreate.isVirtual()) {
-
+                doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
             } else {
                 doCreateReal(toCreate, parentId, treeId, parentStorage);
             }
@@ -169,7 +170,7 @@ public final class Create extends AbstractAction {
         parentStorage.createFolder(toCreate, storageParameters);
     }
 
-    private void doCreateVirtual(final VirtualFolder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         /*
@@ -177,9 +178,13 @@ public final class Create extends AbstractAction {
          */
         if (supportsContentType(folderContentType, realStorage)) {
             checkOpenedStorage(realStorage, openedStorages);
-            // 1. Create in real storage
+            /*
+             * 1. Create in real storage
+             */
             realStorage.createFolder(toCreate, storageParameters);
-            // 2. Create in virtual storage
+            /*
+             * 2. Create in virtual storage
+             */
             // TODO: Pass this one? final Folder created = realStorage.getFolder(treeId, toCreate.getID(), storageParameters);
             virtualStorage.createFolder(toCreate, storageParameters);
         } else {
@@ -193,48 +198,28 @@ public final class Create extends AbstractAction {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
             }
             checkOpenedStorage(capStorage, openedStorages);
-            
-            // KEEP CONSISTENT STRUCTURE IN ALL REAL FOLDER STORAGES
             /*
-             * Get all real storages to create corresponding duplicate folders
+             * 1. Create at default location in capable real storage
              */
-            final FolderStorage[] realStorages = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(FolderStorage.REAL_TREE_ID);
-            for (final FolderStorage fs : realStorages) {
-                if (!capStorage.equals(fs)) {
-                    checkOpenedStorage(fs, openedStorages);
-                    /*
-                     * Create corresponding folder in current real storage
-                     */
-                    final Folder clone = (Folder) toCreate.clone();
-                    clone.setContentType(fs.getDefaultContentType());
-                    clone.setParentID("blubber"); // Look-up parent ID in current storage
-                    
-                }
+            {
+                final String realParentId = capStorage.getDefaultFolderID(
+                    user,
+                    FolderStorage.REAL_TREE_ID,
+                    capStorage.getDefaultContentType(),
+                    storageParameters);
+                // TODO: Check permission for obtained default folder ID?
+                final Folder clone4Real = (Folder) toCreate.clone();
+                clone4Real.setParentID(realParentId);
+                capStorage.createFolder(clone4Real, storageParameters);
+                toCreate.setID(clone4Real.getID());
             }
             /*
-             * Create folder in actual storage
+             * 2. Create in virtual storage
              */
-            final Folder clone = (Folder) toCreate.clone();
-            clone.setParentID("blubber"); // Look-up parent ID in storage
-            capStorage.createFolder(clone, storageParameters);
-            
-            
-            
-            // CREATE AT DEFAULT LOCATION
-            /*
-             * Determine where to create the folder in real storage
-             */
-            String pId = parentId;
-            while (!capStorage.getFolderType().servesFolderId(pId) || capStorage.containsFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters)) {
-                pId = virtualStorage.getFolder(treeId, pId, storageParameters).getParentID();
-            }
-            
-            
+            virtualStorage.createFolder(toCreate, storageParameters);
         }
-
+        // TODO: Check for storage capabilities! Does storage support permissions? Etc.
     }
-
-    
 
     private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
         for (final FolderStorage openedStorage : openedStorages) {

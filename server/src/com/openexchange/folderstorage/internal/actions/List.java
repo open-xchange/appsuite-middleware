@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +68,10 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.FolderStorageRegistry;
+import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contexts.Context;
