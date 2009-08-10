@@ -424,7 +424,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
 
-				if (MailProperties.getInstance().isSupportSubscription()) {
+				if (MailProperties.getInstance().isSupportSubscription() && !MailProperties.getInstance().isIgnoreSubscription()) {
 					final MailFolderDescription mfd = new MailFolderDescription();
 					mfd.setSubscribed(true);
 					mailAccess.getFolderStorage().updateFolder(fullname, mfd);
