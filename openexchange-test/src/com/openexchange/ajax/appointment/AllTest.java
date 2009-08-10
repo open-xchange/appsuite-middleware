@@ -229,7 +229,9 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setInterval(1);
         appointmentObj.setOccurrence(3);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+        int objectId = -1;
+        try {
+        objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 
         final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), timeZone, false, getHostName(), getSessionId());
 
@@ -237,6 +239,11 @@ public class AllTest extends AppointmentTest {
             if(loaded.getObjectID() == objectId) {
                 assertEquals(appointmentObj.getOccurrence(), loaded.getOccurrence());
             }
+        }
+        } finally {
+            if(objectId == -1)
+                return;
+            deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
         }
     }
 
