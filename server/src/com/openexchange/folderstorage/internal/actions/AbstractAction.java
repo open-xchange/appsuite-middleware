@@ -68,7 +68,7 @@ public abstract class AbstractAction {
 
     protected final Context context;
 
-    protected final StorageParameters storageParameters;
+    protected StorageParameters storageParameters;
 
     /**
      * Initializes a new {@link AbstractAction} from given session.
@@ -115,6 +115,15 @@ public abstract class AbstractAction {
      */
     public StorageParameters getStorageParameters() {
         return storageParameters;
+    }
+
+    /**
+     * Sets the storage parameters.
+     * 
+     * @param storageParameters The storage parameters
+     */
+    public void setStorageParameters(final StorageParameters storageParameters) {
+        this.storageParameters = storageParameters;
     }
 
     /**

@@ -119,6 +119,16 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String INVALID_CONTENT_TYPE_MSG = "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%3$s\" for user %4$s in context %5$s.";
 
     /**
+     * Move operation not permitted.
+     */
+    public static final String MOVE_NOT_PERMITTED_MSG = "Move operation not permitted.";
+
+    /**
+     * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
+     */
+    public static final String EQUAL_NAME_MSG = "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree \"%3$s\".";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

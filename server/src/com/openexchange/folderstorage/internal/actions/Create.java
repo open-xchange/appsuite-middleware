@@ -125,10 +125,10 @@ public final class Create extends AbstractAction {
             /*
              * Create folder dependent on folder is virtual or not
              */
-            if (toCreate.isVirtual()) {
-                doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
-            } else {
+            if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
                 doCreateReal(toCreate, parentId, treeId, parentStorage);
+            } else {
+                doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
             }
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);

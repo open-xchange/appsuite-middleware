@@ -110,7 +110,15 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
      */
-    INVALID_CONTENT_TYPE(FolderExceptionMessages.INVALID_CONTENT_TYPE_MSG, Category.CODE_ERROR, 12);
+    INVALID_CONTENT_TYPE(FolderExceptionMessages.INVALID_CONTENT_TYPE_MSG, Category.CODE_ERROR, 12),
+    /**
+     * Move operation not permitted.
+     */
+    MOVE_NOT_PERMITTED(FolderExceptionMessages.MOVE_NOT_PERMITTED_MSG, Category.CODE_ERROR, 13),
+    /**
+     * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
+     */
+    EQUAL_NAME(FolderExceptionMessages.EQUAL_NAME_MSG, Category.PERMISSION, 14);
 
     private final Category category;
 
