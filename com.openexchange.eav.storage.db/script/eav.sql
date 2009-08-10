@@ -21,13 +21,13 @@ CREATE TABLE eav_paths1 (
     nodeId INT4 UNSIGNED NOT NULL,
     name VARCHAR(128),
     parent INT4 UNSIGNED NOT NULL,
+    eavType VARCHAR(64) NOT NULL,
     PRIMARY KEY (cid, module, objectId),
     FOREIGN KEY (parent) REFERENCES eav_paths1(nodeId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE eav_int1 (
     cid INT4 UNSIGNED NOT NULL,
-    eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload INT8
@@ -35,7 +35,6 @@ CREATE TABLE eav_int1 (
 
 CREATE TABLE eav_bool1 (
     cid INT4 UNSIGNED NOT NULL,
-    eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload BOOLEAN
@@ -43,7 +42,6 @@ CREATE TABLE eav_bool1 (
 
 CREATE TABLE eav_varchar1 (
     cid INT4 UNSIGNED NOT NULL,
-    eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload VARCHAR(1024)
@@ -51,7 +49,6 @@ CREATE TABLE eav_varchar1 (
 
 CREATE TABLE eav_text1 (
     cid INT4 UNSIGNED NOT NULL,
-    eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload TEXT
@@ -59,7 +56,6 @@ CREATE TABLE eav_text1 (
 
 CREATE TABLE eav_blob1 (
     cid INT4 UNSIGNED NOT NULL,
-    eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload BLOB
@@ -67,13 +63,12 @@ CREATE TABLE eav_blob1 (
 
 CREATE TABLE eav_reference1 (
     cid INT4 UNSIGNED NOT NULL,
-    eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload VARCHAR(1024)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE sequence_uid_eav_node ("
+CREATE TABLE sequence_uid_eav_node (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
