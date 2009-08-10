@@ -4,6 +4,12 @@ CREATE TABLE eav_pathIndex (
     cid INT4 UNSIGNED NOT NULL,
     module INT1 UNSIGNED NOT NULL,
     objectId INT4 UNSIGNED NOT NULL,
+    intTable VARCHAR(64),
+    textTable VARCHAR(64),
+    varcharTable VARCHAR(64),
+    blobTable VARCHAR(64),
+    boolTable VARCHAR(64),
+    referenceTable VARCHAR(64),
     pathTable VARCHAR(64) NOT NULL,
     PRIMARY KEY (cid, module, objectId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -15,7 +21,6 @@ CREATE TABLE eav_paths1 (
     nodeId INT4 UNSIGNED NOT NULL,
     name VARCHAR(128),
     parent INT4 UNSIGNED NOT NULL,
-    table VARCHAR(64),
     PRIMARY KEY (cid, module, objectId),
     FOREIGN KEY (parent) REFERENCES eav_paths1(nodeId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -28,7 +33,7 @@ CREATE TABLE eav_int1 (
     payload INT8
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE eav_bool (
+CREATE TABLE eav_bool1 (
     cid INT4 UNSIGNED NOT NULL,
     eavType VARCHAR(64) NOT NULL,
     containerType VARCHAR(64) NOT NULL,
