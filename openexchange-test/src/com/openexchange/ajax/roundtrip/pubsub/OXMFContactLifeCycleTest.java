@@ -70,9 +70,9 @@ import com.openexchange.tools.servlet.AjaxException;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class OXMFLifeCycleTest extends AbstractPubSubRoundtripTest {
+public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
 
-    public OXMFLifeCycleTest(String name) {
+    public OXMFContactLifeCycleTest(String name) {
         super(name);
     }
 
