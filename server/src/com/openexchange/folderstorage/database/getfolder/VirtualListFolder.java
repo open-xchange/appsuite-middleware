@@ -79,6 +79,48 @@ public final class VirtualListFolder {
     }
 
     /**
+     * Checks if specified virtual folder identifier exists; meaning corresponding non-tree-visible folders exist.
+     * 
+     * @param folderId The folder identifier
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return <code>true</code> if specified virtual folder identifier exists; otherwise <code>false</code>
+     * @throws FolderException If checking existence fails
+     */
+    public static boolean existsVirtualListFolder(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        try {
+            final int module;
+            if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
+                // Task
+                module = FolderObject.TASK;
+            } else if (FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID == folderId) {
+                // Calendar
+                module = FolderObject.CALENDAR;
+            } else if (FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID == folderId) {
+                // Contact
+                module = FolderObject.CONTACT;
+            } else {
+                // Infostore
+                module = FolderObject.INFOSTORE;
+            }
+            // Return non-isEmpty()
+            return !(((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                module,
+                user.getId(),
+                user.getGroups(),
+                userConfiguration,
+                ctx,
+                con)).asQueue().isEmpty());
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    /**
      * Gets the database folder representing given virtual folder.
      * 
      * @param folderId The virtual folder identifier

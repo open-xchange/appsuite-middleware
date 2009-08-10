@@ -200,7 +200,7 @@ public final class FolderStorageRegistry {
          */
         final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
-            return null;
+            return new FolderStorage[0];
         }
         final List<FolderStorage> l = new ArrayList<FolderStorage>(4);
         for (final FolderStorage folderStorage : storages) {
@@ -209,6 +209,35 @@ public final class FolderStorageRegistry {
             }
         }
         return l.toArray(new FolderStorage[l.size()]);
+    }
+
+    /**
+     * Gets the folder storages for specified tree identifier.
+     * 
+     * @param treeId The tree identifier
+     * @return The folder storages for specified tree identifier or an empty array if none available
+     */
+    public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
+        if (!genStorages.isEmpty()) {
+            /*
+             * Check general storages first
+             */
+            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+                final FolderStorage folderStorage = iterator.next();
+                final FolderType folderType = folderStorage.getFolderType();
+                if (folderType.servesTreeId(treeId)) {
+                    return new FolderStorage[] { folderStorage };
+                }
+            }
+        }
+        /*
+         * Obtain candidates by tree identifier
+         */
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return new FolderStorage[0];
+        }
+        return storages.toArray(new FolderStorage[storages.size()]);
     }
 
     /**

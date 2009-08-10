@@ -126,6 +126,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
             InfostoreContentType.getInstance(), UnboundContentType.getInstance() };
     }
 
+    public ContentType getDefaultContentType() {
+        return ContactContentType.getInstance();
+    }
+
     public void commitTransaction(final StorageParameters params) throws FolderException {
         final Connection con;
         final Boolean writable;
@@ -651,6 +655,86 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    public StoragePriority getStoragePriority() {
+        return StoragePriority.NORMAL;
+    }
+
+    public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                }
+            }
+
+            final boolean retval;
+
+            if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+
+                retval = SharedPrefixFolder.existsSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+            } else {
+                /*
+                 * A numeric folder identifier
+                 */
+                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                    retval = true;
+                } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                    /*
+                     * A virtual database folder
+                     */
+                    retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
+                } else {
+                    /*
+                     * A non-virtual database folder
+                     */
+
+                    if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                        /*
+                         * The system shared folder
+                         */
+                        retval = true;
+                    } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                        /*
+                         * The system public folder
+                         */
+                        retval = true;
+                    } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                        /*
+                         * The system infostore folder
+                         */
+                        retval = true;
+                    } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                        /*
+                         * The system private folder
+                         */
+                        retval = true;
+                    } else {
+                        /*
+                         * Check for shared folder, that is folder is of type private and requesting user is different from folder's owner
+                         */
+                        retval = OXFolderSQL.exists(folderId, con, ctx);
+                    }
+                }
+            }
+
+            return retval;
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+    } // End of containsFolder()
+
     /*-
      * ############################# HELPER METHODS #############################
      */
@@ -720,35 +804,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             return (id1 < id2 ? -1 : (id1 == id2 ? 0 : 1));
         }
 
-    } // End of MailAccountComparator
+    } // End of FolderObjectComparator
 
-    public StoragePriority getStoragePriority() {
-        return StoragePriority.NORMAL;
-    }
-
-    /**
-     * {@link DisplayNameComparator} - Sorts display names with respect to a certain locale
-     * 
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private static final class DisplayNameComparator implements Comparator<String> {
-
-        private final Collator collator;
-
-        public DisplayNameComparator(final Locale locale) {
-            super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
-        }
-
-        public int compare(final String displayName1, final String displayName2) {
-            return collator.compare(displayName1, displayName2);
-        }
-
-    }
-
-    public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return false;
-    }
 }

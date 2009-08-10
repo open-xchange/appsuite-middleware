@@ -92,6 +92,13 @@ public interface FolderStorage {
     StoragePriority getStoragePriority();
 
     /**
+     * Gets the default content type for this folder storage.
+     * 
+     * @return The default content type or <code>null</code> if this folder storage has no default content type
+     */
+    ContentType getDefaultContentType();
+
+    /**
      * Checks if the folder denoted by specified folder ID exists in this folder storage.
      * 
      * @param treeId The tree identifier

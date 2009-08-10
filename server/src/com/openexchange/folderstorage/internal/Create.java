@@ -193,6 +193,34 @@ public final class Create extends AbstractAction {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
             }
             checkOpenedStorage(capStorage, openedStorages);
+            
+            // KEEP CONSISTENT STRUCTURE IN ALL REAL FOLDER STORAGES
+            /*
+             * Get all real storages to create corresponding duplicate folders
+             */
+            final FolderStorage[] realStorages = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(FolderStorage.REAL_TREE_ID);
+            for (final FolderStorage fs : realStorages) {
+                if (!capStorage.equals(fs)) {
+                    checkOpenedStorage(fs, openedStorages);
+                    /*
+                     * Create corresponding folder in current real storage
+                     */
+                    final Folder clone = (Folder) toCreate.clone();
+                    clone.setContentType(fs.getDefaultContentType());
+                    clone.setParentID("blubber"); // Look-up parent ID in current storage
+                    
+                }
+            }
+            /*
+             * Create folder in actual storage
+             */
+            final Folder clone = (Folder) toCreate.clone();
+            clone.setParentID("blubber"); // Look-up parent ID in storage
+            capStorage.createFolder(clone, storageParameters);
+            
+            
+            
+            // CREATE AT DEFAULT LOCATION
             /*
              * Determine where to create the folder in real storage
              */

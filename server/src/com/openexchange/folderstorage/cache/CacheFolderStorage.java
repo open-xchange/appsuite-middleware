@@ -142,6 +142,10 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    public ContentType getDefaultContentType() {
+        return null;
+    }
+
     public void commitTransaction(final StorageParameters params) throws FolderException {
         // Nothing to do
     }

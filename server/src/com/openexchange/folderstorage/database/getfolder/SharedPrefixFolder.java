@@ -86,6 +86,43 @@ public final class SharedPrefixFolder {
     }
 
     /**
+     * Checks existence of specified folder identifier starting with shared prefix; meaning folder's owner shared at least one folder to
+     * given user.
+     * 
+     * @param folderIdentifier The folder identifier starting with shared prefix
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
+     * @return <code>true</code> if specified folder identifier starting with shared prefix exists; otherwise <code>false</code>
+     * @throws FolderException If checking existence fails
+     */
+    public static boolean existsSharedPrefixFolder(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int sharedOwner;
+        try {
+            sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
+        } catch (final NumberFormatException exc) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
+        }
+        final Queue<FolderObject> q;
+        try {
+            q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
+                user.getId(),
+                user.getGroups(),
+                userConfiguration.getAccessibleModules(),
+                sharedOwner,
+                ctx,
+                null,
+                con)).asQueue();
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+        return !q.isEmpty();
+    }
+
+    /**
      * Gets the folder whose identifier starts with shared prefix.
      * 
      * @param folderIdentifier The folder identifier starting with shared prefix

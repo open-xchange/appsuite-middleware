@@ -78,6 +78,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -111,6 +112,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] { MailContentType.getInstance() };
+    }
+
+    public ContentType getDefaultContentType() {
+        return MailContentType.getInstance();
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
@@ -472,8 +477,23 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            final MailServletInterface mailServletInterface = (MailServletInterface) storageParameters.getParameter(
+                MailFolderType.getInstance(),
+                MailParameterConstants.PARAM_MAIL_ACCESS);
+
+            if (null == mailServletInterface) {
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
+            }
+
+            mailServletInterface.getFolder(folderId, true);
+            return true;
+        } catch (final MailException e) {
+            if (MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                return false;
+            }
+            throw new FolderException(e);
+        }
     }
 
 }

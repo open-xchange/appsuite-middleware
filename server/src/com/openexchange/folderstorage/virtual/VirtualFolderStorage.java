@@ -83,6 +83,10 @@ public final class VirtualFolderStorage implements FolderStorage {
         folderType = new VirtualFolderType();
     }
 
+    public ContentType getDefaultContentType() {
+        return null;
+    }
+
     public void commitTransaction(final StorageParameters params) throws FolderException {
 
     }
