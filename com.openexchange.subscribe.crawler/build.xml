@@ -8,6 +8,7 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="lib.dir" value="lib"/>
+    <property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -19,6 +20,10 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+
+    <!-- Replacements -->
+    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+    <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -82,7 +87,36 @@
     <!-- Install targets -->
     <target name="install" depends="installJar,installConfig"/>
 
-    <target name="installConfig">
+    <target name="patchConfigFiles">
+        <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+        <move tofile="${patch.conf.dir}/crawler.properties"
+            file="${patch.conf.dir}/crawler.properties.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/crawler.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.install.dir}"/>
+        </replace>
+    </target>
+
+    <target name="patchConfig" depends="prepare">
+        <property name="patch.conf.dir" value="${tmp.dir}/${conf.dir}"/>
+        <mkdir dir="${patch.conf.dir}"/>
+        <copy todir="${patch.conf.dir}" overwrite="true">
+            <fileset dir="${conf.dir}"/>
+        </copy>
+        <antcall target="patchConfigFiles">
+            <param name="conf.subst.patch" value="${conf.install.dir}"/>
+        </antcall>
+    </target>
+
+    <target name="installConfig" depends="patchConfig">
+        <mkdir dir="${confInstallCopyDir}"/>
+        <copy todir="${confInstallCopyDir}" overwrite="true">
+            <fileset dir="${patch.conf.dir}">
+                <include name="**"/>
+                <exclude name="*.in"/>
+                <exclude name="CVS"/>
+                <exclude name="osgi/**"/>
+	    </fileset>
+        </copy>
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>

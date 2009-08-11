@@ -1,0 +1,3 @@
+/opt/open-xchange/etc/groupware/crawler.properties
+/opt/open-xchange/etc/groupware/crawlers/LinkedIn.yml
+/opt/open-xchange/etc/groupware/crawlers/XING.yml
