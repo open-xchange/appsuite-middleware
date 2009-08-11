@@ -49,92 +49,57 @@
 
 package com.openexchange.sim;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
+
 /**
- * {@link DynamicSim}
+ * {@link SimBuilder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class DynamicSim implements InvocationHandler{
-
-    private Throwable exception;
-    private Object retval;
-    private boolean wasCalled;
+public class SimBuilder {
+    private List<DynamicSim> expectedCalls = new ArrayList<DynamicSim>();
+    private DynamicSim last = null;
     
-    private Expectation expectation;
-
-    public DynamicSim(Expectation expectation) {
-        super();
-        this.expectation = expectation;
+    
+    public SimBuilder expectCall(String methodName, Object...args) {
+        last = new DynamicSim(new Called(methodName, args));
+        expectedCalls.add(last);
+        return this;
+    }
+    
+    public SimBuilder andReturn(Object returnValue) {
+        last.setReturnValue(returnValue);
+        return this;
+    }
+    
+    public SimBuilder andThrow(Exception x) {
+        last.setException(x);
+        return this;
+    }
+    
+    public <T> T getSim(Class<T> klass) {
+        return DynamicSim.compose(klass, expectedCalls);
     }
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        expectation.verify(method, args);
-        wasCalled = true;
-        if(exception != null) {
-            throw exception;
-        }
-        if(retval != null) {
-            return retval;
-        }
-        return null;
-    }
-    
-    public <T> T become(Class<T> klass) {
-        return (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[]{klass}, this);
-    }
-    
-    public static <T> T compose(Class<T> klass, DynamicSim...sims) {
-        SequenceInvocationHandler sequenceInvocationHandler = new SequenceInvocationHandler(sims);
-        return (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[]{klass}, sequenceInvocationHandler);
-    }
-    
-    public static<T> T compose(Class<T> klass, List<DynamicSim> dynamicSims) {
-        return compose(klass, dynamicSims.toArray(new DynamicSim[dynamicSims.size()]));
-    }
-    
-    private static final class SequenceInvocationHandler implements InvocationHandler {
-        private InvocationHandler[] invocationHandlers;
-        private int index = 0;
-        
-        public SequenceInvocationHandler(InvocationHandler[] handlers) {
-            this.invocationHandlers = handlers;
-        }
-
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if(index == invocationHandlers.length) {
-                throw new IllegalStateException("Didn't expect method call: "+method);
+    public List<String> getMissingCalls() {
+        LinkedList<String> missingCalls = new LinkedList<String>();
+        for (DynamicSim expectedCall : expectedCalls) {
+            if(!expectedCall.wasCalled()) {
+                missingCalls.add(expectedCall.getExpectation().toString());
             }
-            return invocationHandlers[index++].invoke(proxy, method, args);
         }
-        
-        
+        return missingCalls;
     }
     
-    public boolean wasCalled() {
-        return wasCalled;
+    public void assertAllWereCalled() {
+        List<String> missingCalls = getMissingCalls();
+        assertTrue("Missing calls: "+missingCalls.toString(), missingCalls.isEmpty());
     }
-    
-
-    public void setReturnValue(Object retval) {
-        this.retval = retval;
-    }
-
-    public Expectation getExpectation() {
-        return expectation;
-    }
-
-    public void setException(Throwable x) {
-        this.exception = x;
-    }
-
-
-    
-    
     
 }
