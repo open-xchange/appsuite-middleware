@@ -20,10 +20,10 @@ CREATE TABLE eav_paths1 (
     objectId INT4 UNSIGNED NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     name VARCHAR(128),
-    parent INT4 UNSIGNED NOT NULL,
+    parent INT4 UNSIGNED,
     eavType VARCHAR(64) NOT NULL,
-    PRIMARY KEY (cid, module, objectId),
-    FOREIGN KEY (parent) REFERENCES eav_paths1(nodeId)
+    PRIMARY KEY (cid, nodeId),
+    INDEX(cid, module, objectId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE eav_int1 (
