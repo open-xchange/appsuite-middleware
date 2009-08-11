@@ -69,6 +69,11 @@ public interface FolderStorage {
     public static final String ALL_TREE_ID = "*";
 
     /**
+     * The reserved identifier for root folder.
+     */
+    public static final String ROOT_ID = "0";
+
+    /**
      * Gets the content types supported by this folder storage.
      * <p>
      * A zero length array means this folder storage supports all content types for a certain tree identifier.
@@ -143,6 +148,16 @@ public interface FolderStorage {
      * @throws FolderException If deletion fails
      */
     void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Clears the content of the folder denoted by specified folder ID.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder ID
+     * @param storageParameters The storage parameters
+     * @throws FolderException If deletion fails
+     */
+    void clearFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Updates the data of the given folder on the storage.

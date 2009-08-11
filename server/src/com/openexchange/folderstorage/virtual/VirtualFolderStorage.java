@@ -99,6 +99,10 @@ public final class VirtualFolderStorage implements FolderStorage {
             folder);
     }
 
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        // Nothing to do
+    }
+
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         Delete.deleteFolder(
             storageParameters.getContext().getContextId(),

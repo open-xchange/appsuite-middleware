@@ -241,6 +241,39 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        try {
+            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+                MailFolderType.getInstance(),
+                MailParameterConstants.PARAM_MAIL_ACCESS);
+            if (null == mailAccess) {
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
+            }
+
+            final FullnameArgument arg = prepareMailFolderParam(folderId);
+            mailAccess = checkMailAccess(arg.getAccountId(), mailAccess, storageParameters);
+            final String fullname = arg.getFullname();
+            /*
+             * Only backup if fullname does not denote trash (sub)folder
+             */
+            mailAccess.getFolderStorage().clearFolder(fullname, (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+            try {
+                /*
+                 * Update message cache
+                 */
+                MailMessageCache.getInstance().removeFolderMessages(
+                    arg.getAccountId(),
+                    fullname,
+                    storageParameters.getUser().getId(),
+                    storageParameters.getContext().getContextId());
+            } catch (final OXCachingException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        }
+    }
+
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(

@@ -226,6 +226,23 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final FolderObject fo = new FolderObject();
+            fo.setObjectID(Integer.parseInt(folderId));
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            folderManager.clearFolder(fo, true, System.currentTimeMillis());
+        } catch (final OXFolderException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final FolderObject fo = new FolderObject();

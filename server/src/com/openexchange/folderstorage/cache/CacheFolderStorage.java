@@ -189,6 +189,10 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        // TODO
+    }
+
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         final FolderStorage storage = CacheFolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
         if (null == storage) {
