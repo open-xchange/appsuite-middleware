@@ -28,41 +28,78 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public abstract class MessageStorageTest extends AbstractMailTest {
 
-    protected static final MailField[] FIELDS_ID = { MailField.ID };
+    public static final String[] NON_MATCHING_HEADERS = {
+        MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
+        MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY,
+        MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD,
+        MessageHeaders.HDR_X_OX_NOTIFICATION };
 
-    protected static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
+    protected static final MailField[] FIELDS_ID = { MailField.ID };
 
 //    private static final MailField[] RELEVANT_FIELD = { MailField.ID, MailField.FOLDER_ID, MailField.CONTENT_TYPE, MailField.FROM, MailField.TO, MailField.CC, 
 //        MailField.BCC, MailField.SUBJECT, MailField.SIZE, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.FLAGS, MailField.THREAD_LEVEL,
 //        MailField.DISPOSITION_NOTIFICATION_TO, MailField.PRIORITY, MailField.COLOR_LABEL, MailField.HEADERS, MailField.BODY };
     
-    protected MailMessage[] testmessages = null;
+    protected static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
     
     protected MailAccess<?, ?> mailAccess = null;
     
+    protected MailMessage[] testmessages = null;
+
     /**
      * 
      */
     protected MessageStorageTest() {
         super();
     }
-
+    
     protected MessageStorageTest(final String name) {
         super(name);
     }
+
     
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        this.testmessages = getMessages(getTestMailDir(), -1);
-        this.mailAccess = getMailAccess();
+    protected static MailField[][] generateVariations() {
+        final MailField[] values = MailField.values();
+        final int number = 1 << values.length ;
+        final MailField[][] retval = new MailField[number][];
+        int[] indices;
+        int t = 0;
+        for (int o = 1; o <= values.length; o++) {
+            final CombinationGenerator x = new CombinationGenerator(values.length, o);
+            while (x.hasMore()) {
+                indices = x.getNext();
+                retval[t] = new MailField[indices.length];
+                for (int i = 0; i < indices.length; i++) {
+                    retval[t][i] = values[indices[i]];
+                }
+                t++;
+            }
+        }
+        return retval;
     }
 
-    public static final String[] NON_MATCHING_HEADERS = {
-        MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
-        MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY,
-        MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD,
-        MessageHeaders.HDR_X_OX_NOTIFICATION };
+    private static long fac(final long l) {
+        long retval = 1;
+        for (long i = 1; i < l; i++) {
+            retval *= i;
+        }
+        return retval;
+    }
+
+    private static boolean isValidAddressHeader(final MailMessage mail, final String name) {
+        final String addressStr = mail.getHeader(name, ',');
+        if (null == addressStr || addressStr.length() == 0) {
+            return true;
+        }
+        try {
+            InternetAddress.parse(MIMEMessageUtility.decodeMultiEncodedHeader(addressStr), true);
+            // Valid addresses
+            return true;
+        } catch (final Exception e) {
+            // No valid addresses
+            return false;
+        }
+    }
 
     /**
      * Compares if two MailMessage object are equal. Only the fields specified
@@ -172,21 +209,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         }
         
     }
-
-    private static boolean isValidAddressHeader(final MailMessage mail, final String name) {
-        final String addressStr = mail.getHeader(name, ',');
-        if (null == addressStr || addressStr.length() == 0) {
-            return true;
-        }
-        try {
-            InternetAddress.parse(MIMEMessageUtility.decodeMultiEncodedHeader(addressStr), true);
-            // Valid addresses
-            return true;
-        } catch (final Exception e) {
-            // No valid addresses
-            return false;
-        }
-    }
     
     /**
      * @param session
@@ -224,24 +246,39 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return fullname;
     }
     
-    protected static MailField[][] generateVariations() {
-        final MailField[] values = MailField.values();
-        final int number = 1 << values.length ;
-        final MailField[][] retval = new MailField[number][];
-        int[] indices;
-        int t = 0;
-        for (int o = 1; o <= values.length; o++) {
-            final CombinationGenerator x = new CombinationGenerator(values.length, o);
-            while (x.hasMore()) {
-                indices = x.getNext();
-                retval[t] = new MailField[indices.length];
-                for (int i = 0; i < indices.length; i++) {
-                    retval[t][i] = values[indices[i]];
-                }
-                t++;
-            }
+    /**
+     * Creates a folder with tempFolderName under the inbox
+     * 
+     * @param session
+     * @param mailAccess
+     * @param tempFolderName
+     * @return
+     * @throws MailException
+     */
+    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, String tempFolderName) throws MailException {
+        final String fullname;
+        {
+            final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+        	final String parentFullname;
+        	if (inbox.isHoldsFolders()) {
+        		fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+        				tempFolderName).toString();
+        		parentFullname = "INBOX";
+        	} else {
+        		fullname = tempFolderName;
+        		parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+        	}
+    
+        	final MailFolderDescription mfd = new MailFolderDescription();
+        	mfd.setExists(false);
+        	mfd.setParentFullname(parentFullname);
+        	mfd.setSeparator(inbox.getSeparator());
+        	mfd.setName(tempFolderName);
+    
+        	mfd.addPermission(getPermission(session));
+        	mailAccess.getFolderStorage().createFolder(mfd);
         }
-        return retval;
+        return fullname;
     }
 
     protected MailAccess<?, ?> getMailAccess() throws MailException {
@@ -252,6 +289,34 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         return mailAccess;
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        this.testmessages = getMessages(getTestMailDir(), -1);
+        this.mailAccess = getMailAccess();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        mailAccess.close(false);
+    }
+
+    private void check(final String string, final HeaderCollection value1, final HeaderCollection value2, final String mail1name, final String mail2name) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(string);
+        sb.append(" of ");
+        sb.append(mail1name);
+        sb.append(": ``");
+        sb.append(value1);
+        sb.append("'' is not equal with ");
+        sb.append(mail2name);
+        sb.append(": ``");
+        sb.append(value2).append("''");
+        assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
+    }
+
+    
     private void check(final String string, final int value1, final int value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -266,7 +331,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append("''");
         assertTrue(sb.toString(), value1 == value2);
     }
-
     private void check(final String string, final InternetAddress[] address1, final InternetAddress[] address2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -281,7 +345,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append("''");
         assertTrue(sb.toString(), Arrays.equals(address1, address2));
     }
-
+    
     private void check(final String string, final long value1, final long value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -296,21 +360,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append("''");
         assertTrue(sb.toString(), value1 == value2);
     }
-
     
-    private void check(final String string, final String value1, final String value2, final String mail1name, final String mail2name) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        sb.append(" of ");
-        sb.append(mail1name);
-        sb.append(": ``");
-        sb.append(value1);
-        sb.append("'' is not equal with ");
-        sb.append(mail2name);
-        sb.append(": ``");
-        sb.append(value2).append("''");
-        assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
-    }
     private void check(final String string, final Object value1, final Object value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
@@ -324,8 +374,8 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append(value2).append("''");
         assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
     }
-    
-    private void check(final String string, final HeaderCollection value1, final HeaderCollection value2, final String mail1name, final String mail2name) {
+
+    private void check(final String string, final String value1, final String value2, final String mail1name, final String mail2name) {
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
         sb.append(" of ");
@@ -338,7 +388,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append(value2).append("''");
         assertTrue(sb.toString(), equalsCheckWithNull(value1, value2));
     }
-    
+
     private void checkFieldsSet(final MailMessage mail, final Set<MailField> set, final String mailname, final boolean parsed) {
         final boolean full = set.contains(MailField.FULL);
         if (full || set.contains(MailField.ID)) {
@@ -467,30 +517,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         // }
     }
 
-    private boolean equalsCheckWithNull(final String a, final String b) {
-        if (null == a) {
-            if (null == b) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return a.trim().equals(b.trim());
-        }
-    }
-
-    private boolean equalsCheckWithNull(final Object a, final Object b) {
-        if (null == a) {
-            if (null == b) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return a.equals(b);
-        }
-    }
-
     private boolean equalsCheckWithNull(final HeaderCollection a, final HeaderCollection b) {
         if (null == a) {
             if (null == b) {
@@ -514,52 +540,33 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         }
     }
     
-    private static long fac(final long l) {
-        long retval = 1;
-        for (long i = 1; i < l; i++) {
-            retval *= i;
+    private boolean equalsCheckWithNull(final Object a, final Object b) {
+        if (null == a) {
+            if (null == b) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return a.equals(b);
         }
-        return retval;
+    }
+
+    private boolean equalsCheckWithNull(final String a, final String b) {
+        if (null == a) {
+            if (null == b) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return a.trim().equals(b.trim());
+        }
     }
 
     private String getFullFolderName(final MailFolder inbox, final String tempFolderName) {
         return new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
         		tempFolderName).toString();
-    }
-
-    /**
-     * Creates a folder with tempFolderName under the inbox
-     * 
-     * @param session
-     * @param mailAccess
-     * @param tempFolderName
-     * @return
-     * @throws MailException
-     */
-    protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, String tempFolderName) throws MailException {
-        final String fullname;
-        {
-            final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
-        	final String parentFullname;
-        	if (inbox.isHoldsFolders()) {
-        		fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-        				tempFolderName).toString();
-        		parentFullname = "INBOX";
-        	} else {
-        		fullname = tempFolderName;
-        		parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-        	}
-    
-        	final MailFolderDescription mfd = new MailFolderDescription();
-        	mfd.setExists(false);
-        	mfd.setParentFullname(parentFullname);
-        	mfd.setSeparator(inbox.getSeparator());
-        	mfd.setName(tempFolderName);
-    
-        	mfd.addPermission(getPermission(session));
-        	mailAccess.getFolderStorage().createFolder(mfd);
-        }
-        return fullname;
     }
 
     private MailPermission getPermission(final SessionObject session) throws MailException {
