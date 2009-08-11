@@ -49,102 +49,41 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.util.LinkedList;
+import java.util.List;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+import org.ho.yaml.Yaml;
+
 
 /**
- * This Step gets a page reachable via Url in the current context (WebClient) 
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ *
  */
-public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object>{
-
-	private String url;
-	private HtmlPage currentPage;
-	private Exception exception;
-	private boolean executedSuccessfully;
+public class GenericSubscribeServiceForXingTest extends
+		GenericSubscribeServiceTestHelpers {
 	
-	public PageByUrlStep(){
+	public void testGenericSubscribeServiceForXing(){
+		// insert valid credentials here
+		String username ="";
+		String password ="";
 		
-	}
-	
-	public PageByUrlStep(String description, String url){
-		this.description = description;
-		this.url = url;
-	}
-	
-	public void execute(WebClient webClient)  throws SubscriptionException{
-		try {
-			HtmlPage pageByUrl = webClient.getPage(this.url);
-			this.currentPage = pageByUrl;
-			executedSuccessfully = true;
-		} catch (FailingHttpStatusCodeException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (MalformedURLException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (IOException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		}
-	}
+		//create a CrawlerDescription
+		CrawlerDescription crawler = new CrawlerDescription();
+		crawler.setDisplayName("XING");
+		crawler.setId("com.openexchange.subscribe.xing");
+        
+		List<Step> steps = new LinkedList<Step>(); 
+        steps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", "", "", "loginform", "login_user_name", "login_password","/app/contact"));
+        steps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/contact?op=vcard;scr_id"));
+        steps.add(new ContactObjectsByVcardTextPagesStep());
 
-	public boolean executedSuccessfully() {
-		return this.executedSuccessfully;
+        Workflow workflow = new Workflow(steps);
+        crawler.setWorkflowString(Yaml.dump(workflow));
+        
+        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
+        //uncomment this if the if the crawler description was updated to get the new config-files
+        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
 	}
-
-	public Exception getException() {
-		return this.exception;
-	}
-
-	public String inputType() {
-		return HTML_PAGE;
-	}
-
-	public String outputType() {
-		return HTML_PAGE;
-	}
-
-	public HtmlPage getOutput() {
-		return currentPage;
-	}
-
-	public void setInput(Object input) {
-		// this needs to do nothing
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public HtmlPage getCurrentPage() {
-		return currentPage;
-	}
-
-	public void setCurrentPage(HtmlPage currentPage) {
-		this.currentPage = currentPage;
-	}
-
-	public boolean isExecutedSuccessfully() {
-		return executedSuccessfully;
-	}
-
-	public void setExecutedSuccessfully(boolean executedSuccessfully) {
-		this.executedSuccessfully = executedSuccessfully;
-	}
-
-	public void setException(Exception exception) {
-		this.exception = exception;
-	}
-	
-	
 
 }

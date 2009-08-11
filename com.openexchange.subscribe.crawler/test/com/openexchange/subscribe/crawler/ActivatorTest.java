@@ -49,102 +49,32 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
+import java.util.ArrayList;
+import com.openexchange.config.SimConfigurationService;
+import com.openexchange.subscribe.crawler.osgi.Activator;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
 
 /**
- * This Step gets a page reachable via Url in the current context (WebClient) 
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ *
  */
-public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object>{
-
-	private String url;
-	private HtmlPage currentPage;
-	private Exception exception;
-	private boolean executedSuccessfully;
+public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
 	
-	public PageByUrlStep(){
-		
-	}
-	
-	public PageByUrlStep(String description, String url){
-		this.description = description;
-		this.url = url;
-	}
-	
-	public void execute(WebClient webClient)  throws SubscriptionException{
-		try {
-			HtmlPage pageByUrl = webClient.getPage(this.url);
-			this.currentPage = pageByUrl;
-			executedSuccessfully = true;
-		} catch (FailingHttpStatusCodeException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (MalformedURLException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (IOException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+	/**
+	 * Get all yml-files in the config directory and create crawlers out of them. Use each crawler with a testuser.
+	 */
+	public void testActivator(){
+		String username = "roxyexchanger@ox.io";
+		String password = "secret";
+		SimConfigurationService config = new SimConfigurationService();
+        config.stringProperties.put("com.openexchange.subscribe.crawler.path", "test-crawlers/");
+		Activator activator = new Activator();
+		ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
+		for (CrawlerDescription crawler : crawlers){
+			findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
 		}
-	}
-
-	public boolean executedSuccessfully() {
-		return this.executedSuccessfully;
-	}
-
-	public Exception getException() {
-		return this.exception;
-	}
-
-	public String inputType() {
-		return HTML_PAGE;
-	}
-
-	public String outputType() {
-		return HTML_PAGE;
-	}
-
-	public HtmlPage getOutput() {
-		return currentPage;
-	}
-
-	public void setInput(Object input) {
-		// this needs to do nothing
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public HtmlPage getCurrentPage() {
-		return currentPage;
-	}
-
-	public void setCurrentPage(HtmlPage currentPage) {
-		this.currentPage = currentPage;
-	}
-
-	public boolean isExecutedSuccessfully() {
-		return executedSuccessfully;
-	}
-
-	public void setExecutedSuccessfully(boolean executedSuccessfully) {
-		this.executedSuccessfully = executedSuccessfully;
-	}
-
-	public void setException(Exception exception) {
-		this.exception = exception;
-	}
 	
-	
+	}
 
 }

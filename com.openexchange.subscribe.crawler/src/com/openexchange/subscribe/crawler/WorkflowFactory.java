@@ -78,12 +78,22 @@ public class WorkflowFactory {
 		return workflow;
 	}
 	
+	public static Workflow createWorkflowByString(String string) throws SubscriptionException{
+		
+		Workflow workflow = null;
+		
+			workflow = (Workflow) Yaml.load(string);
+			checkSanity(workflow);
+
+		return workflow;
+	}
+	
 	private static void checkSanity(Workflow workflow) throws SubscriptionException {
 		Step previousStep = null;
 		for (Step currentStep : workflow.getSteps()){
 			if (previousStep != null){
 				if (!previousStep.outputType().equals(currentStep.inputType())){
-					//System.out.println("output : " + previousStep.outputType() + ", input : " + currentStep.inputType());
+					//System.out.println(previousStep + " output : " + previousStep.outputType() +", "+ currentStep + " input : " + currentStep.inputType());
 					throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
 				}
 			}

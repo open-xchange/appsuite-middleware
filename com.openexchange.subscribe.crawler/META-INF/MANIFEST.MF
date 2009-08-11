@@ -3,10 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Crawler Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.crawler
 Bundle-Version: 6.11.0.0
-Bundle-Activator: com.openexchange.subscribe.crawler.Activator
+Bundle-Activator: com.openexchange.subscribe.crawler.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.groupware,
+Import-Package: com.openexchange.config,
+ com.openexchange.datatypes.genericonf,
+ com.openexchange.groupware,
  com.openexchange.groupware.container,
  com.openexchange.subscribe,
  com.openexchange.tools.versit,

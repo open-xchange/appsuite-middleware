@@ -86,6 +86,10 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
 		this.vcardUrl = vcardUrl;
 		this.pictureUrl = pictureUrl;
 	}
+	
+	public ContactObjectsByHTMLAnchorsStep(){
+		
+	}
 
 	public void execute(WebClient webClient) {
 		Vector<Contact> contactObjects = new Vector<Contact>();
@@ -159,7 +163,7 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
 	}
 
 	public String inputType() {
-		return LIST_OF_HTML_PAGES;
+		return LIST_OF_HTML_ANCHORS;
 	}
 
 	public String outputType() {
@@ -190,4 +194,25 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
 		this.contactObjectsArray = contactObjectsArray;
 	}
 
+	public String getVcardUrl() {
+		return vcardUrl;
+	}
+
+	public void setVcardUrl(String vcardUrl) {
+		this.vcardUrl = vcardUrl;
+	}
+
+	public String getPictureUrl() {
+		return pictureUrl;
+	}
+
+	public void setPictureUrl(String pictureUrl) {
+		this.pictureUrl = pictureUrl;
+	}
+
+	public static ContactSanitizer getSANITIZER() {
+		return SANITIZER;
+	}
+
+	
 }

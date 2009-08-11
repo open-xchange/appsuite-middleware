@@ -109,13 +109,16 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
 	    			
 	    		}
 	    	}
-	    	
+	    	int i = 0;
 	    	// traverse the subpages
 	    	for (HtmlPage subpage: subpages){
 	    		//System.out.println("***** Current subpage : " + subpage.getTitleText());
 	    		for (HtmlAnchor possibleLinkToResultpage: subpage.getAnchors()) {
 		    		// get the result pages
 		    		if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex)){
+		    			i++;
+//		    			System.out.println("***** Contact No. "+Integer.toString(i));
+//		    			System.out.println("***** links href " + possibleLinkToResultpage.getHrefAttribute());
 		    			resultpageLinks.add(possibleLinkToResultpage);
 		    		}
 	    		}

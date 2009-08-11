@@ -36,6 +36,10 @@ public class Workflow {
 				((LoginPageStep) currentStep).setUsername(username);
 				((LoginPageStep) currentStep).setPassword(password);
 			}
+			if (currentStep instanceof LoginPageByFormActionStep){
+				((LoginPageByFormActionStep) currentStep).setUsername(username);
+				((LoginPageByFormActionStep) currentStep).setPassword(password);
+			}
 		}	
 		return execute();
 	}
