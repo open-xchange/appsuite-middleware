@@ -187,11 +187,11 @@ public class StatementBuilder implements IStatementBuilder {
 	    return statement;
 	}
 	
-	public void executeStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
+	public int executeStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
 	    PreparedStatement stmt = null;
 	    try {
 	        stmt = prepareStatement(con, element, values);
-	        stmt.execute();
+	        return stmt.executeUpdate();
 	    } finally {
 	        SQLTools.closeSQLStuff(null, stmt, null);
 	    }
