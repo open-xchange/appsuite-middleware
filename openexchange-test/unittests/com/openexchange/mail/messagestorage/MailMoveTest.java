@@ -64,8 +64,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public final class MailMoveTest extends MessageStorageTest {
 
     /**
-	 * 
-	 */
+     * 
+     */
     public MailMoveTest() {
         super();
     }
@@ -88,7 +88,7 @@ public final class MailMoveTest extends MessageStorageTest {
 
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
-    public void testMailMoveNotExistingMail() throws MailException, MessagingException, IOException {
+    public void testMailMoveNotExistingMails() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
@@ -99,16 +99,45 @@ public final class MailMoveTest extends MessageStorageTest {
                  */
                 String[] tmpCopy = null;
                 try {
-                    tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()) }, false);
+                    final long currentTimeMillis = System.currentTimeMillis();
+                    tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, false);
                 } catch (final Exception e) {
                     fail("No exception should be thrown here");
                 }
                 assertNotNull("Move returned no IDs", tmpCopy);
-                assertTrue("Method moveMessages returned wrong id. Must be -1, but was" + tmpCopy[0], tmpCopy[0] == null);
+                assertTrue("Method moveMessages returned wrong id at pos 0. Must be null, but was " + tmpCopy[0], tmpCopy[0] == null);
+                assertTrue("Method moveMessages returned wrong id at pos 1. Must be null, but was " + tmpCopy[1], tmpCopy[1] == null);
             } finally {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
             }
 
+        } finally {
+            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+        }
+    }
+
+    public void testMailMoveNotExistingMailsMixed() throws MailException, MessagingException, IOException {
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
+        try {
+            final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
+            
+            try {
+                /*
+                 * Move not existing message to valid folder
+                 */
+                String[] tmpCopy = null;
+                try {
+                    tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()), uids[0] }, false);
+                } catch (final Exception e) {
+                    fail("No exception should be thrown here");
+                }
+                assertNotNull("Move returned no IDs", tmpCopy);
+                assertTrue("Method moveMessages returned wrong id at pos 0. Must be null, but was " + tmpCopy[0], tmpCopy[0] == null);
+                assertTrue("Method moveMessages returned wrong id at pos 1. Must be != null, but was " + tmpCopy[1], tmpCopy[1] != null);
+            } finally {
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+            }
+            
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
@@ -154,7 +183,7 @@ public final class MailMoveTest extends MessageStorageTest {
         }
     }
 
-    public void testMailMoveCopied() throws MailException, MessagingException, IOException {
+    public void testMailMoveAllOk() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
