@@ -59,7 +59,9 @@ public enum EAVStorageExceptionMessage implements OXErrorMessage {
     GeneralException(1, Category.INTERNAL_ERROR, EAVStorageExceptionStrings.GeneralException, null),
     SQLException(2, Category.CODE_ERROR, EAVStorageExceptionStrings.SQLException, null),
     CouldNotCreateTable(3, Category.INTERNAL_ERROR, EAVStorageExceptionStrings.CouldNotCreateTable, null),
-    NoSuchNodeException(4, Category.CODE_ERROR, EAVStorageExceptionStrings.NoSuchNodeException, null)
+    NoSuchNodeException(4, Category.CODE_ERROR, EAVStorageExceptionStrings.NoSuchNodeException, null),
+    NO_FLOATS(5, Category.USER_INPUT, EAVStorageExceptionStrings.NO_FLOATS, null), 
+    PATH_TAKEN(6, Category.USER_INPUT, EAVStorageExceptionStrings.PATH_TAKEN, "Update the object there or choose a different path");
     ;
 
     private Category category;

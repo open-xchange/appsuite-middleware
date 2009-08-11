@@ -67,4 +67,8 @@ public class EAVStorageExceptionStrings implements LocalizableStrings {
     
     // No such node: %1$s
     public static final String NoSuchNodeException = "No such node: %1$s";
+
+    public static final String NO_FLOATS = "This EAV implementation does not support floating point numbers. Please use only integers.";
+
+    public static final String PATH_TAKEN = "The path %s has already been taken";
 }

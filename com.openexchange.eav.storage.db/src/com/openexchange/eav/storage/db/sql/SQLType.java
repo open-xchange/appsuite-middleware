@@ -58,6 +58,8 @@ import com.openexchange.eav.storage.db.balancing.PathTableManager;
 import com.openexchange.eav.storage.db.balancing.ReferenceTableManager;
 import com.openexchange.eav.storage.db.balancing.TextTableManager;
 import com.openexchange.eav.storage.db.balancing.VarcharTableManager;
+import com.openexchange.eav.storage.db.exception.EAVStorageException;
+import com.openexchange.eav.storage.db.exception.EAVStorageExceptionMessage;
 import com.openexchange.groupware.tx.DBProvider;
 
 
@@ -102,7 +104,20 @@ public enum SQLType {
     public static SQLType chooseType(EAVType type, Object payload) {
         switch(type) {
         case NUMBER : return INTEGER;
+        case BINARY : return BLOB;
+        case BOOLEAN : return BOOLEAN;
+        case STRING : return TEXT;
         }
         return null;
     }
+
+    public void check(Object value) throws EAVStorageException {
+        switch(this) {
+        case INTEGER : 
+            if(value.getClass() == Double.class || value.getClass() == Float.class) {
+                throw EAVStorageExceptionMessage.NO_FLOATS.create();
+            }
+        }
+    }
+    
 }

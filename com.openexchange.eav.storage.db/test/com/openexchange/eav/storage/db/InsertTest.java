@@ -56,6 +56,7 @@ import java.util.Map;
 import com.openexchange.eav.EAVException;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVPath;
+import com.openexchange.eav.storage.db.exception.EAVStorageExceptionMessage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.tx.TransactionException;
@@ -149,24 +150,219 @@ public class InsertTest extends AbstractEAVDBStorageTest {
 
     }
     
-    public void testInsertForFolder() throws EAVException {
+    public void testInsertForFolder() throws EAVException, TransactionException, SQLException {
+        createPathIndexEntry(1, Types.FOLDER, 23);
+        
+        EAVNode node = N("myInteger", 12);
+        
+        EAVPath path = new EAVPath("folder", "23", "com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = "+Types.FOLDER+" AND objectId = 23 ");
+        
+        assertEquals(2, result.size());
+        
+        EAVPath savedPath = assemblePathOfNode("myInteger", result);
+
+        assertEquals(new EAVPath("com.openexchange.test", "myInteger"), savedPath);
+        
+        long nodeId = getNodeId("myInteger", result);
+        
+        assertResult("SELECT 1 FROM eav_int1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+nodeId+" AND payload = 12");
         
     }
     
-    public void testInsertForContext() throws EAVException {
+    public void testInsertForContext() throws EAVException, TransactionException, SQLException {
+        createPathIndexEntry(1, 0, 1);
         
+        EAVNode node = N("myInteger", 12);
+        
+        EAVPath path = new EAVPath("com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = 0 AND objectId = 1 ");
+        
+        assertEquals(2, result.size());
+        
+        EAVPath savedPath = assemblePathOfNode("myInteger", result);
+
+        assertEquals(new EAVPath("com.openexchange.test", "myInteger"), savedPath);
+        
+        long nodeId = getNodeId("myInteger", result);
+        
+        assertResult("SELECT 1 FROM eav_int1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+nodeId+" AND payload = 12");
     }
     
     
+    // Multiples
     
+    public void testInsertMultiple() throws Exception {
+        createPathIndexEntry(1, Types.CONTACT, 23);
+        
+        EAVNode node = N("myIntegers", 12, 13, 14, 15);
+        
+        EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = "+Types.CONTACT+" AND objectId = 23 ");
+        
+        assertEquals(2, result.size());
+        
+        EAVPath savedPath = assemblePathOfNode("myIntegers", result);
+
+        assertEquals(new EAVPath("com.openexchange.test", "myIntegers"), savedPath);
+        
+        long nodeId = getNodeId("myIntegers", result);
+        
+        assertResult("SELECT 1 FROM eav_int1 WHERE cid = 1 AND containerType = 'MULTISET' AND nodeId = "+nodeId+" AND payload = 12");
+        assertResult("SELECT 1 FROM eav_int1 WHERE cid = 1 AND containerType = 'MULTISET' AND nodeId = "+nodeId+" AND payload = 13");
+        assertResult("SELECT 1 FROM eav_int1 WHERE cid = 1 AND containerType = 'MULTISET' AND nodeId = "+nodeId+" AND payload = 14");
+        assertResult("SELECT 1 FROM eav_int1 WHERE cid = 1 AND containerType = 'MULTISET' AND nodeId = "+nodeId+" AND payload = 15");
+    }
+    
+    // BLOB
+    
+    public void testInsertBlob() throws Exception{
+        createPathIndexEntry(1, Types.CONTACT, 23);
+        
+        EAVNode node = N("myBlob", "Hello World".getBytes("UTF-8"));
+        
+        EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = "+Types.CONTACT+" AND objectId = 23 ");
+        
+        assertEquals(2, result.size());
+        
+        EAVPath savedPath = assemblePathOfNode("myBlob", result);
+
+        assertEquals(new EAVPath("com.openexchange.test", "myBlob"), savedPath);
+        
+        long nodeId = getNodeId("myBlob", result);
+        
+        result = query("SELECT payload FROM eav_blob1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+nodeId);
+    
+        assertEquals(1, result.size());
+        
+        byte[] bytes = (byte[]) result.get(0).get("payload");
+        
+        assertEquals("Hello World", new String(bytes, "UTF-8"));
+    }
+    
+    // BOOL
+    
+    public void testInsertBool() throws Exception {
+        createPathIndexEntry(1, Types.CONTACT, 23);
+        
+        EAVNode node = N("myBool", true);
+        
+        EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = "+Types.CONTACT+" AND objectId = 23 ");
+        
+        assertEquals(2, result.size());
+        
+        EAVPath savedPath = assemblePathOfNode("myBool", result);
+
+        assertEquals(new EAVPath("com.openexchange.test", "myBool"), savedPath);
+        
+        long nodeId = getNodeId("myBool", result);
+        
+        assertResult("SELECT 1 FROM eav_bool1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+nodeId+" AND payload = 1");
+    }
+    
+    // TEXT
+    
+    public void testInsertText() throws Exception {
+        createPathIndexEntry(1, Types.CONTACT, 23);
+        
+        EAVNode node = N("myString", "Hello World");
+        
+        EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = "+Types.CONTACT+" AND objectId = 23 ");
+        
+        assertEquals(2, result.size());
+        
+        EAVPath savedPath = assemblePathOfNode("myString", result);
+
+        assertEquals(new EAVPath("com.openexchange.test", "myString"), savedPath);
+        
+        long nodeId = getNodeId("myString", result);
+        
+        assertResult("SELECT 1 FROM eav_text1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+nodeId+" AND payload = 'Hello World'");
+    }
+    
+    public void testSubObject() throws Exception{
+        createPathIndexEntry(1, Types.CONTACT, 23);
+        
+        EAVNode node = N("subObject", 
+            N("myString", "Hello World"),
+            N("myBool", true)
+        );
+        
+        EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
+        
+        storage.insert(ctx, path, node);
+        
+        List<Map<String, Object>> result = query("SELECT * FROM eav_paths1 WHERE cid = 1 AND module = "+Types.CONTACT+" AND objectId = 23 ");
+        
+        assertEquals(4, result.size());
+        
+        assertEquals(new EAVPath("com.openexchange.test", "subObject", "myString"), assemblePathOfNode("myString", result));
+        assertEquals(new EAVPath("com.openexchange.test", "subObject", "myBool"), assemblePathOfNode("myBool", result));
+        
+        
+        
+        long stringId = getNodeId("myString", result);
+        long boolId = getNodeId("myBool", result);
+        
+        assertResult("SELECT 1 FROM eav_text1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+stringId+" AND payload = 'Hello World'");
+        assertResult("SELECT 1 FROM eav_bool1 WHERE cid = 1 AND containerType = 'SINGLE' AND nodeId = "+boolId+" AND payload = 1");
+
+    }
     
     
     /*
      * Error Conditions
      */
     
-    public void testFailsOnInsertingFloat() {
+    public void testFailsOnInsertingFloat() throws Exception{
+        createPathIndexEntry(1, Types.CONTACT, 23);
         
+        EAVNode node = N("myInteger", 12.5);
+        
+        EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
+        try {
+            storage.insert(ctx, path, node);
+            fail("Could insert float");
+        } catch (EAVException x) {
+            assertEquals(EAVStorageExceptionMessage.NO_FLOATS.getDetailNumber(), x.getDetailNumber());
+        }
     }
     
+    public void testInsertOnExistingPathShouldFail() throws EAVException{
+        EAVNode tree = N("com.openexchange.test", 
+            N("exampleString", "Hello")
+        );
+        
+        EAVPath PARENT = new EAVPath("contacts","12","23");
+        
+        storage.insert(ctx, PARENT, tree);
+        
+        try {
+            storage.insert(ctx, PARENT, tree);
+            fail("Could insert on existing path");
+        } catch (EAVException x) {
+            assertEquals("Got: "+x.getMessage(), x.getDetailNumber(), EAVStorageExceptionMessage.PATH_TAKEN.getDetailNumber());
+        }
+    }
 }

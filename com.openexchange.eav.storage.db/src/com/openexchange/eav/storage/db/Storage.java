@@ -145,10 +145,16 @@ public class Storage implements EAVStorage {
         
         Map<SQLType, String> tables = getTables(address, absoluteTree);
         
-        EAVNode root = ObjectAddress.getEAVRoot(absoluteTree);
+        EAVNode root = address.getEAVRoot(absoluteTree);
         
-        
-        dumpNode(tables, address, root, -1);
+        if(root.isLeaf()) {
+            dumpNode(tables, address, root, -1);
+        } else {
+            for(EAVNode child : root.getChildren()) {
+                child.setParent(null);
+                dumpNode(tables, address, child, -1);
+            }
+        }
     }
 
     // Could be done smarter
@@ -168,6 +174,7 @@ public class Storage implements EAVStorage {
         
         Connection con = null;
         ResultSet rs = null;
+        
         StatementBuilder builder = new StatementBuilder();
         boolean found = false;
         int id = -1;
@@ -221,7 +228,7 @@ public class Storage implements EAVStorage {
     
     private void dumpNodeToDB(Map<SQLType, String> tables, ObjectAddress address, EAVNode node, int parentId) throws EAVStorageException {
         
-        int id = writePathElement(tables.get(SQLType.PATH), address, node.getName(), node.getType(), parentId);
+        int id = writePathElement(tables.get(SQLType.PATH), address, node.getName(), node.getType(), parentId, node.getPath());
         
         if(node.isLeaf()) {
             SQLType sqlType = SQLType.chooseType(node.getType(), node.getPayload());
@@ -236,17 +243,29 @@ public class Storage implements EAVStorage {
 
     private void writePayload(String payloadTable, Context ctx, int id, SQLType sqlType, EAVType type, EAVContainerType cType, Object payload) throws EAVStorageException {
         INSERT insert = new INSERT().INTO(payloadTable).SET("cid", PLACEHOLDER).SET("containerType", PLACEHOLDER).SET("nodeId", PLACEHOLDER).SET("payload", PLACEHOLDER);
-        List<Object> values = new ArrayList<Object>(Arrays.asList(ctx.getContextId(), cType.name(), id));
-        values.add(convert(sqlType, type, payload));
+        List<? extends Object> argumentPrototype = Arrays.asList(ctx.getContextId(), cType.name(), id);
+        if(cType.isMultiple()) {
+            for(Object o : (Object[]) payload) {
+                List<Object> values = new ArrayList<Object>(argumentPrototype);
+                sqlType.check(o);
+                values.add(convert(sqlType, type, o));
+                write(ctx, insert, values);
+            }
+        } else {
+            List<Object> values = new ArrayList<Object>(argumentPrototype);
+            sqlType.check(payload);
+            values.add(convert(sqlType, type, payload));
+            write(ctx, insert, values);
+        }
     
-        write(ctx, insert, values);
     }
 
     private Object convert(SQLType sqlType, EAVType type, Object payload) {
         return payload;
     }
 
-    private int writePathElement(String pathTable, ObjectAddress address, String name, EAVType type, int parentId) throws EAVStorageException {
+    private int writePathElement(String pathTable, ObjectAddress address, String name, EAVType type, int parentId, EAVPath path) throws EAVStorageException {
+        checkPath(pathTable, address, name, parentId, path);
         int nodeId = getId(address.ctx);
         INSERT insert = new INSERT().INTO(pathTable).SET(Paths.cid, PLACEHOLDER).SET(Paths.nodeId, PLACEHOLDER).SET(Paths.module, PLACEHOLDER).SET(Paths.objectId, PLACEHOLDER).SET(Paths.name, PLACEHOLDER).SET(Paths.eavType, PLACEHOLDER);
         List<Object> values = new ArrayList();
@@ -260,6 +279,36 @@ public class Storage implements EAVStorage {
         write(address.ctx, insert, values);
         
         return nodeId;
+    }
+
+    private void checkPath(String pathTable, ObjectAddress address, String name, int parentId, EAVPath path) throws EAVStorageException {
+        Predicate predicate = getPredicate(address).AND(new EQUALS("parent", parentId)).AND(new EQUALS("name", PLACEHOLDER));
+        SELECT select = new SELECT("1").FROM(pathTable).WHERE(predicate);
+        
+        Connection con = null;
+        ResultSet rs = null;
+        StatementBuilder builder = new StatementBuilder();
+        Context ctx = address.ctx;
+        try {
+            con = provider.getReadConnection(ctx);
+            rs = builder.executeQuery(con, select, Arrays.asList(name));
+            if(rs.next()) {
+                throw EAVStorageExceptionMessage.PATH_TAKEN.create(path.toString());
+            }
+        } catch (TransactionException e) {
+            throw new EAVStorageException(e);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw EAVStorageExceptionMessage.SQLException.create();
+        } finally {
+            provider.releaseReadConnection(ctx, con);
+            try {
+                builder.closePreparedStatement(null, rs);
+            } catch (SQLException e) {
+            }
+            
+        }
+        
     }
 
     private int getId(Context ctx) throws EAVStorageException {
@@ -353,22 +402,24 @@ public class Storage implements EAVStorage {
 
     }
     
-    private int getModule(EAVPath path) {
+    private static int getModule(EAVPath path) {
         String module = path.first();
         if (module.equalsIgnoreCase("calendar")) {
             return Types.APPOINTMENT;
-        } else if (module.equalsIgnoreCase("contact")) {
+        } else if (module.equalsIgnoreCase("contacts")) {
             return Types.CONTACT;
-        } else if (module.equalsIgnoreCase("task")) {
+        } else if (module.equalsIgnoreCase("tasks")) {
             return Types.TASK;
         } else if (module.equalsIgnoreCase("folder")) {
             return Types.FOLDER;
+        } else if (module.equalsIgnoreCase("infostore")) {
+            return Types.INFOSTORE;
         } else {
             return 0;
         }
     }
     
-    private int getFolderId(EAVPath path) {
+    private static int getFolderId(EAVPath path) {
         if (getModule(path) == 0) {
             return 0;
         } else {
@@ -376,7 +427,7 @@ public class Storage implements EAVStorage {
         }
     }
     
-    private int getObjectId(EAVPath path) {
+    private static int getObjectId(EAVPath path) {
         int module = getModule(path);
         if (module == Types.FOLDER) {
             return Integer.parseInt(path.shiftLeft().first());
@@ -405,13 +456,25 @@ public class Storage implements EAVStorage {
         
         public ObjectAddress(Context ctx, EAVNode absoluteTree) {
             //TODO
-            module = Types.CONTACT;
-            id = Integer.parseInt(absoluteTree.getChildren().get(0).getChildren().get(0).getName());
+            module = getModule(absoluteTree.getPath());
+            switch(module) {
+            case Types.FOLDER: id = Integer.parseInt(absoluteTree.getChildren().get(0).getName()); break;
+            case 0: id = ctx.getContextId(); break;
+            default : id = Integer.parseInt(absoluteTree.getChildren().get(0).getChildren().get(0).getName()); break;
+            }
             this.ctx = ctx;
         }
 
-        public static EAVNode getEAVRoot(EAVNode absoluteTree) {
-            EAVNode node = TreeTools.copy(absoluteTree.getChildren().get(0).getChildren().get(0).getChildren().get(0));
+        public EAVNode getEAVRoot(EAVNode absoluteTree) {
+            EAVNode node = null;
+            
+            switch(module) {
+            case Types.FOLDER: node = absoluteTree.getChildren().get(0); break;
+            case 0: node = new EAVNode(); node.addChild(absoluteTree); break;
+            default : node = absoluteTree.getChildren().get(0).getChildren().get(0); break;
+            }
+            node = TreeTools.copy(node);
+            node.setParent(null);
             return node;
         }
     }
