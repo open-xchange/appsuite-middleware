@@ -49,6 +49,7 @@
 
 package com.openexchange.eav.storage.db.sql;
 
+import com.openexchange.eav.EAVType;
 import com.openexchange.eav.storage.db.balancing.BalancedTableManager;
 import com.openexchange.eav.storage.db.balancing.BlobTableManager;
 import com.openexchange.eav.storage.db.balancing.BooleanTableManager;
@@ -87,7 +88,7 @@ public enum SQLType {
     
     public String getTablePrefix() {
         switch(this) {
-        case PATH: return Paths.pathsPrefix;
+        case PATH: return "eav_paths";
         case REFERENCE: return ReferenceTable.tablePrefix;
         case INTEGER: return IntegerTable.tablePrefix;
         case TEXT: return TextTable.tablePrefix;
@@ -96,5 +97,12 @@ public enum SQLType {
         case BOOLEAN: return BooleanTable.tablePrefix;
         }
         throw new IllegalArgumentException("Don't know a table prefix for "+this);
+    }
+
+    public static SQLType chooseType(EAVType type, Object payload) {
+        switch(type) {
+        case NUMBER : return INTEGER;
+        }
+        return null;
     }
 }

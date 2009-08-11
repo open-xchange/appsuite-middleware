@@ -66,7 +66,7 @@ import static com.openexchange.eav.storage.db.sql.PathIndex.*;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class PathIndex {
+public class PathIndexLookup {
 
     /**
      * Returns the name of the path table, which is responsible for the given object.

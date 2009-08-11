@@ -1,11 +1,16 @@
+package com.openexchange.eav.storage.db;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.eav.AbstractNode;
 import com.openexchange.eav.EAVDSL;
+import com.openexchange.eav.EAVPath;
 import com.openexchange.eav.storage.db.sql.SQLType;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.sql.SQLTestCase;
@@ -128,6 +133,10 @@ public class AbstractEAVDBStorageTest extends SQLTestCase {
         createPathIndexEntry(cid, module, objectId, "eav_int1", "eav_text1", "eav_varchar1", "eav_blob1", "eav_bool1", "eav_reference1", "eav_paths1");
     }
     
+    protected void removeAllPathIndexEntries() throws TransactionException, SQLException {
+        exec("DELETE FROM eav_pathIndex");
+    }
+    
     public static <T extends AbstractNode<T>>  void assertEquals(AbstractNode<T> expected, AbstractNode<T> actual) {
         EAVDSL.assertEquals(expected, actual);
     }
@@ -135,5 +144,44 @@ public class AbstractEAVDBStorageTest extends SQLTestCase {
     public static <T extends AbstractNode<T>> void assertEquals(String message, AbstractNode<T> expected, AbstractNode<T> actual) {
         EAVDSL.assertEquals(message, expected, actual);
     }
+    
+    protected EAVPath assemblePathOfNode(String node, List<Map<String, Object>> result) {
+        Map<Long, String> nodeId2Name = new HashMap<Long, String>();
+        Map<String, Long> name2NodeId = new HashMap<String, Long>();
+        Map<Long, Long> child2parent= new HashMap<Long, Long>();
+        
+        for(Map<String, Object> row : result) {
+            Long nodeId = (Long) row.get("nodeId");
+            Long parent = (Long) row.get("parent");
+            String name = (String) row.get("name");
+            
+            nodeId2Name.put(nodeId, name);
+            name2NodeId.put(name, nodeId);
+            child2parent.put(nodeId, parent);
+        }
+        
+        List<String> inversePath = new ArrayList<String>();
+        
+        Long currentChild = name2NodeId.get(node);
+        while(currentChild != null) {
+            inversePath.add(nodeId2Name.get(currentChild));
+            currentChild = child2parent.get(currentChild); 
+        }
+    
+        Collections.reverse(inversePath);
+        return new EAVPath(inversePath);
+    }
+    
+    protected long getNodeId(String name, List<Map<String, Object>> result) {
+        for(Map<String, Object> row : result) {
+            Long nodeId = (Long) row.get("nodeId");
+            String currentName = (String) row.get("name");
+            if(name.equals(currentName)) {
+                return nodeId;
+            }
+        }
+        return -1;
+    }
+
        
 }

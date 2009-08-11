@@ -105,4 +105,21 @@ public class TreeTools {
     }
     
     
+    public static <T extends AbstractNode<T>>String getStructureString(AbstractNode<T> node) {
+        return getStructureString(node, 0);
+    }
+ 
+    public static <T extends AbstractNode<T>> String getStructureString(AbstractNode<T> node, int indent) {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < indent; i++) {
+            builder.append("  ");
+        }
+        builder.append(node.getName()).append("\n");
+        
+        for(T child : node.getChildren()) {
+            builder.append(getStructureString(child, indent+1));
+        }
+        return builder.toString();
+    }
+    
 }

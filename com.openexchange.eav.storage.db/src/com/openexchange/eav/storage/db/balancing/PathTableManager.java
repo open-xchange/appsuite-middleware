@@ -73,7 +73,7 @@ public class PathTableManager extends BalancedTableManager {
     "FOREIGN KEY (parent) REFERENCES eav_paths1(nodeId)"+
     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
-    public static final String TABLE_PREFIX = Paths.pathsPrefix;
+    public static final String TABLE_PREFIX = "eav_paths";
 
     public static final String COLUMN_NAME = "pathTable";
 
