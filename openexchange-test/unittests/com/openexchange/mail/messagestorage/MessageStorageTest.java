@@ -217,33 +217,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
      * @throws MailException
      */
     protected String createTemporaryFolder(final SessionObject session, final MailAccess<?, ?> mailAccess) throws MailException {
-        final String fullname;
-        final String parentFullname;
-        final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
-        if (inbox.isHoldsFolders()) {
-            fullname = getFullFolderName(inbox, "TemporaryFolder");
-            parentFullname = "INBOX";
-        } else {
-            fullname = "TemporaryFolder";
-            parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-        }
-    
-        final MailFolderDescription mfd = new MailFolderDescription();
-        mfd.setExists(false);
-        mfd.setParentFullname(parentFullname);
-        mfd.setSeparator(inbox.getSeparator());
-        mfd.setName("TemporaryFolder");
-    
-        final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
-        .createNewMailPermission();
-        p.setEntity(getUser());
-        p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        p.setFolderAdmin(true);
-        p.setGroupPermission(false);
-        mfd.addPermission(p);
-        mailAccess.getFolderStorage().createFolder(mfd);
-        return fullname;
+        return createTemporaryFolderAndGetFullname(session, mailAccess, "TemporaryFolder");
     }
     
     /**
@@ -257,27 +231,25 @@ public abstract class MessageStorageTest extends AbstractMailTest {
      */
     protected String createTemporaryFolderAndGetFullname(final SessionObject session, final MailAccess<?, ?> mailAccess, String tempFolderName) throws MailException {
         final String fullname;
-        {
-            final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
-        	final String parentFullname;
-        	if (inbox.isHoldsFolders()) {
-        		fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-        				tempFolderName).toString();
-        		parentFullname = "INBOX";
-        	} else {
-        		fullname = tempFolderName;
-        		parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-        	}
-    
-        	final MailFolderDescription mfd = new MailFolderDescription();
-        	mfd.setExists(false);
-        	mfd.setParentFullname(parentFullname);
-        	mfd.setSeparator(inbox.getSeparator());
-        	mfd.setName(tempFolderName);
-    
-        	mfd.addPermission(getPermission(session));
-        	mailAccess.getFolderStorage().createFolder(mfd);
+        final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+        final String parentFullname;
+        if (inbox.isHoldsFolders()) {
+            fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+                tempFolderName).toString();
+            parentFullname = "INBOX";
+        } else {
+            fullname = tempFolderName;
+            parentFullname = MailFolder.DEFAULT_FOLDER_ID;
         }
+
+        final MailFolderDescription mfd = new MailFolderDescription();
+        mfd.setExists(false);
+        mfd.setParentFullname(parentFullname);
+        mfd.setSeparator(inbox.getSeparator());
+        mfd.setName(tempFolderName);
+
+        mfd.addPermission(getPermission(session));
+        mailAccess.getFolderStorage().createFolder(mfd);
         return fullname;
     }
 
