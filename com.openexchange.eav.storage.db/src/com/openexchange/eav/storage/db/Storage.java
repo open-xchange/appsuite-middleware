@@ -58,7 +58,7 @@ import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.storage.db.exception.EAVStorageExceptionMessage;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
@@ -91,7 +91,7 @@ public class Storage implements EAVStorage {
         }
         SQLStorage storage = new SQLStorage(ctx, getModule(path), getObjectId(path));
         storage.init(con, allBinaries);
-        return storage.getEAVNode(path);
+        return storage.getEAVNode(chopPath(path));
     }
 
     public EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws EAVException {
@@ -127,13 +127,13 @@ public class Storage implements EAVStorage {
     private int getModule(EAVPath path) {
         String module = path.first();
         if (module.equalsIgnoreCase("calendar")) {
-            return FolderObject.CALENDAR;
+            return Types.APPOINTMENT;
         } else if (module.equalsIgnoreCase("contact")) {
-            return FolderObject.CONTACT;
+            return Types.CONTACT;
         } else if (module.equalsIgnoreCase("task")) {
-            return FolderObject.TASK;
+            return Types.TASK;
         } else if (module.equalsIgnoreCase("folder")) {
-            return -1;
+            return Types.FOLDER;
         } else {
             return 0;
         }
@@ -149,12 +149,23 @@ public class Storage implements EAVStorage {
     
     private int getObjectId(EAVPath path) {
         int module = getModule(path);
-        if (module == -1) {
+        if (module == Types.FOLDER) {
             return Integer.parseInt(path.shiftLeft().first());
         } else if (module == 0) {
             return 0;
         } else {
             return Integer.parseInt(path.shiftLeft().shiftLeft().first());
+        }
+    }
+    
+    private EAVPath chopPath(EAVPath path) {
+        int module = getModule(path);
+        if (module == Types.FOLDER) {
+            return path.shiftLeft().shiftLeft();
+        } else if (module == 0) {
+            return path.shiftLeft();
+        } else {
+            return path.shiftLeft().shiftLeft().shiftLeft();
         }
     }
 
