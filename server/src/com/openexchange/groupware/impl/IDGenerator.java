@@ -398,6 +398,7 @@ public final class IDGenerator {
             tmp.put(I(Types.GENERIC_CONFIGURATION), "CALL get_genconf_id(?)");
             tmp.put(I(Types.SUBSCRIPTION), "CALL get_subscriptions_id(?)");
             tmp.put(I(Types.PUBLICATION), "CALL get_publications_id(?)");
+            tmp.put(I(Types.EAV_NODE), "CALL get_eav_id(?)");
             TYPES = tmp;
         }
 
@@ -529,6 +530,7 @@ public final class IDGenerator {
             tmp.put(I(Types.GENERIC_CONFIGURATION), "sequence_genconf");
             tmp.put(I(Types.SUBSCRIPTION), "sequence_subscriptions");
             tmp.put(I(Types.PUBLICATION), "sequence_publications");
+            tmp.put(I(Types.EAV_NODE), "sequence_uid_eav_node");
             TABLES = tmp;
         }
 
