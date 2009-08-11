@@ -135,6 +135,7 @@ public class PathIndexStrategy implements TableManagerStrategy {
             if(!rs.next()) {
                 throw EAVStorageExceptionMessage.CouldNotCreateTable.create(newTableName);
             }
+            return newTableName;
             
         } catch (TransactionException e) {
             throw new EAVStorageException(e);
@@ -145,8 +146,6 @@ public class PathIndexStrategy implements TableManagerStrategy {
             DBUtils.closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(ctx, con);
         }
-   
-        return null;
     }
 
     public String getPredefinedTable(Context ctx, int module, int oid) throws EAVStorageException {

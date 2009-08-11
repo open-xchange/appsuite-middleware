@@ -67,10 +67,10 @@ public class PathTableManager extends BalancedTableManager {
     "objectId INT4 UNSIGNED NOT NULL,"+
     "nodeId INT4 UNSIGNED NOT NULL,"+
     "name VARCHAR(128),"+
-    "parent INT4 UNSIGNED NOT NULL,"+
-    "eavType VARCHAR(64) NOT NULL,"+
-    "PRIMARY KEY (cid, module, objectId),"+
-    "FOREIGN KEY (parent) REFERENCES eav_paths1(nodeId)"+
+    "parent INT4 UNSIGNED,"+
+    "eavType VARCHAR(64),"+
+    "PRIMARY KEY (cid, nodeId),"+
+    "INDEX(cid, module, objectId)"+
     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
     public static final String TABLE_PREFIX = "eav_paths";

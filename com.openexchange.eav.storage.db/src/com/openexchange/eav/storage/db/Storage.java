@@ -269,7 +269,7 @@ public class Storage implements EAVStorage {
         int nodeId = getId(address.ctx);
         INSERT insert = new INSERT().INTO(pathTable).SET(Paths.cid, PLACEHOLDER).SET(Paths.nodeId, PLACEHOLDER).SET(Paths.module, PLACEHOLDER).SET(Paths.objectId, PLACEHOLDER).SET(Paths.name, PLACEHOLDER).SET(Paths.eavType, PLACEHOLDER);
         List<Object> values = new ArrayList();
-        values.addAll(Arrays.asList(address.ctx.getContextId(), nodeId, address.module, address.id, name, type.name()));
+        values.addAll(Arrays.asList(address.ctx.getContextId(), nodeId, address.module, address.id, name, (EAVType.OBJECT == type) ? null : type.name()));
         
         if(parentId != -1) {
             insert = insert.SET(Paths.parent, PLACEHOLDER);

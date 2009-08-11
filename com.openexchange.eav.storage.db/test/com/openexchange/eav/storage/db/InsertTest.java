@@ -107,6 +107,8 @@ public class InsertTest extends AbstractEAVDBStorageTest {
 
  
     public void testInsertIntegerLeafWithoutPriorTableData() throws EAVException, TransactionException, SQLException {
+        exec("DROP TABLE eav_int1"); // Force creation of table
+        
         EAVNode node = N("myInteger", 12);
         
         EAVPath path = new EAVPath("contacts","12","23", "com.openexchange.test");
