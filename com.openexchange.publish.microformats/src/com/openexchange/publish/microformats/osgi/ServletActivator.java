@@ -124,14 +124,14 @@ public class ServletActivator extends DeferredActivator {
         
         
         if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users) {
-            return;
+             return;
         }
 
         OnlinePublicationServlet.setContextService(contexts);
 
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setTemplateService(templates);
-
+        MicroformatServlet.setUserService(users);
         MicroformatServlet microformatServlet = new MicroformatServlet();
 
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);

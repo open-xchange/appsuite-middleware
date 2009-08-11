@@ -51,11 +51,11 @@ package com.openexchange.publish.microformats;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,14 +65,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.tools.UncloseableWriter;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link MicroformatServlet}
@@ -80,6 +82,8 @@ import com.openexchange.templating.TemplateService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MicroformatServlet extends OnlinePublicationServlet {
+
+    private static final long serialVersionUID = 6727750981539640363L;
 
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
@@ -90,20 +94,22 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     private static final String MODULE = "module";
 
     private static final String SITE = "site";
-    
+
     private static final String CONTEXTID = "ctx";
 
     private static PublicationDataLoaderService dataLoader = null;
 
     private static TemplateService templateService = null;
-    
+
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
+
+    private static UserService userService;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
-    
+
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
     static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -115,6 +121,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     public static void setTemplateService(TemplateService service) {
         templateService = service;
+    }
+
+    public static void setUserService(UserService service) {
+        userService = service;
     }
 
     public static void registerType(String module, OXMFPublicationService publisher, String templateName, Map<String, Object> additionalVars) {
@@ -155,8 +165,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("request", req);
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
-            
-            if(additionalTemplateVariables.containsKey(module)) {
+            variables.put("publishDate", new Date());
+            variables.put("publisher", getUser(publication));
+
+            if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
             }
             String templateName = templateNames.get(module);
@@ -174,7 +186,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     private String getCollectionName(String module) {
         return module;
     }
-
 
     private Map<String, String> getPublicationArguments(HttpServletRequest req) throws UnsupportedEncodingException {
         String[] path = req.getPathInfo().split("/");
@@ -197,4 +208,12 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         args.put(SECRET, req.getParameter(SECRET));
         return args;
     }
+
+    private User getUser(Publication publication) throws UserException {
+        Context context = publication.getContext();
+        int uid = publication.getUserId();
+        User user = userService.getUser(uid, context);
+        return user;
+    }
+
 }
