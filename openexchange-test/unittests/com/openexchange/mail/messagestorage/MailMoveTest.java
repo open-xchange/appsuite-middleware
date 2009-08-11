@@ -89,98 +89,72 @@ public final class MailMoveTest extends MessageStorageTest {
     private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
     public void testMailMoveNotExistingMail() throws MailException, MessagingException, IOException {
-        mailAccess.connect();
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
-
             final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
 
             try {
                 /*
                  * Move not existing message to valid folder
                  */
-                {
-                    String[] tmpCopy = null;
-                    try {
-                        tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()) }, false);
-                    } catch (final Exception e) {
-                        fail("No exception should be thrown here");
-                    }
-                    assertNotNull("Move returned no IDs", tmpCopy);
-                    assertTrue("Method moveMessages returned wrong id. Must be -1, but was" + tmpCopy[0], tmpCopy[0] == null);
+                String[] tmpCopy = null;
+                try {
+                    tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()) }, false);
+                } catch (final Exception e) {
+                    fail("No exception should be thrown here");
                 }
+                assertNotNull("Move returned no IDs", tmpCopy);
+                assertTrue("Method moveMessages returned wrong id. Must be -1, but was" + tmpCopy[0], tmpCopy[0] == null);
             } finally {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
             }
 
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-            /*
-             * close
-             */
-            mailAccess.close(false);
         }
     }
 
     public void testMailMoveToNotExistingFolder() throws MailException, MessagingException, IOException {
-        mailAccess.connect();
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             /*
              * Move messages to not existing folder
              */
-            {
-                final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
-                final String tmpFolderName = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append("MichGibtEsNicht").toString();
-                try {
-                    assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("INBOX", tmpFolderName, uids, false));
-                } catch (final MailException e) {
-                    assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
-                }
+            final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+            final String tmpFolderName = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append("MichGibtEsNicht").toString();
+            try {
+                assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("INBOX", tmpFolderName, uids, false));
+            } catch (final MailException e) {
+                assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-            /*
-             * close
-             */
-            mailAccess.close(false);
         }
     }
 
     public void testMailMoveFromNotExistingFolder() throws MailException, MessagingException, IOException {
-        mailAccess.connect();
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
-
             final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
 
             try {
                 /*
                  * Move messages from not existing folder
                  */
-                {
-                    try {
-                        assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("MichGibtEsHoffentlichNicht", fullname, uids, false));
-                    } catch (final MailException e) {
-                        assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
-                    }
+                try {
+                    assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("MichGibtEsHoffentlichNicht", fullname, uids, false));
+                } catch (final MailException e) {
+                    assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
                 }
-
             } finally {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
             }
-
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-            /*
-             * close
-             */
-            mailAccess.close(false);
         }
     }
 
     public void testMailMoveCopied() throws MailException, MessagingException, IOException {
-        mailAccess.connect();
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
@@ -271,14 +245,8 @@ public final class MailMoveTest extends MessageStorageTest {
             } finally {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
             }
-
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-
-            /*
-             * close
-             */
-            mailAccess.close(false);
         }
     }
 
