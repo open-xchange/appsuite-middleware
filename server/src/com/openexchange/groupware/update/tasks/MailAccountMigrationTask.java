@@ -118,7 +118,17 @@ public final class MailAccountMigrationTask implements UpdateTask {
 
         for (final Iterator<Map.Entry<Integer, List<Integer>>> it = m.entrySet().iterator(); it.hasNext();) {
             final Map.Entry<Integer, List<Integer>> me = it.next();
-            iterateUsersPerContext(me.getValue(), me.getKey().intValue());
+            final int currentContextId = me.getKey().intValue();
+            try {
+                iterateUsersPerContext(me.getValue(), currentContextId);
+            } catch (final AbstractOXException e) {
+                final StringBuilder sb = new StringBuilder(128);
+                sb.append("MailAccountMigrationTask experienced an error while migrating mail accounts for users in context ");
+                sb.append(currentContextId);
+                sb.append(":\n");
+                sb.append(e.getMessage());
+                LOG.error(sb.toString(), e);
+            }
         }
     }
 
@@ -193,9 +203,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
                 try {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb);
                 } catch (final UpdateException e) {
-                    LOG.error(
-                        "Default mail account for user " + user.getId() + " in context " + contextId + " could not be created",
-                        e);
+                    LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
             }
         } catch (final LdapException e) {
@@ -242,12 +250,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         return null == string ? "" : string;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." }
-    )
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." })
     private static UpdateException createSQLError(final SQLException e) {
         return EXCEPTION.create(1, e, e.getMessage());
     }

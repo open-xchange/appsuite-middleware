@@ -1,3 +1,8 @@
+* 2009-08-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #14298: Update task for mail account migration runs per context while logging experienced errors.
+   Thus admin is able to see which context's users weren't migrated properly.
+
 * 2009-08-04 - thorben.betten@open-xchange.com
 
  - Bugfix #14272: Discarding non-existing user/group permission previously detected as being corrupt
