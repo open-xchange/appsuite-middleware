@@ -52,21 +52,14 @@ package com.openexchange.subscribe.crawler.osgi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServiceHolder;
-import com.openexchange.config.SimConfigurationService;
-
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.GenericSubscribeService;
 

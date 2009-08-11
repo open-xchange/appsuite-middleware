@@ -75,21 +75,21 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		
 	}
 	
-	public LoginPageByFormActionStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField, String pageTitleAfterLogin) {
+	public LoginPageByFormActionStep (String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin) {
 		this.description = description;
 		this.url = url;
 		this.username = username;
 		this.password = password;
-		this.nameOfLoginForm = nameOfLoginForm;
+		this.nameOfLoginForm = actionOfLoginForm;
 		this.nameOfUserField = nameOfUserField;
 		this.nameOfPasswordField = nameOfPasswordField;
-		this.pageTitleAfterLogin = pageTitleAfterLogin;
+		this.pageTitleAfterLogin = linkAvailableAfterLogin;
 	}
 	
 	public void execute(WebClient webClient) throws SubscriptionException{
 		HtmlPage loginPage;
 		try {
-			// Get the page, fill in the credentials and submit the login form
+			// Get the page, fill in the credentials and submit the login form identified by its action
 			loginPage = webClient.getPage(this.url);
 		    HtmlForm loginForm = loginPage.getFormByName(this.nameOfLoginForm);
 		    HtmlTextInput userfield = loginForm.getInputByName(this.nameOfUserField);
