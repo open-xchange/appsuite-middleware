@@ -56,12 +56,17 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
+import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ServletActivator}
@@ -78,7 +83,7 @@ public class ServletActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class };
+        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class  };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,8 +118,12 @@ public class ServletActivator extends DeferredActivator {
         ContextService contexts = getService(ContextService.class);
         TemplateService templates = getService(TemplateService.class);
         ContactInterfaceDiscoveryService contacts = getService(ContactInterfaceDiscoveryService.class);
-
-        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts) {
+        InfostoreFacade infostore = getService(InfostoreFacade.class);
+        UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        UserService users = getService(UserService.class);
+        
+        
+        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users) {
             return;
         }
 
@@ -127,6 +136,11 @@ public class ServletActivator extends DeferredActivator {
 
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
 
+        InfostoreFileServlet.setUserConfigs(userConfigs);
+        InfostoreFileServlet.setUsers(users);
+        InfostoreFileServlet.setInfostore(infostore);
+        
+        
         registered = true;
         for (String alias : activator.getAliases()) {
             try {
@@ -139,6 +153,7 @@ public class ServletActivator extends DeferredActivator {
         }
         try {
             httpService.registerServlet("/publications/contactPictures/*", new ContactPictureServlet(), null, null);
+            httpService.registerServlet("/publications/files/*", new InfostoreFileServlet(), null, null);
         } catch (ServletException e) {
             LOG.error(e.getMessage(), e);
         } catch (NamespaceException e) {

@@ -104,6 +104,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
     
+    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
+    static {
+        TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     public static void setPublicationDataLoaderService(PublicationDataLoaderService service) {
         dataLoader = service;
     }
@@ -149,6 +154,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("publication", publication);
             variables.put("request", req);
             variables.put("dateFormat", DATE_FORMAT);
+            variables.put("timeFormat", TIME_FORMAT);
+            
             if(additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
             }
@@ -165,10 +172,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     private String getCollectionName(String module) {
-        if (module.equals("contacts")) {
-            return "contacts";
-        }
-        return null;
+        return module;
     }
 
 

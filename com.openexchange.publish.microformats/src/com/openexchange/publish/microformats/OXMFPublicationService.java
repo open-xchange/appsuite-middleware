@@ -102,7 +102,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         PublicationTarget target = new PublicationTarget();
         
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input(SITE, "Site", true, null)).add(FormElement.checkbox(PROTECTED, "Hide with secret?")).add(FormElement.link(URL, "URL", false, null));
+        form.add(FormElement.input(SITE, "Site", true, null)).add(FormElement.checkbox(PROTECTED, "Hide with secret?", true, true)).add(FormElement.link(URL, "URL", false, null));
         
         target.setFormDescription(form);
         target.setPublicationService(this);
