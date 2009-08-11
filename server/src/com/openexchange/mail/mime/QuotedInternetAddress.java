@@ -230,7 +230,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                         final String addr = s.substring(start, end).trim();
 
                         qia = new QuotedInternetAddress();
-                        qia.setAddress(addr);
+                        qia.setAddress(toACE(addr));
                         if (start_personal >= 0) {
                             qia.encodedPersonal = unquote(s.substring(start_personal, end_personal).trim());
                         }
@@ -389,7 +389,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     }
                     qia = new QuotedInternetAddress();
                     end = index + 1;
-                    qia.setAddress(s.substring(start, end).trim());
+                    qia.setAddress(toACE(s.substring(start, end).trim()));
                     list.add(qia);
 
                     route_addr = false;
@@ -440,11 +440,12 @@ public final class QuotedInternetAddress extends InternetAddress {
                     pers = tmp;
                 }
                 if (rfc822 || strict || parseHdr) {
+                    final String ace = toACE(addr);
                     if (!ignoreErrors) {
-                        checkAddress(addr, route_addr, false);
+                        checkAddress(ace, route_addr, false);
                     }
                     qia = new QuotedInternetAddress();
-                    qia.setAddress(addr);
+                    qia.setAddress(ace);
                     if (pers != null) {
                         qia.encodedPersonal = pers;
                     }
@@ -454,9 +455,10 @@ public final class QuotedInternetAddress extends InternetAddress {
                     final StringTokenizer st = new StringTokenizer(addr);
                     while (st.hasMoreTokens()) {
                         final String a = st.nextToken();
-                        checkAddress(a, false, false);
+                        final String ace = toACE(a);
+                        checkAddress(ace, false, false);
                         qia = new QuotedInternetAddress();
-                        qia.setAddress(a);
+                        qia.setAddress(ace);
                         list.add(qia);
                     }
                 }
@@ -564,11 +566,12 @@ public final class QuotedInternetAddress extends InternetAddress {
                 pers = tmp;
             }
             if (rfc822 || strict || parseHdr) {
+                final String ace = toACE(addr);
                 if (!ignoreErrors) {
-                    checkAddress(addr, route_addr, false);
+                    checkAddress(ace, route_addr, false);
                 }
                 qia = new QuotedInternetAddress();
-                qia.setAddress(addr);
+                qia.setAddress(ace);
                 if (pers != null) {
                     qia.encodedPersonal = pers;
                 }
@@ -578,9 +581,10 @@ public final class QuotedInternetAddress extends InternetAddress {
                 final StringTokenizer st = new StringTokenizer(addr);
                 while (st.hasMoreTokens()) {
                     final String a = st.nextToken();
-                    checkAddress(a, false, false);
+                    final String ace = toACE(a);
+                    checkAddress(ace, false, false);
                     qia = new QuotedInternetAddress();
-                    qia.setAddress(a);
+                    qia.setAddress(ace);
                     list.add(qia);
                 }
             }
@@ -716,6 +720,34 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
+    private static String toACE(final String idnString) throws AddressException {
+        if (null == idnString) {
+            return null;
+        }
+        try {
+            final int pos = idnString.indexOf('@');
+            if (pos < 0) {
+                return idnString;
+            }
+            return new StringBuilder(idnString.length() + 8).append(idnString.substring(0, pos)).append('@').append(
+                gnu.inet.encoding.IDNA.toASCII(idnString.substring(pos + 1))).toString();
+        } catch (final gnu.inet.encoding.IDNAException e) {
+            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnString).toString());
+        }
+    }
+
+    private static String toIDN(final String aceString) {
+        if (null == aceString) {
+            return null;
+        }
+        final int pos = aceString.indexOf('@');
+        if (pos < 0) {
+            return aceString;
+        }
+        return new StringBuilder(aceString.length()).append(aceString.substring(0, pos)).append('@').append(
+            gnu.inet.encoding.IDNA.toUnicode(aceString.substring(pos + 1))).toString();
+    }
+
     /**
      * Initializes a new {@link QuotedInternetAddress}.
      */
@@ -734,7 +766,22 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     public QuotedInternetAddress(final String address) throws AddressException {
-        super(address);
+        super();
+        // use our address parsing utility routine to parse the string
+        final InternetAddress a[] = parse(address, true);
+        // if we got back anything other than a single address, it's an error
+        if (a.length != 1) {
+            throw new AddressException("Illegal address", address);
+        }
+
+        /*
+         * Now copy the contents of the single address we parsed into the current object, which will be returned from the constructor. XXX -
+         * this sure is a round-about way of getting this done.
+         */
+        final QuotedInternetAddress internetAddress = (QuotedInternetAddress) a[0];
+        this.address = internetAddress.address;
+        this.personal = internetAddress.personal;
+        this.encodedPersonal = internetAddress.encodedPersonal;
     }
 
     /**
@@ -748,7 +795,14 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     public QuotedInternetAddress(final String address, final boolean strict) throws AddressException {
-        super(address, strict);
+        this(address);
+        if (strict) {
+            if (isGroup()) {
+                getGroup(true); // throw away the result
+            } else {
+                checkAddress(this.address, true, true);
+            }
+        }
     }
 
     /**
@@ -758,10 +812,11 @@ public final class QuotedInternetAddress extends InternetAddress {
      * 
      * @param address The address in RFC822 format
      * @param personal The personal name
+     * @throws AddressException If parsing the address fails
      * @throws UnsupportedEncodingException If encoding is not supported
      */
-    public QuotedInternetAddress(final String address, final String personal) throws UnsupportedEncodingException {
-        super(address, personal);
+    public QuotedInternetAddress(final String address, final String personal) throws AddressException, UnsupportedEncodingException {
+        this(address, personal, null);
     }
 
     /**
@@ -770,10 +825,38 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @param address The address in RFC822 format
      * @param personal The personal name
      * @param charset The MIME charset for the name
+     * @throws AddressException If parsing the address fails
      * @throws UnsupportedEncodingException If encoding is not supported
      */
-    public QuotedInternetAddress(final String address, final String personal, final String charset) throws UnsupportedEncodingException {
-        super(address, personal, charset);
+    public QuotedInternetAddress(final String address, final String personal, final String charset) throws AddressException, UnsupportedEncodingException {
+        super();
+        this.address = toACE(address);
+        setPersonal(personal, charset);
+    }
+
+    /**
+     * Sets the email address.
+     * 
+     * @param address The email address
+     */
+    @Override
+    public void setAddress(final String address) {
+        try {
+            this.address = toACE(address);
+        } catch (final AddressException e) {
+            LOG.error("ACE string could not be parsed from IDN string: " + address, e);
+            this.address = address;
+        }
+    }
+
+    /**
+     * Gets the email address.
+     * 
+     * @return The email address
+     */
+    @Override
+    public String getAddress() {
+        return toIDN(address);
     }
 
     /**
@@ -849,13 +932,13 @@ public final class QuotedInternetAddress extends InternetAddress {
         final String p = getPersonal();
         if (p != null) {
             if (quoted(p)) {
-                return new StringBuilder(32).append(p).append(" <").append(address).append('>').toString();
+                return new StringBuilder(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
             }
-            return new StringBuilder(32).append(quotePhrase(p)).append(" <").append(address).append('>').toString();
+            return new StringBuilder(32).append(quotePhrase(p)).append(" <").append(toIDN(address)).append('>').toString();
         } else if (isGroup() || isSimple()) {
             return address;
         } else {
-            return new StringBuilder().append('<').append(address).append('>').toString();
+            return new StringBuilder().append('<').append(toIDN(address)).append('>').toString();
         }
     }
 

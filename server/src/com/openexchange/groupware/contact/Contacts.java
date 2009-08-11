@@ -68,7 +68,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
@@ -98,6 +97,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -160,13 +160,13 @@ public final class Contacts {
             String email = null;
             try {
                 if (co.containsEmail1() && (co.getEmail1() != null)) {
-                    new InternetAddress((email = co.getEmail1())).validate();
+                    new QuotedInternetAddress((email = co.getEmail1())).validate();
                 }
                 if (co.containsEmail2() && (co.getEmail2() != null)) {
-                    new InternetAddress((email = co.getEmail2())).validate();
+                    new QuotedInternetAddress((email = co.getEmail2())).validate();
                 }
                 if (co.containsEmail3() && (co.getEmail3() != null)) {
-                    new InternetAddress((email = co.getEmail3())).validate();
+                    new QuotedInternetAddress((email = co.getEmail3())).validate();
                 }
             } catch (final AddressException e) {
                 throw EXCEPTIONS.create(0, e, email);
