@@ -119,5 +119,10 @@ public class AbstractEAVDBStorageTest extends SQLTestCase {
     protected void createPathIndexEntry(int cid, int module, int objectId, String intTable, String textTable, String varcharTable, String blobTable, String boolTable, String referenceTable, String pathTable) throws TransactionException, SQLException {
         insert("eav_pathIndex", "cid", cid, "module", module, "objectId", objectId, "intTable", intTable, "textTable", textTable, "varcharTable", varcharTable, "blobTable", blobTable, "boolTable", boolTable, "referenceTable", referenceTable, "pathTable", pathTable);
     }
+    
+    protected void createPathIndexEntry(int cid, int module, int objectId) throws TransactionException, SQLException {
+        createPathIndexEntry(cid, module, objectId, "eav_int1", "eav_text1", "eav_varchar1", "eav_blob1", "eav_bool1", "eav_reference1", "eav_paths1");
+        
+    }
        
 }
