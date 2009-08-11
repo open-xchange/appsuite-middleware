@@ -76,7 +76,7 @@ public final class FolderServiceImpl implements FolderService {
         super();
     }
 
-    public void clearFolder(final String folderId) throws FolderException {
+    public void clearFolder(final String treeId, final String folderId) throws FolderException {
         // TODO Auto-generated method stub
 
     }
@@ -86,7 +86,7 @@ public final class FolderServiceImpl implements FolderService {
 
     }
 
-    public void deleteFolder(final String folderId) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId) throws FolderException {
         // TODO Auto-generated method stub
 
     }

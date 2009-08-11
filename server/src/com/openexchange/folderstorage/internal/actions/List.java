@@ -52,8 +52,6 @@ package com.openexchange.folderstorage.internal.actions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -70,25 +68,19 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
-import com.openexchange.folderstorage.internal.Tools;
-import com.openexchange.folderstorage.internal.UserizedFolderImpl;
-import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link List} - Serves the list request.
+ * {@link List} - Serves the <code>LIST</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class List extends AbstractAction {
+public final class List extends AbstractUserizedFolderAction {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(List.class);
-
-    private TimeZone timeZone;
 
     /**
      * Initializes a new {@link List} from given session.
@@ -109,25 +101,28 @@ public final class List extends AbstractAction {
         super(user, context);
     }
 
-    private TimeZone getTimeZone() {
-        if (null == timeZone) {
-            timeZone = Tools.getTimeZone(getUser().getTimeZone());
-        }
-        return timeZone;
-    }
-
+    /**
+     * Performs the <code>LIST</code> request.
+     * 
+     * @param treeId The tree identifier
+     * @param parentId The parent folder identifier
+     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
+     *            subscribed ones
+     * @return The user-sensitive subfolders
+     * @throws FolderException If a folder error occurs
+     */
     public UserizedFolder[] doList(final String treeId, final String parentId, final boolean all) throws FolderException {
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, parentId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(getStorageParameters(), false);
+        folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(folderStorage);
         final UserizedFolder[] ret;
         try {
-            final Folder parent = folderStorage.getFolder(treeId, parentId, getStorageParameters());
+            final Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
             {
                 /*
                  * Check folder permission for parent folder
@@ -218,16 +213,16 @@ public final class List extends AbstractAction {
                 ret = subfolders;
             }
             for (final FolderStorage fs : openedStorages) {
-                fs.commitTransaction(getStorageParameters());
+                fs.commitTransaction(storageParameters);
             }
         } catch (final FolderException e) {
             for (final FolderStorage fs : openedStorages) {
-                fs.rollback(getStorageParameters());
+                fs.rollback(storageParameters);
             }
             throw e;
         } catch (final Exception e) {
             for (final FolderStorage fs : openedStorages) {
-                fs.rollback(getStorageParameters());
+                fs.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -314,7 +309,16 @@ public final class List extends AbstractAction {
                 /*
                  * Get subfolder from appropriate storage
                  */
-                final Folder subfolder = tmp.getFolder(treeId, id, getStorageParameters());
+                final Folder subfolder;
+                try {
+                    subfolder = tmp.getFolder(treeId, id, getStorageParameters());
+                } catch (final FolderException e) {
+                    LOG.warn(
+                        new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
+                            "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append("\"").toString(),
+                        e);
+                    continue;
+                }
                 /*
                  * Check for subscribed status dependent on parameter "all"
                  */
@@ -347,124 +351,6 @@ public final class List extends AbstractAction {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final java.util.List<FolderStorage> openedStorages) throws FolderException {
-        final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
-        userizedFolder.setLocale(getUser().getLocale());
-        // Permissions
-        userizedFolder.setOwnPermission(ownPermission);
-        CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
-        // Type
-        final boolean isShared;
-        if (userizedFolder.getCreatedBy() != getUser().getId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
-            userizedFolder.setType(SharedType.getInstance());
-            userizedFolder.setSubfolderIDs(new String[0]);
-            isShared = true;
-        } else {
-            isShared = false;
-        }
-        // Time zone offset and last-modified in UTC
-        {
-            final Date cd = folder.getCreationDate();
-            if (null != cd) {
-                userizedFolder.setCreationDate(new Date(addTimeZoneOffset(cd.getTime(), getTimeZone())));
-            }
-        }
-        {
-            final Date lm = folder.getLastModified();
-            if (null != lm) {
-                userizedFolder.setLastModified(new Date(addTimeZoneOffset(lm.getTime(), getTimeZone())));
-                userizedFolder.setLastModifiedUTC(new Date(lm.getTime()));
-            }
-        }
-        if (!isShared) {
-            hasVisibleSubfolderIDs(folder, treeId, all, userizedFolder, openedStorages);
-        }
-        return userizedFolder;
-    }
-
-    private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final java.util.List<FolderStorage> openedStorages) throws FolderException {
-        // Subfolders
-        final String[] subfolders = folder.getSubfolderIDs();
-        final java.util.List<String> visibleSubfolderIds;
-        if (null == subfolders) {
-            // Get appropriate storages and start transaction
-            final String folderId = folder.getID();
-            final FolderStorage[] ss = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, folderId);
-            visibleSubfolderIds = new ArrayList<String>(1);
-            for (int i = 0; visibleSubfolderIds.size() <= 0 && i < ss.length; i++) {
-                final FolderStorage curStorage = ss[i];
-                boolean alreadyOpened = false;
-                for (int j = 0; !alreadyOpened && j < openedStorages.size(); j++) {
-                    if (openedStorages.get(j).equals(curStorage)) {
-                        alreadyOpened = true;
-                    }
-                }
-                if (!alreadyOpened) {
-                    curStorage.startTransaction(getStorageParameters(), false);
-                    openedStorages.add(curStorage);
-                }
-                final SortableId[] visibleIds = curStorage.getSubfolders(treeId, folderId, getStorageParameters());
-                if (visibleIds.length > 0) {
-                    /*
-                     * Found a storage which offers visible subfolder(s)
-                     */
-                    visibleSubfolderIds.add(visibleIds[0].getId());
-                }
-            }
-        } else {
-            visibleSubfolderIds = new ArrayList<String>(1);
-            /*
-             * Check until first visible subfolder found
-             */
-            for (int i = 0; visibleSubfolderIds.size() <= 0 && i < subfolders.length; i++) {
-                final String id = subfolders[i];
-                final FolderStorage tmp = getOpenedStorage(id, treeId, openedStorages);
-                /*
-                 * Get subfolder from appropriate storage
-                 */
-                final Folder subfolder = tmp.getFolder(treeId, id, getStorageParameters());
-                /*
-                 * Check for access rights and subscribed status dependent on parameter "all"
-                 */
-                final Permission subfolderPermission;
-                if (null == getSession()) {
-                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext());
-                } else {
-                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession());
-                }
-                if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
-                    visibleSubfolderIds.add(id);
-                }
-            }
-        }
-        userizedFolder.setSubfolderIDs(visibleSubfolderIds.toArray(new String[visibleSubfolderIds.size()]));
-    }
-
-    private FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.List<FolderStorage> openedStorages) throws FolderException {
-        FolderStorage tmp = null;
-        for (final FolderStorage ps : openedStorages) {
-            if (ps.getFolderType().servesFolderId(id)) {
-                // Found an already opened storage which is capable to server given folderId-treeId-pair
-                tmp = ps;
-            }
-        }
-        if (null == tmp) {
-            // None opened storage is capable to server given folderId-treeId-pair
-            tmp = FolderStorageRegistry.getInstance().getFolderStorage(treeId, id);
-            if (null == tmp) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
-            }
-            // Open storage and add to list of opened storages
-            tmp.startTransaction(getStorageParameters(), false);
-            openedStorages.add(tmp);
-        }
-        return tmp;
-    }
-
-    private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return (date + timeZone.getOffset(date));
     }
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;

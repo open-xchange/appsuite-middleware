@@ -158,18 +158,20 @@ public interface FolderService {
      * <p>
      * The folder is deleted from all trees and its subfolders as well
      * 
+     * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @throws FolderException If folder cannot be deleted
      */
-    void deleteFolder(String folderId) throws FolderException;
+    void deleteFolder(String treeId, String folderId) throws FolderException;
 
     /**
      * Clears the content of specified folder in given tree.
      * 
+     * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @throws FolderException If folder cannot be cleared
      */
-    void clearFolder(String folderId) throws FolderException;
+    void clearFolder(String treeId, String folderId) throws FolderException;
 
     /**
      * Updates a folder identified through given folder object.

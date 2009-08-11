@@ -63,7 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Update} - Serves the update request.
+ * {@link Update} - Serves the <code>UPDATE</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -90,6 +90,12 @@ public final class Update extends AbstractAction {
         super(user, context);
     }
 
+    /**
+     * Performs the <code>UPDATE</code> request.
+     * 
+     * @param folder The object which denotes the folder to update and provides the changes to perform
+     * @throws FolderException If update fails
+     */
     public void doUpdate(final Folder folder) throws FolderException {
         final String folderId = folder.getID();
         if (null == folderId) {
@@ -153,7 +159,7 @@ public final class Update extends AbstractAction {
                 }
             }
             /*
-             * Do move? Handle three million cases
+             * Do move?
              */
             if (move) {
                 /*

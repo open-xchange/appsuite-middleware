@@ -64,7 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Create} - Serves the create request.
+ * {@link Create} - Serves the <code>CREATE</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -89,6 +89,12 @@ public final class Create extends AbstractAction {
         super(user, context);
     }
 
+    /**
+     * Performs the <code>CREATE</code> request.
+     * 
+     * @param toCreate The object describing the folder to create
+     * @throws FolderException If creation fails
+     */
     public void doCreate(final Folder toCreate) throws FolderException {
         final String parentId = toCreate.getParentID();
         if (null == parentId) {
