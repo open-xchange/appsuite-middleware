@@ -68,12 +68,12 @@ import com.openexchange.groupware.tx.TransactionException;
  */
 public class InsertTest extends AbstractEAVDBStorageTest {
 
-    private EAVDBStorage storage;
+    private Storage storage;
     private SimContext ctx = new SimContext(1);
     
     public void setUp() throws Exception {
         super.setUp();
-        this.storage = new EAVDBStorage(getDBProvider());
+        this.storage = new Storage(getDBProvider());
     }
     
     public void tearDown() throws Exception {
