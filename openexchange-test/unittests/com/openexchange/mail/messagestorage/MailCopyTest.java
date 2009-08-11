@@ -60,28 +60,26 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link MailCopyTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailCopyTest extends MessageStorageTest {
 
-	/**
+    /**
 	 * 
 	 */
-	public MailCopyTest() {
-		super();
-	}
+    public MailCopyTest() {
+        super();
+    }
 
-	private static final MailField[] FIELDS_ID = { MailField.ID };
+    private static final MailField[] FIELDS_ID = { MailField.ID };
 
-	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-			MailField.BODY };
+    private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.BODY };
 
-	private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-			MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL,
-			MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY,
-			MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
+    private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.FROM,
+        MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL, MailField.HEADERS, MailField.SUBJECT,
+        MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC,
+        MailField.BCC, MailField.FOLDER_ID };
 
-	private static final MailField[] FIELDS_FULL = { MailField.FULL };
+    private static final MailField[] FIELDS_FULL = { MailField.FULL };
 
     public void testMailCopyNotExistingMails() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
@@ -95,7 +93,8 @@ public final class MailCopyTest extends MessageStorageTest {
                 String[] tmpCopy = null;
                 try {
                     final long currentTimeMillis = System.currentTimeMillis();
-                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, false);
+                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] {
+                        String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, false);
                 } catch (final Exception e) {
                     fail("No exception should be thrown here");
                 }
@@ -115,14 +114,15 @@ public final class MailCopyTest extends MessageStorageTest {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
             final String fullname = createTemporaryFolder(getSession(), mailAccess);
-            
+
             try {
                 /*
                  * Copy not existing message to valid folder
                  */
                 String[] tmpCopy = null;
                 try {
-                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()), uids[0] }, false);
+                    tmpCopy = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, new String[] {
+                        String.valueOf(System.currentTimeMillis()), uids[0] }, false);
                 } catch (final Exception e) {
                     fail("No exception should be thrown here");
                 }
@@ -132,7 +132,7 @@ public final class MailCopyTest extends MessageStorageTest {
             } finally {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
             }
-            
+
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
@@ -178,93 +178,90 @@ public final class MailCopyTest extends MessageStorageTest {
         }
     }
 
-	public void testMailCopy() throws MailException, MessagingException, IOException {
-			final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
-			try {
-			    final String fullname = createTemporaryFolder(getSession(), mailAccess);
+    public void testMailCopy() throws MailException, MessagingException, IOException {
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
+        try {
+            final String fullname = createTemporaryFolder(getSession(), mailAccess);
 
-				try {
-					final String[] copied = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, uids, false);
-					assertTrue("Missing copied mail IDs", copied != null);
-					assertTrue("Number of copied messages does not match", copied.length == uids.length);
-					for (int i = 0; i < copied.length; i++) {
-						assertTrue("Invalid mail ID", copied[i] != null);
-					}
+            try {
+                final String[] copied = mailAccess.getMessageStorage().copyMessages("INBOX", fullname, uids, false);
+                assertTrue("Missing copied mail IDs", copied != null);
+                assertTrue("Number of copied messages does not match", copied.length == uids.length);
+                for (int i = 0; i < copied.length; i++) {
+                    assertTrue("Invalid mail ID", copied[i] != null);
+                }
 
-					MailMessage[] fetchedMails = mailAccess.getMessageStorage()
-							.getMessages(fullname, copied, FIELDS_ID);
-					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
-					}
+                MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_ID);
+                for (int i = 0; i < fetchedMails.length; i++) {
+                    assertFalse("Mail ID is null", fetchedMails[i].getMailId() == null);
+                }
 
-					fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_MORE);
-					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
-						assertTrue("Missing content type", fetchedMails[i].containsContentType());
-						assertTrue("Missing flags", fetchedMails[i].containsFlags());
-						if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
-							assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
-						} else {
-							assertFalse("Content is null", fetchedMails[i].getContent() == null);
-						}
-					}
+                fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_MORE);
+                for (int i = 0; i < fetchedMails.length; i++) {
+                    assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
+                    assertTrue("Missing content type", fetchedMails[i].containsContentType());
+                    assertTrue("Missing flags", fetchedMails[i].containsFlags());
+                    if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
+                        assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
+                    } else {
+                        assertFalse("Content is null", fetchedMails[i].getContent() == null);
+                    }
+                }
 
-					fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_EVEN_MORE);
-					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
-						assertTrue("Missing content type", fetchedMails[i].containsContentType());
-						assertTrue("Missing flags", fetchedMails[i].containsFlags());
-						assertTrue("Missing From", fetchedMails[i].containsFrom());
-						assertTrue("Missing To", fetchedMails[i].containsTo());
-						assertTrue("Missing Disposition-Notification-To", fetchedMails[i]
-								.containsDispositionNotification());
-						assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-						assertTrue("Missing headers", fetchedMails[i].containsHeaders());
-						assertTrue("Missing subject", fetchedMails[i].containsSubject());
-						assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
-						assertTrue("Missing size", fetchedMails[i].containsSize());
-						assertTrue("Missing priority", fetchedMails[i].containsPriority());
-						assertTrue("Missing sent date", fetchedMails[i].containsSentDate());
-						assertTrue("Missing received date", fetchedMails[i].containsReceivedDate());
-						assertTrue("Missing Cc", fetchedMails[i].containsCc());
-						assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
-						assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
-					}
+                fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_EVEN_MORE);
+                for (int i = 0; i < fetchedMails.length; i++) {
+                    assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
+                    assertTrue("Missing content type", fetchedMails[i].containsContentType());
+                    assertTrue("Missing flags", fetchedMails[i].containsFlags());
+                    assertTrue("Missing From", fetchedMails[i].containsFrom());
+                    assertTrue("Missing To", fetchedMails[i].containsTo());
+                    assertTrue("Missing Disposition-Notification-To", fetchedMails[i].containsDispositionNotification());
+                    assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
+                    assertTrue("Missing headers", fetchedMails[i].containsHeaders());
+                    assertTrue("Missing subject", fetchedMails[i].containsSubject());
+                    assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
+                    assertTrue("Missing size", fetchedMails[i].containsSize());
+                    assertTrue("Missing priority", fetchedMails[i].containsPriority());
+                    assertTrue("Missing sent date", fetchedMails[i].containsSentDate());
+                    assertTrue("Missing received date", fetchedMails[i].containsReceivedDate());
+                    assertTrue("Missing Cc", fetchedMails[i].containsCc());
+                    assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
+                    assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
+                }
 
-					fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_FULL);
-					for (int i = 0; i < fetchedMails.length; i++) {
-						assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
-						assertTrue("Missing content type", fetchedMails[i].containsContentType());
-						assertTrue("Missing flags", fetchedMails[i].containsFlags());
-						assertTrue("Missing From", fetchedMails[i].containsFrom());
-						assertTrue("Missing To", fetchedMails[i].containsTo());
-						assertTrue("Missing Disposition-Notification-To", fetchedMails[i]
-								.containsDispositionNotification());
-						assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-						assertTrue("Missing headers", fetchedMails[i].containsHeaders());
-						assertTrue("Missing subject", fetchedMails[i].containsSubject());
-						assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
-						assertTrue("Missing size", fetchedMails[i].containsSize());
-						assertTrue("Missing priority", fetchedMails[i].containsPriority());
-						assertTrue("Missing sent date", fetchedMails[i].containsSentDate());
-						assertTrue("Missing received date", fetchedMails[i].containsReceivedDate());
-						assertTrue("Missing Cc", fetchedMails[i].containsCc());
-						assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
-						assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
-						if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
-							assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
-						} else {
-							assertFalse("Content is null", fetchedMails[i].getContent() == null);
-						}
-					}
+                fetchedMails = mailAccess.getMessageStorage().getMessages(fullname, copied, FIELDS_FULL);
+                for (int i = 0; i < fetchedMails.length; i++) {
+                    assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
+                    assertTrue("Missing content type", fetchedMails[i].containsContentType());
+                    assertTrue("Missing flags", fetchedMails[i].containsFlags());
+                    assertTrue("Missing From", fetchedMails[i].containsFrom());
+                    assertTrue("Missing To", fetchedMails[i].containsTo());
+                    assertTrue("Missing Disposition-Notification-To", fetchedMails[i].containsDispositionNotification());
+                    assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
+                    assertTrue("Missing headers", fetchedMails[i].containsHeaders());
+                    assertTrue("Missing subject", fetchedMails[i].containsSubject());
+                    assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
+                    assertTrue("Missing size", fetchedMails[i].containsSize());
+                    assertTrue("Missing priority", fetchedMails[i].containsPriority());
+                    assertTrue("Missing sent date", fetchedMails[i].containsSentDate());
+                    assertTrue("Missing received date", fetchedMails[i].containsReceivedDate());
+                    assertTrue("Missing Cc", fetchedMails[i].containsCc());
+                    assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
+                    assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
+                    if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
+                        assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
+                    } else {
+                        assertFalse("Content is null", fetchedMails[i].getContent() == null);
+                    }
+                }
 
-				} finally {
-					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-				}
+            } finally {
+                mailAccess.getFolderStorage().deleteFolder(fullname, true);
+            }
 
-			} finally {
-				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-			}
-	}
+        } finally {
+            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+        }
+    }
 
 }
