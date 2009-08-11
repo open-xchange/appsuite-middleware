@@ -160,10 +160,11 @@ public enum EAVType {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
             if (cType == EAVContainerType.SINGLE) {
-                node.setPayload((Boolean) args[1]);
+                node.setPayload((Boolean) args[2]);
             } else {
-                Boolean[] values = new Boolean[args.length-2];
-                System.arraycopy(args, 1, values, 0, values.length);
+                Object[] source = (Object[]) args[2];
+                Boolean[] values = new Boolean[source.length];
+                System.arraycopy(source, 0, values, 0, values.length);
                 node.setPayload(values);
             }
             return null;
@@ -173,10 +174,11 @@ public enum EAVType {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
             if (cType == EAVContainerType.SINGLE) {
-                node.setPayload((Number) args[1]);
+                node.setPayload((Number) args[2]);
             } else {
-                Number[] values = new Number[args.length-2];
-                System.arraycopy(args, 1, values, 0, values.length);
+                Object[] source = (Object[]) args[2];
+                Number[] values = new Number[source.length];
+                System.arraycopy(source, 0, values, 0, values.length);
                 node.setPayload(values);
             }
             return null;
@@ -191,10 +193,11 @@ public enum EAVType {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
             if (cType == EAVContainerType.SINGLE) {
-                node.setPayload((Number) args[1]);
+                node.setPayload((Number) args[2]);
             } else {
-                Number[] values = new Number[args.length-2];
-                System.arraycopy(args, 1, values, 0, values.length);
+                Object[] source = (Object[]) args[2];
+                Number[] values = new Number[source.length];
+                System.arraycopy(source, 0, values, 0, values.length);
                 node.setPayload(values);
             }
             return null;
@@ -209,10 +212,11 @@ public enum EAVType {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
             if (cType == EAVContainerType.SINGLE) {
-                node.setPayload((String) args[1]);
+                node.setPayload((String) args[2]);
             } else {
-                String[] values = new String[args.length-2];
-                System.arraycopy(args, 1, values, 0, values.length);
+                Object[] source = (Object[]) args[2];
+                String[] values = new String[source.length];
+                System.arraycopy(source, 0, values, 0, values.length);
                 node.setPayload(values);
             }
             return null;
@@ -222,10 +226,11 @@ public enum EAVType {
             EAVNode node = (EAVNode) args[0];
             EAVContainerType cType = (EAVContainerType) args[1];
             if (cType == EAVContainerType.SINGLE) {
-                node.setPayload((Number) args[1]);
+                node.setPayload((Number) args[2]);
             } else {
-                Number[] values = new Number[args.length-2];
-                System.arraycopy(args, 1, values, 0, values.length);
+                Object[] source = (Object[]) args[2];
+                Number[] values = new Number[source.length];
+                System.arraycopy(source, 0, values, 0, values.length);
                 node.setPayload(values);
             }
             return null;
@@ -260,7 +265,7 @@ public enum EAVType {
         }
 
         public Object string(Object... args) {
-            return "varcharTable";
+            return "textTable";
         }
 
         public Object time(Object... args) {
