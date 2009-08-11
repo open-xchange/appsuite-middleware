@@ -74,14 +74,27 @@ public enum SQLType {
     
     public BalancedTableManager getTableManager(DBProvider provider) {
        switch(this) {
-        case PATH: return new PathTableManager(provider);
-        case REFERENCE: return new ReferenceTableManager(provider);
-        case INTEGER: return new IntegerTableManager(provider);
-        case TEXT: return new TextTableManager(provider);
-        case VARCHAR: return new VarcharTableManager(provider);
-        case BLOB: return new BlobTableManager(provider);
-        case BOOLEAN: return new BooleanTableManager(provider);
+       case PATH: return new PathTableManager(provider);
+       case REFERENCE: return new ReferenceTableManager(provider);
+       case INTEGER: return new IntegerTableManager(provider);
+       case TEXT: return new TextTableManager(provider);
+       case VARCHAR: return new VarcharTableManager(provider);
+       case BLOB: return new BlobTableManager(provider);
+       case BOOLEAN: return new BooleanTableManager(provider);
+       }
+       throw new IllegalArgumentException("Don't know a table manager for "+this);
+    }
+    
+    public String getTablePrefix() {
+        switch(this) {
+        case PATH: return Paths.pathsPrefix;
+        case REFERENCE: return ReferenceTable.tablePrefix;
+        case INTEGER: return IntegerTable.tablePrefix;
+        case TEXT: return TextTable.tablePrefix;
+        case VARCHAR: return VarcharTable.tablePrefix;
+        case BLOB: return BlobTable.tablePrefix;
+        case BOOLEAN: return BooleanTable.tablePrefix;
         }
-        throw new IllegalArgumentException("Don't know a table manager for "+this);
+        throw new IllegalArgumentException("Don't know a table prefix for "+this);
     }
 }

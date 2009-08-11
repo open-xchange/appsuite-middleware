@@ -74,7 +74,6 @@ import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.tools.sql.DBUtils;
 
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 
 

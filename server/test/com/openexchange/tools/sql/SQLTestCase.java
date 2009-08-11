@@ -55,7 +55,14 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.groupware.tx.DBProvider;
@@ -161,13 +168,25 @@ public abstract class SQLTestCase extends TestCase {
         }
     }
 
-    public void exec(String sql) throws SQLException, TransactionException {
+    public void exec(String sql, Object...substitutes) throws TransactionException, SQLException {
+        exec(sql, Arrays.asList(substitutes));
+    }
+    
+    public void exec(String sql) throws TransactionException, SQLException {
+        exec(sql, new ArrayList<Object>(0));
+    }
+    
+    public void exec(String sql, List<Object> substitues) throws SQLException, TransactionException {
         Connection con = null;
         PreparedStatement stmt = null;
 
         try {
             con = getDBProvider().getReadConnection(null);
             stmt = con.prepareStatement(sql);
+            int index = 1;
+            for(Object attr : substitues) {
+                stmt.setObject(index++, attr);
+            }
             stmt.execute();
         } finally {
             if (stmt != null) {
@@ -177,5 +196,91 @@ public abstract class SQLTestCase extends TestCase {
                 getDBProvider().releaseReadConnection(null, con);
             }
         }
+    }
+    
+    public List<Map<String, Object>> query(String sql) throws TransactionException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        List<Map<String, Object>> results = new LinkedList<Map<String, Object>>();
+        
+        try {
+            con = getDBProvider().getReadConnection(null);
+            stmt = con.prepareStatement(sql);
+            rs = stmt.executeQuery();
+            ResultSetMetaData metaData = rs.getMetaData();
+            while(rs.next()) {
+                Map<String, Object> row = new HashMap<String, Object>();
+                for(int i = 1; i <= metaData.getColumnCount(); i++) {
+                    String key = metaData.getColumnName(i);
+                    Object value = rs.getObject(i);
+                    row.put(key, value);
+                }
+                results.add(row);
+            }
+            
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (con != null) {
+                getDBProvider().releaseReadConnection(null, con);
+            }
+            if(rs != null) {
+                rs.close();
+            }
+        }
+        return results;
+    }
+    
+    protected void copyTableStructure(String origName, String newName) throws TransactionException, SQLException {
+        Map<String, Object> createTableRow = query("SHOW CREATE TABLE "+origName).get(0);
+        String createStatement = (String) createTableRow.get("Create Table");
+        createStatement = createStatement.replaceAll(origName, newName);
+        exec(createStatement);
+    }
+    
+    protected void dropTable(String tableName) throws TransactionException, SQLException {
+        exec("DROP TABLE IF EXISTS "+tableName);
+    }
+    
+    protected void insert(String tableName, Object...attrs) throws TransactionException, SQLException {
+        StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" ");
+        StringBuilder questionMarks = new StringBuilder();
+        
+        String key = null;
+        List<Object> values = new ArrayList<Object>();
+        
+        for(Object attr : attrs) {
+            if(key == null) {
+                key = (String) attr;
+                builder.append(key).append(", ");
+            } else {
+                values.add(attr);
+                questionMarks.append("?, ");
+                key = null;
+            }
+        }
+        
+        builder.setLength(builder.length()-2);
+        questionMarks.setLength(questionMarks.length()-2);
+        builder.append(" (").append(questionMarks).append(")");
+        
+        exec(builder.toString(), values);
+    }
+    
+    protected void assertEntry(String tableName, Object...attrs) throws TransactionException, SQLException {
+        StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
+        String key = null;
+        for(Object object : attrs) {
+            if(key == null) {
+                key = (String) object;
+            } else {
+                builder.append(key).append(" = ").append(object);
+                key = null;
+            }
+        }
+        assertResult(builder.toString());
     }
 }
