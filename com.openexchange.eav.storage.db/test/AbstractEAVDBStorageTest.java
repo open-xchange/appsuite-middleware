@@ -4,9 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.eav.AbstractNode;
+import com.openexchange.eav.EAVDSL;
 import com.openexchange.eav.storage.db.sql.SQLType;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.sql.SQLTestCase;
+
+import static com.openexchange.eav.EAVDSL.*;
 
 /*
  *
@@ -122,7 +126,14 @@ public class AbstractEAVDBStorageTest extends SQLTestCase {
     
     protected void createPathIndexEntry(int cid, int module, int objectId) throws TransactionException, SQLException {
         createPathIndexEntry(cid, module, objectId, "eav_int1", "eav_text1", "eav_varchar1", "eav_blob1", "eav_bool1", "eav_reference1", "eav_paths1");
-        
+    }
+    
+    public static <T extends AbstractNode<T>>  void assertEquals(AbstractNode<T> expected, AbstractNode<T> actual) {
+        EAVDSL.assertEquals(expected, actual);
+    }
+
+    public static <T extends AbstractNode<T>> void assertEquals(String message, AbstractNode<T> expected, AbstractNode<T> actual) {
+        EAVDSL.assertEquals(message, expected, actual);
     }
        
 }
