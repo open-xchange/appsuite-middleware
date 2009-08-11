@@ -65,7 +65,8 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 
 /**
  * Transforms strings of the kind "users:user_a" or "contacts:my_contact" into an internet
- * address (to be used as email address)
+ * address (to be used as email address). If the suffix "(notification)" is used at a fixture,
+ * only the plain e-mail address is added to the internet address object.
  *
  * @author tfriedrich
  * @author Martin Braun <martin.braun@open-xchange.com>
