@@ -64,4 +64,7 @@ public class EAVStorageExceptionStrings implements LocalizableStrings {
     
     // Could not create table %s
     public static final String CouldNotCreateTable = "Could not create table %s";
+    
+    // No such node: %1$s
+    public static final String NoSuchNodeException = "No such node: %1$s";
 }

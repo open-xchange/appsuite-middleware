@@ -62,6 +62,18 @@ public class PathIndex extends AbstractColumns {
     public static Column objectId = new Column("objectId");
     
     public static Column pathTable = new Column("pathTable");
+    
+    public static Column intTable = new Column("intTable");
+    
+    public static Column textTable = new Column("textTable");
+    
+    public static Column varcharTable = new Column("varcharTable");
+    
+    public static Column blobTable = new Column("blobTable");
+    
+    public static Column boolTable = new Column("boolTable");
+    
+    public static Column referenceTable = new Column("referenceTable");
 
     public static Table pathIndex = new Table("eav_pathIndex");
 

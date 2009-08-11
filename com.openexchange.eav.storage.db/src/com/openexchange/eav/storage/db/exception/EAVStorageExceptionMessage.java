@@ -57,8 +57,9 @@ import com.openexchange.groupware.AbstractOXException.Category;
  */
 public enum EAVStorageExceptionMessage implements OXErrorMessage {
     GeneralException(1, Category.INTERNAL_ERROR, EAVStorageExceptionStrings.GeneralException, null),
-    SQLException(2, Category.CODE_ERROR, EAVStorageExceptionStrings.SQLException, null), 
-    CouldNotCreateTable(3, Category.INTERNAL_ERROR, EAVStorageExceptionStrings.CouldNotCreateTable, null)
+    SQLException(2, Category.CODE_ERROR, EAVStorageExceptionStrings.SQLException, null),
+    CouldNotCreateTable(3, Category.INTERNAL_ERROR, EAVStorageExceptionStrings.CouldNotCreateTable, null),
+    NoSuchNodeException(4, Category.CODE_ERROR, EAVStorageExceptionStrings.NoSuchNodeException, null)
     ;
 
     private Category category;

@@ -49,6 +49,7 @@
 
 package com.openexchange.eav.storage.db;
 
+import java.sql.Connection;
 import java.util.Set;
 import com.openexchange.eav.EAVException;
 import com.openexchange.eav.EAVNode;
@@ -56,26 +57,41 @@ import com.openexchange.eav.EAVPath;
 import com.openexchange.eav.EAVSetTransformation;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.EAVTypeMetadataNode;
+import com.openexchange.eav.storage.db.exception.EAVStorageExceptionMessage;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Storage implements EAVStorage {
+    
+    private DBProvider provider;
+
+    public Storage(DBProvider provider) {
+        this.provider = provider;
+    }
 
     public void delete(Context ctx, EAVPath path) throws EAVException {
         // TODO Auto-generated method stub
-
     }
 
     public EAVNode get(Context ctx, EAVPath path) throws EAVException {
-        // TODO Auto-generated method stub
-        return null;
+        return get(ctx, path, true);
     }
 
     public EAVNode get(Context ctx, EAVPath path, boolean allBinaries) throws EAVException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection con = null;
+        try {
+            con = provider.getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw EAVStorageExceptionMessage.SQLException.create(e);
+        }
+        SQLStorage storage = new SQLStorage(ctx, getModule(path), getObjectId(path));
+        storage.init(con, allBinaries);
+        return storage.getEAVNode(path);
     }
 
     public EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws EAVException {
@@ -106,6 +122,40 @@ public class Storage implements EAVStorage {
     public void updateSets(Context ctx, EAVPath path, EAVSetTransformation update) throws EAVException {
         // TODO Auto-generated method stub
 
+    }
+    
+    private int getModule(EAVPath path) {
+        String module = path.first();
+        if (module.equalsIgnoreCase("calendar")) {
+            return FolderObject.CALENDAR;
+        } else if (module.equalsIgnoreCase("contact")) {
+            return FolderObject.CONTACT;
+        } else if (module.equalsIgnoreCase("task")) {
+            return FolderObject.TASK;
+        } else if (module.equalsIgnoreCase("folder")) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+    
+    private int getFolderId(EAVPath path) {
+        if (getModule(path) == 0) {
+            return 0;
+        } else {
+            return Integer.parseInt(path.shiftLeft().first());
+        }
+    }
+    
+    private int getObjectId(EAVPath path) {
+        int module = getModule(path);
+        if (module == -1) {
+            return Integer.parseInt(path.shiftLeft().first());
+        } else if (module == 0) {
+            return 0;
+        } else {
+            return Integer.parseInt(path.shiftLeft().shiftLeft().first());
+        }
     }
 
 }

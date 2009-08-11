@@ -51,7 +51,6 @@ package com.openexchange.eav;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 
@@ -150,6 +149,10 @@ public class EAVPath {
         }
         
         return list;
+    }
+    
+    public int length() {
+        return components.size();
     }
 
     public static EAVPath parse(String string) {

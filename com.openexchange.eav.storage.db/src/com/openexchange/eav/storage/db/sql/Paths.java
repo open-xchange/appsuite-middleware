@@ -62,9 +62,7 @@ public class Paths extends PathIndex {
     
     public static Column parent = new Column("parent");
     
-    public static Column table = new Column("table");
-    
     public static Column eavType = new Column("eavType");
     
-    public static String pathsPrefix = "eav_paths";
+    public static String pathsPrefix = "eav_";
 }

@@ -55,9 +55,17 @@ public class EQUALS extends BinaryPredicate {
 		super(column, right);
 	}
 
+    public EQUALS(Column column, Expression right) {
+        super(column.getName(), right);
+    }
+
 	public EQUALS(String column, Object value) {
 		super(column, value);
 	}
+	
+    public EQUALS(Column column, Object value) {
+        super(column.getName(), value);
+    }
 
 	public EQUALS(Expression left, Expression right) {
 		super(left, right);

@@ -145,6 +145,130 @@ public enum EAVType {
         return COERCIBLE.get(origType).contains(this);
     }
     
+    public String getSQLTable() {
+        return (String) doSwitch(tableSwitcher);
+    }
+    
+    public static final EAVTypeSwitcher valueSwitcher = new EAVTypeSwitcher() {
+
+        public Object binary(Object... args) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Object bool(Object... args) {
+            EAVNode node = (EAVNode) args[0];
+            EAVContainerType cType = (EAVContainerType) args[1];
+            if (cType == EAVContainerType.SINGLE) {
+                node.setPayload((Boolean) args[1]);
+            } else {
+                Boolean[] values = new Boolean[args.length-2];
+                System.arraycopy(args, 1, values, 0, values.length);
+                node.setPayload(values);
+            }
+            return null;
+        }
+
+        public Object date(Object... args) {
+            EAVNode node = (EAVNode) args[0];
+            EAVContainerType cType = (EAVContainerType) args[1];
+            if (cType == EAVContainerType.SINGLE) {
+                node.setPayload((Number) args[1]);
+            } else {
+                Number[] values = new Number[args.length-2];
+                System.arraycopy(args, 1, values, 0, values.length);
+                node.setPayload(values);
+            }
+            return null;
+        }
+
+        public Object nullValue(Object... args) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Object number(Object... args) {
+            EAVNode node = (EAVNode) args[0];
+            EAVContainerType cType = (EAVContainerType) args[1];
+            if (cType == EAVContainerType.SINGLE) {
+                node.setPayload((Number) args[1]);
+            } else {
+                Number[] values = new Number[args.length-2];
+                System.arraycopy(args, 1, values, 0, values.length);
+                node.setPayload(values);
+            }
+            return null;
+        }
+
+        public Object object(Object... args) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Object string(Object... args) {
+            EAVNode node = (EAVNode) args[0];
+            EAVContainerType cType = (EAVContainerType) args[1];
+            if (cType == EAVContainerType.SINGLE) {
+                node.setPayload((String) args[1]);
+            } else {
+                String[] values = new String[args.length-2];
+                System.arraycopy(args, 1, values, 0, values.length);
+                node.setPayload(values);
+            }
+            return null;
+        }
+
+        public Object time(Object... args) {
+            EAVNode node = (EAVNode) args[0];
+            EAVContainerType cType = (EAVContainerType) args[1];
+            if (cType == EAVContainerType.SINGLE) {
+                node.setPayload((Number) args[1]);
+            } else {
+                Number[] values = new Number[args.length-2];
+                System.arraycopy(args, 1, values, 0, values.length);
+                node.setPayload(values);
+            }
+            return null;
+        }
+        
+    };
+    
+    public static final EAVTypeSwitcher tableSwitcher = new EAVTypeSwitcher() {
+
+        public Object binary(Object... args) {
+            return "blobTable";
+        }
+
+        public Object bool(Object... args) {
+            return "boolTable";
+        }
+
+        public Object date(Object... args) {
+            return "intTable";
+        }
+
+        public Object nullValue(Object... args) {
+            return null;
+        }
+
+        public Object number(Object... args) {
+            return "intTable";
+        }
+
+        public Object object(Object... args) {
+            return null;
+        }
+
+        public Object string(Object... args) {
+            return "varcharTable";
+        }
+
+        public Object time(Object... args) {
+            return "intTable";
+        }
+        
+    };
+    
     private static EAVTypeSwitcher getGuessSwitcher() {
         return new EAVTypeSwitcher() {
 
