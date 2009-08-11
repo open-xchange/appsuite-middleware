@@ -103,7 +103,7 @@ public class Storage implements EAVStorage {
     }
 
     public EAVNode get(Context ctx, EAVPath path) throws EAVException {
-        return get(ctx, path, true);
+        return get(ctx, path, false);
     }
 
     public EAVNode get(Context ctx, EAVPath path, boolean allBinaries) throws EAVException {
@@ -119,8 +119,15 @@ public class Storage implements EAVStorage {
     }
 
     public EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws EAVException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection con = null;
+        try {
+            con = provider.getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw EAVStorageExceptionMessage.SQLException.create(e);
+        }
+        SQLStorage storage = new SQLStorage(ctx, getModule(path), getObjectId(path));
+        storage.init(con, false, loadBinaries);
+        return storage.getEAVNode(chopPath(path));
     }
 
     public EAVTypeMetadataNode getTypes(Context ctx, EAVPath parent, EAVNode node) throws EAVException {

@@ -54,8 +54,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.eav.EAVContainerType;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVPath;
@@ -98,7 +100,11 @@ public class SQLStorage {
     
     private Connection con;
 
-    private boolean allBinaries;
+    private boolean allBinaries = false;
+    
+    private Set<EAVPath> binaries;
+    
+    private EAVPath currentPath;
 
     public SQLStorage(Context ctx, int module, int objectId) {
         this.ctx = ctx;
@@ -106,9 +112,23 @@ public class SQLStorage {
         this.id = objectId;
     }
     
+    public void init(Connection con) throws EAVStorageException {
+        init(con, false, null);
+    }
+    
     public void init(Connection con, boolean allBinaries) throws EAVStorageException {
+        init(con, allBinaries, null);
+    }
+    
+    public void init(Connection con, boolean allBinaries, Set<EAVPath> binaries) throws EAVStorageException {
         this.con = con;
         this.allBinaries = allBinaries;
+        currentPath = new EAVPath();
+        if (binaries == null) {
+            this.binaries = new HashSet<EAVPath>();
+        } else {
+            this.binaries = binaries;
+        }
         tables = new HashMap<String, String>();
         List<Object> values = new ArrayList<Object>();
         
@@ -158,11 +178,10 @@ public class SQLStorage {
     }
     
     private EAVNode getEAVNode(Node n) throws EAVStorageException {
-        EAVNode retval = null;
+        EAVNode retval = new EAVNode();
         if (n.type == null) {
             writeInnerNode(retval, n);
         } else {
-            retval = new EAVNode();
             writeLeaf(retval, n);
         }
         
@@ -172,13 +191,18 @@ public class SQLStorage {
     private void writeInnerNode(EAVNode target, Node source) throws EAVStorageException {
         target.setName(source.getName());
         for (Node childNode : getChildNodes(source.getNodeId())) {
+            currentPath.append(childNode.getName());
             target.addChild(getEAVNode(childNode));
+            currentPath = currentPath.parent();
+            if (currentPath == null) {
+                currentPath = new EAVPath();
+            }
         }
     }
     
     private List<Node> getChildNodes(int parentId) throws EAVStorageException {
         List<Node> retval = null;
-        SELECT select = new SELECT(ASTERISK).FROM(pathsPrefix + pathsTable)
+        SELECT select = new SELECT(ASTERISK).FROM(pathsTable)
             .WHERE(new EQUALS(cid, PLACEHOLDER)
                 .AND(new EQUALS(module, PLACEHOLDER))
                 .AND(new EQUALS(parent, PLACEHOLDER)));
@@ -227,7 +251,7 @@ public class SQLStorage {
     
     private void loadValue(EAVNode target, Node source) throws EAVStorageException {
         EAVType type = EAVType.getType(source.type);
-        if (type == EAVType.BINARY && !allBinaries) {
+        if (type == EAVType.BINARY && !allBinaries && !binaries.contains(currentPath)) {
             return;
         }
         String table = (String) type.doSwitch(EAVType.tableSwitcher);
@@ -274,7 +298,7 @@ public class SQLStorage {
     }
     
     private Node getNode(EAVPath path) throws EAVStorageException {
-        SELECT select = new SELECT(ASTERISK).FROM(pathsPrefix + pathsTable)
+        SELECT select = new SELECT(ASTERISK).FROM(pathsTable)
             .WHERE(new EQUALS(cid, PLACEHOLDER)
                 .AND(new EQUALS(module, PLACEHOLDER))
                 .AND(new EQUALS(objectId, PLACEHOLDER))
@@ -316,7 +340,13 @@ public class SQLStorage {
             Node n = new Node();
             n.setName(rs.getString(name.getName()));
             n.setParent(rs.getInt(parent.getName()));
+            if (rs.wasNull()) {
+                n.setParent(null);
+            }
             n.setNodeId(rs.getInt(nodeId.getName()));
+            if (rs.wasNull()) {
+                n.setNodeId(null);
+            }
             n.setType(rs.getString(eavType.getName()));
             
             nodes.put(n.getNodeId(), n);
@@ -325,9 +355,7 @@ public class SQLStorage {
             }
         }
         
-        if (candidates.size() == 1) {
-            return candidates.get(0);
-        } else if (candidates.size() == 0) {
+        if (candidates.size() == 0) {
             return null;
         }
         
@@ -347,6 +375,9 @@ public class SQLStorage {
                     break;
                 }
                 pointer = nodes.get(pointer.getParent());
+                if (pointer == null) {
+                    throw EAVStorageExceptionMessage.NoSuchNodeException.create(path.toString());
+                }
                 pathPointer = path.parent();
             }
             if (!isBad) {

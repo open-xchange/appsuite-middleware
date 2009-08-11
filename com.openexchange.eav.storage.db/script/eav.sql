@@ -21,7 +21,7 @@ CREATE TABLE eav_paths1 (
     nodeId INT4 UNSIGNED NOT NULL,
     name VARCHAR(128),
     parent INT4 UNSIGNED,
-    eavType VARCHAR(64) NOT NULL,
+    eavType VARCHAR(64),
     PRIMARY KEY (cid, nodeId),
     INDEX(cid, module, objectId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
