@@ -34,6 +34,7 @@
     <property name="staxapijar" value="org.dynamicjava.stax-api-1.0.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
+    <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
     <property name="commonjar" value="common.jar"/>
 
@@ -53,6 +54,7 @@
         <pathelement location="${bundlesdir}/${xercesBundle}/lib/${xercesjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${staxapijar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${subscribejar}"/>
         <fileset refid="3rdpartyjars"/>
