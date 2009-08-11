@@ -246,7 +246,7 @@ public abstract class SQLTestCase extends TestCase {
     }
     
     protected void insert(String tableName, Object...attrs) throws TransactionException, SQLException {
-        StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" ");
+        StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
         StringBuilder questionMarks = new StringBuilder();
         
         String key = null;
@@ -265,8 +265,22 @@ public abstract class SQLTestCase extends TestCase {
         
         builder.setLength(builder.length()-2);
         questionMarks.setLength(questionMarks.length()-2);
-        builder.append(" (").append(questionMarks).append(")");
+        builder.append(") VALUES (").append(questionMarks).append(")");
         
         exec(builder.toString(), values);
+    }
+    
+    protected void assertEntry(String tableName, Object...attrs) throws TransactionException, SQLException {
+        StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
+        String key = null;
+        for(Object object : attrs) {
+            if(key == null) {
+                key = (String) object;
+            } else {
+                builder.append(key).append(" = ").append(object);
+                key = null;
+            }
+        }
+        assertResult(builder.toString());
     }
 }
