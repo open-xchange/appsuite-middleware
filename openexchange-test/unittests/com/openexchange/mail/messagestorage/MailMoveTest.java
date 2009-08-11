@@ -91,7 +91,7 @@ public final class MailMoveTest extends MessageStorageTest {
     public void testMailMoveNotExistingMails() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
-            final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
+            final String fullname = createTemporaryFolder(getSession(), mailAccess);
 
             try {
                 /*
@@ -119,7 +119,7 @@ public final class MailMoveTest extends MessageStorageTest {
     public void testMailMoveNotExistingMailsMixed() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
-            final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
+            final String fullname = createTemporaryFolder(getSession(), mailAccess);
             
             try {
                 /*
@@ -164,7 +164,7 @@ public final class MailMoveTest extends MessageStorageTest {
     public void testMailMoveFromNotExistingFolder() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
-            final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
+            final String fullname = createTemporaryFolder(getSession(), mailAccess);
 
             try {
                 /*
@@ -186,7 +186,7 @@ public final class MailMoveTest extends MessageStorageTest {
     public void testMailMoveAllOk() throws MailException, MessagingException, IOException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
-            final String fullname = createTemporaryFolderAndGetFullname(getSession(), mailAccess, "TemporaryFolder");
+            final String fullname = createTemporaryFolder(getSession(), mailAccess);
 
             try {
                 final String[] copied = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, uids, false);
