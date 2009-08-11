@@ -49,86 +49,45 @@
 
 package com.openexchange.eav.storage.db.balancing;
 
-import java.util.List;
-import com.openexchange.eav.storage.db.exception.EAVStorageException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.eav.storage.db.sql.Paths;
+import com.openexchange.groupware.tx.DBProvider;
 
 
 /**
- * {@link BalancedTableManager}
+ * {@link PathTableManager}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class BalancedTableManager {
+public class PathTableManager extends BalancedTableManager {
 
-    private TableManagerStrategy strategy;
-    private int capacity = 1000000;
+    public static final String CREATE_TABLE = "CREATE TABLE %%tablename%% ("+
+    "cid INT4 UNSIGNED NOT NULL,"+
+    "module INT1 UNSIGNED NOT NULL,"+
+    "objectId INT4 UNSIGNED NOT NULL,"+
+    "nodeId INT4 UNSIGNED NOT NULL,"+
+    "name VARCHAR(128),"+
+    "parent INT4 UNSIGNED NOT NULL,"+
+    "eavType VARCHAR(64) NOT NULL,"+
+    "PRIMARY KEY (cid, module, objectId),"+
+    "FOREIGN KEY (parent) REFERENCES eav_paths1(nodeId)"+
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    
+    public static final String TABLE_PREFIX = Paths.pathsPrefix;
 
-    /**
-     * Initializes a new {@link BalancedTableManager}.
-     * @param sim
-     */
-    public BalancedTableManager(TableManagerStrategy strategy) {
+    public static final String COLUMN_NAME = "pathTable";
+
+    
+    public PathTableManager(DBProvider provider) {
         super();
-        this.strategy = strategy;
-    }
-    
-    public BalancedTableManager() {
-        // Must set strategy manually
-    }
-
-    public String getTable(Context ctx, int module, int oid) throws EAVStorageException {
-        String predefinedTable = strategy.getPredefinedTable(ctx, module, oid);
-        if(predefinedTable != null) {
-            return predefinedTable;
-        }
-        return strategy.register(ctx, module, oid, getLeastUsedTable(ctx));
-    }
-    
-    public String getPredefinedTable(Context ctx, int module, int oid) throws EAVStorageException {
-        return strategy.getPredefinedTable(ctx, module, oid);
-    }
-    
-    private String getLeastUsedTable(Context ctx) throws EAVStorageException {
-        List<TableMetadata> tables = strategy.getTableMetadataForAllTables(ctx);
-        if(tables.size() == 0) {
-            return strategy.createNewTable(ctx);
-        }
+        PathIndexStrategy strategy = new PathIndexStrategy("eav_pathIndex", provider);
+        strategy.setColumnName(COLUMN_NAME);
+        strategy.setCreateTable(CREATE_TABLE);
+        strategy.setTablePrefix(TABLE_PREFIX);
         
-        TableMetadata leastUsed = null;
-        
-        for (TableMetadata tableMetadata : tables) {
-            if(leastUsed == null || leastUsed.getObjectCount() > tableMetadata.getObjectCount()) {
-                leastUsed = tableMetadata;
-            }
-        }
-        int threshold = calculateThreshold(capacity, tables.size());
-        if(leastUsed.getObjectCount() >= threshold) {
-            return strategy.createNewTable(ctx);
-        }
-        return leastUsed.getName();
-    }
-
-    public static int calculateThreshold(int capacity, int tableCount) {
-        int threshold = 0;
-        for(int i = 0; i < tableCount; i++) {
-            int toAdd = capacity;
-            for(int j = 0; j <= i; j++) {
-                toAdd = toAdd / 2;
-            }
-            threshold += toAdd;
-        }
-        return threshold;
-    }
-
-    public void setCapacity(int i) {
-        capacity = i;
+        setStrategy(strategy);
     }
     
     
-    public void setStrategy(TableManagerStrategy strategy) {
-        this.strategy = strategy;
-    }
-
+    
 }
