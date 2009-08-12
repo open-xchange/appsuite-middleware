@@ -49,59 +49,25 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.util.Collection;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import junit.framework.TestCase;
-
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link XingSubscribeServiceTest}
+ * {@link DisabledUnitTests}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class XingSubscribeServiceTest extends TestCase {
+public final class DisabledUnitTests {
 
-    private XingSubscribeService subscriptionService;
-    private String password = "secret";
-    private String login = "roxyexchanger@ox.io";
-    
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        subscriptionService = new XingSubscribeService();
-        
+    public DisabledUnitTests() {
+        super();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        // TODO Auto-generated method stub
-        super.tearDown();
-    }
-    
-    public void testModifyOutgoingShouldSetDisplaynameToLogin() throws SubscriptionException{
-        Subscription subscription = new Subscription();
-        subscription.getConfiguration().put("login","expected");
-        subscriptionService.modifyOutgoing(subscription);
-        assertEquals("Display name should be login name", "expected", subscription.getDisplayName());
-    }
-
-    public void testBasics() throws SubscriptionException{
-        Subscription subscription = new Subscription();
-        subscription.getConfiguration().put("login", login);
-        subscription.getConfiguration().put("password", password);
-        
-        Collection<Contact> contacts = subscriptionService.getContent(subscription);
-        assertTrue("Should know at least two people, but is " + contacts.size(), contacts.size() > 1);
-        boolean foundMartin = false, foundCisco = false;
-        for(Contact contact: contacts){
-            if(contact.containsSurName() && "Francisco Laguna de la Vera".equals( contact.getSurName() ) )
-                foundCisco = true;
-            if(contact.containsSurName() && "Herfurth".equals( contact.getSurName() ) )
-                foundMartin = true;
-        }
-        assertTrue("Should find Martin", foundMartin);
-        assertTrue("Should find Cisco", foundCisco);
+    public static final Test suite() {
+        final TestSuite tests = new TestSuite();
+        //tests.addTestSuite(ContactSanitationTest.class);
+        //tests.addTestSuite(XingSubscribeServiceTest.class);
+        //tests.addTestSuite(XingWorkflowTest.class);
+        return tests;
     }
 }
