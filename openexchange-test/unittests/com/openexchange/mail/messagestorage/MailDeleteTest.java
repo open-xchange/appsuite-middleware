@@ -82,17 +82,36 @@ public final class MailDeleteTest extends MessageStorageTest {
         MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY, MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC,
         MailField.BCC, MailField.FOLDER_ID };
 
-    public void testMailDeleteNonExistingMail() throws MailException {
+    public void testMailDeleteNonExistingMails() throws MailException {
         /*
          * Delete non existing mail
          */
         try {
-            mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(System.currentTimeMillis()) }, false);
+            final long currentTimeMillis = System.currentTimeMillis();
+            mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, true);
         } catch (final Exception e) {
             fail("No Exception should be thrown here. Exception was " + e.getMessage());
         }
     }
 
+    public void testMailDeleteNonExistingMailsMixed() throws MailException {
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
+        /*
+         * Delete non existing mail
+         */
+        try {
+            final long currentTimeMillis = System.currentTimeMillis();
+            mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(currentTimeMillis), uids[0] }, true);
+            
+            final MailMessage message = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
+            assertTrue("The message which should be deleted in the mixed delete test, isn't deleted.", null == message);
+        } catch (final Exception e) {
+            fail("No Exception should be thrown here. Exception was " + e.getMessage());
+        } finally {
+            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+        }
+    }
+    
     public void testMailDeleteNonExistingFolder() throws MailException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         /*
@@ -122,12 +141,6 @@ public final class MailDeleteTest extends MessageStorageTest {
             }
 
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
-
-            try {
-                mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(System.currentTimeMillis()) }, false);
-            } catch (final Exception e) {
-                fail(e.getMessage());
-            }
 
             trash = mailAccess.getFolderStorage().getFolder(trashFullname);
             assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount + uids.length == trash.getMessageCount());
