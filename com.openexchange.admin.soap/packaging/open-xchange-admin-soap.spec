@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -86,6 +86,8 @@ ant -Ddestdir=%{buildroot} \
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
 %doc docs
 %changelog
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Tue Jun 02 2009 - dennis.sieben@open-xchange.com
  - Bugfix #13796: soap interface throws error "reconnect to rmi service" on first call .
      Implemented a second call after the reconnect
