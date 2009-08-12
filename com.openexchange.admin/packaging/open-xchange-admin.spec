@@ -5,7 +5,7 @@
 Name:           open-xchange-admin
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-server
+BuildRequires:  ant open-xchange-server >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -48,7 +48,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Admin Daemon
 Requires:	open-xchange-admin-lib >= @OXVERSION@
-Requires:	open-xchange open-xchange-publish-basic open-xchange-subscribe
+Requires:	open-xchange >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-subscribe >= @OXVERSION@
 %if 0%{?suse_version}
 Requires:  mysql-client >= 5.0.0
 %endif
@@ -72,7 +72,7 @@ Authors:
 %package -n	open-xchange-admin-lib
 Group:          Applications/Productivity
 Summary:	The Open Xchange Admin Daemon Bundle client library
-Requires:       open-xchange-server
+Requires:       open-xchange-server >= @OXVERSION@
 
 
 %description -n open-xchange-admin-lib
