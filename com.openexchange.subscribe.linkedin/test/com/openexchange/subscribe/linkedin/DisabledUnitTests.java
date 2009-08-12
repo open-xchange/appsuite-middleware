@@ -65,7 +65,7 @@ public final class DisabledUnitTests {
 
     public static final Test suite() {
         final TestSuite tests = new TestSuite();
-        tests.addTestSuite(LinkedInWorkflowTest.class);
+       // tests.addTestSuite(LinkedInWorkflowTest.class);
         return tests;
     }
 }
