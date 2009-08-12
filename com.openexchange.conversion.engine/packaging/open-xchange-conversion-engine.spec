@@ -4,7 +4,7 @@
 Name:           open-xchange-conversion-engine
 #!BuildIgnore: post-build-checks
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-conversion
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Conversion Engine Bundle
-Requires:       open-xchange-global open-xchange-conversion
+Requires:       open-xchange-global >= @OXVERSION@ open-xchange-conversion >= @OXVERSION@
 #
 
 %description

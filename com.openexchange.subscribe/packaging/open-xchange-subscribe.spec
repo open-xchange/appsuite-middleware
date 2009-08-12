@@ -4,8 +4,8 @@
 Name:           open-xchange-subscribe
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-genconf
-BuildRequires:  open-xchange-genconf-mysql open-xchange-server open-xchange-sql open-xchange-crypto 
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@
+BuildRequires:  open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-crypto  >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Basic subscribe implementation
-Requires:       open-xchange-common open-xchange-global open-xchange-genconf open-xchange-genconf-mysql open-xchange-server open-xchange-sql open-xchange-crypto
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-genconf-mysql >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@
 #
 
 %description

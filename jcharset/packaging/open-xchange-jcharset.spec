@@ -4,7 +4,7 @@
 Name:           open-xchange-jcharset
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common
+BuildRequires:  ant open-xchange-common >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10

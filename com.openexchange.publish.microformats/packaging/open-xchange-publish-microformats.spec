@@ -4,8 +4,8 @@
 Name:           open-xchange-publish-microformats
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-server
-BuildRequires:  open-xchange-genconf open-xchange-publish open-xchange-publish-basic open-xchange-templating
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@
+BuildRequires:  open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Publishes a set of objects in OXMF externally
-Requires:       open-xchange-common open-xchange-global open-xchange-server open-xchange-genconf open-xchange-publish open-xchange-publish-basic open-xchange-templating
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-publish >= @OXVERSION@ open-xchange-publish-basic >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
 #
 
 %description

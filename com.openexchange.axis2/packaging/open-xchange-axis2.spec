@@ -4,7 +4,7 @@
 Name:           open-xchange-axis2
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-server perl
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-server >= @OXVERSION@ perl
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Axis2 Bundle
-Requires:       open-xchange-server
+Requires:       open-xchange-server >= @OXVERSION@
 #
 
 %description

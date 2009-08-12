@@ -4,7 +4,7 @@
 Name:           open-xchange-dataretention-csv
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-global open-xchange-common open-xchange-configread open-xchange-dataretention
+BuildRequires:  ant open-xchange-global >= @OXVERSION@ open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Data Retention CSV Bundle
-Requires:       open-xchange-global open-xchange-common open-xchange-configread open-xchange-dataretention
+Requires:       open-xchange-global >= @OXVERSION@ open-xchange-common >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-dataretention >= @OXVERSION@
 #
 
 %description

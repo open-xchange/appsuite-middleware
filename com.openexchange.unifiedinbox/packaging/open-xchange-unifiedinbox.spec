@@ -5,7 +5,7 @@ Name:           open-xchange-unifiedinbox
 Provides:	open-xchange-mailstore
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-server
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -47,7 +47,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Unified INBOX Bundle
-Requires:       open-xchange-common open-xchange-global open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-server
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-monitoring >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 #
 
 %description
