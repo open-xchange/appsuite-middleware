@@ -1,0 +1,185 @@
+<#macro render key value title>
+	<#if value != "">
+		<tr>
+			<td class="key">${title}:</td> 
+			<td class="${key} value">${value?html}</td>
+		</tr>
+	</#if>
+</#macro>
+
+<#macro render_scalar key value title>
+		<tr>
+			<td class="key">${title}:</td> 
+			<td class="${key} value">${value?html}</td>
+		</tr>
+</#macro>
+
+<#macro fileMicroformatted infoitem>
+		<a class="ox_file" href="${request.scheme!"http"}://${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
+</#macro>
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
+<head>
+	<title>OX PubSub</title>
+	<style type="text/css">
+	<!--
+	html, body {
+		margin: 0;
+		padding: 0;
+		border: none;
+		height: 100%;
+		width: 100%;
+		background: #e1e4eb;
+	}
+
+	html * {
+		font-family: Helvetica, Arial, sans-serif;
+		color: #000;
+	}
+	#disclaimer {
+		clear: both;
+		padding: 10em 35% 0 35%;
+		text-align: justify;
+	}
+	#disclaimer p, #disclaimer h2{
+		font-size: 60%;
+	}
+	#disclaimer h2 {
+		text-align: center;
+	}
+	#nav {
+		float:left;
+		width: 20%;
+	}
+	#infostore {
+		float: left;
+		width: 70%;
+	}
+	td.key {
+		width: 25%;
+		text-align: right;
+		padding-right: 1em;
+	}
+	table.an_infoitem, td.value {
+		width: 100%;
+	}
+	td.value, td.value span {
+		color: #446;
+		font-weight: bold;
+		text-align: left;
+	}
+	.ox_infoitem{
+		clear: both;
+	}
+	#nav, .ox_infoitem {
+		margin: .5em;
+		border: 1px solid #999;
+		background: #fff;
+		padding: .5em;
+	}
+	#nav a, #nav a:visited, #nav a:hover, #nav a:link {
+		font-weight: bold;
+	}
+	a, a:visited, a:hover, a:link {
+		text-decoration: none;
+		color: #446;
+	}
+	#nav li, #nav ul {
+		list-style-type: none; 
+		margin: 0;
+		padding: 0;
+		left-indent: 0;
+	}
+	.back {
+		text-align: center;
+		font-size: 75%;
+		text-decoration none;
+		color: #446;
+	}
+	.ox_image{
+		float:right;
+	}
+	.message {
+		margin-top: 2em;
+		text-align: center;
+	}
+
+	-->
+	</style>
+</head>
+
+<body>
+	<#if (infostore?size == 0)>
+		<div class="message">Folder is empty</div>
+	</#if>
+	
+	<#if (infostore?size > 2)>
+	<div id="nav">
+		<ul>
+			<#list infostore as infoitem>
+			<li>
+				<a href="#infoitem_${infostore?seq_index_of(infoitem)}">
+					${infoitem.title}
+				</a>
+			</li>
+			</#list>
+		</ul>
+	</div>
+	</#if>
+
+	<div id="infostore">
+		<#list infostore as infoitem>
+		<div class="ox_infoitem" id="infoitem_${infostore?seq_index_of(infoitem)}">
+			<table class="an_infoitem">
+				<@render key="ox_title" title="Title" value=infoitem.title!"" />
+				<@render key="ox_url" title="URL" value=infoitem.URL!"" />
+				<@render_scalar key="ox_version" title="Version" value=infoitem.version!"" />
+				<@render key="ox_creationDate" title="Creation Date" value=timeFormat.format(infoitem.creationDate) />
+				<@render key="ox_lastModified" title="Last Modified" value=timeFormat.format(infoitem.lastModified) />
+				<@render key="ox_tags" title="Tags" value=infoitem.categories!"" />
+				<@render key="ox_comment" title="Comment" value=infoitem.description!"" />
+				<#if infoitem.fileName??>
+					<@render key="ox_fileName" title="File Name" value=infoitem.fileName!"" />
+					<@render_scalar key="ox_fileSize" title="File Size" value=infoitem.fileSize!"" />
+					<@render key="ox_MIMEType" title="MIME Type" value=infoitem.fileMIMEType!"" />
+					<tr>
+						<td></td>
+						<td>
+						<@fileMicroformatted infoitem/>
+						</td>
+					</tr>
+				</#if>				
+			</table>
+	 	<div class="back"><a href="#nav">Back to the top</a></div>
+		</div>
+		</#list>
+	</div>
+	
+	<#if (infostore?size > 0)>
+	<div id="disclaimer">
+		<h2>Privacy</h2>
+		<p>The data and any references contained in this webpage are shared with you under 
+			the assumption that the owner of the data was entitled to make them available 
+			to you.  Neither Open-Xchange, nor any of its subsidiaries or affiliates shall 
+			be liable for its publication or re-publication.</p> 
+
+		<p>Any unauthorized use or dissemination of this data is prohibited. If you intend 
+			to store, process, or pass on this data, please make sure that you have the 
+			right to do so.</p> 
+
+		<p>If you are one of the people listed or responsible for a resource listed on 
+			this page and you don’t agree with the publication, please send an email 
+			containing the URL (the link) to this webpage to the publisher of the 
+			data:</p> 
+
+		<p>Data published by <a href="mailto:${publisher.mail}">${publisher.givenName} 
+			${publisher.surname}</a> on ${publishDate?string("yyyy-MM-dd")}</p>
+	</div>
+	</#if>
+</body>
+</html>
