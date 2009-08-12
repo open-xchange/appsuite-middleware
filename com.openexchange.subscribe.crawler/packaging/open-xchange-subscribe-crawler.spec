@@ -49,7 +49,10 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Subscriptions for OXMF feeds
 Requires:       open-xchange-common open-xchange-global open-xchange-subscribe open-xchange-server open-xchange-genconf open-xchange-xml
-Conflicts:   open-xchange-subscribe-linkedin, open-xchange-subscribe-xing
+Conflicts:   open-xchange-subscribe-linkedin < @OXVERSION@
+Conflicts:   open-xchange-subscribe-xing < @OXVERSION@
+Provides:    open-xchange-subscribe-linkedin = @OXVERSION@
+Provides:    open-xchange-subscribe-xing = @OXVERSION@
 %if 0%{?sles_version} >= 10
 Requires:   open-xchange-xerces-ibm
 Conflicts:  open-xchange-xerces-sun
