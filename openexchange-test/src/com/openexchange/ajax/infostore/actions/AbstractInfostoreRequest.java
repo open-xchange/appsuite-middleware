@@ -82,6 +82,10 @@ public abstract class AbstractInfostoreRequest<T extends AbstractInfostoreRespon
     }
 
     public String writeJSON(DocumentMetadata data) throws JSONException {
+        return convertToJSON(data);
+    }
+    
+    public static String convertToJSON(DocumentMetadata data) throws JSONException{
         StringWriter results = new StringWriter();
         InfostoreWriter writer = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
         writer.write(data, TimeZone.getDefault());
