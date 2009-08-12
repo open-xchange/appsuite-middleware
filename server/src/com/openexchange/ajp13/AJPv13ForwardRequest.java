@@ -389,7 +389,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private void parseRequestHeaders(final HttpServletRequestWrapper servletRequest, final int numHeaders) throws AJPv13Exception {
         boolean contentTypeSet = false;
-        NextHeader: for (int i = 1; i <= numHeaders; i++) {
+        NextHeader: for (int i = numHeaders; i > 0; i--) {
             final String headerName;
             final boolean isCookie;
             {
@@ -594,8 +594,20 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     private void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
         int attrNum = REQUEST_TERMINATOR;
         while ((attrNum = nextByte()) != REQUEST_TERMINATOR) {
-            if (attrNum == 0x0b) {
+            if (0x0b == attrNum) {
                 servletRequest.setAttribute(ATTR_SSL_KEY_SIZE, Integer.valueOf(parseInt()));
+            } else if (0x0a == attrNum) {
+                /*-
+                 * "req_attribute": This optional attribute has a special syntax.
+                 * 
+                 * (sc_a_req_attribute string)(string) => 0a <attribute-name> <attribute-value>
+                 * 
+                 * Example:
+                 * 0a 00 0f 41 4a 50 5f 52 45 4d 4f 54 45 5f 50 4f 52 54 00 00 05 33 33 38 36 36 00
+                 * 
+                 * <req_attribute> AJP_REMOTE_PORT 33866
+                 */
+                servletRequest.setAttribute(parseString(), parseString());
             } else {
                 final String attributeName = attributeMapping.get(Integer.valueOf(attrNum));
                 if (attributeName == null) {

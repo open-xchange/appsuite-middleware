@@ -1,3 +1,7 @@
+* 2009-08-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #14292: Support of AJPv13 syntax for attribute "req_attribute"
+
 * 2009-08-11 - thorben.betten@open-xchange.com
 
  - Bugfix #14298: Update task for mail account migration runs per context while logging experienced errors.
