@@ -103,7 +103,23 @@ public class EAVMultipleCompare implements EAVTypeSwitcher {
     }
 
     public Object number(Object... args) {
-        return multisetWiseComparison(args[0], args[1]);
+        return multisetWiseComparison(coerceLong(args[0]), coerceLong(args[1]));
+    }
+
+    private Object coerceLong(Object object) {
+        Number[] orig = (Number[]) object;
+        if(orig.length == 0) {
+            return new Long[0];
+        }
+        
+        Long[] longs = new Long[orig.length];
+        int i = 0;
+        for(Number number : orig) {
+            longs[i] = Long.valueOf(orig[i].toString());
+            i++;
+        }
+        
+        return longs;
     }
 
     public Object object(Object... args) {

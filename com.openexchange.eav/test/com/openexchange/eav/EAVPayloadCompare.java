@@ -85,7 +85,44 @@ public class EAVPayloadCompare implements EAVTypeSwitcher {
     }
 
     public Object number(Object... args) {
-        return equals(args[0], args[1]);
+        if(equals(args[0], args[1])) {
+            return true;
+        }
+        long a = -1;
+        long b = -1;
+        
+        boolean aCast = false;
+        boolean bCast = false;
+        if(Long.class.isInstance(args[0])) {
+            a = (Long)args[0];
+            aCast = true;
+        }
+        
+        if(Long.class.isInstance(args[1])) {
+            b = (Long) args[1];
+            bCast = true;
+        }
+        
+        if(Integer.class.isInstance(args[0])) {
+            a = (Integer) args[0];
+            aCast = true;
+        }
+        
+        if(Integer.class.isInstance(args[1])) {
+            b = (Integer) args[1];
+            bCast = true;
+        }
+        
+        if(aCast != bCast) {
+            return false;
+        }
+        
+        if(aCast) {
+            return 0 == a-b;
+        }
+        
+        // TODO Floats
+        return false;
     }
 
     public Object object(Object... args) {
