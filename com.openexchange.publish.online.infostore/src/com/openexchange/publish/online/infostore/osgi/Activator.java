@@ -82,7 +82,7 @@ public class Activator extends DeferredActivator {
         ContextService contexts = getService(ContextService.class);
         if(contexts == null) {
             return;
-        }
+        }   
         
         UserService users = getService(UserService.class);
         if(users == null) {

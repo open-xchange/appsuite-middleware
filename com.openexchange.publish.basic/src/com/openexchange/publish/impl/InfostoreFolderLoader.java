@@ -51,57 +51,80 @@ package com.openexchange.publish.impl;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
- * {@link ContactFolderLoader}
+ * {@link InfostoreFolderLoader}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ContactFolderLoader implements PublicationDataLoaderService {
+public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
-    private final ContactInterfaceFactory factory;
-
-    /**
-     * Initializes a new {@link ContactFolderLoader}.
-     * @param contacts
-     */
-    public ContactFolderLoader(final ContactInterfaceFactory contacts) {
+    private InfostoreFacade infostore = null;
+    private UserService users;
+    private UserConfigurationService userConfigs;
+    
+    public InfostoreFolderLoader(InfostoreFacade infostore, UserService users, UserConfigurationService userConfigs) {
         super();
-        this.factory = contacts;
+        this.infostore = infostore;
+        this.users = users;
+        this.userConfigs = userConfigs;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.publish.PublicationDataLoaderService#load(com.openexchange.publish.Publication)
-     */
-    public Collection<? extends Object> load(final Publication publication) throws PublicationException {
-        final LinkedList<Contact> list = new LinkedList<Contact>();
+
+
+    public Collection<? extends Object> load(Publication publication) throws PublicationException {
+        final LinkedList<Object> list = new LinkedList<Object>();
         try {
             final int folderId = Integer.parseInt(publication.getEntityId());
-            final ContactInterface contacts = factory.create(folderId, new PublicationSession(publication));
-            final int numberOfContacts = contacts.getNumberOfContacts(folderId);
-            final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.GIVEN_NAME, "ASC", Contact.ALL_COLUMNS);
-            while(contactsInFolder.hasNext()) {
-                Contact next = contactsInFolder.next();
-                if(!next.getMarkAsDistribtuionlist()) {
-                    list.add(next);
-                }
+            final SearchIterator documentsInFolder = infostore.getDocuments(folderId, Metadata.HTTPAPI_VALUES_ARRAY, Metadata.TITLE_LITERAL, InfostoreFacade.ASC, getContext(publication), getUser(publication), getUserConfig(publication)).results();
+            while(documentsInFolder.hasNext()) {
+                Object next = documentsInFolder.next();
+                list.add(next);
             }
+            documentsInFolder.close();
         } catch (final AbstractOXException e) {
             throw new PublicationException(e);
         }
-        // FIXME add sorting
         return list;
+    }
+
+
+
+    private UserConfiguration getUserConfig(Publication publication) throws PublicationException, UserConfigurationException {
+        return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
+    }
+
+
+
+    private User getUser(Publication publication) throws PublicationException, UserException {
+        return users.getUser(publication.getUserId(), publication.getContext());
+    }
+
+
+
+    private Context getContext(Publication publication) {
+        return publication.getContext();
     }
 
 }

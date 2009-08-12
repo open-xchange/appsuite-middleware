@@ -60,6 +60,7 @@ import com.openexchange.publish.impl.CachingLoader;
 import com.openexchange.publish.impl.CompositeLoaderService;
 import com.openexchange.publish.impl.ContactFolderLoader;
 import com.openexchange.publish.impl.InfostoreDocumentLoader;
+import com.openexchange.publish.impl.InfostoreFolderLoader;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -85,7 +86,8 @@ public class LoaderActivator implements BundleActivator {
         UserService users = whiteboard.getService(UserService.class);
         UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
         compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
-    
+        compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
+        
         ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactInterfaceFactory.class));
         compositeLoader.registerLoader("contacts", contactLoader);
         
