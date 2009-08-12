@@ -1,3 +1,9 @@
+open-xchange-genconf-mysql (6.11.0.0-1) unstable; urgency=low
+
+  * first build for 6.11 Rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Aug 2009 16:04:23 +0200
+
 open-xchange-genconf-mysql (6.11.0.0-0) unstable; urgency=low
 
   * prepare for unstable

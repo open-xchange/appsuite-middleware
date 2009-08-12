@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -96,5 +96,7 @@ mv doc javadoc
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %changelog
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Wed Jun 24 2009 - marcus.klein@open-xchange.com
  - Bugfix #13886: Fixed NPE when starting bundle.

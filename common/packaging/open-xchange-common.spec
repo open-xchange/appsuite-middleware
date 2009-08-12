@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -83,6 +83,14 @@ ant -Ddestdir=%{buildroot} install
 %doc ChangeLog
 
 %changelog
+* Thu Jul 30 2009 - choeger@open-xchange.com
+ - Bugfix ID#14207 [L3] wrong exit code from init script if you stop an
+   already stopped service
+* Wed Jul 29 2009 - choeger@open-xchange.com
+ - Bugfix ID#14241 missing common shell functions file on update from RC3 to
+   RC4
+* Thu Jul 09 2009 - schweigi@open-xchange.com
+ - Added new distribution UCS in OS detection function ox_system_type()
 * Mon Jun 15 2009 - choeger@open-xchange.com
  - Bugfix ID#13385: config update script destroys parameters on update when no
    newline is at the end of a configuration file

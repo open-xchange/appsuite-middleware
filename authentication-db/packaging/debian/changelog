@@ -1,3 +1,9 @@
+open-xchange-authentication-database (6.11.0.0-1) unstable; urgency=low
+
+  * first build for 6.11 Rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Aug 2009 16:03:27 +0200
+
 open-xchange-authentication-database (6.11.0.0-0) unstable; urgency=low
 
   * prepare for unstable

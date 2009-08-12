@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -365,8 +365,75 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Aug 12 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14292: Support of AJPv13 syntax for attribute "req_attribute"
+* Tue Aug 11 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14298: Update task for mail account migration runs per context while logging experienced errors.
+   Thus admin is able to see which context's users weren't migrated properly.
+* Tue Aug 04 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14272: Discarding non-existing user/group permission previously detected as being corrupt
+* Mon Aug 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14246: Allowing any letter character in an URL
+ - Bugfix #14271: Fixed StringIndexOutOfBoundsException when un-quoting an email address
+ - Bugfix #14269: Setting proper "Date" header in user's time zone when sending an email
+* Fri Jul 31 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
+   uid of table login2user.
+* Tue Jul 28 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14225: Allowing static setup of update tasks
+ - Bugfix #14232: Checking for Drafts folder prior to deleting old draft version
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+* Fri Jul 24 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14050: Maintaining quoted personal name of an email address when
+   generating address' mail-safe version to be compatible with other mail client
+ - Bugfix #14217: Maintaining quoted personal name of an email address when
+   generating address' mail-safe version to properly quote umlauts
+* Thu Jul 23 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14211: Using static delimiter character '/' to separate mail account part form fullname part within a mail folder identifier
+* Wed Jul 22 2009 - martin.herfurth@open-xchange.com
+ - New User Configuration: defaultStatusPrivate/defaultStatusPublic for setting a default
+                           confirmation status for participants in private/public folders.
+* Tue Jul 21 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14196: Fixed error message arguments
+* Mon Jul 20 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14181: Improved regex to detect MS conditional comments
+* Mon Jul 20 2009 - martin.herfurth@open-xchange.com
+ - New Parameter: com.openexchange.calendar.undefinedstatusconflict, conflict behaviour for
+                  appointments with status: waiting/none
+* Sun Jul 19 2009 - choeger@open-xchange.com
+ - Bugfix #14193: Update from SP5 to 6.10 RC5 fails with error on Debian
+* Fri Jul 17 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14115: Added renaming of oxreport.in to oxreport and setting its executable permission. Added missing library to classpath.
+* Thu Jul 16 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14154: Corrected replacements in PO files for forwarded mails.
+* Tue Jul 14 2009 - martin.herfurth@open-xchange.com
+ - Update Task #58: Repair bad null value in in recurrence pattern.
+* Mon Jul 13 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #12509: Participant creates change exception of an appointment
+                  which is not located in the creators default folder.
+* Mon Jul 13 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14152: Added support for Dovecot ACL identifiers
+* Fri Jul 10 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14143: Force connection close after a subscription has been loaded.
+ - Bugfix #14075: Don't recreate the collected addresses folder if the feature has been disabled explicitely.
+ - Bugfix #14135: Don't share string builder instance among threads.
+* Thu Jul 09 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #11210: Conflicts for appointment series.
+ - New Config parameter for limiting the search range for series conflicts.
+* Thu Jul 09 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14134: WebDAV Infostore disregards uploadfilesizelimitperfile.
+ - Bugfix #14107: Clients may specify the ID of the task to confirm in either the request body or the parameters. If both are sent, body wins.
+ - Bugfix #14134: Infostore and Object Attachments disregard user specific file upload quotas.
+* Tue Jul 07 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14082: Make webdav.version conform to new version numbering scheme.
+* Mon Jul 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14077: Tasks in public folders now get context administrator as creating or changing user if original user is removed.
+ - Bugfix #14074: Moving series is now respecting different time zone offsets due to daylight saving times.
 * Fri Jul 03 2009 - marcus.klein@open-xchange.com
  - Bugfix #14072: Corrected version number in server start log entries.
+* Fri Jul 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #12623: action=updates requests return changes (new, modified, and deleted) greater than passed last-modified time stamp
 * Thu Jul 02 2009 - thorben.betten@open-xchange.com
  - Bugfix #14061: Properly initialization of AbstractMailAccount if mail properties have not been initialized, yet
 * Wed Jul 01 2009 - thorben.betten@open-xchange.com

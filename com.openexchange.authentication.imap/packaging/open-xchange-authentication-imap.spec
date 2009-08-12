@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -81,6 +81,8 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %config(noreplace) /opt/open-xchange/etc/groupware/imapauth.properties
 
 %changelog
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Wed Dec 24 2008 - manuel.kraft@open-xchange.com
  - Features added:
             Imapservers defined in OX User Accounts can be used instead of single IMAP Server defined in config -> USE_MULTIPLE=false
