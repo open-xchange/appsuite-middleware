@@ -81,6 +81,7 @@ import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -215,6 +216,8 @@ public class ContactTestManager {
         GetResponse response = null;
         try {
             response = (GetResponse) getClient().execute(request);
+            if(response.hasError() && getFailOnError()) 
+                throw response.getException();
             returnedContact = response.getContact();
         } catch (Exception e) {
             doExceptionHandling(e, "GetRequest for folder " + folderId + " and object " + objectId);
@@ -335,9 +338,12 @@ public class ContactTestManager {
         } catch (JSONException e) {
             if (getFailOnError())
                 fail("JSONException occured during " + action + ": " + e.getMessage());
+        } catch (AbstractOXException e){
+            if (getFailOnError())
+                fail("AbstractOXException occured during " + action + ": " + e.getMessage());
         } catch (Exception e) {
             if (getFailOnError())
-                fail("Unexpected exception occuredduring " + action + ": " + e.getMessage());
+                fail("Unexpected exception occured during " + action + ": " + e.getMessage());
         }
 
     }
