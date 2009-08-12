@@ -1,8 +1,24 @@
-<#macro display key value title>
+<#macro render key value title>
 	<#if value != "">
-		<span class="${key}">${value?html}</span>
+		<tr>
+			<td class="key">${title}:</td> 
+			<td class="${key} value">${value?html}</td>
+		</tr>
 	</#if>
 </#macro>
+
+<#macro render_scalar key value title>
+		<tr>
+			<td class="key">${title}:</td> 
+			<td class="${key} value">${value?html}</td>
+		</tr>
+</#macro>
+
+<#macro fileMicroformatted infoitem>
+		<a class="ox_file" href="${request.scheme!"http"}://${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
+</#macro>
+
+
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -38,7 +54,7 @@
 		text-align: right;
 		padding-right: 1em;
 	}
-	table.a_contact, td.value {
+	table.an_infoitem, td.value {
 		width: 100%;
 	}
 	td.value, td.value span {
@@ -46,10 +62,10 @@
 		font-weight: bold;
 		text-align: left;
 	}
-	.ox_contact{
+	.ox_infoitem{
 		clear: both;
 	}
-	#nav, .ox_contact {
+	#nav, .ox_infoitem {
 		margin: .5em;
 		border: 1px solid #999;
 		background: #fff;
@@ -97,16 +113,23 @@
 			<table class="an_infoitem">
 				<@render key="ox_title" title="Title" value=infoitem.title!"" />
 				<@render key="ox_url" title="URL" value=infoitem.URL!"" />
-				<@render key="ox_version" title="Version" value=infoitem.version!"" />
+				<@render_scalar key="ox_version" title="Version" value=infoitem.version!"" />
+				<@render key="ox_creationDate" title="Creation Date" value=timeFormat.format(infoitem.creationDate) />
+				<@render key="ox_lastModified" title="Last Modified" value=timeFormat.format(infoitem.lastModified) />
 				<@render key="ox_tags" title="Tags" value=infoitem.categories!"" />
 				<@render key="ox_comment" title="Comment" value=infoitem.description!"" />
 				<#if infoitem.fileName??>
-					<@render key="ox_fileName" title="File Name" value="infoitem.fileName" />
-					<@render key="ox_fileSize" title="File Size" value="infoitem.fileSize" />
-					<@render key="ox_MIMEType" title="MIME Type" value="infoitem.fileMIMEType" />
+					<@render key="ox_fileName" title="File Name" value=infoitem.fileName!"" />
+					<@render_scalar key="ox_fileSize" title="File Size" value=infoitem.fileSize!"" />
+					<@render key="ox_MIMEType" title="MIME Type" value=infoitem.fileMIMEType!"" />
+					<tr>
+						<td></td>
+						<td>
+						<@fileMicroformatted infoitem/>
+						</td>
+					</tr>
 				</#if>				
 			</table>
-			<!-- TODO: Version Comment -->
 	 	<div class="back"><a href="#nav">Back to the top</a></div>
 		</div>
 		</#list>
