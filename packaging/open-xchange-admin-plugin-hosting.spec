@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,15 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+* Fri Jul 17 2009 - choeger@open-xchange.com
+ - Bugfix #14188: Update from SP5 to 6.10 RC5 fails with error
+* Wed Jul 15 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14128: Context deletion does not fail if some bundle extending the delete mechanism fails or if the remove method of the file
+   store fails.
+* Tue Jul 14 2009 - schweigi@open-xchange.com
+ - Extended oxsysreport for distribution UCS and added some further commands
 * Tue Jun 23 2009 - marcus.klein@open-xchange.com
  - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
 * Mon Jun 22 2009 - marcus.klein@open-xchange.com
