@@ -209,6 +209,17 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
     
+    public void testMailGetNotExistingFolder() throws MailException {
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
+        try {
+            assertNull("No mail should be returned on a invalid folder", mailAccess.getMessageStorage().getMessage("Ichbinnichda1337", String.valueOf(System.currentTimeMillis()), true));
+        } catch (final MailException e) {
+            assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
+        } finally {
+            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+        }
+    }
+    
     public void testMailGet() throws MailException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", testmessages);
         try {
@@ -276,7 +287,6 @@ public final class MailGetTest extends MessageStorageTest {
                     assertFalse("Content is null", fetchedMails[i].getContent() == null);
                 }
             }
-
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
         }
