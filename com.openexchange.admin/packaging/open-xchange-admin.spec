@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -240,6 +240,16 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jul 31 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
+   uid of table login2user.
+* Thu Jul 30 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #14257: allpluginsloaded doesn't honor fragment bundles
+     added handling for fragment bundles
+* Mon Jul 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+* Wed Jul 15 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14158: Setting attribute value to alias using the PreparedStatement instead of error prone quoting in SQL statement.
 * Tue Jun 30 2009 - marcus.klein@open-xchange.com
  - Bugfix #13477: If a user is deleted a connection without timeout is used because a lot of data must be moved taking a lot of time.
 * Fri Jun 26 2009 - marcus.klein@open-xchange.com
