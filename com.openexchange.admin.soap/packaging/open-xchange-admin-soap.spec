@@ -4,7 +4,7 @@
 Name:           open-xchange-admin-soap
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-admin-client open-xchange-admin-plugin-hosting-client open-xchange-common perl
+BuildRequires:  ant open-xchange-admin-client >= @OXVERSION@ open-xchange-admin-plugin-hosting-client >= @OXVERSION@ open-xchange-common >= @OXVERSION@ perl
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -48,7 +48,7 @@ Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin SOAP API
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:	open-xchange-admin-plugin-hosting-client >= @OXVERSION@
-Requires:	open-xchange-axis2
+Requires:	open-xchange-axis2 >= @OXVERSION@
 
 %description
 Open Xchange Admin SOAP API
