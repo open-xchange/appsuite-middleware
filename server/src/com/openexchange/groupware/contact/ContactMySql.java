@@ -55,8 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
@@ -93,7 +97,7 @@ public class ContactMySql implements ContactSql {
 
     private String select = "SELECT co.intfield01" + ",co.cid," + "co.timestampfield01," + "co.field03," + "co.field04," + "co.field06," + "co.field07," + "co.field09," + "co.field10," + "co.intfield03," + "co.field79 FROM prg_contacts AS co ";
 
-    private String where;
+    private String[] where;
 
     private String order = "";
 
@@ -168,12 +172,50 @@ public class ContactMySql implements ContactSql {
 
     public PreparedStatement getSqlStatement(final Connection con) throws SQLException {
         final StringBuilder sb = new StringBuilder(256);
-        sb.append(getSelect());
-        if (all_folders != null && all_folders.length() > 1) {
-            sb.append(all_folders);
+
+        String select = getSelect();
+        String orderBy = getOrder();
+        if (null != orderBy) {
+            int pos = select.indexOf(" FROM");
+            if (-1 == pos) {
+                pos = select.indexOf(" from");
+                if (-1 == pos) {
+                    throw new SQLException("SELECT statement does not contain \"FROM\".");
+                }
+            }
+            final String[] orderFields = parseFieldsFromOrderBy(orderBy);
+            if (0 < orderFields.length) {
+                sb.append(select.substring(0, pos));
+                for (final String orderField : orderFields) {
+                    if (-1 == select.indexOf(orderField)) {
+                        sb.append(',').append(orderField);
+                    }
+                }
+                sb.append(" FROM").append(select.substring(pos + 5));
+                select = sb.toString();
+                sb.setLength(0);
+                orderBy = prepareOrderBy(orderBy);
+            }
         }
-        sb.append(getWhere());
-        sb.append(getOrder());
+
+        final String[] whereClauses = getWhere();
+        {
+            sb.append(select);
+            if (all_folders != null && all_folders.length() > 1) {
+                sb.append(all_folders);
+            }
+            sb.append(whereClauses[0]);
+        }
+        for (int i = 1; i < whereClauses.length; i++) {
+            sb.append(" UNION ");
+            sb.append(select);
+            if (all_folders != null && all_folders.length() > 1) {
+                sb.append(all_folders);
+            }
+            sb.append(whereClauses[i]);
+        }
+        sb.append(orderBy);
+
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
         }
@@ -187,7 +229,33 @@ public class ContactMySql implements ContactSql {
         return ps;
     }
 
-    private String getWhere() {
+    private static final Pattern PAT_ORDER_BY = Pattern.compile(
+        "( *ORDER +BY +)(?:([a-zA-Z0-9_.]+)(?: *ASC *| *DESC *)?)(?:, *[a-zA-Z0-9_.]+(?: *ASC *| *DESC *)?)?",
+        Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PAT_FIELD = Pattern.compile("(?:([a-zA-Z0-9_.]+)(?: *ASC| *DESC)?)", Pattern.CASE_INSENSITIVE);
+
+    private static String[] parseFieldsFromOrderBy(final String orderBy) {
+        // ORDER BY oc.field01 DESC
+        Matcher m = PAT_ORDER_BY.matcher(orderBy);
+        if (m.matches()) {
+            m = PAT_FIELD.matcher(orderBy.substring(m.end(1)));
+            final List<String> l = new ArrayList<String>(2);
+            while (m.find()) {
+                l.add(m.group(1));
+            }
+            return l.toArray(new String[l.size()]);
+        }
+        return new String[0];
+    }
+
+    private static final Pattern PAT_PREP = Pattern.compile("[a-zA-Z0-9_]+\\.([a-zA-Z0-9_])");
+
+    private static final String prepareOrderBy(final String orderBy) {
+        return PAT_PREP.matcher(orderBy).replaceAll("$1");
+    }
+
+    private String[] getWhere() {
 
         if (null != where) {
             return where;
@@ -247,6 +315,9 @@ public class ContactMySql implements ContactSql {
         }
 
         if (cso != null) {
+            /*
+             * With search object
+             */
 
             if (cso.getEmailAutoComplete() || cso.isOrSearch()) {
                 search_habit = " OR ";
@@ -254,337 +325,477 @@ public class ContactMySql implements ContactSql {
 
             sb.append(" ( ");
 
-            /*********************** * search all fields * ***********************/
+            if (" OR ".equals(search_habit)) {
+                /*
+                 * Create a UNION statement
+                 */
+                final List<String> whereClauses = new ArrayList<String>(16);
 
-            if (cso.getPattern() != null && cso.getPattern().length() > 0) {
-                if (cso.isStartLetter()) {
-                    final String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
-                    final String p = cso.getPattern().trim();
+                final String preWhere = sb.toString();
+                final int preWhereLen = preWhere.length();
 
-                    if (".".equals(p) || "#".equals(p)) {
-                        sb.append(" (");
-                        sb.append(field);
-                        sb.append(" < '0%' OR ");
-                        sb.append(field);
-                        sb.append(" > 'z%') AND ");
-                        sb.append(field);
-                        sb.append(" NOT LIKE 'z%' AND ");
-                    } else if (p.matches("\\d")) {
-                        sb.append(" ");
-                        sb.append(field);
-                        sb.append(" > '0%' AND ");
-                        sb.append(field);
-                        sb.append(" < 'a%' AND ");
-                    } else if (!".".equals(p) && !"all".equals(p)) {
-                        sb.append(" ");
-                        sb.append(field);
-                        sb.append(" LIKE ? AND ");
-                        injectors.add(new StringSQLInjector(p, STR_PERCENT));
-                    }
-                } else {
-                    cso.setDisplayName(cso.getPattern());
-                }
-            }
-
-            if (cso.getDynamicSearchField() != null && cso.getDynamicSearchField().length > 0) {
-                final int[] fields = cso.getDynamicSearchField();
-                final String[] values = cso.getDynamicSearchFieldValue();
-
-                for (int i = 0; i < fields.length; i++) {
-                    if ((fields[i] == Contact.ANNIVERSARY) || (fields[i] == Contact.BIRTHDAY)) {
-                        String field = "";
-                        if (fields[i] == Contact.ANNIVERSARY) {
-                            field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
-                        } else if (fields[i] == Contact.BIRTHDAY) {
-                            field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
-                        }
-                        /*
-                         * TODO: BIRTHDAY: `timestampfield01` date default NULL, ANNIVERSARY: `timestampfield02` date default NULL,
-                         */
-                        final String value = values[i];
-                        sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(search_habit).append(' ');
-                    } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == Contact.NUMBER_OF_LINKS) {
-                        String field = "";
-                        if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
-                            field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
-                        } else if (fields[i] == Contact.NUMBER_OF_LINKS) {
-                            field = Contacts.mapping[Contact.NUMBER_OF_LINKS].getDBFieldName();
-                        }
-                        final String value = values[i];
-                        sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(search_habit).append(' ');
-                    } else if (fields[i] == Contact.CATEGORIES) {
-                        final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
-                        String value = values[i];
-
-                        if (!"*".equals(value) && null != value) {
-                            value = StringCollection.prepareForSearch(value, false);
-
-                            if (value.indexOf(',') == -1) {
-                                // No comma-separated value
-                                sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                                injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
-                            } else {
-                                // Comma-separated value
-                                final String[] tokens = value.trim().split("\\s*,\\s*");
-                                sb.append('(');
-
-                                sb.append(" ( co.").append(field).append(" LIKE ? )");
-                                injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0].toUpperCase(), STR_PERCENT));
-                                for (int j = 1; j < tokens.length; j++) {
-                                    sb.append(" OR").append(" ( co.").append(field).append(" LIKE ? )");
-                                    injectors.add(new StringSQLInjector(STR_PERCENT, tokens[j].toUpperCase(), STR_PERCENT));
-                                }
-
-                                sb.append(") ").append(search_habit).append(' ');
-                            }
-                        }
-                    } else {
-                        final String field = Contacts.mapping[fields[i]].getDBFieldName();
-                        String value = values[i];
-
-                        if (!"*".equals(value)) {
-                            value = StringCollection.prepareForSearch(value);
-
-                            sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
-                            injectors.add(new StringSQLInjector(value));
-                        }
+                for (final SearchFiller searchFiller : SEARCH_FILLERS) {
+                    sb.setLength(0);
+                    sb.append(preWhere);
+                    final int field = searchFiller.fillSearchCriteria(this, sb, false);
+                    final int sbLen = sb.length();
+                    if ((sbLen - preWhereLen) > 1) {
+                        // Filler appended something to string builder
+                        appendix(sb, field, true);
+                        whereClauses.add(sb.toString());
                     }
                 }
-            }
 
-            /*********************** * search ranges * ***********************/
-
-            // final String language = UserStorage.getStorageUser(user, ctx).getLocale().getLanguage();
-            if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
-                final Date[] d = cso.getAnniversaryRange();
-                try {
-                    final String field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
-                    sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
-                    sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
-                    injectors.add(new TimestampSQLInjector(d[0]));
-                    injectors.add(new TimestampSQLInjector(d[1]));
-                    /*
-                     * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * sb.append(getRangeSearch(Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName(), a, b, search_habit));
-                     */
-                } catch (final Exception e) {
-                    LOG.error("Could not Format Anniversary Date for Range Search! ", e);
+                where = whereClauses.toArray(new String[whereClauses.size()]);
+            } else {
+                /*
+                 * Create a single statement with conditions linkd with "AND"
+                 */
+                for (final SearchFiller searchFiller : SEARCH_FILLERS) {
+                    searchFiller.fillSearchCriteria(this, sb, true);
                 }
-            }
-            if (cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0) {
-                final Date[] d = cso.getBirthdayRange();
-                try {
-                    final String field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
-                    sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
-                    sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
-                    injectors.add(new TimestampSQLInjector(d[0]));
-                    injectors.add(new TimestampSQLInjector(d[1]));
-                    /*
-                     * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * sb.append(getRangeSearch(Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName(), a, b, search_habit));
-                     */
-                } catch (final Exception e) {
-                    LOG.error("Could not Format Birthday Date for Range Search! ", e);
+                if (cso.getIgnoreOwn() > 0) {
+                    sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
                 }
-            }
-            if (cso.getBusinessPostalCodeRange() != null && cso.getBusinessPostalCodeRange().length > 0) {
-                final String[] x = cso.getBusinessPostalCodeRange();
-                sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_BUSINESS].getDBFieldName(), x[0], x[1], search_habit));
-            }
-            if (cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0) {
-                final Date[] d = cso.getCreationDateRange();
-                try {
-                    final String field = Contacts.mapping[Contact.CREATION_DATE].getDBFieldName();
-                    sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
-                    sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
-                    injectors.add(new TimestampSQLInjector(d[0]));
-                    injectors.add(new TimestampSQLInjector(d[1]));
-                    /*
-                     * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * sb.append(getRangeSearch(Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName(), a, b, search_habit));
-                     */
-                } catch (final Exception e) {
-                    LOG.error("Could not Format Creating_Date Date for Range Search! ", e);
-                }
-            }
-            if (cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0) {
-                final Date[] d = cso.getLastModifiedRange();
-                try {
-                    final String field = Contacts.mapping[Contact.LAST_MODIFIED].getDBFieldName();
-                    sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
-                    sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
-                    injectors.add(new TimestampSQLInjector(d[0]));
-                    injectors.add(new TimestampSQLInjector(d[1]));
-                    /*
-                     * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
-                     * sb.append(getRangeSearch(Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName(), a, b, search_habit));
-                     */
-                } catch (final Exception e) {
-                    LOG.error("Could not Format LastModified Date for Range Search! ", e);
-                }
-            }
-            if (cso.getNumberOfEmployeesRange() != null && cso.getNumberOfEmployeesRange().length > 0) {
-                final String[] x = cso.getNumberOfEmployeesRange();
-                sb.append(getRangeSearch(Contacts.mapping[Contact.NUMBER_OF_EMPLOYEE].getDBFieldName(), x[0], x[1], search_habit));
-            }
-            if (cso.getOtherPostalCodeRange() != null && cso.getOtherPostalCodeRange().length > 0) {
-                final String[] x = cso.getOtherPostalCodeRange();
-                sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_OTHER].getDBFieldName(), x[0], x[1], search_habit));
-            }
-            if (cso.getPrivatePostalCodeRange() != null && cso.getPrivatePostalCodeRange().length > 0) {
-                final String[] x = cso.getPrivatePostalCodeRange();
-                sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_HOME].getDBFieldName(), x[0], x[1], search_habit));
-            }
-            if (cso.getSalesVolumeRange() != null && cso.getSalesVolumeRange().length > 0) {
-                final String[] x = cso.getSalesVolumeRange();
-                sb.append(getRangeSearch(Contacts.mapping[Contact.SALES_VOLUME].getDBFieldName(), x[0], x[1], search_habit));
-            }
 
-            /*********************** * search single field * ***********************/
-
-            if (cso.getGivenName() != null && cso.getGivenName().length() > 0) {
-                final String field = Contacts.mapping[Contact.GIVEN_NAME].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getGivenName());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
-                } else {
-                    sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
-                }
-            }
-            if (cso.getSurname() != null && cso.getSurname().length() > 0) {
-                final String field = Contacts.mapping[Contact.SUR_NAME].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getSurname());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
-                } else {
-                    sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
-                }
-            }
-            if (cso.getDisplayName() != null && cso.getDisplayName().length() > 0) {
-                final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getDisplayName());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
-                } else {
-                    sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
-                }
-            }
-            if (cso.getEmail1() != null && cso.getEmail1().length() > 0) {
-                final String field = Contacts.mapping[Contact.EMAIL1].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getEmail1());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
-                } else {
-                    sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
-                }
-            }
-            if (cso.getEmail2() != null && cso.getEmail2().length() > 0) {
-                final String field = Contacts.mapping[Contact.EMAIL2].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getEmail2());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
-                } else {
-                    sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
-                }
-            }
-            if (cso.getEmail3() != null && cso.getEmail3().length() > 0) {
-                final String field = Contacts.mapping[Contact.EMAIL3].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getEmail3());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
-                } else {
-                    sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
-                }
-            }
-            if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
-                final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
-                String value = cso.getCatgories().trim();
-
-                if (!"*".equals(value)) {
-                    value = StringCollection.prepareForSearch(value, false);
-
-                    if (value.indexOf(',') == -1) {
-                        // No comma-separated value
-                        sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-                        injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
-                    } else {
-                        // Comma-separated value
-                        final String[] tokens = value.split("\\s*,\\s*");
-                        sb.append('(');
-
-                        sb.append("( co.").append(field).append(" LIKE ? )");
-                        injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0], STR_PERCENT));
-                        for (int i = 1; i < tokens.length; i++) {
-                            sb.append(" OR ").append("( co.").append(field).append(" LIKE ? )");
-                            injectors.add(new StringSQLInjector(STR_PERCENT, tokens[i], STR_PERCENT));
-                        }
-
-                        sb.append(") ").append(search_habit).append(' ');
+                final int pos = endsWith(sb, "(", true);
+                if (pos == -1) {
+                    final int pos2 = endsWith(sb, search_habit, true);
+                    if (pos2 != -1) {
+                        sb.delete(pos2, sb.length());
                     }
-                }
-            }
-            if (cso.getCompany() != null && cso.getCompany().length() > 0) {
-                final String field = Contacts.mapping[Contact.COMPANY].getDBFieldName();
-
-                final String value = StringCollection.prepareForSearch(cso.getCompany());
-
-                if (STR_PERCENT.equals(value)) {
-                    sb.append(' ');
+                    sb.append(") AND ");
                 } else {
-                    sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
-                    injectors.add(new StringSQLInjector(value));
+                    sb.delete(pos, sb.length());
                 }
+
+                if (null != cso.getAllFolderSQLINString()) {
+                    folder = -1;
+                    sb.append(cso.getAllFolderSQLINString());
+                    sb.append(" AND ");
+                }
+                // Special condition for email auto complete
+                if (cso.getEmailAutoComplete()) {
+                    sb.append('(');
+                    sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
+                    sb.append(" is not null OR ");
+                    sb.append(Contacts.mapping[Contact.EMAIL2].getDBFieldName());
+                    sb.append(" is not null OR ");
+                    sb.append(Contacts.mapping[Contact.EMAIL3].getDBFieldName());
+                    sb.append(" is not null OR ");
+                    sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
+                    sb.append(" > 0) AND ");
+                }
+                appendix(sb, -1, false);
+
+                where = new String[] { sb.toString() };
             }
+
+            // /*********************** * search all fields * ***********************/
+            //
+            // if (cso.getPattern() != null && cso.getPattern().length() > 0) {
+            // if (cso.isStartLetter()) {
+            // final String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
+            // final String p = cso.getPattern().trim();
+            //
+            // if (".".equals(p) || "#".equals(p)) {
+            // sb.append(" (");
+            // sb.append(field);
+            // sb.append(" < '0%' OR ");
+            // sb.append(field);
+            // sb.append(" > 'z%') AND ");
+            // sb.append(field);
+            // sb.append(" NOT LIKE 'z%' AND ");
+            // } else if (p.matches("\\d")) {
+            // sb.append(" ");
+            // sb.append(field);
+            // sb.append(" > '0%' AND ");
+            // sb.append(field);
+            // sb.append(" < 'a%' AND ");
+            // } else if (!".".equals(p) && !"all".equals(p)) {
+            // sb.append(" ");
+            // sb.append(field);
+            // sb.append(" LIKE ? AND ");
+            // injectors.add(new StringSQLInjector(p, STR_PERCENT));
+            // }
+            // } else {
+            // cso.setDisplayName(cso.getPattern());
+            // }
+            // }
+            //
+            // if (cso.getDynamicSearchField() != null && cso.getDynamicSearchField().length > 0) {
+            // final int[] fields = cso.getDynamicSearchField();
+            // final String[] values = cso.getDynamicSearchFieldValue();
+            //
+            // for (int i = 0; i < fields.length; i++) {
+            // if ((fields[i] == Contact.ANNIVERSARY) || (fields[i] == Contact.BIRTHDAY)) {
+            // String field = "";
+            // if (fields[i] == Contact.ANNIVERSARY) {
+            // field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
+            // } else if (fields[i] == Contact.BIRTHDAY) {
+            // field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
+            // }
+            // /*
+            // * TODO: BIRTHDAY: `timestampfield01` date default NULL, ANNIVERSARY: `timestampfield02` date default NULL,
+            // */
+            // final String value = values[i];
+            // sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(search_habit).append(' ');
+            // } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == Contact.NUMBER_OF_LINKS) {
+            // String field = "";
+            // if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
+            // field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
+            // } else if (fields[i] == Contact.NUMBER_OF_LINKS) {
+            // field = Contacts.mapping[Contact.NUMBER_OF_LINKS].getDBFieldName();
+            // }
+            // final String value = values[i];
+            // sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(search_habit).append(' ');
+            // } else if (fields[i] == Contact.CATEGORIES) {
+            // final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
+            // String value = values[i];
+            //
+            // if (!"*".equals(value) && null != value) {
+            // value = StringCollection.prepareForSearch(value, false);
+            //
+            // if (value.indexOf(',') == -1) {
+            // // No comma-separated value
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
+            // } else {
+            // // Comma-separated value
+            // final String[] tokens = value.trim().split("\\s*,\\s*");
+            // sb.append('(');
+            //
+            // sb.append(" ( co.").append(field).append(" LIKE ? )");
+            // injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0].toUpperCase(), STR_PERCENT));
+            // for (int j = 1; j < tokens.length; j++) {
+            // sb.append(" OR").append(" ( co.").append(field).append(" LIKE ? )");
+            // injectors.add(new StringSQLInjector(STR_PERCENT, tokens[j].toUpperCase(), STR_PERCENT));
+            // }
+            //
+            // sb.append(") ").append(search_habit).append(' ');
+            // }
+            // }
+            // } else {
+            // final String field = Contacts.mapping[fields[i]].getDBFieldName();
+            // String value = values[i];
+            //
+            // if (!"*".equals(value)) {
+            // value = StringCollection.prepareForSearch(value);
+            //
+            // sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // }
+            // }
+            //
+            // /*********************** * search ranges * ***********************/
+            //
+            // // final String language = UserStorage.getStorageUser(user, ctx).getLocale().getLanguage();
+            // if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
+            // final Date[] d = cso.getAnniversaryRange();
+            // try {
+            // final String field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
+            // sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+            // sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+            // injectors.add(new TimestampSQLInjector(d[0]));
+            // injectors.add(new TimestampSQLInjector(d[1]));
+            // /*
+            // * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * sb.append(getRangeSearch(Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName(), a, b, search_habit));
+            // */
+            // } catch (final Exception e) {
+            // LOG.error("Could not Format Anniversary Date for Range Search! ", e);
+            // }
+            // }
+            // if (cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0) {
+            // final Date[] d = cso.getBirthdayRange();
+            // try {
+            // final String field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
+            // sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+            // sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+            // injectors.add(new TimestampSQLInjector(d[0]));
+            // injectors.add(new TimestampSQLInjector(d[1]));
+            // /*
+            // * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * sb.append(getRangeSearch(Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName(), a, b, search_habit));
+            // */
+            // } catch (final Exception e) {
+            // LOG.error("Could not Format Birthday Date for Range Search! ", e);
+            // }
+            // }
+            // if (cso.getBusinessPostalCodeRange() != null && cso.getBusinessPostalCodeRange().length > 0) {
+            // final String[] x = cso.getBusinessPostalCodeRange();
+            // sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_BUSINESS].getDBFieldName(), x[0], x[1], search_habit));
+            // }
+            // if (cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0) {
+            // final Date[] d = cso.getCreationDateRange();
+            // try {
+            // final String field = Contacts.mapping[Contact.CREATION_DATE].getDBFieldName();
+            // sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+            // sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+            // injectors.add(new TimestampSQLInjector(d[0]));
+            // injectors.add(new TimestampSQLInjector(d[1]));
+            // /*
+            // * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * sb.append(getRangeSearch(Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName(), a, b, search_habit));
+            // */
+            // } catch (final Exception e) {
+            // LOG.error("Could not Format Creating_Date Date for Range Search! ", e);
+            // }
+            // }
+            // if (cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0) {
+            // final Date[] d = cso.getLastModifiedRange();
+            // try {
+            // final String field = Contacts.mapping[Contact.LAST_MODIFIED].getDBFieldName();
+            // sb.append("co.").append(field).append(" >= ? ").append(search_habit).append(' ');
+            // sb.append("co.").append(field).append(" <= ? ").append(search_habit).append(' ');
+            // injectors.add(new TimestampSQLInjector(d[0]));
+            // injectors.add(new TimestampSQLInjector(d[1]));
+            // /*
+            // * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0], false);
+            // * sb.append(getRangeSearch(Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName(), a, b, search_habit));
+            // */
+            // } catch (final Exception e) {
+            // LOG.error("Could not Format LastModified Date for Range Search! ", e);
+            // }
+            // }
+            // if (cso.getNumberOfEmployeesRange() != null && cso.getNumberOfEmployeesRange().length > 0) {
+            // final String[] x = cso.getNumberOfEmployeesRange();
+            // sb.append(getRangeSearch(Contacts.mapping[Contact.NUMBER_OF_EMPLOYEE].getDBFieldName(), x[0], x[1], search_habit));
+            // }
+            // if (cso.getOtherPostalCodeRange() != null && cso.getOtherPostalCodeRange().length > 0) {
+            // final String[] x = cso.getOtherPostalCodeRange();
+            // sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_OTHER].getDBFieldName(), x[0], x[1], search_habit));
+            // }
+            // if (cso.getPrivatePostalCodeRange() != null && cso.getPrivatePostalCodeRange().length > 0) {
+            // final String[] x = cso.getPrivatePostalCodeRange();
+            // sb.append(getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_HOME].getDBFieldName(), x[0], x[1], search_habit));
+            // }
+            // if (cso.getSalesVolumeRange() != null && cso.getSalesVolumeRange().length > 0) {
+            // final String[] x = cso.getSalesVolumeRange();
+            // sb.append(getRangeSearch(Contacts.mapping[Contact.SALES_VOLUME].getDBFieldName(), x[0], x[1], search_habit));
+            // }
+            //
+            // /*********************** * search single field * ***********************/
+            //
+            // if (cso.getGivenName() != null && cso.getGivenName().length() > 0) {
+            // final String field = Contacts.mapping[Contact.GIVEN_NAME].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getGivenName());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getSurname() != null && cso.getSurname().length() > 0) {
+            // final String field = Contacts.mapping[Contact.SUR_NAME].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getSurname());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getDisplayName() != null && cso.getDisplayName().length() > 0) {
+            // final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getDisplayName());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getEmail1() != null && cso.getEmail1().length() > 0) {
+            // final String field = Contacts.mapping[Contact.EMAIL1].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getEmail1());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getEmail2() != null && cso.getEmail2().length() > 0) {
+            // final String field = Contacts.mapping[Contact.EMAIL2].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getEmail2());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getEmail3() != null && cso.getEmail3().length() > 0) {
+            // final String field = Contacts.mapping[Contact.EMAIL3].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getEmail3());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
+            // final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
+            // String value = cso.getCatgories().trim();
+            //
+            // if (!"*".equals(value)) {
+            // value = StringCollection.prepareForSearch(value, false);
+            //
+            // if (value.indexOf(',') == -1) {
+            // // No comma-separated value
+            // sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
+            // } else {
+            // // Comma-separated value
+            // final String[] tokens = value.split("\\s*,\\s*");
+            // sb.append('(');
+            //
+            // sb.append("( co.").append(field).append(" LIKE ? )");
+            // injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0], STR_PERCENT));
+            // for (int i = 1; i < tokens.length; i++) {
+            // sb.append(" OR ").append("( co.").append(field).append(" LIKE ? )");
+            // injectors.add(new StringSQLInjector(STR_PERCENT, tokens[i], STR_PERCENT));
+            // }
+            //
+            // sb.append(") ").append(search_habit).append(' ');
+            // }
+            // }
+            // }
+            // if (cso.getCompany() != null && cso.getCompany().length() > 0) {
+            // final String field = Contacts.mapping[Contact.COMPANY].getDBFieldName();
+            //
+            // final String value = StringCollection.prepareForSearch(cso.getCompany());
+            //
+            // if (STR_PERCENT.equals(value)) {
+            // sb.append(' ');
+            // } else {
+            // sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
+            // injectors.add(new StringSQLInjector(value));
+            // }
+            // }
+            // if (cso.getIgnoreOwn() > 0) {
+            // sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
+            // }
+            //
+            // final int pos = endsWith(sb, "(", true);
+            // if (pos == -1) {
+            // final int pos2 = endsWith(sb, search_habit, true);
+            // if (pos2 != -1) {
+            // sb.delete(pos2, sb.length());
+            // }
+            // sb.append(") AND ");
+            // } else {
+            // sb.delete(pos, sb.length());
+            // }
+            //
+            // if (null != cso.getAllFolderSQLINString()) {
+            // folder = -1;
+            // sb.append(cso.getAllFolderSQLINString());
+            // sb.append(" AND ");
+            // }
+            // // Special condition for email auto complete
+            // if (cso.getEmailAutoComplete()) {
+            // sb.append('(');
+            // sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
+            // sb.append(" is not null OR ");
+            // sb.append(Contacts.mapping[Contact.EMAIL2].getDBFieldName());
+            // sb.append(" is not null OR ");
+            // sb.append(Contacts.mapping[Contact.EMAIL3].getDBFieldName());
+            // sb.append(" is not null OR ");
+            // sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
+            // sb.append(" > 0) AND ");
+            // }
+        } else {
+            /*
+             * No search object
+             */
+
+            appendix(sb, -1, false);
+
+            // // Normal Folder
+            // if (folder != 0 && folder != -1) {
+            // sb.append(" (co.fid = ").append(folder).append(") AND ");
+            // }
+            //
+            // sb.append(' ');
+            //
+            // // Remove ending " AND "
+            // final int pos = endsWith(sb, "AND", true);
+            // if (pos != -1) {
+            // sb.delete(pos, sb.length());
+            // }
+            //
+            // /*
+            // * Private Flag
+            // */
+            // where = new String[] {
+            // sb.append(" AND ((co.pflag = 1 and co.created_from = ").append(user).append(") OR (co.pflag is null))").toString() };
+
+            where = new String[] { sb.toString() };
+        }
+        return where;
+    }
+
+    private static final int[] AUTOCOMPLETE_FIELDS = { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3 };
+
+    /**
+     * Appends appendix to string builder
+     * 
+     * @param sb The string builder
+     * @param field The affected field
+     * @param union <code>true</code> if a UNION statement is generated
+     */
+    private void appendix(final StringBuilder sb, final int field, final boolean union) {
+        if (union) {
             if (cso.getIgnoreOwn() > 0) {
                 sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
             }
 
-            final int pos = endsWith(sb, "(", true);
-            if (pos == -1) {
-                final int pos2 = endsWith(sb, search_habit, true);
-                if (pos2 != -1) {
-                    sb.delete(pos2, sb.length());
+            {
+                final int pos = endsWith(sb, "(", true);
+                if (pos == -1) {
+                    final int pos2 = endsWith(sb, search_habit, true);
+                    if (pos2 != -1) {
+                        sb.delete(pos2, sb.length());
+                    }
+                    sb.append(") AND ");
+                } else {
+                    sb.delete(pos, sb.length());
                 }
-                sb.append(") AND ");
-            } else {
-                sb.delete(pos, sb.length());
             }
 
-            if (null != cso.getAllFolderSQLINString()) {
+            final String allFolderSQLINString = cso.getAllFolderSQLINString();
+            if (null != allFolderSQLINString) {
                 folder = -1;
-                sb.append(cso.getAllFolderSQLINString());
+                sb.append(allFolderSQLINString);
                 sb.append(" AND ");
             }
+
             // Special condition for email auto complete
-            if (cso.getEmailAutoComplete()) {
+            if (cso.getEmailAutoComplete() && Arrays.binarySearch(AUTOCOMPLETE_FIELDS, field) >= 0) {
                 sb.append('(');
-                sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
-                sb.append(" is not null OR ");
-                sb.append(Contacts.mapping[Contact.EMAIL2].getDBFieldName());
-                sb.append(" is not null OR ");
-                sb.append(Contacts.mapping[Contact.EMAIL3].getDBFieldName());
+                sb.append(Contacts.mapping[field].getDBFieldName());
                 sb.append(" is not null OR ");
                 sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
                 sb.append(" > 0) AND ");
@@ -607,8 +818,7 @@ public class ContactMySql implements ContactSql {
         /*
          * Private Flag
          */
-        where = sb.append(" AND ((co.pflag = 1 and co.created_from = ").append(user).append(") OR (co.pflag is null))").toString();
-        return where;
+        sb.append(" AND ((co.pflag = 1 and co.created_from = ").append(user).append(") OR (co.pflag is null))");
     }
 
     public String getSelect() {
@@ -769,7 +979,7 @@ public class ContactMySql implements ContactSql {
         result.append(')');
         return result.toString();
     }
-    
+
     /*************************************************************************/
 
     private static String rightsSelectString = "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";
@@ -1237,6 +1447,631 @@ public class ContactMySql implements ContactSql {
 
     }
 
+    private static interface SearchFiller {
+
+        public int fillSearchCriteria(ContactMySql instance, StringBuilder sb, boolean isSingleSelect);
+
+    }
+
+    private static final List<SearchFiller> SEARCH_FILLERS;
+
+    static {
+        final List<SearchFiller> searchFillers = new ArrayList<SearchFiller>(32);
+
+        /*********************** * search all fields * ***********************/
+
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getPattern() != null && cso.getPattern().length() > 0) {
+                    if (cso.isStartLetter()) {
+                        final String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
+                        final String p = cso.getPattern().trim();
+
+                        if (".".equals(p) || "#".equals(p)) {
+                            sb.append(" (");
+                            sb.append(field);
+                            sb.append(" < '0%' OR ");
+                            sb.append(field);
+                            sb.append(" > 'z%') AND ");
+                            sb.append(field);
+                            sb.append(" NOT LIKE 'z%' AND ");
+                        } else if (p.matches("\\d")) {
+                            sb.append(" ");
+                            sb.append(field);
+                            sb.append(" > '0%' AND ");
+                            sb.append(field);
+                            sb.append(" < 'a%' AND ");
+                        } else if (!".".equals(p) && !"all".equals(p)) {
+                            sb.append(" ");
+                            sb.append(field);
+                            sb.append(" LIKE ? AND ");
+                            instance.injectors.add(new StringSQLInjector(p, STR_PERCENT));
+                        }
+                    } else {
+                        cso.setDisplayName(cso.getPattern());
+                    }
+                }
+                return -1;
+            }
+        });
+
+        /*********************** * search dynamic fields * ***********************/
+
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getDynamicSearchField() != null && cso.getDynamicSearchField().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+                    final int[] fields = cso.getDynamicSearchField();
+                    final String[] values = cso.getDynamicSearchFieldValue();
+
+                    boolean modified = false;
+
+                    for (int i = 0; i < fields.length; i++) {
+                        if ((fields[i] == Contact.ANNIVERSARY) || (fields[i] == Contact.BIRTHDAY)) {
+                            String field = "";
+                            if (fields[i] == Contact.ANNIVERSARY) {
+                                field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
+                            } else if (fields[i] == Contact.BIRTHDAY) {
+                                field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
+                            }
+                            /*
+                             * TODO: BIRTHDAY: `timestampfield01` date default NULL, ANNIVERSARY: `timestampfield02` date default NULL,
+                             */
+                            final String value = values[i];
+                            sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(searchHabit).append(' ');
+                            modified = true;
+                        } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == Contact.NUMBER_OF_LINKS) {
+                            String field = "";
+                            if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
+                                field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
+                            } else if (fields[i] == Contact.NUMBER_OF_LINKS) {
+                                field = Contacts.mapping[Contact.NUMBER_OF_LINKS].getDBFieldName();
+                            }
+                            final String value = values[i];
+                            sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(searchHabit).append(
+                                ' ');
+                            modified = true;
+                        } else {
+                            if (fields[i] == Contact.CATEGORIES) {
+                                final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
+                                String value = values[i];
+
+                                if (!"*".equals(value) && null != value) {
+                                    value = StringCollection.prepareForSearch(value, false);
+
+                                    if (value.indexOf(',') == -1) {
+                                        // No comma-separated value
+                                        sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(searchHabit).append(' ');
+                                        injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
+                                    } else {
+                                        // Comma-separated value
+                                        final String[] tokens = value.trim().split("\\s*,\\s*");
+                                        sb.append('(');
+
+                                        sb.append(" ( co.").append(field).append(" LIKE ? )");
+                                        injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0].toUpperCase(), STR_PERCENT));
+                                        for (int j = 1; j < tokens.length; j++) {
+                                            sb.append(" OR").append(" ( co.").append(field).append(" LIKE ? )");
+                                            injectors.add(new StringSQLInjector(STR_PERCENT, tokens[j].toUpperCase(), STR_PERCENT));
+                                        }
+
+                                        sb.append(") ").append(searchHabit).append(' ');
+                                        modified = true;
+                                    }
+                                }
+                            } else {
+                                final String field = Contacts.mapping[fields[i]].getDBFieldName();
+                                String value = values[i];
+
+                                if (!"*".equals(value)) {
+                                    value = StringCollection.prepareForSearch(value);
+
+                                    sb.append("( co.").append(field).append(" LIKE ? ) ").append(searchHabit).append(' ');
+                                    injectors.add(new StringSQLInjector(value));
+                                    modified = true;
+                                }
+                            }
+                        }
+                    }
+                    if (modified && !isSingleSelect) {
+                        final int pos2 = endsWith(sb, searchHabit, true);
+                        if (pos2 != -1) {
+                            sb.delete(pos2, sb.length());
+                        }
+                    }
+                }
+                return -1;
+            }
+        });
+
+        /*********************** * search ranges * ***********************/
+
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+                    final Date[] d = cso.getAnniversaryRange();
+                    try {
+                        final String field = Contacts.mapping[Contact.ANNIVERSARY].getDBFieldName();
+                        sb.append("co.").append(field).append(" >= ? ").append(searchHabit).append(' ');
+                        sb.append("co.").append(field).append(" <= ? ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new TimestampSQLInjector(d[0]));
+                        injectors.add(new TimestampSQLInjector(d[1]));
+                        /*
+                         * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0],
+                         * false); final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
+                         * .formatDateForPostgres(d[0], false);
+                         * sb.append(getRangeSearch(Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName(), a, b, search_habit));
+                         */
+                    } catch (final Exception e) {
+                        LOG.error("Could not Format Anniversary Date for Range Search! ", e);
+                    }
+                }
+                return Contact.ANNIVERSARY;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+                    final Date[] d = cso.getBirthdayRange();
+                    try {
+                        final String field = Contacts.mapping[Contact.BIRTHDAY].getDBFieldName();
+                        sb.append("co.").append(field).append(" >= ? ").append(searchHabit).append(' ');
+                        sb.append("co.").append(field).append(" <= ? ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new TimestampSQLInjector(d[0]));
+                        injectors.add(new TimestampSQLInjector(d[1]));
+                        /*
+                         * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0],
+                         * false); final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
+                         * .formatDateForPostgres(d[0], false);
+                         * sb.append(getRangeSearch(Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName(), a, b, search_habit));
+                         */
+                    } catch (final Exception e) {
+                        LOG.error("Could not Format Birthday Date for Range Search! ", e);
+                    }
+                }
+                return Contact.BIRTHDAY;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getBusinessPostalCodeRange() != null && cso.getBusinessPostalCodeRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final String[] x = cso.getBusinessPostalCodeRange();
+                    sb.append(instance.getRangeSearch(
+                        Contacts.mapping[Contact.POSTAL_CODE_BUSINESS].getDBFieldName(),
+                        x[0],
+                        x[1],
+                        searchHabit));
+                    if (!isSingleSelect) {
+                        final int pos2 = endsWith(sb, searchHabit, true);
+                        if (pos2 != -1) {
+                            sb.delete(pos2, sb.length());
+                        }
+                    }
+                }
+                return Contact.POSTAL_CODE_BUSINESS;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+                    final Date[] d = cso.getCreationDateRange();
+                    try {
+                        final String field = Contacts.mapping[Contact.CREATION_DATE].getDBFieldName();
+                        sb.append("co.").append(field).append(" >= ? ").append(searchHabit).append(' ');
+                        sb.append("co.").append(field).append(" <= ? ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new TimestampSQLInjector(d[0]));
+                        injectors.add(new TimestampSQLInjector(d[1]));
+                        /*
+                         * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0],
+                         * false); final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
+                         * .formatDateForPostgres(d[0], false);
+                         * sb.append(getRangeSearch(Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName(), a, b, search_habit));
+                         */
+                    } catch (final Exception e) {
+                        LOG.error("Could not Format Creating_Date Date for Range Search! ", e);
+                    }
+                }
+                return Contact.CREATION_DATE;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+                    final Date[] d = cso.getLastModifiedRange();
+                    try {
+                        final String field = Contacts.mapping[Contact.LAST_MODIFIED].getDBFieldName();
+                        sb.append("co.").append(field).append(" >= ? ").append(searchHabit).append(' ');
+                        sb.append("co.").append(field).append(" <= ? ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new TimestampSQLInjector(d[0]));
+                        injectors.add(new TimestampSQLInjector(d[1]));
+                        /*
+                         * final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()) .formatDateForPostgres(d[0],
+                         * false); final String b = new FormatDate(language.toLowerCase(), language.toUpperCase())
+                         * .formatDateForPostgres(d[0], false);
+                         * sb.append(getRangeSearch(Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName(), a, b, search_habit));
+                         */
+                    } catch (final Exception e) {
+                        LOG.error("Could not Format LastModified Date for Range Search! ", e);
+                    }
+                }
+                return Contact.LAST_MODIFIED;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getNumberOfEmployeesRange() != null && cso.getNumberOfEmployeesRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final String[] x = cso.getNumberOfEmployeesRange();
+                    sb.append(instance.getRangeSearch(
+                        Contacts.mapping[Contact.NUMBER_OF_EMPLOYEE].getDBFieldName(),
+                        x[0],
+                        x[1],
+                        searchHabit));
+                    if (!isSingleSelect) {
+                        final int pos2 = endsWith(sb, searchHabit, true);
+                        if (pos2 != -1) {
+                            sb.delete(pos2, sb.length());
+                        }
+                    }
+                }
+                return Contact.NUMBER_OF_EMPLOYEE;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getOtherPostalCodeRange() != null && cso.getOtherPostalCodeRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final String[] x = cso.getOtherPostalCodeRange();
+                    sb.append(instance.getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_OTHER].getDBFieldName(), x[0], x[1], searchHabit));
+                    if (!isSingleSelect) {
+                        final int pos2 = endsWith(sb, searchHabit, true);
+                        if (pos2 != -1) {
+                            sb.delete(pos2, sb.length());
+                        }
+                    }
+                }
+                return Contact.POSTAL_CODE_OTHER;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getPrivatePostalCodeRange() != null && cso.getPrivatePostalCodeRange().length > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final String[] x = cso.getPrivatePostalCodeRange();
+                    sb.append(instance.getRangeSearch(Contacts.mapping[Contact.POSTAL_CODE_HOME].getDBFieldName(), x[0], x[1], searchHabit));
+                    if (!isSingleSelect) {
+                        final int pos2 = endsWith(sb, searchHabit, true);
+                        if (pos2 != -1) {
+                            sb.delete(pos2, sb.length());
+                        }
+                    }
+                }
+                return Contact.POSTAL_CODE_HOME;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getSalesVolumeRange() != null && cso.getSalesVolumeRange().length > 0) {
+                    final String[] x = cso.getSalesVolumeRange();
+                    final String searchHabit = instance.search_habit;
+                    sb.append(instance.getRangeSearch(Contacts.mapping[Contact.SALES_VOLUME].getDBFieldName(), x[0], x[1], searchHabit));
+                    if (!isSingleSelect) {
+                        final int pos2 = endsWith(sb, searchHabit, true);
+                        if (pos2 != -1) {
+                            sb.delete(pos2, sb.length());
+                        }
+                    }
+                }
+                return Contact.SALES_VOLUME;
+            }
+
+        });
+
+        /*********************** * search single field * ***********************/
+
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getGivenName() != null && cso.getGivenName().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.GIVEN_NAME].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getGivenName());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Cut off starting '%' to let optimizer use appropriate index
+                             */
+                            injectors.add(new StringSQLInjector(value.substring(1)));
+                        }
+                    }
+                }
+                return Contact.GIVEN_NAME;
+            }
+
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getSurname() != null && cso.getSurname().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.SUR_NAME].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getSurname());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Cut off starting '%' to let optimizer use appropriate index
+                             */
+                            injectors.add(new StringSQLInjector(value.substring(1)));
+                        }
+                    }
+                }
+                return Contact.SUR_NAME;
+            }
+
+        });
+
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getDisplayName() != null && cso.getDisplayName().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getDisplayName());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Cut off starting '%' to let optimizer use appropriate index
+                             */
+                            injectors.add(new StringSQLInjector(value.substring(1)));
+                        }
+                    }
+                }
+                return Contact.DISPLAY_NAME;
+            }
+
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getEmail1() != null && cso.getEmail1().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.EMAIL1].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getEmail1());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Cut off starting '%' to let optimizer use appropriate index
+                             */
+                            injectors.add(new StringSQLInjector(value.substring(1)));
+                        }
+                    }
+                }
+                return Contact.EMAIL1;
+            }
+
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getEmail2() != null && cso.getEmail2().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.EMAIL2].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getEmail2());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Cut off starting '%' to let optimizer use appropriate index
+                             */
+                            injectors.add(new StringSQLInjector(value.substring(1)));
+                        }
+                    }
+                }
+                return Contact.EMAIL2;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getEmail3() != null && cso.getEmail3().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.EMAIL3].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getEmail3());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                            injectors.add(new StringSQLInjector(value));
+                        } else {
+                            /*
+                             * Cut off starting '%' to let optimizer use appropriate index
+                             */
+                            injectors.add(new StringSQLInjector(value.substring(1)));
+                        }
+                    }
+                }
+                return Contact.EMAIL3;
+            }
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.CATEGORIES].getDBFieldName();
+                    String value = cso.getCatgories().trim();
+
+                    if (!"*".equals(value)) {
+                        value = StringCollection.prepareForSearch(value, false);
+
+                        if (value.indexOf(',') == -1) {
+                            // No comma-separated value
+                            sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                            if (isSingleSelect) {
+                                sb.append(searchHabit).append(' ');
+                            }
+                            injectors.add(new StringSQLInjector(STR_PERCENT, value, STR_PERCENT));
+                        } else {
+                            // Comma-separated value
+                            final String[] tokens = value.split("\\s*,\\s*");
+                            sb.append('(');
+
+                            sb.append("( co.").append(field).append(" LIKE ? )");
+                            injectors.add(new StringSQLInjector(STR_PERCENT, tokens[0], STR_PERCENT));
+                            for (int i = 1; i < tokens.length; i++) {
+                                sb.append(" OR ").append("( co.").append(field).append(" LIKE ? )");
+                                injectors.add(new StringSQLInjector(STR_PERCENT, tokens[i], STR_PERCENT));
+                            }
+
+                            sb.append(") ");
+                            if (isSingleSelect) {
+                                sb.append(searchHabit).append(' ');
+                            }
+                        }
+                    }
+                }
+                return Contact.CATEGORIES;
+            }
+
+        });
+        searchFillers.add(new SearchFiller() {
+
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getCompany() != null && cso.getCompany().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.COMPANY].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getCompany());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append("( co.").append(field).append(" LIKE ? ) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new StringSQLInjector(value));
+                    }
+                }
+                return Contact.COMPANY;
+            }
+
+        });
+
+        SEARCH_FILLERS = new CopyOnWriteArrayList<SearchFiller>(searchFillers);
+    }
+
     /**
      * Checks if specified {@link StringBuilder string builder} ends with given suffix
      * 
@@ -1247,7 +2082,7 @@ public class ContactMySql implements ContactSql {
      * @return The suffix' index position if the character sequence represented by the argument is a suffix of the character sequence
      *         represented by specified string builder; <code>-1</code> otherwise.
      */
-    private static int endsWith(final StringBuilder stringBuilder, final String suffix, final boolean ignoreTrailingWhitespaces) {
+    static int endsWith(final StringBuilder stringBuilder, final String suffix, final boolean ignoreTrailingWhitespaces) {
         final int pos = stringBuilder.lastIndexOf(suffix);
         if (pos == -1) {
             return -1;
@@ -1263,4 +2098,16 @@ public class ContactMySql implements ContactSql {
         }
         return (pos + suffix.length() == len ? pos : -1);
     }
+
+    static void removeMultipleTrailingWhitespaces(final StringBuilder stringBuilder) {
+        final int length = stringBuilder.length();
+        int pos = length - 1;
+        while (pos > 0 && Character.isWhitespace(stringBuilder.charAt(pos))) {
+            pos--;
+        }
+        if ((pos < length - 1)) {
+            stringBuilder.delete(pos + 1, length);
+        }
+    }
+
 }

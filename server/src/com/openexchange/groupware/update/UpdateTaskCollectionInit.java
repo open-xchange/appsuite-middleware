@@ -329,6 +329,12 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // New config parameters to set the default conifmration status of newly created appointments
             // for participants in private an public folders
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DefaultConfirmStatusUpdateTask());
+            // Version 72
+            // Creates necessary tables for virtual folder tree
+            registry.addUpdateTask(new com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask());
+            // Version 74
+            // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete search
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
