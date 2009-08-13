@@ -118,7 +118,19 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
      */
-    EQUAL_NAME(FolderExceptionMessages.EQUAL_NAME_MSG, Category.PERMISSION, 14);
+    EQUAL_NAME(FolderExceptionMessages.EQUAL_NAME_MSG, Category.PERMISSION, 14),
+    /**
+     * Subscribe operation not permitted on tree "%1$s".
+     */
+    NO_REAL_SUBSCRIBE(FolderExceptionMessages.NO_REAL_SUBSCRIBE_MSG, Category.PERMISSION, 15),
+    /**
+     * Un-Subscribe operation not permitted on tree "%1$s".
+     */
+    NO_REAL_UNSUBSCRIBE(FolderExceptionMessages.NO_REAL_UNSUBSCRIBE_MSG, Category.PERMISSION, 16),
+    /**
+     * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
+     */
+    NO_UNSUBSCRIBE(FolderExceptionMessages.NO_UNSUBSCRIBE_MSG, Category.PERMISSION, 17);
 
     private final Category category;
 
@@ -146,6 +158,15 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * Creates a {@link FolderException} carrying this error message.
+     * 
+     * @return A newly created {@link FolderException} carrying this error message.
+     */
+    public FolderException create() {
+        return FolderExceptionFactory.getInstance().create(this, null, new Object[0]);
     }
 
     /**

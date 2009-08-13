@@ -129,6 +129,21 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String EQUAL_NAME_MSG = "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree \"%3$s\".";
 
     /**
+     * Subscribe operation not permitted on tree "%1$s".
+     */
+    public static final String NO_REAL_SUBSCRIBE_MSG = "Subscribe operation not permitted on tree \"%1$s\".";
+
+    /**
+     * Un-Subscribe operation not permitted on tree "%1$s".
+     */
+    public static final String NO_REAL_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on tree \"%1$s\".";
+    
+    /**
+     * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
+     */
+    public static final String NO_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\".";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

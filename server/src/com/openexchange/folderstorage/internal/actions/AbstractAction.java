@@ -49,7 +49,11 @@
 
 package com.openexchange.folderstorage.internal.actions;
 
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -98,6 +102,36 @@ public abstract class AbstractAction {
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
     };
+
+    /**
+     * Gets an opened storage for given tree-folder-pair.
+     * 
+     * @param id The folder identifier
+     * @param treeId The tree identifier
+     * @param openedStorages The list of opened storages
+     * @return An opened storage for given tree-folder-pair
+     * @throws FolderException If a folder error occurs
+     */
+    protected FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.List<FolderStorage> openedStorages) throws FolderException {
+        FolderStorage tmp = null;
+        for (final FolderStorage ps : openedStorages) {
+            if (ps.getFolderType().servesFolderId(id)) {
+                // Found an already opened storage which is capable to server given folderId-treeId-pair
+                tmp = ps;
+            }
+        }
+        if (null == tmp) {
+            // None opened storage is capable to server given folderId-treeId-pair
+            tmp = FolderStorageRegistry.getInstance().getFolderStorage(treeId, id);
+            if (null == tmp) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
+            }
+            // Open storage and add to list of opened storages
+            tmp.startTransaction(getStorageParameters(), false);
+            openedStorages.add(tmp);
+        }
+        return tmp;
+    }
 
     /**
      * Gets the context.

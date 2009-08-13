@@ -50,78 +50,103 @@
 package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AllVisibleFolders} - Serves the request to deliver all visible folders.
+ * {@link UnSubscribe} - Serves the <code>UNSUBSCRIBE</code> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllVisibleFolders extends AbstractUserizedFolderAction {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllVisibleFolders.class);
+public final class UnSubscribe extends AbstractAction {
 
     /**
-     * Initializes a new {@link AllVisibleFolders}.
+     * Initializes a new {@link UnSubscribe}.
      * 
-     * @param session The session
+     * @param session
      */
-    public AllVisibleFolders(final ServerSession session) {
+    public UnSubscribe(final ServerSession session) {
         super(session);
     }
 
     /**
-     * Initializes a new {@link AllVisibleFolders}.
+     * Initializes a new {@link UnSubscribe}.
      * 
-     * @param user The user
-     * @param context The context final
+     * @param user
+     * @param context
      */
-    public AllVisibleFolders(final User user, final Context context) {
+    public UnSubscribe(final User user, final Context context) {
         super(user, context);
     }
 
     /**
-     * Gets all visible folders
+     * Performs the <code>UNSUBSCRIBE</code> action.
      * 
-     * @param treeId The tree identifier
-     * @return All visible folders
+     * @param treeId The virtual tree identifier
+     * @param folderId The folder identifier
      * @throws FolderException If a folder error occurs
      */
-    public UserizedFolder[] doAllVisibleFolders(final String treeId) throws FolderException {
-        final FolderStorage rootStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, FolderStorage.ROOT_ID);
-        if (null == rootStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, FolderStorage.ROOT_ID);
+    public void doUnsubscribe(final String treeId, final String folderId) throws FolderException {
+        if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            throw FolderExceptionErrorMessage.NO_REAL_UNSUBSCRIBE.create(treeId);
         }
-        rootStorage.startTransaction(storageParameters, false);
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
+        final FolderStorage virtualStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+        if (null == virtualStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        virtualStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        openedStorages.add(rootStorage);
+        openedStorages.add(virtualStorage);
         try {
-            final java.util.List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
-            final List listAction = null == session ? new List(user, context) : new List(session);
+            final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
+            {
+                /*
+                 * Check folder permission for parent folder
+                 */
+                final Permission parentPermission;
+                if (null == getSession()) {
+                    parentPermission = CalculatePermission.calculate(folder, getUser(), getContext());
+                } else {
+                    parentPermission = CalculatePermission.calculate(folder, getSession());
+                }
+                if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                    throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                        folderId,
+                        getUser().getDisplayName(),
+                        Integer.valueOf(getContext().getContextId()));
+                }
+            }
+            {
+                /*
+                 * No unsubscribe on a folder which has subfolders
+                 */
+                final String[] ids = folder.getSubfolderIDs();
+                if (null == ids) {
+                    final SortableId[] tmp = virtualStorage.getSubfolders(treeId, folderId, storageParameters);
+                    if (tmp.length > 0) {
+                        throw FolderExceptionErrorMessage.NO_UNSUBSCRIBE.create(folderId, treeId);
+                    }
+                } else {
+                    if (ids.length > 0) {
+                        throw FolderExceptionErrorMessage.NO_UNSUBSCRIBE.create(folderId, treeId);
+                    }
+                }
+            }
 
-            fillSubfolders(treeId, FolderStorage.ROOT_ID, visibleFolders, listAction);
-
-            final UserizedFolder[] ret = visibleFolders.toArray(new UserizedFolder[visibleFolders.size()]);
+            virtualStorage.deleteFolder(treeId, folderId, storageParameters);
 
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
-
-            if (LOG.isDebugEnabled()) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("AllVisibleFolders.doAllVisibleFolders() took ").append(duration).append("msec").toString());
-            }
-
-            return ret;
         } catch (final FolderException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
@@ -129,24 +154,11 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
             throw e;
         } catch (final Exception e) {
             for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters); 
+                fs.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
 
-    private void fillSubfolders(final String treeId, final String parentId, final java.util.List<UserizedFolder> visibleFolders, final List listAction) throws FolderException {
-        final UserizedFolder[] subfolders = getSubfolders(treeId, parentId, listAction);
-        if (subfolders.length > 0) {
-            visibleFolders.addAll(Arrays.asList(subfolders));
-            for (int i = 0; i < subfolders.length; i++) {
-                fillSubfolders(treeId, subfolders[i].getID(), visibleFolders, listAction);
-            }
-        }
-    }
-
-    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final List listAction) throws FolderException {
-        return listAction.doList(treeId, parentId, true);
     }
 
 }

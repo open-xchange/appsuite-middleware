@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
@@ -211,36 +210,6 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
             }
         }
         userizedFolder.setSubfolderIDs(visibleSubfolderIds.toArray(new String[visibleSubfolderIds.size()]));
-    }
-
-    /**
-     * Gets an opened storage for given tree-folder-pair.
-     * 
-     * @param id The folder identifier
-     * @param treeId The tree identifier
-     * @param openedStorages The list of opened storages
-     * @return An opened storage for given tree-folder-pair
-     * @throws FolderException If a folder error occurs
-     */
-    protected FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.List<FolderStorage> openedStorages) throws FolderException {
-        FolderStorage tmp = null;
-        for (final FolderStorage ps : openedStorages) {
-            if (ps.getFolderType().servesFolderId(id)) {
-                // Found an already opened storage which is capable to server given folderId-treeId-pair
-                tmp = ps;
-            }
-        }
-        if (null == tmp) {
-            // None opened storage is capable to server given folderId-treeId-pair
-            tmp = FolderStorageRegistry.getInstance().getFolderStorage(treeId, id);
-            if (null == tmp) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
-            }
-            // Open storage and add to list of opened storages
-            tmp.startTransaction(getStorageParameters(), false);
-            openedStorages.add(tmp);
-        }
-        return tmp;
     }
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
