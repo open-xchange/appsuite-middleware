@@ -49,61 +49,44 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.ho.yaml.Yaml;
 
-
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServiceTestHelpers {
+public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeServiceTestHelpers {
 	
-	public void testGenericSubscribeServiceForLinkedInTest(){
+	public void testGenericSubscribeServiceForGoogleMail(){
 		// insert valid credentials here
-		String username ="roxyexchanger@ox.io";
-		String password ="secret";
+		String username = "o6sidian@gmail.com";
+		String password = "P1lotGoo";
 		
 		//create a CrawlerDescription
 		CrawlerDescription crawler = new CrawlerDescription();
-		crawler.setDisplayName("LinkedIn");
-		crawler.setId("com.openexchange.subscribe.linkedin");
-		
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
+		crawler.setDisplayName("GoogleMail");
+		crawler.setId("com.openexchange.subscribe.crawler.googlemail");
+		List<Step> steps = new LinkedList<Step>(); 
         
-        listOfSteps.add(new LoginPageStep(
-            "Login to www.linkedin.com",
-            "https://www.linkedin.com/secure/login",
-            "",
-            "",
-            "login",
-            "session_key",
-            "session_password",
-            "/connections?trk=hb_side_cnts"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the contacts list", 
-            "http://www.linkedin.com/connections?trk=hb_side_cnts"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the no-javascript contacts list",
-            "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-        listOfSteps.add(new AnchorsByLinkRegexStep(
-            "Get all pages that link to a connections profile",
-            "(/connectionsnojs\\?split_page=).*",
-            "(/profile\\?viewProfile=).*(goback).*"));
-        listOfSteps.add(new ContactObjectsByHTMLAnchorsStep(
-            "Extract the contact information from these pages",
-            "/addressBookExport?exportMemberVCard",
-            "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
+        steps.add(new LoginPageByFormActionStep(
+        		"Get a user«s contact information from google mail", 
+        		"https://www.googlemail.com",
+        		username,
+        		password,
+        		"https://www.google.com/accounts/ServiceLoginAuth?service=mail",
+        		"Email",
+        		"Passwd",
+        		"?logout"));
+        steps.add(new PageByUrlStep("Get the basic html view", "?ui=html&zy=e"));
+        steps.add(new PageByUrlStep("Get the contact list", "?v=cl"));
 
-        Workflow workflow = new Workflow(listOfSteps);
+        Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
         
-        //findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        dumpThis(crawler, "test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
 	}
 }

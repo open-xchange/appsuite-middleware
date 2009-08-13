@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
@@ -68,7 +69,7 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public class LoginPageByFormActionStep extends AbstractStep implements Step<HtmlPage, Object>{
 
-	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, pageTitleAfterLogin;
+	private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin;
 	private HtmlPage currentPage;
 	
 	public LoginPageByFormActionStep(){
@@ -80,10 +81,10 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		this.url = url;
 		this.username = username;
 		this.password = password;
-		this.nameOfLoginForm = actionOfLoginForm;
+		this.actionOfLoginForm = actionOfLoginForm;
 		this.nameOfUserField = nameOfUserField;
 		this.nameOfPasswordField = nameOfPasswordField;
-		this.pageTitleAfterLogin = linkAvailableAfterLogin;
+		this.linkAvailableAfterLogin = linkAvailableAfterLogin;
 	}
 	
 	public void execute(WebClient webClient) throws SubscriptionException{
@@ -91,18 +92,35 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		try {
 			// Get the page, fill in the credentials and submit the login form identified by its action
 			loginPage = webClient.getPage(this.url);
-		    HtmlForm loginForm = loginPage.getFormByName(this.nameOfLoginForm);
-		    HtmlTextInput userfield = loginForm.getInputByName(this.nameOfUserField);
-		    userfield.setValueAttribute(this.username);
-		    HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);
-		    passwordfield.setValueAttribute(this.password);
-		    final HtmlPage pageAfterLogin = (HtmlPage)loginForm.submit(null);
-		    this.currentPage = pageAfterLogin;
-		    
-		    if (!pageAfterLogin.getTitleText().equals(pageTitleAfterLogin)){
-		    	throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+			System.out.println("***** Page title : " + loginPage.getTitleText());
+			System.out.println("***** Page : "+loginPage.getWebResponse().getContentAsString());
+		    HtmlForm loginForm = null;
+		    for (HtmlForm form : loginPage.getForms()){
+		    	if (form.getActionAttribute().startsWith(actionOfLoginForm) & form.getInputsByName(nameOfUserField) != null){
+		    		loginForm = form;
+		    		System.out.println("***** found it!");
+		    	}
 		    }
-		    executedSuccessfully = true;
+		    if (loginForm != null){
+		    	System.out.println("***** LoginForm "+loginForm.asText());
+			    HtmlTextInput userfield = loginForm.getInputByName(this.nameOfUserField);
+			    userfield.setValueAttribute(this.username);
+			    HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);
+			    passwordfield.setValueAttribute(this.password);
+			    final HtmlPage pageAfterLogin = (HtmlPage)loginForm.submit(null);
+			    this.currentPage = pageAfterLogin;
+			    
+			    boolean linkAvailable = false;
+			    for (HtmlAnchor link : pageAfterLogin.getAnchors()){
+			    	if (link.getHrefAttribute().contains(linkAvailableAfterLogin)){
+			    		linkAvailable = true;
+			    	}
+			    }
+			    if (! linkAvailable){
+			    	throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+			    }
+			    executedSuccessfully = true;
+		    }
 		} catch (FailingHttpStatusCodeException e) {	
 			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
 		} catch (MalformedURLException e) {
@@ -156,12 +174,12 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		this.password = password;
 	}
 
-	public String getNameOfLoginForm() {
-		return nameOfLoginForm;
+	public String getActionOfLoginForm() {
+		return actionOfLoginForm;
 	}
 
-	public void setNameOfLoginForm(String nameOfLoginForm) {
-		this.nameOfLoginForm = nameOfLoginForm;
+	public void setActionOfLoginForm(String nameOfLoginForm) {
+		this.actionOfLoginForm = nameOfLoginForm;
 	}
 
 	public String getNameOfUserField() {
@@ -185,11 +203,11 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 	}
 
 	public String getPageTitleAfterLogin() {
-		return pageTitleAfterLogin;
+		return linkAvailableAfterLogin;
 	}
 
 	public void setPageTitleAfterLogin(String pageTitleAfterLogin) {
-		this.pageTitleAfterLogin = pageTitleAfterLogin;
+		this.linkAvailableAfterLogin = pageTitleAfterLogin;
 	}
 	
 	

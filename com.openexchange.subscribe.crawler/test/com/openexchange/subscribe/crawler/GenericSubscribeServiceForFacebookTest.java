@@ -49,61 +49,42 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.ho.yaml.Yaml;
 
-
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServiceTestHelpers {
+public class GenericSubscribeServiceForFacebookTest extends GenericSubscribeServiceTestHelpers {
 	
-	public void testGenericSubscribeServiceForLinkedInTest(){
+	public void testGenericSubscribeServiceForFacebook(){
 		// insert valid credentials here
-		String username ="roxyexchanger@ox.io";
-		String password ="secret";
+		String username = "rodeldodel@wolke7.net";
+		String password = "r0deld0del";
 		
 		//create a CrawlerDescription
 		CrawlerDescription crawler = new CrawlerDescription();
-		crawler.setDisplayName("LinkedIn");
-		crawler.setId("com.openexchange.subscribe.linkedin");
-		
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
+		crawler.setDisplayName("Facebook");
+		crawler.setId("com.openexchange.subscribe.crawler.facebook");
+		List<Step> steps = new LinkedList<Step>(); 
         
-        listOfSteps.add(new LoginPageStep(
-            "Login to www.linkedin.com",
-            "https://www.linkedin.com/secure/login",
-            "",
-            "",
-            "login",
-            "session_key",
-            "session_password",
-            "/connections?trk=hb_side_cnts"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the contacts list", 
-            "http://www.linkedin.com/connections?trk=hb_side_cnts"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the no-javascript contacts list",
-            "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
-        listOfSteps.add(new AnchorsByLinkRegexStep(
-            "Get all pages that link to a connections profile",
-            "(/connectionsnojs\\?split_page=).*",
-            "(/profile\\?viewProfile=).*(goback).*"));
-        listOfSteps.add(new ContactObjectsByHTMLAnchorsStep(
-            "Extract the contact information from these pages",
-            "/addressBookExport?exportMemberVCard",
-            "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
+        steps.add(new FacebookAPIStep(
+        		"Get a user«s friend information from facebook via facebook-java-api", 
+        		"",
+        		username,
+        		password,
+        		"https://login.facebook.com/login.php?login_attempt=1",
+        		"email",
+        		"pass",
+        		"http://www.facebook.com/inbox"));
 
-        Workflow workflow = new Workflow(listOfSteps);
+        Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
         
-        //findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        dumpThis(crawler, "test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
 	}
 }
