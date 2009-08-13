@@ -235,6 +235,12 @@ public class ContactMySql implements ContactSql {
 
     private static final Pattern PAT_FIELD = Pattern.compile("(?:([a-zA-Z0-9_.]+)(?: *ASC| *DESC)?)", Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Parses denoted fields out of specified <code>ORDER BY</code> statement; <code>" ORDER BY co.field01 DESC "</code>
+     * 
+     * @param orderBy The <code>ORDER BY</code> statement
+     * @return The parsed fields
+     */
     private static String[] parseFieldsFromOrderBy(final String orderBy) {
         // ORDER BY oc.field01 DESC
         Matcher m = PAT_ORDER_BY.matcher(orderBy);
@@ -251,6 +257,16 @@ public class ContactMySql implements ContactSql {
 
     private static final Pattern PAT_PREP = Pattern.compile("[a-zA-Z0-9_]+\\.([a-zA-Z0-9_])");
 
+    /**
+     * Prepares given <code>ORDER BY</code> statement to be used within a <code>UNION</code> statement.
+     * 
+     * <pre>
+     * ORDER BY co.field01 DESC -&gt; ORDER BY field01 DESC
+     * </pre>
+     * 
+     * @param orderBy The <code>ORDER BY</code> statement
+     * @return The prepared <code>ORDER BY</code> statement
+     */
     private static final String prepareOrderBy(final String orderBy) {
         return PAT_PREP.matcher(orderBy).replaceAll("$1");
     }
