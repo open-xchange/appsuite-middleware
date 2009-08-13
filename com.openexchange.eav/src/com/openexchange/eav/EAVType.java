@@ -51,6 +51,7 @@ package com.openexchange.eav;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.EnumMap;
@@ -152,7 +153,16 @@ public enum EAVType {
     public static final EAVTypeSwitcher valueSwitcher = new EAVTypeSwitcher() {
 
         public Object binary(Object... args) {
-            // TODO Auto-generated method stub
+            EAVNode node = (EAVNode) args[0];
+            EAVContainerType cType = (EAVContainerType) args[1];
+            if (cType == EAVContainerType.SINGLE) {
+                node.setPayload(new ByteArrayInputStream((byte[]) args[2]));
+            } else {
+                Object[] source = (Object[]) args[2];
+                byte[][] values = new byte[source.length][];
+                System.arraycopy(source, 0, values, 0, values.length);
+                node.setPayload(transformByteArrays(values));
+            }
             return null;
         }
 
@@ -234,6 +244,14 @@ public enum EAVType {
                 node.setPayload(values);
             }
             return null;
+        }
+        
+        private InputStream[] transformByteArrays(byte[][] byteArrays) {
+            InputStream[] inputStreams = new InputStream[byteArrays.length];
+            for (int i = 0; i < byteArrays.length; i++) {
+                inputStreams[i] = new ByteArrayInputStream(byteArrays[i]);
+            }
+            return inputStreams;
         }
         
     };

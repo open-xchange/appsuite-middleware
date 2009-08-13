@@ -113,22 +113,8 @@ public class SQLStorage {
     }
     
     public void init(Connection con) throws EAVStorageException {
-        init(con, false, null);
-    }
-    
-    public void init(Connection con, boolean allBinaries) throws EAVStorageException {
-        init(con, allBinaries, null);
-    }
-    
-    public void init(Connection con, boolean allBinaries, Set<EAVPath> binaries) throws EAVStorageException {
         this.con = con;
-        this.allBinaries = allBinaries;
         currentPath = new EAVPath();
-        if (binaries == null) {
-            this.binaries = new HashSet<EAVPath>();
-        } else {
-            this.binaries = binaries;
-        }
         tables = new HashMap<String, String>();
         List<Object> values = new ArrayList<Object>();
         
@@ -173,6 +159,21 @@ public class SQLStorage {
     }
     
     public EAVNode getEAVNode(EAVPath path) throws EAVStorageException {
+        return getEAVNode(path, false, null);
+    }
+    
+    public EAVNode getEAVNode(EAVPath path, boolean allBinaries) throws EAVStorageException {
+        return getEAVNode(path, allBinaries, null);
+    }
+    
+    public EAVNode getEAVNode(EAVPath path, boolean allBinaries, Set<EAVPath> binaries) throws EAVStorageException {
+        this.allBinaries = allBinaries;
+        this.binaries = new HashSet<EAVPath>();
+        if (binaries != null) {
+            this.binaries.addAll(binaries);
+        }
+        this.binaries.add(new EAVPath());
+        
         Node n = getNode(path);
         return getEAVNode(n);
     }
@@ -191,7 +192,7 @@ public class SQLStorage {
     private void writeInnerNode(EAVNode target, Node source) throws EAVStorageException {
         target.setName(source.getName());
         for (Node childNode : getChildNodes(source.getNodeId())) {
-            currentPath.append(childNode.getName());
+            currentPath = currentPath.append(childNode.getName());
             target.addChild(getEAVNode(childNode));
             currentPath = currentPath.parent();
             if (currentPath == null) {
@@ -378,7 +379,7 @@ public class SQLStorage {
                 if (pointer == null) {
                     throw EAVStorageExceptionMessage.NoSuchNodeException.create(path.toString());
                 }
-                pathPointer = path.parent();
+                pathPointer = pathPointer.parent();
             }
             if (!isBad) {
                 found = true;

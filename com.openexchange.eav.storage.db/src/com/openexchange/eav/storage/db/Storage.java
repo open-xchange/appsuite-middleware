@@ -114,8 +114,12 @@ public class Storage implements EAVStorage {
             throw EAVStorageExceptionMessage.SQLException.create(e);
         }
         SQLStorage storage = new SQLStorage(ctx, getModule(path), getObjectId(path));
-        storage.init(con, allBinaries);
-        return storage.getEAVNode(chopPath(path));
+        try {
+            storage.init(con);
+            return storage.getEAVNode(chopPath(path), allBinaries);
+        } finally {
+            provider.releaseReadConnection(ctx, con);
+        }
     }
 
     public EAVNode get(Context ctx, EAVPath path, Set<EAVPath> loadBinaries) throws EAVException {
@@ -126,8 +130,12 @@ public class Storage implements EAVStorage {
             throw EAVStorageExceptionMessage.SQLException.create(e);
         }
         SQLStorage storage = new SQLStorage(ctx, getModule(path), getObjectId(path));
-        storage.init(con, false, loadBinaries);
-        return storage.getEAVNode(chopPath(path));
+        try {
+            storage.init(con);
+            return storage.getEAVNode(chopPath(path), false, loadBinaries);
+        } finally {
+            provider.releaseReadConnection(ctx, con);
+        }
     }
 
     public EAVTypeMetadataNode getTypes(Context ctx, EAVPath parent, EAVNode node) throws EAVException {

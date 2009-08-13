@@ -54,6 +54,6 @@ package com.openexchange.eav.storage.db.sql;
  */
 public class BooleanTable extends AbstractDataTable {
 
-    public static String tablePrefix = eavPrefix + "boolean";
+    public static String tablePrefix = eavPrefix + "bool";
 
 }

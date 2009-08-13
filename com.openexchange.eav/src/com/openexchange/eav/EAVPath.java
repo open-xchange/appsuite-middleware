@@ -102,6 +102,9 @@ public class EAVPath {
     }
 
     public String toString() {
+        if (components.size() == 0) {
+            return "";
+        }
         StringBuilder builder = new StringBuilder();
         for(String component : components) {
             builder.append(component).append('/');
