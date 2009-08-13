@@ -15,7 +15,8 @@
 </#macro>
 
 <#macro fileMicroformatted infoitem>
-		<a class="ox_file" href="${request.scheme!"http"}://${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
+		<br />
+		<a class="ox_file button" href="${request.scheme!"http"}://${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
 </#macro>
 
 
@@ -107,6 +108,21 @@
 	.message {
 		margin-top: 2em;
 		text-align: center;
+	}
+	a.button {
+		border: 2px solid #668;
+		border-right: 2px solid #224;
+		border-bottom: 2px solid #224;
+		padding: 0.25em 0.5em;
+		background: #446;
+		text-align: center;
+		width: 20%;
+		color: #fff;
+	}
+	a.button:hover {
+		background: #668;
+		border-left: 2px solid #88a;
+		border-top: 2px solid #88a;
 	}
 
 	-->
