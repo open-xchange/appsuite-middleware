@@ -169,6 +169,54 @@ public final class StringCollection {
     }
 
     /**
+     * Prepares specified string for being used in a statement's WHERE clause as a search pattern.
+     * <ul>
+     * <li>Any contained SQL wildcard characters (<code>'%'</code> and <code>
+     * '_'</code>) are escaped.</li>
+     * <li>Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced with corresponding SQL wildcard characters
+     * <code>'%'</code> and <code>'_'</code>.</li>
+     * </ul>
+     * <p>
+     * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
+     * 
+     * @param s The string to be prepared for SQL search
+     * @param prependWildcard <code>true</code> to prepend <code>'%'</code> character, if pattern does not start with <code>'*'</code>
+     *            wildcard character; otherwise <code>false</code>
+     * @param appendWildcard <code>true</code> to append <code>'%'</code> character, if pattern does not end with <code>'*'</code> wildcard
+     *            character; otherwise <code>false</code>
+     * @param preparedStatement <code>true</code> if search string is going to be inserted through
+     *            <code>java.sql.PreparedStatement.setString()</code> to omit escaping of "'" (single-quote) and "\" (backslash); otherwise
+     *            <code>false</code>
+     * @return A prepared search string
+     */
+    public static String prepareForSearch(final String s, final boolean prependWildcard, final boolean appendWildcard, final boolean preparedStatement) {
+        if (s == null) {
+            return s;
+        }
+        String value = s.trim();
+        if (!preparedStatement) {
+            // Escape every backslash and single-quote character
+            value = value.replaceAll("\\\\", quoteReplacement("\\\\")).replaceAll("'", quoteReplacement("\\'"));
+        }
+        value = value.replaceAll("%", quoteReplacement("\\%")).replaceAll("_", quoteReplacement("\\_")).replaceAll(
+            "\\*",
+            quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
+        if (prependWildcard) {
+            if (value.charAt(0) != '%') {
+                // Prepend '%' character
+                value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
+            }
+        }
+        if (appendWildcard) {
+            if (value.charAt(value.length() - 1) != '%' || (value.length() > 1 && value.charAt(value.length() - 2) == '\\')) {
+                // Append '%' character
+                value = new StringBuilder(value.length() + 1).append(value).append('%').toString();
+            }
+        }
+        return value;
+    }
+
+    /**
      * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
      * that will work use as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class.
      * The <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\')
@@ -278,6 +326,7 @@ public final class StringCollection {
 
     /**
      * returns a SQL IN String containing all the integers in the set
+     * 
      * @param set
      * @return
      */
@@ -450,7 +499,7 @@ public final class StringCollection {
         sb.append("SELECT ");
         boolean first = true;
         for (int a = 0; a < cols.length; a++) {
-            CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService);
+            final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService);
             final String temp = calColl.getFieldName(cols[a]);
             if (temp != null) {
                 if (first) {
