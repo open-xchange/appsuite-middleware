@@ -1,3 +1,7 @@
+* 2009-08-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #14038: Fixed permission check to ignore infostore folders when considering limited public folder access
+
 * 2009-08-13 - thorben.betten@open-xchange.com
 
  - Bugfix #14264: Improved auto-complete search in contact module
