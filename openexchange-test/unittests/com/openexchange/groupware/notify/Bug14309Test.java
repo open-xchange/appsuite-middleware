@@ -49,31 +49,66 @@
 
 package com.openexchange.groupware.notify;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.tools.CommonAppointments;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.notify.ParticipantNotifyTest.Message;
+import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class NotifyTestSuite {
+public class Bug14309Test extends ParticipantNotifyTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+    private Context ctx;
 
-        tests.addTestSuite(NoSendTest.class);
-        tests.addTestSuite(ExternalTest.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug9256Test.class);
-        tests.addTestSuite(Bug9204Test.class);
-        tests.addTestSuite(Bug7507Test.class);
-        tests.addTestSuite(Bug6524Test.class);
-        tests.addTestSuite(Bug12985Test.class);
-        tests.addTestSuite(ResourcesTest.class);
-        tests.addTestSuite(SimpleTest.class);
-        tests.addTestSuite(StateTest.class);
-        tests.addTestSuite(Bug13184Test.class);
-        tests.addTestSuite(Bug14309Test.class);
+    private String user;
 
-        return tests;
+    private String secondUser;
+
+    private int secondUserId;
+
+    private String secondUserMail;
+
+    private CommonAppointments appointments;
+
+    private CalendarDataObject appointment;
+
+    private Session so;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        
+        final TestContextToolkit contextTools = new TestContextToolkit();
+        ctx = contextTools.getDefaultContext();
+        final TestConfig config = new TestConfig();
+        user = config.getUser();
+        secondUser = config.getSecondUser();
+        secondUserId = contextTools.resolveUser(secondUser, ctx);
+        secondUserMail = contextTools.loadUser(secondUserId, ctx).getMail();
+
+        so = contextTools.getSessionForUser(user, ctx);
+
+        appointments = new CommonAppointments(ctx, user);
+        appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+
+        notify.realUsers = true;
+    }
+
+    public void testBug14309() throws Exception {
+        notify.appointmentCreated(appointment, so);
+        List<Message> messages = notify.getMessages();
+        assertEquals("Wrong amount of notification messages.", 1, messages.size());
+        Message message = messages.get(0);
+        assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
+        assertTrue("Message should contain a link to the apointment.", message.message.contains("http://")); // TODO: Make more
+                                                                                                             // sophisticated.
+    }
+
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 }
