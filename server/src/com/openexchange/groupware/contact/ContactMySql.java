@@ -216,16 +216,18 @@ public class ContactMySql implements ContactSql {
         }
         sb.append(orderBy);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
-        }
-        // System.out.println("-> "+sb.toString());
         final PreparedStatement ps = con.prepareStatement(sb.toString());
         final int size = injectors.size();
         for (int i = 0; i < size; i++) {
             injectors.get(i).inject(ps, i + 1);
         }
         injectors.clear();
+
+        if (LOG.isDebugEnabled()) {
+            final String sql = ps.toString();
+            LOG.debug(new StringBuilder().append("\nContactSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
+        }
+
         return ps;
     }
 
@@ -357,12 +359,17 @@ public class ContactMySql implements ContactSql {
                     final int sbLen = sb.length();
                     if ((sbLen - preWhereLen) > 1) {
                         // Filler appended something to string builder
-                        appendix(sb, field, true);
+                        appendixWithCSO(sb, field, true);
                         whereClauses.add(sb.toString());
                     }
                 }
 
-                where = whereClauses.toArray(new String[whereClauses.size()]);
+                if (whereClauses.isEmpty()) {
+                    appendixWithCSO(sb, -1, false);
+                    where = new String[] { sb.toString() };
+                } else {
+                    where = whereClauses.toArray(new String[whereClauses.size()]);
+                }
             } else {
                 /*
                  * Create a single statement with conditions linkd with "AND"
@@ -370,39 +377,7 @@ public class ContactMySql implements ContactSql {
                 for (final SearchFiller searchFiller : SEARCH_FILLERS) {
                     searchFiller.fillSearchCriteria(this, sb, true);
                 }
-                if (cso.getIgnoreOwn() > 0) {
-                    sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
-                }
-
-                final int pos = endsWith(sb, "(", true);
-                if (pos == -1) {
-                    final int pos2 = endsWith(sb, search_habit, true);
-                    if (pos2 != -1) {
-                        sb.delete(pos2, sb.length());
-                    }
-                    sb.append(") AND ");
-                } else {
-                    sb.delete(pos, sb.length());
-                }
-
-                if (null != cso.getAllFolderSQLINString()) {
-                    folder = -1;
-                    sb.append(cso.getAllFolderSQLINString());
-                    sb.append(" AND ");
-                }
-                // Special condition for email auto complete
-                if (cso.getEmailAutoComplete()) {
-                    sb.append('(');
-                    sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
-                    sb.append(" is not null OR ");
-                    sb.append(Contacts.mapping[Contact.EMAIL2].getDBFieldName());
-                    sb.append(" is not null OR ");
-                    sb.append(Contacts.mapping[Contact.EMAIL3].getDBFieldName());
-                    sb.append(" is not null OR ");
-                    sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
-                    sb.append(" > 0) AND ");
-                }
-                appendix(sb, -1, false);
+                appendixWithCSO(sb, -1, false);
 
                 where = new String[] { sb.toString() };
             }
@@ -747,7 +722,7 @@ public class ContactMySql implements ContactSql {
              * No search object
              */
 
-            appendix(sb, -1, false);
+            appendix(sb);
 
             // // Normal Folder
             // if (folder != 0 && folder != -1) {
@@ -776,38 +751,35 @@ public class ContactMySql implements ContactSql {
     private static final int[] AUTOCOMPLETE_FIELDS = { Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3 };
 
     /**
-     * Appends appendix to string builder
+     * Appends appendix to string builder with contact search object proeprly set.
      * 
      * @param sb The string builder
      * @param field The affected field
      * @param union <code>true</code> if a UNION statement is generated
      */
-    private void appendix(final StringBuilder sb, final int field, final boolean union) {
-        if (union) {
-            if (cso.getIgnoreOwn() > 0) {
-                sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
-            }
-
-            {
-                final int pos = endsWith(sb, "(", true);
-                if (pos == -1) {
-                    final int pos2 = endsWith(sb, search_habit, true);
-                    if (pos2 != -1) {
-                        sb.delete(pos2, sb.length());
-                    }
-                    sb.append(") AND ");
-                } else {
-                    sb.delete(pos, sb.length());
+    private void appendixWithCSO(final StringBuilder sb, final int field, final boolean union) {
+        if (cso.getIgnoreOwn() > 0) {
+            sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
+        }
+        {
+            final int pos = endsWith(sb, "(", true);
+            if (pos == -1) {
+                final int pos2 = endsWith(sb, search_habit, true);
+                if (pos2 != -1) {
+                    sb.delete(pos2, sb.length());
                 }
+                sb.append(") AND ");
+            } else {
+                sb.delete(pos, sb.length());
             }
-
-            final String allFolderSQLINString = cso.getAllFolderSQLINString();
-            if (null != allFolderSQLINString) {
-                folder = -1;
-                sb.append(allFolderSQLINString);
-                sb.append(" AND ");
-            }
-
+        }
+        final String allFolderSQLINString = cso.getAllFolderSQLINString();
+        if (null != allFolderSQLINString) {
+            folder = -1;
+            sb.append(allFolderSQLINString);
+            sb.append(" AND ");
+        }
+        if (union) {
             // Special condition for email auto complete
             if (cso.getEmailAutoComplete() && Arrays.binarySearch(AUTOCOMPLETE_FIELDS, field) >= 0) {
                 sb.append('(');
@@ -816,8 +788,30 @@ public class ContactMySql implements ContactSql {
                 sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
                 sb.append(" > 0) AND ");
             }
+        } else {
+            // Special condition for email auto complete
+            if (cso.getEmailAutoComplete()) {
+                sb.append('(');
+                sb.append(Contacts.mapping[Contact.EMAIL1].getDBFieldName());
+                sb.append(" is not null OR ");
+                sb.append(Contacts.mapping[Contact.EMAIL2].getDBFieldName());
+                sb.append(" is not null OR ");
+                sb.append(Contacts.mapping[Contact.EMAIL3].getDBFieldName());
+                sb.append(" is not null OR ");
+                sb.append(Contacts.mapping[Contact.MARK_AS_DISTRIBUTIONLIST].getDBFieldName());
+                sb.append(" > 0) AND ");
+            }
         }
+        // Append appendix
+        appendix(sb);
+    }
 
+    /**
+     * Appends appendix to string builder
+     * 
+     * @param sb The string builder
+     */
+    private void appendix(final StringBuilder sb) {
         // Normal Folder
         if (folder != 0 && folder != -1) {
             sb.append(" (co.fid = ").append(folder).append(") AND ");
