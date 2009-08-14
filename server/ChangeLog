@@ -1,3 +1,7 @@
+* 2009-08-14 - choeger@open-xchange.com
+
+ - Bugfix #14319 -  Publication Templates must be marked as configuration files
+
 * 2009-08-14 - thorben.betten@open-xchange.com
 
  - Bugfix #14038: Fixed permission check to ignore infostore folders when considering limited public folder access
