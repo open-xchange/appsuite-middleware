@@ -645,6 +645,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(participant.id, session.getContext());
             final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
+            
+            if (oxfa.getFolderType(obj.getParentFolderID()) == FolderObject.PRIVATE) {
+                return true;
+            }
+            
             final EffectivePermission permission = oxfa.getFolderPermission(obj.getParentFolderID(), participant.id, userConfig);
 
             if (permission.canReadAllObjects()) {

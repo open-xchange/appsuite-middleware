@@ -1,3 +1,7 @@
+* 2009-08-14 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14309: Link in notification mails for internal participants.
+
 * 2009-08-14 - choeger@open-xchange.com
 
  - Bugfix #14319 -  Publication Templates must be marked as configuration files
