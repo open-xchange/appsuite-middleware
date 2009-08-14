@@ -64,7 +64,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
  * {@link Bug13911Test}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug13911Test extends AbstractAJAXSession {
@@ -72,15 +72,14 @@ public class Bug13911Test extends AbstractAJAXSession {
     private static final Log LOG = LogFactory.getLog(Bug13911Test.class);
 
     private static final int[] COLUMNS = new int[] {
-        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1,
-        Contact.MARK_AS_DISTRIBUTIONLIST, Contact.INTERNAL_USERID, Contact.EMAIL2, Contact.EMAIL3,
-        Contact.SUR_NAME, Contact.GIVEN_NAME };
+        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.DISPLAY_NAME, Contact.EMAIL1, Contact.MARK_AS_DISTRIBUTIONLIST,
+        Contact.INTERNAL_USERID, Contact.EMAIL2, Contact.EMAIL3, Contact.SUR_NAME, Contact.GIVEN_NAME };
 
     private AJAXClient client;
 
     private Contact contact;
 
-    public Bug13911Test(String name) {
+    public Bug13911Test(final String name) {
         super(name);
     }
 
@@ -88,22 +87,24 @@ public class Bug13911Test extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        GetResponse response = client.execute(new GetRequest(client.getValues().getUserId()));
+        final GetResponse response = client.execute(new GetRequest(client.getValues().getUserId()));
         contact = response.getContact();
     }
 
     /**
      * The following search request does not find users in global addressbook:
-     * 
-     * {"module":"contacts","action":"search","columns":"1,20,500,555,602,524,556,557","sort":"500","order":"asc","data":{"display_name":"e","email1":"e","email2":"e","email3":"e","last_name":"e","first_name":"e","orSearch":true}}
+     * {"module":"contacts","action":"search","columns":"1,20,500,555,602,524,556,557"
+     * ,"sort":"500","order":"asc","data":{"display_name":"e",
+     * "email1":"e","email2":"e","email3":"e","last_name":"e","first_name":"e","orSearch":true}}
      * 
      * @throws Throwable
      */
     public void testPatternSearch() throws Throwable {
-        for (String value : new String[] { contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
-            String pattern = getPart(value);
+        for (final String value : new String[] {
+            contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
+            final String pattern = surroundWithWildcards(getPart(value));
             LOG.info("Pattern: " + pattern);
-            ContactSearchObject cso = new ContactSearchObject();
+            final ContactSearchObject cso = new ContactSearchObject();
             cso.setDisplayName(pattern);
             cso.setEmail1(pattern);
             cso.setEmail2(pattern);
@@ -111,30 +112,44 @@ public class Bug13911Test extends AbstractAJAXSession {
             cso.setSurname(pattern);
             cso.setGivenName(pattern);
             cso.setOrSearch(true);
-            SearchRequest[] searches = new SearchRequest[] { new SearchRequest(cso, COLUMNS, true) };
-            SearchResponse response = client.execute(new MultipleRequest<SearchResponse>(searches)).getResponse(0);
+            final SearchRequest[] searches = new SearchRequest[] { new SearchRequest(cso, COLUMNS, true) };
+            final SearchResponse response = client.execute(new MultipleRequest<SearchResponse>(searches)).getResponse(0);
             boolean found = false;
-            for (Object[] test : response) {
-                int id = ((Integer) test[response.getColumnPos(Contact.OBJECT_ID)]).intValue();
+            for (final Object[] test : response) {
+                final int id = ((Integer) test[response.getColumnPos(Contact.OBJECT_ID)]).intValue();
                 if (id == contact.getObjectID()) {
                     found = true;
                     break;
                 }
-//                System.out.println("Display name: " + test[response.getColumnPos(ContactObject.DISPLAY_NAME)]);
-//                System.out.println("Email1: " + test[response.getColumnPos(ContactObject.EMAIL1)]);
-//                System.out.println("Email2: " + test[response.getColumnPos(ContactObject.EMAIL2)]);
-//                System.out.println("Email3: " + test[response.getColumnPos(ContactObject.EMAIL3)]);
-//                System.out.println("Last name: " + test[response.getColumnPos(ContactObject.SUR_NAME)]);
-//                System.out.println("Given name: " + test[response.getColumnPos(ContactObject.GIVEN_NAME)]);
+                // System.out.println("Display name: " + test[response.getColumnPos(ContactObject.DISPLAY_NAME)]);
+                // System.out.println("Email1: " + test[response.getColumnPos(ContactObject.EMAIL1)]);
+                // System.out.println("Email2: " + test[response.getColumnPos(ContactObject.EMAIL2)]);
+                // System.out.println("Email3: " + test[response.getColumnPos(ContactObject.EMAIL3)]);
+                // System.out.println("Last name: " + test[response.getColumnPos(ContactObject.SUR_NAME)]);
+                // System.out.println("Given name: " + test[response.getColumnPos(ContactObject.GIVEN_NAME)]);
             }
             assertTrue("Searched user contact not found.", found);
         }
     }
 
-    private String getPart(String value) {
-        Random rand = new Random(System.currentTimeMillis());
-        int start = rand.nextInt(value.length());
-        int length = rand.nextInt(value.length() - start);
+    private String getPart(final String value) {
+        final Random rand = new Random(System.currentTimeMillis());
+        final int start = rand.nextInt(value.length());
+        final int length = rand.nextInt(value.length() - start);
         return value.substring(start, start + length);
     }
+
+    private static String surroundWithWildcards(final String value) {
+        String ret = value;
+        if (ret.charAt(0) != '*') {
+            // Prepend '*' character
+            ret = new StringBuilder(ret.length() + 1).append('*').append(ret).toString();
+        }
+        if (ret.charAt(ret.length() - 1) != '*' || (ret.length() > 1 && ret.charAt(ret.length() - 2) == '\\')) {
+            // Append '*' character
+            ret = new StringBuilder(ret.length() + 1).append(ret).append('*').toString();
+        }
+        return ret;
+    }
+
 }
