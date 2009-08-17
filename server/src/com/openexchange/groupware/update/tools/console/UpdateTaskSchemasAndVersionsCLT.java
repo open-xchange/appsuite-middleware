@@ -70,19 +70,17 @@ import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
 
 /**
- * {@link UpdateTaskResetVersionCLT} - Command-Line access to reset version via update task toolkit.
+ * {@link UpdateTaskSchemasAndVersionsCLT} - Command-Line access to get schemas and versions via update task toolkit.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdateTaskResetVersionCLT {
+public final class UpdateTaskSchemasAndVersionsCLT {
 
     private static final Options toolkitOptions;
 
     static {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
-        toolkitOptions.addOption("v", "version", true, "The version number to set");
-        toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
         toolkitOptions.addOption("p", "port", true, "The JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("pass", "password", true, "The JMX password (if JMX has authentication enabled)");
@@ -90,13 +88,13 @@ public final class UpdateTaskResetVersionCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("resetVersion", toolkitOptions);
+        helpFormatter.printHelp("schemasAndVersions", toolkitOptions);
     }
 
     /**
-     * Initializes a new {@link UpdateTaskResetVersionCLT}.
+     * Initializes a new {@link UpdateTaskSchemasAndVersionsCLT}.
      */
-    private UpdateTaskResetVersionCLT() {
+    private UpdateTaskSchemasAndVersionsCLT() {
         super();
     }
 
@@ -118,34 +116,6 @@ public final class UpdateTaskResetVersionCLT {
                         System.err.println("Port parameter is not a number: " + val);
                         port = 9999;
                     }
-                }
-            }
-            int version = -1;
-            if (!cmd.hasOption('v')) {
-                System.err.println("Missing version number.");
-                printHelp();
-                System.exit(0);
-            } else {
-                final String optionValue = cmd.getOptionValue('v');
-                try {
-                    version = Integer.parseInt(optionValue.trim());
-                } catch (final NumberFormatException e) {
-                    System.err.println("Port parameter is not a number: " + optionValue);
-                    System.exit(0);
-                }
-            }
-            int contextId = -1;
-            if (!cmd.hasOption('c')) {
-                System.err.println("Missing context identifier.");
-                printHelp();
-                System.exit(0);
-            } else {
-                final String optionValue = cmd.getOptionValue('c');
-                try {
-                    contextId = Integer.parseInt(optionValue.trim());
-                } catch (final NumberFormatException e) {
-                    System.err.println("Port parameter is not a number: " + optionValue);
-                    System.exit(0);
                 }
             }
 
@@ -171,12 +141,9 @@ public final class UpdateTaskResetVersionCLT {
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-                mbsc.invoke(
-                    Constants.OBJECT_NAME,
-                    "resetVersion",
-                    new Object[] { Integer.valueOf(version), Integer.valueOf(contextId) },
-                    null);
+                final String output = (String) mbsc.invoke(Constants.OBJECT_NAME, "schemasAndVersions", null, null);
 
+                System.out.println(output);
             } finally {
                 jmxConnector.close();
             }

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.tools;
 
+import java.util.Iterator;
+import java.util.Map;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -81,6 +83,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
     }
 
     private MBeanInfo buildMBeanInfo() {
+        /*
+         * Reset version operation
+         */
         final MBeanParameterInfo[] params = new MBeanParameterInfo[] {
             new MBeanParameterInfo("versionNumber", "java.lang.Integer", "The version number to set"),
             new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
@@ -90,9 +95,24 @@ public final class UpdateTaskMBean implements DynamicMBean {
             params,
             "void",
             MBeanOperationInfo.ACTION);
+        /*
+         * Schemas and versions operation
+         */
+        final MBeanOperationInfo schemasAndVersionsOperation = new MBeanOperationInfo(
+            "schemasAndVersions",
+            "Gets all schemas with versions.",
+            null,
+            "java.lang.String",
+            MBeanOperationInfo.INFO);
 
-        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { resetOperation };
+        /*
+         * Operations
+         */
+        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { resetOperation, schemasAndVersionsOperation };
 
+        /*
+         * MBean info
+         */
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations, null);
     }
 
@@ -119,9 +139,32 @@ public final class UpdateTaskMBean implements DynamicMBean {
             }
             // Void
             return null;
+        } else if (actionName.equals("schemasAndVersions")) {
+            try {
+                final Map<String, Integer> m = UpdateTaskToolkit.getSchemasAndVersions();
+                final int size = m.size();
+                if (size <= 0) {
+                    return "";
+                }
+                final Iterator<Map.Entry<String, Integer>> it = m.entrySet().iterator();
+                final StringBuilder sb = new StringBuilder(size * 16);
+                final String delim = ": ";
+                {
+                    final Map.Entry<String, Integer> entry = it.next();
+                    sb.append(entry.getKey()).append(delim).append(entry.getValue());
+                }
+                for (int i = 1; i < size; i++) {
+                    final Map.Entry<String, Integer> entry = it.next();
+                    sb.append('\n').append(entry.getKey()).append(delim).append(entry.getValue());
+                }
+                return sb.toString();
+            } catch (final UpdateException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            }
         }
         throw new ReflectionException(new NoSuchMethodException(actionName));
-
     }
 
     public void setAttribute(final Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {

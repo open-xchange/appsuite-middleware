@@ -53,6 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.EnumComponent;
@@ -89,6 +94,74 @@ public final class UpdateTaskToolkit {
      */
     private UpdateTaskToolkit() {
         super();
+    }
+
+    /**
+     * Gets all schemas with their versions.
+     * 
+     * @return All schemas with their versions
+     * @throws UpdateException If retrieving schemas and versions fails
+     */
+    public static Map<String, Integer> getSchemasAndVersions() throws UpdateException {
+        /*
+         * Get schemas with their context IDs
+         */
+        final Map<String, Set<Integer>> schemasAndContexts = getSchemasAndContexts();
+        /*
+         * Get version for each schema
+         */
+        final int size = schemasAndContexts.size();
+        final Map<String, Integer> schemasAndVersions = new HashMap<String, Integer>(size);
+        final Iterator<Map.Entry<String, Set<Integer>>> it = schemasAndContexts.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
+            final Map.Entry<String, Set<Integer>> entry = it.next();
+            final Schema schema = getSchema(entry.getValue().iterator().next().intValue());
+            schemasAndVersions.put(entry.getKey(), Integer.valueOf(schema.getDBVersion()));
+        }
+        return schemasAndVersions;
+    }
+
+    private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema, cid FROM context_server2db_pool";
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 14 }, msg = { "A SQL error occurred while reading schema version information: %1$s." })
+    private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
+        try {
+            Connection writeCon = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                writeCon = Database.get(false);
+                stmt = writeCon.prepareStatement(SQL_SELECT_SCHEMAS);
+                rs = stmt.executeQuery();
+
+                final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
+
+                while (rs.next()) {
+                    final String schemaName = rs.getString(1);
+                    final int contextId = rs.getInt(2);
+
+                    Set<Integer> contextIds = schemasAndContexts.get(schemaName);
+                    if (null == contextIds) {
+                        contextIds = new HashSet<Integer>();
+                        schemasAndContexts.put(schemaName, contextIds);
+                    }
+                    contextIds.add(Integer.valueOf(contextId));
+                }
+
+                return schemasAndContexts;
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                if (writeCon != null) {
+                    Database.back(false, writeCon);
+                }
+            }
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+            throw new UpdateException(e);
+        } catch (final SQLException e) {
+            throw EXCEPTION.create(9, e, e.getMessage());
+        }
+
     }
 
     /**
