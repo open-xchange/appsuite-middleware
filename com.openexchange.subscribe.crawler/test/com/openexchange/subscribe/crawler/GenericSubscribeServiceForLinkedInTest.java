@@ -102,8 +102,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
         
-        //findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        dumpThis(crawler, "test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler, "test-crawlers/", crawler.getDisplayName());
 	}
 }

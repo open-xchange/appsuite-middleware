@@ -92,17 +92,17 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		try {
 			// Get the page, fill in the credentials and submit the login form identified by its action
 			loginPage = webClient.getPage(this.url);
-			System.out.println("***** Page title : " + loginPage.getTitleText());
-			System.out.println("***** Page : "+loginPage.getWebResponse().getContentAsString());
+			//System.out.println("***** Page title : " + loginPage.getTitleText());
+			//System.out.println("***** Page : "+loginPage.getWebResponse().getContentAsString());
 		    HtmlForm loginForm = null;
 		    for (HtmlForm form : loginPage.getForms()){
 		    	if (form.getActionAttribute().startsWith(actionOfLoginForm) & form.getInputsByName(nameOfUserField) != null){
 		    		loginForm = form;
-		    		System.out.println("***** found it!");
+		    		//System.out.println("***** found it!");
 		    	}
 		    }
 		    if (loginForm != null){
-		    	System.out.println("***** LoginForm "+loginForm.asText());
+		    	//System.out.println("***** LoginForm "+loginForm.asText());
 			    HtmlTextInput userfield = loginForm.getInputByName(this.nameOfUserField);
 			    userfield.setValueAttribute(this.username);
 			    HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);

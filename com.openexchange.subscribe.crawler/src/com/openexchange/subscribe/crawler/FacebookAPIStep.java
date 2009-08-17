@@ -2,9 +2,12 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.facebook.api.FacebookException;
 import com.facebook.api.FacebookJaxbRestClient;
@@ -104,17 +107,50 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 			for (User user : users) {
 				Contact contact = new Contact();
 				Location location = user.getHometownLocation().getValue();
-				System.out.println("Username : " + user.getName());
+				//System.out.println("Username : " + user.getName());
 				contact.setDisplayName(user.getName());
-				System.out.println("First Name : " + user.getFirstName());
+				//System.out.println("First Name : " + user.getFirstName());
 				contact.setGivenName(user.getFirstName());
-				System.out.println("Last Name : " + user.getLastName());
+				//System.out.println("Last Name : " + user.getLastName());
 				contact.setSurName(user.getLastName());
-				System.out.println("Birthday : " + user.getBirthday().getValue());
+				//System.out.println("Birthday : " + user.getBirthday().getValue());
 				if (user.getBirthday() != null){
-					//TODO: Birthday Converter
-					Date date = new Date();
-					contact.setBirthday(date);
+					Calendar calendar = Calendar.getInstance();
+					String birthdayString = user.getBirthday().getValue();
+					Pattern pattern = Pattern.compile("([a-zA-Z]*)([\\s])([0-9]{1,2})([,]{1}[\\s]{1})([0-9]{4})");
+					Matcher matcher = pattern.matcher(birthdayString);
+					if (matcher.matches()){
+						//only set the contact«s birthday if at least day and month are available
+						if (matcher.groupCount()>=3){
+							int month = 0;
+							int day = 0;
+							//set the year to the current year in case it is not available
+							int year = calendar.get(Calendar.YEAR);
+							//set the day
+							day = Integer.valueOf(matcher.group(3));																					
+							//set the month
+							if (matcher.group(1).equals("January")) month = calendar.JANUARY;
+							else if (matcher.group(1).equals("February")) month = calendar.FEBRUARY;
+							else if (matcher.group(1).equals("March")) month = calendar.MARCH;
+							else if (matcher.group(1).equals("April")) month = calendar.APRIL;
+							else if (matcher.group(1).equals("May")) month = calendar.MAY;
+							else if (matcher.group(1).equals("June")) month = calendar.JUNE;
+							else if (matcher.group(1).equals("July")) month = calendar.JULY;
+							else if (matcher.group(1).equals("August")) month = calendar.AUGUST;
+							else if (matcher.group(1).equals("September")) month = calendar.SEPTEMBER;
+							else if (matcher.group(1).equals("October")) month = calendar.OCTOBER;
+							else if (matcher.group(1).equals("November")) month = calendar.NOVEMBER;
+							else if (matcher.group(1).equals("December")) month = calendar.DECEMBER;
+							
+							//set the year
+							if (matcher.groupCount()==5) year = Integer.valueOf(matcher.group(5)); 
+							
+							calendar.set(year, month, day);
+							
+							contact.setBirthday(calendar.getTime());
+						}
+					}	
+					
 				}
 				if (location != null){
 					System.out.println("Hometown : " + location.getStreet() +", "+ location.getZip() +", "+ location.getCity() +", "+ location.getState() +", "+ location.getCountry());
@@ -124,13 +160,12 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 					if (location.getState() != null && !location.getState().equals("null")) contact.setStateHome(location.getState());
 					if (location.getCountry() != null && !location.getCountry().equals("null")) contact.setCountryHome(location.getCountry());
 				}
-				System.out.println("Picture : " + user.getPic().getValue());
+				//System.out.println("***** Picture url : " + user.getPic().getValue());
 				//TODO: download picture
 				//add the image from a url to the contact
     			if (user.getPic() != null){
     				OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
     			}	
-				System.out.println("------------------------------");
 				contactObjects.add(contact);
 			}
 		} catch (FacebookException e) {
