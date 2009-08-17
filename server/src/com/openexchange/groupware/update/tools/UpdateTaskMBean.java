@@ -104,11 +104,23 @@ public final class UpdateTaskMBean implements DynamicMBean {
             null,
             "java.lang.String",
             MBeanOperationInfo.INFO);
+        /*
+         * Force re-run operation
+         */
+        final MBeanParameterInfo[] forceParams = new MBeanParameterInfo[] {
+            new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
+            new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
+        final MBeanOperationInfo forceOperation = new MBeanOperationInfo(
+            "force",
+            "Forces re-run of given update task.",
+            forceParams,
+            "void",
+            MBeanOperationInfo.ACTION);
 
         /*
          * Operations
          */
-        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { resetOperation, schemasAndVersionsOperation };
+        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { resetOperation, schemasAndVersionsOperation, forceOperation };
 
         /*
          * MBean info
@@ -163,6 +175,16 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             }
+        } else if (actionName.equals("force")) {
+            try {
+                UpdateTaskToolkit.forceUpdateTask(((String) params[0]), ((Integer) params[1]).intValue());
+            } catch (final UpdateException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            }
+            // Void
+            return null;
         }
         throw new ReflectionException(new NoSuchMethodException(actionName));
     }
