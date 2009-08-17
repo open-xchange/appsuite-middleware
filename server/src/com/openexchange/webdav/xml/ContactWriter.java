@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
+import org.jdom.Namespace;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -371,7 +372,7 @@ public class ContactWriter extends CommonWriter {
     @SuppressWarnings("unchecked")
     private static void addEmailAddress(final String name, final String emailAddress, final Element e, final Set<InternetAddress> internalAddresses) throws AddressException {
         if (null != emailAddress) {
-            final List<Element> children = e.getChildren(name);
+            final List<Element> children = e.getChildren(name, Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE));
             final QuotedInternetAddress ia = new QuotedInternetAddress(emailAddress);
             if (null != children && !children.isEmpty()) {
                 /*
