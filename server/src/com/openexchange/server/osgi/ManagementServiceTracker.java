@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.consistency.ConsistencyInit;
+import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
 import com.openexchange.management.ManagementService;
 import com.openexchange.report.internal.ReportingInit;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -76,7 +77,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
      * 
      * @param context The bundle context
      */
-    public ManagementServiceTracker(BundleContext context) {
+    public ManagementServiceTracker(final BundleContext context) {
         super(context, ManagementService.class);
     }
 
@@ -106,10 +107,12 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             LOG.error(e.getMessage(), e);
         }
         new ReportingInit(managementService).start();
+        new UpdateTaskMBeanInit(managementService).start();
     }
 
     @Override
     protected void removedServiceInternal(final ManagementService managementService) {
+        new UpdateTaskMBeanInit(managementService).stop();
         new ReportingInit(managementService).stop();
         try {
             /*
