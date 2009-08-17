@@ -145,6 +145,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-109 / SoftwareChange_Request-104
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/calendar.properties
+   if ! ox_exists_property com.openexchange.calendar.undefinedstatusconflict $pfile; then
+      ox_set_property com.openexchange.calendar.undefinedstatusconflict true $pfile
+   fi
+   if ! ox_exists_property com.openexchange.calendar.seriesconflictlimit $pfile; then
+      ox_set_property com.openexchange.calendar.seriesconflictlimit true $pfile
+   fi
+
    # SoftwareChange_Request-84
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/TidyConfiguration.properties
