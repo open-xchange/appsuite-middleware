@@ -51,6 +51,9 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
@@ -73,7 +76,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * AppointmentWriter
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class GroupUserWriter extends ContactWriter {
@@ -108,8 +111,7 @@ public class GroupUserWriter extends ContactWriter {
         Contact.DEPARTMENT,
         Contact.DISPLAY_NAME,
         // ContactObject.DISTRIBUTIONLIST,
-        Contact.EMAIL1,
-        Contact.EMAIL2,
+        Contact.EMAIL1, Contact.EMAIL2,
         Contact.EMAIL3,
         Contact.EMPLOYEE_TYPE,
         Contact.FAX_BUSINESS,
@@ -122,76 +124,20 @@ public class GroupUserWriter extends ContactWriter {
         Contact.INSTANT_MESSENGER1,
         Contact.INSTANT_MESSENGER2,
         // ContactObject.LINKS,
-        Contact.MANAGER_NAME,
-        Contact.MARITAL_STATUS,
-        Contact.MIDDLE_NAME,
-        Contact.NICKNAME,
-        Contact.NOTE,
-        Contact.NUMBER_OF_CHILDREN,
-        Contact.NUMBER_OF_EMPLOYEE,
-        Contact.POSITION,
-        Contact.POSTAL_CODE_BUSINESS,
-        Contact.POSTAL_CODE_HOME,
-        Contact.POSTAL_CODE_OTHER,
-        Contact.PRIVATE_FLAG,
-        Contact.PROFESSION,
-        Contact.ROOM_NUMBER,
-        Contact.SALES_VOLUME,
-        Contact.SPOUSE_NAME,
-        Contact.STATE_BUSINESS,
-        Contact.STATE_HOME,
-        Contact.STATE_OTHER,
-        Contact.STREET_BUSINESS,
-        Contact.STREET_HOME,
-        Contact.STREET_OTHER,
-        Contact.SUFFIX,
-        Contact.TAX_ID,
-        Contact.TELEPHONE_ASSISTANT,
-        Contact.TELEPHONE_BUSINESS1,
-        Contact.TELEPHONE_BUSINESS2,
-        Contact.TELEPHONE_CALLBACK,
-        Contact.TELEPHONE_CAR,
-        Contact.TELEPHONE_COMPANY,
-        Contact.TELEPHONE_HOME1,
-        Contact.TELEPHONE_HOME2,
-        Contact.TELEPHONE_IP,
-        Contact.TELEPHONE_ISDN,
-        Contact.TELEPHONE_OTHER,
-        Contact.TELEPHONE_PAGER,
-        Contact.TELEPHONE_PRIMARY,
-        Contact.TELEPHONE_RADIO,
-        Contact.TELEPHONE_TELEX,
-        Contact.TELEPHONE_TTYTDD,
-        Contact.TITLE,
-        Contact.URL,
-        Contact.USERFIELD01,
-        Contact.USERFIELD02,
-        Contact.USERFIELD03,
-        Contact.USERFIELD04,
-        Contact.USERFIELD05,
-        Contact.USERFIELD06,
-        Contact.USERFIELD07,
-        Contact.USERFIELD08,
-        Contact.USERFIELD09,
-        Contact.USERFIELD10,
-        Contact.USERFIELD11,
-        Contact.USERFIELD12,
-        Contact.USERFIELD13,
-        Contact.USERFIELD14,
-        Contact.USERFIELD15,
-        Contact.USERFIELD16,
-        Contact.USERFIELD17,
-        Contact.USERFIELD18,
-        Contact.USERFIELD19,
-        Contact.USERFIELD20,
-        Contact.INTERNAL_USERID
-    };
+        Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME, Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN,
+        Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER,
+        Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS,
+        Contact.STATE_HOME, Contact.STATE_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX,
+        Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK,
+        Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP,
+        Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO,
+        Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02,
+        Contact.USERFIELD03, Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08,
+        Contact.USERFIELD09, Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14,
+        Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20,
+        Contact.INTERNAL_USERID };
 
-    protected final static int[] deleteFields = {
-        DataObject.OBJECT_ID,
-        DataObject.LAST_MODIFIED,
-        Contact.INTERNAL_USERID
-    };
+    protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED, Contact.INTERNAL_USERID };
 
     protected UserStorage userStorage = null;
 
@@ -211,7 +157,7 @@ public class GroupUserWriter extends ContactWriter {
     }
 
     public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
-        //final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
+        // final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
 
         if (lastsync == null) {
@@ -256,9 +202,15 @@ public class GroupUserWriter extends ContactWriter {
         final XMLOutputter xo = new XMLOutputter();
         SearchIterator<Contact> it = null;
         try {
-            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, sessionObj);
-            it = contactInterface.searchContacts(searchpattern, FolderObject.SYSTEM_LDAP_FOLDER_ID, Contact.DISPLAY_NAME, "asc", changeFields);
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                sessionObj);
+            it = contactInterface.searchContacts(
+                searchpattern,
+                FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                Contact.DISPLAY_NAME,
+                "asc",
+                changeFields);
             writeIterator(it, false, xo, os);
         } finally {
             if (it != null) {
@@ -302,7 +254,30 @@ public class GroupUserWriter extends ContactWriter {
             addElement("uid", userId, e);
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
             addElement(ContactFields.FOLDER_ID, FolderObject.SYSTEM_LDAP_FOLDER_ID, e);
-            addElement("email1", u.getMail(), e);
+            final String primaryAddress = u.getMail();
+            {
+                final Element child = addElement("email1", primaryAddress, e);
+                child.setAttribute("isInternal", "true");
+            }
+
+            /*
+             * Create set with internal email addresses
+             */
+            final Set<InternetAddress> internalAddresses;
+
+            final String[] aliases = u.getAliases();
+            if (null != aliases && aliases.length > 0) {
+                internalAddresses = new HashSet<InternetAddress>(aliases.length + 1);
+                internalAddresses.add(new InternetAddress(primaryAddress));
+
+                for (final String alias : aliases) {
+                    internalAddresses.add(new InternetAddress(alias));
+                }
+            } else {
+                internalAddresses = new HashSet<InternetAddress>(1);
+                internalAddresses.add(new InternetAddress(primaryAddress));
+            }
+
             addElement(DataFields.LAST_MODIFIED, contactobject.getLastModified(), e);
             addElementMemberInGroups(e, u);
 
@@ -311,7 +286,7 @@ public class GroupUserWriter extends ContactWriter {
                 addElement("context_id", sessionObj.getContextId(), e);
             }
 
-            writeContactElement(contactobject, e);
+            writeContactElement(contactobject, e, internalAddresses);
         }
     }
 
@@ -326,4 +301,31 @@ public class GroupUserWriter extends ContactWriter {
 
         eProp.addContent(eMemberInGroups);
     }
+
+    private static void addIfNotEmpty(final String name, final String value, final Element parent) {
+        if (isEmpty(value)) {
+            return;
+        }
+        addElement(name, value, parent);
+    }
+
+    /**
+     * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
+     * 
+     * @param str The string to test
+     * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
+     */
+    private static boolean isEmpty(final String str) {
+        if (null == str || str.length() == 0) {
+            return true;
+        }
+        final char[] chars = str.toCharArray();
+        for (final char c : chars) {
+            if (!Character.isWhitespace(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

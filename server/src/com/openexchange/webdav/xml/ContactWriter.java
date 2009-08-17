@@ -47,16 +47,19 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
+import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.Types;
@@ -70,6 +73,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
@@ -78,179 +82,88 @@ import com.openexchange.webdav.xml.fields.ContactFields;
 
 /**
  * ContactWriter
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class ContactWriter extends CommonWriter {
-	
-	protected final static int[] changeFields = {
-		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
-		FolderChildObject.FOLDER_ID,
-		CommonObject.PRIVATE_FLAG,
-		CommonObject.CATEGORIES,
-		Contact.GIVEN_NAME,
-		Contact.SUR_NAME,
-		Contact.ANNIVERSARY,
-		Contact.ASSISTANT_NAME,
-		Contact.BIRTHDAY,
-		Contact.BRANCHES,
-		Contact.BUSINESS_CATEGORY,
-		Contact.CATEGORIES,
-		Contact.CELLULAR_TELEPHONE1,
-		Contact.CELLULAR_TELEPHONE2,
-		Contact.CITY_BUSINESS,
-		Contact.CITY_HOME,
-		Contact.CITY_OTHER,
-		Contact.COMMERCIAL_REGISTER,
-		Contact.COMPANY,
-		Contact.COUNTRY_BUSINESS,
-		Contact.COUNTRY_HOME,
-		Contact.COUNTRY_OTHER,
-		Contact.DEPARTMENT,
-		Contact.DISPLAY_NAME,
-		Contact.DISTRIBUTIONLIST,
-		Contact.EMAIL1,
-		Contact.EMAIL2,
-		Contact.EMAIL3,
-		Contact.EMPLOYEE_TYPE,
-		Contact.FAX_BUSINESS,
-		Contact.FAX_HOME,
-		Contact.FAX_OTHER,
-		Contact.FILE_AS,
-		Contact.FOLDER_ID,
-		Contact.GIVEN_NAME,
-		Contact.IMAGE1,
-		Contact.IMAGE1_CONTENT_TYPE,
-		Contact.INFO,
-		Contact.INSTANT_MESSENGER1,
-		Contact.INSTANT_MESSENGER2,
-		Contact.LINKS,
-		Contact.MANAGER_NAME,
-		Contact.MARITAL_STATUS,
-		Contact.MIDDLE_NAME,
-		Contact.NICKNAME,
-		Contact.NOTE,
-		Contact.NUMBER_OF_CHILDREN,
-		Contact.NUMBER_OF_EMPLOYEE,
-		Contact.POSITION,
-		Contact.POSTAL_CODE_BUSINESS,
-		Contact.POSTAL_CODE_HOME,
-		Contact.POSTAL_CODE_OTHER,
-		Contact.PRIVATE_FLAG,
-		Contact.PROFESSION,
-		Contact.ROOM_NUMBER,
-		Contact.SALES_VOLUME,
-		Contact.SPOUSE_NAME,
-		Contact.STATE_BUSINESS,
-		Contact.STATE_HOME,
-		Contact.STATE_OTHER,
-		Contact.STREET_BUSINESS,
-		Contact.STREET_HOME,
-		Contact.STREET_OTHER,
-		Contact.SUFFIX,
-		Contact.TAX_ID,
-		Contact.TELEPHONE_ASSISTANT,
-		Contact.TELEPHONE_BUSINESS1,
-		Contact.TELEPHONE_BUSINESS2,
-		Contact.TELEPHONE_CALLBACK,
-		Contact.TELEPHONE_CAR,
-		Contact.TELEPHONE_COMPANY,
-		Contact.TELEPHONE_HOME1,
-		Contact.TELEPHONE_HOME2,
-		Contact.TELEPHONE_IP,
-		Contact.TELEPHONE_ISDN,
-		Contact.TELEPHONE_OTHER,
-		Contact.TELEPHONE_PAGER,
-		Contact.TELEPHONE_PRIMARY,
-		Contact.TELEPHONE_RADIO,
-		Contact.TELEPHONE_TELEX,
-		Contact.TELEPHONE_TTYTDD,
-		Contact.TITLE,
-		Contact.URL,
-		Contact.USERFIELD01,
-		Contact.USERFIELD02,
-		Contact.USERFIELD03,
-		Contact.USERFIELD04,
-		Contact.USERFIELD05,
-		Contact.USERFIELD06,
-		Contact.USERFIELD07,
-		Contact.USERFIELD08,
-		Contact.USERFIELD09,
-		Contact.USERFIELD10,
-		Contact.USERFIELD11,
-		Contact.USERFIELD12,
-		Contact.USERFIELD13,
-		Contact.USERFIELD14,
-		Contact.USERFIELD15,
-		Contact.USERFIELD16,
-		Contact.USERFIELD17,
-		Contact.USERFIELD18,
-		Contact.USERFIELD19,
-		Contact.USERFIELD20,
-		Contact.DEFAULT_ADDRESS,
-                Contact.NUMBER_OF_ATTACHMENTS
-	};
-	
-	//private ContactSQLInterface contactsql;
-	
-	protected final static int[] deleteFields = {
-		DataObject.OBJECT_ID,
-		DataObject.LAST_MODIFIED		
-	};
-	
-	private static final Log LOG = LogFactory.getLog(ContactWriter.class);
-	
-	public ContactWriter() {
-		
-	}
-	
-	public ContactWriter(final User userObj, final Context ctx, final Session sessionObj) {
-		this.userObj = userObj;
-		this.ctx = ctx;
-		this.sessionObj = sessionObj;
-		//contactsql = new RdbContactSQLInterface(sessionObj, ctx);
-	}
-	
-	public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final Element eProp = new Element("prop", "D", "DAV:");
-		final XMLOutputter xo = new XMLOutputter();
-		try {
-		    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-	            ContactInterfaceDiscoveryService.class).newContactInterface(folderId, sessionObj);
-			final Contact contactobject = contactInterface.getObjectById(objectId, folderId);
-			writeObject(contactobject, eProp, false, xo, os);
-		} catch (final OXObjectNotFoundException exc) {
-			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
-		} catch (final Exception ex) {
-			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
-		}
-	}
-	
-	public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
-		final XMLOutputter xo = new XMLOutputter();
-		/*
+
+    protected final static int[] changeFields = {
+        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME,
+        Contact.ANNIVERSARY, Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES, Contact.BUSINESS_CATEGORY, Contact.CATEGORIES,
+        Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER,
+        Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER,
+        Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3,
+        Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.FILE_AS, Contact.FOLDER_ID,
+        Contact.GIVEN_NAME, Contact.IMAGE1, Contact.IMAGE1_CONTENT_TYPE, Contact.INFO, Contact.INSTANT_MESSENGER1,
+        Contact.INSTANT_MESSENGER2, Contact.LINKS, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME, Contact.NICKNAME,
+        Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION, Contact.POSTAL_CODE_BUSINESS,
+        Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER,
+        Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER,
+        Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT,
+        Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR,
+        Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN,
+        Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX,
+        Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02, Contact.USERFIELD03,
+        Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08, Contact.USERFIELD09,
+        Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14, Contact.USERFIELD15,
+        Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20, Contact.DEFAULT_ADDRESS,
+        Contact.NUMBER_OF_ATTACHMENTS };
+
+    // private ContactSQLInterface contactsql;
+
+    protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED };
+
+    private static final Log LOG = LogFactory.getLog(ContactWriter.class);
+
+    public ContactWriter() {
+
+    }
+
+    public ContactWriter(final User userObj, final Context ctx, final Session sessionObj) {
+        this.userObj = userObj;
+        this.ctx = ctx;
+        this.sessionObj = sessionObj;
+        // contactsql = new RdbContactSQLInterface(sessionObj, ctx);
+    }
+
+    public void startWriter(final int objectId, final int folderId, final OutputStream os) throws Exception {
+        final Element eProp = new Element("prop", "D", "DAV:");
+        final XMLOutputter xo = new XMLOutputter();
+        try {
+            final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                folderId,
+                sessionObj);
+            final Contact contactobject = contactInterface.getObjectById(objectId, folderId);
+            writeObject(contactobject, eProp, false, xo, os);
+        } catch (final OXObjectNotFoundException exc) {
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
+        } catch (final Exception ex) {
+            writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
+        }
+    }
+
+    public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+        final XMLOutputter xo = new XMLOutputter();
+        /*
          * Fist send all 'deletes', than all 'modified'
          */
-		if (bDeleted) {
-			SearchIterator<Contact> it = null;
-			try {
-			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-	                ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
-				it = contactInterface.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
-				writeIterator(it, true, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
+        if (bDeleted) {
+            SearchIterator<Contact> it = null;
+            try {
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
+                it = contactInterface.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
+                writeIterator(it, true, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
 
-		if (bModified) {
+        if (bModified) {
             SearchIterator<Contact> it = null;
             try {
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
@@ -263,237 +176,288 @@ public class ContactWriter extends CommonWriter {
                 }
             }
         }
-		
-		if (bList) {
-			SearchIterator<Contact> it = null;
-			try {
-			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-	                ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
-				it = contactInterface.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
-				writeList(it, xo, os);
-			} finally {
-				if (it != null) {
-					it.close();
-				}
-			}
-		}
-	}
-	
-	public void writeIterator(final SearchIterator<Contact> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		while (it.hasNext()) {
-			writeObject(it.next(), delete, xo, os);
-		}
-	}
-	
-	public void writeObject(final Contact contactObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		writeObject(contactObj, new Element("prop", "D", "DAV:"), delete, xo, os); 
-	}
-	
-	public void writeObject(final Contact contactObj, final Element eProp, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
-		int status = 200;
-		String description = "OK";
-		int object_id = 0;
-		
-		try {
-			object_id = contactObj.getObjectID();
-			if (contactObj.containsImage1()&& !delete) {
-			    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-	                ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), sessionObj);
-				final Contact contactObjectWithImage = contactInterface.getObjectById(object_id, contactObj.getParentFolderID());
-				addContent2PropElement(eProp, contactObjectWithImage, delete);
-			} else {
-				addContent2PropElement(eProp, contactObj, delete);
-			}
-		} catch (final Exception exc) {
-			LOG.error("writeObject", exc);
-			status = 500;
-			description = "Server Error: " + exc.getMessage();
-			object_id = 0;
-		}
-		
-		writeResponseElement(eProp, object_id, status, description, xo, os);
-	}
-	
-	protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete) throws Exception {
-		addContent2PropElement(e, contactobject, delete, false);
-	}
-	
-	protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws Exception {
-		if (delete) {
-			addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
-			addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
-			addElement("object_status", "DELETE", e);
-		} else {
-			writeCommonElements(contactobject, e);
-			writeContactElement(contactobject, e);
-			
-			if (contactobject.containsImage1()) {
-				addElement(ContactFields.IMAGE_CONTENT_TYPE, contactobject.getImageContentType(), e);
-				addElement(ContactFields.IMAGE1, Base64.encode(contactobject.getImage1()), e);
-			}
-			
-			if (contactobject.getDistributionList() != null) {
-				addElement(ContactFields.DISTRIBUTIONLIST_FLAG, true, e);
-				writeDistributionList(contactobject, e);
-			} else {
-				addElement(ContactFields.DISTRIBUTIONLIST_FLAG, false, e);
-			}
-			
-			if (contactobject.getNumberOfLinks() > 0) {
-				writeLinks(contactobject, e);
-			}
-		}
-	}
-	
-	protected void writeContactElement(final Contact contactobject, final Element e) throws Exception {
-		addElement("object_status", "CREATE", e);
-		addElement(ContactFields.LAST_NAME, contactobject.getSurName(), e);
-		addElement(ContactFields.FIRST_NAME, contactobject.getGivenName(), e);
-		addElement(ContactFields.ANNIVERSARY, contactobject.getAnniversary(), e);
-		addElement(ContactFields.ASSISTANTS_NAME, contactobject.getAssistantName(), e);
-		addElement(ContactFields.BIRTHDAY, contactobject.getBirthday(), e);
-		addElement(ContactFields.BRANCHES, contactobject.getBranches(), e);
-		addElement(ContactFields.BUSINESS_CATEGORY, contactobject.getBusinessCategory(), e);
-		addElement(ContactFields.CATEGORIES, contactobject.getCategories(), e);
-		addElement(ContactFields.MOBILE1, contactobject.getCellularTelephone1(), e);
-		addElement(ContactFields.MOBILE2, contactobject.getCellularTelephone2(), e);
-		addElement(ContactFields.CITY, contactobject.getCityHome(), e);
-		addElement(ContactFields.BUSINESS_CITY, contactobject.getCityBusiness(), e);
-		addElement(ContactFields.SECOND_CITY, contactobject.getCityOther(), e);
-		addElement(ContactFields.COMMERCIAL_REGISTER, contactobject.getCommercialRegister(), e);
-		addElement(ContactFields.COMPANY, contactobject.getCompany(), e);
-		addElement(ContactFields.COUNTRY, contactobject.getCountryHome(), e);
-		addElement(ContactFields.BUSINESS_COUNTRY, contactobject.getCountryBusiness(), e);
-		addElement(ContactFields.SECOND_COUNTRY, contactobject.getCountryOther(), e);
-		addElement(ContactFields.DEPARTMENT, contactobject.getDepartment(), e);
-		addElement(ContactFields.DISPLAY_NAME, contactobject.getDisplayName(), e);
-		addElement(ContactFields.EMAIL1, contactobject.getEmail1(), e);
-		addElement(ContactFields.EMAIL2, contactobject.getEmail2(), e);
-		addElement(ContactFields.EMAIL3, contactobject.getEmail3(), e);
-		addElement(ContactFields.EMPLOYEE_TYPE, contactobject.getEmployeeType(), e);
-		addElement(ContactFields.FAX_BUSINESS, contactobject.getFaxBusiness(), e);
-		addElement(ContactFields.FAX_HOME, contactobject.getFaxHome(), e);
-		addElement(ContactFields.FAX_OTHER, contactobject.getFaxOther(), e);
-		addElement("fileas", contactobject.getFileAs(), e);
-		addElement(ContactFields.NOTE, contactobject.getNote(), e);
-		addElement(ContactFields.MORE_INFO, contactobject.getInfo(), e);
-		addElement(ContactFields.INSTANT_MESSENGER, contactobject.getInstantMessenger1(), e);
-		addElement(ContactFields.INSTANT_MESSENGER2, contactobject.getInstantMessenger2(), e);
-		addElement(ContactFields.MARTITAL_STATUS, contactobject.getMaritalStatus(), e);
-		addElement(ContactFields.MANAGERS_NAME, contactobject.getManagerName(), e);
-		addElement(ContactFields.SECOND_NAME, contactobject.getMiddleName(), e);
-		addElement(ContactFields.NICKNAME, contactobject.getNickname(), e);
-		addElement(ContactFields.NUMBER_OF_CHILDREN, contactobject.getNumberOfChildren(), e);
-		addElement(ContactFields.NUMBER_OF_EMPLOYEE, contactobject.getNumberOfEmployee(), e);
-		addElement(ContactFields.POSITION, contactobject.getPosition(), e);
-		addElement(ContactFields.POSTAL_CODE, contactobject.getPostalCodeHome(), e);
-		addElement(ContactFields.BUSINESS_POSTAL_CODE, contactobject.getPostalCodeBusiness(), e);
-		addElement(ContactFields.SECOND_POSTAL_CODE, contactobject.getPostalCodeOther(), e);
-		addElement(ContactFields.PROFESSION, contactobject.getProfession(), e);
-		addElement(ContactFields.ROOM_NUMBER, contactobject.getRoomNumber(), e);
-		addElement(ContactFields.SALES_VOLUME, contactobject.getSalesVolume(), e);
-		addElement(ContactFields.SPOUSE_NAME, contactobject.getSpouseName(), e);
-		addElement(ContactFields.STATE, contactobject.getStateHome(), e);
-		addElement(ContactFields.BUSINESS_STATE, contactobject.getStateBusiness(), e);
-		addElement(ContactFields.SECOND_STATE, contactobject.getStateOther(), e);
-		addElement(ContactFields.STREET, contactobject.getStreetHome(), e);
-		addElement(ContactFields.BUSINESS_STREET, contactobject.getStreetBusiness(), e);
-		addElement(ContactFields.SECOND_STREET, contactobject.getStreetOther(), e);
-		addElement(ContactFields.SUFFIX, contactobject.getSuffix(), e);
-		addElement(ContactFields.TAX_ID, contactobject.getTaxID(), e);
-		addElement(ContactFields.PHONE_ASSISTANT, contactobject.getTelephoneAssistant(), e);
-		addElement(ContactFields.PHONE_BUSINESS, contactobject.getTelephoneBusiness1(), e);
-		addElement(ContactFields.PHONE_BUSINESS2, contactobject.getTelephoneBusiness2(), e);
-		addElement(ContactFields.CALLBACK, contactobject.getTelephoneCallback(), e);
-		addElement(ContactFields.PHONE_CAR, contactobject.getTelephoneCar(), e);
-		addElement(ContactFields.PHONE_COMPANY, contactobject.getTelephoneCompany(), e);
-		addElement(ContactFields.PHONE_HOME, contactobject.getTelephoneHome1(), e);
-		addElement(ContactFields.PHONE_HOME2, contactobject.getTelephoneHome2(), e);
-		addElement(ContactFields.IP_PHONE, contactobject.getTelephoneIP(), e);
-		addElement(ContactFields.ISDN, contactobject.getTelephoneISDN(), e);
-		addElement(ContactFields.PHONE_OTHER, contactobject.getTelephoneOther(), e);
-		addElement(ContactFields.PAGER, contactobject.getTelephonePager(), e);
-		addElement(ContactFields.PRIMARY, contactobject.getTelephonePrimary(), e);
-		addElement(ContactFields.RADIO, contactobject.getTelephoneRadio(), e);
-		addElement(ContactFields.TELEX, contactobject.getTelephoneTelex(), e);
-		addElement(ContactFields.TTY_TDD, contactobject.getTelephoneTTYTTD(), e);
-		addElement(ContactFields.TITLE, contactobject.getTitle(), e);
-		addElement(ContactFields.URL, contactobject.getURL(), e);
-		addElement(ContactFields.USERFIELD01, contactobject.getUserField01(), e);
-		addElement(ContactFields.USERFIELD02, contactobject.getUserField02(), e);
-		addElement(ContactFields.USERFIELD03, contactobject.getUserField03(), e);
-		addElement(ContactFields.USERFIELD04, contactobject.getUserField04(), e);
-		addElement(ContactFields.USERFIELD05, contactobject.getUserField05(), e);
-		addElement(ContactFields.USERFIELD06, contactobject.getUserField06(), e);
-		addElement(ContactFields.USERFIELD07, contactobject.getUserField07(), e);
-		addElement(ContactFields.USERFIELD08, contactobject.getUserField08(), e);
-		addElement(ContactFields.USERFIELD09, contactobject.getUserField09(), e);
-		addElement(ContactFields.USERFIELD10, contactobject.getUserField10(), e);
-		addElement(ContactFields.USERFIELD11, contactobject.getUserField11(), e);
-		addElement(ContactFields.USERFIELD12, contactobject.getUserField12(), e);
-		addElement(ContactFields.USERFIELD13, contactobject.getUserField13(), e);
-		addElement(ContactFields.USERFIELD14, contactobject.getUserField14(), e);
-		addElement(ContactFields.USERFIELD15, contactobject.getUserField15(), e);
-		addElement(ContactFields.USERFIELD16, contactobject.getUserField16(), e);
-		addElement(ContactFields.USERFIELD17, contactobject.getUserField17(), e);
-		addElement(ContactFields.USERFIELD18, contactobject.getUserField18(), e);
-		addElement(ContactFields.USERFIELD19, contactobject.getUserField19(), e);
-		addElement(ContactFields.USERFIELD20, contactobject.getUserField20(), e);
-		addElement(ContactFields.DEFAULTADDRESS, contactobject.getDefaultAddress(), e);
-	}
-	
-	protected void writeLinks(final Contact contactobject, final Element e_prop) throws Exception {
-		final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
-		
-		final LinkEntryObject[] links = contactobject.getLinks();
-		for (int a = 0; a < links.length; a++) {
-			final int id = links[a].getLinkID();
-			String displayname = links[a].getLinkDisplayname();
-			if (displayname == null) {
-				displayname = String.valueOf(id);
-			}
-			
-			final Element e = new Element("link", XmlServlet.NS);
-			e.addContent(String.valueOf(id));
-			e.setAttribute("displayname", displayname, XmlServlet.NS);
-			
-			e_links.addContent(e);
-		}
-		
-		e_prop.addContent(e_links);
-	}
-	
-	protected void writeDistributionList(final Contact contactobject, final Element e_prop) throws Exception {
-		final Element e_distributionlist = new Element(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS);
-		
-		final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
-		for (int a = 0; a < distributionlist.length; a++) {
-			String displayname = distributionlist[a].getDisplayname();
-			final String email = distributionlist[a].getEmailaddress();
-			
-			if (displayname == null) {
-				displayname = email;
-			}
-			
-			final Element e = new Element("email", XmlServlet.NS);
-			e.addContent(correctCharacterData(email));
-			e.setAttribute("id", String.valueOf(distributionlist[a].getEntryID()), XmlServlet.NS);
-			e.setAttribute(ContactFields.FOLDER_ID, String.valueOf(distributionlist[a].getFolderID()), XmlServlet.NS);
-			e.setAttribute("displayname", displayname.trim(), XmlServlet.NS);
-			e.setAttribute("emailfield", String.valueOf(distributionlist[a].getEmailfield()), XmlServlet.NS);
-			
-			e_distributionlist.addContent(e);
-		}
-		
-		e_prop.addContent(e_distributionlist);
-	}
-	
-	@Override
-	protected int getModule() {
-		return Types.CONTACT;
-	}
+
+        if (bList) {
+            SearchIterator<Contact> it = null;
+            try {
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(folder_id, sessionObj);
+                it = contactInterface.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
+                writeList(it, xo, os);
+            } finally {
+                if (it != null) {
+                    it.close();
+                }
+            }
+        }
+    }
+
+    public void writeIterator(final SearchIterator<Contact> it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        while (it.hasNext()) {
+            writeObject(it.next(), delete, xo, os);
+        }
+    }
+
+    public void writeObject(final Contact contactObj, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        writeObject(contactObj, new Element("prop", "D", "DAV:"), delete, xo, os);
+    }
+
+    public void writeObject(final Contact contactObj, final Element eProp, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {
+        int status = 200;
+        String description = "OK";
+        int object_id = 0;
+
+        try {
+            object_id = contactObj.getObjectID();
+            if (contactObj.containsImage1() && !delete) {
+                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
+                    ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), sessionObj);
+                final Contact contactObjectWithImage = contactInterface.getObjectById(object_id, contactObj.getParentFolderID());
+                addContent2PropElement(eProp, contactObjectWithImage, delete);
+            } else {
+                addContent2PropElement(eProp, contactObj, delete);
+            }
+        } catch (final Exception exc) {
+            LOG.error("writeObject", exc);
+            status = 500;
+            description = "Server Error: " + exc.getMessage();
+            object_id = 0;
+        }
+
+        writeResponseElement(eProp, object_id, status, description, xo, os);
+    }
+
+    protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete) throws Exception {
+        addContent2PropElement(e, contactobject, delete, false);
+    }
+
+    protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws Exception {
+        if (delete) {
+            addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
+            addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
+            addElement("object_status", "DELETE", e);
+        } else {
+            writeCommonElements(contactobject, e);
+            writeContactElement(contactobject, e);
+
+            if (contactobject.containsImage1()) {
+                addElement(ContactFields.IMAGE_CONTENT_TYPE, contactobject.getImageContentType(), e);
+                addElement(ContactFields.IMAGE1, Base64.encode(contactobject.getImage1()), e);
+            }
+
+            if (contactobject.getDistributionList() != null) {
+                addElement(ContactFields.DISTRIBUTIONLIST_FLAG, true, e);
+                writeDistributionList(contactobject, e);
+            } else {
+                addElement(ContactFields.DISTRIBUTIONLIST_FLAG, false, e);
+            }
+
+            if (contactobject.getNumberOfLinks() > 0) {
+                writeLinks(contactobject, e);
+            }
+        }
+    }
+
+    protected void writeContactElement(final Contact contactobject, final Element e) throws Exception {
+        writeContactElement(contactobject, e, null);
+    }
+
+    protected void writeContactElement(final Contact contactobject, final Element e, final Set<InternetAddress> internalAddresses) throws Exception {
+        addElement("object_status", "CREATE", e);
+        addElement(ContactFields.LAST_NAME, contactobject.getSurName(), e);
+        addElement(ContactFields.FIRST_NAME, contactobject.getGivenName(), e);
+        addElement(ContactFields.ANNIVERSARY, contactobject.getAnniversary(), e);
+        addElement(ContactFields.ASSISTANTS_NAME, contactobject.getAssistantName(), e);
+        addElement(ContactFields.BIRTHDAY, contactobject.getBirthday(), e);
+        addElement(ContactFields.BRANCHES, contactobject.getBranches(), e);
+        addElement(ContactFields.BUSINESS_CATEGORY, contactobject.getBusinessCategory(), e);
+        addElement(ContactFields.CATEGORIES, contactobject.getCategories(), e);
+        addElement(ContactFields.MOBILE1, contactobject.getCellularTelephone1(), e);
+        addElement(ContactFields.MOBILE2, contactobject.getCellularTelephone2(), e);
+        addElement(ContactFields.CITY, contactobject.getCityHome(), e);
+        addElement(ContactFields.BUSINESS_CITY, contactobject.getCityBusiness(), e);
+        addElement(ContactFields.SECOND_CITY, contactobject.getCityOther(), e);
+        addElement(ContactFields.COMMERCIAL_REGISTER, contactobject.getCommercialRegister(), e);
+        addElement(ContactFields.COMPANY, contactobject.getCompany(), e);
+        addElement(ContactFields.COUNTRY, contactobject.getCountryHome(), e);
+        addElement(ContactFields.BUSINESS_COUNTRY, contactobject.getCountryBusiness(), e);
+        addElement(ContactFields.SECOND_COUNTRY, contactobject.getCountryOther(), e);
+        addElement(ContactFields.DEPARTMENT, contactobject.getDepartment(), e);
+        addElement(ContactFields.DISPLAY_NAME, contactobject.getDisplayName(), e);
+        /*
+         * Write email addresses
+         */
+        if (null == internalAddresses || internalAddresses.isEmpty()) {
+            addElement(ContactFields.EMAIL1, contactobject.getEmail1(), e);
+            addElement(ContactFields.EMAIL2, contactobject.getEmail2(), e);
+            addElement(ContactFields.EMAIL3, contactobject.getEmail3(), e);
+        } else {
+            addEmailAddress(ContactFields.EMAIL1, contactobject.getEmail1(), e, internalAddresses);
+            addEmailAddress(ContactFields.EMAIL2, contactobject.getEmail2(), e, internalAddresses);
+            addEmailAddress(ContactFields.EMAIL3, contactobject.getEmail3(), e, internalAddresses);
+        }
+        addElement(ContactFields.EMPLOYEE_TYPE, contactobject.getEmployeeType(), e);
+        addElement(ContactFields.FAX_BUSINESS, contactobject.getFaxBusiness(), e);
+        addElement(ContactFields.FAX_HOME, contactobject.getFaxHome(), e);
+        addElement(ContactFields.FAX_OTHER, contactobject.getFaxOther(), e);
+        addElement("fileas", contactobject.getFileAs(), e);
+        addElement(ContactFields.NOTE, contactobject.getNote(), e);
+        addElement(ContactFields.MORE_INFO, contactobject.getInfo(), e);
+        addElement(ContactFields.INSTANT_MESSENGER, contactobject.getInstantMessenger1(), e);
+        addElement(ContactFields.INSTANT_MESSENGER2, contactobject.getInstantMessenger2(), e);
+        addElement(ContactFields.MARTITAL_STATUS, contactobject.getMaritalStatus(), e);
+        addElement(ContactFields.MANAGERS_NAME, contactobject.getManagerName(), e);
+        addElement(ContactFields.SECOND_NAME, contactobject.getMiddleName(), e);
+        addElement(ContactFields.NICKNAME, contactobject.getNickname(), e);
+        addElement(ContactFields.NUMBER_OF_CHILDREN, contactobject.getNumberOfChildren(), e);
+        addElement(ContactFields.NUMBER_OF_EMPLOYEE, contactobject.getNumberOfEmployee(), e);
+        addElement(ContactFields.POSITION, contactobject.getPosition(), e);
+        addElement(ContactFields.POSTAL_CODE, contactobject.getPostalCodeHome(), e);
+        addElement(ContactFields.BUSINESS_POSTAL_CODE, contactobject.getPostalCodeBusiness(), e);
+        addElement(ContactFields.SECOND_POSTAL_CODE, contactobject.getPostalCodeOther(), e);
+        addElement(ContactFields.PROFESSION, contactobject.getProfession(), e);
+        addElement(ContactFields.ROOM_NUMBER, contactobject.getRoomNumber(), e);
+        addElement(ContactFields.SALES_VOLUME, contactobject.getSalesVolume(), e);
+        addElement(ContactFields.SPOUSE_NAME, contactobject.getSpouseName(), e);
+        addElement(ContactFields.STATE, contactobject.getStateHome(), e);
+        addElement(ContactFields.BUSINESS_STATE, contactobject.getStateBusiness(), e);
+        addElement(ContactFields.SECOND_STATE, contactobject.getStateOther(), e);
+        addElement(ContactFields.STREET, contactobject.getStreetHome(), e);
+        addElement(ContactFields.BUSINESS_STREET, contactobject.getStreetBusiness(), e);
+        addElement(ContactFields.SECOND_STREET, contactobject.getStreetOther(), e);
+        addElement(ContactFields.SUFFIX, contactobject.getSuffix(), e);
+        addElement(ContactFields.TAX_ID, contactobject.getTaxID(), e);
+        addElement(ContactFields.PHONE_ASSISTANT, contactobject.getTelephoneAssistant(), e);
+        addElement(ContactFields.PHONE_BUSINESS, contactobject.getTelephoneBusiness1(), e);
+        addElement(ContactFields.PHONE_BUSINESS2, contactobject.getTelephoneBusiness2(), e);
+        addElement(ContactFields.CALLBACK, contactobject.getTelephoneCallback(), e);
+        addElement(ContactFields.PHONE_CAR, contactobject.getTelephoneCar(), e);
+        addElement(ContactFields.PHONE_COMPANY, contactobject.getTelephoneCompany(), e);
+        addElement(ContactFields.PHONE_HOME, contactobject.getTelephoneHome1(), e);
+        addElement(ContactFields.PHONE_HOME2, contactobject.getTelephoneHome2(), e);
+        addElement(ContactFields.IP_PHONE, contactobject.getTelephoneIP(), e);
+        addElement(ContactFields.ISDN, contactobject.getTelephoneISDN(), e);
+        addElement(ContactFields.PHONE_OTHER, contactobject.getTelephoneOther(), e);
+        addElement(ContactFields.PAGER, contactobject.getTelephonePager(), e);
+        addElement(ContactFields.PRIMARY, contactobject.getTelephonePrimary(), e);
+        addElement(ContactFields.RADIO, contactobject.getTelephoneRadio(), e);
+        addElement(ContactFields.TELEX, contactobject.getTelephoneTelex(), e);
+        addElement(ContactFields.TTY_TDD, contactobject.getTelephoneTTYTTD(), e);
+        addElement(ContactFields.TITLE, contactobject.getTitle(), e);
+        addElement(ContactFields.URL, contactobject.getURL(), e);
+        addElement(ContactFields.USERFIELD01, contactobject.getUserField01(), e);
+        addElement(ContactFields.USERFIELD02, contactobject.getUserField02(), e);
+        addElement(ContactFields.USERFIELD03, contactobject.getUserField03(), e);
+        addElement(ContactFields.USERFIELD04, contactobject.getUserField04(), e);
+        addElement(ContactFields.USERFIELD05, contactobject.getUserField05(), e);
+        addElement(ContactFields.USERFIELD06, contactobject.getUserField06(), e);
+        addElement(ContactFields.USERFIELD07, contactobject.getUserField07(), e);
+        addElement(ContactFields.USERFIELD08, contactobject.getUserField08(), e);
+        addElement(ContactFields.USERFIELD09, contactobject.getUserField09(), e);
+        addElement(ContactFields.USERFIELD10, contactobject.getUserField10(), e);
+        addElement(ContactFields.USERFIELD11, contactobject.getUserField11(), e);
+        addElement(ContactFields.USERFIELD12, contactobject.getUserField12(), e);
+        addElement(ContactFields.USERFIELD13, contactobject.getUserField13(), e);
+        addElement(ContactFields.USERFIELD14, contactobject.getUserField14(), e);
+        addElement(ContactFields.USERFIELD15, contactobject.getUserField15(), e);
+        addElement(ContactFields.USERFIELD16, contactobject.getUserField16(), e);
+        addElement(ContactFields.USERFIELD17, contactobject.getUserField17(), e);
+        addElement(ContactFields.USERFIELD18, contactobject.getUserField18(), e);
+        addElement(ContactFields.USERFIELD19, contactobject.getUserField19(), e);
+        addElement(ContactFields.USERFIELD20, contactobject.getUserField20(), e);
+        addElement(ContactFields.DEFAULTADDRESS, contactobject.getDefaultAddress(), e);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void addEmailAddress(final String name, final String emailAddress, final Element e, final Set<InternetAddress> internalAddresses) throws AddressException {
+        if (null != emailAddress) {
+            final List<Element> children = e.getChildren(name);
+            final QuotedInternetAddress ia = new QuotedInternetAddress(emailAddress);
+            if (null != children && !children.isEmpty()) {
+                /*
+                 * A child element with the same name already exists
+                 */
+                if (children.size() > 1) {
+                    LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" Multiple elements named \"").append(
+                        name).append("\" already exist."));
+                    return;
+                }
+                final Element elem = children.get(0);
+                final Text text = (Text) elem.getContent().get(0);
+                if (!new QuotedInternetAddress(text.getText()).equals(ia)) {
+                    LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" An element named \"").append(
+                        name).append("\" already exists."));
+                    return;
+                }
+                /*
+                 * An element with the same name and same value already exists. check for "isInternal" attribute.
+                 */
+                final org.jdom.Attribute attr = elem.getAttribute("isInternal");
+                if (null == attr) {
+                    if (internalAddresses.contains(ia)) {
+                        elem.setAttribute("isInternal", "true");
+                    }
+                }
+                return;
+            }
+            /*
+             * No equally named element exists, create it.
+             */
+            final Element child = addElement(name, emailAddress, e);
+            if (internalAddresses.contains(ia)) {
+                child.setAttribute("isInternal", "true");
+            }
+        }
+    }
+
+    protected void writeLinks(final Contact contactobject, final Element e_prop) throws Exception {
+        final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
+
+        final LinkEntryObject[] links = contactobject.getLinks();
+        for (int a = 0; a < links.length; a++) {
+            final int id = links[a].getLinkID();
+            String displayname = links[a].getLinkDisplayname();
+            if (displayname == null) {
+                displayname = String.valueOf(id);
+            }
+
+            final Element e = new Element("link", XmlServlet.NS);
+            e.addContent(String.valueOf(id));
+            e.setAttribute("displayname", displayname, XmlServlet.NS);
+
+            e_links.addContent(e);
+        }
+
+        e_prop.addContent(e_links);
+    }
+
+    protected void writeDistributionList(final Contact contactobject, final Element e_prop) throws Exception {
+        final Element e_distributionlist = new Element(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS);
+
+        final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
+        for (int a = 0; a < distributionlist.length; a++) {
+            String displayname = distributionlist[a].getDisplayname();
+            final String email = distributionlist[a].getEmailaddress();
+
+            if (displayname == null) {
+                displayname = email;
+            }
+
+            final Element e = new Element("email", XmlServlet.NS);
+            e.addContent(correctCharacterData(email));
+            e.setAttribute("id", String.valueOf(distributionlist[a].getEntryID()), XmlServlet.NS);
+            e.setAttribute(ContactFields.FOLDER_ID, String.valueOf(distributionlist[a].getFolderID()), XmlServlet.NS);
+            e.setAttribute("displayname", displayname.trim(), XmlServlet.NS);
+            e.setAttribute("emailfield", String.valueOf(distributionlist[a].getEmailfield()), XmlServlet.NS);
+
+            e_distributionlist.addContent(e);
+        }
+
+        e_prop.addContent(e_distributionlist);
+    }
+
+    @Override
+    protected int getModule() {
+        return Types.CONTACT;
+    }
 }
-
-
-
-

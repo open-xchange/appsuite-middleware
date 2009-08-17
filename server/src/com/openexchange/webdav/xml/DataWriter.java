@@ -51,12 +51,10 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.util.Date;
-
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Verifier;
 import org.jdom.output.XMLOutputter;
-
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -71,195 +69,190 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public class DataWriter {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(DataWriter.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DataWriter.class);
 
-	public static final int ACTION_MODIFIED = 1;
+    public static final int ACTION_MODIFIED = 1;
 
-	public static final int ACTION_DELETE = 2;
+    public static final int ACTION_DELETE = 2;
 
-	public static final int ACTION_LIST = 3;
+    public static final int ACTION_LIST = 3;
 
-	private static final Namespace dav = Namespace.getNamespace("D", "DAV:");
+    private static final Namespace dav = Namespace.getNamespace("D", "DAV:");
 
-	public static final Namespace namespace = Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+    public static final Namespace namespace = Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 
-	protected Session sessionObj;
+    protected Session sessionObj;
 
-	protected Context ctx;
+    protected Context ctx;
 
-	protected User userObj;
+    protected User userObj;
 
-	protected void writeResponseElement(final Element e_prop, final int object_id, final int status,
-			final String description, final XMLOutputter xo, final OutputStream os) throws Exception {
-		final Element e_response = new Element("response", dav);
-		e_response.addNamespaceDeclaration(Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE));
-		e_response.addContent(new Element("href", dav).addContent(String.valueOf(object_id)));
+    protected void writeResponseElement(final Element e_prop, final int object_id, final int status, final String description, final XMLOutputter xo, final OutputStream os) throws Exception {
+        final Element e_response = new Element("response", dav);
+        e_response.addNamespaceDeclaration(Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE));
+        e_response.addContent(new Element("href", dav).addContent(String.valueOf(object_id)));
 
-		final Element e_propstat = new Element("propstat", dav);
-		e_response.addContent(e_propstat);
+        final Element e_propstat = new Element("propstat", dav);
+        e_response.addContent(e_propstat);
 
-		e_propstat.addContent(e_prop);
-		e_propstat.addContent(new Element("status", dav).addContent(String.valueOf(status)));
-		e_propstat.addContent(new Element("responsedescription", dav).addContent(correctCharacterData(description)));
+        e_propstat.addContent(e_prop);
+        e_propstat.addContent(new Element("status", dav).addContent(String.valueOf(status)));
+        e_propstat.addContent(new Element("responsedescription", dav).addContent(correctCharacterData(description)));
 
-		xo.output(e_response, os);
-		os.flush();
-	}
+        xo.output(e_response, os);
+        os.flush();
+    }
 
-	protected void writeDataElements(final DataObject dataobject, final Element e_prop) {
-		if (dataobject.containsCreatedBy()) {
-			addElement(DataFields.CREATED_BY, dataobject.getCreatedBy(), e_prop);
-		}
+    protected void writeDataElements(final DataObject dataobject, final Element e_prop) {
+        if (dataobject.containsCreatedBy()) {
+            addElement(DataFields.CREATED_BY, dataobject.getCreatedBy(), e_prop);
+        }
 
-		if (dataobject.containsCreationDate()) {
-			addElement(DataFields.CREATION_TIME, dataobject.getCreationDate(), e_prop);
-		}
+        if (dataobject.containsCreationDate()) {
+            addElement(DataFields.CREATION_TIME, dataobject.getCreationDate(), e_prop);
+        }
 
-		if (dataobject.containsModifiedBy()) {
-			addElement(DataFields.MODIFIED_BY, dataobject.getModifiedBy(), e_prop);
-		}
+        if (dataobject.containsModifiedBy()) {
+            addElement(DataFields.MODIFIED_BY, dataobject.getModifiedBy(), e_prop);
+        }
 
-		if (dataobject.containsLastModified()) {
-			addElement(DataFields.LAST_MODIFIED, dataobject.getLastModified(), e_prop);
-		}
+        if (dataobject.containsLastModified()) {
+            addElement(DataFields.LAST_MODIFIED, dataobject.getLastModified(), e_prop);
+        }
 
-		if (dataobject.containsObjectID()) {
-			addElement(DataFields.OBJECT_ID, dataobject.getObjectID(), e_prop);
-		}
-	}
+        if (dataobject.containsObjectID()) {
+            addElement(DataFields.OBJECT_ID, dataobject.getObjectID(), e_prop);
+        }
+    }
 
-	public static void addElement(final String name, final String value, final Element parent) {
-		if (value != null) {
-			final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-			e.addContent(correctCharacterData(value));
-			parent.addContent(e);
-		}
-	}
+    public static Element addElement(final String name, final String value, final Element parent) {
+        if (value != null) {
+            final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+            e.addContent(correctCharacterData(value));
+            parent.addContent(e);
+            return e;
+        }
+        return null;
+    }
 
-	public static void addElement(final String name, final Date value, final Element parent) {
-		if (value != null) {
-			final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-			e.addContent(String.valueOf(value.getTime()));
-			parent.addContent(e);
-		}
-	}
+    public static Element addElement(final String name, final Date value, final Element parent) {
+        if (value != null) {
+            final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+            e.addContent(String.valueOf(value.getTime()));
+            parent.addContent(e);
+            return e;
+        }
+        return null;
+    }
 
-	public static void addElement(final String name, final int value, final Element parent) {
-		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-		e.addContent(String.valueOf(value));
-		parent.addContent(e);
-	}
+    public static Element addElement(final String name, final int value, final Element parent) {
+        final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+        e.addContent(String.valueOf(value));
+        parent.addContent(e);
+        return e;
+    }
 
-	public static void addElement(final String name, final float value, final Element parent) throws Exception {
-		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-		e.addContent(String.valueOf(value));
-		parent.addContent(e);
-	}
+    public static Element addElement(final String name, final float value, final Element parent) throws Exception {
+        final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+        e.addContent(String.valueOf(value));
+        parent.addContent(e);
+        return e;
+    }
 
-	public static void addElement(final String name, final long value, final Element parent) throws Exception {
-		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-		e.addContent(String.valueOf(value));
-		parent.addContent(e);
-	}
+    public static Element addElement(final String name, final long value, final Element parent) throws Exception {
+        final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+        e.addContent(String.valueOf(value));
+        parent.addContent(e);
+        return e;
+    }
 
-	public static void addElement(final String name, final boolean value, final Element parent) {
-		final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-		if (value) {
-			e.addContent("true");
-		} else {
-			e.addContent("false");
-		}
+    public static Element addElement(final String name, final boolean value, final Element parent) {
+        final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
+        if (value) {
+            e.addContent("true");
+        } else {
+            e.addContent("false");
+        }
 
-		parent.addContent(e);
-	}
+        parent.addContent(e);
+        return e;
+    }
 
-	/**
-	 * This will correct the supplied string to ensure it only contains
-	 * characters allowed by the XML 1.0 specification. The C0 controls (e.g.
-	 * null, vertical tab, form-feed, etc.) are specifically excluded except for
-	 * carriage return, line-feed, and the horizontal tab. Surrogates are also
-	 * excluded. Thus the returned string will pass the
-	 * {@link Verifier#checkCharacterData(String) check} internally performed
-	 * inside JDOM library.
-	 * <p>
-	 * <ul>
-	 * <li>A <code>null</code> value is transformed to an empty string</li>
-	 * <li>A truncated or illegal surrogate pair is transformed to an empty
-	 * string</li>
-	 * <li>Any non-XML character is omitted</li>
-	 * </ul>
-	 * <p>
-	 * This method is useful for correcting element content and attribute
-	 * values. Note that characters like " and &lt; are allowed in attribute
-	 * values and element content. They will simply be escaped as &quot; or &lt;
-	 * when the value is serialized.
-	 * 
-	 * @param text
-	 *            The value to correct.
-	 * @return The corrected text (if passed to
-	 *         {@link Verifier#checkCharacterData(String)} <code>null</code>
-	 *         would be returned)
-	 */
-	public static final String correctCharacterData(final String text) {
-		if (text == null) {
-			/*
-			 * null is not a legal XML value, transform to an empty string
-			 */
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("null is not a legal XML value");
-			}
-			return "";
-		}
-		/*
-		 * Check non-null text
-		 */
-		final char[] chars = text.toCharArray();
-		final StringBuilder retvalBuilder = new StringBuilder(chars.length);
-		for (int i = 0; i < chars.length; i++) {
-			int ch = chars[i];
-			/*
-			 * Check for high part of a surrogate pair
-			 */
-			if (ch >= 0xD800 && ch <= 0xDBFF) {
-				/*
-				 * Check if next char is the low-surrogate
-				 */
-				if (++i < chars.length) {
-					final char low = chars[i];
-					if (low >= 0xDC00 && low <= 0xDFFF) {
-						/*
-						 * Good pair, calculate character's true value to check
-						 * for a valid XML character
-						 */
-						ch = 0x10000 + (ch - 0xD800) * 0x400 + (low - 0xDC00);
-						if (Verifier.isXMLCharacter(ch)) {
-							retvalBuilder.append((char) ch);
-						} else if (LOG.isDebugEnabled()) {
-							LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
-						}
-					} else if (LOG.isDebugEnabled()) {
-						LOG.debug("illegal surrogate pair");
-					}
-				} else if (LOG.isDebugEnabled()) {
-					LOG.debug("truncated surrogate pair");
-				}
-			} else {
-				/*
-				 * A common character, check if it is according XML
-				 * specification
-				 */
-				if (Verifier.isXMLCharacter(ch)) {
-					retvalBuilder.append((char) ch);
-				} else if (LOG.isDebugEnabled()) {
-					LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
-				}
-			}
-		}
-		/*
-		 * Return cleansed string
-		 */
-		return retvalBuilder.toString();
-	}
+    /**
+     * This will correct the supplied string to ensure it only contains characters allowed by the XML 1.0 specification. The C0 controls
+     * (e.g. null, vertical tab, form-feed, etc.) are specifically excluded except for carriage return, line-feed, and the horizontal tab.
+     * Surrogates are also excluded. Thus the returned string will pass the {@link Verifier#checkCharacterData(String) check} internally
+     * performed inside JDOM library.
+     * <p>
+     * <ul>
+     * <li>A <code>null</code> value is transformed to an empty string</li>
+     * <li>A truncated or illegal surrogate pair is transformed to an empty string</li>
+     * <li>Any non-XML character is omitted</li>
+     * </ul>
+     * <p>
+     * This method is useful for correcting element content and attribute values. Note that characters like " and &lt; are allowed in
+     * attribute values and element content. They will simply be escaped as &quot; or &lt; when the value is serialized.
+     * 
+     * @param text The value to correct.
+     * @return The corrected text (if passed to {@link Verifier#checkCharacterData(String)} <code>null</code> would be returned)
+     */
+    public static final String correctCharacterData(final String text) {
+        if (text == null) {
+            /*
+             * null is not a legal XML value, transform to an empty string
+             */
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("null is not a legal XML value");
+            }
+            return "";
+        }
+        /*
+         * Check non-null text
+         */
+        final char[] chars = text.toCharArray();
+        final StringBuilder retvalBuilder = new StringBuilder(chars.length);
+        for (int i = 0; i < chars.length; i++) {
+            int ch = chars[i];
+            /*
+             * Check for high part of a surrogate pair
+             */
+            if (ch >= 0xD800 && ch <= 0xDBFF) {
+                /*
+                 * Check if next char is the low-surrogate
+                 */
+                if (++i < chars.length) {
+                    final char low = chars[i];
+                    if (low >= 0xDC00 && low <= 0xDFFF) {
+                        /*
+                         * Good pair, calculate character's true value to check for a valid XML character
+                         */
+                        ch = 0x10000 + (ch - 0xD800) * 0x400 + (low - 0xDC00);
+                        if (Verifier.isXMLCharacter(ch)) {
+                            retvalBuilder.append((char) ch);
+                        } else if (LOG.isDebugEnabled()) {
+                            LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
+                        }
+                    } else if (LOG.isDebugEnabled()) {
+                        LOG.debug("illegal surrogate pair");
+                    }
+                } else if (LOG.isDebugEnabled()) {
+                    LOG.debug("truncated surrogate pair");
+                }
+            } else {
+                /*
+                 * A common character, check if it is according XML specification
+                 */
+                if (Verifier.isXMLCharacter(ch)) {
+                    retvalBuilder.append((char) ch);
+                } else if (LOG.isDebugEnabled()) {
+                    LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
+                }
+            }
+        }
+        /*
+         * Return cleansed string
+         */
+        return retvalBuilder.toString();
+    }
 
 }

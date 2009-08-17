@@ -1,3 +1,7 @@
+* 2009-08-17 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13782: Added marker attribute for internal email addresses 
+
 * 2009-08-14 - martin.herfurth@open-xchange.com
 
  - Bugfix #14309: Link in notification mails for internal participants.
