@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaStoreImpl;
+import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
@@ -94,6 +96,47 @@ public final class UpdateTaskToolkit {
      */
     private UpdateTaskToolkit() {
         super();
+    }
+
+    /**
+     * Force (re-)run of update task denoted by given class name
+     * 
+     * @param className The update task's class name
+     * @param contextId The context identifier
+     * @throws UpdateException If update task cannot be performed
+     */
+    public static void forceUpdateTask(final String className, final int contextId) throws UpdateException {
+        synchronized (LOCK) {
+            /*
+             * Get schema for given context ID
+             */
+            final Schema schema = getSchema(contextId);
+            /*
+             * Lock schema
+             */
+            lockSchema(schema, contextId);
+            try {
+                /*
+                 * Apply new version number
+                 */
+                runUpdateTask(className, schema, contextId);
+            } finally {
+                /*
+                 * Unlock schema
+                 */
+                unlockSchema(schema, contextId);
+                /*
+                 * Invalidate schema's contexts
+                 */
+                try {
+                    removeContexts(contextId);
+                } catch (final DBPoolingException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final ContextException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
     }
 
     /**
@@ -198,7 +241,58 @@ public final class UpdateTaskToolkit {
                  * Unlock schema
                  */
                 unlockSchema(schema, contextId);
+                /*
+                 * Invalidate schema's contexts
+                 */
+                try {
+                    removeContexts(contextId);
+                } catch (final DBPoolingException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (final ContextException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
+        }
+    }
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Error loading update task \"%1$s\": %2$s." })
+    private static void runUpdateTask(final String className, final Schema schema, final int contextId) throws UpdateException {
+        try {
+            /*
+             * Remove affected contexts and kick active sessions
+             */
+            removeContexts(contextId);
+            /*
+             * Load update task by class name
+             */
+            UpdateTask task;
+            try {
+                task = Class.forName(className).asSubclass(UpdateTask.class).newInstance();
+            } catch (final InstantiationException e) {
+                throw EXCEPTION.create(15, e, className, e.getMessage());
+            } catch (final IllegalAccessException e) {
+                throw EXCEPTION.create(15, e, className, e.getMessage());
+            } catch (final ClassNotFoundException e) {
+                throw EXCEPTION.create(15, e, className, e.getMessage());
+            }
+            try {
+                LOG.info("Starting update task "
+                    + className + " on schema "
+                    + schema.getSchema() + ".");
+                task.perform(schema, contextId);
+            } catch (final AbstractOXException e) {
+                LOG.error(e.getMessage(), e);
+                throw new UpdateException(e);
+            }
+            LOG.info("Update task " + className + " on schema "
+                + schema.getSchema() + " done.");
+            
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+            throw new UpdateException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            throw new UpdateException(e);
         }
     }
 
@@ -470,5 +564,13 @@ public final class UpdateTaskToolkit {
             throw EXCEPTION.create(5, e, e.getMessage());
         }
     } // End of unlockSchema()
+
+    private static void removeContexts(final int contextId) throws DBPoolingException, ContextException {
+        final int[] contextIds = Database.getContextsInSameSchema(contextId);
+        final ContextStorage contextStorage = ContextStorage.getInstance();
+        for (final int cid : contextIds) {
+            contextStorage.invalidateContext(cid);
+        }
+    }
 
 }
