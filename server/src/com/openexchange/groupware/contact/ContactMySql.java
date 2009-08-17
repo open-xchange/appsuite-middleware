@@ -1833,7 +1833,7 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.GIVEN_NAME].getDBFieldName();
 
-                    final String value = StringCollection.prepareForSearch(cso.getGivenName());
+                    String value = StringCollection.prepareForSearch(cso.getGivenName());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
@@ -1844,9 +1844,10 @@ public class ContactMySql implements ContactSql {
                             injectors.add(new StringSQLInjector(value));
                         } else {
                             /*
-                             * Cut off starting '%' to let optimizer use appropriate index
+                             * Don't force starting '%' to let optimizer use appropriate index
                              */
-                            injectors.add(new StringSQLInjector(value.substring(1)));
+                            value = StringCollection.prepareForSearch(cso.getGivenName(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
                         }
                     }
                 }
@@ -1864,7 +1865,7 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.SUR_NAME].getDBFieldName();
 
-                    final String value = StringCollection.prepareForSearch(cso.getSurname());
+                    String value = StringCollection.prepareForSearch(cso.getSurname());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
@@ -1875,9 +1876,10 @@ public class ContactMySql implements ContactSql {
                             injectors.add(new StringSQLInjector(value));
                         } else {
                             /*
-                             * Cut off starting '%' to let optimizer use appropriate index
+                             * Don't force starting '%' to let optimizer use appropriate index
                              */
-                            injectors.add(new StringSQLInjector(value.substring(1)));
+                            value = StringCollection.prepareForSearch(cso.getSurname(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
                         }
                     }
                 }
@@ -1896,7 +1898,7 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
 
-                    final String value = StringCollection.prepareForSearch(cso.getDisplayName());
+                    String value = StringCollection.prepareForSearch(cso.getDisplayName());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
@@ -1907,9 +1909,10 @@ public class ContactMySql implements ContactSql {
                             injectors.add(new StringSQLInjector(value));
                         } else {
                             /*
-                             * Cut off starting '%' to let optimizer use appropriate index
+                             * Don't force starting '%' to let optimizer use appropriate index
                              */
-                            injectors.add(new StringSQLInjector(value.substring(1)));
+                            value = StringCollection.prepareForSearch(cso.getDisplayName(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
                         }
                     }
                 }
@@ -1927,7 +1930,7 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.EMAIL1].getDBFieldName();
 
-                    final String value = StringCollection.prepareForSearch(cso.getEmail1());
+                    String value = StringCollection.prepareForSearch(cso.getEmail1());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
@@ -1938,9 +1941,10 @@ public class ContactMySql implements ContactSql {
                             injectors.add(new StringSQLInjector(value));
                         } else {
                             /*
-                             * Cut off starting '%' to let optimizer use appropriate index
+                             * Don't force starting '%' to let optimizer use appropriate index
                              */
-                            injectors.add(new StringSQLInjector(value.substring(1)));
+                            value = StringCollection.prepareForSearch(cso.getEmail1(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
                         }
                     }
                 }
@@ -1958,7 +1962,7 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.EMAIL2].getDBFieldName();
 
-                    final String value = StringCollection.prepareForSearch(cso.getEmail2());
+                    String value = StringCollection.prepareForSearch(cso.getEmail2());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
@@ -1969,9 +1973,10 @@ public class ContactMySql implements ContactSql {
                             injectors.add(new StringSQLInjector(value));
                         } else {
                             /*
-                             * Cut off starting '%' to let optimizer use appropriate index
+                             * Don't force starting '%' to let optimizer use appropriate index
                              */
-                            injectors.add(new StringSQLInjector(value.substring(1)));
+                            value = StringCollection.prepareForSearch(cso.getEmail2(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
                         }
                     }
                 }
@@ -1988,7 +1993,7 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.EMAIL3].getDBFieldName();
 
-                    final String value = StringCollection.prepareForSearch(cso.getEmail3());
+                    String value = StringCollection.prepareForSearch(cso.getEmail3());
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
@@ -1999,9 +2004,10 @@ public class ContactMySql implements ContactSql {
                             injectors.add(new StringSQLInjector(value));
                         } else {
                             /*
-                             * Cut off starting '%' to let optimizer use appropriate index
+                             * Don't force starting '%' to let optimizer use appropriate index
                              */
-                            injectors.add(new StringSQLInjector(value.substring(1)));
+                            value = StringCollection.prepareForSearch(cso.getEmail3(), false, true, true);
+                            injectors.add(new StringSQLInjector(value));
                         }
                     }
                 }
