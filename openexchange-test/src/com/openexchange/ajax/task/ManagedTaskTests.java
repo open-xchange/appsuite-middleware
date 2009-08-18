@@ -76,6 +76,7 @@ public class ManagedTaskTests extends AbstractAJAXSession {
         super.setUp();
         manager = new TaskTestManager(getClient());
         folderID = getClient().getValues().getPrivateTaskFolder();
+        actual = null;
     }
 
     @Override
@@ -109,12 +110,17 @@ public class ManagedTaskTests extends AbstractAJAXSession {
         Task expected = generateTask("Create test");
         manager.insertTaskOnServer(expected);
         Task[] allTasksOnServer = manager.getAllTasksOnServer(folderID, new int[] { 1, 4, 5, 20, 209 });
+        actual = null;
+        for(Task temp: allTasksOnServer){
+            if(expected.getObjectID() == temp.getObjectID())
+                actual = temp;
+        }
         assertEquals("Should find one more element than before", numberBefore + 1, allTasksOnServer.length);
-        actual = allTasksOnServer[0];
-        // assertEquals("Should have the same field #1", expected.get(1), actual.get(1));
-        // assertEquals("Should have the same field #4", expected.get(4), actual.get(4));
-        // assertEquals("Should have the same field #5", expected.get(5), actual.get(5));
-        // assertEquals("Should have the same field #20", expected.get(20), actual.get(20));
+        assertNotNull("Should find the newly created element", actual);
+        assertEquals("Should have the same field #1 (id)", expected.get(1), actual.get(1));
+        //assertEquals("Should have the same field #4 (creation date)", expected.get(4), actual.get(4));
+        //assertEquals("Should have the same field #5 (last modified)", expected.get(5), actual.get(5));
+        //assertEquals("Should have the same field #20 (folder)", expected.get(20), actual.get(20));
         assertEquals("Should have the same field #209", expected.get(209), actual.get(209));
     }
 
@@ -135,9 +141,9 @@ public class ManagedTaskTests extends AbstractAJAXSession {
 
         actual = updates[0];
         assertEquals("Should have the same field #1", expected.get(1), actual.get(1));
-        // assertEquals("Should have the same field #4", expected.get(4), actual.get(4));
-        // assertEquals("Should have the same field #5", expected.get(5), actual.get(5));
-        // assertEquals("Should have the same field #20", expected.get(20), actual.get(20));
+        //assertEquals("Should have the same field #4", expected.get(4), actual.get(4));
+        //assertEquals("Should have the same field #5", expected.get(5), actual.get(5));
+        //assertEquals("Should have the same field #20", expected.get(20), actual.get(20));
         assertEquals("Should have the same field #209", expected.get(209), actual.get(209));
     }
 

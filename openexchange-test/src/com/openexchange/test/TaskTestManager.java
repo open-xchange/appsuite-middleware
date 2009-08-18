@@ -121,7 +121,7 @@ public class TaskTestManager {
         } catch (JSONException e) {
         } finally {
             if (timezone == null) {
-                timezone = TimeZone.getTimeZone("Europe/Berlin");
+                timezone = TimeZone.getDefault();
             }
         }
     }
@@ -232,7 +232,7 @@ public class TaskTestManager {
             List<Task> tasks = new LinkedList<Task>();
             for (int j = 0; j < jsonTasks.length(); j++) {
                 JSONArray taskAsArray = (JSONArray) jsonTasks.get(j);
-                Task task = transformArrayToTask(taskAsArray);
+                Task task = transformArrayToTask(taskAsArray, allTasksResponse.getColumns());
                 tasks.add(task);
             }
             return tasks.toArray(new Task[tasks.size()]);
@@ -260,7 +260,7 @@ public class TaskTestManager {
         try {
             resp = getClient().execute(req);
             setLastResponse(resp);
-            tasks = transformArrayToTasks((JSONArray) resp.getData());
+            tasks = transformArrayToTasks((JSONArray) resp.getData(), resp.getColumns());
         } catch (Exception e) {
             doHandleExeption(e, "ListRequest");
         }
@@ -291,14 +291,14 @@ public class TaskTestManager {
             break;
         case Task.ACTUAL_DURATION:
         case Task.TARGET_DURATION:
-            retval = new Long(((Integer) value).longValue());
+            retval = Long.valueOf(((Integer) value).longValue());
             break;
         case Task.ACTUAL_COSTS:
         case Task.TARGET_COSTS:
-            retval = new Float(((Long) value).floatValue());
+            retval = Float.valueOf(((Long) value).floatValue());
             break;
         case Task.PERCENT_COMPLETED:
-            retval = (Integer.valueOf(((Long) value).intValue()));
+            retval = Integer.valueOf(((Long) value).intValue());
             break;
         case Task.BILLING_INFORMATION:
             retval = String.valueOf(((Integer) value).intValue());
@@ -309,10 +309,10 @@ public class TaskTestManager {
         return retval;
     }
 
-    protected List<Task> transformArrayToTasks(JSONArray tasks) throws JSONException{
+    protected List<Task> transformArrayToTasks(JSONArray tasks, int[] columns) throws JSONException{
         LinkedList<Task> results = new LinkedList<Task>();
         for(int i = 0, length = tasks.length(); i < length; i++){
-            results.add(transformArrayToTask( tasks.getJSONArray(i)));
+            results.add(transformArrayToTask( tasks.getJSONArray(i), columns));
         }
         return results;
     }
@@ -323,11 +323,11 @@ public class TaskTestManager {
      * @return
      * @throws JSONException
      */
-    protected static Task transformArrayToTask(JSONArray taskAsArray) throws JSONException {
+    protected static Task transformArrayToTask(JSONArray taskAsArray, int[] columns) throws JSONException {
         Task resultingTask = new Task();
 
-        for (int i = 0; i < Task.ALL_COLUMNS.length; i++) {
-            int column = Task.ALL_COLUMNS[i];
+        for (int i = 0; i < columns.length; i++) {
+            int column = columns[i];
             Mapper attributeMapping = Mapping.getMapping(column);
             if (taskAsArray.isNull(i) || attributeMapping == null || taskAsArray.get(i) == null)
                 continue;
