@@ -293,7 +293,7 @@ public class AJPv13TaskWatcher {
             if (enabled && task.isWaitingOnAJPSocket()) {
                 waiting.incrementAndGet();
             }
-            if (task.isProcessing() && !task.isLongRunning()) {
+            if (task.isProcessing()) {
                 /*
                  * Task is currently processing and is NOT marked as a long-running task
                  */
@@ -305,7 +305,7 @@ public class AJPv13TaskWatcher {
                     if (enabled) {
                         exceeded.incrementAndGet();
                     }
-                    if (log.isInfoEnabled()) {
+                    if (!task.isLongRunning() && log.isInfoEnabled()) {
                         final Throwable t = new Throwable();
                         t.setStackTrace(task.getStackTrace());
                         log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
