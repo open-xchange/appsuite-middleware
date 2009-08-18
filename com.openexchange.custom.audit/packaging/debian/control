@@ -1,13 +1,13 @@
-Source: open-xchange-custom-configjump-netsol
+Source: open-xchange-custom-audit
 Section: unknown
 Priority: optional
 Maintainer: Benjamin Otterbach <benjamin.otterbach@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.6.0), open-xchange-global (>=6.6.0), open-xchange-server (>=6.6.0)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@)
 Standards-Version: 3.6.1
 
-Package: open-xchange-custom-configjump-netsol
+Package: open-xchange-custom-audit
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.6.0), open-xchange-global (>=6.6.0), open-xchange-server (>=6.6.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@)
 Provides: 
-Description: Custom Netsol configjump package.
+Description: Open-Xchange user action tracking.
 Conflicts: 
