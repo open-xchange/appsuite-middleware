@@ -2176,6 +2176,14 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
 
+        if (cdao.getFolderMove()) {
+            /*
+             * Fake a deletion on MOVE operation for MS Outlook prior to
+             * performing actual UPDATE
+             */
+            backupAppointment(writecon, so.getContextId(), cdao.getObjectID(), so.getUserId());
+        }
+        
         final int ucols[] = new int[26];
         int uc = CalendarOperation.fillUpdateArray(cdao, edao, ucols);
         final MBoolean cup = new MBoolean(false);
@@ -2236,11 +2244,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         cdao.setParentFolderID(cdao.getActionFolder());
 
         if (cdao.getFolderMove()) {
-            /*
-             * Fake a deletion on MOVE operation for MS Outlook prior to
-             * performing actual UPDATE
-             */
-            backupAppointment(writecon, so.getContextId(), cdao.getObjectID(), so.getUserId());
             
             /*
              * Update reminders' folder ID on move operation
@@ -2944,6 +2947,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                 cup.setMBoolean(true);
                 PreparedStatement pidm = null;
                 try {
+                    pidm = writecon.prepareStatement("DELETE FROM del_dates WHERE cid = ? AND intfield01 = ?");
+                    pidm.setInt(1, cid);
+                    pidm.setInt(2, cdao.getObjectID());
+                    pidm.execute();
                     pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
                     pidm.setInt(2, uid);

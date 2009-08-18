@@ -1,3 +1,7 @@
+* 2009-08-17 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14250: Fake delete for outlook. 
+
 * 2009-08-18 - thorben.betten@open-xchange.com
 
  - Bugfix #14333: Fixed parsing of duplicate parameters in parameterized list
