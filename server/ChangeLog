@@ -1,6 +1,7 @@
 * 2009-08-18 - thorben.betten@open-xchange.com
 
  - Bugfix #14333: Fixed parsing of duplicate parameters in parameterized list
+ - Bugfix #13631: Supporting SIEVE STARTTLS
 
 * 2009-08-17 - martin.herfurth@open-xchange.com
 

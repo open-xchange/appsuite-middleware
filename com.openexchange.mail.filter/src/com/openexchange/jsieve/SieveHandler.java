@@ -204,15 +204,76 @@ public class SieveHandler {
          * Capabilities read; further communication dependent on capabilities
          */
         measureStart();
-        final List<String> sasl = capa.getSasl();
+        List<String> sasl = capa.getSasl();
         measureEnd("capa.getSasl");
 
         if (null == sasl || !sasl.contains("PLAIN")) {
+            /*
+             * Switch to TLS, re-fetch capabilities, and check again for PLAIN authentication
+             */
             if (!capa.getStarttls().booleanValue()) {
-                throw new OXSieveHandlerException("The server doesn't suppport PLAIN authentication", sieve_host, sieve_host_port);
+                throw new OXSieveHandlerException(
+                    "The server neither supports PLAIN authentication nor STARTTLS.",
+                    sieve_host,
+                    sieve_host_port);
             }
-            // TODO: Start TLS connection here...
-
+            /*-
+             * Send STARTTLS
+             * 
+             * C: STARTTLS
+             * S: OK
+             * <TLS negotiation, further commands are under TLS layer>
+             * S: "IMPLEMENTATION" "Example1 ManageSieved v001"
+             * S: "SASL" "PLAIN"
+             * S: "SIEVE" "fileinto vacation"
+             * S: OK
+             */
+            measureStart();
+            final String starttls = "STARTTLS" + CRLF;
+            bos_sieve.write(starttls.getBytes("UTF-8"));
+            bos_sieve.flush();
+            measureEnd("startTLS");
+            /*
+             * Expect OK
+             */
+            while (true) {
+                final String temp = bis_sieve.readLine();
+                if (null == temp) {
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+                } else if (temp.startsWith(SIEVE_OK)) {
+                    break;
+                } else if (temp.startsWith(SIEVE_AUTH_FAILD)) {
+                    throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port);
+                }
+            }
+            /*
+             * Switch to TLS
+             */
+            s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
+            bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
+            bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
+            /*
+             * Fire CAPABILITY command
+             */
+            measureStart();
+            bos_sieve.write(("CAPABILITY" + CRLF).getBytes("UTF-8"));
+            bos_sieve.flush();
+            measureEnd("capability");
+            /*
+             * Read capabilities
+             */
+            measureStart();
+            if (!getServerWelcome()) {
+                throw new OXSieveHandlerException("No TLS negotiation from server", sieve_host, sieve_host_port);
+            }
+            measureEnd("tlsNegotiation");
+            sasl = capa.getSasl();
+            if (null == sasl || !sasl.contains("PLAIN")) {
+                throw new OXSieveHandlerException(
+                    "The server doesn't suppport PLAIN authentication on a TLS connection",
+                    sieve_host,
+                    sieve_host_port);
+            }
         }
         measureStart();
         if (selectAuth("PLAIN")) {
@@ -314,6 +375,9 @@ public class SieveHandler {
         boolean firstread = true;
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.startsWith(SIEVE_OK)) {
                 // We have to strip off the last trailing CRLF...
                 return sb.substring(0, sb.length() - 2);
@@ -351,6 +415,9 @@ public class SieveHandler {
         final ArrayList<String> list = new ArrayList<String>();
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.startsWith(SIEVE_OK)) {
                 return list;
             }
@@ -385,6 +452,9 @@ public class SieveHandler {
         String scriptname = null;
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.startsWith(SIEVE_OK)) {
                 return scriptname;
             }
@@ -423,6 +493,9 @@ public class SieveHandler {
 
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.startsWith(SIEVE_OK)) {
                 return;
             } else if (temp.startsWith(SIEVE_NO)) {
@@ -447,11 +520,14 @@ public class SieveHandler {
         }
     }
 
-    private boolean getServerWelcome() throws UnknownHostException, IOException {
+    private boolean getServerWelcome() throws UnknownHostException, IOException, OXSieveHandlerException {
         capa = new Capabilities();
 
         while (true) {
             final String test = bis_sieve.readLine();
+            if (null == test) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (test.startsWith(SIEVE_OK)) {
                 return true;
             } else if (test.startsWith(SIEVE_NO)) {
@@ -501,6 +577,9 @@ public class SieveHandler {
 
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.endsWith(SIEVE_AUTH_LOGIN_USERNAME)) {
                 break;
             } else if (temp.endsWith(SIEVE_AUTH_FAILD)) {
@@ -516,6 +595,9 @@ public class SieveHandler {
 
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.endsWith(SIEVE_AUTH_LOGIN_PASSWORD)) {
                 break;
             } else if (temp.endsWith(SIEVE_AUTH_FAILD)) {
@@ -531,6 +613,9 @@ public class SieveHandler {
 
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.startsWith(SIEVE_OK)) {
                 AUTH = true;
                 return true;
@@ -551,6 +636,9 @@ public class SieveHandler {
 
         while (true) {
             final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
             if (temp.startsWith(SIEVE_OK)) {
                 return;
             } else if (temp.startsWith(SIEVE_NO)) {
@@ -575,6 +663,9 @@ public class SieveHandler {
 
             while (true) {
                 final String temp = bis_sieve.readLine();
+                if (null == temp) {
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+                }
                 if (temp.startsWith(SIEVE_OK)) {
                     return;
                 } else if (temp.startsWith(SIEVE_NO)) {
