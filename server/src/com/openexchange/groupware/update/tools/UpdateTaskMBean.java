@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tools;
 
-import java.util.Iterator;
 import java.util.Map;
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -154,22 +153,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("schemasAndVersions")) {
             try {
                 final Map<String, Integer> m = UpdateTaskToolkit.getSchemasAndVersions();
-                final int size = m.size();
-                if (size <= 0) {
-                    return "";
-                }
-                final Iterator<Map.Entry<String, Integer>> it = m.entrySet().iterator();
-                final StringBuilder sb = new StringBuilder(size * 16);
-                final String delim = ": ";
-                {
-                    final Map.Entry<String, Integer> entry = it.next();
-                    sb.append(entry.getKey()).append(delim).append(entry.getValue());
-                }
-                for (int i = 1; i < size; i++) {
-                    final Map.Entry<String, Integer> entry = it.next();
-                    sb.append('\n').append(entry.getKey()).append(delim).append(entry.getValue());
-                }
-                return sb.toString();
+                return Utility.toTable(m, new String[] { "schema", "version" });
             } catch (final UpdateException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
