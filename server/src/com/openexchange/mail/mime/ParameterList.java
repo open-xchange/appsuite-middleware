@@ -227,7 +227,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                 procName = procName.substring(0, procName.length() - 1);
                 pos = procName.indexOf('*');
                 p = parameters.get(soleName);
-                if (null == p) {
+                if (null == p || !p.rfc2231) {
                     /*
                      * Expect utf-8'EN'%C2%A4%20txt
                      */
