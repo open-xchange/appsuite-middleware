@@ -214,7 +214,7 @@ public final class UpdateTaskToolkit {
      * @param contextId A valid context identifier contained in target schema
      * @throws UpdateException If changing version number fails
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, }, desc = { "" }, exceptionId = { 13 }, msg = { "Current version number %1$s is already lower than or equal to desired version number %2$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 13 }, msg = { "Current version number %1$s is already lower than or equal to desired version number %2$s." })
     public static void resetVersion(final int versionNumber, final int contextId) throws UpdateException {
         synchronized (LOCK) {
             /*
