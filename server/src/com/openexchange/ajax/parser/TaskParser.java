@@ -157,7 +157,24 @@ public class TaskParser extends CalendarParser {
             taskobject.setAlarm(parseTime(json, CalendarFields.ALARM,
                 timeZone));
         }
-
+        
+        if (json.has(CalendarFields.LAST_MODIFIED)) {
+            taskobject.setLastModified(parseTime(json, CalendarFields.LAST_MODIFIED,
+                timeZone));
+        }
+        
+        if (json.has(CalendarFields.CREATION_DATE)) {
+            taskobject.setCreationDate(parseTime(json, CalendarFields.CREATION_DATE,
+                timeZone));
+        }
+        
+        if (json.has(CalendarFields.FOLDER_ID)) {
+            taskobject.setParentFolderID(parseInt(json, CalendarFields.FOLDER_ID));
+        }
+        
+        if (json.has(CalendarFields.ID)) {
+            taskobject.setObjectID(parseInt(json, CalendarFields.FOLDER_ID));
+        }
         parseElementCalendar(taskobject, json);
     }
 }
