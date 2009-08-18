@@ -255,8 +255,8 @@ public final class ExtendedMimeMessage extends MimeMessage {
             try {
                 return Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Strange X-Priority header: " + tmp[0], nfe);
                 }
                 return MailMessage.PRIORITY_NORMAL;
             }
