@@ -13,7 +13,7 @@
 
 	<property name="version" value="${Bundle-Version}" />
 	<property name="bundle.name" value="${Bundle-SymbolicName}.jar" />
-	<property name="composite.name" value="open-xchange-custom-configjump-netsol-${version}" />
+	<property name="composite.name" value="open-xchange-custom-audit-${version}" />
 
 	<!-- Install Constants -->
 	<property name="bundlesdir" value="${prefix}/bundles" />
