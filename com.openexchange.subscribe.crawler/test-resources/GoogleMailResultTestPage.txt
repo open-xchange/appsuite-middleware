@@ -1,0 +1,389 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Google Mail - Contact</title>
+<link rel="shortcut icon"
+href="/mail/images/favicon.ico"
+type="image/x-icon">
+<link rel="stylesheet" type="text/css"
+href="https://mail.google.com/mail/h/ov26kvkoya62/?v=ss&name=c&ver=kwt3unuo4cq4">
+<style type="text/css">
+@import url("https://mail.google.com/mail/h/17hrn2usaupdb/?v=ss&name=a&ver=1sthyqjwgl8hj"); #gbar{padding-left:8px;height:22px}.gbh,.gbd{border-top:1px solid #c9d7f1;font-size:1px}.gbh{height:0;position:absolute;top:24px;width:100%}#guser{padding-bottom:7px !important;text-align:right}#gbar,#guser{font-size:13px;padding-right:8px;padding-top:4px !important}@media all{.gb1,.gb3{height:22px;margin-right:.5em;vertical-align:top}#gbar{float:left}}a.gb1,a.gb3{color:#00c !important}.gb3{text-decoration:none}
+</style>
+<base href="https://mail.google.com/mail/h/149j2mlic2tf4/">
+<script><!--
+var tz_path=";path=/";if(top.location.href.toLowerCase().indexOf("google.com")>0)tz_path+=";domain=.google.com";document.cookie="TZ="+(new Date).getTimezoneOffset()+tz_path
+//-->
+</script>
+</head>
+<body bgcolor=#ffffff>
+<div id=gbar><nobr><a onclick=""></a><b class=gb1>Mail</b> <a href="https://www.google.com/calendar/render?tab=mc" class=gb1 target=_blank>Calendar</a> <a href="https://docs.google.com/?tab=mo" class=gb1 target=_blank>Documents</a> <a href="http://picasaweb.google.com/home?tab=mq" class=gb1 target=_blank>Photos</a> <a href="https://www.google.com/reader/view/?tab=my" class=gb1 target=_blank>Reader</a> <a href="https://sites.google.com/?tab=m3" class=gb1 target=_blank>Sites</a> <a href="http://www.google.com/webhp?tab=mw" class=gb1 target=_blank>Web</a> <a href="http://www.google.com/intl/en/options/" class=gb3><u>more</u> &raquo;</a></nobr></div><div class=gbh style=left:0></div><div class=gbh style=right:0></div>
+
+<div width=100% align=right id=guser>
+<h2 class=hdn>Account Options</h2>
+<b>o6sidian@googlemail.com</b> |
+<a href="?v=prg">Settings</a> |
+<a href="/support/?ctx=mail&hl=en" 
+target=_blank>Help</a> |
+<a href="https://mail.google.com/mail/h/t8ckhce4z1yy/?logout&amp;hl=en">Sign out</a>
+</div>
+<table width=100% cellpadding=4 cellspacing=0 border=0 class=bn>
+<tr>
+
+<td id=bm bgcolor=#FAE5B0>
+<b>You are currently viewing Google Mail in
+basic HTML. &nbsp;
+<a href="?redir=%2Fmail%2F&amp;a=stsv&amp;at=xn3j2xujznl3rbazsvonz877ry23za" 
+>
+Switch to standard view</a></b>
+| <a href="?redir=%3F&amp;a=pbhtml&amp;at=xn3j2xujznl3rbazsvonz877ry23za">
+Set basic HTML as default view</a>
+</td>
+</tr>
+</table>
+<table width=100% cellpadding=0 cellspacing=0 border=0>
+<tr>
+<td width=143 rowspan=3>
+<h1>
+
+<a href="?">
+<img src="/mail/help/images/googlemail.gif"
+width=143 height=59 border=0
+alt="Google Mail by Google">
+</a>
+</h1>
+</td>
+<td width=1 rowspan=3>&nbsp;</td>
+<td height=25 colspan=2 align=right valign=top>
+<tr>
+<form action=? name=sf method=GET>
+<input type=hidden name=s value=q>
+</td>
+<td>
+<table width=100% cellpadding=0 cellspacing=0 border=0>
+<tr>
+<td width=1% height=25 nowrap>
+<input size=28 maxlength=2048 title="Search"
+name=q value=""
+>&nbsp;<input type=submit name=nvp_site_mail value="Search Mail"
+>&nbsp;<input type=submit name=nvp_site_web value="Search the Web">
+</td>
+
+<td>
+<font size=1>
+&nbsp;<a href="?v=as&pv=tl"
+>Show&nbsp;search&nbsp;options</a>
+</font>
+<br><font size=1>
+&nbsp;<a href="?v=caf&pv=tl"
+>Create&nbsp;a&nbsp;filter</a>
+</font>
+</form>
+</table>
+<tr>
+<td height=25 colspan=2>
+
+</table>
+<table width=100% cellpadding=0 cellspacing=0 border=0>
+<tr>
+<td width=120 valign=top>
+<table width=100% cellpadding=2 cellspacing=0 border=0 class=m>
+<tr>
+<td>
+<b><a href="?v=b&pv=tl&cs=b" accesskey=c
+>Compose&nbsp;Mail</a></b>
+<tr>
+<td height=5>
+<h2 class=hdn>Folders</h2>
+<tr>
+<td>
+<h3><b><a href="?"
+accesskey=i
+>Inbox&nbsp;(15)</a></b></h3>
+
+<tr>
+<td>
+<a href="?s=r"
+>Starred&nbsp;<img src="/mail/images/star_on_sm_2.gif" width="13" height="13" border="0" alt="star" /></a>
+<tr>
+<td>
+<a href="?s=s"
+>Sent Mail</a>
+<tr>
+<td>
+<a href="?s=d"
+>Drafts</a>
+<tr>
+<td>
+<a href="?s=a"
+>All Mail</a>
+<tr>
+
+<td>
+<a href="?s=m"
+>Spam</a>
+<tr>
+<td>
+<a href="?s=t"
+>Trash</a>
+<tr>
+<td height=8>
+<tr>
+<td>
+<h3><b><a href="?v=cl">Contacts</a></b></h3>
+<tr>
+<td height=8>
+</table>
+<table width=100% cellpadding=2 cellspacing=0 border=0 class=l>
+
+<tr>
+<td class=lb>
+<h2><font color=#000000>Labels</font><br></h2>
+<a href="?s=l&l=Personal"><font color=#006633
+>Personal</font></a>
+<br>
+<a href="?s=l&l=Receipts"><font color=#006633
+>Receipts</font></a>
+<br>
+<a href="?s=l&l=Travel"><font color=#006633
+>Travel</font></a>
+<br>
+<a href="?s=l&l=Work"><font color=#006633
+>Work</font></a>
+<br>
+<a class="ml" href="?v=prl">Edit labels</a>
+
+</td>
+</table>
+</td>
+<td valign=top>
+<table width=100% cellpadding=0 cellspacing=0 border=0>
+<tr>
+<td width=5 bgcolor="#FAD163">&nbsp;</td>
+<td bgcolor=#fff7d7>
+<table width=100% cellpadding=2 cellspacing=0 border=0 bgcolor=#fad163>
+<tr>
+<td>
+<form action="?v=cl&fv=ct&at=xn3j2xujznl3rbazsvonz877ry23za&fpnl=a&cs=fc" name=f method=POST>
+<b><a href="?v=cl&fv=ct&at=xn3j2xujznl3rbazsvonz877ry23za&nvp_bu_canc=1&fpnl=a&cs=fc"
+>&laquo; Back to Contacts</a></b>&nbsp;
+<input type="hidden" name=c value="0">
+&nbsp;<input type=submit name=nvp_bu_comp value="Compose">
+
+&nbsp;<input type=submit name=nvp_bu_del value="Delete">
+</form>
+</td>
+<td align=right>&nbsp;
+</td>
+</tr>
+</table>
+<div class="ml h"><font size=+1><h2>Edit Contact</h2></font></div><br>
+<table cellspacing=0 cellpadding=3>
+<form action="?v=cl&fv=ct&at=xn3j2xujznl3rbazsvonz877ry23za&fpnl=a&cs=fc" name=cf method=POST>
+<input type="hidden" name=ct_id value="0">
+<input type="hidden" name=at>
+<tr>
+<td class=ctlf align=right><label for=ct_nm><b>Name:</b></label></td>
+<td><input name=ct_nm id=ct_nm size=32
+value="Kevin Ortiz"><br></td>
+
+</tr>
+<tr>
+<td class=ctlf align=right><label for=ct_em><b>Primary Email:</b></label></td>
+<td><input name=ct_em id=ct_em size=32
+value="topshooter@gmail.com"><br></td>
+</tr>
+<tr>
+<td class=ctlf align=right><label for=ctf_n><b>Notes:</b></label></td>
+<td>
+<textarea name=ctf_n id=ctf_n
+cols=40 rows=3>some personal note</textarea>
+</td>
+</tr>
+<tr>
+<th class=nl scope=col>
+<div class="ml h">
+
+<input name="ctsn_00" size=15
+value="Personal">
+</div>
+</th>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>Email:</b>
+</td>
+<td>
+<input size=32 name="ctsf_00_00_e"
+value="personal@mail.com">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>Phone:</b>
+
+</td>
+<td>
+<input size=32 name="ctsf_00_01_p"
+value="+49 221 987456">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>Mobile:</b>
+</td>
+<td>
+<input size=32 name="ctsf_00_02_m"
+value="+49 171 234765">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>IM:</b>
+
+</td>
+<td>
+<input size=32 name="ctsf_00_03_i"
+value="personal@im.com">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right><label for=ctf_a><b>Address:</b></label></td>
+<td class=ctrf>
+<textarea name="ctsf_00_04_a" id=ctf_a
+cols=40 rows=3>Peterstr. 1, Kšln</textarea>
+</td>
+</tr>
+<tr>
+<th class=nl scope=col>
+<div class="ml h">
+<input name="ctsn_01" size=15
+value="Work">
+
+</div>
+</th>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>Email:</b>
+</td>
+<td>
+<input size=32 name="ctsf_01_00_e"
+value="business@mail.com">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>Phone:</b>
+</td>
+
+<td>
+<input size=32 name="ctsf_01_01_p"
+value="+49 221 123000">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>Mobile:</b>
+</td>
+<td>
+<input size=32 name="ctsf_01_02_m"
+value="+49 171 123000">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right>
+<b>IM:</b>
+
+</td>
+<td>
+<input size=32 name="ctsf_01_03_i"
+value="business@im.com">
+</td>
+</tr>
+<tr>
+<td class=ctlf align=right><label for=ctf_a><b>Address:</b></label></td>
+<td class=ctrf>
+<textarea name="ctsf_01_04_a" id=ctf_a
+cols=40 rows=3>Kšlnstr. 55, Kšln</textarea>
+</td>
+</tr>
+<tr>
+<td class=lr align=center colspan=2>
+<input class=bn type=submit name=nvp_a_ec value="Save">
+&nbsp;<input class=bn type=submit name=nvp_bu_canc value="Cancel">
+
+</td>
+</tr>
+</form>
+</table>
+<table width=100% cellpadding=2 cellspacing=0 border=0 bgcolor=#fad163>
+<tr>
+<td>
+<form action="?v=cl&fv=ct&at=xn3j2xujznl3rbazsvonz877ry23za&fpnl=a&cs=fc" name=f method=POST>
+<b><a href="?v=cl&fv=ct&at=xn3j2xujznl3rbazsvonz877ry23za&nvp_bu_canc=1&fpnl=a&cs=fc"
+>&laquo; Back to Contacts</a></b>&nbsp;
+&nbsp;<input type=submit name=nvp_bu_comp value="Compose">
+&nbsp;<input type=submit name=nvp_bu_del value="Delete">
+</form>
+</td>
+<td align=right>&nbsp;
+</td>
+
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+<table cellpadding=2 cellspacing=0 border=0 align=center class=ft>
+<tr>
+<td align=center>
+Use the search box or <b>search options</b> to find messages quickly!
+<tr>
+<td align=center>
+
+<span style="color: #006633;
+font-weight: bold;">
+You are currently using
+1 MB
+(0%) of your
+7360 MB
+</span>
+<div style="font-size: 11px; line-height: 17px;">
+Last account activity: 1.5 hours ago
+on this computer.
+&nbsp;<a href="?v=ac"
+target="details">Details</a>
+</div>
+<div style="margin:5 0 10">
+<table cellpadding=0 cellspacing=0 border=0 class=bn>
+<tr><td id=bm bgcolor=#FAE5B0>
+<div style="font-size:85%;margin:3 15 3 15;">
+Google Mail view:
+<a href="?redir=%2Fmail%2F&amp;a=stsv&amp;at=xn3j2xujznl3rbazsvonz877ry23za">
+standard</a> |
+
+<b>basic HTML</b>&nbsp;
+<a href="/support/bin/answer.py?ctx=%67mail&answer=15049"
+target="_blank">Learn more</a>
+</div>
+</td></tr>
+</table>
+</div>
+<tr>
+<td align=center>
+<font size=1>
+&copy;2009 Google -
+<a href="/mail/help/terms.html"
+target=_blank>
+Terms
+</a> -
+<a href="http://www.google.com" target=_blank>Google Home</a>
+
+</font>
+</table>
+</body>
+</html>

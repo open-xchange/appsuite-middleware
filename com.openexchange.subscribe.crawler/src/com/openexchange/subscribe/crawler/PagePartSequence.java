@@ -49,46 +49,73 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.ho.yaml.Yaml;
 
 /**
+ * This describes a sequence of ->PageParts to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode.
+ * To identify a particular bit of information two factors are used: 
+ * - Its place in the sequence (e.g. in the page«s sourcecode the last name is listed after the first name)
+ * - The sourcecode immediately surrounding it.
+ * There are two kinds of page parts: 
+ * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them
+ * - Infos, containing a three-capture-group regex (immediately before, relevant part, immediately after) 
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeServiceTestHelpers {
-	
-	public void testGenericSubscribeServiceForGoogleMail(){
-		// insert valid credentials here
-		String username = "o6sidian@gmail.com";
-		String password = "P1lotGoo";
-		
-		//create a CrawlerDescription
-		CrawlerDescription crawler = new CrawlerDescription();
-		crawler.setDisplayName("GoogleMail");
-		crawler.setId("com.openexchange.subscribe.crawler.googlemail");
-		List<Step> steps = new LinkedList<Step>(); 
-        
-        steps.add(new LoginPageByFormActionStep(
-        		"Get a user«s contact information from google mail", 
-        		"https://www.googlemail.com",
-        		username,
-        		password,
-        		"https://www.google.com/accounts/ServiceLoginAuth?service=mail",
-        		"Email",
-        		"Passwd",
-        		"?ui=html&zy=e"));
-        steps.add(new PageByUrlStep("Get the basic html view", "https://mail.google.com/mail/?ui=html&zy=e"));
-        steps.add(new PageByLinkRegexStep("Get the contact list", "(\\?v=cl)"));
-        steps.add(new AnchorsByLinkRegexStep("Get all contacts on a page", "", "(\\?v=ct&ct_id=)"));
-        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep());
+public class PagePartSequence {
 
-        Workflow workflow = new Workflow(steps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
-        
-        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
-        //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
+	private ArrayList<PagePart> pageParts;
+	private String page;
+	
+	public PagePartSequence(){
+		
 	}
+	
+	public PagePartSequence (ArrayList<PagePart> pageParts, String page){
+		this.pageParts = pageParts; 
+		this.page = page;
+	}
+	
+	public HashMap<String,String> retrieveInformation(){
+		HashMap<String, String> retrievedInformation = new HashMap<String,String>();
+		
+		for(PagePart pagePart : pageParts){
+			Pattern pattern = Pattern.compile(pagePart.getRegex());
+			Matcher matcher = pattern.matcher(page);
+			//find out if the part matches the remaining page
+			if (matcher.find()){
+				int indexOfPageRest = matcher.end();
+				//if it is an info-part  and its info is not empty get its info and put it into the map
+				if (pagePart.getType() == PagePart.INFO && matcher.groupCount() == 3){
+					String info = matcher.group(2);
+					if (!info.equals("")) retrievedInformation.put(pagePart.getTypeOfInfo(), info);					
+				}
+				//set the page to the rest (after this part)
+				page = page.substring(indexOfPageRest);
+			}
+		}
+		
+		return retrievedInformation;
+	}
+
+	public ArrayList<PagePart> getPageParts() {
+		return pageParts;
+	}
+
+	public void setPageParts(ArrayList<PagePart> pageParts) {
+		this.pageParts = pageParts;
+	}
+
+	public String getPage() {
+		return page;
+	}
+
+	public void setPage(String page) {
+		this.page = page;
+	}
+	
 }
