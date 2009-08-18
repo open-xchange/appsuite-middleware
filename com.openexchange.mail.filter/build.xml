@@ -34,6 +34,7 @@
 	<property name="serverbundle"         value="com.openexchange.server.jar"/>
 	<property name="globalbundle"         value="com.openexchange.global.jar"/>
 	<property name="configbundle"         value="com.openexchange.configread.jar"/>
+	<property name="commonjar"            value="common.jar"/>
 
 	<!-- non-osgi jars -->
 	<property name="mail"     value="mail-1.4.2.jar"/>
@@ -49,6 +50,7 @@
 		<pathelement location="${bundlesdir}/${servletbundle}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mail}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     </path>
 
 	<!-- jars for tests -->
