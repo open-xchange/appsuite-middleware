@@ -1000,6 +1000,25 @@ public class ContactParser extends CommonParser {
                 final JSONObject jsonobject) throws Exception {
                 contactobject.setUserField20(parseString(jsonobject, ContactFields.USERFIELD20));
             }
+        },
+        new JSONAttributeMapper() {
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.LAST_MODIFIED);
+            }
+            public void setObject(final Contact contactobject,
+                final JSONObject jsonobject) throws Exception {
+                contactobject.setLastModified(parseDate(jsonobject, ContactFields.LAST_MODIFIED));
+            }
+        },
+        new JSONAttributeMapper() {
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.CREATION_DATE);
+            }
+            public void setObject(final Contact contactobject,
+                final JSONObject jsonobject) throws Exception {
+                contactobject.setCreationDate(parseDate(jsonobject, ContactFields.CREATION_DATE));
+            }
         }
+        
     };
 }
