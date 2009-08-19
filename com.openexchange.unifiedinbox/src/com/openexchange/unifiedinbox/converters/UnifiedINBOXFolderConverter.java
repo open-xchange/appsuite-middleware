@@ -110,7 +110,15 @@ public final class UnifiedINBOXFolderConverter {
             ownPermission.setAllObjectPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
             ownPermission.setFolderAdmin(false);
             tmp.setOwnPermission(ownPermission);
-            tmp.addPermission(ownPermission);
+        }
+        {
+            final MailPermission permission = new DefaultMailPermission();
+            permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+            permission.setGroupPermission(true);
+            permission.setFolderPermission(OCLPermission.READ_FOLDER);
+            permission.setAllObjectPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+            permission.setFolderAdmin(false);
+            tmp.addPermission(permission);
         }
         tmp.setDefaultFolder(false);
         tmp.setMessageCount(-1);
