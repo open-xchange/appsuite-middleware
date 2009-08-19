@@ -1,3 +1,15 @@
+open-xchange-pop3 (6.11.0.0-3) unstable; urgency=low
+
+  * internal build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 19 Aug 2009 17:03:54 +0200
+
+open-xchange-pop3 (6.11.0.0-2) unstable; urgency=low
+
+  * internal build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 19 Aug 2009 17:01:13 +0200
+
 open-xchange-pop3 (6.11.0.0-1) unstable; urgency=low
 
   * first build for 6.11 Rev2
