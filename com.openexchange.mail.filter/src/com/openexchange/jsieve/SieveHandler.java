@@ -273,11 +273,10 @@ public class SieveHandler {
                 sieve_host_port);
         }
         measureStart();
-        if (selectAuth("PLAIN")) {
-            log.debug("Authentication to sieve successful");
-        } else {
+        if (!selectAuth("PLAIN")) {
             throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
         }
+        log.debug("Authentication to sieve successful");
         measureEnd("selectAuth");
     }
 
