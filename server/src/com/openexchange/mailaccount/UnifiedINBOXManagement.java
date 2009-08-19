@@ -64,6 +64,11 @@ public interface UnifiedINBOXManagement {
     public static final String PROTOCOL_UNIFIED_INBOX = "unifiedinbox";
 
     /**
+     * The Unified INBOX name.
+     */
+    public static final String NAME_UNIFIED_INBOX = "Unified INBOX";
+
+    /**
      * Creates the Unified INBOX account for given user in specified context.
      * 
      * @param userId The user ID

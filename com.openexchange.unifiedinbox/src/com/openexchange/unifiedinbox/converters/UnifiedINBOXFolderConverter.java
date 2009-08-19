@@ -65,6 +65,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -101,7 +102,7 @@ public final class UnifiedINBOXFolderConverter {
         tmp.setSubscribedSubfolders(true);
         tmp.setFullname(MailFolder.DEFAULT_FOLDER_ID);
         tmp.setParentFullname(null);
-        tmp.setName(MailFolder.DEFAULT_FOLDER_NAME);
+        tmp.setName(UnifiedINBOXManagement.NAME_UNIFIED_INBOX);
         tmp.setHoldsFolders(true);
         tmp.setHoldsMessages(false);
         {

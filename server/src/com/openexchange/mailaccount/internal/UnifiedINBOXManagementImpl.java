@@ -110,7 +110,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             }
             // Create and fill appropriate description object
             final MailAccountDescription mailAccountDescription = new MailAccountDescription();
-            mailAccountDescription.setName("Unified INBOX");
+            mailAccountDescription.setName(NAME_UNIFIED_INBOX);
             mailAccountDescription.setConfirmedHam("confirmed-ham");
             mailAccountDescription.setConfirmedSpam("confirmed-spam");
             mailAccountDescription.setDefaultFlag(false);
@@ -118,7 +118,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             final String login = getUserLogin(userId, ctx);
             mailAccountDescription.setLogin(login);
             mailAccountDescription.setMailPort(143);
-            mailAccountDescription.setMailProtocol(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX);
+            mailAccountDescription.setMailProtocol(PROTOCOL_UNIFIED_INBOX);
             mailAccountDescription.setMailSecure(false);
             mailAccountDescription.setMailServer("localhost");
             mailAccountDescription.setPassword("");
