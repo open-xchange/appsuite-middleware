@@ -150,7 +150,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     private String composePath(final int pop3AccountId, final int user, final int cid) throws MailException {
-        defaultMailAccess.connect();
+        defaultMailAccess.connect(false);
         try {
             final String fn = defaultMailAccess.getFolderStorage().getTrashFolder();
             final char sep = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
@@ -202,7 +202,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     public void connect() throws MailException {
-        defaultMailAccess.connect();
+        defaultMailAccess.connect(false);
         // Check path existence
         if (!defaultMailAccess.getFolderStorage().exists(path)) {
             final MailFolderDescription toCreate = new MailFolderDescription();
