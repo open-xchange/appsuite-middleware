@@ -103,6 +103,9 @@ public class Bug14309Test extends ParticipantNotifyTest {
         List<Message> messages = notify.getMessages();
         assertEquals("Wrong amount of notification messages.", 1, messages.size());
         Message message = messages.get(0);
+        
+        System.out.println(message.message);
+        
         assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
         assertTrue("Message should contain a link to the apointment.", message.message.contains("http://")); // TODO: Make more
                                                                                                              // sophisticated.
