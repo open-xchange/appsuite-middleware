@@ -141,7 +141,7 @@ public class Bug13911Test extends AbstractAJAXSession {
 
     private static String surroundWithWildcards(final String value) {
         String ret = value;
-        if (ret.charAt(0) != '*') {
+        if ("".equals(ret) || ret.charAt(0) != '*') {
             // Prepend '*' character
             ret = new StringBuilder(ret.length() + 1).append('*').append(ret).toString();
         }
