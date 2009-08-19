@@ -55,9 +55,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.imap.impl.IMAPAuthentication;
-
 public class Activator implements BundleActivator {
 
     private static transient final Log LOG = LogFactory.getLog(Activator.class);
