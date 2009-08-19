@@ -57,7 +57,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;

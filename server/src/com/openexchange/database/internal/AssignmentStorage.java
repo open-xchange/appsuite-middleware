@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

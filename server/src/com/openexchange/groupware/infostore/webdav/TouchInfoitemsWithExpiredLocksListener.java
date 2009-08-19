@@ -52,15 +52,12 @@ package com.openexchange.groupware.infostore.webdav;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link TouchInfoitemsWithExpiredLocksListener}

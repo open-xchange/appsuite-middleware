@@ -49,15 +49,11 @@
 
 package com.openexchange.groupware.contact;
 
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Stack;
-import com.davekoelle.AlphanumComparator;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;

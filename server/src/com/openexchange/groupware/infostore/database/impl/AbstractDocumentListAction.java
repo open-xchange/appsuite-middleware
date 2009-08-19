@@ -57,7 +57,6 @@ import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;

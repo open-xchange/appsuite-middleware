@@ -69,7 +69,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.tools.RenderMap;
 import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;

@@ -74,7 +74,6 @@ import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;

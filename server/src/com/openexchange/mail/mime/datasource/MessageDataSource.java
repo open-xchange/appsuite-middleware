@@ -56,7 +56,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;

@@ -183,8 +183,6 @@ public class ContactRequest {
             throw new OXMandatoryFieldException("missing folder");
         }
 
-        final Context ctx = session.getContext();
-
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             contactObj.getParentFolderID(),
             session);
@@ -209,8 +207,6 @@ public class ContactRequest {
         contactparser.parse(contactobject, jData);
 
         contactobject.setObjectID(id);
-
-        final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
@@ -248,8 +244,6 @@ public class ContactRequest {
             }
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
-
-            final Context ctx = session.getContext();
 
             final ContactWriter contactWriter = new ContactWriter(timeZone);
 
@@ -297,8 +291,6 @@ public class ContactRequest {
         final int objectId = DataParser.checkInt(jData, DataFields.ID);
         final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
 
-        final Context ctx = session.getContext();
-
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
             session);
@@ -339,8 +331,6 @@ public class ContactRequest {
             }
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
-
-            final Context ctx = session.getContext();
 
             try {
                 // check if the int array has always the same folder id
@@ -462,8 +452,6 @@ public class ContactRequest {
         try {
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
-            final Context ctx = session.getContext();
-
             final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
                 folderId,
                 session);
@@ -511,8 +499,6 @@ public class ContactRequest {
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
-
-        final Context ctx = session.getContext();
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
