@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -375,6 +375,24 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Aug 19 2009 - martin.herfurth@open-xchange.com
+ - HTTP-API: Additional return parameter for free/busy:
+             folder_id, if the appointment is visible for the user.
+* Tue Aug 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14333: Fixed parsing of duplicate parameters in parameterized list
+ - Bugfix #13631: Supporting SIEVE STARTTLS
+* Mon Aug 17 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13782: Added marker attribute for internal email addresses 
+* Mon Aug 17 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14250: Fake delete for outlook. 
+* Fri Aug 14 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14038: Fixed permission check to ignore infostore folders when considering limited public folder access
+* Fri Aug 14 2009 - choeger@open-xchange.com
+ - Bugfix #14319 -  Publication Templates must be marked as configuration files
+* Fri Aug 14 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14309: Link in notification mails for internal participants.
+* Thu Aug 13 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14264: Improved auto-complete search in contact module
 * Wed Aug 12 2009 - thorben.betten@open-xchange.com
  - Bugfix #14292: Support of AJPv13 syntax for attribute "req_attribute"
 * Tue Aug 11 2009 - thorben.betten@open-xchange.com
