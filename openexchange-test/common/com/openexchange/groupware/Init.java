@@ -123,6 +123,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -419,12 +420,13 @@ public final class Init {
          */
         MailProperties.getInstance().loadProperties();
 
-        IMAPServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
-        IMAPServiceRegistry.getServiceRegistry().addService(CacheService.class, services.get(CacheService.class));
-        IMAPServiceRegistry.getServiceRegistry().addService(UserService.class, services.get(UserService.class));
-        IMAPServiceRegistry.getServiceRegistry().addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
-        IMAPServiceRegistry.getServiceRegistry().addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
-        IMAPServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
+        final ServiceRegistry imapServiceRegistry = IMAPServiceRegistry.getServiceRegistry();
+        imapServiceRegistry.addService(ConfigurationService.class, services.get(ConfigurationService.class));
+        imapServiceRegistry.addService(CacheService.class, services.get(CacheService.class));
+        imapServiceRegistry.addService(UserService.class, services.get(UserService.class));
+        imapServiceRegistry.addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
+        imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
+        imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
 
         /*
          * Register IMAP bundle
