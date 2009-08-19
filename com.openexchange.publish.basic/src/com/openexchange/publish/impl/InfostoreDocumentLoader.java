@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;

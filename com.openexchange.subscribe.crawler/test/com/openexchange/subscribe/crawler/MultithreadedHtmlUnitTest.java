@@ -1,17 +1,8 @@
 package com.openexchange.subscribe.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 

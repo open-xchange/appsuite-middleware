@@ -55,7 +55,6 @@ import static com.openexchange.sql.schema.Tables.publications;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;

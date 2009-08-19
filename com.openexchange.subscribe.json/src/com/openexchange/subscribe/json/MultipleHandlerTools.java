@@ -50,10 +50,6 @@
 package com.openexchange.subscribe.json;
 
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.THROWABLE;
-import org.json.JSONException;
-import org.json.JSONValue;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.writer.ResponseWriter;
 
 
 /**

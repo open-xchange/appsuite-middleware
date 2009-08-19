@@ -3,7 +3,6 @@ package com.openexchange.templating.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.server.osgiservice.ServiceDependentRegistration;

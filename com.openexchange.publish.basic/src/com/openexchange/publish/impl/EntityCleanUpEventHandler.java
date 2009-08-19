@@ -58,7 +58,6 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.publish.PublicationException;
-import com.openexchange.session.Session;
 
 /**
  * {@link EntityCleanUpEventHandler}

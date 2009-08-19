@@ -49,28 +49,9 @@
 
 package com.openexchange.subscribe.json;
 
-import java.io.IOException;
-import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import com.openexchange.ajax.MultipleAdapterServlet;
-import com.openexchange.ajax.PermissionServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.multiple.MultipleHandler;
-import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.*;
 
 
 /**

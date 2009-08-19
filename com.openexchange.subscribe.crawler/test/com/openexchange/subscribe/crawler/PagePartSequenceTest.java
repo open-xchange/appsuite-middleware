@@ -55,8 +55,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.groupware.container.Contact;
 import junit.framework.TestCase;
 
 /**

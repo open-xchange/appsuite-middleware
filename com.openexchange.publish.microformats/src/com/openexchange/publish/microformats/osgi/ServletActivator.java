@@ -57,7 +57,6 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
 import com.openexchange.publish.microformats.InfostoreFileServlet;

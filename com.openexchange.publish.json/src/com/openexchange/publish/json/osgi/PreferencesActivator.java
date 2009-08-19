@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.publish.json.preferences.Enabled;
-import com.openexchange.publish.json.preferences.Installed;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

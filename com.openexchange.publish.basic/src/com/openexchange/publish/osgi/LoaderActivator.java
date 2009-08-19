@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.impl.CachingLoader;
 import com.openexchange.publish.impl.CompositeLoaderService;

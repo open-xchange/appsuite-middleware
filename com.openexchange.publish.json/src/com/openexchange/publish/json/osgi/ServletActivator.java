@@ -14,8 +14,6 @@ import com.openexchange.publish.json.PublicationServlet;
 import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationTargetServlet;
 import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.publish.json.types.FolderType;
-import com.openexchange.publish.json.types.IDType;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 public class ServletActivator extends DeferredActivator {

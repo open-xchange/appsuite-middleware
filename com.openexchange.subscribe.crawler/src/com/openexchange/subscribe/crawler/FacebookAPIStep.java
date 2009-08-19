@@ -3,7 +3,6 @@ package com.openexchange.subscribe.crawler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -120,7 +119,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 					Pattern pattern = Pattern.compile("([a-zA-Z]*)([\\s])([0-9]{1,2})([,]{1}[\\s]{1})([0-9]{4})");
 					Matcher matcher = pattern.matcher(birthdayString);
 					if (matcher.matches()){
-						//only set the contact«s birthday if at least day and month are available
+						//only set the contactï¿½s birthday if at least day and month are available
 						if (matcher.groupCount()>=3){
 							int month = 0;
 							int day = 0;
