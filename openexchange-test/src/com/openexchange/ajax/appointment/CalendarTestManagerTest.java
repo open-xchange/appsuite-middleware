@@ -115,6 +115,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     public void testCreate() throws Exception {
         Appointment appointment = generateAppointment();
+        appointment.setIgnoreConflicts(true);
 
         contactMgr.insertAppointmentOnServer(appointment);
 
@@ -124,6 +125,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     public void testRemove() throws Exception {
         Appointment appointment = generateAppointment();
+        appointment.setIgnoreConflicts(true);
 
         contactMgr.insertAppointmentOnServer(appointment);
 
@@ -136,6 +138,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     public void testGet() throws Exception {
         Appointment appointment = generateAppointment();
+        appointment.setIgnoreConflicts(true);
 
         contactMgr.insertAppointmentOnServer(appointment);
 
@@ -152,6 +155,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     public void testUpdate() throws Exception {
         Appointment appointment = generateAppointment();
+        appointment.setIgnoreConflicts(true);
 
         contactMgr.insertAppointmentOnServer(appointment);
 
@@ -164,6 +168,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
         update.setStartDate(new Date(23000));
         update.setEndDate(new Date(25000));
+        update.setIgnoreConflicts(true);
 
         contactMgr.updateAppointmentOnServer(update);
 
@@ -175,6 +180,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     public void testUpdates() throws Exception {
         Appointment appointment = generateAppointment();
+        appointment.setIgnoreConflicts(true);
 
         contactMgr.insertAppointmentOnServer(appointment);
 
@@ -182,6 +188,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         Appointment update = contactMgr.createIdentifyingCopy(appointment);
         String updatedTitle = getName() + "2";
         update.setTitle(updatedTitle);
+        update.setIgnoreConflicts(true);
 
         assertEquals(update.getObjectID(), appointment.getObjectID());
         assertEquals(update.getParentFolderID(), appointment.getParentFolderID());
@@ -202,6 +209,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         appointment.setTitle(getName());
         appointment.setStartDate(D("12/02/1999 10:00"));
         appointment.setEndDate(D("12/02/1999 12:00"));
+        appointment.setIgnoreConflicts(true);
 
         contactMgr.insertAppointmentOnServer(appointment);
 
