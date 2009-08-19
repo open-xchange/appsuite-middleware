@@ -182,16 +182,28 @@ public interface Folder extends Serializable, Cloneable {
     /**
      * Gets the subfolder IDs.
      * <p>
-     * {@link FolderStorage#getSubfolders(String)} is supposed to be used if <code>null</code> is returned.
+     * <b>Note</b>: This method is allowed to return <code>null</code>. A returned <code>null</code> value indicates that:
+     * <ul>
+     * <li>this folder surely has subfolders</li>
+     * <li>this folder's subfolders may be located in more than one folder storages</li>
+     * </ul>
+     * <p>
+     * To obtain full list of subfolders use the {@link FolderStorage#getSubfolders(String)} method on each appropriate folder storage.
      * 
-     * @return The subfolder IDs or <code>null</code> if not available
+     * @return The subfolder IDs or <code>null</code>
      */
     String[] getSubfolderIDs();
 
     /**
      * Sets the subfolder IDs.
+     * <p>
+     * <b>Note</b>: This method allows to pass a <code>null</code> value. A passed <code>null</code> value indicates that:
+     * <ul>
+     * <li>this folder surely has subfolders</li>
+     * <li>this folder's subfolders may be located in more than one folder storages</li>
+     * </ul>
      * 
-     * @param subfolderIds The subfolder IDs to set
+     * @param subfolderIds The subfolder IDs to set or <code>null</code>
      */
     void setSubfolderIDs(String[] subfolderIds);
 
