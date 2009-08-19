@@ -395,13 +395,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
             }
-            MailAccessWatcher.addMailAccess(this);
-            return;
-        }
-        checkFieldsBeforeConnect(getMailConfig());
-        connectInternal();
-        if (checkDefaultFolder) {
-            checkDefaultFolderOnConnect();
+        } else {
+            checkFieldsBeforeConnect(getMailConfig());
+            connectInternal();
+            if (checkDefaultFolder) {
+                checkDefaultFolderOnConnect();
+            }
         }
         MailAccessWatcher.addMailAccess(this);
     }
