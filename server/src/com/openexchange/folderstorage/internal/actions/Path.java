@@ -169,7 +169,7 @@ public final class Path extends AbstractUserizedFolderAction {
                     Integer.valueOf(getContext().getContextId()));
             }
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
-            path.add(getUserizedFolder(folder, ownPermission, treeId, all, openedStorages));
+            path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, openedStorages));
             while (!FolderStorage.ROOT_ID.equals(folder.getParentID())) {
                 folder = folderStorage.getFolder(treeId, folder.getParentID(), storageParameters);
                 ownPermission = permissionProvider.getOwnPermission(folder);
@@ -179,7 +179,7 @@ public final class Path extends AbstractUserizedFolderAction {
                         getUser().getDisplayName(),
                         Integer.valueOf(getContext().getContextId()));
                 }
-                path.add(getUserizedFolder(folder, ownPermission, treeId, all, openedStorages));
+                path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, openedStorages));
             }
 
             ret = path.toArray(new UserizedFolder[path.size()]);

@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.TimeZone;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -115,11 +116,13 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      * @param ownPermission The user's permission on given folder
      * @param treeId The tree identifier
      * @param all <code>true</code> to add all subfolders; otherwise <code>false</code> to only add subscribed ones
+     * @param nullIsPublicAccess <code>true</code> if a <code>null</code> value obtained from {@link Folder#getSubfolderIDs()} hints to
+     *            publicly accessible folder; otherwise <code>false</code>
      * @param openedStorages The list of opened storages
      * @return The user-sensitive folder for given folder
      * @throws FolderException If a folder error occurs
      */
-    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final java.util.List<FolderStorage> openedStorages) throws FolderException {
+    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
         userizedFolder.setLocale(getUser().getLocale());
         // Permissions
@@ -149,38 +152,45 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
             }
         }
         if (!isShared) {
-            hasVisibleSubfolderIDs(folder, treeId, all, userizedFolder, openedStorages);
+            hasVisibleSubfolderIDs(folder, treeId, all, userizedFolder, nullIsPublicAccess, openedStorages);
         }
         return userizedFolder;
     }
 
-    private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final java.util.List<FolderStorage> openedStorages) throws FolderException {
+    private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         // Subfolders
         final String[] subfolders = folder.getSubfolderIDs();
         final java.util.List<String> visibleSubfolderIds;
         if (null == subfolders) {
-            // Get appropriate storages and start transaction
-            final String folderId = folder.getID();
-            final FolderStorage[] ss = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, folderId);
-            visibleSubfolderIds = new ArrayList<String>(1);
-            for (int i = 0; visibleSubfolderIds.size() <= 0 && i < ss.length; i++) {
-                final FolderStorage curStorage = ss[i];
-                boolean alreadyOpened = false;
-                for (int j = 0; !alreadyOpened && j < openedStorages.size(); j++) {
-                    if (openedStorages.get(j).equals(curStorage)) {
-                        alreadyOpened = true;
+            if (nullIsPublicAccess) {
+                // A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
+                visibleSubfolderIds = new ArrayList<String>(1);
+                visibleSubfolderIds.add("dummyId");
+            } else {
+                // Get appropriate storages and start transaction
+                final String folderId = folder.getID();
+                final FolderStorage[] ss = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, folderId);
+                visibleSubfolderIds = new ArrayList<String>(1);
+                for (int i = 0; visibleSubfolderIds.size() <= 0 && i < ss.length; i++) {
+                    final FolderStorage curStorage = ss[i];
+                    boolean alreadyOpened = false;
+                    final Iterator<FolderStorage> it = openedStorages.iterator();
+                    for (int j = 0; !alreadyOpened && j < openedStorages.size(); j++) {
+                        if (it.next().equals(curStorage)) {
+                            alreadyOpened = true;
+                        }
                     }
-                }
-                if (!alreadyOpened) {
-                    curStorage.startTransaction(getStorageParameters(), false);
-                    openedStorages.add(curStorage);
-                }
-                final SortableId[] visibleIds = curStorage.getSubfolders(treeId, folderId, getStorageParameters());
-                if (visibleIds.length > 0) {
-                    /*
-                     * Found a storage which offers visible subfolder(s)
-                     */
-                    visibleSubfolderIds.add(visibleIds[0].getId());
+                    if (!alreadyOpened) {
+                        curStorage.startTransaction(getStorageParameters(), false);
+                        openedStorages.add(curStorage);
+                    }
+                    final SortableId[] visibleIds = curStorage.getSubfolders(treeId, folderId, getStorageParameters());
+                    if (visibleIds.length > 0) {
+                        /*
+                         * Found a storage which offers visible subfolder(s)
+                         */
+                        visibleSubfolderIds.add(visibleIds[0].getId());
+                    }
                 }
             }
         } else {

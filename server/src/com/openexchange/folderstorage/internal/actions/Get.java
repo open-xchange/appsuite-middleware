@@ -117,7 +117,7 @@ public final class Get extends AbstractUserizedFolderAction {
                     Integer.valueOf(getContext().getContextId()));
             }
             // TODO: All or only subscribed subfolders?
-            final UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, true, openedStorages);
+            final UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, true, true, openedStorages);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());

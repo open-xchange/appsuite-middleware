@@ -108,11 +108,11 @@ public abstract class AbstractAction {
      * 
      * @param id The folder identifier
      * @param treeId The tree identifier
-     * @param openedStorages The list of opened storages
+     * @param openedStorages The collection of opened storages
      * @return An opened storage for given tree-folder-pair
      * @throws FolderException If a folder error occurs
      */
-    protected FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.List<FolderStorage> openedStorages) throws FolderException {
+    protected FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         FolderStorage tmp = null;
         for (final FolderStorage ps : openedStorages) {
             if (ps.getFolderType().servesFolderId(id)) {
