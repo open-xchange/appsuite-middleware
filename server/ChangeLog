@@ -1,3 +1,8 @@
+* 2009-08-19 - martin.herfurth@open-xchange.com
+
+ - HTTP-API: Additional return parameter for free/busy:
+             folder_id, if the appointment is visible for the user.
+
 * 2009-08-17 - martin.herfurth@open-xchange.com
 
  - Bugfix #14250: Fake delete for outlook. 

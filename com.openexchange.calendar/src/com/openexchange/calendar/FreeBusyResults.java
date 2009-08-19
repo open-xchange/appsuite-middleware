@@ -123,6 +123,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private CalendarCollection recColl;
     
+    private int readFolderId;
+    
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
     /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
@@ -297,6 +299,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         if (show_details) {
             if(checkPermissions()) {
                 cdao.setTitle(title);
+                cdao.setParentFolderID(readFolderId);
             }
             final Participants ret = resolveConflictingUserParticipants();
             cdao.setParticipants(ret.getList());
@@ -367,13 +370,17 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                     int o = pfio.getParticipant();
                     int p = pfio.getPrivateFolder();
                     if (cfo.canReadAllInPrivateFolder(p)) {
+                        readFolderId = p;
                         return true;
                     } else if (cfo.canReadAllInSharedFolder(p)) {
+                        readFolderId = p;
                         return true;
                     } else if (o == uid) {
                         if (cfo.canReadOwnInPrivateFolder(p)) {
+                            readFolderId = p;
                             return true;
                         } else if (cfo.canReadOwnInSharedFolder(p)) {
+                            readFolderId = p;
                             return true;
                         }
                     } 
