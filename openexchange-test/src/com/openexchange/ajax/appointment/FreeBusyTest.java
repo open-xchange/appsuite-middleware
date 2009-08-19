@@ -50,7 +50,7 @@ public class FreeBusyTest extends AppointmentTest {
 				found = true;
 				
 				appointmentObj.removeTitle();
-				appointmentObj.removeParentFolderID();
+				//appointmentObj.removeParentFolderID();
 				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
 			}
 		}
@@ -93,7 +93,7 @@ public class FreeBusyTest extends AppointmentTest {
 				found = true;
 				
 				appointmentObj.removeTitle();
-				appointmentObj.removeParentFolderID();
+				//appointmentObj.removeParentFolderID();
 				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
 			}
 		}
@@ -126,7 +126,7 @@ public class FreeBusyTest extends AppointmentTest {
 				found = true;
 				
 				appointmentObj.removeTitle();
-				appointmentObj.removeParentFolderID();
+				//appointmentObj.removeParentFolderID();
 				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
 			}
 		}
@@ -170,7 +170,7 @@ public class FreeBusyTest extends AppointmentTest {
 				found = true;
 				
 				appointmentObj.removeTitle();
-				appointmentObj.removeParentFolderID();
+				//appointmentObj.removeParentFolderID();
 				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
 			}
 		}
