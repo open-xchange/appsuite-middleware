@@ -354,6 +354,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Opens this access. May be invoked on an already opened access.
+     * 
+     * @param checkDefaultFolders <code>true</code> to check existence of default folders; otherwise <code>false</code> to omit check
+     * @throws MailException If the connection could not be established for various reasons
+     */
+    public final void connect(final boolean checkDefaultFolders) throws MailException {
+        connect0(checkDefaultFolders);
+    }
+
+    /**
      * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
      * the root folder.
      * <p>
