@@ -392,33 +392,39 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private final void connect0(final boolean checkDefaultFolder) throws MailException {
         applyNewThread();
         if (isConnected()) {
-            getFolderStorage().checkDefaultFolders();
+            if (checkDefaultFolder) {
+                checkDefaultFolderOnConnect();
+            }
             MailAccessWatcher.addMailAccess(this);
             return;
         }
         checkFieldsBeforeConnect(getMailConfig());
         connectInternal();
         if (checkDefaultFolder) {
-            try {
-                getFolderStorage().checkDefaultFolders();
-            } catch (final MailException e) {
-                throw e;
-            } catch (final Exception e) {
-                final MailConfig mailConfig = getMailConfig();
-                final MailException mailExc = new MailException(
-                    MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
-                    e,
-                    mailConfig.getServer(),
-                    Integer.valueOf(session.getUserId()),
-                    mailConfig.getLogin(),
-                    Integer.valueOf(session.getContextId()),
-                    e.getMessage());
-                LOG.error(mailExc.getMessage(), mailExc);
-                closeInternal();
-                throw mailExc;
-            }
+            checkDefaultFolderOnConnect();
         }
         MailAccessWatcher.addMailAccess(this);
+    }
+
+    private void checkDefaultFolderOnConnect() throws MailException {
+        try {
+            getFolderStorage().checkDefaultFolders();
+        } catch (final MailException e) {
+            throw e;
+        } catch (final Exception e) {
+            final MailConfig mailConfig = getMailConfig();
+            final MailException mailExc = new MailException(
+                MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
+                e,
+                mailConfig.getServer(),
+                Integer.valueOf(session.getUserId()),
+                mailConfig.getLogin(),
+                Integer.valueOf(session.getContextId()),
+                e.getMessage());
+            LOG.error(mailExc.getMessage(), mailExc);
+            closeInternal();
+            throw mailExc;
+        }
     }
 
     /**
