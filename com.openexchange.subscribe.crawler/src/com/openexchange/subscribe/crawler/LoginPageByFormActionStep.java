@@ -70,13 +70,14 @@ import com.openexchange.subscribe.SubscriptionException;
 public class LoginPageByFormActionStep extends AbstractStep implements Step<HtmlPage, Object>{
 
 	private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin;
+	private int numberOfForm;
 	private HtmlPage currentPage;
 	
 	public LoginPageByFormActionStep(){
 		
 	}
 	
-	public LoginPageByFormActionStep (String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin) {
+	public LoginPageByFormActionStep (String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin, int numberOfForm) {
 		this.description = description;
 		this.url = url;
 		this.username = username;
@@ -85,6 +86,7 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		this.nameOfUserField = nameOfUserField;
 		this.nameOfPasswordField = nameOfPasswordField;
 		this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+		this.numberOfForm = numberOfForm;
 	}
 	
 	public void execute(WebClient webClient) throws SubscriptionException{
@@ -95,11 +97,13 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 			//System.out.println("***** Page title : " + loginPage.getTitleText());
 			//System.out.println("***** Page : "+loginPage.getWebResponse().getContentAsString());
 		    HtmlForm loginForm = null;
+		    int numberOfFormCounter = 1;
 		    for (HtmlForm form : loginPage.getForms()){
-		    	if (form.getActionAttribute().startsWith(actionOfLoginForm) & form.getInputsByName(nameOfUserField) != null){
+		    	if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter & form.getInputsByName(nameOfUserField) != null){
 		    		loginForm = form;
 		    		//System.out.println("***** found it!");
 		    	}
+		    	numberOfFormCounter++;
 		    }
 		    if (loginForm != null){
 		    	//System.out.println("***** LoginForm "+loginForm.asText());
@@ -208,6 +212,22 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 
 	public void setPageTitleAfterLogin(String pageTitleAfterLogin) {
 		this.linkAvailableAfterLogin = pageTitleAfterLogin;
+	}
+
+	public String getLinkAvailableAfterLogin() {
+		return linkAvailableAfterLogin;
+	}
+
+	public void setLinkAvailableAfterLogin(String linkAvailableAfterLogin) {
+		this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+	}
+
+	public int getNumberOfForm() {
+		return numberOfForm;
+	}
+
+	public void setNumberOfForm(int numberOfForm) {
+		this.numberOfForm = numberOfForm;
 	}
 	
 	

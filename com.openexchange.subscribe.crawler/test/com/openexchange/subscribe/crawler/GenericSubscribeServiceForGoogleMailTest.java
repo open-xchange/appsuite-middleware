@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,8 +62,8 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
 	
 	public void testGenericSubscribeServiceForGoogleMail(){
 		// insert valid credentials here
-		String username = "o6sidian@gmail.com";
-		String password = "P1lotGoo";
+		String username = "";
+		String password = "";
 		
 		//create a CrawlerDescription
 		CrawlerDescription crawler = new CrawlerDescription();
@@ -71,18 +72,33 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
 		List<Step> steps = new LinkedList<Step>(); 
         
         steps.add(new LoginPageByFormActionStep(
-        		"Get a user«s contact information from google mail", 
+        		"Login to Google Mail", 
         		"https://www.googlemail.com",
         		username,
         		password,
         		"https://www.google.com/accounts/ServiceLoginAuth?service=mail",
         		"Email",
         		"Passwd",
-        		"?ui=html&zy=e"));
+        		"?ui=html&zy=e", 
+        		1));
         steps.add(new PageByUrlStep("Get the basic html view", "https://mail.google.com/mail/?ui=html&zy=e"));
         steps.add(new PageByLinkRegexStep("Get the contact list", "(\\?v=cl)"));
-        steps.add(new AnchorsByLinkRegexStep("Get all contacts on a page", "", "(\\?v=ct&ct_id=)"));
-        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep());
+        steps.add(new PageByLinkRegexStep("switch to see all contacts", "(\\?v=cl&pnl=a)"));
+        steps.add(new AnchorsByLinkRegexStep("Get all contacts on a page", "NO_SUBPAGES", "(\\?v=ct&ct_id=[0-9a-zA-Z]*)"));
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+	    pageParts.add(new PagePart("(<input[\\s]{1}name=ct_nm[\\s]{1}id=ct_nm[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-zA-Z\\s]*)(\"><br></td>)", "display_name"));
+	    pageParts.add(new PagePart("(<input[\\s]{1}name=ct_em[\\s]{1}id=ct_em[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-z@A-Z0-9\\.]*)(\"><br></td>)", "email1"));
+	    pageParts.add(new PagePart("(<textarea[\\s]{1}name=ctf_n[\\s]{1}id=ctf_n[\\s]{1}cols=[0-9]{1,2}[\\s]{1}rows=[0-9]{1,2}>)([^<]*)(</textarea>)", "note"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_00_e\"[\\s]value=\")([a-zA-Z@0-9\\.]*)(\">)", "email2"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_01_p\"[\\s]value=\")([+0-9\\s]*)(\">)", "telephone_home1"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_02_m\"[\\s]value=\")([+0-9\\s]*)(\">)", "cellular_telephone2"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_03_i\"[\\s]value=\")([a-z\\.@A-Z0-9]*)(\">)", "instant_messenger2"));    
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_00_e\"[\\s]value=\")([a-zA-Z@0-9\\.]*)(\">)", "email3"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_01_p\"[\\s]value=\")([+0-9\\s]*)(\">)", "telephone_business1"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_02_m\"[\\s]value=\")([+0-9\\s]*)(\">)", "cellular_telephone1"));
+	    pageParts.add(new PagePart("(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_03_i\"[\\s]value=\")([a-z\\.@A-Z0-9]*)(\">)", "instant_messenger1"));
+	    PagePartSequence sequence = new PagePartSequence(pageParts, "");
+        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep("Get the information of each contact from the individual webpages",sequence));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));

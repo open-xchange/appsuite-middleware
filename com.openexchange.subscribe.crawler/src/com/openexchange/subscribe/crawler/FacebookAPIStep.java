@@ -70,7 +70,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 					actionOfLoginForm,
 					nameOfUserField,
 					nameOfPasswordField,
-					linkAvailableAfterLogin);
+					linkAvailableAfterLogin, 1);
 			step.execute(webClient);
 			HtmlPage pageAfterLogin = step.getOutput();
 			webClient.closeAllWindows();
@@ -119,7 +119,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 					Pattern pattern = Pattern.compile("([a-zA-Z]*)([\\s])([0-9]{1,2})([,]{1}[\\s]{1})([0-9]{4})");
 					Matcher matcher = pattern.matcher(birthdayString);
 					if (matcher.matches()){
-						//only set the contact�s birthday if at least day and month are available
+						//only set the contacts birthday if at least day and month are available
 						if (matcher.groupCount()>=3){
 							int month = 0;
 							int day = 0;

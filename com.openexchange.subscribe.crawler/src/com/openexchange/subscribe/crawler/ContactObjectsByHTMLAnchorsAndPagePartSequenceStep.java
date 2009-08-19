@@ -79,6 +79,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
 	
 	public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(String description, PagePartSequence pageParts) {
 		this.description = description;
+		this.pageParts = pageParts;
 	}
 	
 	public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(){
@@ -144,6 +145,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     			
     			SANITIZER.sanitize(contact);
     			contactObjects.add(contact);
+    			
+    			
     			
     		} catch (final VersitException e){
     			e.printStackTrace();

@@ -1,0 +1,75 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+displayName: GoogleMail
+id: com.openexchange.subscribe.crawler.googlemail
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
+      actionOfLoginForm: "https://www.google.com/accounts/ServiceLoginAuth?service=mail"
+      linkAvailableAfterLogin: "?ui=html&zy=e"
+      nameOfPasswordField: Passwd
+      nameOfUserField: Email
+      numberOfForm: 1
+      pageTitleAfterLogin: "?ui=html&zy=e"
+      password: P1lotGoo
+      url: "https://www.googlemail.com"
+      username: o6sidian@gmail.com
+    - !com.openexchange.subscribe.crawler.PageByUrlStep
+      url: "https://mail.google.com/mail/?ui=html&zy=e"
+    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
+      url: (\?v=cl)
+    - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
+      linkRegex: "(\\?v=ct&ct_id=[0-9a-zA-Z]*)"
+      resultpageLinks: []
+      subpageLinkRegex: NO_SUBPAGES
+      subpages: []
+      subpagesHref: []
+    - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
+      pageParts: !com.openexchange.subscribe.crawler.PagePartSequence
+        page: ""
+        pageParts: 
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]{1}name=ct_nm[\\s]{1}id=ct_nm[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-zA-Z\\s]*)(\"><br></td>)"
+            type: 1
+            typeOfInfo: display_name
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]{1}name=ct_em[\\s]{1}id=ct_em[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-z@A-Z\\.]*)(\"><br></td>)"
+            type: 1
+            typeOfInfo: email1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<textarea[\\s]{1}name=ctf_n[\\s]{1}id=ctf_n[\\s]{1}cols=[0-9]{1,2}[\\s]{1}rows=[0-9]{1,2}>)([^<]*)(</textarea>)"
+            type: 1
+            typeOfInfo: note
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_00_e\"[\\s]value=\")([a-zA-Z@\\.]*)(\">)"
+            type: 1
+            typeOfInfo: email2
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_01_p\"[\\s]value=\")([+0-9\\s]*)(\">)"
+            type: 1
+            typeOfInfo: telephone_home1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_02_m\"[\\s]value=\")([+0-9\\s]*)(\">)"
+            type: 1
+            typeOfInfo: cellular_telephone2
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_00_03_i\"[\\s]value=\")([a-z\\.@A-Z]*)(\">)"
+            type: 1
+            typeOfInfo: instant_messenger2
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_00_e\"[\\s]value=\")([a-zA-Z@\\.]*)(\">)"
+            type: 1
+            typeOfInfo: email3
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_01_p\"[\\s]value=\")([+0-9\\s]*)(\">)"
+            type: 1
+            typeOfInfo: telephone_business1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_02_m\"[\\s]value=\")([+0-9\\s]*)(\">)"
+            type: 1
+            typeOfInfo: cellular_telephone1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<input[\\s]size=[0-9]{2}[\\s]name=\"ctsf_01_03_i\"[\\s]value=\")([a-z\\.@A-Z]*)(\">)"
+            type: 1
+            typeOfInfo: instant_messenger1
+  
