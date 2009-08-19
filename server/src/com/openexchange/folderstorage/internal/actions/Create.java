@@ -95,7 +95,7 @@ public final class Create extends AbstractAction {
      * @param toCreate The object describing the folder to create
      * @throws FolderException If creation fails
      */
-    public void doCreate(final Folder toCreate) throws FolderException {
+    public String doCreate(final Folder toCreate) throws FolderException {
         final String parentId = toCreate.getParentID();
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
@@ -131,14 +131,16 @@ public final class Create extends AbstractAction {
             /*
              * Create folder dependent on folder is virtual or not
              */
+            final String newId;
             if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
-                doCreateReal(toCreate, parentId, treeId, parentStorage);
+                newId = doCreateReal(toCreate, parentId, treeId, parentStorage);
             } else {
-                doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
+                newId = doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
             }
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);
             }
+            return newId;
         } catch (final FolderException e) {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
@@ -152,7 +154,7 @@ public final class Create extends AbstractAction {
         }
     }
 
-    private void doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws FolderException {
+    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws FolderException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
@@ -174,9 +176,10 @@ public final class Create extends AbstractAction {
                 Integer.valueOf(context.getContextId()));
         }
         parentStorage.createFolder(toCreate, storageParameters);
+        return toCreate.getID();
     }
 
-    private void doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
+    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         /*
@@ -224,6 +227,7 @@ public final class Create extends AbstractAction {
              */
             virtualStorage.createFolder(toCreate, storageParameters);
         }
+        return toCreate.getID();
         // TODO: Check for storage capabilities! Does storage support permissions? Etc.
     }
 

@@ -56,6 +56,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -147,6 +148,8 @@ public final class FolderWriter {
     };
 
     private static final Map<Integer, FolderFieldWriter> STATIC_WRITERS_MAP;
+
+    private static final int[] ALL_FIELDS;
 
     static {
         final Map<Integer, FolderFieldWriter> m = new HashMap<Integer, FolderFieldWriter>();
@@ -316,23 +319,36 @@ public final class FolderWriter {
             }
         });
         STATIC_WRITERS_MAP = Collections.unmodifiableMap(m);
+
+        final FolderField[] all = FolderField.values();
+        final int[] allFields = new int[all.length];
+        int j = 0;
+        for (int i = 0; i < allFields.length; i++) {
+            final int val = all[i].getColumn();
+            if (val > 0) {
+                allFields[j++] = val;
+            }
+        }
+        ALL_FIELDS = new int[j];
+        System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
     }
 
     /**
      * Writes requested fields of given folder into a JSON array.
      * 
-     * @param fields The fields to write
+     * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
      * @return The JSON array carrying requested fields of given folder
      * @throws FolderException If writing JSON array fails
      */
     public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder) throws FolderException {
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        final int[] cols = null == fields ? ALL_FIELDS : fields;
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                    LOG.warn("Unknown field: " + cols[i], new Throwable());
                 }
                 ffw = UNKNOWN_FIELD_FFW;
             }
@@ -353,18 +369,19 @@ public final class FolderWriter {
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
      * 
-     * @param fields The fields to write to each JSON array
+     * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON arrays of given folders
      * @throws FolderException If writing JSON array fails
      */
     public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders) throws FolderException {
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        final int[] cols = null == fields ? ALL_FIELDS : fields;
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                    LOG.warn("Unknown field: " + cols[i], new Throwable());
                 }
                 ffw = UNKNOWN_FIELD_FFW;
             }
@@ -390,18 +407,19 @@ public final class FolderWriter {
     /**
      * Writes requested fields of given folder into a JSON object.
      * 
-     * @param fields The fields to write
+     * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
      * @return The JSON object carrying requested fields of given folder
      * @throws FolderException If writing JSON object fails
      */
     public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder) throws FolderException {
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        final int[] cols = null == fields ? ALL_FIELDS : fields;
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                    LOG.warn("Unknown field: " + cols[i], new Throwable());
                 }
                 ffw = UNKNOWN_FIELD_FFW;
             }
@@ -422,18 +440,19 @@ public final class FolderWriter {
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON objects.
      * 
-     * @param fields The fields to write to each JSON object
+     * @param fields The fields to write to each JSON object or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON objects of given folders
      * @throws FolderException If writing JSON array fails
      */
     public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders) throws FolderException {
-        final FolderFieldWriter[] ffws = new FolderFieldWriter[fields.length];
+        final int[] cols = null == fields ? ALL_FIELDS : fields;
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + fields[i], new Throwable());
+                    LOG.warn("Unknown field: " + cols[i], new Throwable());
                 }
                 ffw = UNKNOWN_FIELD_FFW;
             }

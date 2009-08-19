@@ -93,7 +93,7 @@ public class GroupRequest {
 
     private static final String MODULE_GROUP = "group";
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
+    public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
         JSONValue retval = null;
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
             retval = actionList(jsonObject);

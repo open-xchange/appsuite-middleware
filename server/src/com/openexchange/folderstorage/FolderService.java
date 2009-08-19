@@ -66,10 +66,23 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param user The user
+     * @param context The context
      * @return The folder
      * @throws FolderException If folder cannot be returned
      */
-    UserizedFolder getFolder(String treeId, String folderId) throws FolderException;
+    UserizedFolder getFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+
+    /**
+     * Gets the folder identified by given folder identifier and tree identifier.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param session The session
+     * @return The folder
+     * @throws FolderException If folder cannot be returned
+     */
+    UserizedFolder getFolder(String treeId, String folderId, Session session) throws FolderException;
 
     /**
      * Gets this storage's default folder for specified user.
@@ -77,10 +90,24 @@ public interface FolderService {
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param contentType The content type or the default folder
+     * @param ruser The requesting user
+     * @param context The context
      * @return The default folder for specified user
      * @throws FolderException If the default folder cannot be returned
      */
-    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType) throws FolderException;
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, User ruser, Context context) throws FolderException;
+
+    /**
+     * Gets this storage's default folder for specified user.
+     * 
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param contentType The content type or the default folder
+     * @param session The session
+     * @return The default folder for specified user
+     * @throws FolderException If the default folder cannot be returned
+     */
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Session session) throws FolderException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -91,9 +118,26 @@ public interface FolderService {
      * @param folderId The (source) folder identifier
      * @param targetTreeId The target tree identifier
      * @param targetParentId The target parent identifier
+     * @param user The user
+     * @param context The context
+     * @param session The session
      * @throws FolderException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId) throws FolderException;
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, User user, Context context) throws FolderException;
+
+    /**
+     * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
+     * <p>
+     * Does only work on virtual trees.
+     * 
+     * @param sourceTreeId The source tree identifier
+     * @param folderId The (source) folder identifier
+     * @param targetTreeId The target tree identifier
+     * @param targetParentId The target parent identifier
+     * @param session The session
+     * @throws FolderException If folder cannot be added
+     */
+    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String targetParentId, Session session) throws FolderException;
 
     /**
      * Unsubscribes the specified folder in given (virtual) tree only.
@@ -102,9 +146,23 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param user The user
+     * @param context The context
      * @throws FolderException If folder cannot be deleted
      */
-    void unsubscribeFolder(String treeId, String folderId) throws FolderException;
+    void unsubscribeFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+
+    /**
+     * Unsubscribes the specified folder in given (virtual) tree only.
+     * <p>
+     * Does only work on virtual trees.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param session The session
+     * @throws FolderException If folder cannot be deleted
+     */
+    void unsubscribeFolder(String treeId, String folderId, Session session) throws FolderException;
 
     /**
      * Gets the subfolders of specified parent in given tree.
@@ -185,9 +243,22 @@ public interface FolderService {
      * Creates a new folder described by given folder object.
      * 
      * @param folder The folder object containing tree identifier, parent identifier and data.
+     * @param user The user
+     * @param context The context
+     * @return The identifier of the newly created folder
      * @throws FolderException If creation fails
      */
-    void createFolder(Folder folder) throws FolderException;
+    String createFolder(Folder folder, User user, Context context) throws FolderException;
+
+    /**
+     * Creates a new folder described by given folder object.
+     * 
+     * @param folder The folder object containing tree identifier, parent identifier and data.
+     * @param session The session
+     * @return The identifier of the newly created folder
+     * @throws FolderException If creation fails
+     */
+    String createFolder(Folder folder, Session session) throws FolderException;
 
     // TODO: default folder? all visible folders
 

@@ -59,7 +59,7 @@ import org.json.JSONValue;
  */
 public final class AJAXRequestResult {
 
-    private final JSONValue resultObject;
+    private final Object resultObject;
 
     private final Date timestamp;
 
@@ -70,7 +70,7 @@ public final class AJAXRequestResult {
      * 
      * @param resultObject The result object
      */
-    public AJAXRequestResult(final JSONValue resultObject) {
+    public AJAXRequestResult(final Object resultObject) {
         this(resultObject, null);
     }
 
@@ -80,7 +80,7 @@ public final class AJAXRequestResult {
      * @param resultObject The result object
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      */
-    public AJAXRequestResult(final JSONValue resultObject, final Date timestamp) {
+    public AJAXRequestResult(final Object resultObject, final Date timestamp) {
         super();
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
@@ -134,7 +134,7 @@ public final class AJAXRequestResult {
      * 
      * @return The result object
      */
-    public JSONValue getResultObject() {
+    public Object getResultObject() {
         return resultObject;
     }
 

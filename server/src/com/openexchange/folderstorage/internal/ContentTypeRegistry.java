@@ -50,11 +50,15 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
 
@@ -63,7 +67,7 @@ import com.openexchange.folderstorage.FolderStorageComparator;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ContentTypeRegistry {
+public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContentTypeRegistry.class);
 
@@ -190,6 +194,36 @@ public final class ContentTypeRegistry {
             return null;
         }
         return types.get(contentType);
+    }
+
+    public ContentType getByString(final String contentTypeString) {
+        for (final Iterator<Entry<String, Element>> iterator = registry.entrySet().iterator(); iterator.hasNext();) {
+            final Entry<String, Element> entry = iterator.next();
+            final List<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();
+            /*
+             * Iterate general storages' content types
+             */
+            for (final FolderStorage genStorage : generalStorages) {
+                final FolderStorage folderStorage = genStorage;
+                final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
+                for (int i = 0; i < supportedContentTypes.length; i++) {
+                    final ContentType supportedContentType = supportedContentTypes[i];
+                    if (supportedContentType.toString().equals(contentTypeString)) {
+                        return supportedContentType;
+                    }
+                }
+            }
+            /*
+             * Iterate concrete content types
+             */
+            final Set<ContentType> concreteCTs = entry.getValue().getConcreteStorages().keySet();
+            for (final ContentType contentType : concreteCTs) {
+                if (contentType.toString().equals(contentTypeString)) {
+                    return contentType;
+                }
+            }
+        }
+        return null;
     }
 
     /**

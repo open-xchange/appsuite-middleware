@@ -56,10 +56,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
+import com.openexchange.folderstorage.internal.ContentTypeRegistry;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator;
@@ -101,6 +103,10 @@ public final class FolderStorageActivator implements BundleActivator {
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
             // Register folder service
             serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+            serviceRegistrations.add(context.registerService(
+                ContentTypeDiscoveryService.class.getName(),
+                ContentTypeRegistry.getInstance(),
+                null));
             // Register service trackers
             serviceTrackers = new ArrayList<ServiceTracker>(4);
             serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new FolderStorageTracker(context)));

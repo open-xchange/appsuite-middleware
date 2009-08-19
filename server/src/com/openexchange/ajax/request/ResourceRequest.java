@@ -53,7 +53,6 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.SearchFields;
@@ -99,7 +98,7 @@ public class ResourceRequest {
 
 	private static final String MODULE_RESOURCE = "resource";
 
-	public JSONValue action(final String action, final JSONObject jsonObject) throws AbstractOXException,
+	public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException,
 			JSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			return actionList(jsonObject);

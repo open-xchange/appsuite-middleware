@@ -52,7 +52,6 @@ package com.openexchange.multiple.handlers;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
@@ -97,9 +96,9 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
             final GroupRequest request = new GroupRequest(session);
-            final JSONValue retval = request.action(action, jsonObject);
+            final Object retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();
             return retval;
         }

@@ -52,7 +52,6 @@ package com.openexchange.multiple.handlers;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
@@ -97,9 +96,9 @@ public final class ResourceFactoryService implements MultipleHandlerFactoryServi
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
             final ResourceRequest request = new ResourceRequest(session);
-            final JSONValue retval = request.action(action, jsonObject);
+            final Object retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();
             return retval;
         }

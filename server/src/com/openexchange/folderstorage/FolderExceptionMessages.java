@@ -137,11 +137,21 @@ public class FolderExceptionMessages implements LocalizableStrings {
      * Un-Subscribe operation not permitted on tree "%1$s".
      */
     public static final String NO_REAL_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on tree \"%1$s\".";
-    
+
     /**
      * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
      */
     public static final String NO_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\".";
+
+    /**
+     * Unknown content type: %1$s.
+     */
+    public static final String UNKNOWN_CONTENT_TYPE_MSG = "Unknown content type: %1$s.";
+
+    /**
+     * Missing parameter: %1$s.
+     */
+    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
 
     /**
      * Initializes a new {@link FolderExceptionMessages}

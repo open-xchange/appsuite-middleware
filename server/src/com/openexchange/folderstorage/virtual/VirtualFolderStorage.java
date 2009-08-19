@@ -119,7 +119,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         } catch (final ServiceException e) {
             throw new FolderException(e);
         }
-        return folderService.getDefaultFolder(user, FolderStorage.REAL_TREE_ID, contentType).getID();
+        return folderService.getDefaultFolder(user, FolderStorage.REAL_TREE_ID, contentType, storageParameters.getSession()).getID();
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -132,7 +132,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             } catch (final ServiceException e) {
                 throw new FolderException(e);
             }
-            final Folder realFolder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId);
+            final Folder realFolder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters.getSession());
             virtualFolder = new VirtualFolder(realFolder);
             virtualFolder.setTreeID(treeId);
         }

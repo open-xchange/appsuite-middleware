@@ -55,6 +55,8 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.actions.Create;
+import com.openexchange.folderstorage.internal.actions.Get;
 import com.openexchange.folderstorage.internal.actions.List;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -81,9 +83,16 @@ public final class FolderServiceImpl implements FolderService {
 
     }
 
-    public void createFolder(final Folder folder) throws FolderException {
-        // TODO Auto-generated method stub
+    public String createFolder(final Folder folder, final User user, final Context context) throws FolderException {
+        return new Create(user, context).doCreate(folder);
+    }
 
+    public String createFolder(final Folder folder, final Session session) throws FolderException {
+        try {
+            return new Create(new ServerSessionAdapter(session)).doCreate(folder);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public void deleteFolder(final String treeId, final String folderId) throws FolderException {
@@ -91,14 +100,26 @@ public final class FolderServiceImpl implements FolderService {
 
     }
 
-    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType) throws FolderException {
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final User ruser, final Context context) throws FolderException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public UserizedFolder getFolder(final String treeId, final String folderId) throws FolderException {
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Session session) throws FolderException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public UserizedFolder getFolder(final String treeId, final String folderId, final User user, final Context context) throws FolderException {
+        return new Get(user, context).doGet(treeId, folderId);
+    }
+
+    public UserizedFolder getFolder(final String treeId, final String folderId, final Session session) throws FolderException {
+        try {
+            return new Get(new ServerSessionAdapter(session)).doGet(treeId, folderId);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public UserizedFolder[] getPath(final String treeId, final String folderId) throws FolderException {
@@ -123,12 +144,22 @@ public final class FolderServiceImpl implements FolderService {
         return null;
     }
 
-    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId) throws FolderException {
+    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final User user, final Context context) throws FolderException {
         // TODO Auto-generated method stub
 
     }
 
-    public void unsubscribeFolder(final String treeId, final String folderId) throws FolderException {
+    public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final Session session) throws FolderException {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void unsubscribeFolder(final String treeId, final String folderId, final User user, final Context context) throws FolderException {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void unsubscribeFolder(final String treeId, final String folderId, final Session session) throws FolderException {
         // TODO Auto-generated method stub
 
     }

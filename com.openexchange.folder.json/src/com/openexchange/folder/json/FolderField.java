@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folder.json.writer;
+package com.openexchange.folder.json;
 
 /**
  * {@link FolderField} - Enumeration for folder fields.

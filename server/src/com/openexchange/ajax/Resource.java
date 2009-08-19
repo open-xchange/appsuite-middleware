@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.groupware.AbstractOXException;
@@ -97,7 +96,7 @@ public class Resource extends DataServlet {
 			}
 
 			final ResourceRequest resourceRequest = new ResourceRequest(session);
-			final JSONValue responseObj = resourceRequest.action(action, jsonObj);
+			final Object responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final AbstractOXException e) {
@@ -146,7 +145,7 @@ public class Resource extends DataServlet {
 				jsonObj.put(PARAMETER_DATA, jData);
 
 				final ResourceRequest resourceRequest = new ResourceRequest(session);
-				final JSONValue responseObj = resourceRequest.action(action, jsonObj);
+				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
 			} else {

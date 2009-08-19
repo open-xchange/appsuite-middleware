@@ -49,46 +49,64 @@
 
 package com.openexchange.folder.json.actions;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.parser.FolderParser;
+import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FolderActionFactory}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link CreateAction} - Maps the action to a GET action.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderActionFactory implements AJAXActionServiceFactory {
+public final class CreateAction extends AbstractFolderAction {
 
-    private static final FolderActionFactory SINGLETON = new FolderActionFactory();
+    public static final String ACTION = AJAXServlet.ACTION_NEW;
 
-    private final Map<String, AJAXActionService> actions;
-
-    private FolderActionFactory() {
+    /**
+     * Initializes a new {@link CreateAction}.
+     */
+    public CreateAction() {
         super();
-        actions = initActions();
     }
 
-    public static final FolderActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    public AJAXActionService createActionService(final String action) throws AjaxException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        /*
+         * Parse parameters
+         */
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            /*
+             * Fallback to default tree identifier
+             */
+            treeId = FolderStorage.REAL_TREE_ID;
         }
-        return retval;
+        final String parentId = request.getParameter("folder_id");
+        if (null == parentId) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
+        }
+        /*
+         * Get folder object
+         */
+        final JSONObject folderObject = (JSONObject) request.getData();
+        final Folder folder = FolderParser.parseFolder(folderObject);
+        /*
+         * Create
+         */
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        final String newId = folderService.createFolder(folder, session);
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(newId);
     }
 
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
-        tmp.put(RootAction.ACTION, new RootAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(GetAction.ACTION, new GetAction());
-        return Collections.unmodifiableMap(tmp);
-    }
 }

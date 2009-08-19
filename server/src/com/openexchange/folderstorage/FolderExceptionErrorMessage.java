@@ -130,7 +130,15 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
      */
-    NO_UNSUBSCRIBE(FolderExceptionMessages.NO_UNSUBSCRIBE_MSG, Category.PERMISSION, 17);
+    NO_UNSUBSCRIBE(FolderExceptionMessages.NO_UNSUBSCRIBE_MSG, Category.PERMISSION, 17),
+    /**
+     * Unknown content type: %1$s.
+     */
+    UNKNOWN_CONTENT_TYPE(FolderExceptionMessages.UNKNOWN_CONTENT_TYPE_MSG, Category.CODE_ERROR, 18),
+    /**
+     * Missing parameter: %1$s.
+     */
+    MISSING_PARAMETER(FolderExceptionMessages.MISSING_PARAMETER_MSG, Category.CODE_ERROR, 19);
 
     private final Category category;
 
