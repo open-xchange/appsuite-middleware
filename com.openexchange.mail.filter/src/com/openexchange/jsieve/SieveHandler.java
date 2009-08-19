@@ -207,17 +207,13 @@ public class SieveHandler {
         List<String> sasl = capa.getSasl();
         measureEnd("capa.getSasl");
 
-        if (null == sasl || !sasl.contains("PLAIN")) {
-            /*
-             * Switch to TLS, re-fetch capabilities, and check again for PLAIN authentication
-             */
-            if (!capa.getStarttls().booleanValue()) {
-                throw new OXSieveHandlerException(
-                    "The server neither supports PLAIN authentication nor STARTTLS.",
-                    sieve_host,
-                    sieve_host_port);
-            }
+        final boolean issueTLS = capa.getStarttls().booleanValue();
+
+        if (issueTLS) {
             /*-
+             * Switch to TLS, re-fetch capabilities, and check for PLAIN authentication
+             *
+             *
              * Send STARTTLS
              * 
              * C: STARTTLS
@@ -268,12 +264,13 @@ public class SieveHandler {
             }
             measureEnd("tlsNegotiation");
             sasl = capa.getSasl();
-            if (null == sasl || !sasl.contains("PLAIN")) {
-                throw new OXSieveHandlerException(
-                    "The server doesn't suppport PLAIN authentication on a TLS connection",
-                    sieve_host,
-                    sieve_host_port);
-            }
+        }
+        if (null == sasl || !sasl.contains("PLAIN")) {
+            throw new OXSieveHandlerException(
+                new StringBuilder(64).append("The server doesn't suppport PLAIN authentication over a ").append(
+                    issueTLS ? "TLS" : "plain-text").append(" connection.").toString(),
+                sieve_host,
+                sieve_host_port);
         }
         measureStart();
         if (selectAuth("PLAIN")) {
