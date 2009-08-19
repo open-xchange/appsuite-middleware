@@ -57,6 +57,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -84,7 +85,7 @@ public final class MailFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+        return new Class<?>[] { MailAccountStorageService.class, UnifiedINBOXManagement.class };
     }
 
     @Override
