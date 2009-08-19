@@ -49,12 +49,12 @@
 
 package com.openexchange.imap.cache;
 
-import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import java.util.Arrays;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
@@ -240,7 +240,7 @@ public final class NamespaceFoldersCache {
 
         private CacheKey getKeyInternal() {
             if (null == key) {
-                key = getServiceRegistry().getService(CacheService.class).newCacheKey(
+                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(
                     MailCacheCode.NAMESPACE_FOLDERS.getCode(),
                     namespaceKey);
             }

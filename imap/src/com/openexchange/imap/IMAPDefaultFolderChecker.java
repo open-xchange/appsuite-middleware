@@ -136,7 +136,7 @@ public final class IMAPDefaultFolderChecker {
         this.imapConfig = imapConfig;
         final int timeout = ((IIMAPProperties) imapConfig.getMailProperties()).getImapTimeout();
         if (timeout <= 0) {
-            final ConfigurationService confService = IMAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
             if (null == confService) {
                 // Default of 2 minutes
                 maxRunningMillis = DEFAULT_MAX_RUNNING_MILLIS;
@@ -282,7 +282,7 @@ public final class IMAPDefaultFolderChecker {
                     final boolean isSpamOptionEnabled;
                     final MailAccount mailAccount;
                     try {
-                        mailAccount = IMAPServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true).getMailAccount(
+                        mailAccount = IMAPServiceRegistry.getService(MailAccountStorageService.class, true).getMailAccount(
                             accountId,
                             session.getUserId(),
                             session.getContextId());
@@ -310,9 +310,8 @@ public final class IMAPDefaultFolderChecker {
                     }
                     final CompletionService<Object> completionService;
                     try {
-                        completionService = new ExecutorCompletionService<Object>(IMAPServiceRegistry.getServiceRegistry().getService(
-                            TimerService.class,
-                            true).getExecutor());
+                        completionService = new ExecutorCompletionService<Object>(
+                            IMAPServiceRegistry.getService(TimerService.class, true).getExecutor());
                     } catch (final ServiceException e) {
                         throw new IMAPException(e);
                     }
@@ -599,7 +598,7 @@ public final class IMAPDefaultFolderChecker {
                             throw new MessagingException("Unexpected index: " + index);
                         }
                         try {
-                            final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+                            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(
                                 MailAccountStorageService.class,
                                 true);
                             storageService.updateMailAccount(

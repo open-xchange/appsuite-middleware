@@ -49,11 +49,11 @@
 
 package com.openexchange.imap.entity2acl;
 
-import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
@@ -95,10 +95,10 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return AUTH_ID_ANYONE;
         }
-        final MailAccountStorageService storageService = getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
         final String userLoginInfo;
         {
-            final UserService userService = getServiceRegistry().getService(UserService.class, true);
+            final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
             if (null == userService) {
                 throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
             }

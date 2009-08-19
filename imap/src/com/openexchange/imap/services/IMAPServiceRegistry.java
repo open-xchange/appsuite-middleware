@@ -49,32 +49,56 @@
 
 package com.openexchange.imap.services;
 
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link IMAPServiceRegistry} - A registry for services needed by IMAP bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class IMAPServiceRegistry {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
-	/**
-	 * Gets the service registry
-	 * 
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    /**
+     * Gets the service registry
+     * 
+     * @return The service registry
+     */
+    public static ServiceRegistry getServiceRegistry() {
+        return REGISTRY;
+    }
 
-	/**
-	 * Initializes a new {@link IMAPServiceRegistry}
-	 */
-	private IMAPServiceRegistry() {
-		super();
-	}
+    /**
+     * Gets the service from registry defined by given class
+     * 
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @return The service if found; otherwise <code>null</code>
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        return REGISTRY.getService(clazz);
+    }
+
+    /**
+     * Gets the service from registry defined by given class
+     * 
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
+     * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
+     * @throws ServiceException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws ServiceException {
+        return REGISTRY.getService(clazz, errorOnAbsence);
+    }
+
+    /**
+     * Initializes a new {@link IMAPServiceRegistry}
+     */
+    private IMAPServiceRegistry() {
+        super();
+    }
 
 }

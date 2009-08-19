@@ -49,13 +49,13 @@
 
 package com.openexchange.imap.entity2acl;
 
-import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
@@ -161,13 +161,13 @@ public class DovecotEntity2ACL extends Entity2ACL {
     }
 
     private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws AbstractOXException {
-        final MailAccountStorageService storageService = getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
         if (null == storageService) {
             throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, MailAccountStorageService.class.getName());
         }
         final String userLoginInfo;
         {
-            final UserService userService = getServiceRegistry().getService(UserService.class, true);
+            final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
             if (null == userService) {
                 throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, UserService.class.getName());
             }

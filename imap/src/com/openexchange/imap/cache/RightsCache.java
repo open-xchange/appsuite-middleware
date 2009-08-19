@@ -49,10 +49,10 @@
 
 package com.openexchange.imap.cache;
 
-import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
@@ -125,7 +125,7 @@ public final class RightsCache {
 
         private CacheKey getKeyInternal() {
             if (null == key) {
-                key = getServiceRegistry().getService(CacheService.class).newCacheKey(MailCacheCode.RIGHTS.getCode(), fullname);
+                key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.RIGHTS.getCode(), fullname);
             }
             return key;
         }

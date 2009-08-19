@@ -172,7 +172,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private MailAccount getMailAccount() throws MailException {
         if (mailAccount == null) {
             try {
-                final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+                final MailAccountStorageService storageService = IMAPServiceRegistry.getService(
                     MailAccountStorageService.class,
                     true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
@@ -188,7 +188,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private Locale getLocale() throws MailException {
         if (locale == null) {
             try {
-                final UserService userService = IMAPServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+                final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
                 locale = userService.getUser(session.getUserId(), ctx).getLocale();
             } catch (final ServiceException e) {
                 throw new MailException(e);

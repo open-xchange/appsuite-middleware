@@ -669,7 +669,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected IMailProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = IMAPServiceRegistry.getServiceRegistry().getService(
+            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(
                 MailAccountStorageService.class,
                 true);
             return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
