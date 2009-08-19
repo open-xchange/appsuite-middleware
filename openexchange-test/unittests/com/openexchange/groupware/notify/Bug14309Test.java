@@ -94,6 +94,7 @@ public class Bug14309Test extends ParticipantNotifyTest {
 
         appointments = new CommonAppointments(ctx, user);
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+        appointment.setObjectID(123);
 
         notify.realUsers = true;
     }
