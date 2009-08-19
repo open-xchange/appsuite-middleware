@@ -61,6 +61,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -70,6 +71,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VirtualListFolder {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(VirtualListFolder.class);
 
     /**
      * Initializes a new {@link VirtualListFolder}.
@@ -90,33 +93,41 @@ public final class VirtualListFolder {
      * @throws FolderException If checking existence fails
      */
     public static boolean existsVirtualListFolder(final int folderId, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
+        final int module;
+        if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
+            // Task
+            module = FolderObject.TASK;
+        } else if (FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID == folderId) {
+            // Calendar
+            module = FolderObject.CALENDAR;
+        } else if (FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID == folderId) {
+            // Contact
+            module = FolderObject.CONTACT;
+        } else {
+            // Infostore
+            module = FolderObject.INFOSTORE;
+        }
+        // Return non-isEmpty()
+        final SearchIterator<FolderObject> searchIterator;
         try {
-            final int module;
-            if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
-                // Task
-                module = FolderObject.TASK;
-            } else if (FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID == folderId) {
-                // Calendar
-                module = FolderObject.CALENDAR;
-            } else if (FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID == folderId) {
-                // Contact
-                module = FolderObject.CONTACT;
-            } else {
-                // Infostore
-                module = FolderObject.INFOSTORE;
-            }
-            // Return non-isEmpty()
-            return !(((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+            searchIterator = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
                 module,
                 user.getId(),
                 user.getGroups(),
                 userConfiguration,
                 ctx,
-                con)).asQueue().isEmpty());
-        } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+                con);
         } catch (final OXException e) {
             throw new FolderException(e);
+        }
+        try {
+            return searchIterator.hasNext();
+        } finally {
+            try {
+                searchIterator.close();
+            } catch (final SearchIteratorException e) {
+                LOG.error("Failed closing search iterator.", e);
+            }
         }
     }
 

@@ -336,7 +336,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         /*
                          * The system shared folder
                          */
-                        retval = SystemSharedFolder.getSystemSharedFolder(fo);
+                        retval = SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
                     } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
                         /*
                          * The system public folder

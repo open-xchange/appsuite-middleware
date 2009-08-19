@@ -78,6 +78,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -87,6 +88,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemSharedFolder {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SystemSharedFolder.class);
 
     /**
      * Initializes a new {@link SystemSharedFolder}.
@@ -99,16 +102,51 @@ public final class SystemSharedFolder {
      * Gets the database folder representing system shared folder for given user.
      * 
      * @param fo The folder object fetched from database
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @param ctx The context
+     * @param con The connection
      * @return The database folder representing system shared folder for given user
+     * @throws FolderException
      */
-    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo) {
+    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws FolderException {
         /*
          * The system shared folder
          */
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
         retval.setName(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
-        // Enforce getSubfolders() from storage
-        retval.setSubfolderIDs(null);
+        // Enforce getSubfolders() from storage if at least one shared folder is accessible for user
+        final SearchIterator<FolderObject> searchIterator;
+        try {
+            searchIterator = OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                FolderObject.SYSTEM_SHARED_FOLDER_ID,
+                user.getId(),
+                user.getGroups(),
+                ctx,
+                userConfiguration,
+                null,
+                con);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+        try {
+            /*
+             * Set to null if a shared folder exists otherwise to empty array to indicate no subfolders
+             */
+            retval.setSubfolderIDs(searchIterator.hasNext() ? null : new String[0]);
+        } finally {
+            try {
+                searchIterator.close();
+            } catch (final SearchIteratorException e) {
+                LOG.error("Failed closing search iterator.", e);
+            }
+        }
         return retval;
     }
 

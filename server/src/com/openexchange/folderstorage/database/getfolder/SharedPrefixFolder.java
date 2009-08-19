@@ -68,6 +68,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -77,6 +78,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SharedPrefixFolder {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SharedPrefixFolder.class);
 
     /**
      * Initializes a new {@link SharedPrefixFolder}.
@@ -104,22 +107,30 @@ public final class SharedPrefixFolder {
         } catch (final NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
-        final Queue<FolderObject> q;
+        final SearchIterator<FolderObject> searchIterator;
         try {
-            q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
+            searchIterator = OXFolderIteratorSQL.getVisibleSharedFolders(
                 user.getId(),
                 user.getGroups(),
                 userConfiguration.getAccessibleModules(),
                 sharedOwner,
                 ctx,
                 null,
-                con)).asQueue();
-        } catch (final SearchIteratorException e) {
-            throw new FolderException(e);
+                con);
         } catch (final OXException e) {
             throw new FolderException(e);
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
         }
-        return !q.isEmpty();
+        try {
+            return searchIterator.hasNext();
+        } finally {
+            try {
+                searchIterator.close();
+            } catch (final SearchIteratorException e) {
+                LOG.error("Failed closing search iterator.", e);
+            }
+        }
     }
 
     /**
