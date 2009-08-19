@@ -425,8 +425,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Check if denoted parent can hold default folders like Trash, Sent, etc.
          */
-        if (!MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname) && !prepareMailFolderParam(getInboxFolder(accountId)).getFullname().equals(
-            parentFullname)) {
+        if (!MailFolder.DEFAULT_FOLDER_ID.equals(parentFullname) && !INBOX_ID.equals(parentFullname)) {
             /*
              * Denoted parent is not capable to hold default folders. Therefore output as it is.
              */
