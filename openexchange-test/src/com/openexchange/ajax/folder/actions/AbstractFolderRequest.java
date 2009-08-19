@@ -70,18 +70,32 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
      */
     public static final String FOLDER_URL = "/ajax/folders";
 
+    private String folderURL;
+
     /**
      * Default constructor.
      */
     protected AbstractFolderRequest() {
         super();
+        folderURL = FOLDER_URL;
+    }
+
+    /**
+     * Manually set folder URL. The URL is then accessible via {@link #getServletPath()}.
+     * <p>
+     * Default is <code>"/ajax/folders"</code>.
+     * 
+     * @param folderURL The new folder URL
+     */
+    public void setFolderURL(final String folderURL) {
+        this.folderURL = folderURL;
     }
 
     /**
      * {@inheritDoc}
      */
     public String getServletPath() {
-        return FOLDER_URL;
+        return folderURL;
     }
 
     protected JSONObject convert(final FolderObject folder) throws JSONException {

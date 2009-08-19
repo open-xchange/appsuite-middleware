@@ -47,55 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.folder.actions;
+package com.openexchange.ajax.folder.api2;
 
-import java.util.Date;
-import com.openexchange.ajax.framework.CommonUpdatesParser;
-import com.openexchange.ajax.framework.CommonUpdatesRequest;
-import com.openexchange.groupware.search.Order;
+import org.json.JSONObject;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link CreateTest}
+ * 
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> {
+public class CreateTest extends AbstractAJAXSession {
 
-    private String folderURL;
-
-    /**
-     * @param folderId
-     * @param columns
-     * @param sort
-     * @param order
-     * @param lastModified
-     */
-    public UpdatesRequest(final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified) {
-        this(folderId, columns, sort, order, lastModified, CommonUpdatesRequest.Ignore.DELETED);
-    }
-
-    public UpdatesRequest(final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified, final CommonUpdatesRequest.Ignore ignore) {
-        super(AbstractFolderRequest.FOLDER_URL, folderId, columns, sort, order, lastModified, ignore, true);
-        this.folderURL = AbstractFolderRequest.FOLDER_URL;
-    }
+    private AJAXClient client;
 
     /**
-     * Manually set folder URL. The URL is then accessible via {@link #getServletPath()}.
-     * <p>
-     * Default is <code>"/ajax/folders"</code>.
+     * Initializes a new {@link CreateTest}.
      * 
-     * @param folderURL The new folder URL
+     * @param name The name of the test.
      */
-    public void setFolderURL(final String folderURL) {
-        this.folderURL = folderURL;
+    public CreateTest(final String name) {
+        super(name);
     }
 
     @Override
-    public CommonUpdatesParser<FolderUpdatesResponse> getParser() {
-        return new FolderUpdatesParser(isFailOnError(), getColumns());
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
     }
 
-    @Override
-    public String getServletPath() {
-        return folderURL;
+    public void testCreatePrivate() throws Throwable {
+        // Get root folder
+        final String id = null;
+        
+        final FolderObject fo = new FolderObject();
+        fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        fo.setFolderName("testFolder" + System.currentTimeMillis());
+        
+        final InsertRequest request = new InsertRequest(fo);
+        request.setFolderURL("/ajax/folder2");
+        final InsertResponse response = (InsertResponse) client.execute(request);
+        
+
+
+        final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
+
+        assertEquals("Unexpected root folder ID.", "0", jsonObject.get("id"));
     }
 
 }
