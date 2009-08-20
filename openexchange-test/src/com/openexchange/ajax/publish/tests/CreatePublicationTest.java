@@ -67,8 +67,6 @@ import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * {@link CreatePublicationTest}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CreatePublicationTest extends AbstractPublicationTest {
@@ -79,7 +77,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         //create contact folder
-        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
+        FolderObject folder = fMgr.generateFolder("publishedContacts", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
         
         //fill contact folder
@@ -109,7 +107,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{
         //create contact folder
-        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
+        FolderObject folder = fMgr.generateFolder("publishedContacts", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
         
         //fill contact folder

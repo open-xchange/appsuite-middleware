@@ -84,7 +84,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
     public void testShouldNotFindNonExistingPublication() throws AjaxException, IOException, SAXException, JSONException{
         AJAXClient myClient = getClient();
         
-        FolderObject testFolder = generateFolder("pubsub", FolderObject.CONTACT);
+        FolderObject testFolder = getFolderManager().generateFolder("pubsub", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer( testFolder );
         
         AllPublicationsRequest req = new AllPublicationsRequest(String.valueOf(testFolder.getObjectID()), Integer.MAX_VALUE, "calendar", new LinkedList<String>());

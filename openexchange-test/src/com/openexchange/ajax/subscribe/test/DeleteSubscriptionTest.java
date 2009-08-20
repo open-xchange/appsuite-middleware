@@ -78,7 +78,7 @@ public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
 
     public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws AjaxException, IOException, SAXException, JSONException{
         //setup
-        FolderObject folder = generateFolder("subscriptionTest", FolderObject.CONTACT);
+        FolderObject folder = getFolderManager().generateFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
         
         DynamicFormDescription form = generateFormDescription();        

@@ -75,7 +75,7 @@ public class NewSubscriptionTest extends AbstractSubscriptionTest {
     
     public void testShouldSurviveBasicOXMFSubscriptionCreation() throws AjaxException, IOException, SAXException, JSONException{
         //setup
-        FolderObject folder = generateFolder("subscriptionTest", FolderObject.CONTACT);
+        FolderObject folder = getFolderManager().generateFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
         
         DynamicFormDescription form = generateFormDescription();        

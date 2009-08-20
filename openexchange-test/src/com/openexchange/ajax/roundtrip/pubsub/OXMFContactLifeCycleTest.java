@@ -76,12 +76,12 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         super(name);
     }
 
-    public void testContactTripping() throws AjaxException, IOException, SAXException, JSONException{
+    public void testContactTripping() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
-        FolderObject pubFolder = generateFolder("publishRoundtripTest", FolderObject.CONTACT);
-        FolderObject subFolder = generateFolder("subscribeRoundtripTest", FolderObject.CONTACT);
+        FolderObject pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer(pubFolder);
         fMgr.insertFolderOnServer(subFolder);
         
