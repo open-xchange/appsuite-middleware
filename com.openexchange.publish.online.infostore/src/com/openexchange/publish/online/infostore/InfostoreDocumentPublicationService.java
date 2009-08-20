@@ -73,7 +73,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
 
     private static final String SECRET = "secret";
 
-    public static final String PREFIX = "/publications/infostore/documents";
+    public static final String PREFIX = "/publications/documents";
 
     private static final String URL = "url";
 
