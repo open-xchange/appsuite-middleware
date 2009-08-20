@@ -86,13 +86,14 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		
 		for (TextPage page : pages) {
-			byte[] vcard = page.getContent().getBytes();
+			byte[] vcard = page.getWebResponse().getContentAsBytes();
     		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
     		VersitDefinition.Reader versitReader;
 				
     		try {
     			versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
     			VersitObject versitObject = def.parse(versitReader);
+    			//System.out.println("***** VersitObject (ADR): " + versitObject.getProperty("ADR").getValue());
     			Contact contactObject = oxContainerConverter.convertContact(versitObject);
     			SANITIZER.sanitize(contactObject);
     			contactObjects.add(contactObject);

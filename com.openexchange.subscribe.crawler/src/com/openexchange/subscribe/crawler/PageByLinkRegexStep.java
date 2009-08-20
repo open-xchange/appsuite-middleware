@@ -85,7 +85,7 @@ public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, 
 			for (HtmlAnchor link: inputPage.getAnchors()) {
 	    		if (link.getHrefAttribute().matches(linkRegex)){
 	    			currentPage = link.click();		
-	    			System.out.println("***** Current Page : " + currentPage.getTitleText());
+	    			//System.out.println("***** Current Page : " + currentPage.getTitleText());
 	    		}
 	    	}
 			executedSuccessfully = true;

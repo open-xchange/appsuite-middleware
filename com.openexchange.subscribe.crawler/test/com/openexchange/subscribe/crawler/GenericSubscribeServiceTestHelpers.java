@@ -94,7 +94,8 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 					System.out.println("contacts last name : " + contact.getSurName());
 					System.out.println("contacts email address : " + contact.getEmail1());
 					System.out.println("contacts birthday is : " + contact.getBirthday());					
-					System.out.println("contacts picture type is : " + contact.getImageContentType());					
+					System.out.println("contacts picture type is : " + contact.getImageContentType());
+					System.out.println("contacts city of work is : " + contact.getCityBusiness());
 					
 			        System.out.println("----------");
 				}
