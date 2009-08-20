@@ -211,7 +211,7 @@ public class SieveHandler {
 
         if (issueTLS) {
             /*-
-             * Switch to TLS, re-fetch capabilities, and check for PLAIN authentication
+             * Switch to TLS and re-fetch capabilities
              *
              *
              * Send STARTTLS
@@ -265,6 +265,9 @@ public class SieveHandler {
             measureEnd("tlsNegotiation");
             sasl = capa.getSasl();
         }
+        /*
+         * Check for PLAIN authentication support
+         */
         if (null == sasl || !sasl.contains("PLAIN")) {
             throw new OXSieveHandlerException(
                 new StringBuilder(64).append("The server doesn't suppport PLAIN authentication over a ").append(
