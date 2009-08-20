@@ -69,9 +69,16 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final Date lastModified;
 
-    /**
-     * Default constructor.
-     */
+    public DeleteRequest(final String[] folderIds, final Date lastModified) {
+        super();
+        this.folderIds = folderIds;
+        this.lastModified = lastModified;
+    }
+
+    public DeleteRequest(final String folderId, final Date lastModified) {
+        this(new String[] { folderId }, lastModified);
+    }
+    
     public DeleteRequest(final int[] folderIds, final Date lastModified) {
         super();
         this.folderIds = i2s(folderIds);
@@ -133,10 +140,11 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         return new CommonDeleteParser(true);
     }
 
-    private String[] i2s(int[] intArr) {
-        String[] strArr = new String[intArr.length];
-        for (int i = 0; i < intArr.length; i++)
+    private String[] i2s(final int[] intArr) {
+        final String[] strArr = new String[intArr.length];
+        for (int i = 0; i < intArr.length; i++) {
             strArr[i] = Integer.valueOf(intArr[i]).toString();
+        }
         return strArr;
     }
 }
