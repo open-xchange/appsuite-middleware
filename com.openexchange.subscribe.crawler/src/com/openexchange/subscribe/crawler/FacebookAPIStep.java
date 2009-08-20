@@ -116,43 +116,47 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 				if (user.getBirthday() != null){
 					Calendar calendar = Calendar.getInstance();
 					String birthdayString = user.getBirthday().getValue();
-					Pattern pattern = Pattern.compile("([a-zA-Z]*)([\\s])([0-9]{1,2})([,]{1}[\\s]{1})([0-9]{4})");
-					Matcher matcher = pattern.matcher(birthdayString);
-					if (matcher.matches()){
-						//only set the contacts birthday if at least day and month are available
-						if (matcher.groupCount()>=3){
-							int month = 0;
-							int day = 0;
-							//set the year to the current year in case it is not available
-							int year = calendar.get(Calendar.YEAR);
-							//set the day
-							day = Integer.valueOf(matcher.group(3));																					
-							//set the month
-							if (matcher.group(1).equals("January")) month = calendar.JANUARY;
-							else if (matcher.group(1).equals("February")) month = calendar.FEBRUARY;
-							else if (matcher.group(1).equals("March")) month = calendar.MARCH;
-							else if (matcher.group(1).equals("April")) month = calendar.APRIL;
-							else if (matcher.group(1).equals("May")) month = calendar.MAY;
-							else if (matcher.group(1).equals("June")) month = calendar.JUNE;
-							else if (matcher.group(1).equals("July")) month = calendar.JULY;
-							else if (matcher.group(1).equals("August")) month = calendar.AUGUST;
-							else if (matcher.group(1).equals("September")) month = calendar.SEPTEMBER;
-							else if (matcher.group(1).equals("October")) month = calendar.OCTOBER;
-							else if (matcher.group(1).equals("November")) month = calendar.NOVEMBER;
-							else if (matcher.group(1).equals("December")) month = calendar.DECEMBER;
-							
-							//set the year
-							if (matcher.groupCount()==5) year = Integer.valueOf(matcher.group(5)); 
-							
-							calendar.set(year, month, day);
-							
-							contact.setBirthday(calendar.getTime());
-						}
-					}	
-					
+					Pattern pattern = Pattern.compile("([a-zA-Z]*)([\\s])([0-9]{1,2})([,]{0,1}[\\s]{0,1})([0-9]{0,4})");
+					//System.out.println("***** birthdayString : " + birthdayString);
+					if (birthdayString != null){
+						Matcher matcher = pattern.matcher(birthdayString);
+						if (matcher.matches()){
+							//only set the contacts birthday if at least day and month are available
+							if (matcher.groupCount()>=3){
+								int month = 0;
+								int day = 0;
+								//set the year to the current year in case it is not available
+								int year = calendar.get(Calendar.YEAR);
+								//set the day
+								day = Integer.valueOf(matcher.group(3));																					
+								//set the month
+								if (matcher.group(1).equals("January")) month = calendar.JANUARY;
+								else if (matcher.group(1).equals("February")) month = calendar.FEBRUARY;
+								else if (matcher.group(1).equals("March")) month = calendar.MARCH;
+								else if (matcher.group(1).equals("April")) month = calendar.APRIL;
+								else if (matcher.group(1).equals("May")) month = calendar.MAY;
+								else if (matcher.group(1).equals("June")) month = calendar.JUNE;
+								else if (matcher.group(1).equals("July")) month = calendar.JULY;
+								else if (matcher.group(1).equals("August")) month = calendar.AUGUST;
+								else if (matcher.group(1).equals("September")) month = calendar.SEPTEMBER;
+								else if (matcher.group(1).equals("October")) month = calendar.OCTOBER;
+								else if (matcher.group(1).equals("November")) month = calendar.NOVEMBER;
+								else if (matcher.group(1).equals("December")) month = calendar.DECEMBER;
+								
+								//set the year
+								if (matcher.groupCount()==5 && !matcher.group(5).equals("")){
+									year = Integer.valueOf(matcher.group(5)); 
+								}
+								
+								calendar.set(year, month, day);
+								
+								contact.setBirthday(calendar.getTime());
+							}
+						}	
+					}
 				}
 				if (location != null){
-					System.out.println("Hometown : " + location.getStreet() +", "+ location.getZip() +", "+ location.getCity() +", "+ location.getState() +", "+ location.getCountry());
+					//System.out.println("***** Hometown : " + location.getStreet() +", "+ location.getZip() +", "+ location.getCity() +", "+ location.getState() +", "+ location.getCountry());
 					if (location.getStreet() != null && !location.getStreet().equals("null")) contact.setStreetHome(location.getStreet());
 					if (location.getZip() != null && location.getZip() !=0) contact.setPostalCodeHome(Integer.toString(location.getZip()));
 					if (location.getCity() != null && !location.getCity().equals("null")) contact.setCityHome(location.getCity());
