@@ -134,10 +134,16 @@ public class ManagedContactTests extends AbstractAJAXSession {
 
         assertEquals("Should find exactly one more contact", numberBefore + 1, allContactsOnServer.length);
 
-        Contact actual = allContactsOnServer[0];
+        
+        Contact actual = null;
+        for(Contact temp: allContactsOnServer){
+            if(temp.getObjectID() == expected.getObjectID())
+                actual = temp;
+        }
+        assertNotNull("Should find new contact in response of AllRequest", actual);
         assertTrue("Should contain field #1", actual.contains(1));
-        // assertTrue("Should contain field #4", actual.contains(4));
-        // assertTrue("Should contain field #5", actual.contains(5));
+        assertTrue("Should contain field #4", actual.contains(4));
+        assertTrue("Should contain field #5", actual.contains(5));
         assertTrue("Should contain field #20", actual.contains(20));
     }
 
