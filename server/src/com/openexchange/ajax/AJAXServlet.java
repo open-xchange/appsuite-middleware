@@ -225,14 +225,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_KEEPALIVE = "keepalive";
 
     /**
-     * The parameter 'from' specifies index of starting entry in list of objects
-     * dependent on given order criteria and folder id
+     * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
      */
     public static final String PARAMETER_FROM = "from";
 
     /**
-     * The parameter 'to' specifies the index of excluding ending entry in list
-     * of objects dependent on given order criteria and folder id
+     * The parameter 'to' specifies the index of excluding ending entry in list of objects dependent on given order criteria and folder id
      */
     public static final String PARAMETER_TO = "to";
 
@@ -241,8 +239,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_END = "end";
 
     /**
-     * The parameter 'id' indicates the id of a certain objects from which
-     * certain information must be returned to client
+     * The parameter 'id' indicates the id of a certain objects from which certain information must be returned to client
      */
     public static final String PARAMETER_ID = "id";
 
@@ -265,14 +262,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_MODULE = "module";
 
     /**
-     * The parameter 'sort' specifies the field which is used as order source
-     * and can be compared to SQL'S 'Order By' statement
+     * The parameter 'sort' specifies the field which is used as order source and can be compared to SQL'S 'Order By' statement
      */
     public static final String PARAMETER_SORT = "sort";
 
     /**
-     * The parameter 'dir' specifies the order direction: ASC (ascending) vs.
-     * DESC (descending)
+     * The parameter 'dir' specifies the order direction: ASC (ascending) vs. DESC (descending)
      */
     public static final String PARAMETER_ORDER = "order";
 
@@ -287,9 +282,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_ACTION = "action";
 
     /**
-     * The parameter 'columns' delivers a comma-sparated list of numbers which
-     * encode the fields of a certain object (Mail, Task, Appointment, etc.)
-     * that should be transfered to client
+     * The parameter 'columns' delivers a comma-sparated list of numbers which encode the fields of a certain object (Mail, Task,
+     * Appointment, etc.) that should be transfered to client
      */
     public static final String PARAMETER_COLUMNS = "columns";
 
@@ -316,19 +310,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_LIMIT = "limit";
 
     public static final String PARAMETER_TYPE = "type";
-    
+
     public static final String PARAMETER_USER = "user";
 
     /**
-     * The content type if the response body contains javascript data. Set it
-     * with <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code>
-     * .
+     * The content type if the response body contains javascript data. Set it with
+     * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
      */
     public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
     /**
-     * The content type if the reponse body contains the html page include the
-     * response for uploads.
+     * The content type if the reponse body contains the html page include the response for uploads.
      */
     public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
 
@@ -340,17 +332,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     // Javascript
 
-    public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-            + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
-            + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> "
-            + "<script type=\"text/javascript\"> function callback(arg) { "
-            + "parent.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
+    public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "parent.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
 
-    protected static final String JS_FRAGMENT_POPUP = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-            + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
-            + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> "
-            + "<script type=\"text/javascript\"> function callback(arg) { "
-            + "window.opener.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
+    protected static final String JS_FRAGMENT_POPUP = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "window.opener.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
 
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
@@ -368,14 +352,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static final String RESPONSE_ERROR = "Error while writing response object.";
 
     /**
-     * The service method of HttpServlet is extended to catch bad exceptions and
-     * keep the AJP socket alive. Otherwise apache things in a balancer
-     * environment this AJP container is temporarily dead and redirects requests
-     * to other AJP containers. This will kill the users session.
+     * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise apache things in a
+     * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
+     * session.
      */
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
         try {
             super.service(req, resp);
@@ -392,8 +374,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * Increments the number of requests to path <code>&quot;ajax*&quot;</code>
-     * at the very beginning of
+     * Increments the number of requests to path <code>&quot;ajax*&quot;</code> at the very beginning of
      * {@link #service(HttpServletRequest, HttpServletResponse) service} method
      */
     protected void incrementRequests() {
@@ -401,8 +382,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * Decrements the number of requests to path <code>&quot;ajax*&quot;</code>
-     * at the very end of
+     * Decrements the number of requests to path <code>&quot;ajax*&quot;</code> at the very end of
      * {@link #service(HttpServletRequest, HttpServletResponse) service} method
      */
     protected void decrementRequests() {
@@ -414,8 +394,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * Returns the complete body as a string. Be careful when getting big
-     * request bodies.
+     * Returns the complete body as a string. Be careful when getting big request bodies.
      * 
      * @param req http servlet request.
      * @return a string with the complete body.
@@ -425,10 +404,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         InputStreamReader isr = null;
         try {
             int count = 0;
+            isr = new InputStreamReader(
+                req.getInputStream(),
+                null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
             final char[] c = new char[8192];
-            final String charset = null == req.getCharacterEncoding() ? ServerConfig
-                    .getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
-            isr = new InputStreamReader(req.getInputStream(), charset);
             if ((count = isr.read(c)) > 0) {
                 final StringBuilder sb = new StringBuilder(16384);
                 do {
@@ -463,8 +442,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static String getServletSpecificURI(final HttpServletRequest req) {
         String uri;
         try {
-            uri = URLDecoder.decode(req.getRequestURI(), req.getCharacterEncoding() == null ? ServerConfig
-                    .getProperty(ServerConfig.Property.DefaultEncoding) : req.getCharacterEncoding());
+            uri = URLDecoder.decode(
+                req.getRequestURI(),
+                req.getCharacterEncoding() == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : req.getCharacterEncoding());
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
@@ -487,20 +467,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * This method sends the given error message as a java script error object
-     * to the client.
+     * This method sends the given error message as a java script error object to the client.
      * 
-     * @param resp This response will be used to send the java script error
-     *            object.
+     * @param resp This response will be used to send the java script error object.
      * @param errorMessage The error message to send to the client.
      * @throws IOException if writing to the response fails.
-     * @throws ServletException if the creation of the java script error object
-     *             fails.
+     * @throws ServletException if the creation of the java script error object fails.
      * @deprecated use {@link Response}.
      */
     @Deprecated
-    protected static void sendErrorAsJS(final HttpServletResponse resp, final String errorMessage) throws IOException,
-            ServletException {
+    protected static void sendErrorAsJS(final HttpServletResponse resp, final String errorMessage) throws IOException, ServletException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
@@ -526,8 +502,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @deprecated
      */
     @Deprecated
-    protected static void sendErrorAsJSHTML(final HttpServletResponse res, final String error, final String action)
-            throws IOException {
+    protected static void sendErrorAsJSHTML(final HttpServletResponse res, final String error, final String action) throws IOException {
         res.setContentType("text/html");
         PrintWriter w = null;
         try {
@@ -543,8 +518,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    protected void unknownColumn(final HttpServletResponse res, final String parameter, final String columnId,
-            final boolean html, final String action) throws IOException, ServletException {
+    protected void unknownColumn(final HttpServletResponse res, final String parameter, final String columnId, final boolean html, final String action) throws IOException, ServletException {
         final String msg = "Unknown column in " + parameter + " :" + columnId;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
@@ -553,8 +527,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    protected void invalidParameter(final HttpServletResponse res, final String parameter, final String value,
-            final boolean html, final String action) throws IOException, ServletException {
+    protected void invalidParameter(final HttpServletResponse res, final String parameter, final String value, final boolean html, final String action) throws IOException, ServletException {
         final String msg = "Invalid Parameter " + parameter + " :" + value;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
@@ -563,8 +536,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    protected void missingParameter(final String parameter, final HttpServletResponse res, final boolean html,
-            final String action) throws IOException, ServletException {
+    protected void missingParameter(final String parameter, final HttpServletResponse res, final boolean html, final String action) throws IOException, ServletException {
         final String msg = "Missing Parameter: " + parameter;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
@@ -573,8 +545,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    protected void unknownAction(final String method, final String action, final HttpServletResponse res,
-            final boolean html) throws IOException, ServletException {
+    protected void unknownAction(final String method, final String action, final HttpServletResponse res, final boolean html) throws IOException, ServletException {
         final String msg = "The action " + action + " isn't even specified yet. At least not for the method: " + method;
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
@@ -641,11 +612,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             } catch (final FileUploadException e) {
                 throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
             }
-            if (action != null
-                    && (action.equals(ACTION_NEW) || action.equals(ACTION_UPLOAD) || action.equals(ACTION_APPEND)
-                            || action.equals(ACTION_UPDATE) || action.equals(ACTION_ATTACH)
-                            || action.equals(ACTION_COPY) || com.openexchange.groupware.importexport.Format
-                            .containsConstantName(action))) {
+            if (action != null && (action.equals(ACTION_NEW) || action.equals(ACTION_UPLOAD) || action.equals(ACTION_APPEND) || action.equals(ACTION_UPDATE) || action.equals(ACTION_ATTACH) || action.equals(ACTION_COPY) || com.openexchange.groupware.importexport.Format.containsConstantName(action))) {
                 uploadEvent.setAction(action);
                 /*
                  * Set affiliation to mail upload
@@ -655,8 +622,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                  * Fill upload event instance
                  */
                 final int size = items.size();
-                final String charEnc = req.getCharacterEncoding() == null ? ServerConfig
-                        .getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+                final String charEnc = req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
                 NextFileItem: for (int i = 0; i < size; i++) {
                     final FileItem fileItem = items.get(i);
                     if (fileItem.isFormField()) {
@@ -671,8 +637,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                             continue NextFileItem;
                         }
                         try {
-                            uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig
-                                    .getProperty(Property.UploadDirectory)));
+                            uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig.getProperty(Property.UploadDirectory)));
                         } catch (final Exception e) {
                             throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
                         }
@@ -705,15 +670,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
-    public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners)
-            throws UploadServletException {
+    public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners) throws UploadServletException {
         try {
             for (final UploadListener uploadListener : uploadListeners) {
                 try {
                     uploadListener.action(uploadEvent);
                 } catch (final OXException e) {
-                    LOG.error(new StringBuilder(64).append("Failed upload listener: ")
-                            .append(uploadListener.getClass()), e);
+                    LOG.error(new StringBuilder(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
                 }
             }
         } finally {
@@ -726,8 +689,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         jsonwriter.key("data");
     }
 
-    public static void endResponse(final JSONWriter jsonwriter, final Date timestamp, final String error)
-            throws JSONException {
+    public static void endResponse(final JSONWriter jsonwriter, final Date timestamp, final String error) throws JSONException {
         if (timestamp != null) {
             jsonwriter.key("timestamp");
             jsonwriter.value(timestamp.getTime());
@@ -743,8 +705,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         jsonwriter.endObject();
     }
 
-    protected boolean checkRequired(final HttpServletRequest req, final HttpServletResponse res, final boolean html,
-            final String action, final String... parameters) throws IOException, ServletException {
+    protected boolean checkRequired(final HttpServletRequest req, final HttpServletResponse res, final boolean html, final String action, final String... parameters) throws IOException, ServletException {
         if (html) {
             res.setContentType("text/html; charset=UTF-8");
         }
@@ -763,15 +724,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
         // return;
         /*
-         * if (w == null) { return; } try { w.flush(); //
-         * System.out.println("INFOSTORE: Flushed!"); } catch (IOException e) {
-         * LOG.error(e); } try { w.close(); // System.out.println("INFOSTORE:
-         * Closed!"); } catch (IOException e) { LOG.error(e); }
+         * if (w == null) { return; } try { w.flush(); // System.out.println("INFOSTORE: Flushed!"); } catch (IOException e) { LOG.error(e);
+         * } try { w.close(); // System.out.println("INFOSTORE: Closed!"); } catch (IOException e) { LOG.error(e); }
          */
     }
 
-    protected void writeResponse(final Response response, final HttpServletResponse httpServletResponse)
-            throws IOException {
+    protected void writeResponse(final Response response, final HttpServletResponse httpServletResponse) throws IOException {
         httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, httpServletResponse.getWriter());
