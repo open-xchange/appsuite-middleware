@@ -59,6 +59,13 @@ import org.json.JSONValue;
  */
 public final class AJAXRequestResult {
 
+    /**
+     * The constant representing an empty AJAX request result.
+     * <p>
+     * Both data and time stamp are set to <code>null</code>.
+     */
+    public static final AJAXRequestResult EMPTY_REQUEST_RESULT = new AJAXRequestResult();
+
     private final Object resultObject;
 
     private final Date timestamp;
@@ -67,6 +74,8 @@ public final class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
+     * 
+     * @see #EMPTY_REQUEST_RESULT
      */
     public AJAXRequestResult() {
         this(null, null);
