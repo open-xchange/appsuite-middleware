@@ -89,6 +89,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(RootAction.ACTION, new RootAction());
         tmp.put(ListAction.ACTION, new ListAction());
         tmp.put(GetAction.ACTION, new GetAction());
+        tmp.put(CreateAction.ACTION, new CreateAction());
         return Collections.unmodifiableMap(tmp);
     }
 }

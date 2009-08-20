@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CreateAction} - Maps the action to a GET action.
+ * {@link CreateAction} - Maps the action to a NEW action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
