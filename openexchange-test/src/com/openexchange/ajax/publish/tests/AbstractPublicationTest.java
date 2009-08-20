@@ -72,6 +72,19 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
     
     protected PublicationTestManager pubMgr;
     
+    
+    public AbstractPublicationTest(String name) {
+        super(name);
+    }
+
+    public void setPublishManager(PublicationTestManager pubMgr) {
+        this.pubMgr = pubMgr;
+    }
+
+    public PublicationTestManager getPublishManager() {
+        return pubMgr;
+    }
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -86,45 +99,5 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
         cMgr.cleanUp();
         fMgr.cleanUp();
         super.tearDown();
-    }
-
-    public AbstractPublicationTest(String name) {
-        super(name);
-    }
-
-    protected PublicationTarget generateTarget(DynamicFormDescription form, String type){
-        PublicationTarget target = new PublicationTarget();
-        target.setFormDescription(form);
-        target.setId("com.openexchange.publish.microformats." + type+ ".online");
-        return target;
-    }
-    
-    protected Publication generatePublication(String type, String folder) {
-        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
-        return generatePublication(type, folder, discovery);
-    }
-
-    protected DynamicFormDescription generateOXMFFormDescription(){
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
-        return form;
-    }
-    
-    protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery) {
-        DynamicFormDescription form = generateOXMFFormDescription();
-        PublicationTarget target = generateTarget(form, type);
-        
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication");
-        config.put("protected", Boolean.valueOf(true));
-
-        discovery.addTarget(target);
-
-        Publication pub = new Publication();
-        pub.setModule(type);
-        pub.setEntityId(folder);
-        pub.setTarget(target);
-        pub.setConfiguration(config);
-        return pub;
     }
 }
