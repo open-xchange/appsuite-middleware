@@ -81,13 +81,16 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
         
-        Publication orignal = generatePublication(module, folderID );
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
+        
+        Publication orignal = generatePublication(module, folderID, discovery );
         NewPublicationRequest newReq = new NewPublicationRequest(orignal);
         NewPublicationResponse newResp = getClient().execute(newReq);
         assertFalse("Should contain no error after creating", newResp.hasError());
         orignal.setId(newResp.getId());
         
-        Publication update = generatePublication(module, folderID);
+        Publication update = generatePublication(module, folderID, discovery);
         update.setId(newResp.getId());
         UpdatePublicationRequest updReq = new UpdatePublicationRequest(update);
         UpdatePublicationResponse updResp = getClient().execute(updReq);
@@ -112,7 +115,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         Publication pub2 = pubMgr.getAction(pub1.getId());
         assertEquals("Should have set the siteName", "oldName", pub2.getConfiguration().get("siteName"));
         
-        Publication pub3 = generatePublication("contacts", folderID);
+        Publication pub3 = generatePublication("contacts", folderID, discovery);
         pub3.setId(pub1.getId());
         pub3.getConfiguration().put("siteName", "newName");
         pubMgr.updateAction(pub3);

@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -83,7 +84,10 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         String folderID = String.valueOf(contact.getParentFolderID() );
         String module = "contacts";
         
-        Publication expected = generatePublication(module, folderID );
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
+        
+        Publication expected = generatePublication(module, folderID, discovery );
         expected.setDisplayName("This will be changed");
         NewPublicationRequest newReq = new NewPublicationRequest(expected);
         NewPublicationResponse newResp = getClient().execute(newReq);
@@ -110,8 +114,12 @@ public class ListPublicationsTest extends AbstractPublicationTest {
         String folderID = String.valueOf(contact.getObjectID() );
         String module = "contacts";
         
-        Publication expected = generatePublication(module, folderID );
+        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(discovery);
+        
+        Publication expected = generatePublication(module, folderID , discovery);
         expected.setDisplayName("This will be changed");
+
         pubMgr.newAction(expected);
         NewPublicationResponse newResp = (NewPublicationResponse) pubMgr.getLastResponse();
         assertFalse("Precondition: Should be able to create a publication", newResp.hasError());
