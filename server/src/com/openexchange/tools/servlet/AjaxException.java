@@ -133,7 +133,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * A harmful attachment was detected.
          */
-        HARMFUL_ATTACHMENT("A harmful attachment was detected.", Category.CODE_ERROR, 8);
+        HARMFUL_ATTACHMENT("A harmful attachment was detected.", Category.CODE_ERROR, 8),
+        /**
+         * JSON error: %s
+         */
+        JSONError("JSON error: %s", Category.CODE_ERROR, 9), ;
 
         /**
          * Message of the exception.
