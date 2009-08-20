@@ -77,6 +77,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -143,13 +144,15 @@ public class PublicationTestManager {
             setClient(client);
         }
 
-        public Publication newAction(Publication publication) throws AjaxException, IOException, SAXException, JSONException {
+        public Publication newAction(Publication publication) throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException {
             NewPublicationRequest newReq = new NewPublicationRequest(publication);
             newReq.setFailOnError(getFailOnError());
             NewPublicationResponse newResp = getClient().execute(newReq);
-            lastResponse = newResp;
             createdItems.add(I(newResp.getId()));
-            publication.setId(newResp.getId());
+            Publication updatedPublication = getAction(newResp.getId());
+            publication.setConfiguration(updatedPublication.getConfiguration());
+            publication.setId(updatedPublication.getId());
+            lastResponse = newResp;
             return publication;
         }
 
