@@ -791,12 +791,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      */
     private void writeScript(final SieveHandler sieveHandler, final String activeScript, final String writeback)
             throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
+        final StringBuilder commandBuilder = new StringBuilder(64);
+        
         if (null != activeScript && activeScript.equals(this.scriptname)) {
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"));
-            sieveHandler.setScriptStatus(activeScript, true);
+            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"), commandBuilder);
+            sieveHandler.setScriptStatus(activeScript, true, commandBuilder);
         } else {
-            sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"));
-            sieveHandler.setScriptStatus(this.scriptname, true);
+            sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"), commandBuilder);
+            sieveHandler.setScriptStatus(this.scriptname, true, commandBuilder);
         }
     }
 

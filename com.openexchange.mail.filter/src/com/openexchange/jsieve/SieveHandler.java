@@ -209,6 +209,8 @@ public class SieveHandler {
 
         final boolean issueTLS = capa.getStarttls().booleanValue();
 
+        final StringBuilder commandBuilder = new StringBuilder(64);
+
         if (issueTLS) {
             /*-
              * Switch to TLS and re-fetch capabilities
@@ -225,10 +227,10 @@ public class SieveHandler {
              * S: OK
              */
             measureStart();
-            final String starttls = "STARTTLS" + CRLF;
-            bos_sieve.write(starttls.getBytes("UTF-8"));
+            bos_sieve.write(commandBuilder.append("STARTTLS").append(CRLF).toString().getBytes("UTF-8"));
             bos_sieve.flush();
             measureEnd("startTLS");
+            commandBuilder.setLength(0);
             /*
              * Expect OK
              */
@@ -252,9 +254,10 @@ public class SieveHandler {
              * Fire CAPABILITY command
              */
             measureStart();
-            bos_sieve.write(("CAPABILITY" + CRLF).getBytes("UTF-8"));
+            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
             bos_sieve.flush();
             measureEnd("capability");
+            commandBuilder.setLength(0);
             /*
              * Read capabilities
              */
@@ -276,7 +279,7 @@ public class SieveHandler {
                 sieve_host_port);
         }
         measureStart();
-        if (!selectAuth("PLAIN")) {
+        if (!selectAuth("PLAIN", commandBuilder)) {
             throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
         }
         log.debug("Authentication to sieve successful");
@@ -288,11 +291,12 @@ public class SieveHandler {
      * 
      * @param script_name
      * @param script
+     * @param commandBuilder
      * @throws OXSieveHandlerException
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    public void setScript(final String script_name, final byte[] script) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
+    public void setScript(final String script_name, final byte[] script, final StringBuilder commandBuilder) throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
         if (AUTH == false) {
             throw new OXSieveHandlerException("Script upload not possible. Auth first.", sieve_host, sieve_host_port);
         }
@@ -301,7 +305,10 @@ public class SieveHandler {
             throw new OXSieveHandlerException("Script upload not possible. No Script", sieve_host, sieve_host_port);
         }
 
-        final String put = SIEVE_PUT + '\"' + script_name + "\" {" + script.length + "+}" + CRLF;
+        final String put = commandBuilder.append(SIEVE_PUT).append('\"').append(script_name).append("\" {").append(script.length).append(
+            "+}").append(CRLF).toString();
+        commandBuilder.setLength(0);
+
         bos_sieve.write(put.getBytes("UTF-8"));
         bos_sieve.write(script);
 
@@ -342,13 +349,14 @@ public class SieveHandler {
      * 
      * @param script_name
      * @param status
+     * @param commandBuilder
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
-    public void setScriptStatus(final String script_name, final boolean status) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+    public void setScriptStatus(final String script_name, final boolean status, final StringBuilder commandBuilder) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (status) {
-            activate(script_name);
+            activate(script_name, commandBuilder);
         } else {
             deactivate(script_name);
         }
@@ -484,9 +492,13 @@ public class SieveHandler {
             throw new OXSieveHandlerException("Script can't be removed", sieve_host, sieve_host_port);
         }
 
-        setScriptStatus(script_name, false);
+        final StringBuilder commandBuilder = new StringBuilder(64);
 
-        final String delete = SIEVE_DELETE + "\"" + script_name + "\"" + CRLF;
+        setScriptStatus(script_name, false, commandBuilder);
+
+        final String delete = commandBuilder.append(SIEVE_DELETE).append("\"").append(script_name).append("\"").append(CRLF).toString();
+        commandBuilder.setLength(0);
+
         bos_sieve.write(delete.getBytes("UTF-8"));
         bos_sieve.flush();
 
@@ -538,11 +550,18 @@ public class SieveHandler {
         }
     }
 
-    private boolean authPLAIN() throws IOException, UnsupportedEncodingException {
-        final String to64 = sieve_user + '\0' + sieve_auth + '\0' + sieve_auth_passwd;
-        final String user_auth_pass_64 = convertStringToBase64(to64) + CRLF;
-        final String auth_mech_string = SIEVE_AUTH + "\"PLAIN\" ";
-        final String user_size = "{" + (user_auth_pass_64.length() - 2) + "+}" + CRLF;
+    private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException {
+        final String to64 = commandBuilder.append(sieve_user).append('\0').append(sieve_auth).append('\0').append(sieve_auth_passwd).toString();
+        commandBuilder.setLength(0);
+
+        final String user_auth_pass_64 = commandBuilder.append(convertStringToBase64(to64)).append(CRLF).toString();
+        commandBuilder.setLength(0);
+
+        final String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"PLAIN\" ").toString();
+        commandBuilder.setLength(0);
+
+        final String user_size = commandBuilder.append("{").append((user_auth_pass_64.length() - 2)).append("+}").append(CRLF).toString();
+        commandBuilder.setLength(0);
 
         // We don't need to specify an encoding here because all strings contain only ASCII Text
         bos_sieve.write(auth_mech_string.getBytes());
@@ -568,9 +587,11 @@ public class SieveHandler {
     }
 
     // FIXME: Not tested yet
-    private boolean authLOGIN() throws IOException, OXSieveHandlerException, UnsupportedEncodingException {
+    private boolean authLOGIN(final StringBuilder commandBuilder) throws IOException, OXSieveHandlerException, UnsupportedEncodingException {
 
-        final String auth_mech_string = SIEVE_AUTH + "\"LOGIN\"" + CRLF;
+        final String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"LOGIN\"").append(CRLF).toString();
+        commandBuilder.setLength(0);
+
         bos_sieve.write(auth_mech_string.getBytes("UTF-8"));
         bos_sieve.flush();
 
@@ -586,8 +607,12 @@ public class SieveHandler {
             }
         }
 
-        final String user64 = convertStringToBase64(sieve_auth) + CRLF;
-        final String user_size = '{' + (user64.length() - 2) + "+}" + CRLF;
+        final String user64 = commandBuilder.append(convertStringToBase64(sieve_auth)).append(CRLF).toString();
+        commandBuilder.setLength(0);
+
+        final String user_size = commandBuilder.append('{').append((user64.length() - 2)).append("+}").append(CRLF).toString();
+        commandBuilder.setLength(0);
+
         bos_sieve.write(user_size.getBytes("UTF-8"));
         bos_sieve.write(user64.getBytes("UTF-8"));
         bos_sieve.flush();
@@ -604,8 +629,12 @@ public class SieveHandler {
             }
         }
 
-        final String pass64 = convertStringToBase64(sieve_auth_passwd) + CRLF;
-        final String pass_size = '{' + (pass64.length() - 2) + "+}" + CRLF;
+        final String pass64 = commandBuilder.append(convertStringToBase64(sieve_auth_passwd)).append(CRLF).toString();
+        commandBuilder.setLength(0);
+
+        final String pass_size = commandBuilder.append('{').append((pass64.length() - 2)).append("+}").append(CRLF).toString();
+        commandBuilder.setLength(0);
+
         bos_sieve.write(pass_size.getBytes("UTF-8"));
         bos_sieve.write(pass64.getBytes("UTF-8"));
         bos_sieve.flush();
@@ -624,12 +653,14 @@ public class SieveHandler {
         }
     }
 
-    private void activate(final String sieve_script_name) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+    private void activate(final String sieve_script_name, final StringBuilder commandBuilder) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (AUTH == false) {
             throw new OXSieveHandlerException("Activate a script not possible. Auth first.", sieve_host, sieve_host_port);
         }
 
-        final String active = SIEVE_ACTIVE + '\"' + sieve_script_name + '\"' + CRLF;
+        final String active = commandBuilder.append(SIEVE_ACTIVE).append('\"').append(sieve_script_name).append('\"').append(CRLF).toString();
+        commandBuilder.setLength(0);
+
         bos_sieve.write(active.getBytes("UTF-8"));
         bos_sieve.flush();
 
@@ -681,11 +712,11 @@ public class SieveHandler {
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
-    private boolean selectAuth(final String auth_mech) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean selectAuth(final String auth_mech, final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         if (auth_mech.equals("PLAIN")) {
-            return authPLAIN();
+            return authPLAIN(commandBuilder);
         } else if (auth_mech.equals("LOGIN")) {
-            return authLOGIN();
+            return authLOGIN(commandBuilder);
         }
         return false;
     }
