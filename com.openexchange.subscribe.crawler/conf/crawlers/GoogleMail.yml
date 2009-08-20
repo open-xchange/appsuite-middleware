@@ -11,9 +11,9 @@ workflowString: |
       nameOfUserField: Email
       numberOfForm: 1
       pageTitleAfterLogin: "?ui=html&zy=e"
-      password: ""
+      password: P1lotGoo
       url: "https://www.googlemail.com"
-      username: ""
+      username: o6sidian@gmail.com
     - !com.openexchange.subscribe.crawler.PageByUrlStep
       url: "https://mail.google.com/mail/?ui=html&zy=e"
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
@@ -31,7 +31,7 @@ workflowString: |
         page: ""
         pageParts: 
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(<input[\\s]{1}name=ct_nm[\\s]{1}id=ct_nm[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-zA-Z\\s]*)(\"><br></td>)"
+            regex: "(<input[\\s]{1}name=ct_nm[\\s]{1}id=ct_nm[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-zA-Z\\säöüß]*)(\"><br></td>)"
             type: 1
             typeOfInfo: display_name
           - !com.openexchange.subscribe.crawler.PagePart
