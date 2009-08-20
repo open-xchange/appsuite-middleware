@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.actions;
 
+import java.util.Date;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -90,15 +91,19 @@ public final class Delete extends AbstractAction {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param timeStamp The requestor's last-modified time stamp
      * @throws FolderException If an error occurs during deletion
      */
-    public void doDelete(final String treeId, final String folderId) throws FolderException {
+    public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws FolderException {
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         folderStorage.startTransaction(storageParameters, false);
+        if (null != timeStamp) {
+            storageParameters.setTimeStamp(timeStamp);
+        }
         try {
             folderStorage.deleteFolder(treeId, folderId, storageParameters);
             if (LOG.isDebugEnabled()) {

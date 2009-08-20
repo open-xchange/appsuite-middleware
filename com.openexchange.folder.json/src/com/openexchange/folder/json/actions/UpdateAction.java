@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -93,16 +94,17 @@ public final class UpdateAction extends AbstractFolderAction {
         if (null == id) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
         }
-        final long timestamp;
+        final Date timestamp;
         {
             final String timestampStr = request.getParameter("timestamp");
             if (null == timestampStr) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "timestamp");
-            }
-            try {
-                timestamp = Long.parseLong(timestampStr);
-            } catch (final NumberFormatException e) {
-                throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+                timestamp = null;
+            } else {
+                try {
+                    timestamp = new Date(Long.parseLong(timestampStr));
+                } catch (final NumberFormatException e) {
+                    throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+                }
             }
         }
         /*
@@ -116,7 +118,7 @@ public final class UpdateAction extends AbstractFolderAction {
          * Create
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        folderService.updateFolder(folder, session);
+        folderService.updateFolder(folder, timestamp, session);
         /*
          * Return appropriate result
          */

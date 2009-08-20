@@ -243,10 +243,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static final int[] PUBLIC_FOLDER_IDS = {
-        FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-        FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
-        FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
-    };
+        FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters, final FolderType folderType) throws OXException {
         int type = -1;
@@ -295,7 +292,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session);
-            folderManager.deleteFolder(fo, true, System.currentTimeMillis());
+            final Date clientLastModified = storageParameters.getTimeStamp();
+            folderManager.deleteFolder(fo, true, null == clientLastModified ? System.currentTimeMillis() : clientLastModified.getTime());
         } catch (final OXFolderException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
@@ -658,7 +656,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final long millis = System.currentTimeMillis();
+
+            final Date millis;
+            {
+                final Date clientLastModified = storageParameters.getTimeStamp();
+                millis = null == clientLastModified ? new Date() : clientLastModified;
+            }
 
             final FolderObject updateMe = new FolderObject();
             updateMe.setObjectID(Integer.parseInt(folder.getID()));
@@ -669,7 +672,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     updateMe.setFolderName(name);
                 }
             }
-            updateMe.setLastModified(new Date(millis));
+            updateMe.setLastModified(millis);
             updateMe.setModifiedBy(session.getUserId());
             {
                 final ContentType ct = folder.getContentType();
@@ -709,7 +712,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session);
-            folderManager.updateFolder(updateMe, true, millis);
+            folderManager.updateFolder(updateMe, true, millis.getTime());
         } catch (final OXException e) {
             throw new FolderException(e);
         }

@@ -218,11 +218,12 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
      * @throws FolderException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+    void deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws FolderException;
 
     /**
      * Deletes the specified folder in given tree.
@@ -231,10 +232,11 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
      * @throws FolderException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId, Session session) throws FolderException;
+    void deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws FolderException;
 
     /**
      * Clears the content of specified folder in given tree.
@@ -261,20 +263,22 @@ public interface FolderService {
      * Updates a folder identified through given folder object.
      * 
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
+     * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
      * @throws FolderException If update fails
      */
-    void updateFolder(Folder folder, User user, Context context) throws FolderException;
+    void updateFolder(Folder folder, Date timeStamp, User user, Context context) throws FolderException;
 
     /**
      * Updates a folder identified through given folder object.
      * 
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
+     * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
      * @throws FolderException If update fails
      */
-    void updateFolder(Folder folder, Session session) throws FolderException;
+    void updateFolder(Folder folder, Date timeStamp, Session session) throws FolderException;
 
     /**
      * Creates a new folder described by given folder object.

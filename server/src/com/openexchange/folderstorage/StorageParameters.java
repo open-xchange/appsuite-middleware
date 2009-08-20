@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Date;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -80,6 +81,22 @@ public interface StorageParameters {
      * @return The session
      */
     Session getSession();
+
+    /**
+     * Gets a <b>copy</b> of the requestor's last-modified time stamp.
+     * 
+     * @return A <b>copy</b> of the requestor's last-modified time stamp or <code>null</code>
+     */
+    Date getTimeStamp();
+
+    /**
+     * Sets the requestor's last-modified time stamp.
+     * <p>
+     * <b>Note</b>: Given time stamp is copied if not <code>null</code>.
+     * 
+     * @param timeStamp The requestor's last-modified time stamp or <code>null</code> to remove
+     */
+    void setTimeStamp(Date timeStamp);
 
     /**
      * Gets the parameter bound to given name.

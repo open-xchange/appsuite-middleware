@@ -102,14 +102,14 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final User user, final Context context) throws FolderException {
-        new Delete(user, context).doDelete(treeId, folderId);
+    public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context) throws FolderException {
+        new Delete(user, context).doDelete(treeId, folderId, timeStamp);
 
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final Session session) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws FolderException {
         try {
-            new Delete(new ServerSessionAdapter(session)).doDelete(treeId, folderId);
+            new Delete(new ServerSessionAdapter(session)).doDelete(treeId, folderId, timeStamp);
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
@@ -179,13 +179,13 @@ public final class FolderServiceImpl implements FolderService {
 
     }
 
-    public void updateFolder(final Folder folder, final User user, final Context context) throws FolderException {
-        new Update(user, context).doUpdate(folder);
+    public void updateFolder(final Folder folder, final Date timeStamp, final User user, final Context context) throws FolderException {
+        new Update(user, context).doUpdate(folder, timeStamp);
     }
 
-    public void updateFolder(final Folder folder, final Session session) throws FolderException {
+    public void updateFolder(final Folder folder, final Date timeStamp, final Session session) throws FolderException {
         try {
-            new Update(new ServerSessionAdapter(session)).doUpdate(folder);
+            new Update(new ServerSessionAdapter(session)).doUpdate(folder, timeStamp);
         } catch (final ContextException e) {
             throw new FolderException(e);
         }

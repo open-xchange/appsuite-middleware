@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -73,6 +74,8 @@ public final class StorageParametersImpl implements StorageParameters {
     private final Context context;
 
     private final ConcurrentMap<FolderType, ConcurrentMap<String, Object>> parameters;
+
+    private Date timeStamp;
 
     /**
      * Initializes a new {@link List} from given session.
@@ -152,6 +155,14 @@ public final class StorageParametersImpl implements StorageParameters {
         }
         final ConcurrentMap<String, Object> m = getFolderTypeMap(folderType, true);
         m.putIfAbsent(name, value);
+    }
+
+    public Date getTimeStamp() {
+        return null == timeStamp ? null : new Date(timeStamp.getTime());
+    }
+
+    public void setTimeStamp(final Date timeStamp) {
+        this.timeStamp = null == timeStamp ? null : new Date(timeStamp.getTime());
     }
 
 }

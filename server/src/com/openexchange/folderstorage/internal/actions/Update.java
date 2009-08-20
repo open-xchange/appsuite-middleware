@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -94,9 +95,10 @@ public final class Update extends AbstractAction {
      * Performs the <code>UPDATE</code> request.
      * 
      * @param folder The object which denotes the folder to update and provides the changes to perform
+     * @param timeStamp The requestor's last-modified time stamp
      * @throws FolderException If update fails
      */
-    public void doUpdate(final Folder folder) throws FolderException {
+    public void doUpdate(final Folder folder, final Date timeStamp) throws FolderException {
         final String folderId = folder.getID();
         if (null == folderId) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create(new Object[0]);
@@ -110,6 +112,9 @@ public final class Update extends AbstractAction {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         storage.startTransaction(storageParameters, true);
+        if (null != timeStamp) {
+            storageParameters.setTimeStamp(timeStamp);
+        }
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(storage);
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -89,16 +90,17 @@ public final class DeleteAction extends AbstractFolderAction {
              */
             treeId = FolderStorage.REAL_TREE_ID;
         }
-        final long timestamp;
+        final Date timestamp;
         {
             final String timestampStr = request.getParameter("timestamp");
             if (null == timestampStr) {
-                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "timestamp");
-            }
-            try {
-                timestamp = Long.parseLong(timestampStr);
-            } catch (final NumberFormatException e) {
-                throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+                timestamp = null;
+            } else {
+                try {
+                    timestamp = new Date(Long.parseLong(timestampStr));
+                } catch (final NumberFormatException e) {
+                    throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+                }
             }
         }
         /*
@@ -115,7 +117,7 @@ public final class DeleteAction extends AbstractFolderAction {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
-                    folderService.deleteFolder(treeId, folderId, session);
+                    folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final FolderException e) {
                     responseArray.put(folderId);
                 }
