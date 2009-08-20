@@ -1133,10 +1133,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(oldParticipants, resourceSet, receivers, all, session, newParticipants);
+        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, receivers, all, session, newParticipants);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants) {
         if (oldParticipants == null) {
             return;
         }
@@ -1149,7 +1149,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 EmailableParticipant p = getExternalParticipant(participant, session);
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, null, resourceSet, receivers, all, false);
+                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                 }
                 break;
             case Participant.RESOURCE:
@@ -1160,7 +1160,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 if (p != null) {
                     p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, null, resourceSet, receivers, all, true);
+                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
                 }
                 break;
             case Participant.GROUP:
