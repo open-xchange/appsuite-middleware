@@ -52,6 +52,7 @@ package com.openexchange.tools.encoding;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 
 /**
@@ -63,6 +64,20 @@ public class Helper {
 
     private Helper() {
         super();
+    }
+
+    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
+
+    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
+
+    /**
+     * Escapes every <code>'"'</code> and <code>'\'</code> character in given string with a heading <code>'\'</code> character.
+     * 
+     * @param value The value to escape
+     * @return The escaped value
+     */
+    public static String escape(final String value) {
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(value).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
     /**

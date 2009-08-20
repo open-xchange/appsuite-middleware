@@ -93,7 +93,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     static {
         final String paramNameRegex = "([\\p{ASCII}&&[^=\"\\s;]]+)";
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
-        final String quotedStringRegex = "(?:\".+?\")";
+        final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")";
         PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?:=(" + tokenRegex + '|' + quotedStringRegex + "))?");
 
         PATTERN_PARAM_CORRECT = Pattern.compile(paramNameRegex + "=([^\"][^; \t]*[ \t][^;]*)($|;)");
@@ -211,7 +211,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if (value == null) {
             val = "";
         } else {
-            val = (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? value.substring(1, value.length() - 1) : value;
+            val = (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? unescape(value.substring(1, value.length() - 1)) : value;
         }
         int pos = name.indexOf('*');
         if (pos == -1) {
@@ -422,11 +422,40 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         return quote;
     }
 
+    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
+
+    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
+
     static String checkQuotation(final String str) {
         if (containsSpecial(str)) {
-            return new StringBuilder(2 + str.length()).append('"').append(str).append('"').toString();
+            return new StringBuilder(2 + str.length()).append('"').append(
+                PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"")).append('"').toString();
         }
         return str;
+    }
+
+    private static String unescape(final String escaped) {
+        final StringBuilder sb = new StringBuilder(escaped.length());
+
+        final char[] chars = escaped.toCharArray();
+
+        boolean ignore = false;
+        for (int i = 0; i < chars.length; i++) {
+            final char c = chars[i];
+            if ('\\' == c) {
+                if (ignore) {
+                    ignore = false;
+                } else {
+                    sb.append(c);
+                    ignore = true;
+                }
+            } else {
+                sb.append(c);
+                ignore = true;
+            }
+        }
+
+        return sb.toString();
     }
 
     /**

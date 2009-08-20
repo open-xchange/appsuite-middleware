@@ -1631,6 +1631,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*", Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
+
+    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
+
     private static final String DEFAULT_FILENAME = "file.dat";
 
     public static final String getSaveAsFileName(final String fileName, final boolean internetExplorer, final String baseCT) {
@@ -1661,7 +1665,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         }
-        return tmp.toString();
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(tmp.toString()).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
     public void actionPutForwardMultiple(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
