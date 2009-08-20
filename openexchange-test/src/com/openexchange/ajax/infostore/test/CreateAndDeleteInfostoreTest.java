@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
@@ -57,8 +58,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.test.TestInit;
 import com.openexchange.tools.servlet.AjaxException;
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -69,10 +70,10 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         super(name);
     }
 
-    public void testCreatingOneItem() throws AjaxException, IOException, SAXException, JSONException, OXException{
+    public void testCreatingOneItem() throws AjaxException, IOException, SAXException, JSONException, OXException {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
-        
+
         DocumentMetadata expected = new DocumentMetadataImpl();
         expected.setCreationDate(new Date());
         expected.setFolderId(folder.getObjectID());
@@ -81,15 +82,33 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
 
         infoMgr.newAction(expected);
         assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
-        
+
         DocumentMetadata actual = infoMgr.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
-        
+
         infoMgr.deleteAction(expected);
         assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
     }
-    
+
     public void testCreatingOneItemWithFile() throws Exception {
-        //TODO: Implement
+
+        FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
+        fMgr.insertFolderOnServer(folder);
+
+        DocumentMetadata expected = new DocumentMetadataImpl();
+        expected.setCreationDate(new Date());
+        expected.setFolderId(folder.getObjectID());
+        expected.setTitle("InfostoreCreateDeleteTest File");
+        expected.setLastModified(new Date());
+        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+
+        infoMgr.newAction(expected);//TODO, upload);
+        assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
+
+        DocumentMetadata actual = infoMgr.getAction(expected.getId());
+        assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
+
+        infoMgr.deleteAction(expected);
+        assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());
     }
 }
