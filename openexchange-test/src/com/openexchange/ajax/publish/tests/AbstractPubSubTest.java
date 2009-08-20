@@ -50,11 +50,16 @@
 package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
@@ -62,7 +67,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.test.ContactTestManager;
@@ -77,6 +81,8 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     private FolderTestManager folderMgr;
 
     private ContactTestManager contactMgr;
+
+    private InfostoreTestManager infostoreMgr;
 
     public AbstractPubSubTest(String name) {
         super(name);
@@ -98,39 +104,28 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return contactMgr;
     }
 
+    public void setInfostoreManager(InfostoreTestManager infostoreMgr) {
+        this.infostoreMgr = infostoreMgr;
+    }
+
+    public InfostoreTestManager getInfostoreManager() {
+        return infostoreMgr;
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         setFolderManager(new FolderTestManager(getClient()));
         setContactManager(new ContactTestManager(getClient()));
+        setInfostoreManager(new InfostoreTestManager(getClient()));
     }
 
     @Override
     protected void tearDown() throws Exception {
         getContactManager().cleanUp();
+        getInfostoreManager().cleanUp();
         getFolderManager().cleanUp();
         super.tearDown();
-    }
-
-    protected FolderObject generateFolder(String name, int moduleType) throws AjaxException, IOException, SAXException, JSONException {
-        // create a folder
-        FolderObject folderObject1 = new FolderObject();
-        folderObject1.setFolderName(name);
-        folderObject1.setType(FolderObject.PUBLIC);
-        folderObject1.setParentFolderID(getClient().getValues().getPrivateContactFolder());
-        folderObject1.setModule(moduleType);
-        // create permissions
-        final OCLPermission perm1 = new OCLPermission();
-        perm1.setEntity(getClient().getValues().getUserId());
-        perm1.setGroupPermission(false);
-        perm1.setFolderAdmin(true);
-        perm1.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
-        folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
-        return folderObject1;
     }
 
     protected Contact generateContact(String firstname, String lastname) {
@@ -144,27 +139,24 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return contact;
     }
 
-    protected PublicationTarget generateTarget(DynamicFormDescription form, String type) {
+    protected PublicationTarget generateMicroformatTarget(DynamicFormDescription form, String type) {
         PublicationTarget target = new PublicationTarget();
         target.setFormDescription(form);
         target.setId("com.openexchange.publish.microformats." + type + ".online");
         return target;
     }
 
-    protected Publication generatePublication(String type, String folder) {
-        SimPublicationTargetDiscoveryService discovery = new SimPublicationTargetDiscoveryService();
-        return generatePublication(type, folder, discovery);
-    }
-
     protected DynamicFormDescription generateOXMFFormDescription() {
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
+        form.add(FormElement.input("siteName", "Site Name"));
+        form.add(FormElement.checkbox("protected", "Protected"));
+        form.add(FormElement.link("url", "URL"));
         return form;
     }
 
     protected Publication generatePublication(String type, String folder, SimPublicationTargetDiscoveryService discovery) {
         DynamicFormDescription form = generateOXMFFormDescription();
-        PublicationTarget target = generateTarget(form, type);
+        PublicationTarget target = generateMicroformatTarget(form, type);
 
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("siteName", "publication");
@@ -175,6 +167,48 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         Publication pub = new Publication();
         pub.setModule(type);
         pub.setEntityId(folder);
+        pub.setTarget(target);
+        pub.setConfiguration(config);
+        return pub;
+    }
+
+    protected Publication generateInfostoreFolderPublication(String folder, SimPublicationTargetDiscoveryService discovery) {
+        DynamicFormDescription form = generateOXMFFormDescription();
+
+        PublicationTarget target = new PublicationTarget();
+        target.setFormDescription(form);
+        target.setId("com.openexchange.publish.online.infostore.document");
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("siteName", "publication");
+        config.put("protected", Boolean.valueOf(true));
+
+        discovery.addTarget(target);
+
+        Publication pub = new Publication();
+        pub.setModule("infostore/object");
+        pub.setEntityId(folder);
+        pub.setTarget(target);
+        pub.setConfiguration(config);
+        return pub;
+    }
+
+    protected Publication generateInfostoreItemPublication(String objId, SimPublicationTargetDiscoveryService discovery) {
+        DynamicFormDescription form = generateOXMFFormDescription();
+
+        PublicationTarget target = new PublicationTarget();
+        target.setFormDescription(form);
+        target.setId("com.openexchange.publish.online.infostore.document");
+
+        Map<String, Object> config = new HashMap<String, Object>();
+        config.put("siteName", "publication");
+        config.put("protected", Boolean.valueOf(true));
+
+        discovery.addTarget(target);
+
+        Publication pub = new Publication();
+        pub.setModule("infostore/object");
+        pub.setEntityId(objId);
         pub.setTarget(target);
         pub.setConfiguration(config);
         return pub;
@@ -204,7 +238,21 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject createDefaultContactFolder() throws AjaxException, IOException, SAXException, JSONException {
-        FolderObject folder = generateFolder("publishedContacts", FolderObject.CONTACT);
+        FolderObject folder = getFolderManager().generateFolder(
+            "pubsub default contact folder",
+            FolderObject.CONTACT,
+            getClient().getValues().getPrivateContactFolder(),
+            getClient().getValues().getUserId());
+        getFolderManager().insertFolderOnServer(folder);
+        return folder;
+    }
+
+    protected FolderObject createDefaultInfostoreFolder() throws AjaxException, IOException, SAXException, JSONException {
+        FolderObject folder = getFolderManager().generateFolder(
+            "pubsub default infostore folder",
+            FolderObject.INFOSTORE,
+            getClient().getValues().getPrivateInfostoreFolder(),
+            getClient().getValues().getUserId());
         getFolderManager().insertFolderOnServer(folder);
         return folder;
     }
@@ -218,4 +266,28 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return contact;
     }
 
+    private WebResponse getResponse(String url) throws IOException {
+        WebConversation conv = new WebConversation();
+        String correctedUrl = url;
+        if (!correctedUrl.startsWith("http"))
+            correctedUrl = "http://" + url;
+        GetMethodWebRequest req = new GetMethodWebRequest(correctedUrl);
+        return conv.getResource(req);
+    }
+
+    public String getWebsite(String url) throws IOException {
+        return getResponse(url).getText();
+    }
+
+    public InputStream getDownload(String url) throws IOException {
+        InputStream in = null;
+
+        try {
+            in = getResponse(url).getInputStream();
+        } finally {
+            if (in != null)
+                in.close();
+        }
+        return in;
+    }
 }
