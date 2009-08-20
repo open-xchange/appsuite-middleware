@@ -66,7 +66,7 @@ public final class AJAXRequestResult {
     private final int hashCode;
 
     /**
-     * Initializes a new {@link AJAXRequestResult} with time stamp left to <code>null</code>.
+     * Initializes a new {@link AJAXRequestResult} with time stamp set to <code>null</code>.
      * 
      * @param resultObject The result object
      */
