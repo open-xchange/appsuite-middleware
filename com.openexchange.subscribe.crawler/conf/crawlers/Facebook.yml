@@ -1,0 +1,15 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+displayName: Facebook
+id: com.openexchange.subscribe.crawler.facebook
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.FacebookAPIStep
+      actionOfLoginForm: "https://login.facebook.com/login.php?login_attempt=1"
+      linkAvailableAfterLogin: "http://www.facebook.com/inbox"
+      nameOfPasswordField: pass
+      nameOfUserField: email
+      password: r0deld0del
+      url: ""
+      username: rodeldodel@wolke7.net
+  
