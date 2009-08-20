@@ -218,26 +218,63 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param user The user
+     * @param context The context
      * @throws FolderException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId) throws FolderException;
+    void deleteFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+
+    /**
+     * Deletes the specified folder in given tree.
+     * <p>
+     * The folder is deleted from all trees and its subfolders as well
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param session The session
+     * @throws FolderException If folder cannot be deleted
+     */
+    void deleteFolder(String treeId, String folderId, Session session) throws FolderException;
 
     /**
      * Clears the content of specified folder in given tree.
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param user The user
+     * @param context The context
      * @throws FolderException If folder cannot be cleared
      */
-    void clearFolder(String treeId, String folderId) throws FolderException;
+    void clearFolder(String treeId, String folderId, User user, Context context) throws FolderException;
+
+    /**
+     * Clears the content of specified folder in given tree.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param session The session
+     * @throws FolderException If folder cannot be cleared
+     */
+    void clearFolder(String treeId, String folderId, Session session) throws FolderException;
 
     /**
      * Updates a folder identified through given folder object.
      * 
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
+     * @param user The user
+     * @param context The context
      * @throws FolderException If update fails
      */
-    void updateFolder(Folder folder) throws FolderException;
+    void updateFolder(Folder folder, User user, Context context) throws FolderException;
+
+    /**
+     * Updates a folder identified through given folder object.
+     * 
+     * @param folder The folder object containing tree identifier, folder identifier and modified data.
+     * @param session The session
+     * @throws FolderException If update fails
+     */
+    void updateFolder(Folder folder, Session session) throws FolderException;
 
     /**
      * Creates a new folder described by given folder object.

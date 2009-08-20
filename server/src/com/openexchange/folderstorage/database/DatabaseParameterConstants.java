@@ -73,4 +73,9 @@ public final class DatabaseParameterConstants {
      */
     public static final String PARAM_WRITABLE = "c~.o~.r~.Write";
 
+    /**
+     * The parameter name for folder access instance.
+     */
+    public static final String PARAM_ACCESS = "c~.o~.r~.Access";
+
 }

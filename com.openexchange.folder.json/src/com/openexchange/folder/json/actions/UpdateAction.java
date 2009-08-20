@@ -47,94 +47,80 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.folder.json.actions;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONObject;
-import com.openexchange.ajax.fields.RequestConstants;
-import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.parser.FolderParser;
+import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AJAXRequestData} contains the parameters and the payload of the request.
+ * {@link UpdateAction} - Maps the action to a NEW action.
  * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJAXRequestData {
+public final class UpdateAction extends AbstractFolderAction {
 
-    private final Map<String, String> params;
-
-    private Object data;
+    public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
     /**
-     * Initializes a new {@link AJAXRequestData}.
-     * 
-     * @param json The JSON data
-     * @throws AjaxException If an AJAX error occurs
+     * Initializes a new {@link UpdateAction}.
      */
-    public AJAXRequestData(final JSONObject json) throws AjaxException {
-        this();
-        data = DataParser.checkJSONObject(json, RequestConstants.DATA);
-    }
-
-    /**
-     * Initializes a new {@link AJAXRequestData}.
-     */
-    public AJAXRequestData() {
+    public UpdateAction() {
         super();
-        params = new HashMap<String, String>();
     }
 
-    /**
-     * Puts given name-value-pair into this data's parameters.
-     * <p>
-     * A <code>null</code> value removes the mapping.
-     * 
-     * @param name The parameter name
-     * @param value The parameter value
-     */
-    public void putParameter(final String name, final String value) {
-        if (null == name) {
-            return;
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        /*
+         * Parse parameters
+         */
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            /*
+             * Fallback to default tree identifier
+             */
+            treeId = FolderStorage.REAL_TREE_ID;
         }
-        if (null == value) {
-            params.remove(name);
-        } else {
-            params.put(name, value);
+        final String id = request.getParameter("id");
+        if (null == id) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
         }
-    }
-
-    /**
-     * Gets the value mapped to given parameter name.
-     * 
-     * @param name The parameter name
-     * @return The value mapped to given parameter name or <code>null</code> if not present
-     */
-    public String getParameter(final String name) {
-        if (null == name) {
-            return null;
+        final long timestamp;
+        {
+            final String timestampStr = request.getParameter("timestamp");
+            if (null == timestampStr) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "timestamp");
+            }
+            try {
+                timestamp = Long.parseLong(timestampStr);
+            } catch (final NumberFormatException e) {
+                throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+            }
         }
-        return params.get(name);
-    }
-
-    /**
-     * Gets the data object.
-     * 
-     * @return The data object
-     */
-    public Object getData() {
-        return data;
-    }
-
-    /**
-     * Sets the data object.
-     * 
-     * @param data The data object to set
-     */
-    public void setData(final Object data) {
-        this.data = data;
+        /*
+         * Parse folder object
+         */
+        final JSONObject folderObject = (JSONObject) request.getData();
+        final Folder folder = FolderParser.parseFolder(folderObject);
+        folder.setID(id);
+        folder.setTreeID(treeId);
+        /*
+         * Create
+         */
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        folderService.updateFolder(folder, session);
+        /*
+         * Return appropriate result
+         */
+        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 
 }

@@ -97,6 +97,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -118,6 +119,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
      */
     public DatabaseFolderStorage() {
         super();
+    }
+
+    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters, final FolderType folderType) {
+        OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(folderType, DatabaseParameterConstants.PARAM_ACCESS);
+        if (null == ret) {
+            ret = new OXFolderAccess(storageParameters.getContext());
+            storageParameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_ACCESS, ret);
+        }
+        return ret;
     }
 
     public ContentType[] getSupportedContentTypes() {
@@ -194,7 +204,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             {
                 final Type t = folder.getType();
-                if (null != t) {
+                if (null == t) {
+                    /*
+                     * Determine folder type by examining parent folder
+                     */
+                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters, getFolderType()));
+                } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
             }
@@ -216,6 +231,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPerm.setSystem(p.getSystem());
                     oclPermissions[i] = oclPerm;
                 }
+                createMe.setPermissionsAsArray(oclPermissions);
             }
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session);
@@ -224,6 +240,33 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final OXException e) {
             throw new FolderException(e);
         }
+    }
+
+    private static final int[] PUBLIC_FOLDER_IDS = {
+        FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+        FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+        FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
+    };
+
+    private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters, final FolderType folderType) throws OXException {
+        int type = -1;
+        int folderId = folderIdArg;
+        /*
+         * Special treatment for system folders
+         */
+        if (folderId == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
+            folderId = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
+            type = FolderObject.SHARED;
+        } else if (folderId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID) {
+            type = FolderObject.PRIVATE;
+        } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, folderId) >= 0) {
+            type = FolderObject.PUBLIC;
+        } else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
+            type = FolderObject.PROJECT;
+        } else {
+            type = getFolderAccess(storageParameters, folderType).getFolderType(folderId);
+        }
+        return type;
     }
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {

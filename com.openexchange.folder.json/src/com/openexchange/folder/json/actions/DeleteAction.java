@@ -49,13 +49,13 @@
 
 package com.openexchange.folder.json.actions;
 
-import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.AbstractOXException;
@@ -63,18 +63,18 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CreateAction} - Maps the action to a NEW action.
+ * {@link DeleteAction} - Maps the action to a DELETE action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateAction extends AbstractFolderAction {
+public final class DeleteAction extends AbstractFolderAction {
 
-    public static final String ACTION = AJAXServlet.ACTION_NEW;
+    public static final String ACTION = AJAXServlet.ACTION_DELETE;
 
     /**
-     * Initializes a new {@link CreateAction}.
+     * Initializes a new {@link DeleteAction}.
      */
-    public CreateAction() {
+    public DeleteAction() {
         super();
     }
 
@@ -89,26 +89,44 @@ public final class CreateAction extends AbstractFolderAction {
              */
             treeId = FolderStorage.REAL_TREE_ID;
         }
-        final String parentId = request.getParameter("folder_id");
-        if (null == parentId) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "folder_id");
+        final long timestamp;
+        {
+            final String timestampStr = request.getParameter("timestamp");
+            if (null == timestampStr) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "timestamp");
+            }
+            try {
+                timestamp = Long.parseLong(timestampStr);
+            } catch (final NumberFormatException e) {
+                throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+            }
         }
         /*
-         * Parse folder object
+         * Compose JSON array with id
          */
-        final JSONObject folderObject = (JSONObject) request.getData();
-        final Folder folder = FolderParser.parseFolder(folderObject);
-        folder.setParentID(parentId);
-        folder.setTreeID(treeId);
+        final JSONArray jsonArray = (JSONArray) request.getData();
+        final int len = jsonArray.length();
         /*
-         * Create
+         * Delete
          */
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final String newId = folderService.createFolder(folder, session);
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(newId);
+        try {
+            final JSONArray responseArray = new JSONArray();
+            final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+            for (int i = 0; i < len; i++) {
+                final String folderId = jsonArray.getString(i);
+                try {
+                    folderService.deleteFolder(treeId, folderId, session);
+                } catch (final FolderException e) {
+                    responseArray.put(folderId);
+                }
+            }
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(responseArray);
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+        }
     }
 
 }

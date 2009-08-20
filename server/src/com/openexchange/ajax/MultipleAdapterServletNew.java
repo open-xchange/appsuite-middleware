@@ -56,7 +56,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -71,7 +73,7 @@ import com.openexchange.tools.servlet.http.Tools;
 /**
  * {@link MultipleAdapterServletNew} is a rewrite of the really good {@link MultipleAdapterServlet} with smarter handling of the request
  * parameters.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class MultipleAdapterServletNew extends PermissionServlet {
@@ -82,40 +84,40 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     private final AJAXActionServiceFactory factory;
 
-    protected MultipleAdapterServletNew(AJAXActionServiceFactory factory) {
+    protected MultipleAdapterServletNew(final AJAXActionServiceFactory factory) {
         super();
         this.factory = factory;
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // TODO this method may need some extra handling due to uploads.
         handle(req, resp);
     }
 
-    protected void handle(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
         try {
-            String action = req.getParameter(PARAMETER_ACTION);
+            final String action = req.getParameter(PARAMETER_ACTION);
             if (action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
-            AJAXRequestData data = parseRequest(req);
-            AJAXActionService actionService = factory.createActionService(action);
-            AJAXRequestResult result = actionService.perform(data, getSessionObject(req));
+            final AJAXRequestData data = parseRequest(req);
+            final AJAXActionService actionService = factory.createActionService(action);
+            final AJAXRequestResult result = actionService.perform(data, getSessionObject(req));
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -124,22 +126,68 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         Tools.disableCaching(resp);
         try {
             ResponseWriter.write(response, resp.getWriter());
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             final OXJSONException e1 = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
             LOG.error(e1.getMessage(), e1);
             sendError(resp);
         }
     }
 
-    private AJAXRequestData parseRequest(HttpServletRequest req) {
-        AJAXRequestData retval = new AJAXRequestData();
-        Enumeration<?> paramNames = req.getParameterNames();
+    private AJAXRequestData parseRequest(final HttpServletRequest req) throws IOException {
+        final AJAXRequestData retval = new AJAXRequestData();
+        final Enumeration<?> paramNames = req.getParameterNames();
         while (paramNames.hasMoreElements()) {
-            String name = (String) paramNames.nextElement();
-            String value = req.getParameter(name);
+            final String name = (String) paramNames.nextElement();
+            final String value = req.getParameter(name);
             retval.putParameter(name, value);
         }
-        // FIXME add body parsing here.
+        /*
+         * Add body
+         */
+        final String body = AJAXServlet.getBody(req);
+        if (startsWith('{', body, true)) {
+            /*
+             * Expect the body to be a JSON object
+             */
+            try {
+                retval.setData(new JSONObject(body));
+            } catch (final JSONException e) {
+                retval.setData(body);
+            }
+        } else if (startsWith('[', body, true)) {
+            /*
+             * Expect the body to be a JSON array
+             */
+            try {
+                retval.setData(new JSONArray(body));
+            } catch (final JSONException e) {
+                retval.setData(body);
+            }
+        } else {
+            retval.setData(0 == body.length() ? null : body);
+        }
         return retval;
     }
+
+    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len < 0) {
+            return false;
+        }
+        if (!ignoreHeadingWhitespaces) {
+            return startingChar == toCheck.charAt(0);
+        }
+        int i = 0;
+        while (i < len && Character.isWhitespace(toCheck.charAt(i))) {
+            i++;
+        }
+        if (i >= len) {
+            return false;
+        }
+        return startingChar == toCheck.charAt(i);
+    }
+
 }
