@@ -252,6 +252,10 @@
         <chmod perm="755" file="${bin.install.copy.dir}/checkconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/checkconfigconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/oxreport"/>
+    	<chmod perm="755" file="${bin.install.copy.dir}/resetversion"/>
+    	<chmod perm="755" file="${bin.install.copy.dir}/schemasandversions"/>
+    	<chmod perm="755" file="${bin.install.copy.dir}/forceupdatetask"/>
+    	
         <copy todir="${destdir}/" overwrite="true">
             <fileset dir="system"/>
             <mapper type="glob" from="*.${distribution}" to="*"/>
