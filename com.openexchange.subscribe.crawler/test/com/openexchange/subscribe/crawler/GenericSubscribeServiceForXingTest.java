@@ -65,8 +65,8 @@ public class GenericSubscribeServiceForXingTest extends
 	
 	public void testGenericSubscribeServiceForXing(){
 		// insert valid credentials here
-		String username ="";
-		String password ="";
+		String username ="rodeldodel@wolke7.net";
+		String password ="r0deld0del";
 		
 		//create a CrawlerDescription
 		CrawlerDescription crawler = new CrawlerDescription();
@@ -83,7 +83,7 @@ public class GenericSubscribeServiceForXingTest extends
         
         findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler,"conf/crawlers/", crawler.getDisplayName());
 	}
 
 }

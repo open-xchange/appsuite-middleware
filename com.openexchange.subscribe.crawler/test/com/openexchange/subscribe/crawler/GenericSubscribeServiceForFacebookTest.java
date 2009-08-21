@@ -78,13 +78,13 @@ public class GenericSubscribeServiceForFacebookTest extends GenericSubscribeServ
         		"https://login.facebook.com/login.php?login_attempt=1",
         		"email",
         		"pass",
-        		"http://www.facebook.com/inbox"));
+        		"(http://www.facebook.com/inbox/\\?ref=[a-z]*)"));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
         
         findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler,"conf/crawlers/", crawler.getDisplayName());
 	}
 }

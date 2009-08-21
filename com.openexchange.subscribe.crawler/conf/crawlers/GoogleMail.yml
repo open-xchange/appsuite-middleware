@@ -6,20 +6,16 @@ workflowString: |
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
       actionOfLoginForm: "https://www.google.com/accounts/ServiceLoginAuth?service=mail"
-      linkAvailableAfterLogin: "?ui=html&zy=e"
+      linkAvailableAfterLogin: "(\\?v=cl)|(\\?ui=html&zy=e)"
       nameOfPasswordField: Passwd
       nameOfUserField: Email
       numberOfForm: 1
-      pageTitleAfterLogin: "?ui=html&zy=e"
-      password: P1lotGoo
-      url: "https://www.googlemail.com"
-      username: o6sidian@gmail.com
+      pageTitleAfterLogin: "(\\?v=cl)|(\\?ui=html&zy=e)"
+      password: r0deld0del
+      url: "https://mail.google.com"
+      username: peter.mueller113@googlemail.com
     - !com.openexchange.subscribe.crawler.PageByUrlStep
-      url: "https://mail.google.com/mail/?ui=html&zy=e"
-    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
-      url: (\?v=cl)
-    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
-      url: "(\\?v=cl&pnl=a)"
+      url: "https://mail.google.com/mail/?ui=html&zy=e&v=cl&pnl=a"
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
       linkRegex: "(\\?v=ct&ct_id=[0-9a-zA-Z]*)"
       resultpageLinks: []

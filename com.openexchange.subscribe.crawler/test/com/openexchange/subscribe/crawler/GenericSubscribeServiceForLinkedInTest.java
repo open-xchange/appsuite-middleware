@@ -102,6 +102,6 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         
         findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, "test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler, "conf/crawlers/", crawler.getDisplayName());
 	}
 }

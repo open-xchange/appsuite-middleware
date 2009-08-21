@@ -62,8 +62,9 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
 	
 	public void testGenericSubscribeServiceForGoogleMail(){
 		// insert valid credentials here
-		String username = "";
-		String password = "";
+		String username = "peter.mueller113@googlemail.com";
+		String password = "r0deld0del";
+		
 		
 		//create a CrawlerDescription
 		CrawlerDescription crawler = new CrawlerDescription();
@@ -73,17 +74,15 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
         
         steps.add(new LoginPageByFormActionStep(
         		"Login to Google Mail", 
-        		"https://www.googlemail.com",
+        		"https://mail.google.com",
         		username,
         		password,
         		"https://www.google.com/accounts/ServiceLoginAuth?service=mail",
         		"Email",
         		"Passwd",
-        		"?ui=html&zy=e", 
+        		"(\\?v=cl)|(\\?ui=html&zy=e)", 
         		1));
-        steps.add(new PageByUrlStep("Get the basic html view", "https://mail.google.com/mail/?ui=html&zy=e"));
-        steps.add(new PageByLinkRegexStep("Get the contact list", "(\\?v=cl)"));
-        steps.add(new PageByLinkRegexStep("switch to see all contacts", "(\\?v=cl&pnl=a)"));
+        steps.add(new PageByUrlStep("Get the basic html view of all contacts", "https://mail.google.com/mail/?ui=html&zy=e&v=cl&pnl=a"));
         steps.add(new AnchorsByLinkRegexStep("Get all contacts on a page", "NO_SUBPAGES", "(\\?v=ct&ct_id=[0-9a-zA-Z]*)"));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
 	    pageParts.add(new PagePart("(<input[\\s]{1}name=ct_nm[\\s]{1}id=ct_nm[\\s]{1}size=[0-9]{2}[\\s]{1}value=\")([a-zA-Z\\sŠšŸ§]*)(\"><br></td>)", "display_name"));
@@ -105,6 +104,6 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
         
         findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler,"test-crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler,"conf/crawlers/", crawler.getDisplayName());
 	}
 }

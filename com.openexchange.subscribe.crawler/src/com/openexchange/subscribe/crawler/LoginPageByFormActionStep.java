@@ -94,8 +94,8 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		try {
 			// Get the page, fill in the credentials and submit the login form identified by its action
 			loginPage = webClient.getPage(this.url);
-			//System.out.println("***** Page title : " + loginPage.getTitleText());
-			//System.out.println("***** Page : "+loginPage.getWebResponse().getContentAsString());
+//			System.out.println("***** Page title : " + loginPage.getTitleText());
+//			System.out.println("***** Page : "+loginPage.getWebResponse().getContentAsString());
 		    HtmlForm loginForm = null;
 		    int numberOfFormCounter = 1;
 		    for (HtmlForm form : loginPage.getForms()){
@@ -113,10 +113,12 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 			    passwordfield.setValueAttribute(this.password);
 			    final HtmlPage pageAfterLogin = (HtmlPage)loginForm.submit(null);
 			    this.currentPage = pageAfterLogin;
+//			    System.out.println("***** Page title : " + pageAfterLogin.getTitleText());
+//				System.out.println("***** Page : "+pageAfterLogin.getWebResponse().getContentAsString());
 			    
 			    boolean linkAvailable = false;
 			    for (HtmlAnchor link : pageAfterLogin.getAnchors()){
-			    	if (link.getHrefAttribute().contains(linkAvailableAfterLogin)){
+			    	if (link.getHrefAttribute().matches(linkAvailableAfterLogin)){
 			    		linkAvailable = true;
 			    	}
 			    }
