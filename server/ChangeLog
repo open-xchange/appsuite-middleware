@@ -1,6 +1,7 @@
 * 2009-08-21 - thorben.betten@open-xchange.com
 
  - Bugfix #14346: Considering all available inline text parts when composing reply version of a mail
+ - Bugfix #13322: Fixed NPE in CalendarCollection
 
 * 2009-08-20 - thorben.betten@open-xchange.com
 

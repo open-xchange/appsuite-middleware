@@ -605,7 +605,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
 
     public void changeRecurrenceString(final CalendarDataObject cdao) throws OXException {
-        String recString = createDSString(cdao);
+        final String recString = createDSString(cdao);
         if (recString == null) {
             cdao.removeRecurrenceID();
         }
@@ -1095,7 +1095,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         dsf(sb, 't', type);
     }
     
-    public Date calculateRecurringDate(final long date, final long time, int timeZoneOffsetDiff) {
+    public Date calculateRecurringDate(final long date, final long time, final int timeZoneOffsetDiff) {
         return new Date((date - (date % Constants.MILLI_DAY)) + time + timeZoneOffsetDiff);
     }
 
@@ -1380,16 +1380,16 @@ public final class CalendarCollection implements CalendarCollectionService {
         return clone;
     }
 
-    private void ensureOriginFolder(CalendarDataObject edao, CalendarDataObject clone) {
+    private void ensureOriginFolder(final CalendarDataObject edao, final CalendarDataObject clone) {
         int originFolder = 0;
-        for (UserParticipant userParticipant : edao.getUsers()) {
+        for (final UserParticipant userParticipant : edao.getUsers()) {
             if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
                 originFolder = userParticipant.getPersonalFolderId();
                 break;
             }
         }
         if (originFolder != 0) {
-            for (UserParticipant userParticipant : clone.getUsers()) {
+            for (final UserParticipant userParticipant : clone.getUsers()) {
                 if (userParticipant.getIdentifier() == edao.getCreatedBy()) {
                     userParticipant.setPersonalFolderId(originFolder);
                     break;
@@ -1430,10 +1430,19 @@ public final class CalendarCollection implements CalendarCollectionService {
                     normalized + Constants.MILLI_WEEK,
                     0);
                 final int pos = rrs.getPositionByLong(normalized);
-                rs = rrs.getRecurringResult(pos - 1);
+                RecurringResultInterface tmp = rrs.getRecurringResult(pos - 1);
+                if (null == tmp) {
+                    tmp = rrs.getRecurringResult(0);
+                }
+                rs = tmp;
             }
-            startDate = rs.getStart();
-            endDate = rs.getEnd();
+            if (rs == null) {
+                startDate = cdao.containsStartDate() ? cdao.getStartDate().getTime() : 0L;
+                endDate = cdao.containsEndDate() ? cdao.getEndDate().getTime() : 0L;
+            } else {
+                startDate = rs.getStart();
+                endDate = rs.getEnd();
+            }
         } else {
             startDate = edao.getStartDate().getTime();
             endDate = edao.getEndDate().getTime();
@@ -1852,11 +1861,11 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
     
-    public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException {
+    public void updateDefaultStatus(final CalendarDataObject cdao, final Context ctx, final int uid, final int inFolder) throws OXException {
         if (cdao.getUsers() == null) {
             return;
         }
-        for (UserParticipant user : cdao.getUsers()) {
+        for (final UserParticipant user : cdao.getUsers()) {
             if (user.getIdentifier() == uid) {
                 continue;
             }
@@ -1866,7 +1875,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             try {
                 switch (cdao.getFolderType()) {
                 case FolderObject.SHARED:
-                    int folderOwner = new OXFolderAccess(ctx).getFolderOwner(inFolder);
+                    final int folderOwner = new OXFolderAccess(ctx).getFolderOwner(inFolder);
                     if (user.getIdentifier() == folderOwner) {
                         continue;
                     } else {
@@ -1882,7 +1891,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 default:
                     break;
                 }
-            } catch (SettingException e) {
+            } catch (final SettingException e) {
                 throw new OXCalendarException(e);
             }
         }
