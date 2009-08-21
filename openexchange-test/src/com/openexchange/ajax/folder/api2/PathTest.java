@@ -68,6 +68,8 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class PathTest extends AbstractAJAXSession {
 
+    private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+
     private AJAXClient client;
 
     /**
@@ -97,7 +99,7 @@ public class PathTest extends AbstractAJAXSession {
     }
 
     public void testPath2() throws Throwable {
-        final PathRequest pathRequest = new PathRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        final PathRequest pathRequest = new PathRequest(PRIVATE_FOLDER_ID);
         pathRequest.setFolderURL("/ajax/folder2");
         final PathResponse pathResponse = client.execute(pathRequest);
 
@@ -106,7 +108,7 @@ public class PathTest extends AbstractAJAXSession {
 
         assertEquals("Unexpected path length.", 1, length);
 
-        assertEquals("Unexpected path element.", "1", jsonArray.getJSONArray(0).getString(0));
+        assertEquals("Unexpected path element.", PRIVATE_FOLDER_ID, jsonArray.getJSONArray(0).getString(0));
 
     }
 
@@ -148,7 +150,7 @@ public class PathTest extends AbstractAJAXSession {
             assertEquals("Unexpected path length.", 2, length);
 
             assertEquals("Unexpected path element.", newId, jsonArray.getJSONArray(0).getString(0));
-            assertEquals("Unexpected path element.", "1", jsonArray.getJSONArray(1).getString(0));
+            assertEquals("Unexpected path element.", PRIVATE_FOLDER_ID, jsonArray.getJSONArray(1).getString(0));
         } finally {
             if (null != newId) {
                 // Delete folder
