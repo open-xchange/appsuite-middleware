@@ -355,8 +355,8 @@
         <move tofile="${patch.bin.dir}/oxreport" file="${patch.bin.dir}/oxreport.in" overwrite="true"/>
     	<move tofile="${patch.bin.dir}/resetversion" file="${patch.bin.dir}/resetversion.in" overwrite="true"/>
     	<move tofile="${patch.bin.dir}/schemasandversions" file="${patch.bin.dir}/schemasandversions.in" overwrite="true"/>
-    	<move tofile="${patch.bin.dir}/force" file="${patch.bin.dir}/force.in" overwrite="true"/>
-        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport">
+    	<move tofile="${patch.bin.dir}/forceupdatetask" file="${patch.bin.dir}/forceupdatetask.in" overwrite="true"/>
+        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion schemasandversions forceupdatetask">
             <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
