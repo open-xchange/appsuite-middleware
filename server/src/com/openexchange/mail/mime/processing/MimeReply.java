@@ -595,7 +595,7 @@ public final class MimeReply {
             /*
              * Get html content
              */
-            for (int i = 0; i < count && !found; i++) {
+            for (int i = 0; i < count; i++) {
                 final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
@@ -627,12 +627,11 @@ public final class MimeReply {
                         replyTexts);
                 }
             }
-        }
-        if (!found) {
+        } else {
             /*
              * Get any text content
              */
-            for (int i = 0; i < count && !found; i++) {
+            for (int i = 0; i < count; i++) {
                 final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
