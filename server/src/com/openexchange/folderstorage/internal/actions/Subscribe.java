@@ -135,7 +135,8 @@ public final class Subscribe extends AbstractAction {
                 final UserizedFolder[] subfolders = (session == null ? new List(user, context) : new List(session)).doList(
                     targetTreeId,
                     targetParentId,
-                    true);
+                    true,
+                    openedStorages);
                 for (final UserizedFolder userizedFolder : subfolders) {
                     if (userizedFolder.getName().equals(sourceFolder.getName())) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(sourceFolder.getName(), targetParentId, targetTreeId);

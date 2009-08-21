@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -108,7 +109,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
             final java.util.List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
             final List listAction = null == session ? new List(user, context) : new List(session);
 
-            fillSubfolders(treeId, FolderStorage.ROOT_ID, visibleFolders, listAction);
+            fillSubfolders(treeId, FolderStorage.ROOT_ID, visibleFolders, listAction, openedStorages);
 
             final UserizedFolder[] ret = visibleFolders.toArray(new UserizedFolder[visibleFolders.size()]);
 
@@ -129,24 +130,24 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
             throw e;
         } catch (final Exception e) {
             for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters); 
+                fs.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void fillSubfolders(final String treeId, final String parentId, final java.util.List<UserizedFolder> visibleFolders, final List listAction) throws FolderException {
-        final UserizedFolder[] subfolders = getSubfolders(treeId, parentId, listAction);
+    private void fillSubfolders(final String treeId, final String parentId, final java.util.List<UserizedFolder> visibleFolders, final List listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
+        final UserizedFolder[] subfolders = getSubfolders(treeId, parentId, listAction, openedStorages);
         if (subfolders.length > 0) {
             visibleFolders.addAll(Arrays.asList(subfolders));
             for (int i = 0; i < subfolders.length; i++) {
-                fillSubfolders(treeId, subfolders[i].getID(), visibleFolders, listAction);
+                fillSubfolders(treeId, subfolders[i].getID(), visibleFolders, listAction, openedStorages);
             }
         }
     }
 
-    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final List listAction) throws FolderException {
-        return listAction.doList(treeId, parentId, true);
+    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final List listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
+        return listAction.doList(treeId, parentId, true, openedStorages);
     }
 
 }

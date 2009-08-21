@@ -206,10 +206,23 @@ public interface FolderService {
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
+     * @param user The user
+     * @param context The context
      * @return The path from given folder to specified tree's root folder
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[] getPath(String treeId, String folderId) throws FolderException;
+    UserizedFolder[] getPath(String treeId, String folderId, User user, Context context) throws FolderException;
+
+    /**
+     * Gets the path from given folder to specified tree's root folder.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param session The session
+     * @return The path from given folder to specified tree's root folder
+     * @throws FolderException If path cannot be returned
+     */
+    UserizedFolder[] getPath(String treeId, String folderId, Session session) throws FolderException;
 
     /**
      * Deletes the specified folder in given tree.

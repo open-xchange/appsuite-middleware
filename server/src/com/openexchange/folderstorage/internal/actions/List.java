@@ -121,6 +121,46 @@ public final class List extends AbstractUserizedFolderAction {
         folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(folderStorage);
+        try {
+            final UserizedFolder[] ret = doList(treeId, parentId, all, openedStorages);
+            /*
+             * Commit
+             */
+            for (final FolderStorage fs : openedStorages) {
+                fs.commitTransaction(storageParameters);
+            }
+            if (LOG.isDebugEnabled()) {
+                final long duration = System.currentTimeMillis() - start;
+                LOG.debug(new StringBuilder().append("List.doList() took ").append(duration).append("msec for parent folder: ").append(
+                    parentId).toString());
+            }
+            return ret;
+        } catch (final FolderException e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs the <code>LIST</code> request.
+     * 
+     * @param treeId The tree identifier
+     * @param parentId The parent folder identifier
+     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
+     *            subscribed ones
+     * @param startTransaction <code>true</code> to start own transaction; otherwise <code>false</code> if invoked from another action class
+     * @return The user-sensitive subfolders
+     * @throws FolderException If a folder error occurs
+     */
+    UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+        final FolderStorage folderStorage = getOpenedStorage(parentId, treeId, openedStorages);
         final UserizedFolder[] ret;
         try {
             final Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
@@ -149,7 +189,7 @@ public final class List extends AbstractUserizedFolderAction {
                 /*
                  * Need to get user-visible subfolders from appropriate storage
                  */
-                ret = null;
+                ret = getSubfoldersFromMultipleStorages(treeId, parentId, all, openedStorages);
             } else {
                 /*
                  * The subfolders can be completely fetched from parent's folder storage
@@ -214,43 +254,22 @@ public final class List extends AbstractUserizedFolderAction {
                 }
                 ret = subfolders;
             }
-            for (final FolderStorage fs : openedStorages) {
-                fs.commitTransaction(storageParameters);
-            }
-        } catch (final FolderException e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
-            throw e;
         } catch (final Exception e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        if (null == ret) {
-            if (!LOG.isDebugEnabled()) {
-                return getSubfoldersFromMultipleStorages(treeId, parentId, all);
-            }
-            final UserizedFolder[] mulRet = getSubfoldersFromMultipleStorages(treeId, parentId, all);
-            final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder().append("List.doList() with multiple storages took ").append(duration).append(
-                "msec for parent folder: ").append(parentId).toString());
-            return mulRet;
-        }
-        if (LOG.isDebugEnabled()) {
-            final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder().append("List.doList() with single storage took ").append(duration).append(
-                "msec for parent folder: ").append(parentId).toString());
         }
         return ret;
     }
 
-    private UserizedFolder[] getSubfoldersFromMultipleStorages(final String treeId, final String parentId, final boolean all) throws FolderException {
-        final java.util.Queue<FolderStorage> openedStorages = new ConcurrentLinkedQueue<FolderStorage>(
-            Arrays.asList(FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, parentId)));
-        for (final FolderStorage ps : openedStorages) {
-            ps.startTransaction(getStorageParameters(), false);
+    private UserizedFolder[] getSubfoldersFromMultipleStorages(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStoragesArg) throws FolderException {
+        final java.util.Queue<FolderStorage> openedStorages = new ConcurrentLinkedQueue<FolderStorage>(openedStoragesArg);
+        {
+            final FolderStorage[] neededStorages = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, parentId);
+            for (final FolderStorage neededStorage : neededStorages) {
+                if (!openedStorages.contains(neededStorage)) {
+                    neededStorage.startTransaction(getStorageParameters(), false);
+                    openedStorages.add(neededStorage);
+                }
+            }
         }
         try {
             final java.util.List<SortableId> allSubfolderIds = new ArrayList<SortableId>(openedStorages.size() * 8);
@@ -387,22 +406,23 @@ public final class List extends AbstractUserizedFolderAction {
                 }
             }
             /*
-             * Commit all used storages
+             * Add all additionally opened storages to given collection
              */
             for (final FolderStorage ps : openedStorages) {
-                ps.commitTransaction(getStorageParameters());
+                if (!openedStoragesArg.contains(ps)) {
+                    openedStoragesArg.add(ps);
+                }
             }
             return subfolderList.toArray(new UserizedFolder[subfolderList.size()]);
-        } catch (final FolderException e) {
-            for (final FolderStorage storage : openedStorages) {
-                storage.rollback(getStorageParameters());
+        } finally {
+            /*
+             * Add all additionally opened storages to given collection
+             */
+            for (final FolderStorage ps : openedStorages) {
+                if (!openedStoragesArg.contains(ps)) {
+                    openedStoragesArg.add(ps);
+                }
             }
-            throw e;
-        } catch (final Exception e) {
-            for (final FolderStorage storage : openedStorages) {
-                storage.rollback(getStorageParameters());
-            }
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

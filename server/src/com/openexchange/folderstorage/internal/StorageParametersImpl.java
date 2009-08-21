@@ -149,12 +149,12 @@ public final class StorageParametersImpl implements StorageParameters {
         }
     }
 
-    public void putParameterIfAbsent(final FolderType folderType, final String name, final Object value) {
+    public boolean putParameterIfAbsent(final FolderType folderType, final String name, final Object value) {
         if (null == value) {
             throw new IllegalArgumentException("value is null");
         }
         final ConcurrentMap<String, Object> m = getFolderTypeMap(folderType, true);
-        m.putIfAbsent(name, value);
+        return (null == m.putIfAbsent(name, value));
     }
 
     public Date getTimeStamp() {

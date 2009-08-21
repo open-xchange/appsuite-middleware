@@ -164,13 +164,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con);
                 }
             }
-            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, null);
-            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, null);
+            final FolderType folderType = getFolderType();
+            params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE, null);
         }
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -234,7 +236,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 createMe.setPermissionsAsArray(oclPermissions);
             }
             // Create
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.createFolder(createMe, true, millis);
             folder.setID(String.valueOf(createMe.getObjectID()));
         } catch (final OXException e) {
@@ -268,13 +270,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final FolderObject fo = new FolderObject();
             fo.setObjectID(Integer.parseInt(folderId));
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.clearFolder(fo, true, System.currentTimeMillis());
         } catch (final OXFolderException e) {
             throw new FolderException(e);
@@ -285,13 +288,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final FolderObject fo = new FolderObject();
             fo.setObjectID(Integer.parseInt(folderId));
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             final Date clientLastModified = storageParameters.getTimeStamp();
             folderManager.deleteFolder(fo, true, null == clientLastModified ? System.currentTimeMillis() : clientLastModified.getTime());
         } catch (final OXFolderException e) {
@@ -624,22 +628,34 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con);
                 }
             }
-            params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
             params.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_WRITABLE, null);
         }
     }
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+        final FolderType folderType = getFolderType();
+        if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
+            // Connection already present
+            return parameters;
+        }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-            final Connection con = modify ? databaseService.getWritable(parameters.getContext()) : databaseService.getReadOnly(parameters.getContext());
+            final Context context = parameters.getContext();
+            final Connection con = modify ? databaseService.getWritable(context) : databaseService.getReadOnly(context);
             con.setAutoCommit(false);
             // Put to parameters
-            parameters.putParameterIfAbsent(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, con);
-            parameters.putParameterIfAbsent(
-                DatabaseFolderType.getInstance(),
-                DatabaseParameterConstants.PARAM_WRITABLE,
-                Boolean.valueOf(modify));
+            if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
+                // Success
+                parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
+            } else {
+                // Fail
+                if (modify) {
+                    databaseService.backWritable(context, con);
+                } else {
+                    databaseService.backReadOnly(context, con);
+                }
+            }
             return parameters;
         } catch (final ServiceException e) {
             throw new FolderException(e);
@@ -652,6 +668,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
@@ -663,8 +680,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 millis = null == clientLastModified ? new Date() : clientLastModified;
             }
 
+            final int folderId = Integer.parseInt(folder.getID());
+
             final FolderObject updateMe = new FolderObject();
-            updateMe.setObjectID(Integer.parseInt(folder.getID()));
+            updateMe.setObjectID(folderId);
             updateMe.setDefaultFolder(false);
             {
                 final String name = folder.getName();
@@ -682,7 +701,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
             }
             {
                 final String parentId = folder.getParentID();
-                if (null != parentId) {
+                if (null == parentId) {
+                    updateMe.setParentFolderID(getFolderAccess(storageParameters, getFolderType()).getFolderObject(folderId).getParentFolderID());
+                } else {
                     updateMe.setParentFolderID(Integer.parseInt(parentId));
                 }
             }
@@ -710,8 +731,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPerm.setSystem(p.getSystem());
                     oclPermissions[i] = oclPerm;
                 }
+                updateMe.setPermissionsAsArray(oclPermissions);
             }
-            final OXFolderManager folderManager = OXFolderManager.getInstance(session);
+            final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.updateFolder(updateMe, true, millis.getTime());
         } catch (final OXException e) {
             throw new FolderException(e);

@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.Folder;
@@ -111,6 +112,7 @@ public final class Update extends AbstractAction {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
+        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         storage.startTransaction(storageParameters, true);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
@@ -193,7 +195,7 @@ public final class Update extends AbstractAction {
                     final String newName = folder.getName();
                     folder.setName(newName == null ? storageFolder.getName() : newName);
                 }
-                if (equallyNamedSibling(folder.getName(), treeId, newParentId)) {
+                if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
                     throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), newParentId, treeId);
                 }
 
@@ -207,7 +209,7 @@ public final class Update extends AbstractAction {
                 }
             } else if (rename) {
                 folder.setParentID(oldParentId);
-                if (equallyNamedSibling(folder.getName(), treeId, oldParentId)) {
+                if (equallyNamedSibling(folder.getName(), treeId, oldParentId, openedStorages)) {
                     throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), oldParentId, treeId);
                 }
 
@@ -244,6 +246,12 @@ public final class Update extends AbstractAction {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
+
+            if (LOG.isDebugEnabled()) {
+                final long duration = System.currentTimeMillis() - start;
+                LOG.debug(new StringBuilder().append("Update.doUpdate() took ").append(duration).append("msec for folder: ").append(
+                    folderId).toString());
+            }
         } catch (final FolderException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
@@ -279,7 +287,7 @@ public final class Update extends AbstractAction {
              * Perform the move in real storage
              */
             final Folder clone4Real = (Folder) folder.clone();
-            clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, clone4Real.getParentID()));
+            clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, clone4Real.getParentID(), openedStorages));
             realStorage.updateFolder(clone4Real, storageParameters);
             /*
              * Perform the move in virtual storage
@@ -303,7 +311,7 @@ public final class Update extends AbstractAction {
             // TODO: Check permission for obtained default folder ID?
             final Folder clone4Real = (Folder) folder.clone();
             clone4Real.setParentID(defaultParentId);
-            clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId));
+            clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
             realStorage.updateFolder(clone4Real, storageParameters);
             /*
              * Perform the move in virtual storage
@@ -330,7 +338,7 @@ public final class Update extends AbstractAction {
         checkOpenedStorage(realStorage, openedStorages);
         final Folder realFolder = realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
         final Folder clone4Real = (Folder) folder.clone();
-        clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, realFolder.getParentID()));
+        clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, realFolder.getParentID(), openedStorages));
         realStorage.updateFolder(clone4Real, storageParameters);
         // Update name in virtual tree
         virtualStorage.updateFolder(folder, storageParameters);
@@ -346,7 +354,7 @@ public final class Update extends AbstractAction {
         openedStorages.add(storage);
     }
 
-    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId) throws FolderException {
+    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
         final com.openexchange.folderstorage.internal.actions.List listAction;
         if (null == session) {
             listAction = new com.openexchange.folderstorage.internal.actions.List(user, context);
@@ -354,7 +362,7 @@ public final class Update extends AbstractAction {
             listAction = new com.openexchange.folderstorage.internal.actions.List(session);
         }
         listAction.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true);
+        final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);
         for (final UserizedFolder userizedFolder : subfolders) {
             if (name.equals(userizedFolder.getName())) {
                 return true;
@@ -363,7 +371,7 @@ public final class Update extends AbstractAction {
         return false;
     }
 
-    private String nonExistingName(final String name, final String treeId, final String parentId) throws FolderException {
+    private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
         final com.openexchange.folderstorage.internal.actions.List listAction;
         if (null == session) {
             listAction = new com.openexchange.folderstorage.internal.actions.List(user, context);
@@ -371,7 +379,7 @@ public final class Update extends AbstractAction {
             listAction = new com.openexchange.folderstorage.internal.actions.List(session);
         }
         listAction.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true);
+        final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);
         final StringBuilder sb = new StringBuilder();
         String nonExistingName = name;
         int i = 0;

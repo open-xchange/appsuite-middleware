@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.internal.actions.Create;
 import com.openexchange.folderstorage.internal.actions.Delete;
 import com.openexchange.folderstorage.internal.actions.Get;
 import com.openexchange.folderstorage.internal.actions.List;
+import com.openexchange.folderstorage.internal.actions.Path;
 import com.openexchange.folderstorage.internal.actions.Update;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -137,9 +138,16 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public UserizedFolder[] getPath(final String treeId, final String folderId) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
+    public UserizedFolder[] getPath(final String treeId, final String folderId, final User user, final Context context) throws FolderException {
+        return new Path(user, context).doPath(treeId, folderId, true);
+    }
+
+    public UserizedFolder[] getPath(final String treeId, final String folderId, final Session session) throws FolderException {
+        try {
+            return new Path(new ServerSessionAdapter(session)).doPath(treeId, folderId, true);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public UserizedFolder[] getSubfolders(final String treeId, final String parentId, final boolean all, final User user, final Context context) throws FolderException {

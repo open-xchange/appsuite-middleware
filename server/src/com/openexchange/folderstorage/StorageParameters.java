@@ -128,7 +128,8 @@ public interface StorageParameters {
      * @param name The parameter name
      * @param value The parameter value
      * @throws IllegalArgumentException If value is <code>null</code>
+     * @return <code>true</code> if put was successful; otherwise <code>false</code>
      */
-    void putParameterIfAbsent(FolderType folderType, String name, Object value);
+    boolean putParameterIfAbsent(FolderType folderType, String name, Object value);
 
 }

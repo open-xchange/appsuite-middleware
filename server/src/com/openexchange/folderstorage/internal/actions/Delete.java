@@ -100,7 +100,7 @@ public final class Delete extends AbstractAction {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, false);
+        folderStorage.startTransaction(storageParameters, true);
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }

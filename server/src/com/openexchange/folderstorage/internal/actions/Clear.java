@@ -98,7 +98,7 @@ public final class Clear extends AbstractAction {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, false);
+        folderStorage.startTransaction(storageParameters, true);
         try {
             folderStorage.clearFolder(treeId, folderId, storageParameters);
             if (LOG.isDebugEnabled()) {

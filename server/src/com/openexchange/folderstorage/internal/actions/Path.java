@@ -140,6 +140,9 @@ public final class Path extends AbstractUserizedFolderAction {
      * @throws FolderException If a folder error occurs
      */
     public UserizedFolder[] doPath(final String treeId, final String folderId, final boolean all) throws FolderException {
+        if (FolderStorage.ROOT_ID.equals(folderId)) {
+            return new UserizedFolder[0];
+        }
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
