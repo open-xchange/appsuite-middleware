@@ -55,6 +55,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.actions.Clear;
 import com.openexchange.folderstorage.internal.actions.Create;
 import com.openexchange.folderstorage.internal.actions.Delete;
 import com.openexchange.folderstorage.internal.actions.Get;
@@ -82,13 +83,15 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     public void clearFolder(final String treeId, final String folderId, final User user, final Context contex) throws FolderException {
-        // TODO Auto-generated method stub
-
+        new Clear(user, contex).doClear(treeId, folderId);
     }
 
     public void clearFolder(final String treeId, final String folderId, final Session session) throws FolderException {
-        // TODO Auto-generated method stub
-
+        try {
+            new Clear(new ServerSessionAdapter(session)).doClear(treeId, folderId);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public String createFolder(final Folder folder, final User user, final Context context) throws FolderException {

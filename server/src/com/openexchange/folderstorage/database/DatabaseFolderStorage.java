@@ -271,8 +271,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-            final FolderObject fo = new FolderObject();
-            fo.setObjectID(Integer.parseInt(folderId));
+            final FolderObject fo = getFolderAccess(storageParameters, getFolderType()).getFolderObject(Integer.parseInt(folderId));
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);

@@ -49,52 +49,72 @@
 
 package com.openexchange.folder.json.actions;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FolderActionFactory}
+ * {@link ClearAction} - Maps the action to a CLEAR action.
  * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderActionFactory implements AJAXActionServiceFactory {
+public final class ClearAction extends AbstractFolderAction {
 
-    private static final FolderActionFactory SINGLETON = new FolderActionFactory();
+    public static final String ACTION = AJAXServlet.ACTION_CLEAR;
 
-    private final Map<String, AJAXActionService> actions;
-
-    private FolderActionFactory() {
+    /**
+     * Initializes a new {@link ClearAction}.
+     */
+    public ClearAction() {
         super();
-        actions = initActions();
     }
 
-    public static final FolderActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    public AJAXActionService createActionService(final String action) throws AjaxException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
+        /*
+         * Parse parameters
+         */
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            /*
+             * Fallback to default tree identifier
+             */
+            treeId = FolderStorage.REAL_TREE_ID;
         }
-        return retval;
-    }
-
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
-        tmp.put(RootAction.ACTION, new RootAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(CreateAction.ACTION, new CreateAction());
-        tmp.put(DeleteAction.ACTION, new DeleteAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(PathAction.ACTION, new PathAction());
-        tmp.put(ClearAction.ACTION, new ClearAction());
-        return Collections.unmodifiableMap(tmp);
+        /*
+         * Compose JSON array with id
+         */
+        final JSONArray jsonArray = (JSONArray) request.getData();
+        final int len = jsonArray.length();
+        /*
+         * Delete
+         */
+        try {
+            final JSONArray responseArray = new JSONArray();
+            final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+            for (int i = 0; i < len; i++) {
+                final String folderId = jsonArray.getString(i);
+                try {
+                    folderService.clearFolder(treeId, folderId, session);
+                } catch (final FolderException e) {
+                    responseArray.put(folderId);
+                }
+            }
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(responseArray);
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+        }
     }
 
 }
