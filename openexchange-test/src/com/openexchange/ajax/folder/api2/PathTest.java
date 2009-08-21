@@ -50,29 +50,32 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
+import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.PathRequest;
+import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link CreateTest}
- *
+ * {@link PathTest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CreateTest extends AbstractAJAXSession {
+public class PathTest extends AbstractAJAXSession {
 
     private AJAXClient client;
 
     /**
-     * Initializes a new {@link CreateTest}.
+     * Initializes a new {@link PathTest}.
      * 
-     * @param name The name of the test.
+     * @param name name of the test.
      */
-    public CreateTest(final String name) {
+    public PathTest(final String name) {
         super(name);
     }
 
@@ -82,8 +85,32 @@ public class CreateTest extends AbstractAJAXSession {
         client = getClient();
     }
 
-    public void testCreatePrivate() throws Throwable {
-        // Get root folder
+    public void testPath1() throws Throwable {
+        final PathRequest pathRequest = new PathRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
+        pathRequest.setFolderURL("/ajax/folder2");
+        final PathResponse pathResponse = client.execute(pathRequest);
+
+        final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
+        final int length = jsonArray.length();
+
+        assertEquals("Unexpected path length.", 0, length);
+    }
+
+    public void testPath2() throws Throwable {
+        final PathRequest pathRequest = new PathRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        pathRequest.setFolderURL("/ajax/folder2");
+        final PathResponse pathResponse = client.execute(pathRequest);
+
+        final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
+        final int length = jsonArray.length();
+
+        assertEquals("Unexpected path length.", 1, length);
+
+        assertEquals("Unexpected path element.", "1", jsonArray.getJSONArray(0).getString(0));
+
+    }
+
+    public void testPath3() throws Throwable {
         String newId = null;
         try {
             final FolderObject fo = new FolderObject();
@@ -108,6 +135,20 @@ public class CreateTest extends AbstractAJAXSession {
 
             newId = (String) response.getResponse().getData();
             assertNotNull("New ID must not be null!", newId);
+
+            final PathRequest pathRequest = new PathRequest(newId);
+            pathRequest.setFolderURL("/ajax/folder2");
+            final PathResponse pathResponse = client.execute(pathRequest);
+
+            final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
+            final int length = jsonArray.length();
+
+            System.out.println(jsonArray);
+
+            assertEquals("Unexpected path length.", 2, length);
+
+            assertEquals("Unexpected path element.", newId, jsonArray.getJSONArray(0).getString(0));
+            assertEquals("Unexpected path element.", "1", jsonArray.getJSONArray(1).getString(0));
         } finally {
             if (null != newId) {
                 // Delete folder

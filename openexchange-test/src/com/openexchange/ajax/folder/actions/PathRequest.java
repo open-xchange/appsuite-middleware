@@ -47,79 +47,92 @@
  *
  */
 
-package com.openexchange.ajax.folder.api2;
+package com.openexchange.ajax.folder.actions;
 
-import java.util.Date;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractListParser;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link CreateTest}
- *
+ * {@link PathRequest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CreateTest extends AbstractAJAXSession {
+public class PathRequest extends AbstractFolderRequest<PathResponse> {
 
-    private AJAXClient client;
+    private static final int[] DEFAULT_COLUMNS = new int[] {
+        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+        FolderObject.CREATED_BY };
+
+    private final String folder;
+
+    private final int[] columns;
+
+    public PathRequest(final String folder, final int[] columns) {
+        super();
+        this.folder = folder;
+        this.columns = columns;
+    }
+
+    public PathRequest(final String parentFolder) {
+        this(parentFolder, DEFAULT_COLUMNS);
+    }
 
     /**
-     * Initializes a new {@link CreateTest}.
-     * 
-     * @param name The name of the test.
+     * {@inheritDoc}
      */
-    public CreateTest(final String name) {
-        super(name);
+    public Object getBody() throws JSONException {
+        return null;
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
     }
 
-    public void testCreatePrivate() throws Throwable {
-        // Get root folder
-        String newId = null;
-        try {
-            final FolderObject fo = new FolderObject();
-            fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-            fo.setFolderName("testCalendarFolder" + System.currentTimeMillis());
-            fo.setModule(FolderObject.CALENDAR);
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        final List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_PATH));
+        parameters.add(new Parameter(Folder.PARAMETER_ID, folder));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        return parameters.toArray(new Parameter[parameters.size()]);
+    }
 
-            final OCLPermission oclP = new OCLPermission();
-            oclP.setEntity(client.getValues().getUserId());
-            oclP.setGroupPermission(false);
-            oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-            fo.setPermissionsAsArray(new OCLPermission[] { oclP });
+    /**
+     * {@inheritDoc}
+     */
+    public PathParser getParser() {
+        return new PathParser(columns, true);
+    }
 
-            final InsertRequest request = new InsertRequest(fo);
-            request.setFolderURL("/ajax/folder2");
-            final InsertResponse response = (InsertResponse) client.execute(request);
+    private static class PathParser extends AbstractListParser<PathResponse> {
 
-            newId = (String) response.getResponse().getData();
-            assertNotNull("New ID must not be null!", newId);
-        } finally {
-            if (null != newId) {
-                // Delete folder
-                try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
-                    deleteRequest.setFolderURL("/ajax/folder2");
-                    client.execute(deleteRequest);
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        /**
+         * @param failOnError
+         */
+        public PathParser(final int[] columns, final boolean failOnError) {
+            super(failOnError, columns);
         }
-    }
 
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected PathResponse instanciateReponse(final Response response) {
+            final PathResponse retval = new PathResponse(response);
+            retval.setColumns(getColumns());
+            return retval;
+        }
+
+    }
 }

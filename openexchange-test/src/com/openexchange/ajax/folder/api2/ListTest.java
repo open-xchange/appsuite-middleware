@@ -58,8 +58,8 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link ListTest}
- * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ListTest extends AbstractAJAXSession {
 

@@ -50,29 +50,35 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link CreateTest}
- *
+ * {@link UpdateTest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CreateTest extends AbstractAJAXSession {
+public class UpdateTest extends AbstractAJAXSession {
 
     private AJAXClient client;
 
     /**
-     * Initializes a new {@link CreateTest}.
+     * Initializes a new {@link UpdateTest}.
      * 
      * @param name The name of the test.
      */
-    public CreateTest(final String name) {
+    public UpdateTest(final String name) {
         super(name);
     }
 
@@ -82,8 +88,7 @@ public class CreateTest extends AbstractAJAXSession {
         client = getClient();
     }
 
-    public void testCreatePrivate() throws Throwable {
-        // Get root folder
+    public void testUpdatePrivate() throws Throwable {
         String newId = null;
         try {
             final FolderObject fo = new FolderObject();
@@ -91,23 +96,77 @@ public class CreateTest extends AbstractAJAXSession {
             fo.setFolderName("testCalendarFolder" + System.currentTimeMillis());
             fo.setModule(FolderObject.CALENDAR);
 
-            final OCLPermission oclP = new OCLPermission();
-            oclP.setEntity(client.getValues().getUserId());
-            oclP.setGroupPermission(false);
-            oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-            fo.setPermissionsAsArray(new OCLPermission[] { oclP });
+            {
+                final OCLPermission oclP = new OCLPermission();
+                oclP.setEntity(client.getValues().getUserId());
+                oclP.setGroupPermission(false);
+                oclP.setFolderAdmin(true);
+                oclP.setAllPermission(
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION);
+                fo.setPermissionsAsArray(new OCLPermission[] { oclP });
+            }
 
-            final InsertRequest request = new InsertRequest(fo);
-            request.setFolderURL("/ajax/folder2");
-            final InsertResponse response = (InsertResponse) client.execute(request);
+            {
+                final InsertRequest request = new InsertRequest(fo);
+                request.setFolderURL("/ajax/folder2");
+                final InsertResponse response = (InsertResponse) client.execute(request);
+                newId = (String) response.getResponse().getData();
+                assertNotNull("New ID must not be null!", newId);
+            }
+            
+            
+            fo.setFolderName("testCalendarFolderRename" + System.currentTimeMillis());
+            fo.setObjectID(Integer.parseInt(newId));
+            {
+                final OCLPermission oclP = new OCLPermission();
+                oclP.setEntity(client.getValues().getUserId());
+                oclP.setGroupPermission(false);
+                oclP.setFolderAdmin(true);
+                oclP.setAllPermission(
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION);
+                
+                final OCLPermission oclP2 = new OCLPermission();
+                oclP2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+                oclP2.setGroupPermission(true);
+                oclP2.setFolderAdmin(false);
+                oclP2.setAllPermission(
+                    OCLPermission.READ_FOLDER,
+                    OCLPermission.READ_ALL_OBJECTS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS);
+                fo.setPermissionsAsArray(new OCLPermission[] { oclP, oclP2 });
+            }
+            
+            {
+                final UpdateRequest updateRequest = new UpdateRequest(fo);
+                updateRequest.setFolderURL("/ajax/folder2");
+                fo.setLastModified(new Date());
+                final Response reqResponse = client.execute(updateRequest).getResponse();
+            }
 
-            newId = (String) response.getResponse().getData();
-            assertNotNull("New ID must not be null!", newId);
+            {
+                final GetRequest request = new GetRequest(newId, true);
+                request.setFolderURL("/ajax/folder2");
+                final GetResponse response = client.execute(request);
+
+                final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
+                
+                final String name = jsonObject.getString("title");
+                assertNotNull("Folder name expected", name);
+                
+                assertEquals("Rename failed.", fo.getFolderName(), name);
+                
+                final JSONArray permissions = jsonObject.getJSONArray("permissions");
+                assertEquals("Unexpected number of permissions.", 2, permissions.length());
+            }
+
+
         } finally {
             if (null != newId) {
                 // Delete folder

@@ -47,79 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.folder.api2;
+package com.openexchange.ajax.folder.actions;
 
-import java.util.Date;
-import com.openexchange.ajax.folder.actions.DeleteRequest;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.impl.OCLPermission;
 
 /**
- * {@link CreateTest}
+ * {@link PathResponse}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CreateTest extends AbstractAJAXSession {
-
-    private AJAXClient client;
+public class PathResponse extends CommonListResponse {
 
     /**
-     * Initializes a new {@link CreateTest}.
-     * 
-     * @param name The name of the test.
+     * @param response
      */
-    public CreateTest(final String name) {
-        super(name);
+    public PathResponse(final Response response) {
+        super(response);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
-    public void testCreatePrivate() throws Throwable {
-        // Get root folder
-        String newId = null;
-        try {
-            final FolderObject fo = new FolderObject();
-            fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-            fo.setFolderName("testCalendarFolder" + System.currentTimeMillis());
-            fo.setModule(FolderObject.CALENDAR);
-
-            final OCLPermission oclP = new OCLPermission();
-            oclP.setEntity(client.getValues().getUserId());
-            oclP.setGroupPermission(false);
-            oclP.setFolderAdmin(true);
-            oclP.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
-            fo.setPermissionsAsArray(new OCLPermission[] { oclP });
-
-            final InsertRequest request = new InsertRequest(fo);
-            request.setFolderURL("/ajax/folder2");
-            final InsertResponse response = (InsertResponse) client.execute(request);
-
-            newId = (String) response.getResponse().getData();
-            assertNotNull("New ID must not be null!", newId);
-        } finally {
-            if (null != newId) {
-                // Delete folder
-                try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
-                    deleteRequest.setFolderURL("/ajax/folder2");
-                    client.execute(deleteRequest);
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                }
+    public Iterator<FolderObject> getFolder() throws OXException {
+        final List<FolderObject> folders = new ArrayList<FolderObject>(); 
+        for (final Object[] rows : this) {
+            final FolderObject folder = new FolderObject();
+            for (int columnPos = 0; columnPos < getColumns().length; columnPos++) {
+                Parser.parse(rows[columnPos], getColumns()[columnPos], folder);
             }
+            folders.add(folder);
         }
+        return folders.iterator();
     }
-
 }
