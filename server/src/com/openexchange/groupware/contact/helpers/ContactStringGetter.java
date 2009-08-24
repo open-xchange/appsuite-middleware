@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import com.openexchange.groupware.contact.ContactException;
 
 /**
@@ -60,6 +63,11 @@ import com.openexchange.groupware.contact.ContactException;
 public class ContactStringGetter implements ContactSwitcher {
 	private ContactSwitcher delegate;
 
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	static {
+	    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+	}
+	
 	/**
 	 * This method makes a string out of an object. 
 	 * Opposed to toString, it does not break in case of null pointers.
@@ -73,6 +81,21 @@ public class ContactStringGetter implements ContactSwitcher {
 		}
 		return obj.toString();
 	}
+	
+	public static final String stringifyDate(Date date) {
+	    if(date == null) {
+	        return "";
+	    }
+	    return DATE_FORMAT.format(date);
+	}
+	
+	public static final String stringifyTimestamp(Date date) {
+	    if (date == null) {
+	        return "";
+	    }
+	    return String.valueOf(date.getTime());
+	}
+	
 	/* DELEGATE */
 	public ContactSwitcher getDelegate() {
 		return delegate;
@@ -84,7 +107,7 @@ public class ContactStringGetter implements ContactSwitcher {
 	
 	/* INTERFACE */
 	public Object anniversary(final Object... objects) throws ContactException {
-		return stringify(delegate.anniversary(objects));
+		return stringifyDate((Date)delegate.anniversary(objects));
 	}
 
 	public Object assistantname(final Object... objects) throws ContactException {
@@ -92,7 +115,7 @@ public class ContactStringGetter implements ContactSwitcher {
 	}
 
 	public Object birthday(final Object... objects) throws ContactException {
-		return stringify(delegate.birthday(objects));
+		return stringifyDate((Date) delegate.birthday(objects));
 	}
 
 	public Object branches(final Object... objects) throws ContactException {
@@ -156,7 +179,7 @@ public class ContactStringGetter implements ContactSwitcher {
 	}
 
 	public Object creationdate(final Object... objects) throws ContactException {
-		return stringify(delegate.creationdate(objects));
+		return stringifyTimestamp((Date)delegate.creationdate(objects));
 	}
 
 	public Object defaultaddress(final Object... objects) throws ContactException {
@@ -236,7 +259,7 @@ public class ContactStringGetter implements ContactSwitcher {
 	}
 
 	public Object lastmodified(final Object... objects) throws ContactException {
-		return stringify(delegate.lastmodified(objects));
+		return stringifyTimestamp((Date)delegate.lastmodified(objects));
 	}
 
 	public Object links(final Object... objects) throws ContactException {
