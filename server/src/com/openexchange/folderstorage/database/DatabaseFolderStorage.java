@@ -57,8 +57,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -72,6 +74,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
@@ -97,8 +100,11 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.FolderObjectIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
@@ -335,11 +341,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    public Folder getFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
+    }
+
     private static final int[] VIRTUAL_IDS = {
         FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
         FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
-    public Folder getFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+    public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final User user = storageParameters.getUser();
@@ -356,71 +366,88 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             final DatabaseFolder retval;
 
-            if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
-                retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
-            } else {
-                /*
-                 * A numeric folder identifier
-                 */
-                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
-                if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
-                    retval = SystemRootFolder.getSystemRootFolder();
-                } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                    /*
-                     * A virtual database folder
-                     */
-                    retval = VirtualListFolder.getVirtualListFolder(folderId);
+            if (StorageType.WORKING.equals(storageType)) {
+                if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+                    retval = SharedPrefixFolder.getSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
                 } else {
                     /*
-                     * A non-virtual database folder
+                     * A numeric folder identifier
                      */
-                    final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
-
-                    if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                    final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                    if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                        retval = SystemRootFolder.getSystemRootFolder();
+                    } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
                         /*
-                         * The system shared folder
+                         * A virtual database folder
                          */
-                        retval = SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
-                    } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
-                        /*
-                         * The system public folder
-                         */
-                        retval = SystemPublicFolder.getSystemPublicFolder(fo);
-                    } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
-                        /*
-                         * The system infostore folder
-                         */
-                        retval = SystemInfostoreFolder.getSystemInfostoreFolder(fo);
-                    } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
-                        /*
-                         * The system private folder
-                         */
-                        retval = SystemPrivateFolder.getSystemPrivateFolder(fo);
+                        retval = VirtualListFolder.getVirtualListFolder(folderId);
                     } else {
                         /*
-                         * Check for shared folder, that is folder is of type private and requesting user is different from folder's owner
+                         * A non-virtual database folder
                          */
-                        retval = new DatabaseFolder(fo);
-                        if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getCreatedBy()) {
-                            retval.setType(SharedType.getInstance());
+                        final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+
+                        if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
                             /*
-                             * A shared folder has no subfolders in real tree
+                             * The system shared folder
                              */
-                            retval.setSubfolderIDs(null);
-                        } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
+                            retval = SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
+                        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
                             /*
-                             * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be
-                             * used.
+                             * The system public folder
                              */
-                            final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
-                            final List<String> subfolderIdentifies = new ArrayList<String>(subfolderIds.size());
-                            for (final Integer id : subfolderIds) {
-                                subfolderIdentifies.add(id.toString());
+                            retval = SystemPublicFolder.getSystemPublicFolder(fo);
+                        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                            /*
+                             * The system infostore folder
+                             */
+                            retval = SystemInfostoreFolder.getSystemInfostoreFolder(fo);
+                        } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                            /*
+                             * The system private folder
+                             */
+                            retval = SystemPrivateFolder.getSystemPrivateFolder(fo);
+                        } else {
+                            /*
+                             * Check for shared folder, that is folder is of type private and requesting user is different from folder's
+                             * owner
+                             */
+                            retval = new DatabaseFolder(fo);
+                            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getCreatedBy()) {
+                                retval.setType(SharedType.getInstance());
+                                /*
+                                 * A shared folder has no subfolders in real tree
+                                 */
+                                retval.setSubfolderIDs(null);
+                            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
+                                /*
+                                 * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be
+                                 * used.
+                                 */
+                                final List<Integer> subfolderIds = FolderObject.getSubfolderIds(folderId, ctx, con);
+                                final List<String> subfolderIdentifies = new ArrayList<String>(subfolderIds.size());
+                                for (final Integer id : subfolderIds) {
+                                    subfolderIdentifies.add(id.toString());
+                                }
+                                retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
                             }
-                            retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
                         }
                     }
                 }
+            } else {
+                /*
+                 * Get from backup tables
+                 */
+                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(
+                    folderId,
+                    ctx,
+                    con,
+                    true,
+                    false,
+                    "del_oxfolder_tree",
+                    "del_oxfolder_permissions");
+                retval = new DatabaseFolder(fo);
             }
             retval.setTreeID(treeId);
             // TODO: Subscribed?
@@ -744,6 +771,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        return containsFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
+    }
+
+    public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final User user = storageParameters.getUser();
@@ -760,55 +791,60 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             final boolean retval;
 
-            if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+            if (StorageType.WORKING.equals(storageType)) {
+                if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
 
-                retval = SharedPrefixFolder.existsSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
-            } else {
-                /*
-                 * A numeric folder identifier
-                 */
-                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
-                if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
-                    retval = true;
-                } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                    /*
-                     * A virtual database folder
-                     */
-                    retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
+                    retval = SharedPrefixFolder.existsSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
                 } else {
                     /*
-                     * A non-virtual database folder
+                     * A numeric folder identifier
                      */
-
-                    if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
-                        /*
-                         * The system shared folder
-                         */
+                    final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                    if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                         retval = true;
-                    } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                    } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
                         /*
-                         * The system public folder
+                         * A virtual database folder
                          */
-                        retval = true;
-                    } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
-                        /*
-                         * The system infostore folder
-                         */
-                        retval = true;
-                    } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
-                        /*
-                         * The system private folder
-                         */
-                        retval = true;
+                        retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
                     } else {
                         /*
-                         * Check for shared folder, that is folder is of type private and requesting user is different from folder's owner
+                         * A non-virtual database folder
                          */
-                        retval = OXFolderSQL.exists(folderId, con, ctx);
+
+                        if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                            /*
+                             * The system shared folder
+                             */
+                            retval = true;
+                        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                            /*
+                             * The system public folder
+                             */
+                            retval = true;
+                        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                            /*
+                             * The system infostore folder
+                             */
+                            retval = true;
+                        } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                            /*
+                             * The system private folder
+                             */
+                            retval = true;
+                        } else {
+                            /*
+                             * Check for shared folder, that is folder is of type private and requesting user is different from folder's
+                             * owner
+                             */
+                            retval = OXFolderSQL.exists(folderId, con, ctx);
+                        }
                     }
                 }
+            } else {
+                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
             }
-
             return retval;
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
@@ -818,6 +854,68 @@ public final class DatabaseFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     } // End of containsFolder()
+
+    public String[] getModifiedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+
+            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(
+                timeStamp == null ? new Date(0) : timeStamp,
+                ctx,
+                con)).asQueue();
+            final int size = q.size();
+            final Iterator<FolderObject> iterator = q.iterator();
+            final String[] ret = new String[size];
+            for (int i = 0; i < size; i++) {
+                ret[i] = String.valueOf(iterator.next().getObjectID());
+            }
+
+            return ret;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    } // End of getModifiedFolderIDs()
+
+    public String[] getDeletedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                }
+            }
+
+            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(
+                timeStamp,
+                user.getId(),
+                user.getGroups(),
+                userConfiguration.getAccessibleModules(),
+                ctx,
+                con)).asQueue();
+            final int size = q.size();
+            final Iterator<FolderObject> iterator = q.iterator();
+            final String[] ret = new String[size];
+            for (int i = 0; i < size; i++) {
+                ret[i] = String.valueOf(iterator.next().getObjectID());
+            }
+
+            return ret;
+        } catch (final SearchIteratorException e) {
+            throw new FolderException(e);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+
+    } // End of getDeletedFolderIDs()
 
     /*-
      * ############################# HELPER METHODS #############################

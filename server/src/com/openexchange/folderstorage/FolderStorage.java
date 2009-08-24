@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Date;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -115,6 +116,18 @@ public interface FolderStorage {
     boolean containsFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
 
     /**
+     * Checks if the folder denoted by specified folder ID exists in this folder storage.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type from which to get the folder
+     * @param storageParameters The storage parameters
+     * @return <code>true</code> if the folder denoted by specified folder ID exists in this folder storage; otherwise <code>false</code>
+     * @throws FolderException If the folder existence cannot be checked
+     */
+    boolean containsFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param treeId The tree identifier
@@ -124,6 +137,18 @@ public interface FolderStorage {
      * @throws FolderException If the folder cannot be returned
      */
     Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Gets the folder denoted by specified folder ID.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type from which to get the folder
+     * @param storageParameters The storage parameters
+     * @return The folder
+     * @throws FolderException If the folder cannot be returned
+     */
+    Folder getFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets this storage's default folder identifier for specified user for given content type.
@@ -189,6 +214,30 @@ public interface FolderStorage {
      * @throws FolderException If returning the subfolder identifiers fails
      */
     SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Gets the identifiers of all new and modified folders from this storage since given time stamp.
+     * <p>
+     * If a certain implementation does not support this feature an empty array is supposed to be returned.
+     * 
+     * @param timeStamp The time stamp
+     * @param storageParameters The storage parameters
+     * @return The identifiers of all new and modified folders from this storage since given time stamp
+     * @throws FolderException If a folder error occurs
+     */
+    String[] getModifiedFolderIDs(Date timeStamp, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Gets the identifiers of all deleted folders from this storage since given time stamp.
+     * <p>
+     * If a certain implementation does not support this feature an empty array is supposed to be returned.
+     * 
+     * @param timeStamp The time stamp
+     * @param storageParameters The storage parameters
+     * @return The identifiers of all deleted folders from this storage since given time stamp
+     * @throws FolderException If a folder error occurs
+     */
+    String[] getDeletedFolderIDs(Date timeStamp, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Starts a transaction on folder storage.

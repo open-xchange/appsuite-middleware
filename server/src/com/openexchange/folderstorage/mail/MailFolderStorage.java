@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -72,6 +73,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -317,6 +319,13 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+    }
+
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        if (StorageType.BACKUP.equals(storageType)) {
+            throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
+        }
         try {
             MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
@@ -633,6 +642,13 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+    }
+
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        if (StorageType.BACKUP.equals(storageType)) {
+            return false;
+        }
         try {
             MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
@@ -648,6 +664,14 @@ public final class MailFolderStorage implements FolderStorage {
         } catch (final MailException e) {
             throw new FolderException(e);
         }
+    }
+
+    public String[] getDeletedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        return new String[0];
+    }
+
+    public String[] getModifiedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        return new String[0];
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {

@@ -60,10 +60,9 @@ import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
  * {@link Delete} - SQL for deleting a virtual folder.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Delete {
@@ -77,9 +76,15 @@ public final class Delete {
 
     private static final String SQL_DELETE_SUBS = "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    private static final String SQL_DELETE_INSERT_SUBS = "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
     private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    private static final String SQL_DELETE_INSERT_PERMS = "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
     private static final String SQL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_DELETE_INSERT = "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     /**
      * Deletes specified folder.
@@ -88,9 +93,10 @@ public final class Delete {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param folderId The folder identifier
+     * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @throws FolderException If delete fails
      */
-    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId) throws FolderException {
+    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup) throws FolderException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -105,8 +111,25 @@ public final class Delete {
             throw new FolderException(e);
         }
         try {
-            // Delete subscribe data
             PreparedStatement stmt = null;
+
+            if (backup) {
+                // Backup subscribe data
+                try {
+                    stmt = con.prepareStatement(SQL_DELETE_INSERT_SUBS);
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, tree);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos, folderId);
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
+            }
+            // Delete subscribe data
             try {
                 stmt = con.prepareStatement(SQL_DELETE_SUBS);
                 int pos = 1;
@@ -119,6 +142,23 @@ public final class Delete {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
+            }
+
+            if (backup) {
+                // Backup permission data
+                try {
+                    stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, tree);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos, folderId);
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
             // Delete permission data
             try {
@@ -133,6 +173,23 @@ public final class Delete {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
+            }
+
+            if (backup) {
+                // Backup folder data
+                try {
+                    stmt = con.prepareStatement(SQL_DELETE_INSERT);
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, tree);
+                    stmt.setInt(pos++, user);
+                    stmt.setString(pos, folderId);
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
             // Delete folder data
             try {
@@ -152,5 +209,5 @@ public final class Delete {
             databaseService.backWritable(cid, con);
         }
     }
-    
+
 }

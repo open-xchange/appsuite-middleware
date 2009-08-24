@@ -52,10 +52,9 @@ package com.openexchange.folderstorage.virtual.sql;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 
-
 /**
  * {@link Update} - SQL for updating a virtual folder.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Update {
@@ -77,8 +76,8 @@ public final class Update {
      * @throws FolderException If update fails
      */
     public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws FolderException {
-        Delete.deleteFolder(cid, tree, user, folder.getID());
+        Delete.deleteFolder(cid, tree, user, folder.getID(), false);
         Insert.insertFolder(cid, tree, user, folder);
     }
-    
+
 }

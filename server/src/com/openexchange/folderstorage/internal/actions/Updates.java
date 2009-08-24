@@ -49,10 +49,31 @@
 
 package com.openexchange.folderstorage.internal.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.FolderStorageRegistry;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,13 +105,240 @@ public final class Updates extends AbstractUserizedFolderAction {
     /**
      * Performs the <code>UPDATES</code> request.
      * 
+     * @param treeId The tree identifier
      * @param since The time stamp
+     * @param ignoreDeleted <code>true</code> to ignore delete operations performed since given time stamp; otherwise <code>false</code> to
+     *            include them
      * @return All updated/deleted folders since given time stamp.
+     * @throws FolderException If updates request fails
      */
-    public UserizedFolder[] doUpdates(final Date since) {
-        
-        
-        return null;
+    public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted) throws FolderException {
+        final FolderStorage[] realFolderStorages = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(
+            FolderStorage.REAL_TREE_ID);
+        for (final FolderStorage folderStorage : realFolderStorages) {
+            folderStorage.startTransaction(storageParameters, false);
+        }
+        try {
+            final UserConfiguration userConfiguration;
+            {
+                final Session s = storageParameters.getSession();
+                if (s instanceof ServerSession) {
+                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                } else {
+                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(
+                        user.getId(),
+                        storageParameters.getContext());
+                }
+            }
+            final List<Folder> updatedList = new ArrayList<Folder>();
+            final List<Folder> deletedList = ignoreDeleted ? null : new ArrayList<Folder>();
+            boolean addSystemSharedFolder;
+            boolean checkVirtualListFolders;
+            {
+                /*
+                 * Iterate real folder and get new-and-modified folders
+                 */
+                final List<Folder> modifiedFolders = new ArrayList<Folder>();
+                for (final FolderStorage folderStorage : realFolderStorages) {
+                    final String[] modifiedFolderIDs = folderStorage.getModifiedFolderIDs(since, storageParameters);
+                    for (int i = 0; i < modifiedFolderIDs.length; i++) {
+                        modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderIDs[i], storageParameters));
+                    }
+                }
+                addSystemSharedFolder = false;
+                checkVirtualListFolders = false;
+                final int size = modifiedFolders.size();
+                final Iterator<Folder> iter = modifiedFolders.iterator();
+                for (int i = 0; i < size; i++) {
+                    final Folder f = iter.next();
+                    final Permission effectivePerm = getEffectivePermission(f);
+                    if (effectivePerm.getFolderPermission() >= Permission.READ_FOLDER) {
+                        if (f.getCreatedBy() != getUser().getId()) {
+                            /*
+                             * Shared
+                             */
+                            addSystemSharedFolder = true;
+                        } else if (PublicType.getInstance().equals(f.getType())) {
+                            /*
+                             * Public
+                             */
+                            final Folder parent = getFolder(FolderStorage.REAL_TREE_ID, f.getParentID(), realFolderStorages);
+                            final Permission parentPerm = getEffectivePermission(parent);
+                            if (parentPerm.getFolderPermission() >= Permission.READ_FOLDER) {
+                                /*
+                                 * Parent is visible
+                                 */
+                                updatedList.add(parent);
+                            } else {
+                                /*
+                                 * Parent NOT visible. Update superior system folder to let the newly visible folder appear underneath virtual
+                                 * "Other XYZ folders"
+                                 */
+                                if (InfostoreContentType.getInstance().equals(f.getContentType())) {
+                                    updatedList.add(getFolder(
+                                        FolderStorage.REAL_TREE_ID,
+                                        String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID),
+                                        realFolderStorages));
+                                } else {
+                                    updatedList.add(getFolder(
+                                        FolderStorage.REAL_TREE_ID,
+                                        String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID),
+                                        realFolderStorages));
+                                }
+                            }
+                        }
+                        updatedList.add(f);
+                    } else {
+                        checkVirtualListFolders |= (PublicType.getInstance().equals(f.getType()));
+                        if (deletedList != null) {
+                            deletedList.add(f);
+                        }
+                    }
+                }
+            }
+            /*
+             * Check virtual list folders
+             */
+            if (checkVirtualListFolders && deletedList != null) {
+                final Set<String> set = getPublicSubfolderIDs(FolderStorage.REAL_TREE_ID, realFolderStorages);
+                {
+                    final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
+                    if (userConfiguration.hasTask() && !set.contains(vid)) {
+                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                    }
+                }
+                {
+                    final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
+                    if (userConfiguration.hasCalendar() && !set.contains(vid)) {
+                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                    }
+                }
+                {
+                    final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
+                    if (userConfiguration.hasContact() && !set.contains(vid)) {
+                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                    }
+                }
+                {
+                    final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+                    if (userConfiguration.hasInfostore() && !set.contains(vid)) {
+                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                    }
+                }
+            }
+            /*
+             * Check if shared folder must be updated, too
+             */
+            if (addSystemSharedFolder) {
+                updatedList.add(getFolder(
+                    FolderStorage.REAL_TREE_ID,
+                    String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID),
+                    realFolderStorages));
+            }
+            /*
+             * Get deleted folders
+             */
+            if (!ignoreDeleted) {
+                final List<Folder> deletedFolders = new ArrayList<Folder>();
+                for (final FolderStorage folderStorage : realFolderStorages) {
+                    final String[] deletedFolderIDs = folderStorage.getDeletedFolderIDs(since, storageParameters);
+                    for (int i = 0; i < deletedFolderIDs.length; i++) {
+                        // Pass storage type to fetch folder from backup tables
+                        deletedFolders.add(folderStorage.getFolder(
+                            FolderStorage.REAL_TREE_ID,
+                            deletedFolderIDs[i],
+                            StorageType.BACKUP,
+                            storageParameters));
+                    }
+                }
+                /*
+                 * Add previously gathered "deleted" folders
+                 */
+                deletedFolders.addAll(deletedList);
+            }
+            /*
+             * Check tree
+             */
+            if (false && !FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                /*
+                 * Check if folders are contained in given tree ID
+                 */
+                final FolderStorage fs = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(treeId)[0];
+                for (final Iterator<Folder> iterator = updatedList.iterator(); iterator.hasNext();) {
+                    final Folder folder = iterator.next();
+                    if (!fs.containsFolder(treeId, folder.getID(), storageParameters)) {
+                        iterator.remove();
+                    }
+                }
+                if (null != deletedList) {
+                    for (final Iterator<Folder> iterator = deletedList.iterator(); iterator.hasNext();) {
+                        final Folder folder = iterator.next();
+                        if (!fs.containsFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters)) {
+                            iterator.remove();
+                        }
+                    }
+                }
+            }
+            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(Arrays.asList(realFolderStorages));
+            final UserizedFolder[] modified = new UserizedFolder[updatedList.size()];
+            for (int i = 0; i < modified.length; i++) {
+                final Folder folder = updatedList.get(i);
+                modified[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, openedStorages);
+            }
+
+            final UserizedFolder[] deleted;
+            if (deletedList != null) {
+                deleted = new UserizedFolder[deletedList.size()];
+                for (int i = 0; i < deleted.length; i++) {
+                    final Folder folder = deletedList.get(i);
+                    deleted[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, openedStorages);
+                }
+            } else {
+                deleted = new UserizedFolder[0];
+            }
+            return new UserizedFolder[][] { modified, deleted };
+        } catch (final FolderException e) {
+            for (final FolderStorage folderStorage : realFolderStorages) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            for (final FolderStorage folderStorage : realFolderStorages) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private Permission getEffectivePermission(final Folder folder) throws FolderException {
+        if (null == getSession()) {
+            return CalculatePermission.calculate(folder, getUser(), getContext());
+        }
+        return CalculatePermission.calculate(folder, getSession());
+    }
+
+    private Folder getFolder(final String treeId, final String folderId, final FolderStorage[] storages) throws FolderException {
+        for (final FolderStorage storage : storages) {
+            if (storage.getFolderType().servesFolderId(folderId)) {
+                return storage.getFolder(treeId, folderId, storageParameters);
+            }
+        }
+        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+    }
+
+    private Set<String> getPublicSubfolderIDs(final String treeId, final FolderStorage[] storages) throws FolderException {
+        final String folderId = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        for (final FolderStorage storage : storages) {
+            if (storage.getFolderType().servesFolderId(folderId)) {
+                final SortableId[] tmp = storage.getSubfolders(treeId, folderId, storageParameters);
+                final Set<String> set = new HashSet<String>(tmp.length);
+                for (final SortableId id : tmp) {
+                    set.add(id.getId());
+                }
+                return set;
+            }
+        }
+        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
     }
 
 }

@@ -154,6 +154,11 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
 
     /**
+     * Unsupported storage type: %1$s.
+     */
+    public static final String UNSUPPORTED_STORAGE_TYPE_MSG = "Unsupported storage type: %1$s.";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

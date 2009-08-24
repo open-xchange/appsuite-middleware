@@ -61,6 +61,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.virtual.VirtualFolder;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
 import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
@@ -83,11 +84,71 @@ public final class Select {
 
     private static final String SQL_SELECT = "SELECT parentId, name, modifiedBy, lastModified FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    private static final String SQL_SELECT_BCK = "SELECT parentId, name, modifiedBy, lastModified FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_SELECT2 = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_SELECT2_BCK = "SELECT folderId FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
     private static final String SQL_SELECT_SUBF = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
+    private static final String SQL_SELECT_SUBF_BCK = "SELECT folderId FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     private static final String SQL_SELECT_PERMS = "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    private static final String SQL_SELECT_PERMS_BCK = "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
     private static final String SQL_SELECT_SUBSCRIPTION = "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_SELECT_SUBSCRIPTION_BCK = "SELECT subscribed FROM virtualBackupSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    /**
+     * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type to use
+     * @return <code>true</code> if the specified virtual tree contains a folder denoted by given folder identifier; otherwise
+     *         <code>false</code>
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT2 : SQL_SELECT2_BCK);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                rs = stmt.executeQuery();
+                return rs.next();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
 
     /**
      * Fills specified folder.
@@ -96,9 +157,10 @@ public final class Select {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param virtualFolder The folder to fill
+     * @param storageType The storage type to use
      * @throws FolderException If filling the folder fails
      */
-    public static void fillFolder(final int cid, final int tree, final int user, final VirtualFolder virtualFolder) throws FolderException {
+    public static void fillFolder(final int cid, final int tree, final int user, final VirtualFolder virtualFolder, final StorageType storageType) throws FolderException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -118,7 +180,7 @@ public final class Select {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement(SQL_SELECT);
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT : SQL_SELECT_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -137,7 +199,7 @@ public final class Select {
             }
             // Select subfolders
             try {
-                stmt = con.prepareStatement(SQL_SELECT_SUBF);
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -157,7 +219,7 @@ public final class Select {
             }
             // Select permissions
             try {
-                stmt = con.prepareStatement(SQL_SELECT_PERMS);
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -188,7 +250,7 @@ public final class Select {
             }
             // Select subscription
             try {
-                stmt = con.prepareStatement(SQL_SELECT_SUBSCRIPTION);
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_SUBSCRIPTION : SQL_SELECT_SUBSCRIPTION_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -218,10 +280,11 @@ public final class Select {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param parentId The parent identifier
+     * @param storageType The storage type
      * @return The identifier-name-pairs of the subfolders located below specified parent
      * @throws FolderException If subfolders cannot be detected
      */
-    public static String[][] getSubfolderIds(final int cid, final int tree, final int user, final String parentId) throws FolderException {
+    public static String[][] getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws FolderException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -239,7 +302,7 @@ public final class Select {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement(SQL_SELECT_SUBF);
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -254,9 +317,10 @@ public final class Select {
                 DBUtils.closeSQLStuff(rs, stmt);
                 final String[][] ret = new String[subfolderIds.size()][];
                 // Select names
+                final String sql = StorageType.WORKING.equals(storageType) ? SQL_SELECT : SQL_SELECT_BCK;
                 for (int i = 0; i < ret.length; i++) {
                     final String subfolderId = subfolderIds.get(i);
-                    stmt = con.prepareStatement(SQL_SELECT);
+                    stmt = con.prepareStatement(sql);
                     pos = 1;
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, tree);

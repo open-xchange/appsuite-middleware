@@ -47,55 +47,22 @@
  *
  */
 
-package com.openexchange.folder.json.actions;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.tools.servlet.AjaxException;
+package com.openexchange.folderstorage;
 
 /**
- * {@link FolderActionFactory}
+ * {@link StorageType} - Denotes the storage type.
  * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderActionFactory implements AJAXActionServiceFactory {
+public enum StorageType {
 
-    private static final FolderActionFactory SINGLETON = new FolderActionFactory();
-
-    private final Map<String, AJAXActionService> actions;
-
-    private FolderActionFactory() {
-        super();
-        actions = initActions();
-    }
-
-    public static final FolderActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    public AJAXActionService createActionService(final String action) throws AjaxException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
-        }
-        return retval;
-    }
-
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
-        tmp.put(RootAction.ACTION, new RootAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(CreateAction.ACTION, new CreateAction());
-        tmp.put(DeleteAction.ACTION, new DeleteAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(PathAction.ACTION, new PathAction());
-        tmp.put(ClearAction.ACTION, new ClearAction());
-        tmp.put(UpdatesAction.ACTION, new UpdatesAction());
-        return Collections.unmodifiableMap(tmp);
-    }
+    /**
+     * The working storage type.
+     */
+    WORKING,
+    /**
+     * The backup storage type.
+     */
+    BACKUP;
 
 }

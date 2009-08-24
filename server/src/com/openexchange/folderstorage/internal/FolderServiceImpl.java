@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.internal.actions.Get;
 import com.openexchange.folderstorage.internal.actions.List;
 import com.openexchange.folderstorage.internal.actions.Path;
 import com.openexchange.folderstorage.internal.actions.Update;
+import com.openexchange.folderstorage.internal.actions.Updates;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -165,9 +166,16 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public UserizedFolder[] getSubfolders(final String treeId, final Date since) throws FolderException {
-        // TODO Auto-generated method stub
-        return null;
+    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final User user, final Context context) throws FolderException {
+        return new Updates(user, context).doUpdates(treeId, timeStamp, ignoreDeleted);
+    }
+
+    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final Session session) throws FolderException {
+        try {
+            return new Updates(new ServerSessionAdapter(session)).doUpdates(treeId, timeStamp, ignoreDeleted);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public void subscribeFolder(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId, final User user, final Context context) throws FolderException {

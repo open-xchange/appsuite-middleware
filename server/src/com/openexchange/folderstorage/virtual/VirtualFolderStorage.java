@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.virtual;
 
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -59,6 +60,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.virtual.sql.Delete;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
@@ -108,7 +110,8 @@ public final class VirtualFolderStorage implements FolderStorage {
             storageParameters.getContext().getContextId(),
             Integer.parseInt(treeId),
             storageParameters.getUser().getId(),
-            folderId);
+            folderId,
+            true);
     }
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
@@ -123,6 +126,10 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+    }
+
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         final VirtualFolder virtualFolder;
         {
             // Get real folder
@@ -141,7 +148,8 @@ public final class VirtualFolderStorage implements FolderStorage {
             storageParameters.getContext().getContextId(),
             Integer.parseInt(treeId),
             storageParameters.getUser().getId(),
-            virtualFolder);
+            virtualFolder,
+            storageType);
         return virtualFolder;
     }
 
@@ -158,7 +166,8 @@ public final class VirtualFolderStorage implements FolderStorage {
             storageParameters.getContext().getContextId(),
             Integer.parseInt(treeId),
             storageParameters.getUser().getId(),
-            parentId);
+            parentId,
+            StorageType.WORKING);
         final SortableId[] ret = new SortableId[idNamePairs.length];
         final Locale locale = storageParameters.getUser().getLocale();
         for (int i = 0; i < idNamePairs.length; i++) {
@@ -190,8 +199,24 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        // TODO Auto-generated method stub
-        return false;
+        return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
+    }
+
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        return Select.containsFolder(
+            storageParameters.getContext().getContextId(),
+            Integer.parseInt(treeId),
+            storageParameters.getUser().getId(),
+            folderId,
+            storageType);
+    }
+
+    public String[] getDeletedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        return new String[0];
+    }
+
+    public String[] getModifiedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        return new String[0];
     }
 
 }

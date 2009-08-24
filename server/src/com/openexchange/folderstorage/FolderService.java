@@ -192,16 +192,6 @@ public interface FolderService {
     UserizedFolder[] getSubfolders(String treeId, String parentId, boolean all, Session session) throws FolderException;
 
     /**
-     * Gets the changed folders since specified time stamp.
-     * 
-     * @param treeId The tree identifier
-     * @param since The time stamp
-     * @return The changed folders since specified time stamp
-     * @throws FolderException If changed folders cannot be returned
-     */
-    UserizedFolder[] getSubfolders(String treeId, Date since) throws FolderException;
-
-    /**
      * Gets the path from given folder to specified tree's root folder.
      * 
      * @param treeId The tree identifier
@@ -223,6 +213,31 @@ public interface FolderService {
      * @throws FolderException If path cannot be returned
      */
     UserizedFolder[] getPath(String treeId, String folderId, Session session) throws FolderException;
+
+    /**
+     * Gets all new, modified and deleted folders since given time stamp.
+     * 
+     * @param treeId The tree identifier
+     * @param timeStamp The time stamp from which to consider changes
+     * @param ignoreDeleted <code>true</code> to ignore delete operations; otherwise <code>false</code>
+     * @param user The user
+     * @param context The context
+     * @return All new, modified and deleted folders since given time stamp
+     * @throws FolderException If path cannot be returned
+     */
+    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, User user, Context context) throws FolderException;
+
+    /**
+     * Gets all new, modified and deleted folders since given time stamp.
+     * 
+     * @param treeId The tree identifier
+     * @param timeStamp The time stamp from which to consider changes
+     * @param ignoreDeleted <code>true</code> to ignore delete operations; otherwise <code>false</code>
+     * @param session The session
+     * @return All new, modified and deleted folders since given time stamp
+     * @throws FolderException If path cannot be returned
+     */
+    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, Session session) throws FolderException;
 
     /**
      * Deletes the specified folder in given tree.

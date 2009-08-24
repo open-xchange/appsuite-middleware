@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.cache;
 
+import java.util.Date;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -62,6 +63,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
+import com.openexchange.folderstorage.StorageType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 
@@ -352,5 +354,25 @@ public final class CacheFolderStorage implements FolderStorage {
     public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    public String[] getModifiedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String[] getDeletedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

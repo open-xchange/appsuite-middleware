@@ -1193,6 +1193,23 @@ public final class OXFolderIteratorSQL {
      * @throws SearchIteratorException If a search iterator error occurs
      */
     public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
+        return getDeletedFoldersSince(since, userId, memberInGroups, accessibleModules, ctx, null);
+    }
+
+    /**
+     * Gets formerly user-visible folders which were deleted since specified time stamp.
+     * 
+     * @param since The time stamp
+     * @param userId The user identifier
+     * @param memberInGroups The user's group identifiers
+     * @param accessibleModules The user's accessible modules
+     * @param ctx The context
+     * @param con The connection to use
+     * @return The formerly user-visible folders which were deleted since specified time stamp
+     * @throws OXException If a folder error occurs
+     * @throws SearchIteratorException If a search iterator error occurs
+     */
+    public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
         final String fields = FolderObjectIterator.getFieldsForSQL(STR_OT);
         final String condition = since == null ? null : new StringBuilder(" AND (ot.changing_date > ").append(since.getTime()).append(')').toString();
         final String sqlSelectStr = getSQLUserVisibleFolders(
@@ -1203,12 +1220,16 @@ public final class OXFolderIteratorSQL {
             StringCollection.getSqlInString(accessibleModules),
             condition,
             "ORDER by ot.fuid");
-        Connection readCon = null;
+        Connection readCon = con;
+        boolean closeCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
         try {
-            readCon = DBPool.pickup(ctx);
+            if (null == readCon) {
+                readCon = DBPool.pickup(ctx);
+                closeCon = true;
+            }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
             stmt.setInt(pos++, contextId);
@@ -1226,16 +1247,16 @@ public final class OXFolderIteratorSQL {
 
             rs = stmt.executeQuery();
         } catch (final SQLException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(contextId));
         } catch (final DBPoolingException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(contextId));
         } catch (final Throwable t) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
     }
 
     /**

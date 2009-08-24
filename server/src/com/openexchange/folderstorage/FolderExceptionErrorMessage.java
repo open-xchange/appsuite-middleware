@@ -138,7 +138,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Missing parameter: %1$s.
      */
-    MISSING_PARAMETER(FolderExceptionMessages.MISSING_PARAMETER_MSG, Category.CODE_ERROR, 19);
+    MISSING_PARAMETER(FolderExceptionMessages.MISSING_PARAMETER_MSG, Category.CODE_ERROR, 19),
+    /**
+     * Unsupported storage type: %1$s.
+     */
+    UNSUPPORTED_STORAGE_TYPE(FolderExceptionMessages.UNSUPPORTED_STORAGE_TYPE_MSG, Category.CODE_ERROR, 20);
 
     private final Category category;
 
