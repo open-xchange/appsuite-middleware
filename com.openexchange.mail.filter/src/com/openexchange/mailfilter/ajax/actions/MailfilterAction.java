@@ -484,8 +484,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         } catch (final IOException e) {
             throw new OXMailfilterException(Code.IO_CONNECTION_ERROR, e, EMPTY_ARGS);
         } catch (final OXSieveHandlerException e) {
-            throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
-                    .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+            handleParsingException(e, credentials);
         } catch (final OXSieveHandlerInvalidCredentialsException e) {
             throw new OXMailfilterException(Code.INVALID_CREDENTIALS, e, EMPTY_ARGS);
         } catch (final ParseException e) {
@@ -809,5 +808,21 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         return msg;
     }
-
+    
+    /**
+     * The SIEVE parser is not very expressive when it comes to exceptions.
+     * This method analyses an exception message and throws a more detailed
+     * one if possible.
+     */
+    private void handleParsingException(OXSieveHandlerException e, Credentials credentials) throws OXMailfilterException{
+        String message = e.toString();
+        
+        if(message.contains("unexpected SUBJECT"))
+            throw new OXMailfilterException(Code.EMPTY_MANDATORY_FIELD, e, "ADDRESS (probably)");
+        if(message.contains("address ''"))
+            throw new OXMailfilterException(Code.EMPTY_MANDATORY_FIELD, e, "ADDRESS");
+        
+        throw new OXMailfilterException(Code.SIEVE_COMMUNICATION_ERROR, e, e.getSieveHost(), Integer.valueOf(e
+            .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+    }
 }
