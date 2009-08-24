@@ -452,8 +452,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         final SieveHandler sieveHandler = connectRight(credentials);
         try {
             sieveHandler.initializeConnection();
-            final String activeScript = sieveHandler.getActiveScript();
-            final String script = sieveHandler.getScript(activeScript);
+            final String activeScript = fixParsingError(sieveHandler.getActiveScript());
+            final String script = fixParsingError(sieveHandler.getScript(activeScript));
             final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
             final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules
@@ -510,6 +510,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 }
             }
         }
+    }
+
+    private String fixParsingError(String script) {
+        String pattern = ":addresses\\s+:";
+        return script.replaceAll(pattern, ":addresses \"\" :");
     }
 
     @Override
