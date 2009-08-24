@@ -109,8 +109,8 @@ public final class UpdateTaskResetVersionCLT {
                 System.exit(0);
             }
             int port = 9999;
-            if (cmd.hasOption('p')) {
-                final String val = cmd.getOptionValue('p');
+            if (cmd.hasOption("port")) {
+                final String val = cmd.getOptionValue("port");
                 if (null != val) {
                     try {
                         port = Integer.parseInt(val.trim());
@@ -155,8 +155,8 @@ public final class UpdateTaskResetVersionCLT {
                 jmxLogin = cmd.getOptionValue('l');
             }
             String jmxPassword = null;
-            if (cmd.hasOption("pass")) {
-                jmxPassword = cmd.getOptionValue("pass");
+            if (cmd.hasOption("pw")) {
+                jmxPassword = cmd.getOptionValue("pw");
             }
 
             final Map<String, Object> environment;
