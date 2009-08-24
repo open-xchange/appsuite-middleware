@@ -83,9 +83,9 @@ public final class UpdateTaskResetVersionCLT {
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("v", "version", true, "The version number to set");
         toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
-        toolkitOptions.addOption("port", true, "The JMX port (default:9999)");
+        toolkitOptions.addOption("p", "port", true, "The JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("pw", "password", true, "The JMX password (if JMX has authentication enabled)");
+        toolkitOptions.addOption("s", "password", true, "The JMX password (if JMX has authentication enabled)");
     }
 
     private static void printHelp() {
@@ -109,8 +109,8 @@ public final class UpdateTaskResetVersionCLT {
                 System.exit(0);
             }
             int port = 9999;
-            if (cmd.hasOption("port")) {
-                final String val = cmd.getOptionValue("port");
+            if (cmd.hasOption('p')) {
+                final String val = cmd.getOptionValue('p');
                 if (null != val) {
                     try {
                         port = Integer.parseInt(val.trim());
@@ -155,8 +155,8 @@ public final class UpdateTaskResetVersionCLT {
                 jmxLogin = cmd.getOptionValue('l');
             }
             String jmxPassword = null;
-            if (cmd.hasOption("pw")) {
-                jmxPassword = cmd.getOptionValue("pw");
+            if (cmd.hasOption('s')) {
+                jmxPassword = cmd.getOptionValue('s');
             }
 
             final Map<String, Object> environment;
