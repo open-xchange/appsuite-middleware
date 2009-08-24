@@ -1,3 +1,7 @@
+* 2009-08-24 - tobias.prinz@open-xchange.com
+
+ - Bugfix #14229: Handling SIEVE scripts with empty addresses
+
 * 2009-08-24 - francisco.laguna@open-xchange.com
 
  - Bugfix #14343: Format dates in CSV export so the import understands them. 
