@@ -1318,31 +1318,59 @@ public final class OXFolderIteratorSQL {
      * @throws SearchIteratorException If a search iterator error occurs
      */
     public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException, SearchIteratorException {
+        return getAllModifiedFoldersSince(since, ctx, null);
+    }
+
+    /**
+     * Gets <b>all</b> modified folders since given time stamp.
+     * <p>
+     * Quote from <a href= "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Updates">HTTP API Updates</a>: <code>
+     * ...
+     * When requesting updates to a previously retrieved set of objects,
+     * the client sends the last timestamp which belongs to that set of objects.
+     * The response contains all updates with timestamps greater than the one
+     * specified by the client. The field timestamp of the response contains the
+     * new maximum timestamp value.
+     * ...
+     * </code>
+     * 
+     * @param since The time stamp
+     * @param ctx The context
+     * @param con The connection to use
+     * @return <b>All</b> modified folders since given time stamp
+     * @throws OXException If a folder error occurs
+     * @throws SearchIteratorException If a search iterator error occurs
+     */
+    public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
         final String sqlSelectStr = new StringBuilder(256).append(SQL_SELECT_FOLDERS_START).append(
             "AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(
             OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
-        Connection readCon = null;
+        Connection readCon = con;
+        boolean closeCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
         try {
-            readCon = DBPool.pickup(ctx);
+            if (null == readCon) {
+                readCon = DBPool.pickup(ctx);
+                closeCon = true;
+            }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setLong(pos, since.getTime());
             rs = stmt.executeQuery();
         } catch (final SQLException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(contextId));
         } catch (final DBPoolingException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(contextId));
         } catch (final Throwable t) {
-            closeResources(rs, stmt, readCon, true, ctx);
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
+        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
     }
 
 }
