@@ -53,9 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.DBPoolingException;
@@ -65,7 +67,9 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
@@ -96,6 +100,118 @@ public final class UpdateTaskToolkit {
      */
     private UpdateTaskToolkit() {
         super();
+    }
+
+    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
+
+    /**
+     * Loads the context by given context identifier.
+     * 
+     * @param contextId The context identifier
+     * @return The context
+     * @throws UpdateException If loading the context fails
+     */
+    public static Context loadContext(final int contextId) throws UpdateException {
+        Connection con = null;
+        try {
+            con = Database.get(false);
+        } catch (final DBPoolingException e) {
+            throw new UpdateException(e);
+        }
+        ContextImpl context = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT_CONTEXT);
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                context = new ContextImpl(contextId);
+                int pos = 1;
+                context.setName(result.getString(pos++));
+                context.setEnabled(result.getBoolean(pos++));
+                context.setFilestoreId(result.getInt(pos++));
+                context.setFilestoreName(result.getString(pos++));
+                final String[] auth = new String[2];
+                auth[0] = result.getString(pos++);
+                auth[1] = result.getString(pos++);
+                context.setFilestoreAuth(auth);
+                context.setFileStorageQuota(result.getLong(pos++));
+            } else {
+                throw new UpdateException(new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId)));
+            }
+        } catch (final SQLException e) {
+            throw new UpdateException(new ContextException(ContextException.Code.SQL_ERROR, e, e.getMessage()));
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+            Database.back(false, con);
+        }
+        try {
+            context.setMailadmin(getMailadmin(context));
+            context.setLoginInfo(getLoginInfos(context));
+        } catch (final ContextException e) {
+            throw new UpdateException(e);
+        }
+        return context;
+    }
+
+    private static final String GET_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid=?";
+
+    private static int getMailadmin(final Context ctx) throws ContextException {
+        Connection con = null;
+        try {
+            con = Database.get(ctx, false);
+        } catch (final DBPoolingException e) {
+            throw new ContextException(ContextException.Code.NO_CONNECTION, e);
+        }
+        int identifier = -1;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(GET_MAILADMIN);
+            final int contextId = ctx.getContextId();
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                identifier = result.getInt(1);
+            } else {
+                throw new ContextException(ContextException.Code.NO_MAILADMIN, Integer.valueOf(contextId));
+            }
+        } catch (final SQLException e) {
+            throw new ContextException(ContextException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+            Database.back(ctx, false, con);
+        }
+        return identifier;
+    }
+
+    private static final String GET_LOGININFOS = "SELECT login_info FROM login2context WHERE cid=?";
+
+    private static String[] getLoginInfos(final Context ctx) throws ContextException {
+        Connection con = null;
+        try {
+            con = Database.get(false);
+        } catch (final DBPoolingException e) {
+            throw new ContextException(ContextException.Code.NO_CONNECTION, e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final List<String> loginInfo = new ArrayList<String>();
+        try {
+            stmt = con.prepareStatement(GET_LOGININFOS);
+            stmt.setInt(1, ctx.getContextId());
+            result = stmt.executeQuery();
+            while (result.next()) {
+                loginInfo.add(result.getString(1));
+            }
+        } catch (final SQLException e) {
+            throw new ContextException(ContextException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+            Database.back(false, con);
+        }
+        return loginInfo.toArray(new String[loginInfo.size()]);
     }
 
     /**
@@ -276,17 +392,14 @@ public final class UpdateTaskToolkit {
                 throw EXCEPTION.create(15, e, className, e.getMessage());
             }
             try {
-                LOG.info("Starting update task "
-                    + className + " on schema "
-                    + schema.getSchema() + ".");
+                LOG.info("Starting update task " + className + " on schema " + schema.getSchema() + ".");
                 task.perform(schema, contextId);
             } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
                 throw new UpdateException(e);
             }
-            LOG.info("Update task " + className + " on schema "
-                + schema.getSchema() + " done.");
-            
+            LOG.info("Update task " + className + " on schema " + schema.getSchema() + " done.");
+
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
             throw new UpdateException(e);
@@ -383,11 +496,8 @@ public final class UpdateTaskToolkit {
      */
     public static Schema getSchema(final int contextId) throws UpdateException {
         try {
-            return SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName()).getSchema(ContextStorage.getStorageContext(contextId));
+            return SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName()).getSchema(loadContext(contextId));
         } catch (final SchemaException e) {
-            LOG.error(e.getMessage(), e);
-            throw new UpdateException(e);
-        } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
             throw new UpdateException(e);
         }
