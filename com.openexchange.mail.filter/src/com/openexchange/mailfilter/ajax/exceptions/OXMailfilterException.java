@@ -139,7 +139,12 @@ public class OXMailfilterException extends AbstractOXException {
         /**
          * Input string "%1$s" is not a number.
          */
-        NAN("Input string \"%1$s\" is not a number.", Category.USER_INPUT, 17);
+        NAN("Input string \"%1$s\" is not a number.", Category.USER_INPUT, 17),
+        /**
+         * The field \"%1$s\" must have a value, but is not set.
+         */
+        EMPTY_MANDATORY_FIELD("The field \"%1$s\" must have a value, but is not set", Category.USER_INPUT, 18),
+        ;
 
         private final String message;
 
