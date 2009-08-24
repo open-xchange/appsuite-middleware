@@ -2,6 +2,8 @@
 
  - Bugfix #14365: New CLI tools no more trigger update process
  - Bugfix #14362: Improved error handling in new CLI tools
+ - Bugfix #14363: Improved error handling in new CLI tools
+ - Bugfix #14364: Improved error handling in new CLI tools
 
 * 2009-08-21 - thorben.betten@open-xchange.com
 

@@ -114,6 +114,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                         port = Integer.parseInt(val.trim());
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
+                        printHelp();
                         port = 9999;
                     }
                 }
@@ -161,6 +162,9 @@ public final class UpdateTaskSchemasAndVersionsCLT {
             System.err.println("Problem on MBean connection: " + e.getMessage());
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
+        } catch (final RuntimeException e) {
+            System.err.println("Problem in runtime: " + e.getMessage());
+            printHelp();
         }
     }
 

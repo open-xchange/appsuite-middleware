@@ -116,6 +116,7 @@ public final class UpdateTaskForceCLT {
                         port = Integer.parseInt(val.trim());
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
+                        printHelp();
                         port = 9999;
                     }
                 }
@@ -138,7 +139,8 @@ public final class UpdateTaskForceCLT {
                 try {
                     contextId = Integer.parseInt(optionValue.trim());
                 } catch (final NumberFormatException e) {
-                    System.err.println("Port parameter is not a number: " + optionValue);
+                    System.err.println("Context identifier parameter is not a number: " + optionValue);
+                    printHelp();
                     System.exit(0);
                 }
             }
@@ -184,6 +186,9 @@ public final class UpdateTaskForceCLT {
             System.err.println("Problem on MBean connection: " + e.getMessage());
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
+        } catch (final RuntimeException e) {
+            System.err.println("Problem in runtime: " + e.getMessage());
+            printHelp();
         }
     }
 
