@@ -262,7 +262,7 @@ public class ContextImpl implements ContextExtended {
     /**
      * @param loginInfo the loginInfo to set
      */
-    protected void setLoginInfo(final String[] loginInfo) {
+    public void setLoginInfo(final String[] loginInfo) {
         this.loginInfo = loginInfo.clone();
     }
 
