@@ -64,6 +64,8 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -109,7 +111,9 @@ public class ExportServlet extends ImportExport {
             final OutputStream outputStream = resp.getOutputStream();
             resp.setContentLength((int) inputStream.getSize());
             resp.setContentType(inputStream.getFormat().getMimeType());
-            
+            resp.setHeader("Content-Disposition", "attachment; filename=\""
+                + Helper.encodeFilename("export."+format.getExtension(), "UTF-8",isIE(req)) + "\"");
+            Tools.removeCachingHeader(resp); // Some browsers don't like these in file downloads.
             final byte[] b = new byte[1024];
             int i = 0; 
             while ((i = inputStream.read(b)) != -1) {
