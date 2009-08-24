@@ -4,6 +4,7 @@
  - Bugfix #14362: Improved error handling in new CLI tools
  - Bugfix #14363: Improved error handling in new CLI tools
  - Bugfix #14364: Improved error handling in new CLI tools
+ - Bugfix #14361: Changed argument identifiers to not collide
 
 * 2009-08-21 - thorben.betten@open-xchange.com
 
