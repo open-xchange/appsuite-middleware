@@ -83,9 +83,9 @@ public final class UpdateTaskResetVersionCLT {
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("v", "version", true, "The version number to set");
         toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
-        toolkitOptions.addOption("p", "port", true, "The JMX port (default:9999)");
+        toolkitOptions.addOption("port", true, "The JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("pass", "password", true, "The JMX password (if JMX has authentication enabled)");
+        toolkitOptions.addOption("pw", "password", true, "The JMX password (if JMX has authentication enabled)");
     }
 
     private static void printHelp() {
