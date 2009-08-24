@@ -52,6 +52,8 @@ package com.openexchange.groupware.update.tools.console;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -61,21 +63,6 @@ import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
 
 final class JMXAuthenticatorImpl implements JMXAuthenticator {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class);
-
-    private static volatile Charset US_ASCII;
-
-    private static Charset getUSASCII() {
-        if (US_ASCII == null) {
-            synchronized (JMXAuthenticatorImpl.class) {
-                if (US_ASCII == null) {
-                    US_ASCII = Charset.forName("US-ASCII");
-                }
-            }
-        }
-        return US_ASCII;
-    }
 
     private final String[] credentials;
 
@@ -101,7 +88,7 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
          */
         final String username = creds[0];
         final String password = creds[1];
-        if ((this.credentials[0].equals(username)) && (this.credentials[1].equals(makeSHAPasswd(password)))) {
+        if ((this.credentials[0].equals(username)) && (this.credentials[1].equals(password))) {
             return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
         }
         throw new SecurityException("Invalid credentials");
@@ -114,7 +101,7 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
         try {
             md = MessageDigest.getInstance("SHA-1");
         } catch (final NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage(), e);
+            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
             return raw;
         }
 
@@ -127,13 +114,20 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
         }
         md.update(salt);
 
-        final String ret = getUSASCII().decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
+        try {
+            return Charset.forName("US-ASCII").decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
+        } catch (final IllegalCharsetNameException e) {
+            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
+        } catch (final UnsupportedCharsetException e) {
+            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
+        }
 
-        return ret;
+        return null;
+
     }
 
 }
