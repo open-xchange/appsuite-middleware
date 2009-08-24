@@ -332,7 +332,7 @@ public final class OXFolderSQL {
      * @throws DBPoolingException
      * @throws SQLException
      */
-    public static int lookUpFolderOnUpdate(int folderId, int parent, String folderName, int module, Connection readConArg, Context ctx) throws DBPoolingException, SQLException {
+    public static int lookUpFolderOnUpdate(final int folderId, final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -349,8 +349,8 @@ public final class OXFolderSQL {
             stmt.setInt(4, module); // module
             rs = stmt.executeQuery();
             while (rs.next()) {
-                int fuid = rs.getInt(1);
-                String fname = rs.getString(2);
+                final int fuid = rs.getInt(1);
+                final String fname = rs.getString(2);
                 if (folderName.equals(fname)) {
                     return fuid;
                 }
@@ -379,6 +379,32 @@ public final class OXFolderSQL {
                 closeReadCon = true;
             }
             stmt = readCon.prepareStatement(SQL_EXISTS);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+        }
+    }
+
+    /**
+     * Checks if underlying storage contains a folder whose ID matches given ID
+     * 
+     * @return <tt>true</tt> if folder exists, otherwise <tt>false</tt>
+     */
+    public static boolean exists(final int folderId, final Connection readConArg, final Context ctx, final String table) throws DBPoolingException, SQLException {
+        Connection readCon = readConArg;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (readCon == null) {
+                readCon = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            stmt = readCon.prepareStatement(new StringBuilder(40).append("SELECT fuid FROM ").append(table).append(
+                " WHERE cid = ? AND fuid = ?").toString());
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
