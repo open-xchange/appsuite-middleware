@@ -1,3 +1,7 @@
+* 2009-08-25 - tobias.prinz@open-xchange.com
+
+ - Bugfix #14331: Translation of privacy disclaimer for published contacts and infostore based on user locale
+
 * 2009-08-24 - tobias.prinz@open-xchange.com
 
  - Bugfix #14229: Handling SIEVE scripts with empty addresses
