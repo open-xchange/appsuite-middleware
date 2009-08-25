@@ -709,6 +709,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         if((String) parser.getOptionValue(this.accessActiveSync) != null) {
         	access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
+        	changed = true;
         }
         return changed;
     }
