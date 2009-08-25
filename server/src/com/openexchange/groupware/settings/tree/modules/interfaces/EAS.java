@@ -69,7 +69,7 @@ public class EAS extends AbstractModules {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "interfaces", "eas" };
+        return new String[] { "modules", "com.openexchange.usm.eas", "module" };
     }
 
     /**
