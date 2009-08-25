@@ -50,9 +50,11 @@
 package com.openexchange.groupware.search;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.java.Autoboxing;
 
 /**
  * SearchObject
@@ -136,12 +138,7 @@ public abstract class SearchObject {
 
 
     public int[] getFolders() {
-        final Integer[] tmp = folders.toArray(new Integer[folders.size()]);
-        final int[] retval = new int[folders.size()];
-        for (int i = 0; i < tmp.length; i++) {
-            retval[i] = tmp[i].intValue();
-        }
-        return retval;
+        return I2i(folders);
     }
 
     public boolean hasFolders() {

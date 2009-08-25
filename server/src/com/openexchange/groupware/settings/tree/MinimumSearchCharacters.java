@@ -89,16 +89,13 @@ public final class MinimumSearchCharacters implements PreferencesItemService {
      */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
+            public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
                 try {
-                    setting.setSingleValue(Integer.valueOf(ServerConfig.getInstance()
-                        .getInteger(Property.MINIMUM_SEARCH_CHARACTERS)));
-                } catch (final ConfigurationException e) {
+                    setting.setSingleValue(ServerConfig.getInteger(Property.MINIMUM_SEARCH_CHARACTERS));
+                } catch (ConfigurationException e) {
                     throw new SettingException(e);
                 }
             }

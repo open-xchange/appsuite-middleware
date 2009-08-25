@@ -321,8 +321,7 @@ public final class SQL {
 
     static String getPatternWhere(final TaskSearchObject search) {
         final StringBuilder sql = new StringBuilder();
-        // This compare is correct. NO_PATTERN is null and cannot be compared
-        // with Object.equals()
+        // This compare is correct. NO_PATTERN is null and cannot be compared with Object.equals()
         if (TaskSearchObject.NO_PATTERN != search.getPattern()) {
             sql.append('(');
             sql.append(Mapping.getMapping(Task.TITLE).getDBColumnName());

@@ -96,7 +96,7 @@ public final class MaxUploadIdleTimeout implements PreferencesItemService {
                 final Setting setting) throws SettingException {
                 try {
                     setting.setSingleValue(Integer.valueOf(ServerConfig
-                        .getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis)));
+                        .getInt(ServerConfig.Property.MaxUploadIdleTimeMillis)));
                 } catch (final ConfigurationException e) {
                     throw new SettingException(e);
                 }

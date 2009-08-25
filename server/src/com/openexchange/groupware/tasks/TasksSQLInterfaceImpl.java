@@ -50,10 +50,8 @@
 package com.openexchange.groupware.tasks;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,8 +59,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -72,14 +68,10 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
- * This class implements the methods needed by the tasks interface of the API
- * version 2.
+ * This class implements the methods needed by the tasks interface of the API version 2.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TasksSQLInterfaceImpl implements TasksSQLInterface {
@@ -139,11 +131,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Task getTaskById(final int taskId, final int folderId)
-        throws OXException {
+    public Task getTaskById(int taskId, int folderId) throws OXException {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
@@ -408,101 +396,19 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public SearchIterator<Task> getTasksByExtendedSearch(
-        final TaskSearchObject search, final int orderBy, final String orderDir,
-        final int[] columns) throws OXException {
-        List<Integer> all = new ArrayList<Integer>();
-        List<Integer> own = new ArrayList<Integer>();
-        List<Integer> shared = new ArrayList<Integer>();
+    public SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchData, int orderBy, String orderDir, int[] columns) throws OXException {
         final Context ctx;
-        final int userId = session.getUserId();
         final User user;
         final UserConfiguration config;
+        final int userId = session.getUserId();
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
             config = Tools.getUserConfiguration(ctx, userId);
-            final int[] groups = user.getGroups();
-            if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
-                final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                    userId,
-                    groups,
-                    config.getAccessibleModules(),
-                    FolderObject.TASK,
-                    ctx)).asQueue();
-                for (final FolderObject folder : queue) {
-                    if (folder.isShared(userId)) {
-                        shared.add(Integer.valueOf(folder.getObjectID()));
-                    } else if (Permission.canOnlySeeFolder(ctx, user, config, folder)) {
-                        continue;
-                    } else if (Permission.canReadInFolder(ctx, user, config, folder)) {
-                        own.add(Integer.valueOf(folder.getObjectID()));
-                    } else {
-                        all.add(Integer.valueOf(folder.getObjectID()));
-                    }
-                }
-            } else {
-                final FolderObject folder = Tools.getFolder(ctx,
-                    search.getFolder());
-                if (folder.isShared(userId)) {
-                    shared.add(Integer.valueOf(folder.getObjectID()));
-                } else if (Permission.canReadInFolder(ctx, user, config,
-                    folder)) {
-                    own.add(Integer.valueOf(folder.getObjectID()));
-                } else {
-                    all.add(Integer.valueOf(folder.getObjectID()));
-                }
-            }
-            all = Collections.unmodifiableList(all);
-            own = Collections.unmodifiableList(own);
-            shared = Collections.unmodifiableList(shared);
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final TaskException e) {
+            final Search search = new Search(ctx, user, config, searchData, orderBy, orderDir, columns);
+            return search.perform();
+        } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        if (LOG.isTraceEnabled()) {
-	        LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: "
-	            + shared);
-        }
-        final SearchIterator<Task> retval;
-        if (all.size() + own.size() + shared.size() == 0) {
-            retval = new SearchIterator<Task>() {
-                public void close() throws SearchIteratorException {
-                }
-                public boolean hasNext() {
-                    return false;
-                }
-                public boolean hasSize() {
-                    return true;
-                }
-                public Task next() throws SearchIteratorException, OXException {
-                    throw new SearchIteratorException(SearchIteratorException
-                        .SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.TASK);
-                }
-                public int size() {
-                    return 0;
-                }
-                public void addWarning(final AbstractOXException warning) {
-        		}
-        		public AbstractOXException[] getWarnings() {
-        			return null;
-        		}
-        		public boolean hasWarnings() {
-        			return false;
-        		}
-            };
-        } else {
-            try {
-                retval = TaskStorage.getInstance().search(ctx, userId, search,
-                    orderBy, orderDir, columns, all, own, shared);
-            } catch (final TaskException e) {
-                throw Tools.convert(e);
-            }
-        }
-        return retval;
     }
 }

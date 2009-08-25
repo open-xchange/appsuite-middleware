@@ -127,33 +127,25 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     public static <T> SearchIterator<T> createEmptyIterator() {
         return new SearchIterator<T>() {
-
             public boolean hasNext() {
                 return false;
             }
-
             public T next() throws SearchIteratorException, OXException {
                 return null;
             }
-
             public void close() throws SearchIteratorException {
             }
-
             public int size() {
                 return 0;
             }
-
             public boolean hasSize() {
                 return true;
             }
-
             public void addWarning(final AbstractOXException warning) {
             }
-
             public AbstractOXException[] getWarnings() {
                 return null;
             }
-
             public boolean hasWarnings() {
                 return false;
             }

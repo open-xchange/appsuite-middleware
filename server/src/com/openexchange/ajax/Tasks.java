@@ -79,37 +79,37 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Tasks extends DataServlet {
-	
-	private static final long serialVersionUID = 8092832647688901704L;
-	
-	private static final Log LOG = LogFactory.getLog(Tasks.class);
-	
-	@Override
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final Response response = new Response();
-		try {
-			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final ServerSession session = getSessionObject(httpServletRequest);
-			final JSONObject jsonObj;
-			try {			
-				 jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-	            writeResponse(response, httpServletResponse);
-	            return;
-			}
-			final TaskRequest taskRequest = new TaskRequest(session);
-			final JSONValue responseObj = taskRequest.action(action, jsonObj);
-			response.setTimestamp(taskRequest.getTimestamp());
-			response.setData(responseObj);
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXConflictException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final JSONException e) {
+
+    private static final long serialVersionUID = 8092832647688901704L;
+
+    private static final Log LOG = LogFactory.getLog(Tasks.class);
+
+    @Override
+    protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        final Response response = new Response();
+        try {
+            final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ServerSession session = getSessionObject(httpServletRequest);
+            final JSONObject jsonObj;
+            try {
+                 jsonObj = convertParameter2JSONObject(httpServletRequest);
+            } catch (final JSONException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                writeResponse(response, httpServletResponse);
+                return;
+            }
+            final TaskRequest taskRequest = new TaskRequest(session);
+            final JSONValue responseObj = taskRequest.action(action, jsonObj);
+            response.setTimestamp(taskRequest.getTimestamp());
+            response.setData(responseObj);
+        } catch (final OXMandatoryFieldException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final OXConflictException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
@@ -117,75 +117,75 @@ public class Tasks extends DataServlet {
         } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (final OXFolderNotFoundException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXObjectNotFoundException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final OXPermissionException e) {
-			LOG.info(e.getMessage(), e);
-			response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
+        } catch (final OXFolderNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final OXObjectNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final OXPermissionException e) {
+            LOG.info(e.getMessage(), e);
+            response.setException(e);
+        } catch (final SearchIteratorException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AjaxException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
         } catch (final OXException e) {
-			if (e.getCategory() == Category.USER_INPUT) {
-				LOG.debug(e.getMessage(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
-			}
-			response.setException(e);
+            if (e.getCategory() == Category.USER_INPUT) {
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
+            response.setException(e);
         }
-		
-		writeResponse(response, httpServletResponse);
-	}
 
-	@Override
-	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		final Response response = new Response();
-		try {
-			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final ServerSession session = getSessionObject(httpServletRequest);
-			
-			final String data = getBody(httpServletRequest);
-			if (data.length() > 0) {
-				final TaskRequest taskRequest = new TaskRequest(session);
-				final JSONObject jsonObj;
+        writeResponse(response, httpServletResponse);
+    }
 
-				try {
-					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (final JSONException e) {
-					LOG.error(e.getMessage(), e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-		            writeResponse(response, httpServletResponse);
-		            return;
-				}
-				
-				if (data.charAt(0) == '[') {
-					final JSONArray jsonDataArray = new JSONArray(data);
-					jsonObj.put(PARAMETER_DATA, jsonDataArray);
-				
-					final JSONValue responseObj = taskRequest.action(action, jsonObj);
-					response.setTimestamp(taskRequest.getTimestamp());
-					response.setData(responseObj);
-				} else if (data.charAt(0) == '{') {
-					final JSONObject jsonDataObject = new JSONObject(data);
-					jsonObj.put(PARAMETER_DATA, jsonDataObject);
+    @Override
+    protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        final Response response = new Response();
+        try {
+            final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final ServerSession session = getSessionObject(httpServletRequest);
 
-					final Object responseObj = taskRequest.action(action, jsonObj);
-					response.setTimestamp(taskRequest.getTimestamp());
-					response.setData(responseObj);
-				} else {
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
-				}
-			} else {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
-			}
-		} catch (final JSONException e) {
+            final String data = getBody(httpServletRequest);
+            if (data.length() > 0) {
+                final TaskRequest taskRequest = new TaskRequest(session);
+                final JSONObject jsonObj;
+
+                try {
+                    jsonObj = convertParameter2JSONObject(httpServletRequest);
+                } catch (final JSONException e) {
+                    LOG.error(e.getMessage(), e);
+                    response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                    writeResponse(response, httpServletResponse);
+                    return;
+                }
+
+                if (data.charAt(0) == '[') {
+                    final JSONArray jsonDataArray = new JSONArray(data);
+                    jsonObj.put(PARAMETER_DATA, jsonDataArray);
+
+                    final JSONValue responseObj = taskRequest.action(action, jsonObj);
+                    response.setTimestamp(taskRequest.getTimestamp());
+                    response.setData(responseObj);
+                } else if (data.charAt(0) == '{') {
+                    final JSONObject jsonDataObject = new JSONObject(data);
+                    jsonObj.put(PARAMETER_DATA, jsonDataObject);
+
+                    final Object responseObj = taskRequest.action(action, jsonObj);
+                    response.setTimestamp(taskRequest.getTimestamp());
+                    response.setData(responseObj);
+                } else {
+                    httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
+                }
+            } else {
+                httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
+            }
+        } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
@@ -193,24 +193,24 @@ public class Tasks extends DataServlet {
         } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
+        } catch (final SearchIteratorException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AjaxException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
         } catch (final OXException e) {
-			if (e.getCategory() == Category.USER_INPUT) {
-				LOG.debug(e.getMessage(), e);
-			} else {
-				LOG.error(e.getMessage(), e);
-			}
-			response.setException(e);
-		}
-		writeResponse(response, httpServletResponse);
-	}
-	
-	@Override
+            if (e.getCategory() == Category.USER_INPUT) {
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
+            response.setException(e);
+        }
+        writeResponse(response, httpServletResponse);
+    }
+
+    @Override
     protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().hasTask();
     }

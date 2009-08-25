@@ -102,7 +102,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
                 }
                 long tmp;
                 try {
-                    tmp = ServerConfig.getInteger(ServerConfig.Property.MAX_UPLOAD_SIZE);
+                    tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
                 } catch (final ConfigurationException e) {
                     LOG.error(e.getMessage(), e);
                     tmp = 0;

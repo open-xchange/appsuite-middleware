@@ -146,6 +146,41 @@ public class TaskException extends AbstractOXException {
      * Error codes for task exceptions.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+     */
     public enum Code {
         /**
          * Error while inserting task: %s.
@@ -399,7 +434,11 @@ public class TaskException extends AbstractOXException {
          */
         COSTS_OFF_LIMIT("The entered value for costs is not within the allowed "
             + "range. Please use a value from -130000.00 to 130000.00.",
-            Category.USER_INPUT, Detail.TRUNCATED, 50);
+            Category.USER_INPUT, Detail.TRUNCATED, 50),
+        /**
+         * The search pattern is too short. It must be at least %1$d characters long.
+         */
+        PATTERN_TOO_SHORT("The search pattern is too short. It must be at least %1$d characters long.", Category.USER_INPUT, Detail.OTHER, 51);
 
         /**
          * Message of the exception.

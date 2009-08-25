@@ -163,6 +163,7 @@ public final class Permission {
      * @param user User.
      * @param userConfig Groupware configuration of the user.
      * @param folder folder object that should be tested for read access.
+     * @return <code>false</code> if all objects can be read and <code>true</code> if only own objects can be read.
      * @throws TaskException if the reading is not okay.
      */
     static boolean canReadInFolder(final Context ctx, final User user, final UserConfiguration userConfig, final FolderObject folder) throws TaskException {
@@ -187,6 +188,7 @@ public final class Permission {
      * @param user User.
      * @param userConfig Groupware configuration of the user.
      * @param folder folder object that should be tested for read access.
+     * @return <code>false</code> if all objects can be read and <code>true</code> if only own objects can be read.
      * @throws TaskException if the reading is not okay.
      */
     static boolean canReadInFolder(final Context ctx, final Connection con, final User user, final UserConfiguration userConfig, final FolderObject folder) throws TaskException {
@@ -234,6 +236,28 @@ public final class Permission {
     static void canReadInFolder(final Context ctx, final Connection con, final User user, final UserConfiguration userConfig, final FolderObject folder, final Task task) throws TaskException {
         final boolean onlyOwn = canReadInFolder(ctx, con, user, userConfig, folder);
         if (onlyOwn && (user.getId() != task.getCreatedBy())) {
+            throw new TaskException(Code.NO_READ_PERMISSION, folder.getFolderName(), I(folder.getObjectID()));
+        }
+    }
+
+    static void checkReadInFolder(Context ctx, User user, UserConfiguration userConfig, FolderObject folder) throws TaskException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(e);
+        }
+        try {
+            checkReadInFolder(ctx, con, user, userConfig, folder);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    static void checkReadInFolder(Context ctx, Connection con, User user, UserConfiguration userConfig, FolderObject folder) throws TaskException {
+        checkForTaskFolder(folder);
+        final OCLPermission permission = getPermission(ctx, con, user, userConfig, folder);
+        if (!permission.canReadAllObjects() && !permission.canReadOwnObjects()) {
             throw new TaskException(Code.NO_READ_PERMISSION, folder.getFolderName(), I(folder.getObjectID()));
         }
     }
