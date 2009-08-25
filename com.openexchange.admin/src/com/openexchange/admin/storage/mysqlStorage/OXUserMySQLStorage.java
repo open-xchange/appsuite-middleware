@@ -2014,6 +2014,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setPublication(user.isPublication());
             acc.setSubscription(user.isSubscription());
             acc.setActiveSync(user.hasActiveSync());
+            acc.setUSM(user.hasUSM());
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2331,6 +2332,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setSubscription(access.isSubscription());
             user.setPublication(access.isPublication());
             user.setHasActiveSync(access.getActiveSync());
+            user.setHasUSM(access.getUSM());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             

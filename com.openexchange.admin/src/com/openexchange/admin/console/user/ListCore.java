@@ -301,6 +301,8 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
             columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
+            columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
+            
             
             
         }        
