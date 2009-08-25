@@ -137,7 +137,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * JSON error: %s
          */
-        JSONError("JSON error: %s", Category.CODE_ERROR, 9), ;
+        JSONError("JSON error: %s", Category.CODE_ERROR, 9),
+        /**
+         * Invalid parameter "%1$s": %2$s
+         */
+        InvalidParameterValue("Invalid parameter \"%1$s\": %2$s", Category.CODE_ERROR, 10);
 
         /**
          * Message of the exception.
