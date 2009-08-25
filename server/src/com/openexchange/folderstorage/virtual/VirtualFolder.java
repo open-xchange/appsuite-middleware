@@ -55,6 +55,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link VirtualFolder} - A virtual folder.
@@ -130,11 +131,11 @@ public final class VirtualFolder implements Folder {
     }
 
     public Date getLastModified() {
-        return lastModified == null ? null : new Date(lastModified.getTime());
+        return lastModified == null ? realFolder.getLastModified() : cloneDate(lastModified);
     }
 
     public int getModifiedBy() {
-        return modifiedBy;
+        return 0 == modifiedBy ? realFolder.getModifiedBy() : modifiedBy;
     }
 
     public void setCreatedBy(final int createdBy) {
@@ -162,11 +163,11 @@ public final class VirtualFolder implements Folder {
     }
 
     public String getLocalizedName(final Locale locale) {
-        return name;
+        return new StringHelper(locale).getString(getName());
     }
 
     public String getName() {
-        return name;
+        return null == name ? realFolder.getName() : name;
     }
 
     public String getParentID() {
@@ -174,7 +175,10 @@ public final class VirtualFolder implements Folder {
     }
 
     public Permission[] getPermissions() {
-        return permissions;
+        /*
+         * If no permissions applied return real folder's permissions
+         */
+        return permissions == null ? realFolder.getPermissions() : permissions;
     }
 
     public String[] getSubfolderIDs() {
@@ -295,6 +299,13 @@ public final class VirtualFolder implements Folder {
 
     public void setUnread(final int unread) {
         // Nothing to do
+    }
+
+    private static Date cloneDate(final Date d) {
+        if (null == d) {
+            return null;
+        }
+        return new Date(d.getTime());
     }
 
 }
