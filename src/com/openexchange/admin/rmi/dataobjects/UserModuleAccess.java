@@ -121,6 +121,9 @@ public class UserModuleAccess implements Serializable {
     
     private boolean Publication = true;
     
+    private boolean ActiveSync = true;
+    
+    
     /**
      * Creates a new instance of UserModuleAccess
      */
@@ -201,6 +204,7 @@ public class UserModuleAccess implements Serializable {
     	this.MultipleMailAccounts = true;
     	this.Subscription = true;
     	this.Publication = true;
+    	this.ActiveSync = true;
     }
     
     /**
@@ -232,6 +236,7 @@ public class UserModuleAccess implements Serializable {
         this.MultipleMailAccounts = false;
         this.Subscription = false;
         this.Publication = false;
+        this.ActiveSync = false;
     }
     
     public boolean getEditGroup() {
@@ -536,6 +541,15 @@ public class UserModuleAccess implements Serializable {
         this.Webmail = val;
     }
     
+	public boolean getActiveSync() {
+		return ActiveSync;
+	}
+	
+	public void setActiveSync(boolean activeSync) {
+		this.ActiveSync = activeSync;
+	}
+
+    
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder();
@@ -666,4 +680,5 @@ public class UserModuleAccess implements Serializable {
         }
         return true;
     }
+
 }
