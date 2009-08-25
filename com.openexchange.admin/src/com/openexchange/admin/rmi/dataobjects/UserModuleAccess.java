@@ -123,6 +123,8 @@ public class UserModuleAccess implements Serializable {
     
     private boolean ActiveSync = true;
     
+    private boolean USM = true;
+    
     
     /**
      * Creates a new instance of UserModuleAccess
@@ -205,6 +207,7 @@ public class UserModuleAccess implements Serializable {
     	this.Subscription = true;
     	this.Publication = true;
     	this.ActiveSync = true;
+    	this.USM = true;
     }
     
     /**
@@ -237,6 +240,7 @@ public class UserModuleAccess implements Serializable {
         this.Subscription = false;
         this.Publication = false;
         this.ActiveSync = false;
+        this.USM = false;
     }
     
     public boolean getEditGroup() {
@@ -549,7 +553,16 @@ public class UserModuleAccess implements Serializable {
 		this.ActiveSync = activeSync;
 	}
 
-    
+	   
+	public boolean getUSM() {
+		return USM;
+	}
+	
+	public void setUSM(boolean val) {
+		this.USM = val;
+	}
+
+	
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder();

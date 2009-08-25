@@ -215,7 +215,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_SUBSCRIPTION = "access-subscription";
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
-     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
+    protected static final String OPT_ACCESS_USM = "access-usm";
+    protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     
     
     
@@ -282,6 +283,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessPublication = null;
     protected Option accessSubscription = null;
     protected Option accessActiveSync = null;
+    protected Option accessUSM = null;
+    
     
     // non-generic extended option
     protected Option addGUISettingOption = null;
@@ -583,7 +586,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setSubscription(accessOption2BooleanCreate(parser,this.accessSubscription));
         access.setPublication(accessOption2BooleanCreate(parser,this.accessPublication));
         access.setActiveSync(accessOption2BooleanCreate(parser,this.accessActiveSync));
-        
+        access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
     }
     
     protected final boolean accessOption2BooleanCreate(final AdminParser parser,final Option accessOption){
@@ -711,6 +714,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         	access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
         	changed = true;
         }
+        if((String) parser.getOptionValue(this.accessUSM) != null) {
+        	access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
+        	changed = true;
+        }
         return changed;
     }
     
@@ -793,6 +800,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);
         this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
+        this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
+        
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
