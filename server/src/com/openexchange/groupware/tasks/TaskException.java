@@ -436,9 +436,9 @@ public class TaskException extends AbstractOXException {
             + "range. Please use a value from -130000.00 to 130000.00.",
             Category.USER_INPUT, Detail.TRUNCATED, 50),
         /**
-         * The search pattern is too short. It must be at least %1$d characters long.
+         * In order to accomplish the search, %1$d or more characters are required.
          */
-        PATTERN_TOO_SHORT("The search pattern is too short. It must be at least %1$d characters long.", Category.USER_INPUT, Detail.OTHER, 51);
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, Detail.OTHER, 51);
 
         /**
          * Message of the exception.

@@ -68,6 +68,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.sql.SearchStrings;
 
 /**
  * Implements the search operation logic.
@@ -127,7 +128,7 @@ public class Search {
         if (0 == minimumSearchCharacters) {
             return;
         }
-        if (search.getPattern().length() < minimumSearchCharacters) {
+        if (SearchStrings.lengthWithoutWildcards(search.getPattern()) < minimumSearchCharacters) {
             throw new TaskException(Code.PATTERN_TOO_SHORT, I(minimumSearchCharacters));
         }
     }
