@@ -63,28 +63,28 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link UnSubscribe} - Serves the <code>UNSUBSCRIBE</code> action.
+ * {@link Unsubscribe} - Serves the <code>UNSUBSCRIBE</code> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnSubscribe extends AbstractAction {
+public final class Unsubscribe extends AbstractAction {
 
     /**
-     * Initializes a new {@link UnSubscribe}.
+     * Initializes a new {@link Unsubscribe}.
      * 
      * @param session
      */
-    public UnSubscribe(final ServerSession session) {
+    public Unsubscribe(final ServerSession session) {
         super(session);
     }
 
     /**
-     * Initializes a new {@link UnSubscribe}.
+     * Initializes a new {@link Unsubscribe}.
      * 
      * @param user
      * @param context
      */
-    public UnSubscribe(final User user, final Context context) {
+    public Unsubscribe(final User user, final Context context) {
         super(user, context);
     }
 
