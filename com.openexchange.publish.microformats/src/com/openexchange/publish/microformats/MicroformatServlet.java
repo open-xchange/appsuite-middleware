@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.microformats.osgi.StringTranslator;
 import com.openexchange.publish.microformats.tools.UncloseableWriter;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -85,6 +86,18 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final long serialVersionUID = 6727750981539640363L;
 
+    private static final String DISCLAIMER_PRIVACY = "Privacy:\n"
+        +   "The data and any references contained in this webpage are shared with you under the assumption "
+        +   "that the owner of the data was entitled to make them available to you. Neither Open-Xchange, "
+        +   "nor any of its subsidiaries or affiliates shall be liable for its publication or "
+        +   "re-publication.\n"
+        +   "Any unauthorized use or dissemination of this data is prohibited. If you intend to store, "
+        +   "process, or pass on this data, please make sure that you have the right to do so.\n"
+        +   "If you are one of the people listed or responsible for a resource listed on this page and you "
+        +   "don’t agree with the publication, please send an email containing the URL (the link) to this "
+        +   "webpage to %s and the publisher of the data:\n"
+        +   "Data published by %s on %s\n";
+    
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
     private static final Map<String, String> templateNames = new HashMap<String, String>();
@@ -104,6 +117,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
 
     private static UserService userService;
+
+    private static StringTranslator translator;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
@@ -125,6 +140,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     public static void setUserService(UserService service) {
         userService = service;
+    }
+
+    public static void setStringTranslator(StringTranslator trans) {
+        translator = trans;
     }
 
     public static void registerType(String module, OXMFPublicationService publisher, String templateName, Map<String, Object> additionalVars) {
@@ -160,13 +179,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             Collection<? extends Object> loaded = dataLoader.load(publication);
 
             HashMap<String, Object> variables = new HashMap<String, Object>();
+            User user = getUser(publication);
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             variables.put("request", req);
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
-            variables.put("publishDate", new Date());
-            variables.put("publisher", getUser(publication));
+            variables.put("privacy", formatPrivacyText(getPrivacyText(user), user, new Date()));
 
             if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
@@ -181,6 +200,12 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             resp.getWriter().println("An exception occurred: ");
             t.printStackTrace(resp.getWriter());
         }
+    }
+
+    private String formatPrivacyText(String privacyText, User user, Date creationDate) {
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
+        String retVal = String.format(privacyText, "revoke@ox.io", user.getMail(), date);
+        return "<p>" +retVal.replaceAll("\n", "</p><p>") + "</p>";
     }
 
     private String getCollectionName(String module) {
@@ -214,6 +239,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         int uid = publication.getUserId();
         User user = userService.getUser(uid, context);
         return user;
+    }
+    
+    private String getPrivacyText(User user){
+        return translator.translate(user.getLocale(), DISCLAIMER_PRIVACY);
     }
 
 }

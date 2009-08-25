@@ -177,24 +177,8 @@
 	</div>
 	
 	<#if (infostore?size > 0)>
-	<div id="disclaimer">
-		<h2>Privacy</h2>
-		<p>The data and any references contained in this webpage are shared with you under 
-			the assumption that the owner of the data was entitled to make them available 
-			to you.  Neither Open-Xchange, nor any of its subsidiaries or affiliates shall 
-			be liable for its publication or re-publication.</p> 
-
-		<p>Any unauthorized use or dissemination of this data is prohibited. If you intend 
-			to store, process, or pass on this data, please make sure that you have the 
-			right to do so.</p> 
-
-		<p>If you are one of the people listed or responsible for a resource listed on 
-			this page and you don’t agree with the publication, please send an email 
-			containing the URL (the link) to this webpage to the publisher of the 
-			data:</p> 
-
-		<p>Data published by <a href="mailto:${publisher.mail}">${publisher.givenName} 
-			${publisher.surname}</a> on ${publishDate?string("yyyy-MM-dd")}</p>
+	<div id="disclaimer"> 
+		${privacy}
 	</div>
 	</#if>
 </body>

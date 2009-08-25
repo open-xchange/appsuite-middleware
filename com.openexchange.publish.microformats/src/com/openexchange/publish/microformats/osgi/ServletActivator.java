@@ -54,15 +54,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
 import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -76,13 +80,17 @@ public class ServletActivator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(ServletActivator.class);
 
+    private ServiceTracker tracker;
+    
     private PublicationServicesActivator activator = new PublicationServicesActivator();
 
     private boolean registered;
 
+    private I18nServiceTrackerCustomizer customizer;
+
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class  };
+        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -102,11 +110,15 @@ public class ServletActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         activator.start(context);
+        customizer = new I18nServiceTrackerCustomizer(context);
+        tracker = new ServiceTracker(context, I18nService.class.getName(), customizer );
+        tracker.open();
         registerServlet();
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        tracker.close();
         activator.stop(context);
         unregisterServlet();
     }
@@ -120,10 +132,9 @@ public class ServletActivator extends DeferredActivator {
         InfostoreFacade infostore = getService(InfostoreFacade.class);
         UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         UserService users = getService(UserService.class);
-        
-        
+
         if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users) {
-             return;
+            return;
         }
 
         OnlinePublicationServlet.setContextService(contexts);
@@ -131,15 +142,15 @@ public class ServletActivator extends DeferredActivator {
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setTemplateService(templates);
         MicroformatServlet.setUserService(users);
+        MicroformatServlet.setStringTranslator(customizer);
         MicroformatServlet microformatServlet = new MicroformatServlet();
-
+        
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
 
         InfostoreFileServlet.setUserConfigs(userConfigs);
         InfostoreFileServlet.setUsers(users);
         InfostoreFileServlet.setInfostore(infostore);
-        
-        
+
         registered = true;
         for (String alias : activator.getAliases()) {
             try {
