@@ -214,7 +214,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS = "access-multiple-mail-accounts";
     protected static final String OPT_ACCESS_SUBSCRIPTION = "access-subscription";
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
-    protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
+    protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
+     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     
     
     
@@ -280,6 +281,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessMultipleMailAccounts = null;
     protected Option accessPublication = null;
     protected Option accessSubscription = null;
+    protected Option accessActiveSync = null;
     
     // non-generic extended option
     protected Option addGUISettingOption = null;
@@ -580,6 +582,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setMultipleMailAccounts(accessOption2BooleanCreate(parser,this.accessMultipleMailAccounts));
         access.setSubscription(accessOption2BooleanCreate(parser,this.accessSubscription));
         access.setPublication(accessOption2BooleanCreate(parser,this.accessPublication));
+        access.setActiveSync(accessOption2BooleanCreate(parser,this.accessActiveSync));
         
     }
     
@@ -704,6 +707,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setPublication(accessOption2BooleanCreate(parser, this.accessPublication));
             changed = true;
         }
+        if((String) parser.getOptionValue(this.accessActiveSync) != null) {
+        	access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
+        }
         return changed;
     }
     
@@ -785,6 +791,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, false,true);
         this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);
         this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
+        this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
