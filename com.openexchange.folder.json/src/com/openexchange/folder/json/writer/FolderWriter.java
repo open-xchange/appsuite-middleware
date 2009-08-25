@@ -318,6 +318,13 @@ public final class FolderWriter {
                 jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
             }
         });
+        m.put(Integer.valueOf(FolderField.CAPABILITIES.getColumn()), new FolderFieldWriter() {
+
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                final int caps = folder.getCapabilities();
+                jsonPutter.put(FolderField.CAPABILITIES.getName(), -1 == caps ? JSONObject.NULL : Integer.valueOf(caps));
+            }
+        });
         STATIC_WRITERS_MAP = Collections.unmodifiableMap(m);
 
         final FolderField[] all = FolderField.values();
