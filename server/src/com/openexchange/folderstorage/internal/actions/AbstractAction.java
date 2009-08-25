@@ -134,6 +134,27 @@ public abstract class AbstractAction {
     }
 
     /**
+     * Checks if given folder storage is already contained in collection of opened storages. If yes, this method terminates immediately.
+     * Otherwise the folder storage is opened according to specified modify flag and is added to specified collection of opened storages.
+     * 
+     * @param checkMe The folder storage to check
+     * @param modify <code>true</code> if the storage is supposed to be opened for a modifying operation; otherwise <code>false</code>
+     * @param openedStorages The collection of already opened storages
+     * @throws FolderException If a folder error occurs
+     */
+    protected void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+        for (final FolderStorage ps : openedStorages) {
+            if (checkMe.equals(ps)) {
+                // Passed storage is already opened
+                return;
+            }
+        }
+        // Passed storage has not been opened before. Open now and add to collection
+        checkMe.startTransaction(storageParameters, modify);
+        openedStorages.add(checkMe);
+    }
+
+    /**
      * Gets the context.
      * 
      * @return The context
