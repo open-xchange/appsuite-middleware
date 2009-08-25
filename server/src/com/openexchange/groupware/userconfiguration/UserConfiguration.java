@@ -117,6 +117,9 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private static final int SUBSCRIPTION = 1 << 23;
 
     private static final int PUBLICATION = 1 << 24;
+    
+    private static final int ACTIVE_SYNC = 1 << 25;
+    
 
     /*-
      * Field members
@@ -773,6 +776,20 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public void setPublication(final boolean publication) {
         setPermission(publication, PUBLICATION);
 
+    }
+    
+    /**
+     *  Checks if this user configuration indicates that the user may use Exchange Active Sync
+     */
+    public boolean hasActiveSync() {
+        return hasPermission(ACTIVE_SYNC);
+    }
+    
+    /**
+     * Sets if this use is able to use Exchange Active Sync
+     */
+    public void setHasActiveSync(boolean eas) {
+        setPermission(eas, ACTIVE_SYNC);
     }
 
     /**
