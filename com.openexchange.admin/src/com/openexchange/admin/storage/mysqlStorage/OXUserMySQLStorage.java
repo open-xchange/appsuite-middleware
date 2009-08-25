@@ -2013,7 +2013,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setMultipleMailAccounts(user.isMultipleMailAccounts());
             acc.setPublication(user.isPublication());
             acc.setSubscription(user.isSubscription());
-
+            acc.setActiveSync(user.hasActiveSync());
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2330,6 +2330,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setMultipleMailAccounts(access.isMultipleMailAccounts());
             user.setSubscription(access.isSubscription());
             user.setPublication(access.isPublication());
+            user.setHasActiveSync(access.getActiveSync());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             
