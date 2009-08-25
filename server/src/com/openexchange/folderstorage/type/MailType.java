@@ -47,43 +47,38 @@
  *
  */
 
-package com.openexchange.folderstorage.database.contentType;
+package com.openexchange.folderstorage.type;
 
-import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.Type;
 
 /**
- * {@link TaskContentType} - The folder storage content type for tasks.
+ * {@link MailType} - The mail type.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TaskContentType implements ContentType {
+public final class MailType implements Type {
 
-    private static final TaskContentType instance = new TaskContentType();
+    private static final MailType instance = new MailType();
 
     /**
-     * Gets the {@link TaskContentType} instance.
+     * Gets the {@link MailType} instance.
      * 
-     * @return The {@link TaskContentType} instance
+     * @return The {@link MailType} instance
      */
-    public static TaskContentType getInstance() {
+    public static MailType getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link TaskContentType}.
+     * Initializes a new {@link MailType}.
      */
-    private TaskContentType() {
+    private MailType() {
         super();
     }
 
-    @Override
-    public String toString() {
-        return "tasks";
-    }
-
-    public int getModule() {
-        // From FolderObject.TASK
-        return 1;
+    public int getType() {
+        // Taken from FolderObject.MAIL
+        return 7;
     }
 
 }

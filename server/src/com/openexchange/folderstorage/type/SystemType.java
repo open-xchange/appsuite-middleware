@@ -47,7 +47,9 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.type;
+
+import com.openexchange.folderstorage.Type;
 
 /**
  * {@link SystemType} - The system type.

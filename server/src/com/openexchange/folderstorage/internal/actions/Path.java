@@ -174,7 +174,8 @@ public final class Path extends AbstractUserizedFolderAction {
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
             path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, openedStorages));
             while (!FolderStorage.ROOT_ID.equals(folder.getParentID())) {
-                folder = folderStorage.getFolder(treeId, folder.getParentID(), storageParameters);
+                final FolderStorage fs = getOpenedStorage(folder.getParentID(), treeId, openedStorages);
+                folder = fs.getFolder(treeId, folder.getParentID(), storageParameters);
                 ownPermission = permissionProvider.getOwnPermission(folder);
                 if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(

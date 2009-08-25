@@ -99,7 +99,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
                 } catch (final NumberFormatException e) {
-                    throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+                    throw new AjaxException(AjaxException.Code.InvalidParameterValue, "timestamp", timestampStr);
                 }
             }
         }

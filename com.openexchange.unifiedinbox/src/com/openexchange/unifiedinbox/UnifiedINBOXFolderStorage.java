@@ -190,6 +190,18 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(parentFullname)) {
             return getKnownFolderSubfolders(parentFullname);
         }
+        final String fn = startsWithKnownFullname(parentFullname);
+        if (null != fn) {
+            final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fn);
+            final int nestedAccountId = fa.getAccountId();
+            if (!isMailAccountEnabled(nestedAccountId)) {
+                throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, parentFullname);
+            }
+            /*
+             * Return empty array since mapped default folders have no subfolders in Unified INBOX account
+             */
+            return EMPTY_PATH;
+        }
         throw new UnifiedINBOXException(UnifiedINBOXException.Code.FOLDER_NOT_FOUND, parentFullname);
     }
 

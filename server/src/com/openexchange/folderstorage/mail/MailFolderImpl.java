@@ -52,9 +52,10 @@ package com.openexchange.folderstorage.mail;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.SystemType;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.type.MailType;
+import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -88,7 +89,10 @@ public final class MailFolderImpl extends AbstractFolder {
         super();
         this.id = MailFolderUtility.prepareFullname(accountId, mailFolder.getFullname());
         this.name = mailFolder.getName();
-        this.parent = MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+        // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
+        this.parent = mailFolder.isRootFolder() ? String.valueOf(1) : MailFolderUtility.prepareFullname(
+            accountId,
+            mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         this.permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
@@ -99,10 +103,10 @@ public final class MailFolderImpl extends AbstractFolder {
         this.capabilities = capabilities;
         {
             final String value = mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append(
-            '/').append(mailFolder.getUnreadMessageCount()).append(')').toString();
+                '/').append(mailFolder.getUnreadMessageCount()).append(')').toString();
             this.summary = value;
         }
-        this.deefault = /*mailFolder.isDefaultFolder();*/0 == accountId && "INBOX".equals(mailFolder.getFullname());
+        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && "INBOX".equals(mailFolder.getFullname());
         this.total = mailFolder.getMessageCount();
         this.nu = mailFolder.getNewMessageCount();
         this.unread = mailFolder.getUnreadMessageCount();
@@ -111,12 +115,12 @@ public final class MailFolderImpl extends AbstractFolder {
 
     @Override
     public ContentType getContentType() {
-        return MailContentType.getInstance();
+        return SystemContentType.getInstance();
     }
 
     @Override
     public Type getType() {
-        return SystemType.getInstance();
+        return MailType.getInstance();
     }
 
     @Override

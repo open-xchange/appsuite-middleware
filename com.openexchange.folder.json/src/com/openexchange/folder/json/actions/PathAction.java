@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -100,13 +101,24 @@ public final class PathAction extends AbstractFolderAction {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final UserizedFolder[] subfolders = folderService.getPath(treeId, folderId, session);
         /*
+         * Determine last-modified time stamp
+         */
+        long lastModified = 0;
+        for (final UserizedFolder userizedFolder : subfolders) {
+            final Date modified = userizedFolder.getLastModified();
+            if (modified != null) {
+                final long time = modified.getTime();
+                lastModified = ((lastModified >= time) ? lastModified : time);
+            }
+        }
+        /*
          * Write subfolders as JSON arrays to JSON array
          */
         final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders);
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonArray);
+        return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified));
     }
 
 }

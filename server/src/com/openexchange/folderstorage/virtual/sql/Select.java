@@ -179,8 +179,9 @@ public final class Select {
             // Select folder data
             PreparedStatement stmt = null;
             ResultSet rs = null;
+            final boolean working = StorageType.WORKING.equals(storageType);
             try {
-                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT : SQL_SELECT_BCK);
+                stmt = con.prepareStatement(working ? SQL_SELECT : SQL_SELECT_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -199,7 +200,7 @@ public final class Select {
             }
             // Select subfolders
             try {
-                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
+                stmt = con.prepareStatement(working ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -219,7 +220,7 @@ public final class Select {
             }
             // Select permissions
             try {
-                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
+                stmt = con.prepareStatement(working ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -250,7 +251,7 @@ public final class Select {
             }
             // Select subscription
             try {
-                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_SUBSCRIPTION : SQL_SELECT_SUBSCRIPTION_BCK);
+                stmt = con.prepareStatement(working ? SQL_SELECT_SUBSCRIPTION : SQL_SELECT_SUBSCRIPTION_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -302,7 +303,8 @@ public final class Select {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
+                final boolean working = StorageType.WORKING.equals(storageType);
+                stmt = con.prepareStatement(working ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -317,7 +319,7 @@ public final class Select {
                 DBUtils.closeSQLStuff(rs, stmt);
                 final String[][] ret = new String[subfolderIds.size()][];
                 // Select names
-                final String sql = StorageType.WORKING.equals(storageType) ? SQL_SELECT : SQL_SELECT_BCK;
+                final String sql = working ? SQL_SELECT : SQL_SELECT_BCK;
                 for (int i = 0; i < ret.length; i++) {
                     final String subfolderId = subfolderIds.get(i);
                     stmt = con.prepareStatement(sql);

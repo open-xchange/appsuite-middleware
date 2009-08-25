@@ -56,7 +56,7 @@ package com.openexchange.folder.json;
  */
 public final class Constants {
 
-    public static final String MODULE = "folder2";
+    public static final String MODULE = "folders";
 
     public static final String SERVLET_PATH = "/ajax/" + MODULE;
 

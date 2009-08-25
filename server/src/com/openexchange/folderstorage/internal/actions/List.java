@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -244,6 +245,8 @@ public final class List extends AbstractUserizedFolderAction {
                     final Throwable t = e.getCause();
                     if (FolderException.class.isAssignableFrom(t.getClass())) {
                         throw (FolderException) t;
+                    } else if (AbstractOXException.class.isAssignableFrom(t.getClass())) {
+                        throw new FolderException((AbstractOXException) t);
                     } else if (t instanceof RuntimeException) {
                         throw (RuntimeException) t;
                     } else if (t instanceof Error) {
@@ -254,6 +257,8 @@ public final class List extends AbstractUserizedFolderAction {
                 }
                 ret = subfolders;
             }
+        } catch (final FolderException e) {
+            throw e;
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -307,6 +312,8 @@ public final class List extends AbstractUserizedFolderAction {
                     final Throwable t = e.getCause();
                     if (FolderException.class.isAssignableFrom(t.getClass())) {
                         throw (FolderException) t;
+                    } else if (AbstractOXException.class.isAssignableFrom(t.getClass())) {
+                        throw new FolderException((AbstractOXException) t);
                     } else if (t instanceof RuntimeException) {
                         throw (RuntimeException) t;
                     } else if (t instanceof Error) {
@@ -390,6 +397,8 @@ public final class List extends AbstractUserizedFolderAction {
                 final Throwable t = e.getCause();
                 if (FolderException.class.isAssignableFrom(t.getClass())) {
                     throw (FolderException) t;
+                } else if (AbstractOXException.class.isAssignableFrom(t.getClass())) {
+                    throw new FolderException((AbstractOXException) t);
                 } else if (t instanceof RuntimeException) {
                     throw (RuntimeException) t;
                 } else if (t instanceof Error) {

@@ -101,7 +101,7 @@ public final class UpdatesAction extends AbstractFolderAction {
             try {
                 timestamp = new Date(Long.parseLong(timestampStr));
             } catch (final NumberFormatException e) {
-                throw new AjaxException(AjaxException.Code.InvalidParameter, "timestamp");
+                throw new AjaxException(AjaxException.Code.InvalidParameterValue, "timestamp", timestampStr);
             }
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
@@ -111,6 +111,24 @@ public final class UpdatesAction extends AbstractFolderAction {
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final UserizedFolder[][] result = folderService.getUpdates(treeId, timestamp, ignoreDeleted, session);
+        /*
+         * Determine last-modified time stamp
+         */
+        long lastModified = timestamp.getTime();
+        for (final UserizedFolder userizedFolder : result[0]) {
+            final Date modified = userizedFolder.getLastModified();
+            if (modified != null) {
+                final long time = modified.getTime();
+                lastModified = ((lastModified >= time) ? lastModified : time);
+            }
+        }
+        for (final UserizedFolder userizedFolder : result[1]) {
+            final Date modified = userizedFolder.getLastModified();
+            if (modified != null) {
+                final long time = modified.getTime();
+                lastModified = ((lastModified >= time) ? lastModified : time);
+            }
+        }
         /*
          * Write subfolders as JSON arrays to JSON array
          */
@@ -135,7 +153,7 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(resultArray);
+        return new AJAXRequestResult(resultArray, 0 == lastModified ? null : new Date(lastModified));
     }
 
 }

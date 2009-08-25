@@ -53,8 +53,10 @@ import java.util.Date;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderFilter;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.actions.AllVisibleFolders;
 import com.openexchange.folderstorage.internal.actions.Clear;
 import com.openexchange.folderstorage.internal.actions.Create;
 import com.openexchange.folderstorage.internal.actions.Delete;
@@ -137,6 +139,18 @@ public final class FolderServiceImpl implements FolderService {
     public UserizedFolder getFolder(final String treeId, final String folderId, final Session session) throws FolderException {
         try {
             return new Get(new ServerSessionAdapter(session)).doGet(treeId, folderId);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public UserizedFolder[] getAllVisibleFolders(final String treeId, final FolderFilter filter, final User user, final Context context) throws FolderException {
+        return new AllVisibleFolders(user, context).doAllVisibleFolders(treeId, filter);
+    }
+
+    public UserizedFolder[] getAllVisibleFolders(final String treeId, final FolderFilter filter, final Session session) throws FolderException {
+        try {
+            return new AllVisibleFolders(new ServerSessionAdapter(session)).doAllVisibleFolders(treeId, filter);
         } catch (final ContextException e) {
             throw new FolderException(e);
         }

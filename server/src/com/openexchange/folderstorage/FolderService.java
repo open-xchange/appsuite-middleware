@@ -85,6 +85,29 @@ public interface FolderService {
     UserizedFolder getFolder(String treeId, String folderId, Session session) throws FolderException;
 
     /**
+     * Gets all visible folders located in given tree for given user.
+     * 
+     * @param treeId The tree identifier
+     * @param filter The folder filter
+     * @param user The user
+     * @param context The context
+     * @return All visible folders
+     * @throws FolderException If folders cannot be returned
+     */
+    UserizedFolder[] getAllVisibleFolders(String treeId, FolderFilter filter, User user, Context context) throws FolderException;
+
+    /**
+     * Gets all visible folders located in given tree for given session's user.
+     * 
+     * @param treeId The tree identifier
+     * @param filter The folder filter
+     * @param session The session
+     * @return All visible folders
+     * @throws FolderException If folders cannot be returned
+     */
+    UserizedFolder[] getAllVisibleFolders(String treeId, FolderFilter filter, Session session) throws FolderException;
+
+    /**
      * Gets this storage's default folder for specified user.
      * 
      * @param user The user whose default folder shall be returned

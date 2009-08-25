@@ -78,7 +78,7 @@ public final class ContactContentType implements ContentType {
 
     @Override
     public String toString() {
-        return "contact";
+        return "contacts";
     }
 
     public int getModule() {

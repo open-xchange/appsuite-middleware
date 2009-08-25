@@ -55,6 +55,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -62,6 +63,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -124,30 +127,21 @@ public final class MailFolderStorage implements FolderStorage {
         super();
     }
 
-    private MailAccess<?, ?> checkMailAccess(final int accountId, final MailAccess<?, ?> openedAccess, final StorageParameters storageParameters) throws FolderException {
-        if (accountId != openedAccess.getAccountId()) {
-            openedAccess.close(true);
-            final Session session = storageParameters.getSession();
-            if (null == session) {
-                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-            }
-            final MailAccess<?, ?> mailAccess;
+    private MailAccess<?, ?> getMailAccessForAccount(final int accountId, final Session session, final ConcurrentMap<Integer, MailAccess<?, ?>> accesses) throws FolderException {
+        final Integer key = Integer.valueOf(accountId);
+        MailAccess<?, ?> ma = accesses.get(key);
+        if (null == ma) {
             try {
-                mailAccess = initMailAccess(accountId, session);
+                ma = MailAccess.getInstance(session, accountId);
             } catch (final MailException e) {
                 throw new FolderException(e);
             }
-            storageParameters.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, mailAccess);
-            return mailAccess;
+            accesses.putIfAbsent(key, ma);
         }
-        return openedAccess;
+        return ma;
     }
 
-    private MailAccess<?, ?> initMailAccess(final int accountId, final Session session) throws MailException {
-        /*
-         * Fetch a mail access (either from cache or a new instance)
-         */
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+    private void openMailAccess(final MailAccess<?, ?> mailAccess) throws MailException {
         if (!mailAccess.isConnected()) {
             /*
              * Get new mail configuration
@@ -165,7 +159,6 @@ public final class MailFolderStorage implements FolderStorage {
                 throw e;
             }
         }
-        return mailAccess;
     }
 
     public ContentType[] getSupportedContentTypes() {
@@ -177,12 +170,15 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
-        final MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) params.getParameter(
+        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
             MailFolderType.getInstance(),
             MailParameterConstants.PARAM_MAIL_ACCESS);
-        if (null != mailAccess) {
+        if (null != accesses) {
             try {
-                mailAccess.close(true);
+                final Collection<MailAccess<?, ?>> values = accesses.values();
+                for (final MailAccess<?, ?> mailAccess : values) {
+                    mailAccess.close(true);
+                }
             } finally {
                 params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
             }
@@ -191,25 +187,23 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
+            final FullnameArgument arg = prepareMailFolderParam(folder.getParentID());
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(arg.getAccountId(), storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
+
             final MailFolderDescription mfd = new MailFolderDescription();
             mfd.setExists(false);
-            // Parent
-            final FullnameArgument arg = prepareMailFolderParam(folder.getParentID());
             mfd.setParentFullname(arg.getFullname());
             mfd.setParentAccountId(arg.getAccountId());
             // Separator
-            {
-                mailAccess = checkMailAccess(arg.getAccountId(), mailAccess, storageParameters);
-                final MailFolder parent = mailAccess.getFolderStorage().getFolder(arg.getFullname());
-                mfd.setSeparator(parent.getSeparator());
-            }
+            mfd.setSeparator(mailAccess.getFolderStorage().getFolder(arg.getFullname()).getSeparator());
             // Other
             mfd.setName(folder.getName());
             mfd.setSubscribed(folder.isSubscribed());
@@ -246,15 +240,17 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final FullnameArgument arg = prepareMailFolderParam(folderId);
-            mailAccess = checkMailAccess(arg.getAccountId(), mailAccess, storageParameters);
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(arg.getAccountId(), storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
+
             final String fullname = arg.getFullname();
             /*
              * Only backup if fullname does not denote trash (sub)folder
@@ -279,15 +275,17 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final FullnameArgument arg = prepareMailFolderParam(folderId);
-            mailAccess = checkMailAccess(arg.getAccountId(), mailAccess, storageParameters);
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(arg.getAccountId(), storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
+
             final String fullname = arg.getFullname();
             /*
              * Only backup if fullname does not denote trash (sub)folder
@@ -327,30 +325,21 @@ public final class MailFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         try {
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
-
             final FullnameArgument argument = prepareMailFolderParam(folderId);
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
 
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
+
             final MailFolder mailFolder;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                if (mailAccess.getAccountId() != accountId) {
-                    /*
-                     * Another account
-                     */
-                    mailAccess.close(true);
-                    mailAccess = MailAccess.getInstance(storageParameters.getSession(), accountId);
-                    mailFolder = mailAccess.getRootFolder();
-                    storageParameters.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, mailAccess);
-                } else {
-                    mailFolder = mailAccess.getRootFolder();
-                }
+                mailFolder = mailAccess.getRootFolder();
                 /*
                  * Set proper name for non-primary account
                  */
@@ -376,7 +365,7 @@ public final class MailFolderStorage implements FolderStorage {
                     }
                 }
             } else {
-                mailAccess = checkMailAccess(accountId, mailAccess, storageParameters);
+                openMailAccess(mailAccess);
                 mailFolder = mailAccess.getFolderStorage().getFolder(fullname);
             }
 
@@ -530,17 +519,18 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             // A mail folder denoted by fullname
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final FullnameArgument argument = prepareMailFolderParam(parentId);
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
-            mailAccess = checkMailAccess(accountId, mailAccess, storageParameters);
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
 
             final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
             /*
@@ -609,12 +599,15 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
-        final MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) params.getParameter(
+        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
             MailFolderType.getInstance(),
             MailParameterConstants.PARAM_MAIL_ACCESS);
-        if (null != mailAccess) {
+        if (null != accesses) {
             try {
-                mailAccess.close(true);
+                final Collection<MailAccess<?, ?>> values = accesses.values();
+                for (final MailAccess<?, ?> mailAccess : values) {
+                    mailAccess.close(true);
+                }
             } finally {
                 params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
             }
@@ -622,19 +615,20 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
-        try {
-            final Session session = parameters.getSession();
-            if (null == session) {
-                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-            }
-            parameters.putParameterIfAbsent(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS,
-                MailAccess.getInstance(session));
-            return parameters;
-        } catch (final MailException e) {
-            throw new FolderException(e);
+        /*
+         * Ensure session is present
+         */
+        if (null == parameters.getSession()) {
+            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
         }
+        /*
+         * Put map
+         */
+        parameters.putParameterIfAbsent(
+            MailFolderType.getInstance(),
+            MailParameterConstants.PARAM_MAIL_ACCESS,
+            new ConcurrentHashMap<Integer, MailAccess<?, ?>>());
+        return parameters;
     }
 
     public StoragePriority getStoragePriority() {
@@ -650,15 +644,16 @@ public final class MailFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
             final FullnameArgument argument = prepareMailFolderParam(folderId);
-            mailAccess = checkMailAccess(argument.getAccountId(), mailAccess, storageParameters);
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(argument.getAccountId(), storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
 
             return mailAccess.getFolderStorage().exists(folderId);
         } catch (final MailException e) {
@@ -676,10 +671,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) storageParameters.getParameter(
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
-            if (null == mailAccess) {
+            if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
 
@@ -690,7 +685,8 @@ public final class MailFolderStorage implements FolderStorage {
                 accountId = argument.getAccountId();
                 fullname = argument.getFullname();
             }
-            mailAccess = checkMailAccess(accountId, mailAccess, storageParameters);
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
 
             final MailFolderDescription mfd = new MailFolderDescription();
             mfd.setExists(true);
@@ -772,7 +768,8 @@ public final class MailFolderStorage implements FolderStorage {
                     }
                 } else {
                     // Move to another account
-                    final MailAccess<?, ?> otherAccess = initMailAccess(parentAccountID, storageParameters.getSession());
+                    final MailAccess<?, ?> otherAccess = getMailAccessForAccount(parentAccountID, storageParameters.getSession(), accesses);
+                    openMailAccess(otherAccess);
                     try {
                         final String newParent = mfd.getParentFullname();
                         // Check if parent mail folder exists
