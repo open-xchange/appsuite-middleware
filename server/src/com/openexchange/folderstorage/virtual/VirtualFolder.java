@@ -99,7 +99,7 @@ public final class VirtualFolder implements Folder {
         try {
             final VirtualFolder clone = (VirtualFolder) super.clone();
             clone.realFolder = (Folder) (realFolder == null ? null : realFolder.clone());
-            clone.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
+            clone.lastModified = cloneDate(lastModified);
             if (permissions != null) {
                 final Permission[] thisPermissions = this.permissions;
                 final Permission[] clonePermissions = new Permission[thisPermissions.length];
