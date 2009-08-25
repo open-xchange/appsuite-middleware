@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +68,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -82,6 +84,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Updates extends AbstractUserizedFolderAction {
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Updates.class);
 
     /**
      * Initializes a new {@link Updates}.
@@ -113,11 +117,12 @@ public final class Updates extends AbstractUserizedFolderAction {
      * @throws FolderException If updates request fails
      */
     public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted) throws FolderException {
-        final FolderStorage[] realFolderStorages = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(
-            FolderStorage.REAL_TREE_ID);
+        final List<FolderStorage> realFolderStorages = new ArrayList<FolderStorage>(
+            Arrays.asList(FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(FolderStorage.REAL_TREE_ID)));
         for (final FolderStorage folderStorage : realFolderStorages) {
             folderStorage.startTransaction(storageParameters, false);
         }
+        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         try {
             final UserConfiguration userConfiguration;
             {
@@ -153,12 +158,12 @@ public final class Updates extends AbstractUserizedFolderAction {
                     final Folder f = iter.next();
                     final Permission effectivePerm = getEffectivePermission(f);
                     if (effectivePerm.getFolderPermission() >= Permission.READ_FOLDER) {
-                        if (f.getCreatedBy() != getUser().getId()) {
+                        if (isShared(f, getUser().getId())) {
                             /*
                              * Shared
                              */
                             addSystemSharedFolder = true;
-                        } else if (PublicType.getInstance().equals(f.getType())) {
+                        } else if (isPublic(f)) {
                             /*
                              * Public
                              */
@@ -171,8 +176,8 @@ public final class Updates extends AbstractUserizedFolderAction {
                                 updatedList.add(parent);
                             } else {
                                 /*
-                                 * Parent NOT visible. Update superior system folder to let the newly visible folder appear underneath virtual
-                                 * "Other XYZ folders"
+                                 * Parent NOT visible. Update superior system folder to let the newly visible folder appear underneath
+                                 * virtual "Other XYZ folders"
                                  */
                                 if (InfostoreContentType.getInstance().equals(f.getContentType())) {
                                     updatedList.add(getFolder(
@@ -259,11 +264,12 @@ public final class Updates extends AbstractUserizedFolderAction {
             /*
              * Check tree
              */
-            if (false && !FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 /*
                  * Check if folders are contained in given tree ID
                  */
                 final FolderStorage fs = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(treeId)[0];
+                checkOpenedStorage(fs, false, realFolderStorages);
                 for (final Iterator<Folder> iterator = updatedList.iterator(); iterator.hasNext();) {
                     final Folder folder = iterator.next();
                     if (!fs.containsFolder(treeId, folder.getID(), storageParameters)) {
@@ -279,23 +285,40 @@ public final class Updates extends AbstractUserizedFolderAction {
                     }
                 }
             }
-            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(Arrays.asList(realFolderStorages));
+            /*
+             * Generate array of modified folders
+             */
             final UserizedFolder[] modified = new UserizedFolder[updatedList.size()];
             for (int i = 0; i < modified.length; i++) {
                 final Folder folder = updatedList.get(i);
-                modified[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, openedStorages);
+                modified[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, realFolderStorages);
             }
-
+            /*
+             * Generate array of deleted folders (if non-null)
+             */
             final UserizedFolder[] deleted;
-            if (deletedList != null) {
+            if (deletedList == null) {
+                deleted = new UserizedFolder[0];
+            } else {
                 deleted = new UserizedFolder[deletedList.size()];
                 for (int i = 0; i < deleted.length; i++) {
                     final Folder folder = deletedList.get(i);
-                    deleted[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, openedStorages);
+                    deleted[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, realFolderStorages);
                 }
-            } else {
-                deleted = new UserizedFolder[0];
             }
+            /*
+             * Commit
+             */
+            for (final FolderStorage folderStorage : realFolderStorages) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            if (LOG.isDebugEnabled()) {
+                final long duration = System.currentTimeMillis() - start;
+                LOG.debug(new StringBuilder().append("Updates.doUpdates() took ").append(duration).append("msec.").toString());
+            }
+            /*
+             * Return result
+             */
             return new UserizedFolder[][] { modified, deleted };
         } catch (final FolderException e) {
             for (final FolderStorage folderStorage : realFolderStorages) {
@@ -317,7 +340,7 @@ public final class Updates extends AbstractUserizedFolderAction {
         return CalculatePermission.calculate(folder, getSession());
     }
 
-    private Folder getFolder(final String treeId, final String folderId, final FolderStorage[] storages) throws FolderException {
+    private Folder getFolder(final String treeId, final String folderId, final Collection<FolderStorage> storages) throws FolderException {
         for (final FolderStorage storage : storages) {
             if (storage.getFolderType().servesFolderId(folderId)) {
                 return storage.getFolder(treeId, folderId, storageParameters);
@@ -326,7 +349,7 @@ public final class Updates extends AbstractUserizedFolderAction {
         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
     }
 
-    private Set<String> getPublicSubfolderIDs(final String treeId, final FolderStorage[] storages) throws FolderException {
+    private Set<String> getPublicSubfolderIDs(final String treeId, final Collection<FolderStorage> storages) throws FolderException {
         final String folderId = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         for (final FolderStorage storage : storages) {
             if (storage.getFolderType().servesFolderId(folderId)) {
@@ -339,6 +362,14 @@ public final class Updates extends AbstractUserizedFolderAction {
             }
         }
         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+    }
+
+    private static boolean isShared(final Folder f, final int userId) {
+        return PrivateType.getInstance().equals(f.getType()) && f.getCreatedBy() != userId;
+    }
+
+    private static boolean isPublic(final Folder f) {
+        return PublicType.getInstance().equals(f.getType());
     }
 
 }
