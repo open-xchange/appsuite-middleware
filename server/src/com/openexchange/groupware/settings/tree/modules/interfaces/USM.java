@@ -52,16 +52,12 @@ package com.openexchange.groupware.settings.tree.modules.interfaces;
 import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
-/**
- * Contains initialization for the modules configuration tree setting exchange active sync.
- * @author <a href="mailto:marcus@open-xchange.org">Francisco Laguna</a> - Faithfully cargo culted from the SyncML class
- */
-public class EAS extends AbstractModules {
+public class USM extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public EAS() {
+    public USM() {
         super();
     }
 
@@ -69,7 +65,7 @@ public class EAS extends AbstractModules {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "interfaces", "eas" };
+        return new String[] { "modules", "interfaces", "usm" };
     }
 
     /**
@@ -77,7 +73,7 @@ public class EAS extends AbstractModules {
      */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasActiveSync();
+		return userConfig.hasUSM();
 	}
 }
 

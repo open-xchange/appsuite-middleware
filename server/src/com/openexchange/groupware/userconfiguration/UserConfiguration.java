@@ -120,6 +120,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     
     private static final int ACTIVE_SYNC = 1 << 25;
     
+    private static final int USM = 1 << 26;
 
     /*-
      * Field members
@@ -786,10 +787,25 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
     
     /**
-     * Sets if this use is able to use Exchange Active Sync
+     * Sets if this user is able to use Exchange Active Sync
      */
     public void setHasActiveSync(boolean eas) {
         setPermission(eas, ACTIVE_SYNC);
+    }
+    
+    
+    /**
+     * Cheks if this user configuration indicates that the user may use USM.
+     */
+    public boolean hasUSM() {
+    	return hasPermission(USM);
+    }
+
+    /**
+	 * Sets if this user is able to user USM.
+     */
+    public void setHasUSM(boolean usm) {
+    	setPermission(usm, USM);
     }
 
     /**

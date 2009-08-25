@@ -258,6 +258,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.EAS.class,
+            com.openexchange.groupware.settings.tree.modules.interfaces.USM.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
             com.openexchange.groupware.settings.tree.modules.mail.Addresses.class,
             com.openexchange.groupware.settings.tree.modules.mail.AllowHTMLImages.class,
