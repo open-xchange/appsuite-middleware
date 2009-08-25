@@ -65,7 +65,7 @@ public class USM extends AbstractModules {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "interfaces", "usm" };
+        return new String[] { "modules", "com.openexchange.usm", "module" };
     }
 
     /**
