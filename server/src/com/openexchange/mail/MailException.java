@@ -356,7 +356,11 @@ public class MailException extends AbstractOXException {
         /**
          * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
          */
-        REFERENCED_MAIL_NOT_FOUND("Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.", Category.CODE_ERROR, 67);
+        REFERENCED_MAIL_NOT_FOUND("Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.", Category.CODE_ERROR, 67),
+        /**
+         * In order to accomplish the search, %1$d or more characters are required.
+         */
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, 68);
 
         private final String message;
 

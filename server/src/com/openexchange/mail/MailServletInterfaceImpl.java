@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.text.Collator;
@@ -67,6 +68,8 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
@@ -77,6 +80,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -117,6 +121,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sql.SearchStrings;
 import com.openexchange.user.UserService;
 
 /**
@@ -715,6 +720,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+        checkPatternLength(searchPatterns);
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -917,6 +923,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public SearchIterator<MailMessage> getThreadedMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
+        checkPatternLength(searchPatterns);
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -985,6 +992,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error(e.getMessage(), e);
         }
         return SearchIteratorAdapter.createArrayIterator(mails);
+    }
+
+    private void checkPatternLength(String[] patterns) throws MailException {
+        final int minimumSearchCharacters;
+        try {
+            minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        } catch (ConfigurationException e) {
+            throw new MailException(e);
+        }
+        if (0 == minimumSearchCharacters || null == patterns) {
+            return;
+        }
+        for (String pattern : patterns) {
+            if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+                throw new MailException(Code.PATTERN_TOO_SHORT, I(minimumSearchCharacters));
+            }
+        }
     }
 
     @Override
