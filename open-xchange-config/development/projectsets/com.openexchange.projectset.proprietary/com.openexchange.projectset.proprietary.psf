@@ -7,5 +7,9 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/1und1/server/com.openexchange.mail.oneandone,com.openexchange.mail.oneandone2"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.spamhandler.netsol,com.openexchange.spamhandler.netsol"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/o3sis,com.openexchange.custom.o3sis"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/versatel,com.openexchange.custom.versatel"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/univention,com.openexchange.authentication.ucs"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/parallels,com.openexchange.custom.parallels"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/hostpoint,com.openexchange.configjump.hostpoint"/>
 </provider>
 </psf>
