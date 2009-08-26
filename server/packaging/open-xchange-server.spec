@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -375,6 +375,24 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Aug 25 2009 - tobias.prinz@open-xchange.com
+ - Bugfix #14331: Translation of privacy disclaimer for published contacts and infostore based on user locale
+* Mon Aug 24 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14365: New CLI tools no more trigger update process
+ - Bugfix #14362: Improved error handling in new CLI tools
+ - Bugfix #14363: Improved error handling in new CLI tools
+ - Bugfix #14364: Improved error handling in new CLI tools
+ - Bugfix #14361: Changed argument identifiers to not collide
+* Mon Aug 24 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14343: Format dates in CSV export so the import understands them. 
+ - Bugfix #14343: Don't set caching headers in file downloads for IE. Set content-disposition header for nice file names.
+* Mon Aug 24 2009 - tobias.prinz@open-xchange.com
+ - Bugfix #14229: Handling SIEVE scripts with empty addresses
+* Fri Aug 21 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14346: Considering all available inline text parts when composing reply version of a mail
+ - Bugfix #13322: Fixed NPE in CalendarCollection
+* Thu Aug 20 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14345: Proper escaping/un-escaping '"' and '\' characters in filenames
 * Wed Aug 19 2009 - martin.herfurth@open-xchange.com
  - HTTP-API: Additional return parameter for free/busy:
              folder_id, if the appointment is visible for the user.
