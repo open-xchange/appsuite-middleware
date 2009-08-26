@@ -50,10 +50,21 @@
 package com.openexchange.templating;
 
 import static com.openexchange.templating.TemplateErrorMessage.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.templating.impl.OXFolderHelper;
+import com.openexchange.templating.impl.OXInfostoreHelper;
+import com.openexchange.tools.session.ServerSession;
 import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -64,8 +75,13 @@ import freemarker.template.Template;
 public class TemplateServiceImpl implements TemplateService {
 
     public static final String PATH_PROPERTY = "com.openexchange.templating.path";
+    public static final String USER_TEMPLATING_PROPERTY = "com.openexchange.templating.usertemplating";
 
     private ConfigurationService config;
+
+    private OXFolderHelper folders;
+
+    private OXInfostoreHelper infostore;
 
     public TemplateServiceImpl(ConfigurationService config) {
         this.config = config;
@@ -102,6 +118,90 @@ public class TemplateServiceImpl implements TemplateService {
             throw TemplateNotFound.create(templateName);
         }
         return retval;
+    }
+
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException {
+        if(isEmpty(templateName) || !isUserTemplatingEnabled()) {
+            return loadTemplate(defaultTemplateName);
+        }
+        try {
+            FolderObject folder = folders.getPrivateTemplateFolder(session);
+            boolean global = false;
+            if(null == folder) {
+                folder = folders.getGlobalTemplateFolder(session);
+                global = true;
+            }
+            String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+            
+            if(templateText == null && ! global) {
+                folder = folders.getGlobalTemplateFolder(session);
+                global = true;
+            }
+            
+            templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+            
+            if(templateText == null) {
+                templateText = loadFromFileSystem(defaultTemplateName);
+                if(global) {
+                    folder = folders.createPrivateTemplateFolder(session);
+                }
+                infostore.storeTemplateInFolder(session, folder, templateName, templateText);
+            }
+            OXTemplateImpl template = new OXTemplateImpl();
+            template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+            return template;
+        } catch (AbstractOXException e) {
+            throw new TemplateException(e);
+        } catch (IOException e) {
+            throw IOException.create(e);
+        }
+    }
+
+    private boolean isUserTemplatingEnabled() {
+        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY,"true"));
+    }
+
+    private boolean isEmpty(String templateName) {
+        return templateName == null || "".equals(templateName);
+    }
+
+    private String loadFromFileSystem(String defaultTemplateName) throws TemplateException {
+        File templateFile = getTemplateFile(defaultTemplateName);
+        if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
+            return "Unfilled Template."; 
+        }
+        BufferedReader reader = null;
+        try {
+            StringBuilder builder = new StringBuilder();
+            reader = new BufferedReader(new FileReader(templateFile));
+            String line = null;
+            while((line = reader.readLine()) != null) {
+                builder.append(line).append("\n");
+            }
+            return builder.toString();
+        } catch (IOException e) {
+            throw IOException.create(e);
+        } finally {
+            if(reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    // IGNORE
+                }
+            }
+        }
+    }
+
+    private File getTemplateFile(String defaultTemplateName) {
+        return new File(config.getProperty(PATH_PROPERTY), defaultTemplateName);
+    }
+
+    public void setOXFolderHelper(OXFolderHelper helper) {
+        this.folders = helper;
+    }
+
+    public void setInfostoreHelper(OXInfostoreHelper helper) {
+        this.infostore = helper;
     }
 
 }

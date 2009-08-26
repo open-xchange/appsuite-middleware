@@ -49,9 +49,20 @@
 
 package com.openexchange.templating;
 
+import java.io.StringWriter;
+import java.util.HashMap;
 import junit.framework.TestCase;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exceptions.StringComponent;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.session.Session;
+import com.openexchange.sim.SimBuilder;
+import com.openexchange.templating.impl.OXFolderHelper;
+import com.openexchange.templating.impl.OXInfostoreHelper;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -59,18 +70,32 @@ import com.openexchange.exceptions.StringComponent;
 public class TestTemplateService extends TestCase {
     
     protected SimConfigurationService configService = null;
-    protected TemplateService templateService = null;
+    protected TemplateServiceImpl templateService = null;
+    private ServerSession session = new ServerSessionAdapter((Session)null, (Context) null);
+    private FolderObject privateTemplateFolder;
+    private FolderObject globalTemplateFolder;
+    
     
     public void setUp() throws Exception {
         super.setUp();
         
         configService = new SimConfigurationService();
         configService.stringProperties.put("com.openexchange.templating.path", "test-resources");
+        configService.stringProperties.put("com.openexchange.templating.usertemplating", "true");
+
         templateService = new TemplateServiceImpl(configService);
         
 
         TemplateErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
         TemplateErrorMessage.EXCEPTIONS.setComponent(new StringComponent("TMPL"));
+    
+        privateTemplateFolder = new FolderObject();
+        privateTemplateFolder.setFolderName("Templates");
+        privateTemplateFolder.setObjectID(23);
+        
+        globalTemplateFolder = new FolderObject();
+        globalTemplateFolder.setFolderName("Templates");
+        globalTemplateFolder.setObjectID(13);
     }
     
     public void tearDown() throws Exception {
@@ -83,5 +108,122 @@ public class TestTemplateService extends TestCase {
     public void testLoadTemplate() throws Exception {
         OXTemplate template = templateService.loadTemplate("test-template");
         assertNotNull("OX-Template should not be null", template);
+    }
+    
+    public void testLoadTemplateFromPrivateTemplateFolder() throws Exception {
+        SimBuilder oxfolderHelperBuilder = new SimBuilder();
+        oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
+        
+        SimBuilder infostoreBuilder = new SimBuilder();
+        infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "test-template").andReturn("Template Content");
+        
+        templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
+        templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
+    
+        OXTemplate template = templateService.loadTemplate("test-template", "default-template", session);
+        
+        assertNotNull(template);
+        StringWriter writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Template Content", writer.toString());
+        
+        oxfolderHelperBuilder.assertAllWereCalled();
+        infostoreBuilder.assertAllWereCalled();
+    }
+    
+    
+
+    public void testLoadTemplateFromGlobalTemplateFolder() throws Exception {
+        SimBuilder oxfolderHelperBuilder = new SimBuilder();
+        oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);
+        oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(globalTemplateFolder);
+        
+        SimBuilder infostoreBuilder = new SimBuilder();
+        infostoreBuilder.expectCall("findTemplateInFolder", session, globalTemplateFolder, "test-template").andReturn("Template Content");
+        
+        templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
+        templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
+    
+        OXTemplate template = templateService.loadTemplate("test-template", "default-template", session);
+        
+        assertNotNull(template);
+        StringWriter writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Template Content", writer.toString());
+        
+        oxfolderHelperBuilder.assertAllWereCalled();
+        infostoreBuilder.assertAllWereCalled();
+    }
+    
+    public void testCreateCopyOfDefaultTemplateInPrivateTemplateFolder() throws Exception {
+        SimBuilder oxfolderHelperBuilder = new SimBuilder();
+        oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
+        
+        SimBuilder infostoreBuilder = new SimBuilder();
+        infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "new-template").andReturn(null);
+        infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File");
+        
+        templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
+        templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
+    
+        OXTemplate template = templateService.loadTemplate("new-template", "test-template", session);
+        
+        assertNotNull(template);
+        StringWriter writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Test Content In File\n", writer.toString());
+        
+        oxfolderHelperBuilder.assertAllWereCalled();
+        infostoreBuilder.assertAllWereCalled();
+    }
+    
+    public void testCreatePrivateTemplateFolderAndCopyDefaultTemplate() throws Exception {
+        SimBuilder oxfolderHelperBuilder = new SimBuilder();
+        oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);
+        oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(globalTemplateFolder);
+        oxfolderHelperBuilder.expectCall("createPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
+            
+        SimBuilder infostoreBuilder = new SimBuilder();
+        infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "new-template").andReturn(null);
+        infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File");
+        
+        templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
+        templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
+    
+        OXTemplate template = templateService.loadTemplate("new-template", "test-template", session);
+        
+        assertNotNull(template);
+        StringWriter writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Test Content In File\n", writer.toString());
+        
+        oxfolderHelperBuilder.assertAllWereCalled();
+        infostoreBuilder.assertAllWereCalled();
+    }
+    
+    public void testFallbackToDefaultTemplate() throws Exception {
+        OXTemplate template = templateService.loadTemplate("", "test-template", session);
+        assertNotNull(template);
+        StringWriter writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Test Content In File\n", writer.toString());
+        
+        template = templateService.loadTemplate(null, "test-template", session);
+        assertNotNull(template);
+        writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Test Content In File\n", writer.toString());
+
+    }
+    
+    public void testDisableUserTemplatingPerConfiguration() throws Exception {
+        configService.stringProperties.put("com.openexchange.templating.usertemplating", "false");
+
+        OXTemplate template = templateService.loadTemplate("user-template", "test-template", session);
+        assertNotNull(template);
+        StringWriter writer = new StringWriter();
+        template.process(new HashMap<Object, Object>(), writer);
+        assertEquals("Test Content In File\n", writer.toString());
+
     }
 }

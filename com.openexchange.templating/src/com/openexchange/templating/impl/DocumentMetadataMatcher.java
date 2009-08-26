@@ -47,56 +47,58 @@
  *
  */
 
-package com.openexchange.templating;
+package com.openexchange.templating.impl;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 
-public enum TemplateErrorMessage implements OXErrorMessage {
-    
-    IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 1, "Verify file system and templates.", "An IOException occurred."),
-    UnderlyingException(Category.CODE_ERROR, 2, "Please correct the template", "The underlying templating system threw an exception: %s"),
-    TemplateNotFound(Category.CODE_ERROR, 3, "Please use an existing template", "The template %2 does not exist."),
-    SQLException(Category.CODE_ERROR, 4, "An underlying system threw an SQLException", "Please try again later.")
-    ;
+/**
+ * {@link DocumentMetadataMatcher}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class DocumentMetadataMatcher {
+    private DocumentMetadata bestMatch;
+    private String name;
+    private int score;
 
-    private Category category;
-    private int errorCode;
-    private String help;
-    private String message;
-    
-    public static TemplateExceptionFactory EXCEPTIONS = new TemplateExceptionFactory();
-    
-    private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
-        this.category = category;
-        this.errorCode = errorCode;
-        this.help = help;
-        this.message = message;
+    public DocumentMetadataMatcher(String name) {
+        this.name = name;
+        this.score = 0;
+        
     }
     
-    public Category getCategory() {
-        return category;
+    public boolean hasPerfectMatch() {
+        return score > 10;
     }
 
-    public int getDetailNumber() {
-        return errorCode;
-    }
-
-    public String getHelp() {
-        return help;
-    }
-
-    public String getMessage() {
-        return message;
+    public DocumentMetadata getBestMatch() {
+        return bestMatch;
     }
     
-    public TemplateException create(final Throwable cause, final Object...args) {
-        return EXCEPTIONS.create(this,cause, args);
+    public void propose(DocumentMetadata document) {
+        int newScore = 0;
+        String fileName = document.getFileName();
+        if(fileName.equals(name)) {
+            newScore = 100;
+        }
+        if(fileName.contains(".")) {
+            String filenameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
+            if(filenameWithoutExtension.equals(name)) {
+                newScore = 5;
+            }
+        }
+        
+        if(document.getTitle().equals(name)) {
+            newScore = 7;
+        }
+        
+        
+        if(newScore > score) {
+            score = newScore;
+            bestMatch = document;
+        }
     }
-    
-    public TemplateException create(final Object...args) {
-        return EXCEPTIONS.create(this,args);
-    }
-
 }
+

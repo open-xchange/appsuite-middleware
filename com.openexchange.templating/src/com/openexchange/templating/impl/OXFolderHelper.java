@@ -47,56 +47,21 @@
  *
  */
 
-package com.openexchange.templating;
+package com.openexchange.templating.impl;
 
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.session.ServerSession;
 
 
-public enum TemplateErrorMessage implements OXErrorMessage {
-    
-    IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 1, "Verify file system and templates.", "An IOException occurred."),
-    UnderlyingException(Category.CODE_ERROR, 2, "Please correct the template", "The underlying templating system threw an exception: %s"),
-    TemplateNotFound(Category.CODE_ERROR, 3, "Please use an existing template", "The template %2 does not exist."),
-    SQLException(Category.CODE_ERROR, 4, "An underlying system threw an SQLException", "Please try again later.")
-    ;
-
-    private Category category;
-    private int errorCode;
-    private String help;
-    private String message;
-    
-    public static TemplateExceptionFactory EXCEPTIONS = new TemplateExceptionFactory();
-    
-    private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
-        this.category = category;
-        this.errorCode = errorCode;
-        this.help = help;
-        this.message = message;
-    }
-    
-    public Category getCategory() {
-        return category;
-    }
-
-    public int getDetailNumber() {
-        return errorCode;
-    }
-
-    public String getHelp() {
-        return help;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-    
-    public TemplateException create(final Throwable cause, final Object...args) {
-        return EXCEPTIONS.create(this,cause, args);
-    }
-    
-    public TemplateException create(final Object...args) {
-        return EXCEPTIONS.create(this,args);
-    }
-
+/**
+ * {@link OXFolderHelper}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public interface OXFolderHelper {
+    public FolderObject getPrivateTemplateFolder(ServerSession session) throws AbstractOXException;
+    public FolderObject getGlobalTemplateFolder(ServerSession session) throws AbstractOXException;
+    public FolderObject createPrivateTemplateFolder(ServerSession session) throws AbstractOXException;
 }

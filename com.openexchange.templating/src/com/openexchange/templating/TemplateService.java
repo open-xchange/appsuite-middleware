@@ -49,10 +49,16 @@
 
 package com.openexchange.templating;
 
+import com.openexchange.tools.session.ServerSession;
+
+
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public interface TemplateService {
 
     public OXTemplate loadTemplate(String templateName) throws TemplateException;
+    
+    public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException;
+    
 }

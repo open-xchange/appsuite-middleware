@@ -5,11 +5,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.server.osgiservice.ServiceDependentRegistration;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.templating.TemplateErrorMessage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplateServiceImpl;
+import com.openexchange.templating.impl.OXIntegration;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -23,13 +25,19 @@ public class Activator implements BundleActivator {
     
     public void start(BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
+        
+        
         this.serviceRegistration = new ServiceDependentRegistration<TemplateServiceImpl>(context, TemplateService.class.getName(), null, whiteboard) {
             private ConfigurationService config;
 
             @Override
             public TemplateServiceImpl configure(TemplateServiceImpl service) {
                 config = get(ConfigurationService.class);
-                return new TemplateServiceImpl(config);
+                OXIntegration integration = new OXIntegration(get(InfostoreFacade.class));
+                TemplateServiceImpl templates = new TemplateServiceImpl(config);
+                templates.setOXFolderHelper(integration);
+                templates.setInfostoreHelper(integration);
+                return templates;
             }
             
             @Override
