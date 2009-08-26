@@ -117,15 +117,6 @@ public final class CacheFolderStorage implements FolderStorage {
     public void onCacheAvailable() throws FolderException {
         try {
             cacheService = CacheServiceRegistry.getServiceRegistry().getService(CacheService.class, true);
-
-            final ConfigurationService configurationService = CacheServiceRegistry.getServiceRegistry().getService(
-                ConfigurationService.class,
-                true);
-            final String configFile = configurationService.getProperty("com.openexchange.folderstorage.cache.configfile");
-            if (null == configFile) {
-                throw FolderExceptionErrorMessage.MISSING_PROPERTY.create("com.openexchange.folderstorage.cache.configfile");
-            }
-            cacheService.loadConfiguration(configFile);
             globalCache = cacheService.getCache("GlobalFolderCache");
             userCache = cacheService.getCache("UserFolderCache");
         } catch (final ServiceException e) {
@@ -383,7 +374,7 @@ public final class CacheFolderStorage implements FolderStorage {
                      */
                     for (final FolderStorage ps : neededStorages) {
                         completionService.submit(new Callable<java.util.List<SortableId>>() {
-    
+
                             public java.util.List<SortableId> call() throws Exception {
                                 return Arrays.asList(ps.getSubfolders(treeId, parentId, storageParameters));
                             }
