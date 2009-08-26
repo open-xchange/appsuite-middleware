@@ -661,11 +661,11 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
-    public String[] getDeletedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
         return new String[0];
     }
 
-    public String[] getModifiedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
         return new String[0];
     }
 

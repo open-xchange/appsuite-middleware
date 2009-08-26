@@ -54,10 +54,10 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -90,8 +90,29 @@ public final class Get extends AbstractUserizedFolderAction {
         super(user, context);
     }
 
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Get(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Get(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
     public UserizedFolder doGet(final String treeId, final String folderId) throws FolderException {
-        final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }

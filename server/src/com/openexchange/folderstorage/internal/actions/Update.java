@@ -57,9 +57,9 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -93,6 +93,27 @@ public final class Update extends AbstractAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Update(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Update(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Performs the <code>UPDATE</code> request.
      * 
      * @param folder The object which denotes the folder to update and provides the changes to perform
@@ -108,7 +129,7 @@ public final class Update extends AbstractAction {
         if (null == treeId) {
             throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
         }
-        final FolderStorage storage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+        final FolderStorage storage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
@@ -173,17 +194,13 @@ public final class Update extends AbstractAction {
                  * Move folder dependent on folder is virtual or not
                  */
                 final String newParentId = folder.getParentID();
-                final FolderStorage newRealParentStorage = FolderStorageRegistry.getInstance().getFolderStorage(
-                    FolderStorage.REAL_TREE_ID,
-                    newParentId);
+                final FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
                 if (null == newRealParentStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
                 }
 
                 final String parentId = folder.getParentID();
-                final FolderStorage realParentStorage = FolderStorageRegistry.getInstance().getFolderStorage(
-                    FolderStorage.REAL_TREE_ID,
-                    parentId);
+                final FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
                 if (null == realParentStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, parentId);
                 }
@@ -228,9 +245,7 @@ public final class Update extends AbstractAction {
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                     storage.updateFolder(folder, storageParameters);
                 } else {
-                    final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(
-                        FolderStorage.REAL_TREE_ID,
-                        folder.getID());
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
                     if (null == realStorage) {
                         throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
                     }
@@ -274,7 +289,7 @@ public final class Update extends AbstractAction {
     }
 
     private void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final List<FolderStorage> openedStorages) throws FolderException {
-        final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
         if (null == realStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
         }
@@ -331,7 +346,7 @@ public final class Update extends AbstractAction {
 
     private void doRenameVirtual(final Folder folder, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
         // Update name in real tree
-        final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
         if (null == realStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
         }

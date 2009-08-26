@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.cache;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +57,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StoragePriority;
 
 /**
@@ -63,7 +66,7 @@ import com.openexchange.folderstorage.StoragePriority;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorageRegistry {
+public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer {
 
     private static final CacheFolderStorageRegistry instance = new CacheFolderStorageRegistry();
 
@@ -129,7 +132,7 @@ public final class CacheFolderStorageRegistry {
             List<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
                 final List<FolderStorage> tmp = new CopyOnWriteArrayList<FolderStorage>();
-                storages = registry.putIfAbsent(treeId, new CopyOnWriteArrayList<FolderStorage>());
+                storages = registry.putIfAbsent(treeId, tmp);
                 if (null == storages) {
                     storages = tmp;
                 }
@@ -139,13 +142,6 @@ public final class CacheFolderStorageRegistry {
         return true;
     }
 
-    /**
-     * Gets the folder storage for specified tree-folder-pair.
-     * 
-     * @param treeId The tree identifier
-     * @param folderId The folder identifier
-     * @return The folder storage for specified tree-folder-pair
-     */
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -154,7 +150,7 @@ public final class CacheFolderStorageRegistry {
             for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 if (folderStorage.getFolderType().servesTreeId(treeId)) {
-                    return null;
+                    return folderStorage;
                 }
             }
         }
@@ -173,13 +169,58 @@ public final class CacheFolderStorageRegistry {
         return null;
     }
 
-    /**
-     * Gets the folder storage capable to handle given content type in specified tree.
-     * 
-     * @param treeId The tree identifier
-     * @param contentType The content type
-     * @return The folder storage capable to handle given content type in specified tree
-     */
+    public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
+        if (!genStorages.isEmpty()) {
+            /*
+             * Check general storages first
+             */
+            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+                final FolderStorage folderStorage = iterator.next();
+                final FolderType folderType = folderStorage.getFolderType();
+                if (folderType.servesTreeId(treeId) && folderType.servesParentId(parentId)) {
+                    return new FolderStorage[] { folderStorage };
+                }
+            }
+        }
+        /*
+         * Obtain candidates by tree identifier
+         */
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return new FolderStorage[0];
+        }
+        final List<FolderStorage> l = new ArrayList<FolderStorage>(4);
+        for (final FolderStorage folderStorage : storages) {
+            if (folderStorage.getFolderType().servesParentId(parentId)) {
+                l.add(folderStorage);
+            }
+        }
+        return l.toArray(new FolderStorage[l.size()]);
+    }
+
+    public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
+        if (!genStorages.isEmpty()) {
+            /*
+             * Check general storages first
+             */
+            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+                final FolderStorage folderStorage = iterator.next();
+                final FolderType folderType = folderStorage.getFolderType();
+                if (folderType.servesTreeId(treeId)) {
+                    return new FolderStorage[] { folderStorage };
+                }
+            }
+        }
+        /*
+         * Obtain candidates by tree identifier
+         */
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return new FolderStorage[0];
+        }
+        return storages.toArray(new FolderStorage[storages.size()]);
+    }
+
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         return CacheContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }

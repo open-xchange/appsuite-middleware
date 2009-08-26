@@ -56,11 +56,11 @@ import java.util.TimeZone;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -95,6 +95,27 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      */
     public AbstractUserizedFolderAction(final User user, final Context context) {
         super(user, context);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public AbstractUserizedFolderAction(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public AbstractUserizedFolderAction(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
     }
 
     /**
@@ -169,7 +190,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
             } else {
                 // Get appropriate storages and start transaction
                 final String folderId = folder.getID();
-                final FolderStorage[] ss = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, folderId);
+                final FolderStorage[] ss = folderStorageDiscoverer.getFolderStoragesForParent(treeId, folderId);
                 visibleSubfolderIds = new ArrayList<String>(1);
                 for (int i = 0; visibleSubfolderIds.size() <= 0 && i < ss.length; i++) {
                     final FolderStorage curStorage = ss[i];

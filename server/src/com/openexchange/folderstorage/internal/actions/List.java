@@ -64,11 +64,11 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -104,6 +104,27 @@ public final class List extends AbstractUserizedFolderAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public List(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public List(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Performs the <code>LIST</code> request.
      * 
      * @param treeId The tree identifier
@@ -114,7 +135,7 @@ public final class List extends AbstractUserizedFolderAction {
      * @throws FolderException If a folder error occurs
      */
     public UserizedFolder[] doList(final String treeId, final String parentId, final boolean all) throws FolderException {
-        final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, parentId);
+        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
@@ -268,7 +289,7 @@ public final class List extends AbstractUserizedFolderAction {
     private UserizedFolder[] getSubfoldersFromMultipleStorages(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStoragesArg) throws FolderException {
         final java.util.Queue<FolderStorage> openedStorages = new ConcurrentLinkedQueue<FolderStorage>(openedStoragesArg);
         {
-            final FolderStorage[] neededStorages = FolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, parentId);
+            final FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
             for (final FolderStorage neededStorage : neededStorages) {
                 if (!openedStorages.contains(neededStorage)) {
                     neededStorage.startTransaction(getStorageParameters(), false);

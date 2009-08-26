@@ -53,10 +53,8 @@ import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.OXCachingException.Code;
 import com.openexchange.caching.Cache;
@@ -98,6 +96,9 @@ public abstract class Refresher<T extends Serializable> {
         super();
         this.factory = factory;
         this.key = factory.getKey();
+        if (null == regionName) {
+            throw new IllegalArgumentException("Cache region name is null");
+        }
         this.regionName = regionName;
     }
 

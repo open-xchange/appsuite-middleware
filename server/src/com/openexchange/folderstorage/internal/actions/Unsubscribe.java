@@ -54,10 +54,10 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -89,6 +89,27 @@ public final class Unsubscribe extends AbstractAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Unsubscribe(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Unsubscribe(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Performs the <code>UNSUBSCRIBE</code> action.
      * 
      * @param treeId The virtual tree identifier
@@ -99,7 +120,7 @@ public final class Unsubscribe extends AbstractAction {
         if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
             throw FolderExceptionErrorMessage.NO_REAL_UNSUBSCRIBE.create(treeId);
         }
-        final FolderStorage virtualStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+        final FolderStorage virtualStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == virtualStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }

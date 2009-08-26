@@ -59,6 +59,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 
 /**
@@ -66,7 +67,7 @@ import com.openexchange.folderstorage.FolderType;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderStorageRegistry {
+public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     private static final FolderStorageRegistry instance = new FolderStorageRegistry();
 
@@ -140,13 +141,6 @@ public final class FolderStorageRegistry {
         return true;
     }
 
-    /**
-     * Gets the folder storage for specified tree-folder-pair.
-     * 
-     * @param treeId The tree identifier
-     * @param folderId The folder identifier
-     * @return The folder storage for specified tree-folder-pair or <code>null</code>
-     */
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -175,13 +169,6 @@ public final class FolderStorageRegistry {
         return null;
     }
 
-    /**
-     * Gets the folder storages for specified tree-parent-pair.
-     * 
-     * @param treeId The tree identifier
-     * @param folderId The folder identifier
-     * @return The folder storages for specified tree-parent-pair or an empty array if none available
-     */
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -211,12 +198,6 @@ public final class FolderStorageRegistry {
         return l.toArray(new FolderStorage[l.size()]);
     }
 
-    /**
-     * Gets the folder storages for specified tree identifier.
-     * 
-     * @param treeId The tree identifier
-     * @return The folder storages for specified tree identifier or an empty array if none available
-     */
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -240,13 +221,6 @@ public final class FolderStorageRegistry {
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
-    /**
-     * Gets the folder storage capable to handle given content type in specified tree.
-     * 
-     * @param treeId The tree identifier
-     * @param contentType The content type
-     * @return The folder storage capable to handle given content type in specified tree
-     */
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         return ContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }

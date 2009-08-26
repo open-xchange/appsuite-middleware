@@ -58,11 +58,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link CacheFolderStorageActivator} - {@link BundleActivator Activator} for cache folder storage.
@@ -92,7 +94,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class };
+        return new Class<?>[] { CacheService.class, TimerService.class, ConfigurationService.class };
     }
 
     @Override

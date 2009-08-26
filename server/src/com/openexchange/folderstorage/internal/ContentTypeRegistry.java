@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -100,6 +101,13 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
         public List<FolderStorage> getGeneralStorages() {
             return generalStorages;
+        }
+
+        public void replaceGeneralStorages(final List<FolderStorage> replacement) {
+            synchronized (generalStorages) {
+                generalStorages.clear();
+                generalStorages.addAll(replacement);
+            }
         }
 
     }
@@ -165,10 +173,11 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      */
     public boolean addGeneralContentType(final String treeId, final FolderStorage folderStorage) {
         final Element element = getElementForTreeId(treeId);
-        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        final List<FolderStorage> generalStorages = new ArrayList<FolderStorage>(element.getGeneralStorages());
         generalStorages.add(folderStorage);
         // Order by storage priority
         Collections.sort(generalStorages, FolderStorageComparator.getInstance());
+        element.replaceGeneralStorages(generalStorages);
         return true;
     }
 

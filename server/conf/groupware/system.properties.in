@@ -3,6 +3,9 @@
 # Location of default cache configuration file
 com.openexchange.caching.configfile:@oxgroupwaresysconfdir@/cache.ccf
 
+# Location of folder cache configuration file
+com.openexchange.folderstorage.cache.configfile:@oxgroupwaresysconfdir@/foldercache.ccf
+
 # Enabled/disable service usage inspection. If enabled, all services
 # obtained and managed by ServiceHolder class will be tracked to ensure
 # all services are put back (via unget) within a certain amount of time.

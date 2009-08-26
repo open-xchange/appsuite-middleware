@@ -142,7 +142,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Unsupported storage type: %1$s.
      */
-    UNSUPPORTED_STORAGE_TYPE(FolderExceptionMessages.UNSUPPORTED_STORAGE_TYPE_MSG, Category.CODE_ERROR, 20);
+    UNSUPPORTED_STORAGE_TYPE(FolderExceptionMessages.UNSUPPORTED_STORAGE_TYPE_MSG, Category.CODE_ERROR, 20),
+    /**
+     * Missing property: %1$s.
+     */
+    MISSING_PROPERTY(FolderExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 21);
 
     private final Category category;
 

@@ -52,7 +52,7 @@ package com.openexchange.folderstorage.internal.actions;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -86,6 +86,27 @@ public final class Clear extends AbstractAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Clear(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Clear(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Performs the <code>CLEAR</code> request.
      * 
      * @param treeId The tree identifier
@@ -93,7 +114,7 @@ public final class Clear extends AbstractAction {
      * @throws FolderException If an error occurs during deletion
      */
     public void doClear(final String treeId, final String folderId) throws FolderException {
-        final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, folderId);
+        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
@@ -103,8 +124,7 @@ public final class Clear extends AbstractAction {
             folderStorage.clearFolder(treeId, folderId, storageParameters);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Delete.doDelete() took ").append(duration).append("msec for folder: ").append(
-                    folderId).toString());
+                LOG.debug(new StringBuilder().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }
             folderStorage.commitTransaction(storageParameters);
         } catch (final FolderException e) {

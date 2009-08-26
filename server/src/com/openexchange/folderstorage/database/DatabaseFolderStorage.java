@@ -855,7 +855,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     } // End of containsFolder()
 
-    public String[] getModifiedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Context ctx = storageParameters.getContext();
@@ -879,7 +879,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     } // End of getModifiedFolderIDs()
 
-    public String[] getDeletedFolderIDs(final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final User user = storageParameters.getUser();

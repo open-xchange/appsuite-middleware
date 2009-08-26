@@ -50,7 +50,9 @@
 package com.openexchange.folderstorage.osgi;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -60,6 +62,7 @@ import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
@@ -118,9 +121,24 @@ public final class FolderStorageActivator implements BundleActivator {
             activators = new ArrayList<BundleActivator>(4);
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
-            // activators.add(new CacheFolderStorageActivator()); // Cache impl
+            activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
-            for (final BundleActivator activator : activators) {
+            BundleActivator activator = null;
+            for (final Iterator<BundleActivator> iter = activators.iterator(); iter.hasNext();) {
+                try {
+                    if (context.getBundle().getState() == Bundle.RESOLVED) {
+                        if (null != activator) {
+                            LOG.error("Failed start of folder storage bundle \"" + activator.getClass().getName() + "\"!", new Throwable());
+                        }
+                        return;
+                    }
+                } catch (final IllegalStateException e) {
+                    if (null != activator) {
+                        LOG.error("Failed start of folder storage bundle \"" + activator.getClass().getName() + "\"!", new Throwable());
+                    }
+                    return;
+                }
+                activator = iter.next();
                 activator.start(context);
             }
 

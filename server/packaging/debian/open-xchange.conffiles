@@ -1,5 +1,6 @@
 /etc/default/open-xchange-groupware
 /opt/open-xchange/etc/groupware/cache.ccf
+/opt/open-xchange/etc/groupware/foldercache.ccf
 /opt/open-xchange/etc/groupware/importerExporter.xml
 /opt/open-xchange/etc/groupware/mailcache.ccf
 /opt/open-xchange/etc/groupware/mime.types

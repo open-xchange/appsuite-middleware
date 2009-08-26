@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.internal.actions;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -65,6 +66,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAction {
+
+    protected final FolderStorageDiscoverer folderStorageDiscoverer;
 
     protected final ServerSession session;
 
@@ -80,7 +83,18 @@ public abstract class AbstractAction {
      * @param session The session
      */
     protected AbstractAction(final ServerSession session) {
+        this(session, FolderStorageRegistry.getInstance());
+    }
+
+    /**
+     * Initializes a new {@link AbstractAction} from given session.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    protected AbstractAction(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super();
+        this.folderStorageDiscoverer = folderStorageDiscoverer;
         this.session = session;
         // Pre-Initialize session
         session.getUserConfiguration();
@@ -96,7 +110,19 @@ public abstract class AbstractAction {
      * @param context The context
      */
     protected AbstractAction(final User user, final Context context) {
+        this(user, context, FolderStorageRegistry.getInstance());
+    }
+
+    /**
+     * Initializes a new {@link AbstractAction} from given user-context-pair.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    protected AbstractAction(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super();
+        this.folderStorageDiscoverer = folderStorageDiscoverer;
         session = null;
         this.user = user;
         this.context = context;
@@ -122,7 +148,7 @@ public abstract class AbstractAction {
         }
         if (null == tmp) {
             // None opened storage is capable to server given folderId-treeId-pair
-            tmp = FolderStorageRegistry.getInstance().getFolderStorage(treeId, id);
+            tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
             if (null == tmp) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
             }
@@ -197,6 +223,15 @@ public abstract class AbstractAction {
      */
     public ServerSession getSession() {
         return session;
+    }
+
+    /**
+     * Gets the folder storage discoverer.
+     * 
+     * @return The folder storage discoverer
+     */
+    public FolderStorageDiscoverer getFolderStorageDiscoverer() {
+        return folderStorageDiscoverer;
     }
 
 }

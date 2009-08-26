@@ -56,8 +56,8 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderFilter;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -91,6 +91,27 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public AllVisibleFolders(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public AllVisibleFolders(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Gets all visible folders
      * 
      * @param treeId The tree identifier
@@ -99,7 +120,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
      * @throws FolderException If a folder error occurs
      */
     public UserizedFolder[] doAllVisibleFolders(final String treeId, final FolderFilter filter) throws FolderException {
-        final FolderStorage rootStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, FolderStorage.ROOT_ID);
+        final FolderStorage rootStorage = folderStorageDiscoverer.getFolderStorage(treeId, FolderStorage.ROOT_ID);
         if (null == rootStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, FolderStorage.ROOT_ID);
         }

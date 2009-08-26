@@ -61,13 +61,13 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.container.FolderObject;
@@ -107,6 +107,27 @@ public final class Updates extends AbstractUserizedFolderAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Updates(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Updates(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Performs the <code>UPDATES</code> request.
      * 
      * @param treeId The tree identifier
@@ -118,7 +139,7 @@ public final class Updates extends AbstractUserizedFolderAction {
      */
     public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted) throws FolderException {
         final List<FolderStorage> realFolderStorages = new ArrayList<FolderStorage>(
-            Arrays.asList(FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(FolderStorage.REAL_TREE_ID)));
+            Arrays.asList(folderStorageDiscoverer.getFolderStoragesForTreeID(FolderStorage.REAL_TREE_ID)));
         for (final FolderStorage folderStorage : realFolderStorages) {
             folderStorage.startTransaction(storageParameters, false);
         }
@@ -145,7 +166,7 @@ public final class Updates extends AbstractUserizedFolderAction {
                  */
                 final List<Folder> modifiedFolders = new ArrayList<Folder>();
                 for (final FolderStorage folderStorage : realFolderStorages) {
-                    final String[] modifiedFolderIDs = folderStorage.getModifiedFolderIDs(since, storageParameters);
+                    final String[] modifiedFolderIDs = folderStorage.getModifiedFolderIDs(treeId, since, storageParameters);
                     for (int i = 0; i < modifiedFolderIDs.length; i++) {
                         modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderIDs[i], storageParameters));
                     }
@@ -246,7 +267,7 @@ public final class Updates extends AbstractUserizedFolderAction {
             if (!ignoreDeleted) {
                 final List<Folder> deletedFolders = new ArrayList<Folder>();
                 for (final FolderStorage folderStorage : realFolderStorages) {
-                    final String[] deletedFolderIDs = folderStorage.getDeletedFolderIDs(since, storageParameters);
+                    final String[] deletedFolderIDs = folderStorage.getDeletedFolderIDs(treeId, since, storageParameters);
                     for (int i = 0; i < deletedFolderIDs.length; i++) {
                         // Pass storage type to fetch folder from backup tables
                         deletedFolders.add(folderStorage.getFolder(
@@ -268,7 +289,7 @@ public final class Updates extends AbstractUserizedFolderAction {
                 /*
                  * Check if folders are contained in given tree ID
                  */
-                final FolderStorage fs = FolderStorageRegistry.getInstance().getFolderStoragesForTreeID(treeId)[0];
+                final FolderStorage fs = folderStorageDiscoverer.getFolderStoragesForTreeID(treeId)[0];
                 checkOpenedStorage(fs, false, realFolderStorages);
                 for (final Iterator<Folder> iterator = updatedList.iterator(); iterator.hasNext();) {
                     final Folder folder = iterator.next();

@@ -56,9 +56,9 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -92,6 +92,27 @@ public final class Create extends AbstractAction {
     }
 
     /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param session The session
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Create(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link Create}.
+     * 
+     * @param user The user
+     * @param context The context
+     * @param folderStorageDiscoverer The folder storage discoverer
+     */
+    public Create(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, folderStorageDiscoverer);
+    }
+
+    /**
      * Performs the <code>CREATE</code> request.
      * 
      * @param toCreate The object describing the folder to create
@@ -107,7 +128,7 @@ public final class Create extends AbstractAction {
         if (null == treeId) {
             throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
         }
-        final FolderStorage parentStorage = FolderStorageRegistry.getInstance().getFolderStorage(treeId, parentId);
+        final FolderStorage parentStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
@@ -188,7 +209,7 @@ public final class Create extends AbstractAction {
 
     private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
         final ContentType folderContentType = toCreate.getContentType();
-        final FolderStorage realStorage = FolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         /*
          * Check if real storage supports folder's content types
          */
@@ -207,7 +228,7 @@ public final class Create extends AbstractAction {
             /*
              * Find the real storage which is capable to create the folder
              */
-            final FolderStorage capStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(
+            final FolderStorage capStorage = folderStorageDiscoverer.getFolderStorageByContentType(
                 FolderStorage.REAL_TREE_ID,
                 folderContentType);
             if (null == capStorage) {

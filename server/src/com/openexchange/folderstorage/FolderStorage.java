@@ -220,24 +220,26 @@ public interface FolderStorage {
      * <p>
      * If a certain implementation does not support this feature an empty array is supposed to be returned.
      * 
+     * @param treeId The tree identifier
      * @param timeStamp The time stamp
      * @param storageParameters The storage parameters
      * @return The identifiers of all new and modified folders from this storage since given time stamp
      * @throws FolderException If a folder error occurs
      */
-    String[] getModifiedFolderIDs(Date timeStamp, StorageParameters storageParameters) throws FolderException;
+    String[] getModifiedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets the identifiers of all deleted folders from this storage since given time stamp.
      * <p>
      * If a certain implementation does not support this feature an empty array is supposed to be returned.
      * 
+     * @param treeId The tree identifier
      * @param timeStamp The time stamp
      * @param storageParameters The storage parameters
      * @return The identifiers of all deleted folders from this storage since given time stamp
      * @throws FolderException If a folder error occurs
      */
-    String[] getDeletedFolderIDs(Date timeStamp, StorageParameters storageParameters) throws FolderException;
+    String[] getDeletedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Starts a transaction on folder storage.
