@@ -50,15 +50,20 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
+import java.util.List;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link UpdatesTest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdatesTest extends AbstractAJAXSession {
@@ -81,15 +86,82 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     public void testUpdates() throws Throwable {
+        String newId = null;
+        try {
+            final long timeStamp;
 
-        final UpdatesRequest request = new UpdatesRequest(FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1,
+            {
+                final FolderObject fo = new FolderObject();
+                fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+                fo.setFolderName("testCalendarFolder" + System.currentTimeMillis());
+                fo.setModule(FolderObject.CALENDAR);
+                final OCLPermission oclP = new OCLPermission();
+                oclP.setEntity(client.getValues().getUserId());
+                oclP.setGroupPermission(false);
+                oclP.setFolderAdmin(true);
+                oclP.setAllPermission(
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION);
+                fo.setPermissionsAsArray(new OCLPermission[] { oclP });
+                timeStamp = System.currentTimeMillis();
+                final InsertRequest request = new InsertRequest(fo);
+                request.setFolderURL("/ajax/folder2");
+                final InsertResponse response = (InsertResponse) client.execute(request);
+                newId = (String) response.getResponse().getData();
+                assertNotNull("New ID must not be null!", newId);
+            }
+
+            final FolderUpdatesResponse response;
+            {
+                final UpdatesRequest request = new UpdatesRequest(
+                    FolderObject.SYSTEM_ROOT_FOLDER_ID,
+                    new int[] { FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID },
+                    -1,
+                    null,
+                    new Date(timeStamp));
+                request.setFolderURL("/ajax/folder2");
+                response = client.execute(request);
+            }
+
+            assertNotNull(response);
+
+            final int iNewId = Integer.parseInt(newId);
+            final List<FolderObject> l = response.getFolders();
+            boolean found = false;
+            for (final FolderObject folderObject : l) {
+                found |= (iNewId == folderObject.getObjectID());
+            }
+            assertTrue("Newly created folder not contained in action=updates response.", found);
+            
+        } finally {
+            if (null != newId) {
+                // Delete folder
+                try {
+                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
+                    deleteRequest.setFolderURL("/ajax/folder2");
+                    client.execute(deleteRequest);
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    public void testUpdatesAll() throws Throwable {
+        final UpdatesRequest request = new UpdatesRequest(
+            FolderObject.SYSTEM_ROOT_FOLDER_ID,
+            new int[] { FolderObject.LAST_MODIFIED_UTC },
+            -1,
             null,
             new Date(0));
         request.setFolderURL("/ajax/folder2");
         final FolderUpdatesResponse response = client.execute(request);
 
         assertNotNull(response);
-        
+        assertFalse("Error occurred: " + response.getResponse().getErrorMessage(), response.getResponse().hasError());
     }
 
 }
