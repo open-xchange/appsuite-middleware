@@ -92,6 +92,16 @@ public abstract class ParserTest extends TestCase {
         
     }
     
+    public void testCollectAnchorHREFs() throws SubscriptionException {
+        final String text = "<html><head /><body><div class='ox_contact someOtherClass'><a href=\"http://www.open-xchange.com/bla.png\" class=\"ox_file\">Download</a> </div></body></html>";
+        final List<Map<String, String>> parsed = parse(text);
+        final Map blaMap = parsed.get(0);
+        
+        
+        assertEquals("http://www.open-xchange.com/bla.png", blaMap.get("ox_file"));
+        
+    }
+    
     public void testCollectDeeplyNested() throws SubscriptionException {
         final String text = "<html><head /><body><div class='ox_contact'><div><span class='ox_bla'>Bla</span><span class='ox_blupp bla'>Blupp</span></div><!-- comment --> </div><div class='ox_contact'><div><div><span class='ox_bla'>Bla2</span></div><span class='ox_blupp'>Blupp2</span></div></div></body></html>";
         final List<Map<String, String>> parsed = parse(text);

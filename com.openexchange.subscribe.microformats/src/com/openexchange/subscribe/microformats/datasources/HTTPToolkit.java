@@ -1,0 +1,147 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.subscribe.microformats.datasources;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.util.Map;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+
+
+/**
+ * {@link HTTPToolkit}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
+ */
+public class HTTPToolkit {
+    public static Reader grab(String site) throws HttpException, IOException {
+        HttpClient client = new HttpClient();
+        client.getParams().setSoTimeout(3000);
+        client.getParams().setIntParameter("http.connection.timeout", 3000);
+        
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
+            new DefaultHttpMethodRetryHandler(0, false));
+        
+     
+        java.net.URL javaURL = new java.net.URL(site);
+
+        if (javaURL.getProtocol().equalsIgnoreCase("https")) {
+            int port = javaURL.getPort();
+            if(port == -1) {
+                port = 443;
+            }
+            
+            Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+            client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
+            
+            
+            GetMethod getMethod = new GetMethod(javaURL.getFile());
+            getMethod.getParams().setSoTimeout(1000);
+            getMethod.setQueryString(javaURL.getQuery());
+            client.executeMethod(getMethod);
+            
+            return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
+        } else {
+            GetMethod getMethod = new GetMethod(site);
+            client.executeMethod(getMethod);
+            return new InputStreamReader(getMethod.getResponseBodyAsStream(), "UTF-8");
+        }
+    }
+    
+    public static Reader post(String site, Map<String, String> values) throws HttpException, IOException {
+        HttpClient client = new HttpClient();
+        client.getParams().setSoTimeout(3000);
+        client.getParams().setIntParameter("http.connection.timeout", 3000);
+        
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
+            new DefaultHttpMethodRetryHandler(0, false));
+        
+     
+        java.net.URL javaURL = new java.net.URL(site);
+
+        if (javaURL.getProtocol().equalsIgnoreCase("https")) {
+            int port = javaURL.getPort();
+            if(port == -1) {
+                port = 443;
+            }
+            
+            Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+            client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
+            
+            PostMethod postMethod = new PostMethod(javaURL.getFile());
+            for(Map.Entry<String, String> entry : values.entrySet()) {
+                postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
+            }
+            
+            postMethod.getParams().setSoTimeout(1000);
+            postMethod.setQueryString(javaURL.getQuery());
+            client.executeMethod(postMethod);
+            
+            return new InputStreamReader(postMethod.getResponseBodyAsStream(), "UTF-8");
+        } else {
+            PostMethod postMethod = new PostMethod(site);
+            for(Map.Entry<String, String> entry : values.entrySet()) {
+                postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
+            }
+            client.executeMethod(postMethod);
+            return new InputStreamReader(postMethod.getResponseBodyAsStream(), "UTF-8");
+        }
+    }
+}

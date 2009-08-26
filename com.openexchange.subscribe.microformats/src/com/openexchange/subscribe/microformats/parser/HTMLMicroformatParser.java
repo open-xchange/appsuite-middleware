@@ -77,6 +77,8 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 public class HTMLMicroformatParser implements OXMFParser {
 
     private static final String IMG = "img";
+    private static final String ANCHOR = "a";
+    
     private Set<String> containerClasses = new HashSet<String>();
     private Set<String> prefixes = new HashSet<String>();
 
@@ -142,10 +144,14 @@ public class HTMLMicroformatParser implements OXMFParser {
     }
 
     private void parse(Node node, Map<String, String> element, List<String> attributeKeys) {
-        String value = isImageElement(node)? getSrc(node) : node.getTextContent();
+        String value = isImageElement(node)? getSrc(node) : isAnchorElement(node) ? getHref(node) : node.getTextContent();
         for (String key : attributeKeys) {
             element.put(key, value);
         }
+    }
+
+    private String getHref(Node node) {
+        return ((Element)node).getAttribute("href");
     }
 
     private String getSrc(Node node) {
@@ -155,6 +161,13 @@ public class HTMLMicroformatParser implements OXMFParser {
     private boolean isImageElement(Node node) {
         if(node.getNodeType() == Node.ELEMENT_NODE) {
             return IMG.equalsIgnoreCase(((Element)node).getTagName());
+        }
+        return false;
+    }
+    
+    private boolean isAnchorElement(Node node) {
+        if(node.getNodeType() == Node.ELEMENT_NODE) {
+            return ANCHOR.equalsIgnoreCase(((Element)node).getTagName());
         }
         return false;
     }

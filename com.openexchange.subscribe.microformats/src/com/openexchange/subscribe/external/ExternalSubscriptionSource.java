@@ -47,46 +47,27 @@
  *
  */
 
-package com.openexchange.subscribe.microformats.datasources;
+package com.openexchange.subscribe.external;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionSource;
+
 
 /**
- * {@link HTTPOXMFDataSource}
- * 
+ * {@link ExternalSubscriptionSource}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class HTTPOXMFDataSource implements OXMFDataSource {
+public class ExternalSubscriptionSource extends SubscriptionSource {
 
-    private static final String URL = "url";
+    private String externalAddress;
 
-    private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
-
-    public Reader getData(Subscription subscription) throws SubscriptionException {
-
-        try {
-            return HTTPToolkit.grab((String)subscription.getConfiguration().get(URL));
-        } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
-        }
-
+    public String getExternalAddress() {
+        return externalAddress;
+    }
+    
+    public void setExternalAddress(String externalAddress) {
+        this.externalAddress = externalAddress;
     }
 
 }

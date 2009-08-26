@@ -50,35 +50,59 @@
 package com.openexchange.subscribe.microformats.datasources;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
+import com.openexchange.subscribe.microformats.parser.OXMFForm;
+
 
 /**
- * {@link HTTPOXMFDataSource}
- * 
+ * {@link HTTPFormSubmittingOXMFDataSource}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class HTTPOXMFDataSource implements OXMFDataSource {
-
-    private static final String URL = "url";
-
-    private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
+public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
+    
+    private static final Log LOG = LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class);
 
     public Reader getData(Subscription subscription) throws SubscriptionException {
+        if(!ExternalSubscriptionSource.class.isInstance(subscription.getSource())) {
+            throw OXMFSubscriptionErrorMessage.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES.create();
+        }
 
+        Map<String, String> formValues = new HashMap<String, String>(subscription.getSource().getFormDescription().getFormElements().size());
+        
+        Map<String, Object> values = subscription.getConfiguration();
+        
+        WidgetSwitcher formSwitcher = new FormSwitcher();
+        for(FormElement element : subscription.getSource().getFormDescription().getFormElements()) {
+            String name = element.getName();
+            String stringValue = (String) element.doSwitch(formSwitcher, values.get(name));
+            if(stringValue != null) {
+                formValues.put(name, stringValue);
+            }
+        }
+        
+        ExternalSubscriptionSource source = (ExternalSubscriptionSource) subscription.getSource();
+        String address = ((OXMFForm) source.getFormDescription()).getAction();
+        if(address == null) {
+            address = source.getExternalAddress();
+        }
+        
+        
         try {
-            return HTTPToolkit.grab((String)subscription.getConfiguration().get(URL));
+            return HTTPToolkit.post(address, formValues);
         } catch (HttpException e) {
             LOG.error(e.getMessage(), e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
@@ -87,6 +111,34 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
 
+    }
+    
+    
+    private static final class FormSwitcher implements WidgetSwitcher {
+
+        public Object checkbox(Object... args) {
+            if(args[0] != null && args[0] == Boolean.TRUE) {
+                return "on";
+            }
+            return null;
+        }
+
+        public Object input(Object... args) {
+            return args[0];
+        }
+
+        public Object link(Object... args) {
+            return args[0];
+        }
+
+        public Object password(Object... args) {
+            return args[0];
+        }
+
+        public Object text(Object... args) {
+            return args[0];
+        }
+        
     }
 
 }

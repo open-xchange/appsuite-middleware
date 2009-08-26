@@ -49,8 +49,11 @@
 
 package com.openexchange.subscribe.microformats.transformers;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.subscribe.SubscriptionException;
 
 
@@ -61,5 +64,8 @@ import com.openexchange.subscribe.SubscriptionException;
  *
  */
 public interface MapToObjectTransformer {
+    
+    
+    
     public List<? extends Object> transform(List<Map<String, String>> list) throws SubscriptionException;
 }

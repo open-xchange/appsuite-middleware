@@ -47,46 +47,50 @@
  *
  */
 
-package com.openexchange.subscribe.microformats.datasources;
+package com.openexchange.subscribe.microformats.parser;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+
 
 /**
- * {@link HTTPOXMFDataSource}
- * 
+ * {@link OXMFForm}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class HTTPOXMFDataSource implements OXMFDataSource {
+public class OXMFForm extends DynamicFormDescription {
 
-    private static final String URL = "url";
+    private Map<String, String> metaInfo = new HashMap<String, String>();
+    private String action;
+    private FormElement displayNameField;
 
-    private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
+    public Map<String, String> getMetaInfo() {
+        return metaInfo;
+    }
 
-    public Reader getData(Subscription subscription) throws SubscriptionException {
+    public void putMetaInfo(String key, String value) {
+        metaInfo.put(key, value);
+    }
 
-        try {
-            return HTTPToolkit.grab((String)subscription.getConfiguration().get(URL));
-        } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
-        }
+    public String getAction() {
+        return action;
+    }
+    
+    public void setAction(String action) {
+        this.action = action;
+    }
 
+    public FormElement getDisplayNameField() {
+        return displayNameField;
+    }
+    
+    public void setDisplayNameField(FormElement displayNameField) {
+        this.displayNameField = displayNameField;
     }
 
 }

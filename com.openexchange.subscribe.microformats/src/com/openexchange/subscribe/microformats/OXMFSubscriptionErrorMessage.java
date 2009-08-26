@@ -66,7 +66,8 @@ public enum OXMFSubscriptionErrorMessage implements OXErrorMessage{
      */
     ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
     IOException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 3, "Try again later.", "An IOException occurred: %1$s."),
-    HttpException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 3, "Try again later.", "A HTTPException occurred: %1$s."),
+    HttpException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 4, "Try again later.", "A HTTPException occurred: %1$s."), 
+    CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(Category.INTERNAL_ERROR, 5, "Try again later.", "Can only post to external subscription soures")
     ;
     
     private Category category;

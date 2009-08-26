@@ -148,7 +148,11 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     
     @Override
     public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
-        subscription.setDisplayName((String)subscription.getConfiguration().get("url"));
+        subscription.setDisplayName(getDisplayName(subscription));
+    }
+
+    protected String getDisplayName(Subscription subscription) {
+        return (String)subscription.getConfiguration().get("url");
     }
 
 }
