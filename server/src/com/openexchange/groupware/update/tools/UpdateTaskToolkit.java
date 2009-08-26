@@ -371,7 +371,7 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Error loading update task \"%1$s\": %2$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Error loading update task \"%1$s\"." })
     private static void runUpdateTask(final String className, final Schema schema, final int contextId) throws UpdateException {
         try {
             /*
@@ -385,11 +385,11 @@ public final class UpdateTaskToolkit {
             try {
                 task = Class.forName(className).asSubclass(UpdateTask.class).newInstance();
             } catch (final InstantiationException e) {
-                throw EXCEPTION.create(15, e, className, e.getMessage());
+                throw EXCEPTION.create(15, e, className);
             } catch (final IllegalAccessException e) {
-                throw EXCEPTION.create(15, e, className, e.getMessage());
+                throw EXCEPTION.create(15, e, className);
             } catch (final ClassNotFoundException e) {
-                throw EXCEPTION.create(15, e, className, e.getMessage());
+                throw EXCEPTION.create(15, e, className);
             }
             try {
                 LOG.info("Starting update task " + className + " on schema " + schema.getSchema() + ".");

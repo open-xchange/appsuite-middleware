@@ -67,6 +67,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.update.tools.Constants;
 
 /**
@@ -83,9 +84,9 @@ public final class UpdateTaskForceCLT {
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("t", "task", true, "The update task's class name");
         toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
-        toolkitOptions.addOption("p", "port", true, "The JMX port (default:9999)");
-        toolkitOptions.addOption("l", "login", true, "The JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("s", "password", true, "The JMX password (if JMX has authentication enabled)");
+        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
+        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
+        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
     }
 
     private static void printHelp() {
@@ -102,6 +103,7 @@ public final class UpdateTaskForceCLT {
 
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
+        int contextId = -1;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -117,7 +119,12 @@ public final class UpdateTaskForceCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
                         printHelp();
-                        port = 9999;
+                        System.exit(0);
+                    }
+                    if (port < 1 || port > 65535) {
+                        System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
+                        printHelp();
+                        System.exit(0);
                     }
                 }
             }
@@ -129,7 +136,6 @@ public final class UpdateTaskForceCLT {
             } else {
                 className = cmd.getOptionValue('t');
             }
-            int contextId = -1;
             if (!cmd.hasOption('c')) {
                 System.err.println("Missing context identifier.");
                 printHelp();
@@ -183,7 +189,18 @@ public final class UpdateTaskForceCLT {
         } catch (final InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
         } catch (final MBeanException e) {
-            System.err.println("Problem on MBean connection: " + e.getMessage());
+            final Throwable t = e.getCause();
+            final String message;
+            if (null == t) {
+                message = e.getMessage();
+            } else {
+                if (t instanceof ContextException) {
+                    message = "Cannot find context " + contextId;
+                } else {
+                    message = t.getMessage();
+                }
+            }
+            System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
         } catch (final RuntimeException e) {

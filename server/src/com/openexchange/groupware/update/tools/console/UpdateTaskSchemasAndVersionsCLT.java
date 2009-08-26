@@ -81,9 +81,9 @@ public final class UpdateTaskSchemasAndVersionsCLT {
     static {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
-        toolkitOptions.addOption("p", "port", true, "The JMX port (default:9999)");
-        toolkitOptions.addOption("l", "login", true, "The JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("s", "password", true, "The JMX password (if JMX has authentication enabled)");
+        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
+        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
+        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
     }
 
     private static void printHelp() {
@@ -115,7 +115,12 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
                         printHelp();
-                        port = 9999;
+                        System.exit(0);
+                    }
+                    if (port < 1 || port > 65535) {
+                        System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
+                        printHelp();
+                        System.exit(0);
                     }
                 }
             }
@@ -159,7 +164,14 @@ public final class UpdateTaskSchemasAndVersionsCLT {
         } catch (final InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
         } catch (final MBeanException e) {
-            System.err.println("Problem on MBean connection: " + e.getMessage());
+            final Throwable t = e.getCause();
+            final String message;
+            if (null == t) {
+                message = e.getMessage();
+            } else {
+                message = t.getMessage();
+            }
+            System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
         } catch (final RuntimeException e) {
