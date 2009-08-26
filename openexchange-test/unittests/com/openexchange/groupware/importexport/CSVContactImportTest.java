@@ -68,7 +68,7 @@ import org.junit.Test;
 
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -138,7 +138,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue( res.isCorrect() );
 
         //basic check: 1 entry in folder
-        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
 
         //detailed check:
@@ -160,7 +160,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue( res.isCorrect() );
 
         //basic check: 1 entry in folder
-        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
 
         //cleaning up
@@ -179,7 +179,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         }
 
         //basic check
-        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         assertTrue("Two contacts in folder?", 2 == contactSql.getNumberOfContacts(folderId));
 
         //cleaning up
@@ -227,7 +227,7 @@ public class CSVContactImportTest extends AbstractContactTest {
             assertTrue( res.isCorrect() );
         }
 
-        final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
         assertTrue("Three contacts in folder?", 3 == contactSql.getNumberOfContacts(folderId));
 
         //cleaning up
@@ -301,7 +301,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     }
 
     protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
-        final Contact co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
+        final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(objectID, folderId);
         assertEquals("Checking name" ,  NAME1 , co.getGivenName());
         assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
     }

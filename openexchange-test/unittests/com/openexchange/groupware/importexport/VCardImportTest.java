@@ -65,7 +65,7 @@ import org.junit.Test;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -112,7 +112,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
 
-		final ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
 		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
@@ -128,7 +128,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
 
-		final ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
 		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 	}
 }

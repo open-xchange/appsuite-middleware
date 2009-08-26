@@ -67,7 +67,7 @@ import org.junit.BeforeClass;
 
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
@@ -448,7 +448,7 @@ public class AbstractContactTest {
 	}
 
 	protected boolean existsEntry(final int entryNumber) throws ContextException {
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
 		try {
 			final Contact co = contactSql.getObjectById(entryNumber, folderId);
 			return co != null;
@@ -458,7 +458,7 @@ public class AbstractContactTest {
 	}
 	
 	protected Contact getEntry(final int entryNumber) throws OXException, ContextException {
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
 		return contactSql.getObjectById(entryNumber, folderId);
 	}
 	

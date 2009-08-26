@@ -65,7 +65,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 
 import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.importexport.csv.CSVParser;
@@ -138,7 +138,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
 		for(final ImportResult res : results){
 			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 		}
@@ -161,7 +161,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 		assertEquals("Two imports", parser.parse(TEST_EMPTY_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
 		for(final ImportResult res : results){
 			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 		}
