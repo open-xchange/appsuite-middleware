@@ -1001,7 +1001,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (ConfigurationException e) {
             throw new MailException(e);
         }
-        if (0 == minimumSearchCharacters || null == patterns) {
+        if (0 == minimumSearchCharacters) {
             return;
         }
         for (String pattern : patterns) {
