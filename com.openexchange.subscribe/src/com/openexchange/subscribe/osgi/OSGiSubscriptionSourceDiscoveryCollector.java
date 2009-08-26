@@ -79,7 +79,6 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     
     private CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
     
-    private boolean grabbedAll = false;
     
     private Set<SubscriptionSourceDiscoveryService> blacklist = new HashSet<SubscriptionSourceDiscoveryService>();
     
@@ -99,7 +98,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     
     public Object addingService(ServiceReference reference) {
         SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
-        if(blacklist.contains(service)) {
+        if(blacklist.contains(service) || service.getClass() == getClass()) {
             context.ungetService(reference);
             return service;
         }
@@ -117,49 +116,34 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         context.ungetService(reference);
     }
     
-    private void grabAll() {
-        grabbedAll = true;
-        try {
-            for(ServiceReference ref : context.getAllServiceReferences(SubscriptionSourceDiscoveryService.class.getName(), null)) {
-                addingService(ref);
-            }
-        } catch (InvalidSyntaxException e) {
-            // IGNORE
-        }
-    }
-
+  
     public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
-        if(!grabbedAll) {
-            grabAll();
-        }
         return delegate.getSource(context, subscriptionId);
     }
 
     public SubscriptionSource getSource(String identifier) {
-        if(!grabbedAll) {
-            grabAll();
-        }
         return delegate.getSource(identifier);
     }
 
     public List<SubscriptionSource> getSources() {
-        if(!grabbedAll) {
-            grabAll();
-        }
         return delegate.getSources();
     }
 
     public List<SubscriptionSource> getSources(int folderModule) {
-        if(!grabbedAll) {
-            grabAll();
-        }
         return delegate.getSources(folderModule);
     }
 
     public boolean knowsSource(String identifier) {
-        if(!grabbedAll) {
-            grabAll();
-        }
         return delegate.knowsSource(identifier);
     }
+
+    public void addSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
+        delegate.addSubscriptionSourceDiscoveryService(service);
+    }
+
+    public void removeSubscriptionSourceDiscoveryService(SubscriptionSourceDiscoveryService service) {
+        delegate.removeSubscriptionSourceDiscoveryService(service);
+    }
+    
+    
 }

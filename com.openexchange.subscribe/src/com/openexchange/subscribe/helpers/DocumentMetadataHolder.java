@@ -47,72 +47,25 @@
  *
  */
 
-package com.openexchange.subscribe.internal;
+package com.openexchange.subscribe.helpers;
 
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.FolderUpdaterService;
-import com.openexchange.subscribe.Subscription;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 
 /**
- * {@link StrategyFolderUpdaterService}
+ * {@link DocumentMetadataHolder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
+public class DocumentMetadataHolder {
+    public String dataLink;
+    public DocumentMetadata documentMetadata;
     
-    private Log LOG = LogFactory.getLog(StrategyFolderUpdaterService.class);
+    public DocumentMetadataHolder(String dataLink, DocumentMetadata documentMetadata) {
+        super();
+        this.dataLink = dataLink;
+        this.documentMetadata = documentMetadata;
+    }
     
-    private FolderUpdaterStrategy<T> strategy;
-
-    public StrategyFolderUpdaterService(FolderUpdaterStrategy<T> strategy) {
-        this.strategy = strategy;
-    }
- 
-    public boolean handles(FolderObject folder) {
-        return strategy.handles(folder);
-    }
-
-    public void save(Collection<T> data, Subscription subscription) throws AbstractOXException {
-        Object session = strategy.startSession(subscription);
-        
-        Collection<T> dataInFolder = strategy.getData(subscription, session);
-        
-        for(T element : data) {
-            try {
-                T bestMatch = findBestMatch(element, dataInFolder, session);
-                if(bestMatch == null) {
-                    strategy.save(element, session);
-                } else {
-                    strategy.update(bestMatch, element, session);
-                }
-            } catch (AbstractOXException x) {
-                LOG.error(x.getMessage(), x);
-            }
-        }
-        
-        strategy.closeSession(session);
-    }
-
-    private T findBestMatch(T element, Collection<T> dataInFolder, Object session) throws AbstractOXException {
-        // USM for the poor
-        int maxScore = -1;
-        T maxElement = null;
-        for(T elementInFolder : dataInFolder) {
-            int currentScore = strategy.calculateSimilarityScore(elementInFolder, element, session);
-            if(currentScore > maxScore) {
-                maxElement = elementInFolder;
-                maxScore = currentScore;
-            }
-        }
-        if(maxScore > strategy.getThreshhold(session))
-            return maxElement;
-       return null;
-    }
-
 }
