@@ -676,6 +676,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_WRITABLE, Boolean.valueOf(modify));
             } else {
                 // Fail
+                con.setAutoCommit(true);
                 if (modify) {
                     databaseService.backWritable(context, con);
                 } else {
