@@ -47,74 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.contact;
+package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarException.Code;
+import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.tools.sql.SearchStrings;
 
 /**
- * This class should contain all the search logic for contacts. That logic is still located in {@link RdbContactSQLImpl} but partly it is
+ * This class should contain all the search logic for the calendar. That logic is still located in {@link CalendarSql} but partly it is
  * here.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(
-    classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACT_SEARCH,
-    component=EnumComponent.CONTACT
-)
 public class Search {
-
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(Search.class);
 
     private Search() {
         super();
     }
 
-    public static void checkPatternLength(ContactSearchObject searchData) throws ContactException {
+    private static int getMinimumSearchCharacters() throws OXCalendarException {
+        try {
+            return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        } catch (ConfigurationException e) {
+            throw new OXCalendarException(e);
+        }
+    }
+
+    public static void checkPatternLength(AppointmentSearchObject searchData) throws OXCalendarException {
         final int minimumSearchCharacters = getMinimumSearchCharacters();
         if (0 == minimumSearchCharacters) {
             return;
         }
-        for (String pattern : new String[] {
-            searchData.getPattern(), searchData.getDisplayName(), searchData.getEmail1(), searchData.getEmail2(), searchData.getEmail3(),
-            searchData.getGivenName(), searchData.getSurname() }) {
+        for (String pattern : new String[] { searchData.getCatgories(), searchData.getPattern(), searchData.getTitle() }) {
             checkPatternLength(minimumSearchCharacters, pattern);
         }
     }
 
-    private static int getMinimumSearchCharacters() throws ContactException {
-        try {
-            return ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (ConfigurationException e) {
-            throw new ContactException(e);
-        }
-    }
-
-    public static void checkPatternLength(String pattern) throws ContactException {
-        final int minimumSearchCharacters = getMinimumSearchCharacters();
-        if (0 == minimumSearchCharacters) {
-            return;
-        }
-        checkPatternLength(minimumSearchCharacters, pattern);
-    }
-
-    @OXThrows(
-        category = Category.USER_INPUT,
-        desc = "The administrator configured a minimum length for a search pattern and the users pattern is shorter than this minimum.",
-        exceptionId = 1,
-        msg = "In order to accomplish the search, %1$d or more characters are required."
-    )
-    private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws ContactException {
+    private static void checkPatternLength(int minimumSearchCharacters, String pattern) throws OXCalendarException {
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
-            throw EXCEPTIONS.create(1, I(minimumSearchCharacters));
+            throw new OXCalendarException(Code.PATTERN_TOO_SHORT, I(minimumSearchCharacters));
         }
     }
 }

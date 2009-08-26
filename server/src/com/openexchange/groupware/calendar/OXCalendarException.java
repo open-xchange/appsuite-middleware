@@ -263,7 +263,11 @@ public class OXCalendarException extends OXException {
         /**
          * Move of recurring appointments is not supported
          */
-        RECURRING_FOLDER_MOVE("Move of a recurring appointment to another folder is not supported.", 93, Category.USER_INPUT);
+        RECURRING_FOLDER_MOVE("Move of a recurring appointment to another folder is not supported.", 93, Category.USER_INPUT),
+        /**
+         * In order to accomplish the search, %1$d or more characters are required.
+         */
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", 94, Category.USER_INPUT);
 
         /**
          * Message of the exception.

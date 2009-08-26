@@ -1043,10 +1043,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols, 0, 0);
     }
 
-    private SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException, SQLException {
+    private SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final String orderDir, int cols[], final int from, final int to) throws OXException {
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
+        Search.checkPatternLength(searchobject);
         Connection readcon = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
