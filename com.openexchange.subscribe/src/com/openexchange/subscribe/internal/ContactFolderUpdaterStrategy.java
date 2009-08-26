@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -110,7 +110,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     public Collection<Contact> getData(Subscription subscription, Object session) throws AbstractOXException {
-        RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
+        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
         
         int folderId = subscription.getFolderIdAsInt();
         int numberOfContacts = contacts.getNumberOfContacts(folderId);
@@ -131,7 +131,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     public void save(Contact newElement, Object session) throws AbstractOXException {
-        RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
+        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
         
@@ -145,13 +145,13 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     public Object startSession(Subscription subscription) throws AbstractOXException {
         Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new RdbContactSQLInterface(new SubscriptionSession(subscription)));
+        userInfo.put(SQL_INTERFACE, new RdbContactSQLImpl(new SubscriptionSession(subscription)));
         userInfo.put(SUBSCRIPTION, subscription);
         return userInfo;
     }
 
     public void update(Contact original, Contact update, Object session) throws AbstractOXException {
-        RdbContactSQLInterface contacts = (RdbContactSQLInterface) getFromSession(SQL_INTERFACE, session);
+        RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
 
         update.setParentFolderID(original.getParentFolderID());
         update.setObjectID(original.getObjectID());

@@ -73,7 +73,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.Types;
@@ -412,7 +412,7 @@ public class ContactRequest {
 
         try {
             // TODO: Use discovery service?
-            final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
+            final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
             final ContactWriter contactwriter = new ContactWriter(timeZone);
 
             for (int a = 0; a < userIdArray.length; a++) {
@@ -523,7 +523,7 @@ public class ContactRequest {
         final Context ctx = session.getContext();
 
         // TODO: Use discovery service?
-        final ContactInterface contactInterface = new RdbContactSQLInterface(session, ctx);
+        final ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
 
         timestamp = new Date(0);
 

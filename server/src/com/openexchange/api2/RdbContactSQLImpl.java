@@ -79,6 +79,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.Contacts.mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
@@ -107,10 +108,10 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(
-    classId=Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLINTERFACE,
+    classId=Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLIMPL,
     component=EnumComponent.CONTACT
 )
-public class RdbContactSQLInterface implements ContactSQLInterface {
+public class RdbContactSQLImpl implements ContactSQLInterface {
 
     private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
     private final int userId;
@@ -119,11 +120,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
     private final Session session;
     private final UserConfiguration userConfiguration;
 
-    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLInterface.class);
+    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLImpl.class);
 
-    private static final Log LOG = LogFactory.getLog(RdbContactSQLInterface.class);
+    private static final Log LOG = LogFactory.getLog(RdbContactSQLImpl.class);
 
-    public RdbContactSQLInterface(final Session session) throws ContextException {
+    public RdbContactSQLImpl(final Session session) throws ContextException {
         final Context ctx = ContextStorage.getStorageContext(session);
         this.ctx = ctx;
         this.userId = session.getUserId();
@@ -133,7 +134,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
                 ctx);
     }
 
-    public RdbContactSQLInterface(final Session session, final Context ctx) {
+    public RdbContactSQLImpl(final Session session, final Context ctx) {
         this.userId = session.getUserId();
         this.memberInGroups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         this.ctx = ctx;
@@ -438,7 +439,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
                 throw new OXException(e);
             }
         }
-
+        Search.checkPatternLength(searchobject);
         final StringBuilder order = new StringBuilder();
         final boolean specialSort;
         if (order_field > 0 && order_field != Contact.SPECIAL_SORTING) {
@@ -528,7 +529,6 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             readcon = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
             throw EXCEPTIONS.create(20,e);
-            //throw new OXException("UNABLE TO GET READ CONNECTION", e);
         }
 
         final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
@@ -544,8 +544,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
                 DBPool.closeReaderSilent(ctx, readcon);
             }
             throw e;
-            //throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
         }
+
+        Search.checkPatternLength(searchpattern);
 
         SearchIterator<Contact> si = null;
         Statement stmt = null;

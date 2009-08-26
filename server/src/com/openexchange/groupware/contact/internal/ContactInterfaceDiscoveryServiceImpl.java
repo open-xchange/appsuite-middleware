@@ -51,7 +51,7 @@ package com.openexchange.groupware.contact.internal;
 
 import java.util.List;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -182,7 +182,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         }
 
         public ContactInterface newContactInterface(final Session session) throws OXException {
-            return new RdbContactSQLInterface(session, ctx);
+            return new RdbContactSQLImpl(session, ctx);
         }
     } // End of RdbContactInterfaceProvider
 

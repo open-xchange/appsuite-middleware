@@ -52,7 +52,7 @@ package com.openexchange.image.internal;
 import java.sql.Connection;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.container.Contact;
@@ -87,7 +87,7 @@ public final class ImageRegistryDeleteListener implements DeleteListener {
 			final Session session = deleteEvent.getSession();
 			final Contact contact;
 			try {
-				final RdbContactSQLInterface contactSql = new RdbContactSQLInterface(session);
+				final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(session);
 				contact = contactSql.getUserById(deleteEvent.getId(), writeCon);
 			} catch (final ContextException e) {
 				throw new DeleteFailedException(e);

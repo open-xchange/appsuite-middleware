@@ -54,7 +54,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -82,7 +82,7 @@ public class ContactHandler {
     protected void storeContacts(Session session, int folderId, Collection<Contact> updatedContacts) throws ContextException, OXException{
        
         
-        RdbContactSQLInterface storage = new RdbContactSQLInterface(session);
+        RdbContactSQLImpl storage = new RdbContactSQLImpl(session);
         
         for(Contact updatedContact: updatedContacts){
             SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, Contact.ALL_COLUMNS);
