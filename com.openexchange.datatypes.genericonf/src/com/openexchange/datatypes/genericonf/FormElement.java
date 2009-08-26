@@ -49,6 +49,8 @@
 
 package com.openexchange.datatypes.genericonf;
 
+import org.w3c.dom.Element;
+
 
 /**
  * {@link FormElement}
@@ -92,6 +94,20 @@ public class FormElement {
             for(Widget widget : values()) {
                 if(widget.getKeyword().equals(keyword)) {
                     return widget;
+                }
+            }
+            return null;
+        }
+
+        public static Widget chooseFromHTMLElement(Element inputElement) {
+            if("input".equalsIgnoreCase(inputElement.getTagName())) {
+                String type = inputElement.getAttribute("type");
+                if("text".equalsIgnoreCase(type)) {
+                    return INPUT;
+                } else if ("password".equalsIgnoreCase(type)) {
+                    return PASSWORD;
+                } else if ("checkbox".equalsIgnoreCase(type)) {
+                    return CHECKBOX;
                 }
             }
             return null;
