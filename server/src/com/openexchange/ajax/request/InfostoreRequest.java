@@ -101,234 +101,234 @@ import com.openexchange.tools.session.ServerSession;
 
 public class InfostoreRequest extends CommonRequest {
 
-	private static final InfostoreParser PARSER = new InfostoreParser();
+    private static final InfostoreParser PARSER = new InfostoreParser();
 
-	private final ServerSession session;
+    private final ServerSession session;
 
     private final Context ctx;
 
     private final User user;
 
-	private final UserConfiguration userConfiguration;
+    private final UserConfiguration userConfiguration;
 
-	private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
+    private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
 
-	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
+    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
 
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);
         this.ctx = session.getContext();
         this.session = session;
-		userConfiguration = session.getUserConfiguration();
-		user = session.getUser();
+        userConfiguration = session.getUserConfiguration();
+        user = session.getUser();
     }
 
-	public static boolean hasPermission(final UserConfiguration userConfig) {
-		return userConfig.hasInfostore();
-	}
+    public static boolean hasPermission(final UserConfiguration userConfig) {
+        return userConfig.hasInfostore();
+    }
 
-	public boolean action(final String action, final SimpleRequest req) throws OXPermissionException {
-		if (!hasPermission(userConfiguration)) {
-			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
-		}
-		try {
-		    ThreadLocalSessionHolder.getInstance().setSession(session);
-			if (action.equals(AJAXServlet.ACTION_ALL)) {
+    public boolean action(final String action, final SimpleRequest req) throws OXPermissionException {
+        if (!hasPermission(userConfiguration)) {
+            throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
+        }
+        try {
+            ThreadLocalSessionHolder.getInstance().setSession(session);
+            if (action.equals(AJAXServlet.ACTION_ALL)) {
 
-				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS)) {
-					return true;
-				}
+                if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS)) {
+                    return true;
+                }
 
-				doSortedSearch(req);
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS,
-						AJAXServlet.PARAMETER_TIMESTAMP)) {
-					return true;
-				}
+                doSortedSearch(req);
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS,
+                        AJAXServlet.PARAMETER_TIMESTAMP)) {
+                    return true;
+                }
 
-				doSortedSearch(req);
+                doSortedSearch(req);
 
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_GET)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_ID)) {
-					return true;
-				}
-				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_GET)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_ID)) {
+                    return true;
+                }
+                final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 
-				int version = InfostoreFacade.CURRENT_VERSION;
+                int version = InfostoreFacade.CURRENT_VERSION;
 
-				if (req.getParameter(AJAXServlet.PARAMETER_VERSION) != null) {
-					version = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_VERSION));
-				}
+                if (req.getParameter(AJAXServlet.PARAMETER_VERSION) != null) {
+                    version = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_VERSION));
+                }
 
-				get(id, version);
+                get(id, version);
 
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_COLUMNS)) {
-					return true;
-				}
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_COLUMNS)) {
+                    return true;
+                }
 
-				doSortedSearch(req);
+                doSortedSearch(req);
 
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_REVERT)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_TIMESTAMP)) {
-					return true;
-				}
-				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
-				final long ts = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_REVERT)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_TIMESTAMP)) {
+                    return true;
+                }
+                final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+                final long ts = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 
-				revert(id, ts);
+                revert(id, ts);
 
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_LIST)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_COLUMNS)) {
-					return true;
-				}
-				final JSONArray array = (JSONArray) req.getBody();
-				final int[] ids = parseIDList(array, null);
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_LIST)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_COLUMNS)) {
+                    return true;
+                }
+                final JSONArray array = (JSONArray) req.getBody();
+                final int[] ids = parseIDList(array, null);
 
-				Metadata[] cols = null;
+                Metadata[] cols = null;
 
-				try {
-					cols = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-				} catch (final InfostoreParser.UnknownMetadataException x) {
-					unknownColumn(x.getColumnId());
-					return true;
-				}
+                try {
+                    cols = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
+                } catch (final InfostoreParser.UnknownMetadataException x) {
+                    unknownColumn(x.getColumnId());
+                    return true;
+                }
 
-				list(ids, cols);
+                list(ids, cols);
 
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_DELETE)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP)) {
-					return true;
-				}
-				final Object toDelete = req.getBody();
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_DELETE)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP)) {
+                    return true;
+                }
+                final Object toDelete = req.getBody();
                 final Map<Integer, Integer> folderMapping = new HashMap<Integer, Integer>();
                 final int[] ids = parseIDList(toDelete, folderMapping);
-				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-				delete(ids, folderMapping, timestamp);
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_DETACH)) {
-				if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP, AJAXServlet.PARAMETER_ID)) {
-					return true;
-				}
-				final JSONArray array = (JSONArray) req.getBody();
-				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+                final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                delete(ids, folderMapping, timestamp);
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_DETACH)) {
+                if (!checkRequired(req, AJAXServlet.PARAMETER_TIMESTAMP, AJAXServlet.PARAMETER_ID)) {
+                    return true;
+                }
+                final JSONArray array = (JSONArray) req.getBody();
+                final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
 
-				final int[] versions = new int[array.length()];
-				for (int i = 0; i < array.length(); i++) {
-					versions[i] = array.getInt(i);
-				}
+                final int[] versions = new int[array.length()];
+                for (int i = 0; i < array.length(); i++) {
+                    versions[i] = array.getInt(i);
+                }
 
-				detach(id, versions, timestamp);
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_UPDATE) || action.equals(AJAXServlet.ACTION_COPY)) {
+                detach(id, versions, timestamp);
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_UPDATE) || action.equals(AJAXServlet.ACTION_COPY)) {
 
-				if (!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_TIMESTAMP)) {
-					return true;
-				}
+                if (!checkRequired(req, AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_TIMESTAMP)) {
+                    return true;
+                }
 
-				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
-				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+                final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 
-				final String updateBody = req.getBody().toString();
-				final DocumentMetadata updated = PARSER.getDocumentMetadata(updateBody);
-				updated.setId(id);
-				Metadata[] presentFields = null;
+                final String updateBody = req.getBody().toString();
+                final DocumentMetadata updated = PARSER.getDocumentMetadata(updateBody);
+                updated.setId(id);
+                Metadata[] presentFields = null;
 
-				try {
-					presentFields = PARSER.findPresentFields(updateBody);
-				} catch (final UnknownMetadataException x) {
-					unknownColumn(x.getColumnId());
-					return true;
-				}
+                try {
+                    presentFields = PARSER.findPresentFields(updateBody);
+                } catch (final UnknownMetadataException x) {
+                    unknownColumn(x.getColumnId());
+                    return true;
+                }
 
-				if (action.equals(AJAXServlet.ACTION_UPDATE)) {
-					update(id, updated, timestamp, presentFields);
-				} else {
-					copy(id, updated, timestamp, presentFields);
-				}
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_NEW)) {
+                if (action.equals(AJAXServlet.ACTION_UPDATE)) {
+                    update(id, updated, timestamp, presentFields);
+                } else {
+                    copy(id, updated, timestamp, presentFields);
+                }
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_NEW)) {
 
-				final DocumentMetadata newDocument = PARSER.getDocumentMetadata(req.getBody().toString());
-				// newDocument.setFolderId(new
-				// Long(req.getParameter(PARAMETER_FOLDERID)));
-				newDocument(newDocument);
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_LOCK)) {
-				if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
-					return true;
-				}
-				long diff = -1;
-				if (null != req.getParameter("diff")) {
-					diff = Long.parseLong(req.getParameter("diff"));
-				}
-				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
-				lock(id, diff);
+                final DocumentMetadata newDocument = PARSER.getDocumentMetadata(req.getBody().toString());
+                // newDocument.setFolderId(new
+                // Long(req.getParameter(PARAMETER_FOLDERID)));
+                newDocument(newDocument);
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_LOCK)) {
+                if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
+                    return true;
+                }
+                long diff = -1;
+                if (null != req.getParameter("diff")) {
+                    diff = Long.parseLong(req.getParameter("diff"));
+                }
+                final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+                lock(id, diff);
 
-				return true;
+                return true;
 
-			} else if (action.equals(AJAXServlet.ACTION_UNLOCK)) {
-				if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
-					return true;
-				}
-				unlock(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID)));
+            } else if (action.equals(AJAXServlet.ACTION_UNLOCK)) {
+                if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
+                    return true;
+                }
+                unlock(Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID)));
 
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
-				if (!checkRequired(req, action, AJAXServlet.PARAMETER_COLUMNS)) {
-					return true;
-				}
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
+                if (!checkRequired(req, action, AJAXServlet.PARAMETER_COLUMNS)) {
+                    return true;
+                }
 
-				doSortedSearch(req);
-				return true;
-			} else if (action.equals(AJAXServlet.ACTION_SAVE_AS)) {
-				if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID,
-						AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHMENT)) {
-					return true;
-				}
-				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
-				final int attachment = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHMENT));
+                doSortedSearch(req);
+                return true;
+            } else if (action.equals(AJAXServlet.ACTION_SAVE_AS)) {
+                if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID,
+                        AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHMENT)) {
+                    return true;
+                }
+                final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+                final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
+                final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+                final int attachment = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHMENT));
 
-				final String body = req.getBody().toString();
-				final DocumentMetadata newDocument = PARSER.getDocumentMetadata(body);
-				final Metadata[] fields = PARSER.findPresentFields(body);
-				saveAs(newDocument, fields, folderId, attachedId, moduleId, attachment);
-				return true;
-			}
-			return false;
-		} catch (final JSONException x) {
-			handle(x);
-			return true;
-		} catch (final UnknownMetadataException x) {
-			handle(x);
-			return true;
-		} catch (final OXException x) {
-			handle(x);
-			return true;
-		} catch (final SearchIteratorException x) {
-			handle(x);
-			return true;
-		} catch (final NumberFormatException x) {
-			handle(x);
-			return true;
-		} catch (final Throwable t) {
-			handle(t);
-			return true;
-		} finally {
-		    ThreadLocalSessionHolder.getInstance().clear();
-		}
-	}
+                final String body = req.getBody().toString();
+                final DocumentMetadata newDocument = PARSER.getDocumentMetadata(body);
+                final Metadata[] fields = PARSER.findPresentFields(body);
+                saveAs(newDocument, fields, folderId, attachedId, moduleId, attachment);
+                return true;
+            }
+            return false;
+        } catch (final JSONException x) {
+            handle(x);
+            return true;
+        } catch (final UnknownMetadataException x) {
+            handle(x);
+            return true;
+        } catch (final OXException x) {
+            handle(x);
+            return true;
+        } catch (final SearchIteratorException x) {
+            handle(x);
+            return true;
+        } catch (final NumberFormatException x) {
+            handle(x);
+            return true;
+        } catch (final Throwable t) {
+            handle(t);
+            return true;
+        } finally {
+            ThreadLocalSessionHolder.getInstance().clear();
+        }
+    }
 
-	protected int[] parseIDList(final Object toDelete, final Map<Integer, Integer> folderMapping) throws JSONException {
+    protected int[] parseIDList(final Object toDelete, final Map<Integer, Integer> folderMapping) throws JSONException {
         if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
             final JSONArray array = (JSONArray) toDelete;
             final int[] ids = new int[array.length()];
@@ -359,297 +359,297 @@ public class InfostoreRequest extends CommonRequest {
         return ids;
     }
 
-	protected void doSortedSearch(final SimpleRequest req) throws JSONException, SearchIteratorException {
-		Metadata[] cols = null;
+    protected void doSortedSearch(final SimpleRequest req) throws JSONException, SearchIteratorException {
+        Metadata[] cols = null;
 
-		try {
-			cols = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-		} catch (final InfostoreParser.UnknownMetadataException x) {
-			unknownColumn(x.getColumnId());
-			return;
-		}
+        try {
+            cols = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
+        } catch (final InfostoreParser.UnknownMetadataException x) {
+            unknownColumn(x.getColumnId());
+            return;
+        }
 
-		final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
-		final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
+        final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+        final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
 
-		if (order != null && !checkRequired(req, AJAXServlet.PARAMETER_SORT)) {
-			return;
-		}
+        if (order != null && !checkRequired(req, AJAXServlet.PARAMETER_SORT)) {
+            return;
+        }
 
-		Metadata sortedBy = null;
-		int dir = -23;
+        Metadata sortedBy = null;
+        int dir = -23;
 
-		if (sort != null) {
+        if (sort != null) {
 
-			dir = InfostoreFacade.ASC;
-			if (order != null && order.equalsIgnoreCase("DESC")) {
-				// if(order.equalsIgnoreCase("DESC")) {
-				dir = InfostoreFacade.DESC;
-				// }
-			}
-			sortedBy = Metadata.get(Integer.parseInt(sort));
-			if (sortedBy == null) {
-				invalidParameter(AJAXServlet.PARAMETER_SORT, sort);
-				return;
-			}
-		}
+            dir = InfostoreFacade.ASC;
+            if (order != null && order.equalsIgnoreCase("DESC")) {
+                // if(order.equalsIgnoreCase("DESC")) {
+                dir = InfostoreFacade.DESC;
+                // }
+            }
+            sortedBy = Metadata.get(Integer.parseInt(sort));
+            if (sortedBy == null) {
+                invalidParameter(AJAXServlet.PARAMETER_SORT, sort);
+                return;
+            }
+        }
 
-		final String action = req.getParameter(AJAXServlet.PARAMETER_ACTION);
+        final String action = req.getParameter(AJAXServlet.PARAMETER_ACTION);
 
-		if (action.equals(AJAXServlet.ACTION_ALL)) {
-			if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID)) {
-				return;
-			}
-			final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-			
-			final String stringLeftHandLimit = req.getParameter(AJAXServlet.LEFT_HAND_LIMIT);
-			final String stringRightHandLimit = req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT);
+        if (action.equals(AJAXServlet.ACTION_ALL)) {
+            if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID)) {
+                return;
+            }
+            final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+            
+            final String stringLeftHandLimit = req.getParameter(AJAXServlet.LEFT_HAND_LIMIT);
+            final String stringRightHandLimit = req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT);
 
-			final int leftHandLimit;
-			final int rightHandLimit;
-			
-			if (stringLeftHandLimit == null) {
-				leftHandLimit = 0;
-			} else {
-				leftHandLimit = Integer.parseInt(AJAXServlet.LEFT_HAND_LIMIT);
-			}
-			
-			if (stringRightHandLimit == null) {
-				rightHandLimit = 0;
-			} else {
-				rightHandLimit = Integer.parseInt(AJAXServlet.RIGHT_HAND_LIMIT);
-			}
-			
-			all(folderId, cols, sortedBy, dir, leftHandLimit, rightHandLimit);
-		} else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
-			if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
-				return;
-			}
-			final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
-			versions(id, cols, sortedBy, dir);
-		} else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
-			if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_TIMESTAMP)) {
-				return;
-			}
-			final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-			final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
-			final String delete = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
-			updates(folderId, cols, sortedBy, dir, timestamp, delete != null && delete.equals("deleted"));
+            final int leftHandLimit;
+            final int rightHandLimit;
+            
+            if (stringLeftHandLimit == null) {
+                leftHandLimit = 0;
+            } else {
+                leftHandLimit = Integer.parseInt(AJAXServlet.LEFT_HAND_LIMIT);
+            }
+            
+            if (stringRightHandLimit == null) {
+                rightHandLimit = 0;
+            } else {
+                rightHandLimit = Integer.parseInt(AJAXServlet.RIGHT_HAND_LIMIT);
+            }
+            
+            all(folderId, cols, sortedBy, dir, leftHandLimit, rightHandLimit);
+        } else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
+            if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
+                return;
+            }
+            final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+            versions(id, cols, sortedBy, dir);
+        } else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
+            if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_TIMESTAMP)) {
+                return;
+            }
+            final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+            final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+            final String delete = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
+            updates(folderId, cols, sortedBy, dir, timestamp, delete != null && delete.equals("deleted"));
 
-		} else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
-			final JSONObject queryObject = (JSONObject) req.getBody();
-			final String query = queryObject.getString(SearchFields.PATTERN);
+        } else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
+            final JSONObject queryObject = (JSONObject) req.getBody();
+            final String query = queryObject.getString(SearchFields.PATTERN);
 
-			int folderId = SearchEngine.NO_FOLDER;
-			final String folderS = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-			if (null != folderS) {
-				folderId = Integer.parseInt(folderS);
-			}
+            int folderId = SearchEngine.NO_FOLDER;
+            final String folderS = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (null != folderS) {
+                folderId = Integer.parseInt(folderS);
+            }
 
-			int start = SearchEngine.NOT_SET;
-			final String startS = req.getParameter(AJAXServlet.PARAMETER_START);
-			if (null != startS) {
-				start = Integer.parseInt(startS);
-			}
+            int start = SearchEngine.NOT_SET;
+            final String startS = req.getParameter(AJAXServlet.PARAMETER_START);
+            if (null != startS) {
+                start = Integer.parseInt(startS);
+            }
 
-			int end = SearchEngine.NOT_SET;
-			final String endS = req.getParameter(AJAXServlet.PARAMETER_END);
-			if (null != endS) {
-				end = Integer.parseInt(endS);
-			}
+            int end = SearchEngine.NOT_SET;
+            final String endS = req.getParameter(AJAXServlet.PARAMETER_END);
+            if (null != endS) {
+                end = Integer.parseInt(endS);
+            }
 
-			if (start == SearchEngine.NOT_SET && end == SearchEngine.NOT_SET) {
-				final String limitS = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
-				if (limitS != null) {
-					final int limit = Integer.parseInt(limitS);
-					start = 0;
-					end = limit - 1;
-				}
-			}
+            if (start == SearchEngine.NOT_SET && end == SearchEngine.NOT_SET) {
+                final String limitS = req.getParameter(AJAXServlet.PARAMETER_LIMIT);
+                if (limitS != null) {
+                    final int limit = Integer.parseInt(limitS);
+                    start = 0;
+                    end = limit - 1;
+                }
+            }
 
-			search(query, cols, folderId, sortedBy, dir, start, end);
-		}
-	}
+            search(query, cols, folderId, sortedBy, dir, start, end);
+        }
+    }
 
-	// Actions
+    // Actions
 
-	protected void list(final int[] ids, final Metadata[] cols) throws SearchIteratorException {
-		final InfostoreFacade infostore = getInfostore();
-		TimedResult<DocumentMetadata> result = null;
-		SearchIterator<DocumentMetadata> iter = null;
-		try {
+    protected void list(final int[] ids, final Metadata[] cols) throws SearchIteratorException {
+        final InfostoreFacade infostore = getInfostore();
+        TimedResult<DocumentMetadata> result = null;
+        SearchIterator<DocumentMetadata> iter = null;
+        try {
 
-			result = infostore.getDocuments(ids, cols, ctx, user, userConfiguration);
+            result = infostore.getDocuments(ids, cols, ctx, user, userConfiguration);
 
-			iter = result.results();
+            iter = result.results();
 
-			final InfostoreWriter iWriter = new InfostoreWriter(w);
-			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
-			iWriter.endTimedResult();
+            final InfostoreWriter iWriter = new InfostoreWriter(w);
+            iWriter.timedResult(result.sequenceNumber());
+            iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.endTimedResult();
 
-		} catch (final Throwable t) {
-			handle(t);
+        } catch (final Throwable t) {
+            handle(t);
 
-		} finally {
-			if (iter != null) {
-				iter.close();
-			}
-		}
-	}
+        } finally {
+            if (iter != null) {
+                iter.close();
+            }
+        }
+    }
 
-	protected void get(final int id, final int version) {
-		final InfostoreFacade infostore = getInfostore();
-		DocumentMetadata dm = null;
-		try {
+    protected void get(final int id, final int version) {
+        final InfostoreFacade infostore = getInfostore();
+        DocumentMetadata dm = null;
+        try {
 
-			dm = infostore.getDocumentMetadata(id, version, ctx, user, userConfiguration);
-			if (dm == null) {
-				sendErrorAsJS("Cannot find document: %s ", String.valueOf(id));
-			}
-		} catch (final Throwable t) {
-			handle(t);
-			return;
-		}
+            dm = infostore.getDocumentMetadata(id, version, ctx, user, userConfiguration);
+            if (dm == null) {
+                sendErrorAsJS("Cannot find document: %s ", String.valueOf(id));
+            }
+        } catch (final Throwable t) {
+            handle(t);
+            return;
+        }
 
-		try {
-			final InfostoreWriter iWriter = new InfostoreWriter(w);
-			iWriter.timedResult(dm.getSequenceNumber());
-			iWriter.write(dm, TimeZone.getTimeZone(user.getTimeZone()));
-			iWriter.endTimedResult();
-		} catch (final JSONException e) {
-			LOG.error("", e);
-		}
-	}
+        try {
+            final InfostoreWriter iWriter = new InfostoreWriter(w);
+            iWriter.timedResult(dm.getSequenceNumber());
+            iWriter.write(dm, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.endTimedResult();
+        } catch (final JSONException e) {
+            LOG.error("", e);
+        }
+    }
 
-	protected void revert(final int id, final long ts) {
-		final InfostoreFacade infostore = getInfostore();
-		SearchIterator<DocumentMetadata> iter = null;
-		long timestamp = -1;
-		try {
-			// SearchENgine?
-			infostore.startTransaction();
-			infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user,
-					userConfiguration).getSequenceNumber();
-			final TimedResult<DocumentMetadata> result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
-					ctx, user, userConfiguration);
-			if (timestamp > ts) {
-				throw new OXConflictException();
-			}
-			iter = result.results();
-			final List<Integer> versions = new ArrayList<Integer>();
-			while (iter.hasNext()) {
-				final int version = (iter.next()).getVersion();
-				if (version == 0) {
-					continue;
-				}
-				versions.add(Integer.valueOf(version));
-			}
-			iter.close();
-			final int[] versionsArray = new int[versions.size()];
-			int index = 0;
-			for (final int version : versions) {
-				versionsArray[index++] = version;
-			}
-			infostore.removeVersion(id, versionsArray, session);
-			timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
-					user, userConfiguration).getSequenceNumber();
-			infostore.commit();
-			w.object();
-			w.key(ResponseFields.DATA).value(new JSONObject()).key(ResponseFields.TIMESTAMP).value(timestamp);
-			w.endObject();
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-			} catch (final TransactionException e) {
-				LOG.debug("", e);
-			}
-			handle(t);
-			return;
-		} finally {
-			if (iter != null) {
-				try {
-					iter.close();
-				} catch (final SearchIteratorException e) {
-					LOG.error("", e);
-				}
-			}
-			try {
-				infostore.finish();
-			} catch (final TransactionException e1) {
-				LOG.error("", e1);
-			}
-		}
-	}
+    protected void revert(final int id, final long ts) {
+        final InfostoreFacade infostore = getInfostore();
+        SearchIterator<DocumentMetadata> iter = null;
+        long timestamp = -1;
+        try {
+            // SearchENgine?
+            infostore.startTransaction();
+            infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user,
+                    userConfiguration).getSequenceNumber();
+            final TimedResult<DocumentMetadata> result = infostore.getVersions(id, new Metadata[] { Metadata.VERSION_LITERAL },
+                    ctx, user, userConfiguration);
+            if (timestamp > ts) {
+                throw new OXConflictException();
+            }
+            iter = result.results();
+            final List<Integer> versions = new ArrayList<Integer>();
+            while (iter.hasNext()) {
+                final int version = (iter.next()).getVersion();
+                if (version == 0) {
+                    continue;
+                }
+                versions.add(Integer.valueOf(version));
+            }
+            iter.close();
+            final int[] versionsArray = new int[versions.size()];
+            int index = 0;
+            for (final int version : versions) {
+                versionsArray[index++] = version;
+            }
+            infostore.removeVersion(id, versionsArray, session);
+            timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
+                    user, userConfiguration).getSequenceNumber();
+            infostore.commit();
+            w.object();
+            w.key(ResponseFields.DATA).value(new JSONObject()).key(ResponseFields.TIMESTAMP).value(timestamp);
+            w.endObject();
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+            } catch (final TransactionException e) {
+                LOG.debug("", e);
+            }
+            handle(t);
+            return;
+        } finally {
+            if (iter != null) {
+                try {
+                    iter.close();
+                } catch (final SearchIteratorException e) {
+                    LOG.error("", e);
+                }
+            }
+            try {
+                infostore.finish();
+            } catch (final TransactionException e1) {
+                LOG.error("", e1);
+            }
+        }
+    }
 
-	protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final int leftHandLimit, final int rightHandLimit)
-			throws SearchIteratorException {
-		/**
-		 * System.out.println("ALL: "+System.currentTimeMillis());
-		 * System.out.println("---------all-------------");
-		 * System.out.println(folderId); System.out.println(cols.length);
-		 * for(Metadata m : cols) { System.out.println(m.getName()); }
-		 * System.out.println(sortedBy); System.out.println(dir);
-		 * System.out.println("----------all------------");
-		 */
-		final InfostoreFacade infostore = getInfostore(folderId);
-		TimedResult<DocumentMetadata> result = null;
-		SearchIterator<DocumentMetadata> iter = null;
-		try {
+    protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final int leftHandLimit, final int rightHandLimit)
+            throws SearchIteratorException {
+        /**
+         * System.out.println("ALL: "+System.currentTimeMillis());
+         * System.out.println("---------all-------------");
+         * System.out.println(folderId); System.out.println(cols.length);
+         * for(Metadata m : cols) { System.out.println(m.getName()); }
+         * System.out.println(sortedBy); System.out.println(dir);
+         * System.out.println("----------all------------");
+         */
+        final InfostoreFacade infostore = getInfostore(folderId);
+        TimedResult<DocumentMetadata> result = null;
+        SearchIterator<DocumentMetadata> iter = null;
+        try {
 
-			if (sortedBy == null) {
-				result = infostore.getDocuments(folderId, cols, ctx, user, userConfiguration);
-			} else {
-				result = infostore.getDocuments(folderId, cols, sortedBy, dir, ctx, user,
-						userConfiguration);
-			}
+            if (sortedBy == null) {
+                result = infostore.getDocuments(folderId, cols, ctx, user, userConfiguration);
+            } else {
+                result = infostore.getDocuments(folderId, cols, sortedBy, dir, ctx, user,
+                        userConfiguration);
+            }
 
-			iter = result.results();
+            iter = result.results();
 
-			final InfostoreWriter iWriter = new InfostoreWriter(w);
-			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
-			iWriter.endTimedResult();
+            final InfostoreWriter iWriter = new InfostoreWriter(w);
+            iWriter.timedResult(result.sequenceNumber());
+            iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.endTimedResult();
 
-		} catch (final Throwable t) {
-			handle(t);
-			return;
-		} finally {
-			if (iter != null) {
-				iter.close();
-			}
-		}
-	}
+        } catch (final Throwable t) {
+            handle(t);
+            return;
+        } finally {
+            if (iter != null) {
+                iter.close();
+            }
+        }
+    }
 
-	protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir)
-			throws SearchIteratorException {
-		final InfostoreFacade infostore = getInfostore();
-		TimedResult<DocumentMetadata> result = null;
-		SearchIterator<DocumentMetadata> iter = null;
-		Metadata[] loadCols = addIfNeeded(cols, Metadata.VERSION_LITERAL);
-		try {
+    protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir)
+            throws SearchIteratorException {
+        final InfostoreFacade infostore = getInfostore();
+        TimedResult<DocumentMetadata> result = null;
+        SearchIterator<DocumentMetadata> iter = null;
+        Metadata[] loadCols = addIfNeeded(cols, Metadata.VERSION_LITERAL);
+        try {
 
-			if (sortedBy == null) {
-				result = infostore.getVersions(id, loadCols, ctx, user, userConfiguration);
-			} else {
-				result = infostore.getVersions(id, loadCols, sortedBy, dir, ctx, user,
-						userConfiguration);
-			}
-			iter = result.results();
-			final InfostoreWriter iWriter = new InfostoreWriter(w);
-			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(skipVersion0(iter), cols, TimeZone.getTimeZone(user.getTimeZone()));
-			iWriter.endTimedResult();
+            if (sortedBy == null) {
+                result = infostore.getVersions(id, loadCols, ctx, user, userConfiguration);
+            } else {
+                result = infostore.getVersions(id, loadCols, sortedBy, dir, ctx, user,
+                        userConfiguration);
+            }
+            iter = result.results();
+            final InfostoreWriter iWriter = new InfostoreWriter(w);
+            iWriter.timedResult(result.sequenceNumber());
+            iWriter.writeMetadata(skipVersion0(iter), cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.endTimedResult();
 
-		} catch (final Throwable t) {
-			handle(t);
-			return;
-		} finally {
-			if (iter != null) {
-				iter.close();
-			}
-		}
-	}
+        } catch (final Throwable t) {
+            handle(t);
+            return;
+        } finally {
+            if (iter != null) {
+                iter.close();
+            }
+        }
+    }
 
     private Metadata[] addIfNeeded(Metadata[] cols, Metadata column) {
         List<Metadata> newCols = new ArrayList<Metadata>(cols.length+1);
@@ -735,525 +735,525 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
-			final long timestamp, final boolean ignoreDelete) throws SearchIteratorException {
-		final InfostoreFacade infostore = getInfostore(folderId);
-		Delta<DocumentMetadata> delta = null;
+            final long timestamp, final boolean ignoreDelete) throws SearchIteratorException {
+        final InfostoreFacade infostore = getInfostore(folderId);
+        Delta<DocumentMetadata> delta = null;
 
-		SearchIterator<DocumentMetadata> iter = null;
-		SearchIterator<DocumentMetadata> iter2 = null;
+        SearchIterator<DocumentMetadata> iter = null;
+        SearchIterator<DocumentMetadata> iter2 = null;
 
-		try {
+        try {
 
-			if (sortedBy == null) {
-				delta = infostore.getDelta(folderId, timestamp, cols, ignoreDelete, ctx, user,
-						userConfiguration);
-			} else {
-				delta = infostore.getDelta(folderId, timestamp, cols, sortedBy, dir, ignoreDelete, ctx,
-						user, userConfiguration);
-			}
+            if (sortedBy == null) {
+                delta = infostore.getDelta(folderId, timestamp, cols, ignoreDelete, ctx, user,
+                        userConfiguration);
+            } else {
+                delta = infostore.getDelta(folderId, timestamp, cols, sortedBy, dir, ignoreDelete, ctx,
+                        user, userConfiguration);
+            }
 
-			iter = delta.results();
-			iter2 = delta.getDeleted();
+            iter = delta.results();
+            iter2 = delta.getDeleted();
 
-			final InfostoreWriter iWriter = new InfostoreWriter(w);
-			iWriter.timedResult(delta.sequenceNumber());
-			iWriter.writeDelta(iter, iter2, cols, ignoreDelete, TimeZone.getTimeZone(user.getTimeZone()));
-			iWriter.endTimedResult();
+            final InfostoreWriter iWriter = new InfostoreWriter(w);
+            iWriter.timedResult(delta.sequenceNumber());
+            iWriter.writeDelta(iter, iter2, cols, ignoreDelete, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.endTimedResult();
 
-		} catch (final Throwable t) {
-			handle(t);
-			return;
-		} finally {
-			if (iter != null) {
-				iter.close();
-			}
-			if (iter2 != null) {
-				iter2.close();
-			}
-		}
-	}
+        } catch (final Throwable t) {
+            handle(t);
+            return;
+        } finally {
+            if (iter != null) {
+                iter.close();
+            }
+            if (iter2 != null) {
+                iter2.close();
+            }
+        }
+    }
 
-	protected void delete(final int[] ids, final Map<Integer, Integer> folderMapping, final long timestamp) {
-		final InfostoreFacade infostore = getInfostore();
-		final SearchEngine searchEngine = getSearchEngine();
+    protected void delete(final int[] ids, final Map<Integer, Integer> folderMapping, final long timestamp) {
+        final InfostoreFacade infostore = getInfostore();
+        final SearchEngine searchEngine = getSearchEngine();
 
-		int[] notDeleted = new int[0];
-		if (ids.length != 0) {
-			try {
+        int[] notDeleted = new int[0];
+        if (ids.length != 0) {
+            try {
 
-				infostore.startTransaction();
-				searchEngine.startTransaction();
+                infostore.startTransaction();
+                searchEngine.startTransaction();
 
-				notDeleted = infostore.removeDocument(ids, timestamp, session);
+                notDeleted = infostore.removeDocument(ids, timestamp, session);
 
-				final Set<Integer> notDeletedSet = new HashSet<Integer>();
-				for (final int nd : notDeleted) {
-					notDeletedSet.add(nd);
-				}
+                final Set<Integer> notDeletedSet = new HashSet<Integer>();
+                for (final int nd : notDeleted) {
+                    notDeletedSet.add(nd);
+                }
 
-				for (final int id : ids) {
-					if (!notDeletedSet.contains(Integer.valueOf(id))) {
-						searchEngine.unIndex0r(id, ctx, user, userConfiguration);
-					}
-				}
+                for (final int id : ids) {
+                    if (!notDeletedSet.contains(Integer.valueOf(id))) {
+                        searchEngine.unIndex0r(id, ctx, user, userConfiguration);
+                    }
+                }
 
-				infostore.commit();
-				searchEngine.commit();
+                infostore.commit();
+                searchEngine.commit();
 
-			} catch (final Throwable t) {
+            } catch (final Throwable t) {
                 try {
-					infostore.rollback();
-					searchEngine.rollback();
+                    infostore.rollback();
+                    searchEngine.rollback();
                     handle(t);
                     return;
-				} catch (final TransactionException e) {
-					LOG.error("", e);
-				}
-			} finally {
-				try {
-					infostore.finish();
-					searchEngine.finish();
-				} catch (final TransactionException e) {
-					LOG.error("", e);
-				}
+                } catch (final TransactionException e) {
+                    LOG.error("", e);
+                }
+            } finally {
+                try {
+                    infostore.finish();
+                    searchEngine.finish();
+                } catch (final TransactionException e) {
+                    LOG.error("", e);
+                }
 
-			}
-		}
+            }
+        }
 
-		try {
-			w.object();
+        try {
+            w.object();
             w.key("data");
 
             w.array();
-			for (int i = 0; i < notDeleted.length; i++) {
+            for (int i = 0; i < notDeleted.length; i++) {
                 w.object();
                 w.key(AJAXServlet.PARAMETER_ID);
                 final int nd = notDeleted[i];
-				w.value(nd);
+                w.value(nd);
                 w.key("folder");
                 w.value(folderMapping.get(nd));
                 w.endObject();
             }
-			w.endArray();
+            w.endArray();
             w.endObject();
 
         } catch (final JSONException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	protected void detach(final int objectId, final int[] ids, final long timestamp) {
-		final InfostoreFacade infostore = getInfostore();
-		final SearchEngine searchEngine = getSearchEngine();
+    protected void detach(final int objectId, final int[] ids, final long timestamp) {
+        final InfostoreFacade infostore = getInfostore();
+        final SearchEngine searchEngine = getSearchEngine();
 
-		int[] notDetached = new int[0];
+        int[] notDetached = new int[0];
         long newTimestamp = 0;
         if (ids.length != 0) {
-			try {
+            try {
 
-				infostore.startTransaction();
-				searchEngine.startTransaction();
+                infostore.startTransaction();
+                searchEngine.startTransaction();
 
-				notDetached = infostore.removeVersion(objectId, ids, session);
+                notDetached = infostore.removeVersion(objectId, ids, session);
 
                 final DocumentMetadata currentVersion = infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION, ctx,
                         user, userConfiguration);
                 searchEngine.index(currentVersion, ctx, user, userConfiguration);
                 newTimestamp = currentVersion.getLastModified().getTime();
-				infostore.commit();
-				searchEngine.commit();
-			} catch (final Throwable t) {
-				try {
-					infostore.rollback();
-					searchEngine.rollback();
-				} catch (final TransactionException e) {
-					LOG.error("", e);
-				}
-				handle(t);
-				return;
-			} finally {
-				try {
-					infostore.finish();
-					searchEngine.finish();
-				} catch (final TransactionException e) {
-					LOG.error("", e);
-				}
+                infostore.commit();
+                searchEngine.commit();
+            } catch (final Throwable t) {
+                try {
+                    infostore.rollback();
+                    searchEngine.rollback();
+                } catch (final TransactionException e) {
+                    LOG.error("", e);
+                }
+                handle(t);
+                return;
+            } finally {
+                try {
+                    infostore.finish();
+                    searchEngine.finish();
+                } catch (final TransactionException e) {
+                    LOG.error("", e);
+                }
 
-			}
-		}
+            }
+        }
 
-		try {
+        try {
             w.object();
             w.key("data");
             w.array();
-			for (int i = 0; i < notDetached.length; i++) {
-				final int nd = notDetached[i];
-				w.value(nd);
-			}
-			w.endArray();
+            for (int i = 0; i < notDetached.length; i++) {
+                final int nd = notDetached[i];
+                w.value(nd);
+            }
+            w.endArray();
             w.key(ResponseFields.TIMESTAMP);
             w.value(newTimestamp);
             w.endObject();
         } catch (final JSONException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	protected void newDocument(final DocumentMetadata newDocument) throws JSONException {
-		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-		final SearchEngine searchEngine = getSearchEngine();
-		try {
+    protected void newDocument(final DocumentMetadata newDocument) throws JSONException {
+        final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
+        final SearchEngine searchEngine = getSearchEngine();
+        try {
 
-			infostore.startTransaction();
-			searchEngine.startTransaction();
+            infostore.startTransaction();
+            searchEngine.startTransaction();
 
-			infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), session);
-			infostore.commit();
-			// System.out.println("DONE SAVING: "+System.currentTimeMillis());
-			searchEngine.index(newDocument, ctx, user, userConfiguration);
-			searchEngine.commit();
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-				searchEngine.rollback();
+            infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), session);
+            infostore.commit();
+            // System.out.println("DONE SAVING: "+System.currentTimeMillis());
+            searchEngine.index(newDocument, ctx, user, userConfiguration);
+            searchEngine.commit();
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+                searchEngine.rollback();
 
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			handle(t);
-			return;
-		} finally {
-			try {
-				infostore.finish();
-				searchEngine.finish();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-		}
-		w.object();
-		w.key(ResponseFields.DATA).value(newDocument.getId());
-		w.endObject();
-	}
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            handle(t);
+            return;
+        } finally {
+            try {
+                infostore.finish();
+                searchEngine.finish();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+        }
+        w.object();
+        w.key(ResponseFields.DATA).value(newDocument.getId());
+        w.endObject();
+    }
 
-	protected void saveAs(final DocumentMetadata newDocument, final Metadata[] fields, final int folderId,
-			final int attachedId, final int moduleId, final int attachment) throws JSONException {
-		final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(fields));
-		if (!alreadySet.contains(Metadata.FOLDER_ID_LITERAL)) {
-			missingParameter("folder_id in object", AJAXServlet.ACTION_SAVE_AS);
-			// try {
-			// missingParameter("folder_id in
-			// object",AJAXServlet.ACTION_SAVE_AS);
-			// } catch (final IOException e1) {
-			// LOG.debug("", e1);
-			// }
-		}
+    protected void saveAs(final DocumentMetadata newDocument, final Metadata[] fields, final int folderId,
+            final int attachedId, final int moduleId, final int attachment) throws JSONException {
+        final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(fields));
+        if (!alreadySet.contains(Metadata.FOLDER_ID_LITERAL)) {
+            missingParameter("folder_id in object", AJAXServlet.ACTION_SAVE_AS);
+            // try {
+            // missingParameter("folder_id in
+            // object",AJAXServlet.ACTION_SAVE_AS);
+            // } catch (final IOException e1) {
+            // LOG.debug("", e1);
+            // }
+        }
 
-		final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
-		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
-		final SearchEngine searchEngine = getSearchEngine();
-		InputStream in = null;
-		try {
-			attachmentBase.startTransaction();
-			infostore.startTransaction();
-			searchEngine.startTransaction();
+        final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
+        final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
+        final SearchEngine searchEngine = getSearchEngine();
+        InputStream in = null;
+        try {
+            attachmentBase.startTransaction();
+            infostore.startTransaction();
+            searchEngine.startTransaction();
 
-			final AttachmentMetadata att = attachmentBase.getAttachment(folderId, attachedId, moduleId, attachment,
-					ctx, user, userConfiguration);
-			final com.openexchange.groupware.attach.util.GetSwitch get = new com.openexchange.groupware.attach.util.GetSwitch(
-					att);
-			final SetSwitch set = new SetSwitch(newDocument);
+            final AttachmentMetadata att = attachmentBase.getAttachment(folderId, attachedId, moduleId, attachment,
+                    ctx, user, userConfiguration);
+            final com.openexchange.groupware.attach.util.GetSwitch get = new com.openexchange.groupware.attach.util.GetSwitch(
+                    att);
+            final SetSwitch set = new SetSwitch(newDocument);
 
-			for (final Metadata attachmentCompatible : Metadata.VALUES) {
-				if (alreadySet.contains(attachmentCompatible)) {
-					continue;
-				}
-				final AttachmentField attField = Metadata.getAttachmentField(attachmentCompatible);
-				if (null == attField) {
-					continue;
-				}
-				final Object value = attField.doSwitch(get);
-				set.setValue(value);
-				attachmentCompatible.doSwitch(set);
-			}
-			newDocument.setId(InfostoreFacade.NEW);
-			in = attachmentBase.getAttachedFile(folderId, attachedId, moduleId, attachment, ctx,
-					user, userConfiguration);
-			infostore.saveDocument(newDocument, in, System.currentTimeMillis(), session); // FIXME
-																								// violates
-																								// encapsulation
+            for (final Metadata attachmentCompatible : Metadata.VALUES) {
+                if (alreadySet.contains(attachmentCompatible)) {
+                    continue;
+                }
+                final AttachmentField attField = Metadata.getAttachmentField(attachmentCompatible);
+                if (null == attField) {
+                    continue;
+                }
+                final Object value = attField.doSwitch(get);
+                set.setValue(value);
+                attachmentCompatible.doSwitch(set);
+            }
+            newDocument.setId(InfostoreFacade.NEW);
+            in = attachmentBase.getAttachedFile(folderId, attachedId, moduleId, attachment, ctx,
+                    user, userConfiguration);
+            infostore.saveDocument(newDocument, in, System.currentTimeMillis(), session); // FIXME
+                                                                                                // violates
+                                                                                                // encapsulation
 
-			// System.out.println("DONE SAVING: "+System.currentTimeMillis());
-			searchEngine.index(newDocument, ctx, user, userConfiguration);
+            // System.out.println("DONE SAVING: "+System.currentTimeMillis());
+            searchEngine.index(newDocument, ctx, user, userConfiguration);
 
-			infostore.commit();
-			searchEngine.commit();
-			attachmentBase.commit();
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-				searchEngine.rollback();
-				attachmentBase.rollback();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			handle(t);
-			return;
-		} finally {
-			try {
-				infostore.finish();
-				searchEngine.finish();
-				attachmentBase.finish();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			if (in != null) {
-				try {
-					in.close();
-				} catch (final IOException e) {
-					LOG.debug("", e);
-				}
-			}
-		}
+            infostore.commit();
+            searchEngine.commit();
+            attachmentBase.commit();
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+                searchEngine.rollback();
+                attachmentBase.rollback();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            handle(t);
+            return;
+        } finally {
+            try {
+                infostore.finish();
+                searchEngine.finish();
+                attachmentBase.finish();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (final IOException e) {
+                    LOG.debug("", e);
+                }
+            }
+        }
 
-		w.object();
-		w.key(ResponseFields.DATA).value(newDocument.getId());
-		w.endObject();
-	}
+        w.object();
+        w.key(ResponseFields.DATA).value(newDocument.getId());
+        w.endObject();
+    }
 
-	protected void update(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
-		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
-		final SearchEngine searchEngine = getSearchEngine();
+    protected void update(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
+        final InfostoreFacade infostore = getInfostore(updated.getFolderId());
+        final SearchEngine searchEngine = getSearchEngine();
 
-		try {
+        try {
 
-			infostore.startTransaction();
-			searchEngine.startTransaction();
+            infostore.startTransaction();
+            searchEngine.startTransaction();
 
-			boolean version = false;
-			for (final Metadata m : presentFields) {
-				if (m.equals(Metadata.VERSION_LITERAL)) {
-					version = true;
-					break;
-				}
-			}
-			if (!version) {
-				updated.setVersion(InfostoreFacade.CURRENT_VERSION);
-			}
+            boolean version = false;
+            for (final Metadata m : presentFields) {
+                if (m.equals(Metadata.VERSION_LITERAL)) {
+                    version = true;
+                    break;
+                }
+            }
+            if (!version) {
+                updated.setVersion(InfostoreFacade.CURRENT_VERSION);
+            }
 
-			infostore.saveDocumentMetadata(updated, timestamp, presentFields, session);
+            infostore.saveDocumentMetadata(updated, timestamp, presentFields, session);
 
-			infostore.commit();
-			searchEngine.commit();
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-				searchEngine.rollback();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			handle(t);
-			return;
-		} finally {
-			try {
-				infostore.finish();
-				searchEngine.finish();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
+            infostore.commit();
+            searchEngine.commit();
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+                searchEngine.rollback();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            handle(t);
+            return;
+        } finally {
+            try {
+                infostore.finish();
+                searchEngine.finish();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
 
-		}
-		try {
-			w.object();
+        }
+        try {
+            w.object();
             w.key(ResponseFields.TIMESTAMP);
             w.value(updated.getLastModified().getTime());
             w.endObject();
         } catch (final JSONException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-	protected void copy(final int id, final DocumentMetadata updated, final long timestamp,
-			final Metadata[] presentFields) {
+    protected void copy(final int id, final DocumentMetadata updated, final long timestamp,
+            final Metadata[] presentFields) {
 
-		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
-		final SearchEngine searchEngine = getSearchEngine();
-		DocumentMetadata metadata = null;
+        final InfostoreFacade infostore = getInfostore(updated.getFolderId());
+        final SearchEngine searchEngine = getSearchEngine();
+        DocumentMetadata metadata = null;
 
-		try {
+        try {
 
-			infostore.startTransaction();
-			searchEngine.startTransaction();
+            infostore.startTransaction();
+            searchEngine.startTransaction();
 
-			metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION,
-					ctx, user, userConfiguration));
+            metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION,
+                    ctx, user, userConfiguration));
 
-			final SetSwitch set = new SetSwitch(metadata);
-			final GetSwitch get = new GetSwitch(updated);
-			for (final Metadata field : presentFields) {
-				final Object value = field.doSwitch(get);
-				set.setValue(value);
-				field.doSwitch(set);
-				// System.out.println(field+" : "+value);
-			}
-			metadata.setVersion(0);
-			metadata.setId(InfostoreFacade.NEW);
+            final SetSwitch set = new SetSwitch(metadata);
+            final GetSwitch get = new GetSwitch(updated);
+            for (final Metadata field : presentFields) {
+                final Object value = field.doSwitch(get);
+                set.setValue(value);
+                field.doSwitch(set);
+                // System.out.println(field+" : "+value);
+            }
+            metadata.setVersion(0);
+            metadata.setId(InfostoreFacade.NEW);
 
-			if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
-				infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx,
-						user, userConfiguration), metadata.getSequenceNumber(), session);
-			} else {
-				infostore.saveDocumentMetadata(metadata, timestamp, session);
-			}
-			searchEngine.index(metadata, ctx, user, userConfiguration);
+            if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
+                infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx,
+                        user, userConfiguration), metadata.getSequenceNumber(), session);
+            } else {
+                infostore.saveDocumentMetadata(metadata, timestamp, session);
+            }
+            searchEngine.index(metadata, ctx, user, userConfiguration);
 
-			infostore.commit();
-			searchEngine.commit();
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-				searchEngine.rollback();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			handle(t);
-			return;
-		} finally {
-			try {
-				infostore.finish();
-				searchEngine.finish();
-			} catch (final TransactionException e) {
-				LOG.debug("", e);
-			}
+            infostore.commit();
+            searchEngine.commit();
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+                searchEngine.rollback();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            handle(t);
+            return;
+        } finally {
+            try {
+                infostore.finish();
+                searchEngine.finish();
+            } catch (final TransactionException e) {
+                LOG.debug("", e);
+            }
 
-		}
-		try {
-			w.object();
-			w.key(ResponseFields.DATA).value(metadata.getId());
-			w.endObject();
-		} catch (final JSONException e) {
-			LOG.error(e.getMessage(), e);
-		}
+        }
+        try {
+            w.object();
+            w.key(ResponseFields.DATA).value(metadata.getId());
+            w.endObject();
+        } catch (final JSONException e) {
+            LOG.error(e.getMessage(), e);
+        }
 
-	}
+    }
 
-	protected void lock(final int id, final long diff) {
-		final InfostoreFacade infostore = getInfostore();
+    protected void lock(final int id, final long diff) {
+        final InfostoreFacade infostore = getInfostore();
 
-		try {
-			infostore.startTransaction();
+        try {
+            infostore.startTransaction();
 
-			infostore.lock(id, diff, session);
+            infostore.lock(id, diff, session);
 
-			infostore.commit();
+            infostore.commit();
 
             final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
                     user, userConfiguration);
 
             try {
-				w.object();
+                w.object();
                 w.key(ResponseFields.TIMESTAMP);
                 w.value(currentVersion.getLastModified().getTime());
                 w.endObject();
-			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
-			}
+            } catch (final JSONException e) {
+                LOG.error(e.getMessage(), e);
+            }
 
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			handle(t);
-		} finally {
-			try {
-				infostore.finish();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-		}
-	}
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            handle(t);
+        } finally {
+            try {
+                infostore.finish();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+        }
+    }
 
-	protected void unlock(final int id) {
-		final InfostoreFacade infostore = getInfostore();
+    protected void unlock(final int id) {
+        final InfostoreFacade infostore = getInfostore();
 
-		try {
-			infostore.startTransaction();
+        try {
+            infostore.startTransaction();
 
-			/* DocumentMetadata m = */new DocumentMetadataImpl();
+            /* DocumentMetadata m = */new DocumentMetadataImpl();
 
-			infostore.unlock(id, session);
+            infostore.unlock(id, session);
 
-			infostore.commit();
+            infostore.commit();
 
             final DocumentMetadata currentVersion = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
                                 user, userConfiguration);
 
             try {
-				w.object().key(ResponseFields.TIMESTAMP).value(currentVersion.getLastModified().getTime()).endObject();
-			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
-			}
+                w.object().key(ResponseFields.TIMESTAMP).value(currentVersion.getLastModified().getTime()).endObject();
+            } catch (final JSONException e) {
+                LOG.error(e.getMessage(), e);
+            }
 
-		} catch (final Throwable t) {
-			try {
-				infostore.rollback();
-			} catch (final TransactionException e) {
-				LOG.error("", e);
-			}
-			handle(t);
-		} finally {
-			try {
-				infostore.finish();
-			} catch (final TransactionException e) {
-				LOG.debug("", e);
-			}
-		}
+        } catch (final Throwable t) {
+            try {
+                infostore.rollback();
+            } catch (final TransactionException e) {
+                LOG.error("", e);
+            }
+            handle(t);
+        } finally {
+            try {
+                infostore.finish();
+            } catch (final TransactionException e) {
+                LOG.debug("", e);
+            }
+        }
 
-	}
+    }
 
-	protected void search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy,
-			final int dir, final int start, final int end) {
-		final SearchEngine searchEngine = getSearchEngine();
+    protected void search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy,
+            final int dir, final int start, final int end) {
+        final SearchEngine searchEngine = getSearchEngine();
 
-		try {
-			searchEngine.startTransaction();
+        try {
+            searchEngine.startTransaction();
 
-			final SearchIterator<DocumentMetadata> results = searchEngine.search(query, cols, folderId, sortedBy, dir, start, end,
-					ctx, user, userConfiguration);
+            final SearchIterator<DocumentMetadata> results = searchEngine.search(query, cols, folderId, sortedBy, dir, start, end,
+                    ctx, user, userConfiguration);
 
-			final InfostoreWriter iWriter = new InfostoreWriter(w);
-			iWriter.timedResult(System.currentTimeMillis());
-			iWriter.writeMetadata(results, cols, TimeZone.getTimeZone(user.getTimeZone()));
-			iWriter.endTimedResult();
+            final InfostoreWriter iWriter = new InfostoreWriter(w);
+            iWriter.timedResult(System.currentTimeMillis());
+            iWriter.writeMetadata(results, cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.endTimedResult();
 
-			searchEngine.commit();
-		} catch (final Throwable t) {
-			try {
-				searchEngine.rollback();
-			} catch (final TransactionException x) {
-				LOG.debug("", x);
-			}
-			handle(t);
-		} finally {
-			try {
-				searchEngine.finish();
-			} catch (final TransactionException x) {
-				LOG.error("", x);
-			}
-		}
-	}
+            searchEngine.commit();
+        } catch (final Throwable t) {
+            try {
+                searchEngine.rollback();
+            } catch (final TransactionException x) {
+                LOG.debug("", x);
+            }
+            handle(t);
+        } finally {
+            try {
+                searchEngine.finish();
+            } catch (final TransactionException x) {
+                LOG.error("", x);
+            }
+        }
+    }
 
-	protected InfostoreFacade getInfostore() {
-		return Infostore.FACADE;
-	}
+    protected InfostoreFacade getInfostore() {
+        return Infostore.FACADE;
+    }
 
-	protected InfostoreFacade getInfostore(final long folderId) {
-		return Infostore.getInfostore(folderId);
-	}
+    protected InfostoreFacade getInfostore(final long folderId) {
+        return Infostore.getInfostore(folderId);
+    }
 
-	protected SearchEngine getSearchEngine() {
-		return Infostore.SEARCH_ENGINE;
-	}
+    protected SearchEngine getSearchEngine() {
+        return Infostore.SEARCH_ENGINE;
+    }
 
 }
