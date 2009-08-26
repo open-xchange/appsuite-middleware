@@ -100,8 +100,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
-    private static final Map<String, String> templateNames = new HashMap<String, String>();
-
     private static final Log LOG = LogFactory.getLog(MicroformatServlet.class);
 
     private static final String MODULE = "module";
@@ -112,7 +110,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static PublicationDataLoaderService dataLoader = null;
 
-    private static TemplateService templateService = null;
 
     private static Map<String, Map<String, Object>> additionalTemplateVariables = new HashMap<String, Map<String, Object>>();
 
@@ -134,9 +131,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         dataLoader = service;
     }
 
-    public static void setTemplateService(TemplateService service) {
-        templateService = service;
-    }
 
     public static void setUserService(UserService service) {
         userService = service;
@@ -146,9 +140,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         translator = trans;
     }
 
-    public static void registerType(String module, OXMFPublicationService publisher, String templateName, Map<String, Object> additionalVars) {
+    public static void registerType(String module, OXMFPublicationService publisher, Map<String, Object> additionalVars) {
         publishers.put(module, publisher);
-        templateNames.put(module, templateName);
         additionalTemplateVariables.put(module, additionalVars);
     }
 
@@ -190,9 +183,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
             }
-            String templateName = templateNames.get(module);
-            OXTemplate template = templateService.loadTemplate(templateName);
-
+            
+            OXTemplate template = publisher.loadTemplate(publication);
             template.process(variables, new UncloseableWriter(resp.getWriter()));
 
         } catch (Throwable t) {

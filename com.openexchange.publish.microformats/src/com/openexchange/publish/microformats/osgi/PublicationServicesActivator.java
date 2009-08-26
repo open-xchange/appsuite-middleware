@@ -16,6 +16,7 @@ import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OXMFPublicationService;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
 import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
+import com.openexchange.templating.TemplateService;
 
 public class PublicationServicesActivator implements BundleActivator {
 
@@ -34,11 +35,12 @@ public class PublicationServicesActivator implements BundleActivator {
         contactPublisher.setRootURL("/publications/contacts");
         contactPublisher.setTargetDisplayName("OXMF Contacts");
         contactPublisher.setTargetId("com.openexchange.publish.microformats.contacts.online");
-
+        contactPublisher.setDefaultTemplateName("contacts.tmpl");
+        
         Map<String, Object> additionalVars = new HashMap<String, Object>();
         additionalVars.put("utils", new ContactTemplateUtils());
-
-        MicroformatServlet.registerType("contacts", contactPublisher, "contacts.tmpl", additionalVars);
+        
+        MicroformatServlet.registerType("contacts", contactPublisher,additionalVars);
         ContactPictureServlet.setContactPublisher(contactPublisher);
 
         aliases.add("/publications/contacts");
@@ -50,12 +52,13 @@ public class PublicationServicesActivator implements BundleActivator {
         infostorePublisher.setRootURL("/publications/infostore");
         infostorePublisher.setTargetDisplayName("OXMF Infostore");
         infostorePublisher.setTargetId("com.openexchange.publish.microformats.infostore.online");
+        infostorePublisher.setDefaultTemplateName("infostore.tmpl");
         InfostoreFileServlet.setInfostorePublisher(infostorePublisher);
 
         HashMap<String, Object> infoAdditionalVars = new HashMap<String, Object>();
         infoAdditionalVars.put("utils", new InfostoreTemplateUtils());
 
-        MicroformatServlet.registerType("infostore", infostorePublisher, "infostore.tmpl", infoAdditionalVars);
+        MicroformatServlet.registerType("infostore", infostorePublisher, infoAdditionalVars);
 
         aliases.add("/publications/infostore");
 
@@ -71,6 +74,11 @@ public class PublicationServicesActivator implements BundleActivator {
 
     public List<String> getAliases() {
         return aliases;
+    }
+    
+    public void setTemplateService(TemplateService templateService) {
+        infostorePublisher.setTemplateService(templateService);
+        contactPublisher.setTemplateService(templateService);
     }
 
 }

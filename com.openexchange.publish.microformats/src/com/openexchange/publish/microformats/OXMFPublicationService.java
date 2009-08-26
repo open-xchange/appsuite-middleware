@@ -58,12 +58,18 @@ import java.util.Random;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
+import com.openexchange.publish.tools.PublicationSession;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateException;
+import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OXMFPublicationService}
@@ -79,12 +85,18 @@ public class OXMFPublicationService extends AbstractPublicationService {
     private static final String SITE = "siteName";
 
     private static final String URL = "url";
+    
+    private static final String TEMPLATE = "template";
 
     private Random random = new Random();
 
     private String rootURL;
 
     private PublicationTarget target;
+
+    private TemplateService templateService;
+
+    private String defaultTemplateName;
 
 
     
@@ -102,7 +114,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         PublicationTarget target = new PublicationTarget();
         
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input(SITE, "Site", true, null)).add(FormElement.checkbox(PROTECTED, "Hide with secret?", true, true)).add(FormElement.link(URL, "URL", false, null));
+        form.add(FormElement.input(SITE, "Site", true, null)).add(FormElement.input(TEMPLATE, "Template Name")).add(FormElement.checkbox(PROTECTED, "Add cipher code", true, true)).add(FormElement.link(URL, "URL", false, null));
         
         target.setFormDescription(form);
         target.setPublicationService(this);
@@ -136,6 +148,23 @@ public class OXMFPublicationService extends AbstractPublicationService {
         super.beforeCreate(publication);
         publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, null);
+        loadTemplate(publication);
+    }
+
+    public OXTemplate loadTemplate(Publication publication) throws PublicationException {
+        String templateName = (String) publication.getConfiguration().get(TEMPLATE);
+        try {
+            if(templateName == null || "".equals(templateName)) {
+                return templateService.loadTemplate(defaultTemplateName);
+            }
+            ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
+            return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
+        } catch (ContextException e) {
+            throw new PublicationException(e);
+        } catch (TemplateException e) {
+            throw new PublicationException(e);
+        }
+
     }
 
     @Override
@@ -238,6 +267,16 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
         
         return result.iterator().next();
+    }
+    
+    
+    public void setDefaultTemplateName(String defaultTemplateName) {
+        this.defaultTemplateName = defaultTemplateName;
+    }
+    
+    
+    public void setTemplateService(TemplateService templateService) {
+        this.templateService = templateService;
     }
 
     @Override
