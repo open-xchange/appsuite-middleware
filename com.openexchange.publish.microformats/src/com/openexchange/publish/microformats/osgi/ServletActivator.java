@@ -56,6 +56,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -90,7 +91,7 @@ public class ServletActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = {
         HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class,
-        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class};
+        ContactInterfaceDiscoveryService.class, UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class};
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -132,8 +133,9 @@ public class ServletActivator extends DeferredActivator {
         InfostoreFacade infostore = getService(InfostoreFacade.class);
         UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         UserService users = getService(UserService.class);
+        ConfigurationService configService = getService(ConfigurationService.class);
 
-        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users) {
+        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null) {
             return;
         }
 
@@ -144,6 +146,7 @@ public class ServletActivator extends DeferredActivator {
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setUserService(users);
         MicroformatServlet.setStringTranslator(customizer);
+        MicroformatServlet.setConfigService(configService);
         MicroformatServlet microformatServlet = new MicroformatServlet();
         
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);

@@ -65,6 +65,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -117,6 +118,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static StringTranslator translator;
 
+    private static ConfigurationService configService;
+
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -138,6 +141,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     public static void setStringTranslator(StringTranslator trans) {
         translator = trans;
+    }
+    
+    public static void setConfigService(ConfigurationService confService) {
+        configService = confService;
     }
 
     public static void registerType(String module, OXMFPublicationService publisher, Map<String, Object> additionalVars) {
@@ -178,7 +185,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("request", req);
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
-            variables.put("privacy", formatPrivacyText(getPrivacyText(user), user, new Date()));
+            String privacyText = formatPrivacyText(
+                getPrivacyText(user),
+                configService.getProperty("PUBLISH_REVOKE"),
+                user,
+                new Date());
+            variables.put("privacy", privacyText );
+             
 
             if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
@@ -194,9 +207,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         }
     }
 
-    private String formatPrivacyText(String privacyText, User user, Date creationDate) {
+    private String formatPrivacyText(String privacyText, String adminAddress, User user, Date creationDate) {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
-        String retVal = String.format(privacyText, "revoke@ox.io", user.getMail(), date);
+        String retVal = String.format(privacyText, adminAddress, user.getMail(), date);
         return "<p>" +retVal.replaceAll("\n", "</p><p>") + "</p>";
     }
 

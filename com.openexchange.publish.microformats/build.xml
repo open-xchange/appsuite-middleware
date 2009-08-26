@@ -36,6 +36,7 @@
     <property name="publishjar" value="com.openexchange.publish.jar"/>
     <property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
     <property name="templatingjar" value="com.openexchange.templating.jar"/>
+	<property name="configreadjar" value="com.openexchange.configread.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -50,6 +51,7 @@
         <pathelement location="${bundlesdir}/${publishbasicjar}"/>
         <pathelement location="${bundlesdir}/${templatingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+    	<pathelement location="${bundlesdir}/${configreadjar}"/>
     </path>
 
     <!-- Compile -->
