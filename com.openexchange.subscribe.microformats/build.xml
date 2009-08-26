@@ -36,6 +36,7 @@
     <property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
     <property name="commonjar" value="common.jar"/>
+	<property name="configreadjar" value="com.openexchange.configread.jar"/>
 
      <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -55,6 +56,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${subscribejar}"/>
+    	<pathelement location="${bundlesdir}/${configreadjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
