@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -375,8 +375,15 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Aug 27 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14337: Interpret CLASS:CONFIDENTIAL as private.
+ - Bugfix #14354: Setting the attachment upload limit to 0 in attachment.properties should be interpreted as "unlimited"
+* Thu Aug 27 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14390: Wrong folder id in team-view.
 * Tue Aug 25 2009 - tobias.prinz@open-xchange.com
  - Bugfix #14331: Translation of privacy disclaimer for published contacts and infostore based on user locale
+* Tue Aug 25 2009 - tobias.prinz@open-xchange.com
+ - Bugfix #14330: Using new OXMF format in default contact publication template
 * Mon Aug 24 2009 - thorben.betten@open-xchange.com
  - Bugfix #14365: New CLI tools no more trigger update process
  - Bugfix #14362: Improved error handling in new CLI tools
