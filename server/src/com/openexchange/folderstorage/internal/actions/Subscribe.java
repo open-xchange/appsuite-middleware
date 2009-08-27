@@ -148,7 +148,7 @@ public final class Subscribe extends AbstractAction {
                         Integer.valueOf(getContext().getContextId()));
                 }
             }
-            final FolderStorage targetStorage = getOpenedStorage(targetParentId, targetTreeId, openedStorages);
+            final FolderStorage targetStorage = getOpenedStorage(targetParentId, targetTreeId, storageParameters, openedStorages);
             {
                 /*
                  * Check for equally named folder

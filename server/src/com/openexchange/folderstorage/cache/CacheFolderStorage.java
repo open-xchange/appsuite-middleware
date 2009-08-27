@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.actions.Clear;
 import com.openexchange.folderstorage.internal.actions.Create;
 import com.openexchange.folderstorage.internal.actions.Delete;
@@ -85,6 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -361,9 +363,6 @@ public final class CacheFolderStorage implements FolderStorage {
              * Get needed storages
              */
             final FolderStorage[] neededStorages = CacheFolderStorageRegistry.getInstance().getFolderStoragesForParent(treeId, parentId);
-            for (final FolderStorage neededStorage : neededStorages) {
-                neededStorage.startTransaction(storageParameters, false);
-            }
             try {
                 final java.util.List<SortableId> allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
                 {
@@ -372,11 +371,23 @@ public final class CacheFolderStorage implements FolderStorage {
                     /*
                      * Get all visible subfolders from each storage
                      */
-                    for (final FolderStorage ps : neededStorages) {
+                    for (final FolderStorage neededStorage : neededStorages) {
                         completionService.submit(new Callable<java.util.List<SortableId>>() {
 
                             public java.util.List<SortableId> call() throws Exception {
-                                return Arrays.asList(ps.getSubfolders(treeId, parentId, storageParameters));
+                                final StorageParameters newParameters = newStorageParameters(storageParameters);
+                                neededStorage.startTransaction(newParameters, false);
+                                try {
+                                    final java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(
+                                        treeId,
+                                        parentId,
+                                        newParameters));
+                                    neededStorage.commitTransaction(newParameters);
+                                    return l;
+                                } catch (final Exception e) {
+                                    neededStorage.rollback(newParameters);
+                                    throw e;
+                                }
                             }
                         });
                     }
@@ -416,21 +427,9 @@ public final class CacheFolderStorage implements FolderStorage {
                  */
                 Collections.sort(allSubfolderIds);
                 ret = allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
-                /*
-                 * Commit
-                 */
-                for (final FolderStorage neededStorage : neededStorages) {
-                    neededStorage.commitTransaction(storageParameters);
-                }
             } catch (final FolderException e) {
-                for (final FolderStorage neededStorage : neededStorages) {
-                    neededStorage.rollback(storageParameters);
-                }
                 throw e;
             } catch (final Exception e) {
-                for (final FolderStorage neededStorage : neededStorages) {
-                    neededStorage.rollback(storageParameters);
-                }
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         } else {
@@ -611,6 +610,19 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         // 2 * AJP_WATCHER_MAX_RUNNING_TIME
         return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
+    }
+
+    /**
+     * Creates a new storage parameter instance.
+     * 
+     * @return A new storage parameter instance.
+     */
+    static StorageParameters newStorageParameters(final StorageParameters source) {
+        final Session session = source.getSession();
+        if (null == session) {
+            return new StorageParametersImpl(source.getUser(), source.getContext());
+        }
+        return new StorageParametersImpl((ServerSession) session);
     }
 
 }

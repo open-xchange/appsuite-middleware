@@ -146,11 +146,12 @@ public abstract class AbstractAction {
      * 
      * @param id The folder identifier
      * @param treeId The tree identifier
+     * @param storageParameters The storage parameters to use
      * @param openedStorages The collection of opened storages
      * @return An opened storage for given tree-folder-pair
      * @throws FolderException If a folder error occurs
      */
-    protected FolderStorage getOpenedStorage(final String id, final String treeId, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
+    protected FolderStorage getOpenedStorage(final String id, final String treeId, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         FolderStorage tmp = null;
         for (final FolderStorage ps : openedStorages) {
             if (ps.getFolderType().servesFolderId(id)) {
@@ -165,7 +166,7 @@ public abstract class AbstractAction {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
             }
             // Open storage and add to list of opened storages
-            tmp.startTransaction(getStorageParameters(), false);
+            tmp.startTransaction(storageParameters, false);
             openedStorages.add(tmp);
         }
         return tmp;
@@ -199,15 +200,6 @@ public abstract class AbstractAction {
      */
     public Context getContext() {
         return context;
-    }
-
-    /**
-     * Gets the storage parameters.
-     * 
-     * @return The storage parameters
-     */
-    public StorageParameters getStorageParameters() {
-        return storageParameters;
     }
 
     /**
