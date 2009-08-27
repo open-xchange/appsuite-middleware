@@ -87,7 +87,7 @@ public final class Delete extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Delete}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -97,7 +97,7 @@ public final class Delete extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Delete}.
      * 
      * @param user The user
      * @param context The context

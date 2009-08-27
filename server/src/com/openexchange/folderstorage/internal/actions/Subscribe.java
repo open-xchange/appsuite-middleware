@@ -89,7 +89,7 @@ public final class Subscribe extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Subscribe}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -99,7 +99,7 @@ public final class Subscribe extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Subscribe}.
      * 
      * @param user The user
      * @param context The context

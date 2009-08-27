@@ -91,7 +91,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link AllVisibleFolders}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -101,7 +101,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link AllVisibleFolders}.
      * 
      * @param user The user
      * @param context The context

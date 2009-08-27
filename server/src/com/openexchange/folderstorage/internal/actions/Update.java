@@ -93,7 +93,7 @@ public final class Update extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Update}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -103,7 +103,7 @@ public final class Update extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Update}.
      * 
      * @param user The user
      * @param context The context

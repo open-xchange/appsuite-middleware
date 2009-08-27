@@ -89,7 +89,7 @@ public final class Unsubscribe extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Unsubscribe}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -99,7 +99,7 @@ public final class Unsubscribe extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Unsubscribe}.
      * 
      * @param user The user
      * @param context The context

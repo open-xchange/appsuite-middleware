@@ -92,7 +92,7 @@ public final class Path extends AbstractUserizedFolderAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Path}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -102,7 +102,7 @@ public final class Path extends AbstractUserizedFolderAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Path}.
      * 
      * @param user The user
      * @param context The context

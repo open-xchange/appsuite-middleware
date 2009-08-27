@@ -107,7 +107,7 @@ public final class Updates extends AbstractUserizedFolderAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Updates}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -117,7 +117,7 @@ public final class Updates extends AbstractUserizedFolderAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Updates}.
      * 
      * @param user The user
      * @param context The context

@@ -86,7 +86,7 @@ public final class Clear extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Clear}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -96,7 +96,7 @@ public final class Clear extends AbstractAction {
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link Clear}.
      * 
      * @param user The user
      * @param context The context
