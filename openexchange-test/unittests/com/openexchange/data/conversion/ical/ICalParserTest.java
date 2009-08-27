@@ -1083,11 +1083,6 @@ public class ICalParserTest extends TestCase {
         assertErrorWhenParsingAppointment(icalText, "Missing DTSTART");
     }
 
-    public void testAppShouldIncludeErrorOnConfidentialAppointments() throws ConversionError {
-        final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "CONFIDENTIAL");
-        assertErrorWhenParsingAppointment(icalText, "Cowardly refusing to convert confidential classified objects.");
-    }
-
     public void testShouldThrowErrorOnNonICalFile() throws ConversionError {
         final String noIcalText = "I am not an iCal file.";
         try {
@@ -1163,6 +1158,16 @@ public class ICalParserTest extends TestCase {
 
         assertNull(appointment.getParticipants());
     }
+    
+
+    public void testAppShouldInterpretConfidentialAsPrivate() throws ConversionError {
+        final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "CLASS", "CONFIDENTIAL");
+        final Appointment appointment = parseAppointment(icalText);
+        
+        assertTrue("CLASS:CONFIDENTIAL should resolve to private appointments", appointment.getPrivateFlag());
+    }
+
+    
 
     // Bug 11958 - a timezone element in a file should be relevant for all data, even if listed afterwards
     public void testTimezoneShouldBeRelevantForAllData() throws ConversionError{
