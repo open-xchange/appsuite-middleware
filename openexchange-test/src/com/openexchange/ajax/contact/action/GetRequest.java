@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 
@@ -71,18 +72,21 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
      * Unique identifier of the contact.
      */
     private final int objectId;
+
+    private TimeZone timeZone;
 	
     /**
      * Default constructor.
      */
-    public GetRequest(final int folderId, final int objectId) {
+    public GetRequest(final int folderId, final int objectId, TimeZone timeZone) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
+        this.timeZone = timeZone;
     }
 
-    public GetRequest(final int folderId, final InsertResponse insert) {
-        this(folderId, insert.getId());
+    public GetRequest(final int folderId, final InsertResponse insert, TimeZone timeZone) {
+        this(folderId, insert.getId(), timeZone);
     }
 
     /**
@@ -114,6 +118,6 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
      * {@inheritDoc}
      */
     public GetParser getParser() {
-        return new GetParser();
+        return new GetParser(timeZone);
     }
 }

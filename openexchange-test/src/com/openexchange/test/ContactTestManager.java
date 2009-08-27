@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.Vector;
 import junit.framework.TestCase;
 import org.json.JSONArray;
@@ -102,6 +103,8 @@ public class ContactTestManager {
     private AJAXClient client;
 
     private ContactParser contactParser;
+    
+    private TimeZone timeZone;
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
@@ -127,6 +130,14 @@ public class ContactTestManager {
         return client;
     }
 
+    private void setTimeZone(TimeZone timezone){
+        this.timeZone = timezone;
+    }
+    
+    private TimeZone getTimeZone(){
+        return this.timeZone;
+    }
+    
     public void setContactParser(ContactParser contactParser) {
         this.contactParser = contactParser;
     }
@@ -135,8 +146,9 @@ public class ContactTestManager {
         return contactParser;
     }
 
-    public ContactTestManager(AJAXClient client) {
+    public ContactTestManager(AJAXClient client) throws AjaxException, IOException, SAXException, JSONException {
         this.setClient(client);
+        this.setTimeZone(client.getValues().getTimeZone());
         setCreatedEntities(new LinkedList<Contact>());
         setContactParser(new ContactParser());
     }
@@ -213,7 +225,7 @@ public class ContactTestManager {
      */
     public Contact getAction(final int folderId, final int objectId) {
         Contact returnedContact = null;
-        GetRequest request = new GetRequest(folderId, objectId);
+        GetRequest request = new GetRequest(folderId, objectId, getTimeZone());
         GetResponse response = null;
         try {
             response = getClient().execute(request);

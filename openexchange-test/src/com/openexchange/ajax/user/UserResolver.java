@@ -103,7 +103,7 @@ public class UserResolver {
      * Loads a user by its user id.
      */
     public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException, OXJSONException {
-        GetRequest request = new GetRequest(identifier);
+        GetRequest request = new GetRequest(identifier, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
         Contact contact = response.getContact();
         UserImpl4Test user = new UserImpl4Test();

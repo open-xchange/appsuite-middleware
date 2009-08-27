@@ -66,8 +66,9 @@ public class GetTest extends ContactTest {
 		assertNotNull("contact object is null", loadContact);
 		assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
 		assertTrue("object id not set", loadContact.getObjectID() > 0);
-		final GetResponse response = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId())).execute(
-		    new com.openexchange.ajax.user.actions.GetRequest(userId));
+		AJAXClient client =  new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final GetResponse response =client .execute(
+		    new com.openexchange.ajax.user.actions.GetRequest(userId, client.getValues().getTimeZone()));
 		loadContact = response.getContact();
 		assertNotNull("contact object is null", loadContact);
         assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
@@ -81,7 +82,7 @@ public class GetTest extends ContactTest {
         final Contact contactObj = createContactObject("testNew");
 		final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
         try {
-            final GetRequest req = new GetRequest(contactFolderId, objectId);
+            final GetRequest req = new GetRequest(contactFolderId, objectId, client.getValues().getTimeZone());
 
             final AbstractAJAXResponse response = Executor.execute(client, req);
             final JSONObject contact = (JSONObject) response.getResponse().getData();

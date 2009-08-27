@@ -87,7 +87,7 @@ public class Bug13911Test extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        final GetResponse response = client.execute(new GetRequest(client.getValues().getUserId()));
+        final GetResponse response = client.execute(new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone()));
         contact = response.getContact();
     }
 

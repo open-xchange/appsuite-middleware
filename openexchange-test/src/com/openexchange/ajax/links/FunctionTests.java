@@ -173,10 +173,12 @@ public final class FunctionTests extends AbstractAJAXSession {
             contact.setObjectID(response.getId());
             // We have to get the contact because the insert response does not
             // contain the timestamp.
+            final TimeZone tz = client.getValues().getTimeZone();
+
             final com.openexchange.ajax.contact.action.GetResponse gResponse =
                 (com.openexchange.ajax.contact.action.GetResponse) Executor
                 .execute(client, new com.openexchange.ajax.contact.action
-                .GetRequest(contactFolder, response));
+                .GetRequest(contactFolder, response, tz));
             contact.setLastModified(gResponse.getTimestamp());
         }
         try {

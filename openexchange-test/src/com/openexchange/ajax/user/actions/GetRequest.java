@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.user.actions;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
@@ -66,14 +67,20 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
      * Unique identifier of the user.
      */
     private final int userId;
+    
+    /**
+     * Timezone used for interpreting fields like last_modified and creation_date
+     */
+    private TimeZone timeZone;
 
     /**
      * Default constructor.
      * @param userId unique identifier of the user.
      */
-    public GetRequest(final int userId) {
+    public GetRequest(final int userId, TimeZone timeZone) {
         super();
         this.userId = userId;
+        this.timeZone = timeZone;
     }
 
     /**
@@ -104,6 +111,6 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
      * {@inheritDoc}
      */
     public GetParser getParser() {
-        return new GetParser(true);
+        return new GetParser(true, timeZone);
     }
 }

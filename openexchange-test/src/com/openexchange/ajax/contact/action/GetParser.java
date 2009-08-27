@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
@@ -60,11 +61,14 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class GetParser extends AbstractAJAXParser<GetResponse> {
 
+    private TimeZone timeZone;
+
     /**
      * Default constructor.
      */
-    GetParser() {
+    GetParser(TimeZone timeZone) {
         super(false);
+        this.timeZone = timeZone;
     }
 
     /**
@@ -73,6 +77,6 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     @Override
     protected GetResponse createResponse(final Response response)
         throws JSONException {
-        return new GetResponse(response);
+        return new GetResponse(response, timeZone);
     }
 }

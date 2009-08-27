@@ -66,12 +66,14 @@ import com.openexchange.tools.servlet.OXJSONException;
 public class GetResponse extends AbstractAJAXResponse {
 
     private Contact contactObj;
+    private TimeZone timeZone;
 
     /**
      * @param response
      */
-    public GetResponse(final Response response) {
+    public GetResponse(final Response response, TimeZone tz) {
         super(response);
+        this.timeZone = tz;
     }
 
     /**
@@ -81,7 +83,7 @@ public class GetResponse extends AbstractAJAXResponse {
     public Contact getContact() throws OXException, OXJSONException {
         if (null == contactObj) {
             this.contactObj = new Contact();
-            new ContactParser(true, TimeZone.getDefault()).parse(contactObj, (JSONObject) getResponse().getData());
+            new ContactParser(true, timeZone).parse(contactObj, (JSONObject) getResponse().getData());
         }
         return contactObj;
     }
