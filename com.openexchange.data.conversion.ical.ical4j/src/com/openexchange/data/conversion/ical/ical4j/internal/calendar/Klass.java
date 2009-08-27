@@ -110,10 +110,8 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         final TimeZone timeZone, final Context ctx,
         final List<ConversionWarning> warnings) throws ConversionError {
         final Clazz clazz = (Clazz) component.getProperty(CLASS);
-        if (PRIVATE.equals(clazz)) {
+        if (PRIVATE.equals(clazz) || CONFIDENTIAL.equals(clazz)) {
             cObj.setPrivateFlag(true);
-        } else if (CONFIDENTIAL.equals(clazz)) {
-            throw new ConversionError(index, Code.CLASS_CONFIDENTIAL);
         } else if (PUBLIC.equals(clazz)) {
             cObj.setPrivateFlag(false);
         } else {
