@@ -1,6 +1,6 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
-displayName: XING_YML
-id: com.openexchange.subscribe.crawler.xing
+displayName: XING
+id: com.openexchange.subscribe.xing
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 

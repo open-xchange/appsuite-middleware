@@ -1,6 +1,6 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
-displayName: LinkedIn_YML
-id: com.openexchange.subscribe.crawler.linkedin
+displayName: LinkedIn
+id: com.openexchange.subscribe.linkedin
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
