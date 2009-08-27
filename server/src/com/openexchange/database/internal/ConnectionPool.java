@@ -299,13 +299,10 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     con.rollback();
                     con.setAutoCommit(true);
                 }
-                final Class< ? extends Connection> connectionClass = con
-                    .getClass();
+                final Class< ? extends Connection> connectionClass = con.getClass();
                 try {
-                    final Method method = connectionClass.getMethod(
-                        "getActiveStatementCount");
-                    final int active = ((Integer) method.invoke(con,
-                        new Object[0])).intValue();
+                    final Method method = connectionClass.getMethod("getActiveStatementCount");
+                    final int active = ((Integer) method.invoke(con, new Object[0])).intValue();
                     if (active > 0) {
                         final DBPoolingException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                         addTrace(dbe, data);
