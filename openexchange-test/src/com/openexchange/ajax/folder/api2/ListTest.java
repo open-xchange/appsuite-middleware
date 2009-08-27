@@ -80,7 +80,7 @@ public class ListTest extends AbstractAJAXSession {
         client = getClient();
     }
 
-    public void _testListRoot() throws Throwable {
+    public void testListRoot() throws Throwable {
         // List root's subfolders
         final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
         request.setFolderURL("/ajax/folder2");
@@ -161,7 +161,7 @@ public class ListTest extends AbstractAJAXSession {
         // System.out.println(email);
     }
 
-    public void _testListPublic() throws Throwable {
+    public void testListPublic() throws Throwable {
         // List root's subfolders
         final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
         request.setFolderURL("/ajax/folder2");
@@ -181,7 +181,7 @@ public class ListTest extends AbstractAJAXSession {
         // System.out.println(email);
     }
 
-    public void _testListShared() throws Throwable {
+    public void testListShared() throws Throwable {
         // List root's subfolders
         final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         request.setFolderURL("/ajax/folder2");
