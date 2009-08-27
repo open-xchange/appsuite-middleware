@@ -130,6 +130,18 @@ public abstract class AbstractAction {
     };
 
     /**
+     * Creates a new storage parameter instance.
+     * 
+     * @return A new storage parameter instance.
+     */
+    protected StorageParameters newStorageParameters() {
+        if (null == session) {
+            return new StorageParametersImpl(user, context);
+        }
+        return new StorageParametersImpl(session);
+    }
+
+    /**
      * Gets an opened storage for given tree-folder-pair.
      * 
      * @param id The folder identifier
