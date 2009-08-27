@@ -58,6 +58,7 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  *
@@ -91,6 +92,8 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
             final JSONObject json = (JSONObject) retval.getData();
             contact.setInternalUserId(json.getInt(ContactFields.USER_ID));
         } catch (final OXException e) {
+            throw new JSONException(e);
+        } catch (OXJSONException e) {
             throw new JSONException(e);
         }
         return retval;

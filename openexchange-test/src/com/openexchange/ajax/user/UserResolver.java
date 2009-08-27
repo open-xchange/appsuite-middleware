@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 
 /**
@@ -101,7 +102,7 @@ public class UserResolver {
     /**
      * Loads a user by its user id.
      */
-    public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException {
+    public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException, OXJSONException {
         GetRequest request = new GetRequest(identifier);
         GetResponse response = client.execute(request);
         Contact contact = response.getContact();

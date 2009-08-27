@@ -84,6 +84,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
@@ -215,7 +216,7 @@ public class ContactTestManager {
         GetRequest request = new GetRequest(folderId, objectId);
         GetResponse response = null;
         try {
-            response = (GetResponse) getClient().execute(request);
+            response = getClient().execute(request);
             if(response.hasError() && getFailOnError()) 
                 throw response.getException();
             returnedContact = response.getContact();
@@ -245,7 +246,7 @@ public class ContactTestManager {
             CommonAllResponse response = getClient().execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             for (int i = 0; i < data.length(); i++) {
-                JSONArray temp = (JSONArray) data.optJSONArray(i);
+                JSONArray temp = data.optJSONArray(i);
                 int tempObjectId = temp.getInt(0);
                 int tempFolderId = temp.getInt(1);
                 Contact tempContact = getAction(tempFolderId, tempObjectId);
@@ -312,7 +313,7 @@ public class ContactTestManager {
         Vector<Contact> allContacts = new Vector<Contact>();
         UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
         try {
-            CommonUpdatesResponse response = (CommonUpdatesResponse) getClient().execute(request);
+            CommonUpdatesResponse response = getClient().execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -358,7 +359,7 @@ public class ContactTestManager {
         }
     }
 
-    private void convertJSONArray2Vector(JSONArray data, Vector<Contact> allContacts) throws JSONException, OXException {
+    private void convertJSONArray2Vector(JSONArray data, Vector<Contact> allContacts) throws JSONException, OXException, OXJSONException {
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
             JSONObject jsonObject = new JSONObject();
@@ -514,10 +515,10 @@ final class ContactMapping extends TestCase {
     }
 
     public static String columnToFieldName(int column) {
-        return (String) columns2fields.get(I(column));
+        return columns2fields.get(I(column));
     }
 
     public static int fieldNameToColumn(String fieldname) {
-        return ((Integer) fields2columns.get(fieldname)).intValue();
+        return (fields2columns.get(fieldname)).intValue();
     }
 }

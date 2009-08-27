@@ -56,6 +56,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * 
@@ -76,7 +77,7 @@ public class GetResponse extends AbstractAJAXResponse {
      * @return the contact
      * @throws OXException parsing the contact out of the response fails.
      */
-    public Contact getContact() throws OXException {
+    public Contact getContact() throws OXException, OXJSONException {
         if (null == contactObj) {
             this.contactObj = new Contact();
             new ContactParser().parse(contactObj, (JSONObject) getResponse().getData());

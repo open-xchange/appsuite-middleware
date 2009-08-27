@@ -803,7 +803,7 @@ public class ContactTest extends AbstractAJAXTest {
 		final Contact contactObj = new Contact();
 		
 		final JSONObject jsonObj = (JSONObject)response.getData();
-		final ContactParser contactParser = new ContactParser(null);
+		final ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, jsonObj);
 		
 		final int id = DataParser.parseInt(jsonObj, ContactFields.ID);
@@ -837,7 +837,7 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		final Contact contactObj = new Contact();
 		
-		final ContactParser contactParser = new ContactParser(null);
+		final ContactParser contactParser = new ContactParser();
 		contactParser.parse(contactObj, (JSONObject)response.getData());
 		
 		return contactObj;
