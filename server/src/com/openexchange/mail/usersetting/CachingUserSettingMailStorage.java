@@ -208,10 +208,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
         }
     }
 
@@ -274,10 +274,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
         }
     }
 
@@ -363,10 +363,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
         }
     }
 
@@ -408,10 +408,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
         }
     }
 
@@ -513,10 +513,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
         }
     }
 

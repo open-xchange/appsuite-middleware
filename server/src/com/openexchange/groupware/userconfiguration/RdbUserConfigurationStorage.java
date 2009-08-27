@@ -187,9 +187,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             }
             saveUserConfiguration(permissionBits, userId, insert, ctx, null);
         } catch (final SQLException e) {
-            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
-            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
+            throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e);
         }
     }
 

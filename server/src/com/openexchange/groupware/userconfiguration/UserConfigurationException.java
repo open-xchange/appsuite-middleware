@@ -55,94 +55,94 @@ import com.openexchange.groupware.EnumComponent;
 
 public class UserConfigurationException extends OXException {
 
-	private static final long serialVersionUID = 5579597483110227098L;
+    private static final long serialVersionUID = 5579597483110227098L;
 
-	public static enum UserConfigurationCode {
+    public static enum UserConfigurationCode {
 
-		/**
-		 * An SQL error occurred: %1$s
-		 */
-		SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
-		/**
-		 * A DBPooling error occurred
-		 */
-		DBPOOL_ERROR("A DBPooling error occurred", Category.CODE_ERROR, 2),
-		/**
-		 * Configuration for user %1$s could not be found in context %2$d
-		 */
-		NOT_FOUND("Configuration for user %1$s could not be found in context %2$d", Category.CODE_ERROR, 3),
-		/**
-		 * Missing property %1$s in system.properties.
-		 */
-		MISSING_SETTING("Missing property %1$s in system.properties.", Category.SETUP_ERROR, 4),
-		/**
-		 * Class %1$s can not be found.
-		 */
-		CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR, 5),
-		/**
-		 * Instantiating the class failed.
-		 */
-		INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 6),
-		/**
-		 * Cache initialization failed. Region: %1$s
-		 */
-		CACHE_INITIALIZATION_FAILED("Cache initialization failed. Region: %1$s", Category.CODE_ERROR, 7),
-		/**
-		 * User configuration could not be put into cache: %1$s
-		 */
-		CACHE_PUT_ERROR("User configuration could not be put into cache: %1$s", Category.CODE_ERROR, 8),
-		/**
-		 * User configuration cache could not be cleared: %1$s
-		 */
-		CACHE_CLEAR_ERROR("User configuration cache could not be cleared: %1$s", Category.CODE_ERROR, 9),
-		/**
-		 * User configuration could not be removed from cache: %1$s
-		 */
-		CACHE_REMOVE_ERROR("User configuration could not be removed from cache: %1$s", Category.CODE_ERROR, 9),
-		/**
-		 * Mail settings for user %1$s could not be found in context %2$d
-		 */
-		MAIL_SETTING_NOT_FOUND("Mail settings for user %1$s could not be found in context %2$d", Category.CODE_ERROR, 10);
+        /**
+         * A SQL error occurred: %1$s
+         */
+        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 1),
+        /**
+         * A DBPooling error occurred
+         */
+        DBPOOL_ERROR("A DBPooling error occurred", Category.CODE_ERROR, 2),
+        /**
+         * Configuration for user %1$s could not be found in context %2$d
+         */
+        NOT_FOUND("Configuration for user %1$s could not be found in context %2$d", Category.CODE_ERROR, 3),
+        /**
+         * Missing property %1$s in system.properties.
+         */
+        MISSING_SETTING("Missing property %1$s in system.properties.", Category.SETUP_ERROR, 4),
+        /**
+         * Class %1$s can not be found.
+         */
+        CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR, 5),
+        /**
+         * Instantiating the class failed.
+         */
+        INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 6),
+        /**
+         * Cache initialization failed. Region: %1$s
+         */
+        CACHE_INITIALIZATION_FAILED("Cache initialization failed. Region: %1$s", Category.CODE_ERROR, 7),
+        /**
+         * User configuration could not be put into cache: %1$s
+         */
+        CACHE_PUT_ERROR("User configuration could not be put into cache: %1$s", Category.CODE_ERROR, 8),
+        /**
+         * User configuration cache could not be cleared: %1$s
+         */
+        CACHE_CLEAR_ERROR("User configuration cache could not be cleared: %1$s", Category.CODE_ERROR, 9),
+        /**
+         * User configuration could not be removed from cache: %1$s
+         */
+        CACHE_REMOVE_ERROR("User configuration could not be removed from cache: %1$s", Category.CODE_ERROR, 9),
+        /**
+         * Mail settings for user %1$s could not be found in context %2$d
+         */
+        MAIL_SETTING_NOT_FOUND("Mail settings for user %1$s could not be found in context %2$d", Category.CODE_ERROR, 10);
 
-		private final String message;
+        private final String message;
 
-		private final int detailNumber;
+        private final int detailNumber;
 
-		private final Category category;
+        private final Category category;
 
-		private UserConfigurationCode(final String message, final Category category, final int detailNumber) {
-			this.message = message;
-			this.detailNumber = detailNumber;
-			this.category = category;
-		}
+        private UserConfigurationCode(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public int getNumber() {
-			return detailNumber;
-		}
+        public int getNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
 
-	}
+    }
 
-	public UserConfigurationException(final AbstractOXException exc) {
-		super(exc);
-	}
+    public UserConfigurationException(final AbstractOXException exc) {
+        super(exc);
+    }
 
-	public UserConfigurationException(final UserConfigurationCode code, final Throwable cause,
-			final Object... messageArgs) {
-		super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, cause);
-		super.setMessageArgs(messageArgs);
-	}
+    public UserConfigurationException(final UserConfigurationCode code, final Throwable cause,
+            final Object... messageArgs) {
+        super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, cause);
+        super.setMessageArgs(messageArgs);
+    }
 
-	public UserConfigurationException(final UserConfigurationCode code, final Object... messageArgs) {
-		super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, null);
-		super.setMessageArgs(messageArgs);
-	}
+    public UserConfigurationException(final UserConfigurationCode code, final Object... messageArgs) {
+        super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, null);
+        super.setMessageArgs(messageArgs);
+    }
 
 }
