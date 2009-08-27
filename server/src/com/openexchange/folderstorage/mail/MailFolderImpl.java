@@ -54,6 +54,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -68,6 +69,8 @@ import com.openexchange.mail.utils.MailFolderUtility;
 public final class MailFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
+
+    private boolean root;
 
     /**
      * Initializes an empty {@link MailFolderImpl}.
@@ -111,11 +114,12 @@ public final class MailFolderImpl extends AbstractFolder {
         this.nu = mailFolder.getNewMessageCount();
         this.unread = mailFolder.getUnreadMessageCount();
         this.deleted = mailFolder.getDeletedMessageCount();
+        this.root = mailFolder.isRootFolder();
     }
 
     @Override
     public ContentType getContentType() {
-        return SystemContentType.getInstance();
+        return root ? SystemContentType.getInstance() : MailContentType.getInstance();
     }
 
     @Override
