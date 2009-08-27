@@ -186,11 +186,18 @@ public final class Create extends AbstractAction {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
-        for (final ContentType contentType : contentTypes) {
-            if (contentType.equals(folderContentType)) {
-                supported = true;
-                break;
+        if (0 < contentTypes.length) {
+            for (final ContentType contentType : contentTypes) {
+                if (contentType.equals(folderContentType)) {
+                    supported = true;
+                    break;
+                }
             }
+        } else {
+            /*
+             * A zero length array means this folder storage supports all content types for a certain tree identifier.
+             */
+            supported = true;
         }
         if (!supported) {
             /*
