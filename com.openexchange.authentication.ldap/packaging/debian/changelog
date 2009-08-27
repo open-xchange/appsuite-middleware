@@ -1,3 +1,9 @@
+open-xchange-authentication-ldap (6.11.0.0-6) unstable; urgency=low
+
+  * First build for 6.11 Rev5
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Thu, 27 Aug 2009 18:26:40 +0200
+
 open-xchange-authentication-ldap (6.11.0.0-5) unstable; urgency=low
 
   * First build for 6.11 Rev4
