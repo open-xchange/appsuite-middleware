@@ -604,7 +604,9 @@ public class Attachment extends PermissionServlet {
         if (maxUploadSize == -2) {
             maxUploadSize = AttachmentConfig.getMaxUploadSize();
         }
-
+        if(maxUploadSize == 0) {
+            return;
+        }
         if (size > maxUploadSize) {
             throw new UploadSizeExceededException(size, maxUploadSize, true);
         }

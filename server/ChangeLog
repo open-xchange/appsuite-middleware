@@ -1,6 +1,7 @@
 * 2009-08-27 - francisco.laguna@open-xchange.com
 
  - Bugfix #14337: Interpret CLASS:CONFIDENTIAL as private.
+ - Bugfix #14354: Setting the attachment upload limit to 0 in attachment.properties should be interpreted as "unlimited"
 
 * 2009-08-25 - tobias.prinz@open-xchange.com
 
