@@ -651,9 +651,26 @@ public final class HTMLProcessing {
                             LOG.warn("Using default JTidy configuration");
                         }
                         try {
-                            final byte[] defaultConfig = String.valueOf(
-                                "indent=auto\n" + "indent-spaces=2\n" + "wrap=0\n" + "markup=yes\n" + "clean=yes\n" + "output-xml=no\n" + "input-xml=no\n" + "show-warnings=yes\n" + "numeric-entities=yes\n" + "quote-marks=yes\n" + "quote-nbsp=yes\n" + "quote-ampersand=no\n" + "break-before-br=no\n" + "uppercase-tags=yes\n" + "uppercase-attributes=yes\n" + "#smart-indent=no\n" + "output-xhtml=yes\n" + "char-encoding=latin1").getBytes();
-                            properties.load(new UnsynchronizedByteArrayInputStream(defaultConfig));
+                            final StringBuilder defaultConfig = new StringBuilder(512);
+                            defaultConfig.append("indent=auto\n");
+                            defaultConfig.append("indent-spaces=2\n");
+                            defaultConfig.append("wrap=0\n");
+                            defaultConfig.append("markup=yes\n");
+                            defaultConfig.append("clean=yes\n");
+                            defaultConfig.append("output-xml=no\n");
+                            defaultConfig.append("input-xml=no\n");
+                            defaultConfig.append("show-warnings=yes\n");
+                            defaultConfig.append("numeric-entities=yes\n");
+                            defaultConfig.append("quote-marks=yes\n");
+                            defaultConfig.append("quote-nbsp=yes\n");
+                            defaultConfig.append("quote-ampersand=no\n");
+                            defaultConfig.append("break-before-br=no\n");
+                            defaultConfig.append("uppercase-tags=yes\n");
+                            defaultConfig.append("uppercase-attributes=yes\n");
+                            defaultConfig.append("#smart-indent=no\n");
+                            defaultConfig.append("output-xhtml=yes\n");
+                            defaultConfig.append("char-encoding=latin1");
+                            properties.load(new UnsynchronizedByteArrayInputStream(String.valueOf(defaultConfig.toString()).getBytes()));
                         } catch (final UnsupportedEncodingException e) {
                             /*
                              * Cannot occur
