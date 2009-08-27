@@ -359,8 +359,10 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
         if (fid > 0) {
             if ( cfo.canReadAllInPublicFolder(fid) ) {
+                readFolderId = fid;
                 return true;
             } else if (owner == uid && cfo.canReadOwnInPublicFolder(fid)) {
+                readFolderId = fid;
                 return true;
             }
         } else {

@@ -1,3 +1,7 @@
+* 2009-08-27 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14390: Wrong folder id in team-view.
+
 * 2009-08-27 - francisco.laguna@open-xchange.com
 
  - Bugfix #14337: Interpret CLASS:CONFIDENTIAL as private.
