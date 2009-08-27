@@ -75,6 +75,10 @@ public class SubcriptionServicesActivator implements BundleActivator {
 
         infostoreSubscriptionSource.setSubscribeService(infostoreService);
         
+        context.registerService(SubscribeService.class.getName(), subscribeService, null);
+        context.registerService(SubscribeService.class.getName(), infostoreService, null);
+        
+        
         context.registerService(OXMFParserFactoryService.class.getName(), parserFactory, null);
         context.registerService(OXMFFormParser.class.getName(), new CybernekoOXMFFormParser(), null);
     }
