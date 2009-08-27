@@ -89,47 +89,33 @@ public class TaskParser extends CalendarParser {
         }
     }
 
-    protected void parseElementTask(final Task taskobject, final JSONObject json)
-        throws JSONException, OXJSONException, OXConflictException {
+    protected void parseElementTask(Task taskobject, JSONObject json) throws JSONException, OXJSONException, OXConflictException {
         if (json.has(CalendarFields.START_DATE)) {
-            taskobject.setStartDate(parseDate(json,
-                CalendarFields.START_DATE));
+            taskobject.setStartDate(parseDate(json, CalendarFields.START_DATE));
         }
-
         if (json.has(CalendarFields.END_DATE)) {
-            taskobject
-                .setEndDate(parseDate(json, CalendarFields.END_DATE));
+            taskobject.setEndDate(parseDate(json, CalendarFields.END_DATE));
         }
-
         if (json.has(TaskFields.STATUS)) {
             taskobject.setStatus(parseInt(json, TaskFields.STATUS));
         }
-
         if (json.has(TaskFields.ACTUAL_COSTS)) {
-            taskobject.setActualCosts(parseFloat(json,
-                TaskFields.ACTUAL_COSTS));
+            taskobject.setActualCosts(parseFloat(json, TaskFields.ACTUAL_COSTS));
         }
         if (json.has(ACTUAL_DURATION)) {
             taskobject.setActualDuration(parseLong(json, ACTUAL_DURATION));
         }
         if (json.has(TaskFields.PERCENT_COMPLETED)) {
-            taskobject.setPercentComplete(parseInt(json,
-                TaskFields.PERCENT_COMPLETED));
+            taskobject.setPercentComplete(parseInt(json, TaskFields.PERCENT_COMPLETED));
         }
-
         if (json.has(TaskFields.DATE_COMPLETED)) {
-            taskobject.setDateCompleted(parseDate(json,
-                TaskFields.DATE_COMPLETED));
+            taskobject.setDateCompleted(parseDate(json, TaskFields.DATE_COMPLETED));
         }
-
         if (json.has(TaskFields.BILLING_INFORMATION)) {
-            taskobject.setBillingInformation(parseString(json,
-                TaskFields.BILLING_INFORMATION));
+            taskobject.setBillingInformation(parseString(json, TaskFields.BILLING_INFORMATION));
         }
-
         if (json.has(TaskFields.TARGET_COSTS)) {
-            taskobject.setTargetCosts(parseFloat(json,
-                TaskFields.TARGET_COSTS));
+            taskobject.setTargetCosts(parseFloat(json, TaskFields.TARGET_COSTS));
         }
         if (json.has(TARGET_DURATION)) {
             taskobject.setTargetDuration(parseLong(json, TARGET_DURATION));
@@ -137,43 +123,17 @@ public class TaskParser extends CalendarParser {
         if (json.has(TaskFields.PRIORITY)) {
             taskobject.setPriority(parseInt(json, TaskFields.PRIORITY));
         }
-
         if (json.has(TaskFields.CURRENCY)) {
-            taskobject
-                .setCurrency(parseString(json, TaskFields.CURRENCY));
+            taskobject.setCurrency(parseString(json, TaskFields.CURRENCY));
         }
-
         if (json.has(TaskFields.TRIP_METER)) {
-            taskobject.setTripMeter(parseString(json,
-                TaskFields.TRIP_METER));
+            taskobject.setTripMeter(parseString(json, TaskFields.TRIP_METER));
         }
-
         if (json.has(TaskFields.COMPANIES)) {
-            taskobject.setCompanies(parseString(json,
-                TaskFields.COMPANIES));
+            taskobject.setCompanies(parseString(json, TaskFields.COMPANIES));
         }
-
         if (json.has(CalendarFields.ALARM)) {
-            taskobject.setAlarm(parseTime(json, CalendarFields.ALARM,
-                timeZone));
-        }
-        
-        if (json.has(CalendarFields.LAST_MODIFIED)) {
-            taskobject.setLastModified(parseTime(json, CalendarFields.LAST_MODIFIED,
-                timeZone));
-        }
-        
-        if (json.has(CalendarFields.CREATION_DATE)) {
-            taskobject.setCreationDate(parseTime(json, CalendarFields.CREATION_DATE,
-                timeZone));
-        }
-        
-        if (json.has(CalendarFields.FOLDER_ID)) {
-            taskobject.setParentFolderID(parseInt(json, CalendarFields.FOLDER_ID));
-        }
-        
-        if (json.has(CalendarFields.ID)) {
-            taskobject.setObjectID(parseInt(json, CalendarFields.FOLDER_ID));
+            taskobject.setAlarm(parseTime(json, CalendarFields.ALARM, timeZone));
         }
         parseElementCalendar(taskobject, json);
     }

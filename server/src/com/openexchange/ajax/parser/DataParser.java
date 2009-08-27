@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.groupware.AbstractOXException.Parsing;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
@@ -75,39 +74,18 @@ public abstract class DataParser {
 
     protected TimeZone timeZone;
 
-    protected Session sessionObj;
-
-    /**
-     * Default old constructor.
-     */
     protected DataParser() {
-        this(false, null, null);
+        this(false, null);
     }
 
-    /**
-     * Constructor for setting timeZone only.
-     * @param timeZone TimeZone for converting Javascript specific timestamps.
-     */
     protected DataParser(final TimeZone timeZone) {
-        this(false, timeZone, null);
+        this(false, timeZone);
     }
 
-    protected DataParser(final boolean parseAll, final TimeZone timeZone) {
-        this(parseAll, timeZone, null);
-    }
-
-    /**
-     * Constructor with all fields.
-     * @param parseAll <code>true</code> to parse all fields.
-     * @param timeZone TimeZone for converting Javascript specific timestamps.
-     * @param sessionObj Session object.
-     */
-    protected DataParser(final boolean parseAll, final TimeZone timeZone,
-        final Session sessionObj) {
+    protected DataParser(boolean parseAll, TimeZone timeZone) {
         super();
         this.parseAll = parseAll;
         this.timeZone = timeZone;
-        this.sessionObj = sessionObj;
     }
 
     protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
@@ -133,27 +111,27 @@ public abstract class DataParser {
     }
 
     /**
-	 * Parses optional field out of specified JSON object.
-	 * 
-	 * @param jsonObj
-	 *            The JSON object to parse
-	 * @param name
-	 *            The optional field name
-	 * @return The optional field's value or <code>null</code> if there's no
-	 *         such field
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
-		String retval = null;
-		if (jsonObj.hasAndNotNull(name)) {
-			final String test = jsonObj.getString(name);
-			if (0 != test.length()) {
-				retval = test;
-			}
-		}
-		return retval;
-	}
+     * Parses optional field out of specified JSON object.
+     * 
+     * @param jsonObj
+     *            The JSON object to parse
+     * @param name
+     *            The optional field name
+     * @return The optional field's value or <code>null</code> if there's no
+     *         such field
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
+        String retval = null;
+        if (jsonObj.hasAndNotNull(name)) {
+            final String test = jsonObj.getString(name);
+            if (0 != test.length()) {
+                retval = test;
+            }
+        }
+        return retval;
+    }
 
     public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
         if (!jsonObj.has(name)) {
@@ -376,28 +354,28 @@ public abstract class DataParser {
     }
 
     /**
-	 * Parses optional array field out of specified JSON object
-	 * 
-	 * @param jsonObj
-	 *            The JSON object to parse
-	 * @param name
-	 *            The optional array field's name
-	 * @return The optional array field's value as an array of {@link String} or
-	 *         <code>null</code> if there's no such field
-	 * @throws JSONException
-	 *             If a JSON error occurs
-	 */
-	public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
-		if (!jsonObj.hasAndNotNull(name)) {
-			return null;
-		}
-		final JSONArray tmp = jsonObj.getJSONArray(name);
-		final String s[] = new String[tmp.length()];
-		for (int a = 0; a < tmp.length(); a++) {
-			s[a] = tmp.getString(a);
-		}
-		return s;
-	}
+     * Parses optional array field out of specified JSON object
+     * 
+     * @param jsonObj
+     *            The JSON object to parse
+     * @param name
+     *            The optional array field's name
+     * @return The optional array field's value as an array of {@link String} or
+     *         <code>null</code> if there's no such field
+     * @throws JSONException
+     *             If a JSON error occurs
+     */
+    public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
+        if (!jsonObj.hasAndNotNull(name)) {
+            return null;
+        }
+        final JSONArray tmp = jsonObj.getJSONArray(name);
+        final String s[] = new String[tmp.length()];
+        for (int a = 0; a < tmp.length(); a++) {
+            s[a] = tmp.getString(a);
+        }
+        return s;
+    }
 
     public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
         if (!jsonObj.has(name)) {

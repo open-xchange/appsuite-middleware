@@ -67,7 +67,7 @@ public class GroupParser extends DataParser {
      * Default constructor.
      */
     public GroupParser() {
-        super(true, null, null);
+        super(true, null);
     }
 
     public void parse(final Group group, final JSONObject json)

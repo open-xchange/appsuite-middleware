@@ -171,12 +171,12 @@ public class ContactRequest {
         }
     }
 
-    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
+    public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException, OXJSONException {
 
         final Contact contactObj = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-        final ContactParser contactparser = new ContactParser(session);
+        final ContactParser contactparser = new ContactParser();
         contactparser.parse(contactObj, jData);
 
         if (!contactObj.containsParentFolderID()) {
@@ -203,7 +203,7 @@ public class ContactRequest {
         final Contact contactobject = new Contact();
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-        final ContactParser contactparser = new ContactParser(session);
+        final ContactParser contactparser = new ContactParser();
         contactparser.parse(contactobject, jData);
 
         contactobject.setObjectID(id);
@@ -356,8 +356,6 @@ public class ContactRequest {
                 } else {
                     // costs more performance because every object in the array
                     // is checked
-                    final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-                        ContactInterfaceDiscoveryService.class);
                     for (int a = 0; a < objectIdAndFolderId.length; a++) {
                         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                             ContactInterfaceDiscoveryService.class).newContactInterface(objectIdAndFolderId[a][1], session);

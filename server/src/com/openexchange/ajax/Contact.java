@@ -256,7 +256,7 @@ public class Contact extends DataServlet {
                     final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
                     final JSONObject jsonobject = new JSONObject(obj);
 
-                    final ContactParser contactparser = new ContactParser(session);
+                    final ContactParser contactparser = new ContactParser();
                     contactparser.parse(contactobject, jsonobject);
 
                     if (!contactobject.containsParentFolderID()) {
@@ -310,7 +310,7 @@ public class Contact extends DataServlet {
                     final com.openexchange.groupware.container.Contact contactobject = new com.openexchange.groupware.container.Contact();
                     final JSONObject jsonobject = new JSONObject(obj);
 
-                    final ContactParser contactparser = new ContactParser(session);
+                    final ContactParser contactparser = new ContactParser();
                     contactparser.parse(contactobject, jsonobject);
 
                     contactobject.setObjectID(id);
