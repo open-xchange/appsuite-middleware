@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.contact.action;
 
+import java.util.TimeZone;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
@@ -80,7 +81,7 @@ public class GetResponse extends AbstractAJAXResponse {
     public Contact getContact() throws OXException, OXJSONException {
         if (null == contactObj) {
             this.contactObj = new Contact();
-            new ContactParser().parse(contactObj, (JSONObject) getResponse().getData());
+            new ContactParser(true, TimeZone.getDefault()).parse(contactObj, (JSONObject) getResponse().getData());
         }
         return contactObj;
     }
