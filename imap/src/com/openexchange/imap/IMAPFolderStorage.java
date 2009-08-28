@@ -570,7 +570,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
                     final Map<String, ACL> m = acl2map(newACLs);
                     if (!equals(initialACLs, m, entity2ACL, args)) {
-                        if (!getACLExtension().canSetACL(createMe.myRights())) {
+                        final ACLExtension aclExtension = getACLExtension();
+                        if (!aclExtension.canSetACL(createMe.myRights())) {
                             throw IMAPException.create(
                                 IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
                                 imapConfig,
@@ -579,7 +580,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         }
                         boolean adminFound = false;
                         for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                            if (getACLExtension().canSetACL(newACLs[i].getRights())) {
+                            if (aclExtension.canSetACL(newACLs[i].getRights())) {
                                 adminFound = true;
                             }
                         }
@@ -948,7 +949,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 session,
                                 updateMe.getFullName());
                         }
-                        if (!getACLExtension().canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
+                        final ACLExtension aclExtension = getACLExtension();
+                        if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
                             throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, updateMe.getFullName());
                         }
                         /*
@@ -960,7 +962,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         {
                             boolean adminFound = false;
                             for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                                if (getACLExtension().canSetACL(newACLs[i].getRights())) {
+                                if (aclExtension.canSetACL(newACLs[i].getRights())) {
                                     adminFound = true;
                                 }
                             }
@@ -1780,14 +1782,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         }
     }
 
-    private static final Pattern PAT_RIGHT_POST = Pattern.compile("p|P");
-
     private boolean equals(final ACL[] oldACLs, final Map<String, ACL> newACLs, final Entity2ACL entity2ACL, final Entity2ACLArgs args) {
         int examined = 0;
         for (final ACL oldACL : oldACLs) {
-            final String aclName = oldACL.getName();
-            if (isKnownEntity(aclName, entity2ACL, ctx, args)) {
-                final ACL newACL = newACLs.get(aclName);
+            final String oldName = oldACL.getName();
+            if (isKnownEntity(oldName, entity2ACL, ctx, args)) {
+                final ACL newACL = newACLs.get(oldName/* .toLowerCase(Locale.ENGLISH) */);
                 if (null == newACL) {
                     // No corresponding entity in new ACLs
                     return false;
@@ -1795,8 +1795,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 // Remember number of corresponding entities
                 examined++;
                 // Check ACLS' rights ignoring POST right
-                if (!PAT_RIGHT_POST.matcher(oldACL.getRights().toString()).replaceFirst("").equals(
-                    PAT_RIGHT_POST.matcher(newACL.getRights().toString()).replaceFirst(""))) {
+                if (!equalRights(oldACL.getRights().toString(), newACL.getRights().toString(), true)) {
                     return false;
                 }
             }
@@ -1804,10 +1803,40 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         return (examined == newACLs.size());
     }
 
+    private static String stripPOSTRight(final String rights) {
+        final StringBuilder sb = new StringBuilder(rights.length());
+        final char[] chars = rights.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            final char c = chars[i];
+            if ('p' != c && 'P' != c) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static boolean equalRights(final String rights1, final String rights2, final boolean ignorePOST) {
+        final char[] r1;
+        final char[] r2;
+        if (ignorePOST) {
+            r1 = stripPOSTRight(rights1).toCharArray();
+            r2 = stripPOSTRight(rights2).toCharArray();
+        } else {
+            r1 = rights1.toCharArray();
+            r2 = rights2.toCharArray();
+        }
+        if (r1.length != r2.length) {
+            return false;
+        }
+        Arrays.sort(r1);
+        Arrays.sort(r2);
+        return Arrays.equals(r1, r2);
+    }
+
     private static Map<String, ACL> acl2map(final ACL[] acls) {
         final Map<String, ACL> m = new HashMap<String, ACL>(acls.length);
         for (final ACL acl : acls) {
-            m.put(acl.getName(), acl);
+            m.put(acl.getName()/* .toLowerCase(Locale.ENGLISH) */, acl);
         }
         return m;
     }
