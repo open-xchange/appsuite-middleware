@@ -49,44 +49,33 @@
 
 package com.openexchange.groupware.vcard;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TimeZone;
-
-import junit.framework.TestCase;
-
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-public class VCardTest extends TestCase {
+/**
+ * Testing bug 6962, in which different MIME types ruin parsing.
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ */
+public class VCardMimeTypeTest extends VCardTest {
 
-    public final String mime1  = "text/x-vcard";
-    public final String mime2  = "text/vcard";
+    public final String vcard1 = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
+
+    public final String vcard2 = "BEGIN:VCARD\nVERSION:3.0\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nCATEGORIES:Nicht abgelegt\nX-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\nEND:VCARD";
+
+    public void test6962variant1() throws IOException, ConverterException {
+        performTest("vCard 1 as " + mime1, vcard1, mime1);
+    }
     
-	
-	public List<Contact> performTest(final String testName, final String vcard, final String mime) throws ConverterException, IOException{
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-		final VersitDefinition def = Versit.getDefinition(mime);
-		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes("UTF-8")), "UTF-8");
-		List<Contact> results = new LinkedList<Contact>();
-		try {
-			VersitObject versitObject = def.parse(versitReader);
-			while (versitObject != null) {
-				final Contact contactObj = oxContainerConverter.convertContact(versitObject);
-				versitObject = def.parse(versitReader);
-				results.add(contactObj);
-			}
-			assertTrue(testName + " passed", true);
-		} catch (final VersitException e){
-			fail(testName + " failed with exception: " + e);
-		}
-		return results;
-	}
+    public void test6962variant2() throws IOException, ConverterException {
+        performTest("vCard 2 as " + mime1, vcard2, mime1);
+    }
+    
+    public void test6962variant3() throws IOException, ConverterException {
+        performTest("vCard 1 as " + mime2, vcard1, mime2);
+    }
+    
+    public void test6962variant4() throws IOException, ConverterException {
+        performTest("vCard 2 as " + mime2, vcard2, mime2);
+    }
 }

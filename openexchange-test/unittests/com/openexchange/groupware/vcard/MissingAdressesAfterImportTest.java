@@ -49,44 +49,9 @@
 
 package com.openexchange.groupware.vcard;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TimeZone;
+/**
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ */
+public class MissingAdressesAfterImportTest extends VCardTest {
 
-import junit.framework.TestCase;
-
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
-
-public class VCardTest extends TestCase {
-
-    public final String mime1  = "text/x-vcard";
-    public final String mime2  = "text/vcard";
-    
-	
-	public List<Contact> performTest(final String testName, final String vcard, final String mime) throws ConverterException, IOException{
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-		final VersitDefinition def = Versit.getDefinition(mime);
-		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes("UTF-8")), "UTF-8");
-		List<Contact> results = new LinkedList<Contact>();
-		try {
-			VersitObject versitObject = def.parse(versitReader);
-			while (versitObject != null) {
-				final Contact contactObj = oxContainerConverter.convertContact(versitObject);
-				versitObject = def.parse(versitReader);
-				results.add(contactObj);
-			}
-			assertTrue(testName + " passed", true);
-		} catch (final VersitException e){
-			fail(testName + " failed with exception: " + e);
-		}
-		return results;
-	}
 }
