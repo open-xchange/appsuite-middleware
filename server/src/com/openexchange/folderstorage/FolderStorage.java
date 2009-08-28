@@ -222,11 +222,12 @@ public interface FolderStorage {
      * 
      * @param treeId The tree identifier
      * @param timeStamp The time stamp
+     * @param includeContentTypes The content types to include
      * @param storageParameters The storage parameters
      * @return The identifiers of all new and modified folders from this storage since given time stamp
      * @throws FolderException If a folder error occurs
      */
-    String[] getModifiedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws FolderException;
+    String[] getModifiedFolderIDs(String treeId, Date timeStamp, ContentType[] includeContentTypes, StorageParameters storageParameters) throws FolderException;
 
     /**
      * Gets the identifiers of all deleted folders from this storage since given time stamp.

@@ -60,9 +60,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.cache.OXCachingException;
@@ -337,9 +339,15 @@ public final class MailFolderStorage implements FolderStorage {
 
             final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
 
-            final MailFolder mailFolder;
+            final MailFolderImpl retval;
+            final boolean hasSubfolders;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                mailFolder = mailAccess.getRootFolder();
+                final MailFolder rootFolder = mailAccess.getRootFolder();
+                retval = new MailFolderImpl(
+                    rootFolder,
+                    mailAccess.getAccountId(),
+                    mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                    null);
                 /*
                  * Set proper name for non-primary account
                  */
@@ -356,7 +364,7 @@ public final class MailFolderStorage implements FolderStorage {
                             storageParameters.getUser().getId(),
                             storageParameters.getContext().getContextId());
                         if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                            mailFolder.setName(mailAccount.getName());
+                            retval.setName(mailAccount.getName());
                         }
                     } catch (final ServiceException e) {
                         throw new FolderException(e);
@@ -364,15 +372,18 @@ public final class MailFolderStorage implements FolderStorage {
                         throw new FolderException(e);
                     }
                 }
+                hasSubfolders = rootFolder.hasSubfolders();
             } else {
                 openMailAccess(mailAccess);
-                mailFolder = mailAccess.getFolderStorage().getFolder(fullname);
+                final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(fullname);
+                retval = new MailFolderImpl(
+                    mailFolder,
+                    mailAccess.getAccountId(),
+                    mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                    mailAccess.getFolderStorage().getTrashFolder());
+                hasSubfolders = mailFolder.hasSubfolders();
             }
 
-            final MailFolderImpl retval = new MailFolderImpl(
-                mailFolder,
-                mailAccess.getAccountId(),
-                mailAccess.getMailConfig().getCapabilities().getCapabilities());
             retval.setTreeID(treeId);
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.
@@ -393,7 +404,7 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * This one needs sorting. Just pass null or an empty array.
                  */
-                retval.setSubfolderIDs(mailFolder.hasSubfolders() ? null : new String[0]);
+                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
 
                 if (false) {
                     /*
@@ -665,8 +676,21 @@ public final class MailFolderStorage implements FolderStorage {
         return new String[0];
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
-        return new String[0];
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+        if (null == includeContentTypes || includeContentTypes.length == 0) {
+            return new String[0];
+        }
+        final List<String> ret = new ArrayList<String>();
+        final Set<ContentType> supported = new HashSet<ContentType>(Arrays.asList(getSupportedContentTypes()));
+        for (final ContentType includeContentType : includeContentTypes) {
+            if (supported.contains(includeContentType)) {
+                final SortableId[] subfolders = getSubfolders(FolderStorage.REAL_TREE_ID, PRIVATE_FOLDER_ID, storageParameters);
+                for (final SortableId sortableId : subfolders) {
+                    ret.add(sortableId.getId());
+                }
+            }
+        }
+        return ret.toArray(new String[ret.size()]);
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {

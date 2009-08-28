@@ -72,6 +72,8 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private boolean root;
 
+    private boolean cacheable;
+
     /**
      * Initializes an empty {@link MailFolderImpl}.
      */
@@ -87,10 +89,12 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
      * @param capabilities The capabilities
+     * @param trashFullname The trash folder fullname
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities) {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final String trashFullname) {
         super();
-        this.id = MailFolderUtility.prepareFullname(accountId, mailFolder.getFullname());
+        final String fullname = mailFolder.getFullname();
+        this.id = MailFolderUtility.prepareFullname(accountId, fullname);
         this.name = mailFolder.getName();
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         this.parent = mailFolder.isRootFolder() ? String.valueOf(1) : MailFolderUtility.prepareFullname(
@@ -109,12 +113,21 @@ public final class MailFolderImpl extends AbstractFolder {
                 '/').append(mailFolder.getUnreadMessageCount()).append(')').toString();
             this.summary = value;
         }
-        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && "INBOX".equals(mailFolder.getFullname());
+        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && "INBOX".equals(fullname);
         this.total = mailFolder.getMessageCount();
         this.nu = mailFolder.getNewMessageCount();
         this.unread = mailFolder.getUnreadMessageCount();
         this.deleted = mailFolder.getDeletedMessageCount();
         this.root = mailFolder.isRootFolder();
+        /*
+         * Trash folder must not be cacheable
+         */
+        this.cacheable = !mailFolder.isDefaultFolder() || !fullname.equals(trashFullname);
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return cacheable;
     }
 
     @Override

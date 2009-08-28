@@ -282,9 +282,9 @@ public final class Update extends AbstractAction {
     } // End of doUpdate()
 
     private void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws FolderException {
-        if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
-            throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
-        }
+        //if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
+        //    throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
+        // }
         folderStorage.updateFolder(folder, storageParameters);
     }
 

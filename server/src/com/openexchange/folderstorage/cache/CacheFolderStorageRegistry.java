@@ -221,6 +221,17 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    public FolderStorage[] getRealFolderStorages() {
+        /*
+         * Obtain candidates by tree identifier
+         */
+        final List<FolderStorage> storages = registry.get(FolderStorage.REAL_TREE_ID);
+        if (null == storages) {
+            return new FolderStorage[0];
+        }
+        return storages.toArray(new FolderStorage[storages.size()]);
+    }
+
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         return CacheContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }

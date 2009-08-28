@@ -1,10 +1,9 @@
 
 package com.openexchange.folderstorage;
 
-
 /**
  * {@link FolderStorageDiscoverer} - The folder storage discovery.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderStorageDiscoverer {
@@ -34,6 +33,13 @@ public interface FolderStorageDiscoverer {
      * @return The folder storages for specified tree identifier or an empty array if none available
      */
     FolderStorage[] getFolderStoragesForTreeID(String treeId);
+
+    /**
+     * Gets the real folder storages.
+     * 
+     * @return The real folder storages or an empty array if none available
+     */
+    FolderStorage[] getRealFolderStorages();
 
     /**
      * Gets the folder storage capable to handle given content type in specified tree.

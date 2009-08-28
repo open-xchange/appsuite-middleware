@@ -243,12 +243,13 @@ public interface FolderService {
      * @param treeId The tree identifier
      * @param timeStamp The time stamp from which to consider changes
      * @param ignoreDeleted <code>true</code> to ignore delete operations; otherwise <code>false</code>
+     * @param includeContentTypes The content types to include
      * @param user The user
      * @param context The context
      * @return All new, modified and deleted folders since given time stamp
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, User user, Context context) throws FolderException;
+    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, User user, Context context) throws FolderException;
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
@@ -256,11 +257,12 @@ public interface FolderService {
      * @param treeId The tree identifier
      * @param timeStamp The time stamp from which to consider changes
      * @param ignoreDeleted <code>true</code> to ignore delete operations; otherwise <code>false</code>
+     * @param includeContentTypes The content types to include
      * @param session The session
      * @return All new, modified and deleted folders since given time stamp
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, Session session) throws FolderException;
+    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, Session session) throws FolderException;
 
     /**
      * Deletes the specified folder in given tree.

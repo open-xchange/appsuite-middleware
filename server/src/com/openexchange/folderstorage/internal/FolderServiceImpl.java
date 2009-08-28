@@ -180,13 +180,13 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final User user, final Context context) throws FolderException {
-        return new Updates(user, context).doUpdates(treeId, timeStamp, ignoreDeleted);
+    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final User user, final Context context) throws FolderException {
+        return new Updates(user, context).doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes);
     }
 
-    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final Session session) throws FolderException {
+    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final Session session) throws FolderException {
         try {
-            return new Updates(new ServerSessionAdapter(session)).doUpdates(treeId, timeStamp, ignoreDeleted);
+            return new Updates(new ServerSessionAdapter(session)).doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes);
         } catch (final ContextException e) {
             throw new FolderException(e);
         }

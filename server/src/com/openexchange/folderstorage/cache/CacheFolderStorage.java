@@ -195,19 +195,28 @@ public final class CacheFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final Folder createdFolder = loadFolder(treeId, folderId, StorageType.WORKING, storageParameters);
-        if (createdFolder.isCacheable()) {
+        putFolder(createdFolder, treeId, storageParameters);
+        /*
+         * Refresh parent
+         */
+        final Folder parentFolder = loadFolder(treeId, folder.getParentID(), StorageType.WORKING, storageParameters);
+        putFolder(parentFolder, treeId, storageParameters);
+    }
+
+    private void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters) throws FolderException {
+        if (folder.isCacheable()) {
             /*
              * Put to cache
              */
             try {
                 final CacheKey key;
-                final String id = createdFolder.getID();
-                if (createdFolder.isGlobalID()) {
+                final String id = folder.getID();
+                if (folder.isGlobalID()) {
                     key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
-                    globalCache.put(key, createdFolder);
+                    globalCache.put(key, folder);
                 } else {
                     key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
-                    userCache.put(key, createdFolder);
+                    userCache.put(key, folder);
                 }
             } catch (final CacheException e) {
                 throw new FolderException(e);
@@ -234,12 +243,14 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        final String parentId;
         final boolean cacheable;
         final boolean global;
         {
             final Folder deleteMe = getFolder(treeId, folderId, storageParameters);
             cacheable = deleteMe.isCacheable();
             global = deleteMe.isGlobalID();
+            parentId = deleteMe.getParentID();
         }
         final Session session = storageParameters.getSession();
         /*
@@ -279,6 +290,13 @@ public final class CacheFolderStorage implements FolderStorage {
             } catch (final CacheException e) {
                 throw new FolderException(e);
             }
+        }
+        /*
+         * Refresh parent
+         */
+        if (!FolderStorage.ROOT_ID.equals(parentId)) {
+            final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, storageParameters);
+            putFolder(parentFolder, treeId, storageParameters);
         }
     }
 
@@ -323,22 +341,7 @@ public final class CacheFolderStorage implements FolderStorage {
         folder = (Folder) userCache.get(key);
         if (null == folder) {
             folder = loadFolder(treeId, folderId, storageType, storageParameters);
-            if (folder.isCacheable()) {
-                /*
-                 * Put to cache
-                 */
-                try {
-                    if (folder.isGlobalID()) {
-                        key = newCacheKey(folderId, treeId, contextId);
-                        globalCache.put(key, folder);
-                    } else {
-                        key = newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId());
-                        userCache.put(key, folder);
-                    }
-                } catch (final CacheException e) {
-                    throw new FolderException(e);
-                }
-            }
+            putFolder(folder, treeId, storageParameters);
         }
         /*
          * Return a cloned version
@@ -458,6 +461,13 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Perform update operation via non-cache storage
          */
+        final String oldParentId;
+        if (null != folder.getParentID()) {
+            // Move
+            oldParentId = getFolder(folder.getTreeID(), folder.getID(), storageParameters).getParentID();
+        } else {
+            oldParentId = null;
+        }
         if (null == session) {
             new Update(storageParameters.getUser(), storageParameters.getContext(), CacheFolderStorageRegistry.getInstance()).doUpdate(
                 folder,
@@ -481,23 +491,18 @@ public final class CacheFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final Folder updatedFolder = loadFolder(treeId, folderId, StorageType.WORKING, storageParameters);
-        if (updatedFolder.isCacheable()) {
-            /*
-             * Put to cache
-             */
-            try {
-                final CacheKey key;
-                final String id = updatedFolder.getID();
-                if (updatedFolder.isGlobalID()) {
-                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
-                    globalCache.put(key, updatedFolder);
-                } else {
-                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
-                    userCache.put(key, updatedFolder);
-                }
-            } catch (final CacheException e) {
-                throw new FolderException(e);
-            }
+        putFolder(updatedFolder, treeId, storageParameters);
+        /*
+         * Refresh parent(s)
+         */
+        final String parentID = updatedFolder.getParentID();
+        if (!FolderStorage.ROOT_ID.equals(parentID)) {
+            final Folder parentFolder = loadFolder(treeId, parentID, StorageType.WORKING, storageParameters);
+            putFolder(parentFolder, treeId, storageParameters);
+        }
+        if (null != oldParentId && !FolderStorage.ROOT_ID.equals(oldParentId)) {
+            final Folder oldParentFolder = loadFolder(treeId, parentID, StorageType.WORKING, storageParameters);
+            putFolder(oldParentFolder, treeId, storageParameters);
         }
     }
 
@@ -505,31 +510,34 @@ public final class CacheFolderStorage implements FolderStorage {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
-        return getChangedFolderIDs(0, treeId, timeStamp, storageParameters);
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+        return getChangedFolderIDs(0, treeId, timeStamp, includeContentTypes, storageParameters);
     }
 
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
-        return getChangedFolderIDs(1, treeId, timeStamp, storageParameters);
+        return getChangedFolderIDs(1, treeId, timeStamp, null, storageParameters);
     }
 
-    private String[] getChangedFolderIDs(final int index, final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    private String[] getChangedFolderIDs(final int index, final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
         final Session session = storageParameters.getSession();
         /*
          * Perform update operation via non-cache storage
          */
         final UserizedFolder[] folders;
+        final boolean ignoreDelete = index == 0;
         if (null == session) {
             folders = new Updates(storageParameters.getUser(), storageParameters.getContext(), CacheFolderStorageRegistry.getInstance()).doUpdates(
                 treeId,
                 timeStamp,
-                false)[index];
+                ignoreDelete,
+                includeContentTypes)[index];
         } else {
             try {
                 folders = new Updates(new ServerSessionAdapter(session), CacheFolderStorageRegistry.getInstance()).doUpdates(
                     treeId,
                     timeStamp,
-                    false)[index];
+                    ignoreDelete,
+                    includeContentTypes)[index];
             } catch (final ContextException e) {
                 throw new FolderException(e);
             }
