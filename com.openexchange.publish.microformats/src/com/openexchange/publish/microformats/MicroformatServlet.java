@@ -95,7 +95,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         +   "Any unauthorized use or dissemination of this data is prohibited. If you intend to store, "
         +   "process, or pass on this data, please make sure that you have the right to do so.\n"
         +   "If you are one of the people listed or responsible for a resource listed on this page and you "
-        +   "don’t agree with the publication, please send an email containing the URL (the link) to this "
+        +   "don't agree with the publication, please send an email containing the URL (the link) to this "
         +   "webpage to %s and the publisher of the data:\n"
         +   "Data published by %s on %s\n";
     
