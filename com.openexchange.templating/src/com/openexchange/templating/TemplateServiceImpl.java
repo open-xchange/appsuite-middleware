@@ -126,7 +126,9 @@ public class TemplateServiceImpl implements TemplateService {
         }
         try {
             FolderObject folder = folders.getPrivateTemplateFolder(session);
+            FolderObject privateFolder = folder;
             boolean global = false;
+            
             if(null == folder) {
                 folder = folders.getGlobalTemplateFolder(session);
                 global = true;
@@ -142,10 +144,11 @@ public class TemplateServiceImpl implements TemplateService {
             
             if(templateText == null) {
                 templateText = loadFromFileSystem(defaultTemplateName);
-                if(global) {
+                if(privateFolder == null) {
                     folder = folders.createPrivateTemplateFolder(session);
+                    privateFolder = folder;
                 }
-                infostore.storeTemplateInFolder(session, folder, templateName, templateText);
+                infostore.storeTemplateInFolder(session, privateFolder, templateName, templateText);
             }
             OXTemplateImpl template = new OXTemplateImpl();
             template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
