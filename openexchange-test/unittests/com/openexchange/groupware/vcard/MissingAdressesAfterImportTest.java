@@ -49,9 +49,41 @@
 
 package com.openexchange.groupware.vcard;
 
+import java.io.IOException;
+import java.util.List;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.versit.converter.ConverterException;
+
 /**
+ * Bug 14350
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MissingAdressesAfterImportTest extends AbstractVCardUnitTest {
 
+    public String vcard = "BEGIN:VCARD\n" + "VERSION:3.0\n" + "PRODID:OPEN-XCHANGE\n" + "FN:Prinz\\, Tobias\n" + "N:Prinz;Tobias;;;\n" + "NICKNAME:Tierlieb\n" + "BDAY:19810501\n" + "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;TŸbingen;Baden-WŸrttemberg;57621;Germany\n" + "ADR;TYPE=home:;;Testroad 4711;Port de la VŽrde;Skol-upon-sea;37542;France\n" + "ORG:- deactivated -\n" + "REV:20061204T160750.018Z\n" + "UID:80@ox6.netline.de\n" + "END:VCARD\n";
+
+    public void testBug14350() throws ConverterException, IOException {
+        checkAdresses(performTest("Test with mime type " + mime1, vcard, mime1));
+    }
+
+    public void testBug14350_2() throws ConverterException, IOException {
+        checkAdresses(performTest("Test with mime type " + mime2, vcard, mime2));
+    }
+
+    private void checkAdresses(List<Contact> list) {
+        assertEquals("Should have parsed one contact", 1, list.size());
+        Contact actual = list.get(0);
+        assertEquals("Broadway 3131 / 5th Ave", actual.getStreetBusiness());
+        assertEquals("TŸbingen", actual.getCityBusiness());
+        assertEquals("Baden-WŸrttemberg", actual.getStateBusiness());
+        assertEquals("57621", actual.getPostalCodeBusiness());
+        assertEquals("Germany", actual.getCountryBusiness());
+
+        assertEquals("Testroad 4711", actual.getStreetHome());
+        assertEquals("Port de la VŽrde", actual.getCityHome());
+        assertEquals("Skol-upon-sea", actual.getStateHome());
+        assertEquals("37542", actual.getPostalCodeHome());
+        assertEquals("France", actual.getCountryHome());
+    }
 }
