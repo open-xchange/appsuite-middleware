@@ -65,7 +65,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-public class VCardTest extends TestCase {
+public class AbstractVCardUnitTest extends TestCase {
 
     public final String mime1  = "text/x-vcard";
     public final String mime2  = "text/vcard";
