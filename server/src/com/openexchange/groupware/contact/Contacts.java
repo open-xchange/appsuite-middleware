@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.awt.Graphics2D;
@@ -1183,7 +1184,7 @@ public final class Contacts {
         }
     }
 
-    public static Contact getUserById(final int userid, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+    public static Contact getUserById(final int userId, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
         Contact co = null;
         final ContactSql contactSQL = new ContactMySql(ctx, user);
@@ -1199,8 +1200,8 @@ public final class Contacts {
         sb.deleteCharAt(0);
         sb = contactSQL.iFgetContactById(sb.toString());
         contactSQL.setSelect(sb.toString());
-        contactSQL.setInternalUser(userid);
-        co = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
+        contactSQL.setInternalUser(userId);
+        co = fillContactObject(contactSQL, userId, user, memberInGroups, ctx, uc, readCon);
 
         return co;
     }
@@ -1238,52 +1239,40 @@ public final class Contacts {
         sb = contactSQL.iFgetContactById(sb.toString());
         contactSQL.setSelect(sb.toString());
         contactSQL.setObjectID(objectId);
-        co = fillContactObject(contactSQL, userId, memberInGroups, ctx, uc, readCon);
+        co = fillContactObject(contactSQL, objectId, userId, memberInGroups, ctx, uc, readCon);
 
         return co;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "25", "26" }, exceptionId = { 25, 26 }, msg = {
-        "Contact not found! Context %1$d", "Unable to load contact: Context %1$d" })
-    private static Contact fillContactObject(final ContactSql contactSQL, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
-
+    @OXThrowsMultiple(
+        category = { Category.CODE_ERROR, Category.CODE_ERROR },
+        desc = { "25", "26" },
+        exceptionId = { 25, 26 },
+        msg = { "Contact %1$d not found in context %2$d.", "Unable to load contact %1$d in context %2$d." }
+    )
+    private static Contact fillContactObject(ContactSql contactSQL, int objectId, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws OXException {
         final Contact co = new Contact();
         Statement stmt = null;
         ResultSet rs = null;
-
         try {
-            stmt = contactSQL.getSqlStatement(readCon);
+            stmt = contactSQL.getSqlStatement(con);
             rs = ((PreparedStatement) stmt).executeQuery();
-
             if (rs.next()) {
                 int cnt = 1;
                 for (int i = 0; i < 650; i++) {
                     if (mapping[i] != null) {
-                        mapping[i].addToContactObject(rs, cnt, co, readCon, user, group, ctx, uc);
+                        mapping[i].addToContactObject(rs, cnt, co, con, user, group, ctx, uc);
                         cnt++;
                     }
                 }
             } else {
-                throw EXCEPTIONS.createOXObjectNotFoundException(25, Integer.valueOf(ctx.getContextId()));
-                // throw new OXObjectNotFoundException("No Contact Found!");
+                throw EXCEPTIONS.createOXObjectNotFoundException(25, I(objectId), I(ctx.getContextId()));
             }
-        } catch (final OXException ex) {
-            throw ex;
-        } catch (final SQLException sq) {
-            throw EXCEPTIONS.create(26, sq, Integer.valueOf(ctx.getContextId()));
+        } catch (final SQLException e) {
+            throw EXCEPTIONS.create(26, e, I(objectId), I(ctx.getContextId()));
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException sxe) {
-                LOG.error(ERR_UNABLE_TO_CLOSE, sxe);
-            }
+            closeSQLStuff(rs, stmt);
         }
-
         return co;
     }
 
