@@ -501,7 +501,7 @@ public final class CacheFolderStorage implements FolderStorage {
             putFolder(parentFolder, treeId, storageParameters);
         }
         if (null != oldParentId && !FolderStorage.ROOT_ID.equals(oldParentId)) {
-            final Folder oldParentFolder = loadFolder(treeId, parentID, StorageType.WORKING, storageParameters);
+            final Folder oldParentFolder = loadFolder(treeId, oldParentId, StorageType.WORKING, storageParameters);
             putFolder(oldParentFolder, treeId, storageParameters);
         }
     }

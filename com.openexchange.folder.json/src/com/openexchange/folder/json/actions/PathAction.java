@@ -105,7 +105,7 @@ public final class PathAction extends AbstractFolderAction {
          */
         long lastModified = 0;
         for (final UserizedFolder userizedFolder : subfolders) {
-            final Date modified = userizedFolder.getLastModified();
+            final Date modified = userizedFolder.getLastModifiedUTC();
             if (modified != null) {
                 final long time = modified.getTime();
                 lastModified = ((lastModified >= time) ? lastModified : time);

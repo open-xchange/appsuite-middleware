@@ -58,6 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -106,24 +108,35 @@ public final class UpdatesAction extends AbstractFolderAction {
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean ignoreDeleted = "deleted".equalsIgnoreCase(request.getParameter(AJAXServlet.PARAMETER_IGNORE));
+        final boolean includeMail;
+        {
+            final String parameter = request.getParameter("mail");
+            includeMail = "1".equals(parameter) || Boolean.parseBoolean(parameter);
+        }
         /*
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[][] result = folderService.getUpdates(treeId, timestamp, ignoreDeleted, session);
+        final UserizedFolder[][] result = folderService.getUpdates(
+            treeId,
+            timestamp,
+            ignoreDeleted,
+            includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
+                "mail") } : null,
+            session);
         /*
          * Determine last-modified time stamp
          */
         long lastModified = timestamp.getTime();
         for (final UserizedFolder userizedFolder : result[0]) {
-            final Date modified = userizedFolder.getLastModified();
+            final Date modified = userizedFolder.getLastModifiedUTC();
             if (modified != null) {
                 final long time = modified.getTime();
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
         for (final UserizedFolder userizedFolder : result[1]) {
-            final Date modified = userizedFolder.getLastModified();
+            final Date modified = userizedFolder.getLastModifiedUTC();
             if (modified != null) {
                 final long time = modified.getTime();
                 lastModified = ((lastModified >= time) ? lastModified : time);
@@ -132,24 +145,16 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray1 = FolderWriter.writeMultiple2Array(columns, result[0]);
-        final JSONArray jsonArray2 = FolderWriter.writeMultiple2Array(new int[] { FolderField.ID.getColumn() }, result[1]);
-
-        final JSONArray resultArray = new JSONArray();
-
+        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0]);
         try {
-            int len = jsonArray1.length();
-            for (int i = 0; i < len; i++) {
-                resultArray.put(jsonArray1.getJSONArray(i));
-            }
-            len = jsonArray2.length();
+            final JSONArray jsonArray2 = FolderWriter.writeMultiple2Array(new int[] { FolderField.ID.getColumn() }, result[1]);
+            final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {
                 resultArray.put(jsonArray2.getJSONArray(i));
             }
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
-
         /*
          * Return appropriate result
          */

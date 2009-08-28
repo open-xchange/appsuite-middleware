@@ -291,18 +291,25 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+    public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         try {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final FolderObject fo = new FolderObject();
-            fo.setObjectID(Integer.parseInt(folderId));
+            final int folderId = Integer.parseInt(folderIdentifier);
+            fo.setObjectID(folderId);
             final Session session = storageParameters.getSession();
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
-            final Date clientLastModified = storageParameters.getTimeStamp();
-            folderManager.deleteFolder(fo, true, null == clientLastModified ? System.currentTimeMillis() : clientLastModified.getTime());
+            {
+                final Date clientLastModified = storageParameters.getTimeStamp();
+                if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
+                    clientLastModified)) {
+                    throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
+                }
+            }
+            folderManager.deleteFolder(fo, true, System.currentTimeMillis());
         } catch (final OXFolderException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
@@ -700,14 +707,20 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
+            final int folderId = Integer.parseInt(folder.getID());
 
-            final Date millis;
+            /*
+             * Check for concurrent modification
+             */
             {
                 final Date clientLastModified = storageParameters.getTimeStamp();
-                millis = null == clientLastModified ? new Date() : clientLastModified;
+                if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
+                    clientLastModified)) {
+                    throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
+                }
             }
 
-            final int folderId = Integer.parseInt(folder.getID());
+            final Date millis = new Date();
 
             final FolderObject updateMe = new FolderObject();
             updateMe.setObjectID(folderId);
@@ -719,6 +732,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             updateMe.setLastModified(millis);
+            folder.setLastModified(millis);
             updateMe.setModifiedBy(session.getUserId());
             {
                 final ContentType ct = folder.getContentType();

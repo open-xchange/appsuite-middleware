@@ -105,7 +105,7 @@ public final class GetAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonObject, folder.getLastModified());
+        return new AJAXRequestResult(jsonObject, folder.getLastModifiedUTC());
     }
 
 }

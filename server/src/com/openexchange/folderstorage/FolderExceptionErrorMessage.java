@@ -146,7 +146,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Missing property: %1$s.
      */
-    MISSING_PROPERTY(FolderExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 21);
+    MISSING_PROPERTY(FolderExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 21),
+    /**
+     * The object has been changed in the meantime.
+     */
+    CONCURRENT_MODIFICATION(FolderExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CONCURRENT_MODIFICATION, 22);
 
     private final Category category;
 

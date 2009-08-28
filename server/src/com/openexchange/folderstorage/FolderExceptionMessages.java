@@ -164,6 +164,11 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String UNSUPPORTED_STORAGE_TYPE_MSG = "Unsupported storage type: %1$s.";
 
     /**
+     * The object has been changed in the meantime.
+     */
+    public static final String CONCURRENT_MODIFICATION_MSG = "The object has been changed in the meantime.";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

@@ -254,7 +254,6 @@ public final class Update extends AbstractAction {
                     storage.updateFolder(folder, storageParameters);
                 }
             }
-
             /*
              * Commit
              */
