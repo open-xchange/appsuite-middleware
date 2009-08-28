@@ -75,6 +75,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 
 public class OXContextMySQLStorageCommon {
@@ -270,7 +271,14 @@ public class OXContextMySQLStorageCommon {
             stmt2.executeUpdate();
             stmt2.close();
             // configdb_write_con.commit(); // temp disabled by c utmasta
-    
+
+            // tell pool, that database has been removed
+            try {
+                com.openexchange.databaseold.Database.reset(context_id);
+            } catch (DBPoolingException e) {
+                log.error(e.getMessage(), e);
+            }
+
             if (!cs2db_broken) {
                 try {
                     // check if any other context uses the same db_schema
@@ -297,8 +305,6 @@ public class OXContextMySQLStorageCommon {
                         oxutilcommon.deleteDatabase(db);
     
                         stmt3.close();
-                        // tell pool, that database has been removed
-                        com.openexchange.databaseold.Database.reset(context_id);
                     }
                     stmt2.close();
                 } catch (final Exception e) {
