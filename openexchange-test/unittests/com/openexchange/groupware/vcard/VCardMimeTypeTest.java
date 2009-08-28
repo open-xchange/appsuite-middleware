@@ -59,7 +59,20 @@ import com.openexchange.tools.versit.converter.ConverterException;
  */
 public class VCardMimeTypeTest extends AbstractVCardUnitTest {
 
-    public final String vcard1 = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
+    public final String vcard1 = "BEGIN:VCARD\n" +
+    		"VERSION:3.0\n" +
+    		"PRODID:OPEN-XCHANGE\n" +
+    		"FN:Prinz\\, Tobias\n" +
+    		"N:Prinz;Tobias;;;\n" +
+    		"NICKNAME:Tierlieb\n" +
+    		"BDAY:19810501\nADR;" +
+    		"TYPE=work:;;;Somewhere;NRW;58541;DE\n" +
+    		"TEL;TYPE=home,voice:+49 2538 7921\n" +
+    		"EMAIL:tobias.prinz@open-xchange.com\n" +
+    		"ORG:- deactivated -\n" +
+    		"REV:20061204T160750.018Z\n" +
+    		"URL:www.tobias-prinz.de\n" +
+    		"UID:80@ox6.netline.de\nEND:VCARD\n";
 
     public final String vcard2 = "BEGIN:VCARD\nVERSION:3.0\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nCATEGORIES:Nicht abgelegt\nX-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\nEND:VCARD";
 
