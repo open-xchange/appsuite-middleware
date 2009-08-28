@@ -74,7 +74,7 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
      */
     public GetParser(final boolean failOnError, TimeZone timezone) {
         super(failOnError);
-        this.timeZone = timeZone;
+        this.timeZone = timezone;
     }
 
     /**
