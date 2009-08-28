@@ -51,6 +51,7 @@ package com.openexchange.event.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -691,7 +692,12 @@ public final class EventQueue {
                 // next run.
                 return;
             }
-            ALL_EVENTS_PROCESSED.await();
+            if (null != ServerServiceRegistry.getInstance().getService(TimerService.class)) {
+                // TODO TimerService is gone. Maybe event queues must be processed without the task.
+                if (!ALL_EVENTS_PROCESSED.await(2 * delay, TimeUnit.SECONDS)) {
+                    LOG.warn("Task did not clean event queues on shutdown.");
+                }
+            }
         } catch (final InterruptedException e) {
             LOG.error(e.getMessage(), e);
         } finally {
