@@ -49,9 +49,6 @@
 
 package com.openexchange.ajax.roundtrip.pubsub;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
 import com.openexchange.groupware.container.Contact;
@@ -61,7 +58,6 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
@@ -94,6 +90,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         PublicationTestManager pubMgr = getPublishManager();
         SubscriptionTestManager subMgr = getSubscribeManager();
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
         Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
         Subscription subscription = generateOXMFSubscription(publication.getTarget().getFormDescription());
         subscription.setFolderId(subFolder.getObjectID());
@@ -108,6 +105,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         subMgr.refreshAction(subscription.getId());
         contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
+        assertNoDataMessedUp(contact1,contacts[0]);
         
         //publish another contact
         Contact contact2 = generateContact("Hubert", "Meier");
@@ -130,5 +128,16 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         subMgr.refreshAction(subscription.getId());
         contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should have no contacts after deleting them all", 0, contacts.length);
+    }
+
+    private void assertNoDataMessedUp(Contact expected, Contact actual) {
+        assertEquals(expected.getSurName(), actual.getSurName());
+        assertEquals(expected.getGivenName(), actual.getGivenName());
+        assertEquals(expected.getCompany(), actual.getCompany());
+        assertEquals(expected.getEmail1(), actual.getEmail1());
+        assertEquals(expected.getDisplayName(), actual.getDisplayName());
+        assertEquals(expected.getPosition(), actual.getPosition());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getSurName(), actual.getSurName());
     }
 }

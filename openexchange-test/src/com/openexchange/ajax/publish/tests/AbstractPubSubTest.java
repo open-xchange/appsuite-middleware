@@ -136,6 +136,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         contact.setDisplayName(firstname + " " + lastname);
         contact.setPosition("Testee");
         contact.setTitle("Tester");
+        contact.setCompany("Testing-Company");
         return contact;
     }
 
