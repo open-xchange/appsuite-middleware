@@ -50,6 +50,7 @@
 package com.openexchange.groupware.vcard;
 
 import java.io.IOException;
+import junit.framework.AssertionFailedError;
 import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
@@ -65,8 +66,8 @@ public class VCardMimeTypeTest extends AbstractVCardUnitTest {
     		"FN:Prinz\\, Tobias\n" +
     		"N:Prinz;Tobias;;;\n" +
     		"NICKNAME:Tierlieb\n" +
-    		"BDAY:19810501\nADR;" +
-    		"TYPE=work:;;;Somewhere;NRW;58541;DE\n" +
+    		"BDAY:19810501\n" +
+    		"ADR;TYPE=work:;;;Somewhere;NRW;58541;DE\n" +
     		"TEL;TYPE=home,voice:+49 2538 7921\n" +
     		"EMAIL:tobias.prinz@open-xchange.com\n" +
     		"ORG:- deactivated -\n" +
@@ -89,7 +90,12 @@ public class VCardMimeTypeTest extends AbstractVCardUnitTest {
     }
     
     public void test6962variant2() throws IOException, ConverterException {
-        performTest("vCard 2 as " + mime1, vcard2, mime1);
+        try {
+            performTest("vCard 2 as " + mime1, vcard2, mime1);
+            fail("Should not be able to parse this as VCard 2.1");
+        }  catch (AssertionFailedError e) {
+            assertTrue(true);
+        }
     }
     
     public void test6962variant3() throws IOException, ConverterException {
