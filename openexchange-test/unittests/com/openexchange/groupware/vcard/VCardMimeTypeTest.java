@@ -72,9 +72,17 @@ public class VCardMimeTypeTest extends AbstractVCardUnitTest {
     		"ORG:- deactivated -\n" +
     		"REV:20061204T160750.018Z\n" +
     		"URL:www.tobias-prinz.de\n" +
-    		"UID:80@ox6.netline.de\nEND:VCARD\n";
+    		"UID:80@ox6.netline.de\n" +
+    		"END:VCARD\n";
 
-    public final String vcard2 = "BEGIN:VCARD\nVERSION:3.0\nN:;Svetlana;;;\nFN:Svetlana\nTEL;type=CELL;type=pref:6670373\nCATEGORIES:Nicht abgelegt\nX-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\nEND:VCARD";
+    public final String vcard2 = "BEGIN:VCARD\n" +
+    		"VERSION:3.0\n" +
+    		"N:;Svetlana;;;\n" +
+    		"FN:Svetlana\n" +
+    		"TEL;type=CELL;type=pref:6670373\n" +
+    		"CATEGORIES:Nicht abgelegt\n" +
+    		"X-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\n" +
+    		"END:VCARD";
 
     public void test6962variant1() throws IOException, ConverterException {
         performTest("vCard 1 as " + mime1, vcard1, mime1);
