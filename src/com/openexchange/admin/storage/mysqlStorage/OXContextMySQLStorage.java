@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -66,6 +69,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Vector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -118,7 +122,6 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class provides the implementation for the storage into a MySQL database
@@ -250,7 +253,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
-            DBUtils.rollback(conForConfigDB);
+            rollback(conForConfigDB);
             throw new StorageException(e);
         } finally {
             try {
@@ -281,10 +284,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
             con.commit();
         } catch (SQLException e) {
-            DBUtils.rollback(con);
+            rollback(con);
             throw new StorageException(e);
         } finally {
-            DBUtils.autocommit(con);
+            autocommit(con);
         }
         LOG.debug("Data delete for context " + ctx.getId() + " completed!");
     }
@@ -297,7 +300,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             stmt.setInt(1, ctx.getId().intValue());
             stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
         }
     }
 
@@ -1038,10 +1041,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
     
+    @Override
     public Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException {
-    	Connection configdb_write_con = null;
-        Connection ox_write_con = null;
-        final int context_id = ctx.getId();
+    	Connection configCon = null;
+        Connection oxCon = null;
+        final int context_id = ctx.getId().intValue();
         try {
             if (admin_user != null) {
                 OXUser.checkAndSetLanguage(admin_user);
@@ -1052,9 +1056,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 ctx.setFilestoreId(oxu.findFilestoreForContext().getId());
 
                 // Get config_db/ox_db connection from pool
-                configdb_write_con = cache.getConnectionForConfigDB();
+                configCon = cache.getConnectionForConfigDB();
 
-                final Database db = getNextDBHandleByWeight(configdb_write_con);
+                final Database db = getNextDBHandleByWeight(configCon);
 
                 // dbid is the id in db_pool of database engine to use for next
                 // context
@@ -1065,9 +1069,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // FIXME: generate unique schema name
                     String schema_name;
                     synchronized (ClientAdminThread.create_mutex) {
-                        configdb_write_con.setAutoCommit(false);
-                        final int srv_id = IDGenerator.getId(configdb_write_con);
-                        configdb_write_con.commit();
+                        configCon.setAutoCommit(false);
+                        final int srv_id = IDGenerator.getId(configCon);
+                        configCon.commit();
                         schema_name = db.getName() + '_' + srv_id;
                     }
 
@@ -1075,76 +1079,76 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     oxu.createDatabase(db);
                     newSchemaCreated = true;
 
-                    this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configdb_write_con, db);
+                    this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configCon, db);
                     // }
                 } else {
                     // check if there's a db schema which is not yet full
                     synchronized (ClientAdminThread.create_mutex) {
-                        String schema_name = getNextUnfilledSchemaFromDB(dbid, configdb_write_con);
+                        String schema_name = getNextUnfilledSchemaFromDB(dbid, configCon);
                         // there's none? create one
                         if (schema_name == null) {
-                            configdb_write_con.setAutoCommit(false);
-                            final int srv_id = IDGenerator.getId(configdb_write_con);
-                            configdb_write_con.commit();
+                            configCon.setAutoCommit(false);
+                            final int srv_id = IDGenerator.getId(configCon);
+                            configCon.commit();
                             schema_name = db.getName() + '_' + srv_id;
                             db.setScheme(schema_name);
                             oxu.createDatabase(db);
                             newSchemaCreated = true;
-                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configdb_write_con, db);
+                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configCon, db);
                         } else {
                             db.setScheme(schema_name);
-                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configdb_write_con, db);
+                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configCon, db);
                         }
                     }
                 }
-                configdb_write_con.setAutoCommit(false);
+                configCon.setAutoCommit(false);
                 // create login2context mapping in configdb
-                this.oxcontextcommon.fillLogin2ContextTable(ctx, configdb_write_con);
-                configdb_write_con.commit();
+                this.oxcontextcommon.fillLogin2ContextTable(ctx, configCon);
+                configCon.commit();
 
-                ox_write_con = cache.getConnectionForContext(context_id);
-                ox_write_con.setAutoCommit(false);
+                oxCon = cache.getConnectionForContext(context_id);
+                oxCon.setAutoCommit(false);
 
-                this.oxcontextcommon.initSequenceTables(context_id, ox_write_con); // perhaps
+                this.oxcontextcommon.initSequenceTables(context_id, oxCon); // perhaps
                 // the
                 // seqs must be
                 // deleted on
                 // exception
-                ox_write_con.commit();
+                oxCon.commit();
 
                 if (newSchemaCreated) {
-                    this.oxcontextcommon.initVersionTable(context_id, ox_write_con);
-                    ox_write_con.commit();
+                    this.oxcontextcommon.initVersionTable(context_id, oxCon);
+                    oxCon.commit();
                 }
 
                 // must be fetched before any other actions, else all statements
                 // are commited on this con
-                final int group_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, ox_write_con);
-                ox_write_con.commit();
+                final int group_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
+                oxCon.commit();
 
-                final int internal_user_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, ox_write_con);
-                ox_write_con.commit();
+                final int internal_user_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
+                oxCon.commit();
 
-                final int contact_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, ox_write_con);
-                ox_write_con.commit();
+                final int contact_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, oxCon);
+                oxCon.commit();
 
                 int uid_number = -1;
                 if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
-                    uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, ox_write_con);
-                    ox_write_con.commit();
+                    uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, oxCon);
+                    oxCon.commit();
                 }
 
                 int gid_number = -1;
                 if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-                    gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, ox_write_con);
-                    ox_write_con.commit();
+                    gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, oxCon);
+                    oxCon.commit();
                 }
 
                 // create group users for context
                 String groupName = translateGroupName(admin_user);
-                this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, groupName, group_id, gid_number);
+                this.oxcontextcommon.createStandardGroupForContext(context_id, oxCon, groupName, group_id, gid_number);
 
-                this.oxcontextcommon.createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin, uid_number, access);
+                this.oxcontextcommon.createAdminForContext(ctx, admin_user, oxCon, internal_user_id_for_admin, contact_id_for_admin, uid_number, access);
                 // create system folder for context
                 // get lang and displayname of admin
                 String display = String.valueOf(admin_user.getId());
@@ -1166,56 +1170,56 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                oxa.addContextSystemFolders(context_id, display, admin_user.getLanguage(), ox_write_con);
+                oxa.addContextSystemFolders(context_id, display, admin_user.getLanguage(), oxCon);
 
-                ox_write_con.commit();
+                oxCon.commit();
 
                 // context created
                 LOG.info("Context " + context_id + " created!");
             } // end if admin_user
             // TODO: cutmasta call setters and fill all required fields
-            ctx.setEnabled(true);
+            ctx.setEnabled(Boolean.TRUE);
             return ctx;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final OXException oxae) {
             LOG.error("Error", oxae);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw new StorageException(oxae.toString());
         } catch (final StorageException ste) {
             LOG.error("Storage Error", ste);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw ste;
         } catch (final SQLException ecop) {
             LOG.error("SQL Error", ecop);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw new StorageException(ecop);            
         } catch (final OXContextException e) {
             LOG.error("Context Error", e);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw new StorageException(e);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw new StorageException(e);
         } catch (final Exception ecp) {
             LOG.error("Internal Error", ecp);
-            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
             throw new StorageException("Internal server error occured");
         } finally {
             try {
-                if (configdb_write_con != null) {
-                    cache.pushConnectionForConfigDB(configdb_write_con);
+                if (configCon != null) {
+                    cache.pushConnectionForConfigDB(configCon);
                 }
             } catch (final PoolException ecp) {
                 LOG.error("Error pushing configdb connection to pool!", ecp);
             }
 
             try {
-                if (ox_write_con != null) {
-                    cache.pushConnectionForContext(context_id, ox_write_con);
+                if (oxCon != null) {
+                    cache.pushConnectionForContext(context_id, oxCon);
                 }
             } catch (final PoolException ecp) {
                 LOG.error("Error pushing ox write connection to pool!", ecp);
@@ -1390,47 +1394,42 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private String getNextUnfilledSchemaFromDB(final Integer pool_id, final Connection con) throws SQLException, StorageException {
-        if (null != pool_id) {
-            PreparedStatement pstm = null;
+    private static final Random rand = new Random(System.currentTimeMillis());
 
-            try {
-                pstm = con.prepareStatement("SELECT db_schema,COUNT(db_schema) FROM context_server2db_pool WHERE write_db_pool_id = ? GROUP BY db_schema");
-                pstm.setInt(1, pool_id);
-                final ResultSet rs = pstm.executeQuery();
-                String ret = null;
-                final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-
-                while (rs.next()) {
-                    final String schema = rs.getString("db_schema");
-                    final int count = rs.getInt("COUNT(db_schema)");
-                    if (count < this.CONTEXTS_PER_SCHEMA) {
-                        if (oxt.schemaBeingLockedOrNeedsUpdate(pool_id, schema)) {
-                            LOG.debug("schema " + schema + "is locked or updated, trying next one");
-                            continue;
-                        }
-                        LOG.debug("count =" + count + " of schema " + schema + ", using it for next context");
-                        ret = schema;
-                        break;
-                    }
-                }
-
-                return ret;
-            } catch (final SQLException e) {
-                LOG.error("SQL Error", e);
-                throw e;
-            } finally {
-                try {
-                    if (pstm != null) {
-                        pstm.close();
-                    }
-                } catch (final Exception e) {
-                    LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
-                }
-            }
-        } else {
+    private String getNextUnfilledSchemaFromDB(Integer poolId, Connection con) throws StorageException {
+        if (null == poolId) {
             throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        String found = null;
+        int contexts = Integer.MAX_VALUE;
+        try {
+            stmt = con.prepareStatement("SELECT db_schema,COUNT(db_schema) FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema");
+            stmt.setInt(1, poolId.intValue());
+            result = stmt.executeQuery();
+            final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
+            while (result.next()) {
+                final String schema = result.getString(1);
+                final int count = result.getInt(2);
+                if (count < this.CONTEXTS_PER_SCHEMA) {
+                    if (oxt.schemaBeingLockedOrNeedsUpdate(poolId.intValue(), schema)) {
+                        LOG.debug("schema " + schema + "is locked or updated, trying next one");
+                        continue;
+                    }
+                    if (count < contexts) {
+                        found = schema;
+                        contexts = count;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);            
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        LOG.debug("count =" + contexts + " of schema " + found + ", using it for next context");
+        return found;
     }
 
     private void deleteSchemeFromDatabaseIfEmpty(final Connection ox_db_write_con, final Connection configdb_con, final int source_database_id, final String scheme) throws SQLException {
