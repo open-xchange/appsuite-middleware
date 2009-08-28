@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * ContactParser
+ * Parses JSON to contact objects.
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
@@ -76,7 +76,7 @@ public class ContactParser extends CommonParser {
     public ContactParser(final boolean parseAll, final TimeZone timeZone) {
         super(parseAll, timeZone);
     }
-    
+
     public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXJSONException, ContactException {
         try {
             parseElementContact(contactobject, jsonobject);
@@ -99,7 +99,7 @@ public class ContactParser extends CommonParser {
         }
         parseElementCommon(contactobject, jsonobject);
     }
-    
+
     protected void parseDistributionList(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXJSONException, ContactException {
         final JSONArray jdistributionlist = jsonobject.getJSONArray(ContactFields.DISTRIBUTIONLIST);
         final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jdistributionlist.length()];
@@ -108,23 +108,23 @@ public class ContactParser extends CommonParser {
             distributionlist[a] = new DistributionListEntryObject();
             if (entry.has(DistributionListFields.ID)) {
                 distributionlist[a].setEntryID(parseInt(entry, DistributionListFields.ID));
-            } 
-            
+            }
+
             if (entry.has(DistributionListFields.FIRST_NAME)) {
                 distributionlist[a].setFirstname(parseString(entry, DistributionListFields.FIRST_NAME));
-            } 
-            
+            }
+
             if (entry.has(DistributionListFields.LAST_NAME)) {
                 distributionlist[a].setLastname(parseString(entry, DistributionListFields.LAST_NAME));
-            } 
-            
+            }
+
             distributionlist[a].setDisplayname(parseString(entry, DistributionListFields.DISPLAY_NAME));
             distributionlist[a].setEmailaddress(parseString(entry, DistributionListFields.MAIL));
             distributionlist[a].setEmailfield(parseInt(entry, DistributionListFields.MAIL_FIELD));
         }
         oxobject.setDistributionList(distributionlist);
     }
-    
+
     protected void parseLinks(final Contact oxobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
         final JSONArray jlinks = jsonobject.getJSONArray(ContactFields.LINKS);
         final LinkEntryObject[] links = new LinkEntryObject[jlinks.length()];
@@ -133,18 +133,18 @@ public class ContactParser extends CommonParser {
             final JSONObject entry = jlinks.getJSONObject(a);
             if (entry.has(ContactFields.ID)) {
                 links[a].setLinkID(parseInt(entry, ContactFields.ID));
-            } 
-            
+            }
+
             links[a].setLinkDisplayname(parseString(entry, DistributionListFields.DISPLAY_NAME));
         }
         oxobject.setLinks(links);
     }
-    
+
     private interface JSONAttributeMapper {
         boolean jsonObjectContains(JSONObject jsonobject);
         void setObject(Contact contactobject, JSONObject jsonobject) throws JSONException, OXJSONException;
     }
-    
+
     private final JSONAttributeMapper[] mapping = new JSONAttributeMapper[] {
         new JSONAttributeMapper() {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
@@ -171,7 +171,7 @@ public class ContactParser extends CommonParser {
                     final JSONObject jsonobject) throws JSONException {
                 contactobject.setGivenName (parseString(jsonobject, ContactFields.FIRST_NAME));
             }
-        },        
+        },
         new JSONAttributeMapper() {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.MARITAL_STATUS);
@@ -422,7 +422,7 @@ public class ContactParser extends CommonParser {
             public void setObject(final Contact contactobject,
                     final JSONObject jsonobject) throws JSONException {
                 final String image = parseString(jsonobject, ContactFields.IMAGE1);
-                if (image != null) {                    
+                if (image != null) {
                     contactobject.setImage1(image.getBytes());
                 } else {
                     contactobject.setImage1(null);
