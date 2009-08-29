@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -252,7 +253,7 @@ public class PushHandler implements EventHandler {
                 }
                 oldFolder = folderService.getFolderObject((int) oldObj.getFolderId(), ctx.getContextId());
             } catch (final FolderException e) {
-                LOG.error("cannot load folder by id: " + oldObj.getFolderId(), e);
+                LOG.error(MessageFormat.format("cannot load folder by id: {0}", Long.valueOf(oldObj.getFolderId())), e);
                 return;
             }
             final int[] oldUsers = getAffectedUsers4Object(oldFolder, ctx);
