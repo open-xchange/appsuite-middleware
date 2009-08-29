@@ -126,15 +126,15 @@ public final class FolderStorageActivator implements BundleActivator {
             BundleActivator activator = null;
             for (final Iterator<BundleActivator> iter = activators.iterator(); iter.hasNext();) {
                 try {
-                    if (context.getBundle().getState() == Bundle.RESOLVED) {
+                    if (isBundleResolved(context)) {
                         if (null != activator) {
-                            LOG.error("Failed start of folder storage bundle \"" + activator.getClass().getName() + "\"!", new Throwable());
+                            logFailedStartup(activator);
                         }
                         return;
                     }
                 } catch (final IllegalStateException e) {
                     if (null != activator) {
-                        LOG.error("Failed start of folder storage bundle \"" + activator.getClass().getName() + "\"!", new Throwable());
+                        logFailedStartup(activator);
                     }
                     return;
                 }
@@ -142,11 +142,29 @@ public final class FolderStorageActivator implements BundleActivator {
                 activator.start(context);
             }
 
-            LOG.info("Bundle \"" + FolderStorageActivator.class.getName() + "\" successfully started!");
+            if (LOG.isInfoEnabled()) {
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append("Bundle \"");
+                sb.append(FolderStorageActivator.class.getName());
+                sb.append("\" successfully started!");
+                LOG.info(sb.toString());
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    private static boolean isBundleResolved(final BundleContext context) {
+        return Bundle.RESOLVED == context.getBundle().getState();
+    }
+
+    private static void logFailedStartup(final BundleActivator activator) {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append("Failed start of folder storage bundle \"");
+        sb.append(activator.getClass().getName());
+        sb.append("\"!");
+        LOG.error(sb.toString(), new Throwable());
     }
 
     public void stop(final BundleContext context) throws Exception {
@@ -181,7 +199,13 @@ public final class FolderStorageActivator implements BundleActivator {
                 componentRegistration = null;
             }
 
-            LOG.info("Bundle \"" + FolderStorageActivator.class.getName() + "\" successfully stopped!");
+            if (LOG.isInfoEnabled()) {
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append("Bundle \"");
+                sb.append(FolderStorageActivator.class.getName());
+                sb.append("\" successfully stopped!");
+                LOG.info(sb.toString());
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
