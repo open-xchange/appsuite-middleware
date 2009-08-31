@@ -75,93 +75,102 @@ public final class CSSMatcher {
     }
 
     /*
-     * Regular expression for CSS2 values
-     */
-
-    private static final String STR_INTEGER = "(?:(?:\\+|-)?[0-9]+)";
-
-    private static final String STR_REAL = "(?:(?:\\+|-)?[0-9]*\\.[0-9]+)";
-
-    private static final String STR_NUMBER = RegexUtility.group(RegexUtility.OR(STR_INTEGER, STR_REAL), GroupType.NON_CAPTURING);
-
-    private static final String STR_REL_UNITS = "(?:em|ex|px)";
-
-    private static final String STR_ABS_UNITS = "(?:in|cm|mm|pt|pc)";
-
-    private static final String STR_UNITS = RegexUtility.group(RegexUtility.OR(STR_REL_UNITS, STR_ABS_UNITS), GroupType.NON_CAPTURING);
-
-    private static final String STR_LENGTH = RegexUtility.group(RegexUtility.OR(
-        RegexUtility.concat(STR_NUMBER, STR_UNITS),
-        RegexUtility.concat("(?:\\\\+|-)?", "0", RegexUtility.optional(STR_UNITS))), GroupType.NON_CAPTURING);
-
-    private static final String STR_PERCENTAGE = RegexUtility.group(RegexUtility.concat(STR_NUMBER, "%"), GroupType.NON_CAPTURING);
-
-    private static final String STR_LENGTH_OR_PERCENTAGE = RegexUtility.group(
-        RegexUtility.OR(STR_LENGTH, STR_PERCENTAGE),
-        GroupType.NON_CAPTURING);
-
-    private static final String STR_TIME_UNITS = "(?:ms|s)";
-
-    private static final String STR_TIME = RegexUtility.group(RegexUtility.concat(STR_NUMBER, STR_TIME_UNITS), GroupType.NON_CAPTURING);
-
-    // private static final String STR_MULTIPLE_LENGTH =
-    // RegexUtility.concat(STR_LENGTH, RegexUtility.group(RegexUtility
-    // .concat("\\p{Blank}+", STR_LENGTH), GroupType.NON_CAPTURING), "*");
-    //
-    // private static final String STR_MULTIPLE_PERCENTAGE =
-    // RegexUtility.concat(STR_PERCENTAGE, RegexUtility.group(
-    // RegexUtility.concat("\\p{Blank}+", STR_PERCENTAGE),
-    // GroupType.NON_CAPTURING), "*");
-    //
-    // private static final String STR_MULTIPLE =
-    // RegexUtility.group(RegexUtility.OR(STR_MULTIPLE_LENGTH,
-    // STR_MULTIPLE_PERCENTAGE), GroupType.NON_CAPTURING);
-
-    private static final String STR_URL = "url\\(\"?\\p{ASCII}+\"?\\)";
-
-    private static final String STR_COLOR_KEYWORD = RegexUtility.group(
-        "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",
-        GroupType.NON_CAPTURING);
-
-    private static final String STR_COLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" + "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" + "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" + "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" + "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
-
-    private static final String STR_COLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
-
-    private static final String STR_CSV_DELIM = "\\s*,\\s*";
-
-    private static final String STR_COLOR_RGB_FUNC = RegexUtility.concat("rgb\\(", RegexUtility.group(
-        RegexUtility.OR(RegexUtility.concat(STR_INTEGER, STR_CSV_DELIM, STR_INTEGER, STR_CSV_DELIM, STR_INTEGER), RegexUtility.concat(
-            STR_PERCENTAGE,
-            STR_CSV_DELIM,
-            STR_PERCENTAGE,
-            STR_CSV_DELIM,
-            STR_PERCENTAGE)),
-        GroupType.NON_CAPTURING), "\\)");
-
-    private static final String STR_COLOR = RegexUtility.group(RegexUtility.concat(
-        STR_COLOR_KEYWORD,
-        "|",
-        STR_COLOR_SYSTEM,
-        "|",
-        STR_COLOR_RGB_HEX,
-        "|",
-        STR_COLOR_RGB_FUNC), GroupType.NON_CAPTURING);
-
-    /*
      * The patterns for values
      */
 
-    private static final Pattern PAT_N = Pattern.compile(STR_LENGTH_OR_PERCENTAGE);
+    private static final Pattern PAT_N;
 
-    private static final Pattern PAT_n = Pattern.compile(STR_LENGTH);
+    private static final Pattern PAT_n;
 
-    private static final Pattern PAT_c = Pattern.compile(STR_COLOR, Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_c;
 
-    private static final Pattern PAT_u = Pattern.compile(STR_URL, Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_u;
 
-    private static final Pattern PAT_t = Pattern.compile(STR_TIME, Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_t;
 
-    private static final Pattern PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
+    private static final Pattern PATTERN_IS_PATTERN;
+
+    private static final Pattern PATTERN_STYLE_BLOCK;
+
+    private static final Pattern PATTERN_COLOR_RGB;
+
+    static {
+        /*
+         * Regular expression for CSS2 values
+         */
+        final String strINTEGER = "(?:(?:\\+|-)?[0-9]+)";
+
+        final String strREAL = "(?:(?:\\+|-)?[0-9]*\\.[0-9]+)";
+
+        final String strNUMBER = RegexUtility.group(RegexUtility.OR(strINTEGER, strREAL), GroupType.NON_CAPTURING);
+
+        final String strREL_UNITS = "(?:em|ex|px)";
+
+        final String strABS_UNITS = "(?:in|cm|mm|pt|pc)";
+
+        final String strUNITS = RegexUtility.group(RegexUtility.OR(strREL_UNITS, strABS_UNITS), GroupType.NON_CAPTURING);
+
+        final String strLENGTH = RegexUtility.group(RegexUtility.OR(RegexUtility.concat(strNUMBER, strUNITS), RegexUtility.concat(
+            "(?:\\\\+|-)?",
+            "0",
+            RegexUtility.optional(strUNITS))), GroupType.NON_CAPTURING);
+
+        final String strPERCENTAGE = RegexUtility.group(RegexUtility.concat(strNUMBER, "%"), GroupType.NON_CAPTURING);
+
+        final String strLENGTH_OR_PERCENTAGE = RegexUtility.group(RegexUtility.OR(strLENGTH, strPERCENTAGE), GroupType.NON_CAPTURING);
+
+        final String strTIME_UNITS = "(?:ms|s)";
+
+        final String strTIME = RegexUtility.group(RegexUtility.concat(strNUMBER, strTIME_UNITS), GroupType.NON_CAPTURING);
+
+        final String strURL = "url\\(\"?\\p{ASCII}+\"?\\)";
+
+        final String strCOLOR_KEYWORD = RegexUtility.group(
+            "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",
+            GroupType.NON_CAPTURING);
+
+        final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" + "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" + "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" + "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" + "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
+
+        final String strCOLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
+
+        final String strCSV_DELIM = "\\s*,\\s*";
+
+        final String strCOLOR_RGB_FUNC = RegexUtility.concat("rgb\\(", RegexUtility.group(
+            RegexUtility.OR(RegexUtility.concat(strINTEGER, strCSV_DELIM, strINTEGER, strCSV_DELIM, strINTEGER), RegexUtility.concat(
+                strPERCENTAGE,
+                strCSV_DELIM,
+                strPERCENTAGE,
+                strCSV_DELIM,
+                strPERCENTAGE)),
+            GroupType.NON_CAPTURING), "\\)");
+
+        final String strCOLOR = RegexUtility.group(RegexUtility.concat(
+            strCOLOR_KEYWORD,
+            "|",
+            strCOLOR_SYSTEM,
+            "|",
+            strCOLOR_RGB_HEX,
+            "|",
+            strCOLOR_RGB_FUNC), GroupType.NON_CAPTURING);
+        /*
+         * Initialize patterns with strings
+         */
+        PAT_N = Pattern.compile(strLENGTH_OR_PERCENTAGE);
+
+        PAT_n = Pattern.compile(strLENGTH);
+
+        PAT_c = Pattern.compile(strCOLOR, Pattern.CASE_INSENSITIVE);
+
+        PAT_u = Pattern.compile(strURL, Pattern.CASE_INSENSITIVE);
+
+        PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
+
+        PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
+
+        PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}+\\s*\\{)([^}]+)\\}");
+
+        PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
+    }
 
     /**
      * Checks if specified CSS value is matched by given allowed values
@@ -246,10 +255,6 @@ public final class CSSMatcher {
             return false;
         }
     }
-
-    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}+\\s*\\{)([^}]+)\\}");
-
-    private static final Pattern PATTERN_COLOR_RGB = Pattern.compile(STR_COLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
 
     /**
      * Iterates over CSS blocks contained in specified string argument and checks each block against given style map
