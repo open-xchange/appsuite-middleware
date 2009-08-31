@@ -144,6 +144,8 @@ public final class MailAccountWriter {
             for (final Attribute attribute : attributes) {
                 if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                     row.put(JSONObject.NULL);
+                } else if (Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL == attribute || Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL == attribute) {
+                	row.put(Boolean.parseBoolean(String.valueOf(attribute.doSwitch(getter))));
                 } else {
                     row.put(attribute.doSwitch(getter));
                 }
