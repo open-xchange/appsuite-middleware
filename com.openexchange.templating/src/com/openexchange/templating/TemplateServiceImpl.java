@@ -134,13 +134,19 @@ public class TemplateServiceImpl implements TemplateService {
                 global = true;
             }
             String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+
+            if(templateText != null) {
+                OXTemplateImpl template = new OXTemplateImpl();
+                template.setTemplate(new Template(templateName, new StringReader(templateText), new Configuration()));
+                return template;
+            }
             
             if(templateText == null && ! global) {
                 folder = folders.getGlobalTemplateFolder(session);
                 global = true;
-            }
             
-            templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+                templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
+            }
             
             if(templateText == null) {
                 templateText = loadFromFileSystem(defaultTemplateName);
