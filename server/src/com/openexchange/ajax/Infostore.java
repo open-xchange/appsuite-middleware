@@ -259,6 +259,8 @@ public class Infostore extends PermissionServlet {
             LOG.error(e.getMessage(), e);
         } catch (final OXPermissionException e) {
             LOG.error("Not possible, obviously: " + e.getMessage(), e);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
@@ -351,6 +353,22 @@ public class Infostore extends PermissionServlet {
             }
         } catch (final JSONException e) {
             handleOXException(res, e, action, true, null);
+        } catch (Throwable t) {
+            final Response resp = new Response();
+            resp.setException(new AbstractOXException(t.getMessage())); // FIXME
+            try {
+                res.setContentType("text/html; charset=UTF-8");
+
+                throw new UploadServletException(res, substitute(
+                    JS_FRAGMENT,
+                    STR_JSON,
+                    ResponseWriter.getJSON(resp).toString(),
+                    STR_ACTION,
+                    action), t.getMessage(), t);
+            } catch (final JSONException e) {
+                LOG.error("Giving up", e);
+            }
+            LOG.error(t.getMessage(), t);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
