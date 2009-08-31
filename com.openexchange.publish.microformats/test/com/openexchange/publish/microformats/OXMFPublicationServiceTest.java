@@ -57,6 +57,10 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateException;
+import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.session.ServerSession;
 import junit.framework.TestCase;
 
 /**
@@ -94,6 +98,8 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService.setFolderType("bananas");
         publicationService.setTargetId("com.openexchange.publish.microformats.contacts.online");
         publicationService.setTargetDisplayName("Banana Publications!");
+        
+        publicationService.setTemplateService(new FindEverythingTemplateService());
     }
 
     public void testModule() throws PublicationException {
@@ -271,5 +277,17 @@ public class OXMFPublicationServiceTest extends TestCase {
     public void assertSecretRemoved(Publication publication) {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
         assertTrue("Secret was not null explicitely!", publication.getConfiguration().get("secret") == null);
+    }
+    
+    private static final class FindEverythingTemplateService implements TemplateService {
+
+        public OXTemplate loadTemplate(String templateName) throws TemplateException {
+            return null;
+        }
+
+        public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException {
+            return null;
+        }
+        
     }
 }
