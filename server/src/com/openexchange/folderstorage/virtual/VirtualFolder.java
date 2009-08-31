@@ -174,6 +174,15 @@ public final class VirtualFolder implements Folder {
         return parent;
     }
 
+    /**
+     * Gets either real folder's permissions or virtual folder's individual permissions (if set)
+     * 
+     * <pre>
+     * return permissions == null ? realFolder.getPermissions() : permissions;
+     * </pre>
+     * 
+     * @return The permissions for this virtual folder
+     */
     public Permission[] getPermissions() {
         /*
          * If no permissions applied return real folder's permissions
