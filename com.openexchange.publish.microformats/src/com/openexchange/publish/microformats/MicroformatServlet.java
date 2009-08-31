@@ -75,7 +75,6 @@ import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
 import com.openexchange.publish.microformats.tools.UncloseableWriter;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
 /**
@@ -185,12 +184,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("request", req);
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
+            String admin = configService.getProperty("PUBLISH_REVOKE");
+            if(admin == null || admin.equals(""))
+                admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
             String privacyText = formatPrivacyText(
                 getPrivacyText(user),
-                configService.getProperty("PUBLISH_REVOKE"),
+                admin,
                 user,
                 new Date());
-            variables.put("privacy", privacyText );
+            variables.put("privacy", privacyText ); //TODO Use lastmodified once someone implements this.
              
 
             if (additionalTemplateVariables.containsKey(module)) {
