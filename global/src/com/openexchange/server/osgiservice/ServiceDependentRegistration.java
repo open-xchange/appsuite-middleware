@@ -107,7 +107,12 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
                 return false;
             }
         }
-        return validateServices();
+        boolean validateServices = validateServices();
+        if(validateServices) {
+            LOG.info("All is fine, registering service "+this.service+".");
+            return true;
+        }
+        return false;
     }
     
     /**
