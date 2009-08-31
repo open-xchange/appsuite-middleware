@@ -55,7 +55,7 @@ import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-public class ParticipantNotifyTest extends TestCase{
+public class ParticipantNotifyTest extends TestCase {
 	
 	protected static final MockGroupLookup GROUP_STORAGE = new MockGroupLookup();
 	protected static final MockUserLookup USER_STORAGE = new MockUserLookup();

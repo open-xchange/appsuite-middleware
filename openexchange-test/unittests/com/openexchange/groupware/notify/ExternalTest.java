@@ -52,7 +52,6 @@ package com.openexchange.groupware.notify;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 
-
 public class ExternalTest extends ParticipantNotifyTest {
 
     public void testExternal() throws Exception {

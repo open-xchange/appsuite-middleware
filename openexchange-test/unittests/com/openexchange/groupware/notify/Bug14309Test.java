@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.notify.ParticipantNotifyTest.Message;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
@@ -79,6 +78,7 @@ public class Bug14309Test extends ParticipantNotifyTest {
 
     private Session so;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -106,12 +106,13 @@ public class Bug14309Test extends ParticipantNotifyTest {
         Message message = messages.get(0);
         
         System.out.println(message.message);
-        
+
         assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
-        assertTrue("Message should contain a link to the apointment.", message.message.contains("http://")); // TODO: Make more
+        assertTrue("Message should contain a link to the apointment: " + message.toString(), message.message.contains("http://")); // TODO: Make more
                                                                                                              // sophisticated.
     }
 
+    @Override
     public void tearDown() throws Exception {
         super.tearDown();
     }
