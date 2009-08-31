@@ -63,6 +63,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -172,6 +173,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             mailAccount.setConfirmedSpamFullname(getOptionalString(result.getString(19)));
             mailAccount.setConfirmedHamFullname(getOptionalString(result.getString(20)));
             mailAccount.setUserId(user);
+            /*
+             * Fill properties
+             */
+            fillProperties(mailAccount, cid, user, id, con);
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -228,6 +233,32 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
+        }
+    }
+
+    private static void fillProperties(final AbstractMailAccount mailAccount, final int cid, final int user, final int id, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT name, value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos, id);
+            rs = stmt.executeQuery();
+            final Map<String, String> properties = new HashMap<String, String>();
+            while (rs.next()) {
+                final String name = rs.getString(1);
+                if (!rs.wasNull()) {
+                    final String value = rs.getString(2);
+                    if (!rs.wasNull()) {
+                        properties.put(name, value);
+                    }
+                }
+            }
+            mailAccount.setProperties(properties);
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 

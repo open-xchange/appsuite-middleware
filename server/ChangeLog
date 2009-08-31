@@ -1,3 +1,7 @@
+* 2009-08-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #14396: Properly writing mail account's properties when writing JSON data
+
 * 2009-08-31 - marcus.klein@open-xchange.com
 
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
