@@ -597,22 +597,37 @@ public final class MIMEMessageUtility {
         final StringBuilder sb = new StringBuilder(len);
         int prev = 0;
         do {
-            final char c1 = eword.charAt(pos + 1);
-            final char c2 = eword.charAt(pos + 2);
-            final int nextPos;
-            if (isHex(c1) && isHex(c2)) {
-                nextPos = pos + 3;
-                sb.append(eword.substring(prev, nextPos));
-            } else {
-                nextPos = pos + 1;
-                if (ENCODINGS.contains(HeaderName.valueOf(charset))) {
-                    sb.append(eword.substring(prev, pos)).append("=3D");
+            final int pos1 = pos + 1;
+            final int pos2 = pos + 2;
+            if (pos2 < len) {
+                final char c1 = eword.charAt(pos1);
+                final char c2 = eword.charAt(pos2);
+                final int nextPos;
+                if (isHex(c1) && isHex(c2)) {
+                    final int pos3 = pos + 3;
+                    if (pos3 > len) {
+                        nextPos = len;
+                    } else {
+                        nextPos = pos3;
+                    }
+                    sb.append(eword.substring(prev, nextPos));
                 } else {
-                    sb.append(eword.substring(prev, pos)).append(qencode('=', charset));
+                    nextPos = pos1;
+                    if (ENCODINGS.contains(HeaderName.valueOf(charset))) {
+                        sb.append(eword.substring(prev, pos)).append("=3D");
+                    } else {
+                        sb.append(eword.substring(prev, pos)).append(qencode('=', charset));
+                    }
                 }
+                prev = nextPos;
+                pos = nextPos < len ? eword.indexOf('=', nextPos) : -1;
+            } else {
+                if (prev < len) {
+                    sb.append(eword.substring(prev));
+                    prev = len;
+                }
+                pos = -1;
             }
-            prev = nextPos;
-            pos = nextPos < len ? eword.indexOf('=', nextPos) : -1;
         } while (pos != -1);
         if (prev < len) {
             sb.append(eword.substring(prev));
