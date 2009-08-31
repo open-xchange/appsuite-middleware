@@ -174,7 +174,7 @@ public class TemplateServiceImpl implements TemplateService {
         return templateName == null || "".equals(templateName);
     }
 
-    private String loadFromFileSystem(String defaultTemplateName) throws TemplateException {
+    protected String loadFromFileSystem(String defaultTemplateName) throws TemplateException {
         File templateFile = getTemplateFile(defaultTemplateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
             return "Unfilled Template."; 
