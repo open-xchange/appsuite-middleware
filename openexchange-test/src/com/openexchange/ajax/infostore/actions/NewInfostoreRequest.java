@@ -49,11 +49,13 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Params;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
@@ -63,6 +65,22 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
 
     private DocumentMetadata metadata;
 
+    private File upload;
+
+    public NewInfostoreRequest() {
+        this(null, null);
+    }
+
+    public NewInfostoreRequest(DocumentMetadata data) {
+        this(data, null);
+    }
+
+    public NewInfostoreRequest(DocumentMetadata data, File upload) {
+        super();
+        this.metadata = data;
+        this.upload = upload;
+    }
+
     public void setMetadata(DocumentMetadata metadata) {
         this.metadata = metadata;
     }
@@ -71,35 +89,25 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
         return metadata;
     }
 
-    public NewInfostoreRequest(DocumentMetadata data) {
-        this();
-        setMetadata(data);
-    }
-
-    public NewInfostoreRequest() {
-        super();
-    }
-
-    public Object getBody() throws JSONException {
+    public String getBody() throws JSONException {
         return writeJSON(getMetadata());
     }
 
     public Method getMethod() {
-        return Method.PUT;
+        return null == upload ? Method.PUT : Method.UPLOAD;
     }
 
-    public Parameter[] getParameters() {
-        return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW).toArray();
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> tmp = new ArrayList<Parameter>(3);
+        tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        if (null != upload) {
+            tmp.add(new FieldParameter("json", getBody()));
+            tmp.add(new FileParameter("file", upload.getName(), new FileInputStream(upload), metadata.getFileMIMEType()));
+        }
+        return tmp.toArray(new Parameter[tmp.size()]);
     }
 
-    public AbstractAJAXParser<NewInfostoreResponse> getParser() {
-        return new AbstractAJAXParser<NewInfostoreResponse>(getFailOnError()) {
-
-            @Override
-            protected NewInfostoreResponse createResponse(final Response response) throws JSONException {
-                return new NewInfostoreResponse(response);
-            }
-        };
+    public NewInfostoreParser getParser() {
+        return new NewInfostoreParser(getFailOnError(), null != upload);
     }
-
 }

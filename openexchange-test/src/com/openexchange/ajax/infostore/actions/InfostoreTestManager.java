@@ -51,7 +51,6 @@ package com.openexchange.ajax.infostore.actions;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -59,16 +58,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.xml.sax.SAXException;
-import com.meterware.httpunit.HttpUnitOptions;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractUploadParser;
-import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.tools.servlet.AjaxException;
@@ -125,41 +116,6 @@ public class InfostoreTestManager {
         }
         createdEntities = new HashSet<DocumentMetadata>();
     }
-
-    private int createNew(final WebConversation webConv, DocumentMetadata data, final File upload) throws MalformedURLException, IOException, SAXException, JSONException {
-        final StringBuffer url = new StringBuffer("http");
-        url.append("://");
-        url.append(getClient().getHostname() == null ? "localhost" : getClient().getHostname());
-        url.append("/ajax/infostore?session=");
-        url.append(getClient().getSession().getId());
-        url.append("&action=");
-        url.append("new");
-        
-        final PostMethodWebRequest req = new PostMethodWebRequest(url.toString(), true);
-        
-        req.setParameter("json", AbstractInfostoreRequest.convertToJSON(data));
-        
-        if (upload != null) {
-            req.selectFile("file", upload, data.getFileMIMEType());
-        }
-        
-        final WebResponse resp = webConv.getResource(req);
-        
-        final String html = resp.getText();
-        final JSONObject response = AbstractUploadParser.extractFromCallback(html);
-        if (response == null) {
-            throw new IOException("Didn't receive response");
-        }
-        final Response respO = ResponseParser.parse(response);
-        if (respO.hasError()) {
-            throw new IOException(respO.getErrorMessage());
-        }
-        try {
-            return response.getInt("data");
-        } catch (final JSONException x) {
-            throw new JSONException("Got unexpected answer: " + response);
-        }
-    }
     
     private void removeFromCreatedEntities(Collection<Integer> ids) {
         for (int id : ids) {
@@ -184,11 +140,12 @@ public class InfostoreTestManager {
      * The following is not beautiful, but the request/response framework 
      * doesn't seem to offer a solution to do POST requests containing files.
      */
-    public void newAction(DocumentMetadata data, File upload) throws MalformedURLException, IOException, SAXException, JSONException {
-        WebConversation conv = getClient().getSession().getConversation();
-        HttpUnitOptions.setDefaultCharacterSet("UTF-8");
-        int id = createNew(conv, data, upload);
-        data.setId(id);
+    public void newAction(DocumentMetadata data, File upload) throws AjaxException, IOException, SAXException, JSONException {
+        NewInfostoreRequest newRequest = new NewInfostoreRequest(data, upload);
+        newRequest.setFailOnError(getFailOnError());
+        NewInfostoreResponse newResponse = getClient().execute(newRequest);
+        lastResponse = newResponse;
+        data.setId(newResponse.getID());
         createdEntities.add(data);
     }
 

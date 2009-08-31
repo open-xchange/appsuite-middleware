@@ -65,8 +65,7 @@ import com.openexchange.ajax.parser.ResponseParser;
  * does not provide a standard response.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse>
-    extends Assert {
+public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends Assert {
 
     /**
      * Should this parser fail if the response contains an error.
@@ -78,24 +77,22 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse>
      * @param failOnError <code>true</code> and this parser checks the server
      * response for containing error messages and lets the test fail.
      */
-    protected AbstractAJAXParser(final boolean failOnError) {
+    protected AbstractAJAXParser(boolean failOnError) {
         super();
         this.failOnError = failOnError;
     }
 
-    protected Response getResponse(final String body) throws JSONException {
+    protected Response getResponse(String body) throws JSONException {
         final Response response = ResponseParser.parse(body);
-        assertFalse(response.getErrorMessage(), failOnError && response
-            .hasError());
+        assertFalse(response.getErrorMessage(), failOnError && response.hasError());
         return response;
     }
 
-    public void checkResponse(final WebResponse resp) {
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
+    public void checkResponse(WebResponse resp) {
+        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
     }
 
-    public T parse(final String body) throws JSONException {
+    public T parse(String body) throws JSONException {
         final Response response = getResponse(body);
         return createResponse(response);
     }

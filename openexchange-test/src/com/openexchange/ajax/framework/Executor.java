@@ -126,13 +126,12 @@ public class Executor extends Assert {
 			addParameter(req, session, request);
 			break;
 		case UPLOAD:
-			final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getPUTParameter(session, request), true);
+			final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getURLParameter(session, request), true);
 			req = post;
-			addFieldParameter(post, request);
-			addFileParameter(post, request);
+			addBodyParameter(post, request);
 			break;
 		case PUT:
-			req = new PutMethodWebRequest(urlString + getPUTParameter(session, request), createBody(request.getBody()),
+			req = new PutMethodWebRequest(urlString + getURLParameter(session, request), createBody(request.getBody()),
 					AJAXServlet.CONTENTTYPE_JAVASCRIPT);
 			break;
 		default:
@@ -160,7 +159,7 @@ public class Executor extends Assert {
 	}
 
 	public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
-			final String protocol, final String hostname) throws AjaxException, IOException {
+			final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
 		final String urlString = protocol + "://" + hostname + request.getServletPath();
 		final WebRequest req;
 		switch (request.getMethod()) {
@@ -180,8 +179,7 @@ public class Executor extends Assert {
 		return resp;
 	}
 
-    private static void addParameter(final WebRequest req,
-        final AJAXSession session, final AJAXRequest<?> request) {
+    private static void addParameter(WebRequest req, AJAXSession session, AJAXRequest<?> request) throws IOException, JSONException {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
@@ -192,37 +190,30 @@ public class Executor extends Assert {
         }
     }
 
-    private static void addFieldParameter(final PostMethodWebRequest post, final AJAXRequest<?> request) {
+    private static void addBodyParameter(PostMethodWebRequest post, AJAXRequest<?> request) throws IOException, JSONException {
 		for (final Parameter param : request.getParameters()) {
 			if (param instanceof FieldParameter) {
 				final FieldParameter fparam = (FieldParameter) param;
 				post.setParameter(fparam.getFieldName(), fparam.getFieldContent());
 			}
+            if (param instanceof FileParameter) {
+                final FileParameter fparam = (FileParameter) param;
+                post.selectFile(fparam.getName(), fparam.getFileName(), fparam.getInputStream(), fparam.getMimeType());
+            }
 		}
 	}
 
-    private static void addFileParameter(final PostMethodWebRequest post,
-        final AJAXRequest<?> request) {
-        for (final Parameter param : request.getParameters()) {
-            if (param instanceof FileParameter) {
-                final FileParameter fparam = (FileParameter) param;
-                post.selectFile(fparam.getName(), fparam.getFileName(),
-                    fparam.getInputStream(), fparam.getMimeType());
-            }
-        }
-    }
-
-    private static String getPUTParameter(final AJAXSession session,
-        final AJAXRequest<?> request) throws UnsupportedEncodingException {
+    private static String getURLParameter(AJAXSession session, AJAXRequest<?> request) throws IOException, JSONException {
         final URLParameter parameter = new URLParameter();
         if (null != session.getId()) {
-            parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session
-                .getId());
+            parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
         for (final Parameter param : request.getParameters()) {
             if (!(param instanceof FileParameter) && !(param instanceof FieldParameter)) {
                 parameter.setParameter(param.getName(), param.getValue());
             }
+            // Don't throw error here because field and file parameters are added on POST with addFieldParameter and addFileParameter
+            // methods.
         }
         return parameter.getURLParameters();
     }

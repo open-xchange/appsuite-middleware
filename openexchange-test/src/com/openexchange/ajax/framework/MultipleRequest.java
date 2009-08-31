@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,7 +93,7 @@ public class MultipleRequest<T extends AbstractAJAXResponse> implements AJAXRequ
         return "/ajax/multiple";
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() throws JSONException, IOException {
         final JSONArray array = new JSONArray();
         for (final AJAXRequest<?> request : requests) {
             final JSONObject object = new JSONObject();

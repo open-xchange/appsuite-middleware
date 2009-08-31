@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.TimeZone;
@@ -195,9 +196,9 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
      * request. The session request parameter is added by the {@link Executor}.
      * @return all request parameters except the session identifier.
      */
-    Parameter[] getParameters();
+    Parameter[] getParameters() throws IOException, JSONException;
 
     AbstractAJAXParser<? extends T> getParser();
 
-    Object getBody() throws JSONException;
+    Object getBody() throws IOException, JSONException;
 }

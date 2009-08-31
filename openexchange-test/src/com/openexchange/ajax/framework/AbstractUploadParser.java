@@ -53,10 +53,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.parser.ResponseParser;
 
 /**
  * This parser extracts the JSON object from the web site returned by the server
@@ -70,7 +68,7 @@ public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> exten
     /**
      * @param failOnError
      */
-    public AbstractUploadParser(final boolean failOnError) {
+    public AbstractUploadParser(boolean failOnError) {
         super(failOnError);
     }
 
@@ -78,28 +76,25 @@ public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> exten
      * {@inheritDoc}
      */
     @Override
-    protected Response getResponse(final String body) throws JSONException {
-        final Response response = ResponseParser.parse(extractFromCallback(body));
-        assertFalse(response.getErrorMessage(), isFailOnError() && response
-            .hasError());
-        return response;
+    protected Response getResponse(String body) throws JSONException {
+        return super.getResponse(extractFromCallback(body));
     }
 
-    public static JSONObject extractFromCallback(final String body) throws JSONException {
-        try {
-            final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
-            final JSONObject json;
-            if (matcher.find()) {
-                // Parse proper response to upload request.
-                json = new JSONObject(matcher.group(1));
-            } else {
-                // Try to parse normal response if something before working on upload fails.
-                // For example the session.
-                json = new JSONObject(body);
-            }
-            return json;
-        } catch (JSONException x) {
-            throw new JSONException("Could not parse JSON in page: "+body);
+    protected Response getSuperResponse(String body) throws JSONException {
+        return super.getResponse(body);
+    }
+
+    public static String extractFromCallback(final String body) {
+        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
+        final String retval;
+        if (matcher.find()) {
+            // Parse proper response to upload request.
+            retval = matcher.group(1);
+        } else {
+            // Try to parse normal response if something before working on upload fails.
+            // For example the session.
+            retval = body;
         }
+        return retval;
     }
 }

@@ -341,7 +341,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     }
 
     public static JSONObject extractFromCallback(final String html) throws JSONException {
-        return AbstractUploadParser.extractFromCallback(html);
+        return new JSONObject(AbstractUploadParser.extractFromCallback(html));
     }
 
     // A poor mans hash literal

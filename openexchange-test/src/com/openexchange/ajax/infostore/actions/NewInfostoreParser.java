@@ -49,18 +49,31 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractUploadParser;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link NewInfostoreParser}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class NewInfostoreResponse extends AbstractInfostoreResponse {
+public class NewInfostoreParser extends AbstractUploadParser<NewInfostoreResponse> {
 
-    protected NewInfostoreResponse(Response response) {
-        super(response);
+    private final boolean upload;
+
+    NewInfostoreParser(boolean failOnError, boolean upload) {
+        super(failOnError);
+        this.upload = upload;
     }
 
-    public int getID() {
-        return ((Integer) getData()).intValue();
+    @Override
+    protected Response getResponse(String body) throws JSONException {
+        return upload ? super.getResponse(body) : super.getSuperResponse(body);
+    }
+
+    @Override
+    protected NewInfostoreResponse createResponse(Response response) throws JSONException {
+        return new NewInfostoreResponse(response);
     }
 }
