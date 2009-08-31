@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.importexport;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -69,7 +69,6 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Contact;
@@ -89,7 +88,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.AjaxInit;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
@@ -478,7 +476,7 @@ public class AbstractContactTest {
 	 * @return
 	 */
 	protected ImportResult performOneEntryCheck(final String file, final Format format, final int folderObjectType, final String foldername,final Context ctx, final boolean errorExpected) throws UnsupportedEncodingException, LdapException, OXException {
-		return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, errorExpected).get(0);
+		return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, B(errorExpected)).get(0);
 	}
 	
 	/**
@@ -500,7 +498,7 @@ public class AbstractContactTest {
 		assertEquals("Correct number of results?", Integer.valueOf(expectedErrors.length), Integer.valueOf(results.size())); //ugly, but necessary to bridge JUnit 3 and 4
 		
 		for(int i = 0; i < expectedErrors.length; i++){
-			assertEquals("Entry " +i+ " is as expected? "+results.get(i).getException() , expectedErrors[i], results.get(i).hasError());
+			assertEquals("Entry " +i+ " is as expected? "+results.get(i).getException() , expectedErrors[i], B(results.get(i).hasError()));
 		}
 		return results;
 	}

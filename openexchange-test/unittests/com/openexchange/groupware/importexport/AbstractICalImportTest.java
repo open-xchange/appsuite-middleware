@@ -54,7 +54,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -74,13 +73,13 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
 		final UserStorage uStorage = UserStorage.getInstance();
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
-	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "csv-tests");
+	    sessObj = ServerSessionFactory.createServerSession(userId, ctx.getContextId(), "csv-tests");
 		userId = sessObj.getUserId();
 		imp = new ICalImporter();
 	}
 
     @AfterClass
-    public static void shutdown() throws AbstractOXException {
+    public static void shutdown() {
         Init.stopServer();
     }
 

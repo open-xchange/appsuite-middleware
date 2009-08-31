@@ -76,10 +76,8 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.database.DBPoolingException;
 
 public class ICalImportTest extends AbstractICalImportTest {
 
@@ -88,6 +86,9 @@ public class ICalImportTest extends AbstractICalImportTest {
         return new JUnit4TestAdapter(ICalImportTest.class);
     }
 
+    /**
+     * Initially this tests if confidential is not imported at all as wanted in bug 7472. But bug 14337 state to import it as private.
+     */
     @Test
     public void test7472_confidential() throws UnsupportedEncodingException, LdapException, OXException {
         folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "icalAppointmentTestFolder");
@@ -102,8 +103,7 @@ public class ICalImportTest extends AbstractICalImportTest {
             _folders(),
             null);
         for (final ImportResult res : results) {
-            assertTrue("Should have error", res.hasError());
-            assertEquals("Should be privacy error", "ICA-0011", res.getException().getErrorCode());
+            assertTrue("Shouldn't have error", res.isCorrect());
         }
 
     }
@@ -130,7 +130,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * Unexpected exception 25! Was related to the ATTENDEE property and it not differing between external and internal users
      */
     @Test
-    public void test6825_unexpectedException() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException {
+    public void test6825_unexpectedException() throws SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException {
         // setup
         final String testMailAddress = "stephan.martin@open-xchange.com";
         final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:External 1&1 Review call\nDTEND:20060519T120000Z\nATTENDEE:mailto:" + testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
@@ -154,7 +154,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     }
 
     @Test
-    public void test6825_tooMuchInformation() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException {
+    public void test6825_tooMuchInformation() throws OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException {
         // setup: building an ICAL file with a summary longer than 255 characters.
         final String testMailAddress = "stephan.martin@open-xchange.com";
         final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
@@ -174,7 +174,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * Description gets lost when importing task
      */
     @Test
-    public void test7718() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException, LdapException {
+    public void test7718() throws UnsupportedEncodingException, NumberFormatException, OXException, LdapException {
         final String description = "das ist ein ical test";
         final String summary = "summariamuttergottes";
         final String ical = "BEGIN:VCALENDAR\nPRODID:-//K Desktop Environment//NONSGML libkcal 3.2//EN\nVERSION:2.0\nBEGIN:VTODO\nDTSTAMP:20070531T093649Z\nORGANIZER;CN=Stephan Martin:MAILTO:stephan.martin@open-xchange.com\nCREATED:20070531T093612Z\nUID:libkcal-1172232934.1028\nSEQUENCE:0\nLAST-MODIFIED:20070531T093612Z\nDESCRIPTION:" + description + "\nSUMMARY:" + summary + "\nLOCATION:daheim\nCLASS:PUBLIC\nPRIORITY:5\nDUE;VALUE=DATE:20070731\nPERCENT-COMPLETE:30\nEND:VTODO\nEND:VCALENDAR";
@@ -182,7 +182,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "7718", ctx, false);
 
         final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
-        final Task task = tasks.getTaskById(Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()));
+        final Task task = tasks.getTaskById(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()));
         assertEquals("Summary", summary, task.getTitle());
         assertEquals("Description:", description, task.getNote());
     }
@@ -191,7 +191,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * Problem with DAILY recurrences
      */
     @Test
-    public void test7703() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException, LdapException {
+    public void test7703() throws SQLException, UnsupportedEncodingException, NumberFormatException, OXException, LdapException {
         final int interval = 3;
         final String ical = generateRecurringICAL(interval, "DAILY");
 
@@ -205,7 +205,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     }
 
     @Test
-    public void test12177() throws LdapException, SQLException, OXException, ImportExportException, UnsupportedEncodingException, DBPoolingException {
+    public void test12177() throws LdapException, SQLException, OXException, ImportExportException, UnsupportedEncodingException {
         StringBuilder icalText = new StringBuilder(1500);
         icalText.append("BEGIN:VCALENDAR\n");
         icalText.append("VERSION:2.0").append('\n');
@@ -233,8 +233,8 @@ public class ICalImportTest extends AbstractICalImportTest {
         } finally {
             final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
             CalendarDataObject appointment = new CalendarDataObject();
-            appointment.setObjectID(Integer.valueOf(res.getObjectId()));
-            appointment.setParentFolderID(Integer.valueOf(res.getFolder()));
+            appointment.setObjectID(Integer.parseInt(res.getObjectId()));
+            appointment.setParentFolderID(Integer.parseInt(res.getFolder()));
             appointment.setContext(sessObj.getContext());
             appointments.deleteAppointmentObject(appointment, appointment.getParentFolderID(), new Date(Long.MAX_VALUE));
         }
@@ -274,7 +274,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * Imported appointment loses reminder
      */
     @Test
-    public void test7473() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, OXException, LdapException {
+    public void test7473() throws SQLException, UnsupportedEncodingException, OXObjectNotFoundException, OXException, LdapException {
         final int alarm = 180;
         final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" + "BEGIN:VEVENT\n" + "CLASS:PRIVATE\n" + "DTSTART:20070614T150000Z\n" + "DTEND:20070614T163000Z\n" + "LOCATION:Olpe\n" + "SUMMARY:Simple iCal Appointment\n" + "DESCRIPTION:Notes here...\n" + "BEGIN:VALARM\nTRIGGER:-PT" + alarm + "M\n" + "ACTION:DISPLAY\n" + "DESCRIPTION:Reminder\n" + "END:VALARM\nEND:VEVENT\n" + "END:VCALENDAR";
 
@@ -290,7 +290,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * "Every sunday in a month" - this is supposed to work
      */
     @Test
-    public void test7735_positive() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+    public void test7735_positive() throws SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
         // positive prefix for RRULE
         final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" + "BEGIN:VEVENT\n" + "DTSTART:20070814T150000Z\n" + "DTEND:20070814T163000Z\n" + "LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" + "DESCRIPTION:Jeden ersten Sonntag im April\n" + "RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4\n" + "END:VEVENT\n" + "END:VCALENDAR";
 
@@ -308,7 +308,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * "Every last sunday in a month" - this is supposed to fail, because this kind of setup is not supported.
      */
     @Test
-    public void test7735_negative() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+    public void test7735_negative() throws SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
         // positive prefix for RRULE
         final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" + "BEGIN:VEVENT\n" + "DTSTART:20070814T150000Z\n" + "DTEND:20070814T163000Z\n" + "LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" + "DESCRIPTION:Jeden letzten Sonntag im April\n" + "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" + "END:VEVENT\n" + "END:VCALENDAR";
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", ctx, false);
@@ -325,7 +325,7 @@ public class ICalImportTest extends AbstractICalImportTest {
      * "Every second last sunday in a month" - this is supposed to fail, because this kind of setup is not supported.
      */
     @Test
-    public void test7735_negative_above_1() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+    public void test7735_negative_above_1() throws UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
         // positive prefix for RRULE
         final String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" + "BEGIN:VEVENT\n" + "DTSTART:20070814T150000Z\n" + "DTEND:20070814T163000Z\n" + "LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" + "DESCRIPTION:Jeden letzten Sonntag im April\n" + "RRULE:FREQ=YEARLY;BYDAY=-2SU;BYMONTH=4\n" + "END:VEVENT\n" + "END:VCALENDAR";
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", ctx, true);
@@ -333,7 +333,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     }
 
     @Test
-    public void test7470() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+    public void test7470() throws UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
         final String ical = "BEGIN:VCALENDAR\n" + "PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" + "VERSION:2.0\n" + "METHOD:REQUEST\n" + "X-MS-OLK-FORCEINSPECTOROPEN:TRUE\n" + "BEGIN:VEVENT\n" + "ATTENDEE;CN=\"Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)\";RSVP=TRUE:mailto:cbartkowiak@oxhemail.open-xchange.com\n" + "CLASS:PUBLIC\n" + "CREATED:20070521T150327Z\n" + "DESCRIPTION:Hallo Hallo\\n\\n\n" + "DTEND:20070523T090000Z\n" + "DTSTAMP:20070521T150327Z\n" + "DTSTART:20070523T083000Z\n" + "LAST-MODIFIED:20070521T150327Z\n" + "LOCATION:Location here\n" + "ORGANIZER;CN=Tobias:mailto:tfriedrich@oxhemail.open-xchange.com\n" + "PRIORITY:5\n" + "SEQUENCE:0\n" + "SUMMARY;LANGUAGE=de:Simple Appointment with participant\n" + "TRANSP:OPAQUE\n" + "UID:040000008200E00074C5B7101A82E0080000000060565ABBC99BC701000000000000000010000000E4B2BA931D32B84DAFB227C9E0CA348C\n" + "X-ALT-DESC;FMTTYPE=text/html:<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//E\n	N\">\\n<HTML>\\n<HEAD>\\n<META NAME=\"Generator\" CONTENT=\"MS Exchange Server ve\\n	rsion 08.00.0681.000\">\\n<TITLE></TITLE>\\n</HEAD>\\n<BODY>\\n<!-- Converted f\n	rom text/rtf format -->\\n\\n<P DIR=LTR><SPAN LANG=\"de\"><FONT FACE=\"Calibri\"\n	>Hallo Hallo</FONT></SPAN></P>\\n\\n<P DIR=LTR><SPAN LANG=\"de\"></SPAN></P>\\n\\n	\\n</BODY>\\n</HTML>\n" + "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + "X-MICROSOFT-CDO-IMPORTANCE:1\n" + "X-MICROSOFT-DISALLOW-COUNTER:FALSE\n" + "X-MS-OLK-ALLOWEXTERNCHECK:TRUE\n" + "X-MS-OLK-AUTOFILLLOCATION:FALSE\n" + "X-MS-OLK-CONFTYPE:0\n" + "BEGIN:VALARM\n" + "TRIGGER:PT0M\n" + "ACTION:DISPLAY\n" + "DESCRIPTION:Reminder\n" + "END:VALARM\n" + "END:VEVENT\n" + "END:VCALENDAR\n";
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7470", ctx, false);
