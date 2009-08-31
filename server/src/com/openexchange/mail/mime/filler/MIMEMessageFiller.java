@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -1316,11 +1317,28 @@ public class MIMEMessageFiller {
         /*
          * Determine filename
          */
-        String fileName;
-        try {
-            fileName = MimeUtility.encodeText(imageProvider.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q");
-        } catch (final UnsupportedEncodingException e) {
-            fileName = imageProvider.getFileName();
+        String fileName = imageProvider.getFileName();
+        if (null == fileName) {
+            /*
+             * Generate dummy file name
+             */
+            final List<String> exts = MIMEType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
+            final StringBuilder sb = new StringBuilder("image.");
+            if (exts == null) {
+                sb.append("dat");
+            } else {
+                sb.append(exts.get(0));
+            }
+            fileName = sb.toString();
+        } else {
+            /*
+             * Encode image's file name for being mail-safe
+             */
+            try {
+                fileName = MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
+            } catch (final UnsupportedEncodingException e) {
+                fileName = imageProvider.getFileName();
+            }
         }
         /*
          * ... and cid

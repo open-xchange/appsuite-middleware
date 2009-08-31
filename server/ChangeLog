@@ -2,6 +2,7 @@
 
  - Bugfix #14396: Properly writing mail account's properties when writing JSON data
  - Bugfix #14421: Added new virtual folder tables to SQL initialization scripts
+ - Bugfix #14399: Fixed NPE on missing inline image file name
 
 * 2009-08-31 - marcus.klein@open-xchange.com
 
