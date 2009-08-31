@@ -86,16 +86,20 @@ public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> exten
     }
 
     public static JSONObject extractFromCallback(final String body) throws JSONException {
-        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
-        final JSONObject json;
-        if (matcher.find()) {
-            // Parse proper response to upload request.
-            json = new JSONObject(matcher.group(1));
-        } else {
-            // Try to parse normal response if something before working on upload fails.
-            // For example the session.
-            json = new JSONObject(body);
+        try {
+            final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
+            final JSONObject json;
+            if (matcher.find()) {
+                // Parse proper response to upload request.
+                json = new JSONObject(matcher.group(1));
+            } else {
+                // Try to parse normal response if something before working on upload fails.
+                // For example the session.
+                json = new JSONObject(body);
+            }
+            return json;
+        } catch (JSONException x) {
+            throw new JSONException("Could not parse JSON in page: "+body);
         }
-        return json;
     }
 }
