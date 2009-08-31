@@ -129,7 +129,11 @@ public final class CSSMatcher {
             "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",
             GroupType.NON_CAPTURING);
 
-        final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" + "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" + "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" + "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" + "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
+        final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" + 
+                "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" + 
+                "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" + 
+                "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" + 
+                "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
 
         final String strCOLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
 
