@@ -119,10 +119,10 @@ public final class MailAccountWriter {
         // Properties
         final Map<String, String> props = account.getProperties();
         if (props.containsKey("pop3.deletewt")) {
-            json.put(MailAccountFields.POP3_DELETE_WRITE_THROUGH, props.get("pop3.deletewt"));
+            json.put(MailAccountFields.POP3_DELETE_WRITE_THROUGH, Boolean.parseBoolean(props.get("pop3.deletewt")));
         }
         if (props.containsKey("pop3.expunge")) {
-            json.put(MailAccountFields.POP3_EXPUNGE_ON_QUIT, props.get("pop3.expunge"));
+            json.put(MailAccountFields.POP3_EXPUNGE_ON_QUIT, Boolean.parseBoolean(props.get("pop3.expunge")));
         }
         if (props.containsKey("pop3.refreshrate")) {
             json.put(MailAccountFields.POP3_REFRESH_RATE, props.get("pop3.refreshrate"));
