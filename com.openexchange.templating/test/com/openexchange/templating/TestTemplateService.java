@@ -161,6 +161,7 @@ public class TestTemplateService extends TestCase {
         
         SimBuilder infostoreBuilder = new SimBuilder();
         infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "new-template").andReturn(null);
+        oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(null);
         infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File");
         
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
