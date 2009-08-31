@@ -77,7 +77,7 @@ CREATE TABLE groups_member (
 CREATE TABLE login2user (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
-    uid VARCHAR(128) NOT NULL,
+    uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
     PRIMARY KEY (cid, uid),
     FOREIGN KEY (cid, id) REFERENCES user(cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
