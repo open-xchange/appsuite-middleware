@@ -196,13 +196,11 @@ public final class ImageRegistry {
         ConcurrentMap<String, ImageData> m = sessionBoundImagesMap.get(sessionId);
         boolean check = true;
         if (m == null) {
-            synchronized (sessionBoundImagesMap) {
-                m = sessionBoundImagesMap.get(sessionId);
-                if (m == null) {
-                    m = new ConcurrentHashMap<String, ImageData>();
-                    sessionBoundImagesMap.put(sessionId, m);
-                    check = false;
-                }
+            final ConcurrentMap<String, ImageData> newInst = new ConcurrentHashMap<String, ImageData>();
+            m = sessionBoundImagesMap.putIfAbsent(sessionId, newInst);
+            if (null == m) {
+                m = newInst;
+                check = false;
             }
         }
         ImageData imageData;
@@ -248,13 +246,11 @@ public final class ImageRegistry {
         ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(cid);
         boolean check = true;
         if (m == null) {
-            synchronized (contextBoundImagesMap) {
-                m = contextBoundImagesMap.get(cid);
-                if (m == null) {
-                    m = new ConcurrentHashMap<String, ImageData>();
-                    contextBoundImagesMap.put(cid, m);
-                    check = false;
-                }
+            final ConcurrentMap<String, ImageData> newInst = new ConcurrentHashMap<String, ImageData>();
+            m = contextBoundImagesMap.putIfAbsent(cid, newInst);
+            if (null == m) {
+                m = newInst;
+                check = false;
             }
         }
         ImageData imageData;
