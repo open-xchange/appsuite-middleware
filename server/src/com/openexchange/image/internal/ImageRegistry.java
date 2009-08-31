@@ -204,16 +204,17 @@ public final class ImageRegistry {
             }
         }
         ImageData imageData;
-        if (check && (imageData = m.get(imageArguments.getID())) != null) {
+        final String id = imageArguments.getID();
+        if (check && (imageData = m.get(id)) != null) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Image data fetched from registry for UID: " + imageArguments.getID());
+                LOG.debug("Image data fetched from registry for UID: " + id);
             }
             return imageData.touch();
         }
         imageData = new ImageData(imageSource, imageArguments, timeToLive);
-        m.put(imageArguments.getID(), imageData);
+        m.put(id, imageData);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Image data put into registry with UID: " + imageArguments.getID());
+            LOG.debug("Image data put into registry with UID: " + id);
         }
         return imageData;
     }
@@ -254,16 +255,17 @@ public final class ImageRegistry {
             }
         }
         ImageData imageData;
-        if (check && (imageData = m.get(imageArguments.getID())) != null) {
+        final String id = imageArguments.getID();
+        if (check && (imageData = m.get(id)) != null) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Image data fetched from registry for UID: " + imageArguments.getID());
+                LOG.debug("Image data fetched from registry for UID: " + id);
             }
             return imageData.touch();
         }
         imageData = new ImageData(imageSource, imageArguments, timeToLive);
-        m.put(imageArguments.getID(), imageData);
+        m.put(id, imageData);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Image data put into registry with UID: " + imageArguments.getID());
+            LOG.debug("Image data put into registry with UID: " + id);
         }
         return imageData;
     }
