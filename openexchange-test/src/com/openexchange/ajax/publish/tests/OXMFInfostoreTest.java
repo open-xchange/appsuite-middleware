@@ -98,6 +98,10 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(base + pubUrl);
         
+        System.out.println("=========");
+        System.out.println(website);
+        System.out.println("=========");
+        
         assertTrue("Should contain reference to a published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_0\">"));
         assertFalse("Should not contain reference to a second published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_1\">"));
         assertTrue("Should contain a link to the published infostore item", website.contains("ox_file"));
