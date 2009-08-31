@@ -56,7 +56,6 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.session.Session;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.templating.impl.OXFolderHelper;
@@ -74,8 +73,8 @@ public class TestTemplateService extends TestCase {
     private ServerSession session = new ServerSessionAdapter((Session)null, (Context) null);
     private FolderObject privateTemplateFolder;
     private FolderObject globalTemplateFolder;
-    
-    
+
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -97,7 +96,8 @@ public class TestTemplateService extends TestCase {
         globalTemplateFolder.setFolderName("Templates");
         globalTemplateFolder.setObjectID(13);
     }
-    
+
+    @Override
     public void tearDown() throws Exception {
         configService = null;
         templateService = null;
@@ -130,8 +130,6 @@ public class TestTemplateService extends TestCase {
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();
     }
-    
-    
 
     public void testLoadTemplateFromGlobalTemplateFolder() throws Exception {
         SimBuilder oxfolderHelperBuilder = new SimBuilder();
