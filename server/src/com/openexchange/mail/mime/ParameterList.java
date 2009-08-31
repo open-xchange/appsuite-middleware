@@ -93,7 +93,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     static {
         final String paramNameRegex = "([\\p{ASCII}&&[^=\"\\s;]]+)";
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
-        final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")";
+        final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")"; // Grab '\"' char sequence or any non-quote character
         PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?:=(" + tokenRegex + '|' + quotedStringRegex + "))?");
 
         PATTERN_PARAM_CORRECT = Pattern.compile(paramNameRegex + "=([^\"][^; \t]*[ \t][^;]*)($|;)");
