@@ -123,7 +123,9 @@
             <test name="${test.class}" todir="${test.xml.dir}" />
 
             <formatter type="xml" />
-            <sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
+            <sysproperty key="test.propfile" value="${conf.dir}/test.properties"/>
+            <sysproperty key="user.language" value="en"/>
+            <sysproperty key="user.country" value="US"/>
         </junit>
     </target>
 
