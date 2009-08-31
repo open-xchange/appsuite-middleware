@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -240,9 +240,13 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
-* Fri Jul 31 2009 - marcus.klein@open-xchange.com
+* Mon Aug 31 2009 - marcus.klein@open-xchange.com
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
    uid of table login2user.
+* Mon Aug 31 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14421: Added new virtual folder tables to SQL initialization scripts
+* Fri Aug 28 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13874: Cached information where context is stored must be invalidated if context is removed.
 * Thu Jul 30 2009 - dennis.sieben@open-xchange.com
  - Bugfix #14257: allpluginsloaded doesn't honor fragment bundles
      added handling for fragment bundles
