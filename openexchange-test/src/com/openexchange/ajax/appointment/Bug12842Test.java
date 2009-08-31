@@ -252,8 +252,7 @@ public class Bug12842Test extends AbstractAJAXSession {
 
             InsertRequest request = new InsertRequest(appointment, tz);
             CommonInsertResponse response = client.execute(request);
-            appointment.setObjectID(response.getId());
-            appointment.setLastModified(response.getTimestamp());
+            response.fillObject(appointment);
 
             // Conflicting appointment
             conflictAppointment.setTitle("conflict");
@@ -270,10 +269,12 @@ public class Bug12842Test extends AbstractAJAXSession {
                 calendar.add(Calendar.MONTH, 1);
                 break;
             case CalendarObject.WEEKLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                // Adding 2 weeks to get into the future. Appointments in the past do not conflict.
+                calendar.add(Calendar.WEEK_OF_YEAR, 2);
                 break;
             case CalendarObject.DAILY:
-                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                // Adding 8 days to get into the future. Appointments in the past do not conflict.
+                calendar.add(Calendar.DAY_OF_MONTH, 8);
                 break;
             default:
                 break;
