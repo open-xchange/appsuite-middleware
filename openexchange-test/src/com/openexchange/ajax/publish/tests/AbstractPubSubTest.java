@@ -250,7 +250,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
 
     protected FolderObject createDefaultInfostoreFolder() throws AjaxException, IOException, SAXException, JSONException {
         FolderObject folder = getFolderManager().generateFolder(
-            "pubsub default infostore folder",
+            "pubsub default infostore folder "+getName(),
             FolderObject.INFOSTORE,
             getClient().getValues().getPrivateInfostoreFolder(),
             getClient().getValues().getUserId());

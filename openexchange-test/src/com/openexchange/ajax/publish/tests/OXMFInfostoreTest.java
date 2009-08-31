@@ -51,6 +51,7 @@ package com.openexchange.ajax.publish.tests;
 import static com.openexchange.test.OXTestToolkit.assertSameStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -73,6 +74,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
     }
 
     public void testLifeCycleOfInfostoreFolderPublication() throws Exception {
+        System.out.println(getName()+" : "+new Date());
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
@@ -109,6 +111,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
     }
     
     public void testLifeCycleOfInfostoreItemPublication() throws Exception{
+        System.out.println(getName()+" : "+new Date());
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
