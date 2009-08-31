@@ -1,11 +1,11 @@
-* 2009-08-28 - marcus.klein@open-xchange.com
-
- - Bugfix #13874: Cached information where context is stored must be invalidated if context is removed.
-
-* 2009-07-31 - marcus.klein@open-xchange.com
+* 2009-08-31 - marcus.klein@open-xchange.com
 
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
    uid of table login2user.
+
+* 2009-08-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #13874: Cached information where context is stored must be invalidated if context is removed.
 
 * 2009-07-30 - dennis.sieben@open-xchange.com
 
