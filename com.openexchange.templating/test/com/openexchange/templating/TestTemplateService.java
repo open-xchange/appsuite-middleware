@@ -62,6 +62,7 @@ import com.openexchange.templating.impl.OXFolderHelper;
 import com.openexchange.templating.impl.OXInfostoreHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import freemarker.template.Template;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -207,28 +208,34 @@ public class TestTemplateService extends TestCase {
     }
     
     public void testFallbackToDefaultTemplate() throws Exception {
-        OXTemplate template = templateService.loadTemplate("", "test-template", session);
-        assertNotNull(template);
-        StringWriter writer = new StringWriter();
-        template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Test Content In File\n", writer.toString());
+        final boolean[] called = new boolean[]{false};
+        templateService = new TemplateServiceImpl(configService) {
+            @Override
+            public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
+                called[0] = true;
+                return null;
+            }
+        };
         
-        template = templateService.loadTemplate(null, "test-template", session);
-        assertNotNull(template);
-        writer = new StringWriter();
-        template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Test Content In File\n", writer.toString());
+        templateService.loadTemplate("", "test-template", session);
+        assertTrue(called[0]);
 
     }
     
     public void testDisableUserTemplatingPerConfiguration() throws Exception {
         configService.stringProperties.put("com.openexchange.templating.usertemplating", "false");
 
-        OXTemplate template = templateService.loadTemplate("user-template", "test-template", session);
-        assertNotNull(template);
-        StringWriter writer = new StringWriter();
-        template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Test Content In File\n", writer.toString());
-
+        final boolean[] called = new boolean[]{false};
+        templateService = new TemplateServiceImpl(configService) {
+            @Override
+            public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
+                called[0] = true;
+                return null;
+            }
+        };
+        
+        templateService.loadTemplate("user-template", "test-template", session);
+        assertTrue(called[0]);
+        
     }
 }
