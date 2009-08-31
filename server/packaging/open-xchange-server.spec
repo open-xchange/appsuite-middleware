@@ -145,6 +145,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-125
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/server.properties
+   if ! ox_exists_property PUBLISH_REVOKE $pfile; then
+      ox_set_property PUBLISH_REVOKE "revoke@example.com" $pfile
+   fi
+
    # SoftwareChange_Request-109 / SoftwareChange_Request-104
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/calendar.properties

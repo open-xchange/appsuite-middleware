@@ -27,6 +27,13 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-125
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  if ! ox_exists_property PUBLISH_REVOKE $pfile; then
+      ox_set_property PUBLISH_REVOKE "" $pfile
+  fi
+
   # SoftwareChange_Request-109 / SoftwareChange_Request-104
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/calendar.properties
