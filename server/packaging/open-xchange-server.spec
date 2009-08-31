@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -382,6 +382,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Aug 31 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
+   uid of table login2user.
+* Mon Aug 31 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14396: Properly writing mail account's properties when writing JSON data
+ - Bugfix #14421: Added new virtual folder tables to SQL initialization scripts
+ - Bugfix #14399: Fixed NPE on missing inline image file name
+ - Bugfix #14425: Fixed safety routine to correct invalid mail-safe encoded header values
 * Thu Aug 27 2009 - francisco.laguna@open-xchange.com
  - Bugfix #14337: Interpret CLASS:CONFIDENTIAL as private.
  - Bugfix #14354: Setting the attachment upload limit to 0 in attachment.properties should be interpreted as "unlimited"
@@ -436,9 +444,6 @@ fi
  - Bugfix #14246: Allowing any letter character in an URL
  - Bugfix #14271: Fixed StringIndexOutOfBoundsException when un-quoting an email address
  - Bugfix #14269: Setting proper "Date" header in user's time zone when sending an email
-* Fri Jul 31 2009 - marcus.klein@open-xchange.com
- - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
-   uid of table login2user.
 * Tue Jul 28 2009 - thorben.betten@open-xchange.com
  - Bugfix #14225: Allowing static setup of update tasks
  - Bugfix #14232: Checking for Drafts folder prior to deleting old draft version
