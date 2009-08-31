@@ -335,6 +335,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 74
             // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete search
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch());
+            // Version 76
+            // Runs the task AlterUidCollation again. The schema creating scripts did not contain the fix for v6.10.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation2());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");

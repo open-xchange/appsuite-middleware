@@ -49,63 +49,20 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-
 /**
- * {@link AlterUidCollation} Alters table login2user and changes the collation of column uid to utf8_bin.
+ * Task must be run again with 6.12 due to missing the fix in the schema creating SQL scripts.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public class AlterUidCollation implements UpdateTask {
+public class AlterUidCollation2 extends AlterUidCollation {
 
-    private static final String SQL = "ALTER TABLE login2user MODIFY uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin";
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectIndexes.class);
-
-    public AlterUidCollation() {
+    public AlterUidCollation2() {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
-        return 60;
+        return 76;
     }
 
-    public int getPriority() {
-        return UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "An SQL error occurred: %1$s.")
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
-        final Connection con = Database.getNoTimeout(contextId, true);
-        Statement stmt = null;
-        try {
-            con.setAutoCommit(false);
-            stmt = con.createStatement();
-            stmt.execute(SQL);
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
-        }
-    }
 }
