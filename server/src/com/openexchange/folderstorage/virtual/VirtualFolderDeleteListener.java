@@ -57,25 +57,11 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 
 /**
- * {@link VirtualFolderDeleteListener} - TODO Short description of this class' purpose.
+ * {@link VirtualFolderDeleteListener} - The delete listener for virtual folder tables.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VirtualFolderDeleteListener implements DeleteListener {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(VirtualFolderDeleteListener.class);
-
-    private static final String SQL_DEL_TREE = "DELETE FROM virtualTree WHERE cid = ? AND user = ?";
-
-    private static final String SQL_DEL_TREE_BAK = "DELETE FROM virtualBackupTree WHERE cid = ? AND user = ?";
-
-    private static final String SQL_DEL_PERM = "DELETE FROM virtualPermission WHERE cid = ? AND user = ?";
-
-    private static final String SQL_DEL_PERM_BAK = "DELETE FROM virtualBackupPermission WHERE cid = ? AND user = ?";
-
-    private static final String SQL_DEL_SUB = "DELETE FROM virtualSubscription WHERE cid = ? AND user = ?";
-
-    private static final String SQL_DEL_SUB_BAK = "DELETE FROM virtualBackupSubscription WHERE cid = ? AND user = ?";
 
     /**
      * Initializes a new {@link VirtualFolderDeleteListener}.
@@ -93,39 +79,39 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
             final int contextId = event.getContext().getContextId();
             final int userId = event.getSession().getUserId();
             // Drop user's subscriptions
-            stmt = writeCon.prepareStatement(SQL_DEL_SUB);
+            stmt = writeCon.prepareStatement("DELETE FROM virtualSubscription WHERE cid = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
-            stmt = writeCon.prepareStatement(SQL_DEL_SUB_BAK);
+            stmt = writeCon.prepareStatement("DELETE FROM virtualBackupSubscription WHERE cid = ? AND user = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
             // Drop user's folder permissions
-            stmt = writeCon.prepareStatement(SQL_DEL_PERM);
+            stmt = writeCon.prepareStatement("DELETE FROM virtualPermission WHERE cid = ? AND user = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
-            stmt = writeCon.prepareStatement(SQL_DEL_PERM_BAK);
+            stmt = writeCon.prepareStatement("DELETE FROM virtualBackupPermission WHERE cid = ? AND user = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
             // Drop user's folders
-            stmt = writeCon.prepareStatement(SQL_DEL_TREE);
+            stmt = writeCon.prepareStatement("DELETE FROM virtualTree WHERE cid = ? AND user = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
-            stmt = writeCon.prepareStatement(SQL_DEL_TREE_BAK);
+            stmt = writeCon.prepareStatement("DELETE FROM virtualBackupTree WHERE cid = ? AND user = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
@@ -137,7 +123,7 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    org.apache.commons.logging.LogFactory.getLog(VirtualFolderDeleteListener.class).error(e.getMessage(), e);
                 }
             }
         }
