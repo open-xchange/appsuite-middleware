@@ -67,9 +67,15 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
 
     private static final String SQL_DEL_TREE = "DELETE FROM virtualTree WHERE cid = ? AND user = ?";
 
+    private static final String SQL_DEL_TREE_BAK = "DELETE FROM virtualBackupTree WHERE cid = ? AND user = ?";
+
     private static final String SQL_DEL_PERM = "DELETE FROM virtualPermission WHERE cid = ? AND user = ?";
 
+    private static final String SQL_DEL_PERM_BAK = "DELETE FROM virtualBackupPermission WHERE cid = ? AND user = ?";
+
     private static final String SQL_DEL_SUB = "DELETE FROM virtualSubscription WHERE cid = ? AND user = ?";
+
+    private static final String SQL_DEL_SUB_BAK = "DELETE FROM virtualBackupSubscription WHERE cid = ? AND user = ?";
 
     /**
      * Initializes a new {@link VirtualFolderDeleteListener}.
@@ -93,6 +99,12 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
+            stmt = writeCon.prepareStatement(SQL_DEL_SUB_BAK);
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
+            stmt.close();
             // Drop user's folder permissions
             stmt = writeCon.prepareStatement(SQL_DEL_PERM);
             pos = 1;
@@ -100,8 +112,20 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
             stmt.close();
+            stmt = writeCon.prepareStatement(SQL_DEL_PERM_BAK);
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
+            stmt.close();
             // Drop user's folders
             stmt = writeCon.prepareStatement(SQL_DEL_TREE);
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos, userId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = writeCon.prepareStatement(SQL_DEL_TREE_BAK);
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
