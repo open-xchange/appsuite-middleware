@@ -86,7 +86,7 @@ public class NewSubscriptionTest extends AbstractSubscriptionTest {
         NewSubscriptionRequest newReq = new NewSubscriptionRequest(expected, form);
         NewSubscriptionResponse newResp = getClient().execute(newReq);
         
-        assertFalse("Should succeed creating the subscription", newResp.hasError());
+        assertFalse("Should succeed creating the subscription: "+newResp.getException(), newResp.hasError());
         expected.setId( newResp.getId() );
 
         //verify via get request
