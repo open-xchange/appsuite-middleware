@@ -82,7 +82,13 @@ public class TestTemplateService extends TestCase {
         configService.stringProperties.put("com.openexchange.templating.path", "test-resources");
         configService.stringProperties.put("com.openexchange.templating.usertemplating", "true");
 
-        templateService = new TemplateServiceImpl(configService);
+        templateService = new TemplateServiceImpl(configService) {
+            
+            @Override
+            protected String loadFromFileSystem(String defaultTemplateName) throws TemplateException {
+                return "Test Content In File\n";
+            }
+        };
         
 
         TemplateErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
