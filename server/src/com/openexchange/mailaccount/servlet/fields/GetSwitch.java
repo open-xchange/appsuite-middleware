@@ -192,11 +192,11 @@ public class GetSwitch implements AttributeSwitch {
     }
 
     public Object pop3DeleteWriteThrough() {
-        return desc.getProperties().get("pop3.deletewt");
+        return Boolean.valueOf(desc.getProperties().get("pop3.deletewt"));
     }
 
     public Object pop3ExpungeOnQuit() {
-        return desc.getProperties().get("pop3.expunge");
+        return Boolean.valueOf(desc.getProperties().get("pop3.expunge"));
     }
 
     public Object pop3RefreshRate() {
