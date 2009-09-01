@@ -280,11 +280,7 @@ public abstract class MailConfig {
             throw new MailException(e);
         }
         mailConfig.accountId = accountId;
-        fillLoginAndPassword(
-            mailConfig,
-            session.getPassword(),
-            UserStorage.getStorageUser(userId, contextId).getLoginInfo(),
-            mailAccount);
+        fillLoginAndPassword(mailConfig, session.getPassword(), UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
@@ -292,8 +288,8 @@ public abstract class MailConfig {
                     new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
             }
-            throw new MailConfigException(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(
-                userId).append(" in context ").append(contextId).toString());
+            throw new MailConfigException(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
+                " in context ").append(contextId).toString());
         }
         {
             /*
@@ -452,15 +448,17 @@ public abstract class MailConfig {
      * @return <code>true</code> if part modifier shall be used; otherwise <code>false</code>
      */
     public static final boolean usePartModifier() {
-        if (usePartModifier == null) {
+        Boolean tmp = usePartModifier;
+        if (tmp == null) {
             synchronized (MailConfig.class) {
-                if (usePartModifier == null) {
+                tmp = usePartModifier;
+                if (tmp == null) {
                     final PartModifier pm = PartModifier.getInstance();
-                    usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
+                    tmp = usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
                 }
             }
         }
-        return usePartModifier.booleanValue();
+        return tmp.booleanValue();
     }
 
     private final static boolean isValidProtocol(final String protocol) {
