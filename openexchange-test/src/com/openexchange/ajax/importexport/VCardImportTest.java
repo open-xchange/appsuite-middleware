@@ -104,10 +104,6 @@ public class VCardImportTest extends AbstractVCardTest {
         super.tearDown();
     }
 
-    public void testDummy() throws Exception {
-
-    }
-
     public void testImportVCard() throws Exception {
         final Contact contactObj = new Contact();
         contactObj.setSurName("testImportVCard" + System.currentTimeMillis());
