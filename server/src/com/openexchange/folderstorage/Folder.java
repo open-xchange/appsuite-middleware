@@ -131,9 +131,9 @@ public interface Folder extends Serializable, Cloneable {
     boolean isVirtual();
 
     /**
-     * Indicates whether this folder's identifier is globally unique, meaning not bound to a certain user.
+     * Indicates whether this folder is globally unique, meaning not bound to a certain user.
      * 
-     * @return <code>true</code> if this folder's identifier is globally unique; otherwise <code>false</code>
+     * @return <code>true</code> if this folder is globally unique; otherwise <code>false</code>
      */
     boolean isGlobalID();
 
