@@ -1,3 +1,7 @@
+* 2009-09-01 - choeger@open-xchange.com
+
+ - Bugfix #14403: log4j does not work on SLES11, file permission problem
+
 * 2009-09-01 - francisco.laguna@open-xchange.com
 
  - Bugfix 14428: Don't overwrite existing secrets.

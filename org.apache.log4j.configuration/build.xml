@@ -65,7 +65,7 @@
             <fileset refid="metainf"/>
         </copy>
         <copy tofile="${destdir}${prefix}/etc/groupware/log4j.xml" file="log4j.xml"/>
-        <chmod perm="640" file="${destdir}${prefix}/etc/groupware/log4j.xml"/>
+        <!-- <chmod perm="640" file="${destdir}${prefix}/etc/groupware/log4j.xml"/>-->
         <symlink link="${log4jconfigurationdirgw}/log4j.xml" resource="${prefix}/etc/groupware/log4j.xml"/>
     </target>
 
@@ -77,7 +77,7 @@
             <fileset refid="metainf"/>
         </copy>
         <copy tofile="${destdir}${prefix}/etc/admindaemon/log4j.xml" file="log4j-admin.xml"/>
-        <chmod perm="640" file="${destdir}${prefix}/etc/admindaemon/log4j.xml"/>
+        <!-- <chmod perm="640" file="${destdir}${prefix}/etc/admindaemon/log4j.xml"/>-->
         <symlink link="${log4jconfigurationdirad}/log4j.xml" resource="${prefix}/etc/admindaemon/log4j.xml"/>
     </target>
 
