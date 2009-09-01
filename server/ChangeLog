@@ -1,3 +1,7 @@
+* 2009-09-01 - francisco.laguna@open-xchange.com
+
+ - Bugfix 14428: Don't overwrite existing secrets.
+
 * 2009-08-31 - thorben.betten@open-xchange.com
 
  - Bugfix #14396: Properly writing mail account's properties when writing JSON data

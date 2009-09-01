@@ -170,7 +170,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     @Override
     public void beforeUpdate(Publication publication) throws PublicationException {
         super.beforeUpdate(publication);
-        Publication oldPublication = load(publication.getContext(), publication.getId());
+        Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
     }

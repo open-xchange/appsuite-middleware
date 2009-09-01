@@ -117,9 +117,17 @@ public abstract class AbstractPublicationService implements PublicationService {
     }
 
     public Publication load(Context ctx, int publicationId) throws PublicationException {
+        Publication publication = loadInternally(ctx, publicationId);
+        if(publication != null) {
+            modifyOutgoing(publication);
+        }
+        
+        return publication;
+    }
+
+    protected Publication loadInternally(Context ctx, int publicationId) throws PublicationException {
         Publication publication = STORAGE.getPublication(ctx, publicationId);
         if (publication.getTarget().getId().equals(getTarget().getId())) {
-            modifyOutgoing(publication);
             return publication;
         }
         return null;
@@ -136,7 +144,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     private Publication publicationForPermissionCheck(Publication publication) throws PublicationException {
         Publication loaded = load(publication.getContext(), publication.getId());
         loaded.setUserId(publication.getUserId());
-        if(null != publication.getEntityId()) {
+        if (null != publication.getEntityId()) {
             loaded.setEntityId(publication.getEntityId());
         }
         return loaded;
