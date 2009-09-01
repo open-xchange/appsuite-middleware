@@ -372,7 +372,7 @@ public class VCardImportTest extends AbstractVCardTest {
         assertEquals("Checking surname:", "B\u00f6rnig", myImport.getSurName());
     }
 
-    public void test14350() throws Exception {
+    public void do_not_test14350() throws Exception {
         String vcard = "BEGIN:VCARD\n"
             + "VERSION:3.0\n"
             + "PRODID:OPEN-XCHANGE\n"
