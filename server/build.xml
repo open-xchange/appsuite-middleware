@@ -151,7 +151,7 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac memoryMaximumSize="192M" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true"
+        <javac memoryMaximumSize="192M" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true" debuglevel="lines,vars,source"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath"/>
         </javac>
