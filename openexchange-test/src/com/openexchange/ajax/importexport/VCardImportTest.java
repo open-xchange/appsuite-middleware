@@ -59,9 +59,14 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 
@@ -69,19 +74,39 @@ public class VCardImportTest extends AbstractVCardTest {
 	
 	final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
+	private FolderTestManager folderManager;
+	
+	private AJAXClient client;
+
+    private FolderObject testFolder;
+	
+	
 	private static final Log LOG = LogFactory.getLog(VCardImportTest.class);
 	
-	public VCardImportTest(final String name) {
+	public VCardImportTest(final String name) throws Exception{
 		super(name);
 		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		client = new AJAXClient( new AJAXSession(getWebConversation(), getSessionId()) );
 	}
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+        folderManager = new FolderTestManager(client);
+        testFolder = folderManager.generateFolder("VCard Interface Tests", Module.CONTACTS.getFolderConstant(), client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
+        //contactFolderId = testFolder.getObjectID();
+        folderManager.insertFolderOnServer(testFolder);
+        contactFolderId = testFolder.getObjectID();
 	}
 	
-	public void testDummy() throws Exception {
+	
+	@Override
+    protected void tearDown() throws Exception {
+	    folderManager.cleanUp();
+        super.tearDown();
+    }
+
+    public void testDummy() throws Exception {
 		
 	}
 	
@@ -114,8 +139,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		}
 		
 		assertTrue("inserted object not found in response", found);
-		
-		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 
 	public void testImportVCardWithBrokenContact() throws Exception {
@@ -152,11 +175,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertTrue("server errors of server", importResult[0].isCorrect());
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
-		
-		//ContactObject[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
-		
-		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
-		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
 	public void test6823() throws TestException, IOException, SAXException, JSONException, Exception{
@@ -166,8 +184,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		
 		assertTrue("Only one import" , importResult.length == 1);
 		assertFalse("No error?", importResult[0].hasError());
-		
-		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
 	public void test6962followup() throws TestException, IOException, SAXException, JSONException, Exception{
@@ -181,7 +197,6 @@ public class VCardImportTest extends AbstractVCardTest {
 
 		//following line was removed since test environment cannot relay correct error messages from server
 		//assertEquals("Correct error code?", "I_E-0605",ex.getErrorCode());
-		ContactTest.deleteContact(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
 	public void test7106() throws TestException, IOException, SAXException, JSONException, Exception{
@@ -192,8 +207,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
 		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n" , myImport.getDisplayName());
-	
-		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
 	/**
@@ -209,8 +222,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
 		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "Colombara" , myImport.getSurName());
-	
-		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
 	/**
@@ -227,8 +238,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Checking email1 (must be null):" , null , myImport.getEmail1());
 		assertEquals("Checking email2 (must be null):" , null , myImport.getEmail2());
 		assertEquals("Checking email3 (must be null):" , null , myImport.getEmail3());
-	
-		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
 	/**
@@ -242,7 +251,54 @@ public class VCardImportTest extends AbstractVCardTest {
 		final int contactId = Integer.parseInt(importResult[0].getObjectId());
 		final Contact myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 		assertEquals("Checking surname:" , "B\u00f6rnig" , myImport.getSurName());
+	}
 	
-		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
+	public void test14350() throws Exception{
+	    String vcard = "BEGIN:VCARD\n" 
+	        + "VERSION:3.0\n" 
+	        + "PRODID:OPEN-XCHANGE\n" 
+	        + "FN:Prinz\\, Tobias\n" 
+	        + "N:Prinz;Tobias;;;\n" 
+	        + "NICKNAME:Tierlieb\n" 
+	        + "BDAY:19810501\n" 
+	        + "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;TŸbingen;Baden-WŸrttemberg;57621;Germany\n" 
+	        + "ADR;TYPE=home:;;Testroad 4711;Port de la VŽrde;Skol-upon-sea;37542;France\n" 
+	        + "ORG:- deactivated -\n" 
+	        + "REV:20061204T160750.018Z\n" 
+	        + "UID:80@ox6.netline.de\n" 
+	        + "END:VCARD\n";
+	    final ImportResult[] importResult = importVCard(
+            getWebConversation(),
+            new ByteArrayInputStream(vcard.getBytes("Cp1252")),
+            testFolder.getObjectID(),
+            timeZone,
+            emailaddress,
+            getHostName(),
+            getSessionId());
+
+        assertFalse("Worked?", importResult[0].hasError());
+        
+        final int contactId = Integer.parseInt(importResult[0].getObjectId());
+        final Contact actual = ContactTest.loadContact(
+            getWebConversation(),
+            contactId,
+            testFolder.getObjectID(),
+            getHostName(),
+            getLogin(),
+            getPassword());
+        
+        assertEquals("Checking name:", "Prinz", actual.getSurName());
+
+        assertEquals("Street, business", "Broadway 3131 / 5th Ave", actual.getStreetBusiness());
+        assertEquals("City, business", "TŸbingen", actual.getCityBusiness());
+        assertEquals("State, business", "Baden-WŸrttemberg", actual.getStateBusiness());
+        assertEquals("ZIP, business", "57621", actual.getPostalCodeBusiness());
+        assertEquals("Country, business", "Germany", actual.getCountryBusiness());
+
+        assertEquals("Street, home", "Testroad 4711", actual.getStreetHome());
+        assertEquals("City, home", "Port de la VŽrde", actual.getCityHome());
+        assertEquals("State, home", "Skol-upon-sea", actual.getStateHome());
+        assertEquals("ZIP, home", "37542", actual.getPostalCodeHome());
+        assertEquals("Country, home", "France", actual.getCountryHome());
 	}
 }
