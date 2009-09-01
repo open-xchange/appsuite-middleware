@@ -1,3 +1,8 @@
+* 2009-09-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
+   uid of table login2user.
+
 * 2009-09-01 - choeger@open-xchange.com
 
  - Bugfix #14403: log4j does not work on SLES11, file permission problem
@@ -12,11 +17,6 @@
  - Bugfix #14421: Added new virtual folder tables to SQL initialization scripts
  - Bugfix #14399: Fixed NPE on missing inline image file name
  - Bugfix #14425: Fixed safety routine to correct invalid mail-safe encoded header values
-
-* 2009-08-31 - marcus.klein@open-xchange.com
-
- - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
-   uid of table login2user.
 
 * 2009-08-25 - tobias.prinz@open-xchange.com
 

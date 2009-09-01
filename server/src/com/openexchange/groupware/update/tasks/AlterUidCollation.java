@@ -55,6 +55,8 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -74,7 +76,9 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class AlterUidCollation implements UpdateTask {
 
-    private static final String SQL = "ALTER TABLE login2user MODIFY uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin";
+    private static final Log LOG = LogFactory.getLog(AlterUidCollation.class);
+
+    private static final String SQL = "ALTER TABLE login2user MODIFY uid VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL";
 
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectIndexes.class);
 
@@ -93,6 +97,15 @@ public class AlterUidCollation implements UpdateTask {
     @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "An SQL error occurred: %1$s.")
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         final Connection con = Database.getNoTimeout(contextId, true);
+        try {
+            if (doUmlautsWork(con)) {
+                LOG.info("Collation allows inserting '\u00e4\u00f6\u00fc' and 'aou'.");
+                return;
+            }
+        } catch (SQLException e) {
+            throw EXCEPTION.create(1, e, e.getMessage());
+        }
+        LOG.info("Changing collation to allow inserting '\u00e4\u00f6\u00fc' and 'aou'.");
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -107,5 +120,32 @@ public class AlterUidCollation implements UpdateTask {
             autocommit(con);
             Database.backNoTimeout(contextId, true, con);
         }
+    }
+
+    private static final String USER = "INSERT INTO user (cid,id,mail,mailEnabled,preferredLanguage,shadowLastChange,timeZone,contactId,passwordMech,uidNumber,gidNumber,homeDirectory,loginShell) VALUES (2147483647,2147483647,'',false,'',0,'',0,'',0,0,'','')";
+
+    private static final String UMLAUTS = "INSERT INTO login2user (cid,id,uid) VALUES (2147483647,2147483647,'\u00e4\u00f6\u00fc')";
+
+    private static final String DUPLICATE = "INSERT INTO login2user (cid,id,uid) VALUES (2147483647,2147483647,'aou')";
+
+    private boolean doUmlautsWork(Connection con) throws SQLException {
+        boolean retval = true;
+        Statement stmt = null;
+        try {
+            con.setAutoCommit(false);
+            stmt = con.createStatement();
+            stmt.execute(USER);
+            stmt.execute(UMLAUTS);
+            try {
+                stmt.execute(DUPLICATE);
+            } catch (SQLException e) {
+                retval = false;
+            }
+        } finally {
+            closeSQLStuff(stmt);
+            rollback(con);
+            autocommit(con);
+        }
+        return retval;
     }
 }
