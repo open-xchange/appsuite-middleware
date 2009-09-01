@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -360,12 +360,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Sep 01 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
+   uid of table login2user.
+* Tue Sep 01 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14272: Discarding non-existing user/group permission previously detected as being corrupt
 * Mon Aug 03 2009 - thorben.betten@open-xchange.com
  - Bugfix #14211: Using static delimiter character '/' to separate mail account part form fullname part within a mail folder identifier
  - Bugfix #14232: Checking for Drafts folder prior to deleting old draft version
-* Fri Jul 31 2009 - marcus.klein@open-xchange.com
- - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
-   uid of table login2user.
 * Sun Jul 19 2009 - choeger@open-xchange.com
  - Bugfix #14193: Update from SP5 to 6.10 RC5 fails with error on Debian
 * Fri Jul 17 2009 - marcus.klein@open-xchange.com
