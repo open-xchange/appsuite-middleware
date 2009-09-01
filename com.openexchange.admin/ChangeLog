@@ -1,11 +1,11 @@
-* 2009-08-31 - thorben.betten@open-xchange.com
-
- - Bugfix #14421: Added new virtual folder tables to SQL initialization scripts
-
-* 2009-08-31 - marcus.klein@open-xchange.com
+* 2009-09-01 - marcus.klein@open-xchange.com
 
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
    uid of table login2user.
+
+* 2009-08-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #14421: Added new virtual folder tables to SQL initialization scripts
 
 * 2009-08-28 - marcus.klein@open-xchange.com
 
