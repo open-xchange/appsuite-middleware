@@ -98,7 +98,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(base + pubUrl);
         
-        System.out.println("=====["+pubUrl+"]====");
+        System.out.println("=====["+base + pubUrl+"]====");
         System.out.println(website);
         System.out.println("=========");
         
