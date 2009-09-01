@@ -49,7 +49,6 @@
 
 package com.openexchange.test;
 
-import com.openexchange.ajax.roundtrip.pubsub.OXMFContactLifeCycleTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -85,13 +84,15 @@ public class InterfaceTests {
         tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(com.openexchange.ajax.user.UserAJAXSuite.suite());
+        tests.addTest(com.openexchange.ajax.importexport.VCardTestSuite.suite());
 
 		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());
-		tests.addTestSuite(OXMFContactLifeCycleTest.class);
+		
+		tests.addTestSuite(com.openexchange.ajax.roundtrip.pubsub.OXMFContactLifeCycleTest.class);
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 		/* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
 		tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
