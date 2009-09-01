@@ -92,6 +92,7 @@ public final class VirtualFolder implements Folder {
     public VirtualFolder(final Folder source) {
         super();
         this.realFolder = source;
+        modifiedBy = -1;
     }
 
     @Override
@@ -135,7 +136,7 @@ public final class VirtualFolder implements Folder {
     }
 
     public int getModifiedBy() {
-        return 0 == modifiedBy ? realFolder.getModifiedBy() : modifiedBy;
+        return -1 == modifiedBy ? realFolder.getModifiedBy() : modifiedBy;
     }
 
     public void setCreatedBy(final int createdBy) {
