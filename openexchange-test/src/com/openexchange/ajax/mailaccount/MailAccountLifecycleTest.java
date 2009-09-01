@@ -71,6 +71,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * {@link MailAccountLifecycleTest}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountLifecycleTest extends AbstractMailAccountTest {
 
