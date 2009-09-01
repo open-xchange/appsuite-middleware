@@ -74,13 +74,12 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
     }
 
     public void testLifeCycleOfInfostoreFolderPublication() throws Exception {
-        System.out.println(getName()+" : "+new Date());
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
         DocumentMetadata data = new DocumentMetadataImpl();
         data.setTitle("roundtripper");
-        data.setDescription("Round-trippin' infostore file");
+        data.setDescription("Round-trippin' infostore folder");
         data.setFileMIMEType("text/plain");
         data.setFolderId(folder.getObjectID());
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -98,10 +97,6 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(base + pubUrl);
         
-        System.out.println("=====["+base + pubUrl+"]====");
-        System.out.println(website);
-        System.out.println("=========");
-        
         assertTrue("Should contain reference to a published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_0\">"));
         assertFalse("Should not contain reference to a second published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_1\">"));
         assertTrue("Should contain a link to the published infostore item", website.contains("ox_file"));
@@ -115,7 +110,6 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
     }
     
     public void testLifeCycleOfInfostoreItemPublication() throws Exception{
-        System.out.println(getName()+" : "+new Date());
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
