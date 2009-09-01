@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.openexchange.tools.oxfolder.deletelistener.Permission;
 
 /**
@@ -148,6 +147,8 @@ public final class MergerUtility {
 	 * @return The merged permission assigned to specified fallback entity
 	 * @throws SQLException
 	 *             If a SQL error occurs
+	 * @throws IllegalStateException
+     *             If neither a permission can be found for given entity nor fallback entity
 	 */
 	public static Permission getMergedPermission(final int entity, final int fallbackEntity, final int fuid,
 			final int cid, final Connection readCon, final boolean[] delete) throws SQLException {
@@ -172,11 +173,11 @@ public final class MergerUtility {
 				stmt.setInt(3, fuid);
 				rs = stmt.executeQuery();
 				if (!rs.next()) {
-					/*
-					 * Empty permission
-					 */
-					throw new SQLException(new StringBuilder(64).append("Entity ").append(entity).append(
-							" has no permission on folder ").append(fuid).append(" in context ").append(cid).toString());
+				    /*
+                     * No permission?!
+                     */
+                    throw new IllegalStateException(new StringBuilder(64).append("Entity ").append(entity).append(
+                    " has no permission on folder ").append(fuid).append(" in context ").append(cid).toString());
 				}
 				delete[0] = false;
 				return new Permission(fallbackEntity, fuid, rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs

@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder.deletelistener.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import com.openexchange.tools.oxfolder.deletelistener.CorruptPermission;
 import com.openexchange.tools.oxfolder.deletelistener.Permission;
 
@@ -93,7 +92,7 @@ public final class GroupPermissionMerger {
 		} else {
 			logBuilder = null;
 		}
-		for (final CorruptPermission corruptPermission : corruptPermissions) {
+		Next: for (final CorruptPermission corruptPermission : corruptPermissions) {
 			/*
 			 * Determine context's admin ID
 			 */
@@ -106,8 +105,14 @@ public final class GroupPermissionMerger {
 			 * assigned to admin.
 			 */
 			delete[0] = false;
-			final Permission merged = MergerUtility.getMergedPermission(corruptPermission.permission_id, admin,
-					corruptPermission.fuid, corruptPermission.cid, con, delete);
+			final Permission merged;
+            try {
+                merged = MergerUtility.getMergedPermission(corruptPermission.permission_id, admin,
+                        corruptPermission.fuid, corruptPermission.cid, con, delete);
+            } catch (final IllegalStateException e) {
+                // Strange. Previously detected corrupt group permission does no more exist.
+                continue Next;
+            }
 			if (delete[0]) {
 				MergerUtility.deletePermission(corruptPermission.permission_id, corruptPermission.fuid,
 						corruptPermission.cid, con);
