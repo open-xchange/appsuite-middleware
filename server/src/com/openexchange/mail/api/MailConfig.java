@@ -265,12 +265,14 @@ public abstract class MailConfig {
          * Fetch mail account
          */
         final MailAccount mailAccount;
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
         try {
             final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             if (accountId == MailAccount.DEFAULT_ID) {
-                mailAccount = storage.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                mailAccount = storage.getDefaultMailAccount(userId, contextId);
             } else {
-                mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                mailAccount = storage.getMailAccount(accountId, userId, contextId);
             }
         } catch (final ServiceException e) {
             throw new MailException(e);
@@ -281,7 +283,7 @@ public abstract class MailConfig {
         fillLoginAndPassword(
             mailConfig,
             session.getPassword(),
-            UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLoginInfo(),
+            UserStorage.getStorageUser(userId, contextId).getLoginInfo(),
             mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
@@ -291,7 +293,7 @@ public abstract class MailConfig {
                         "\" not set in mail properties").toString());
             }
             throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ").append(
-                session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+                userId).append(" in context ").append(contextId).toString());
         }
         {
             /*
