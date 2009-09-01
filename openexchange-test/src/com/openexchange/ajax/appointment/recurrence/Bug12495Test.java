@@ -29,6 +29,13 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.tools.servlet.AjaxException;
 
+/**
+ * User 1 creates an appointment series, user 2 deletes one exception, check whether
+ * recurrence position is present in change exception.
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class Bug12495Test extends AbstractAJAXSession {
 	private TimeZone myLocalTimeZone = null;
 	private int privateFolderOfUser1;
