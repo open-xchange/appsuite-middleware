@@ -277,7 +277,10 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     public String getWebsite(String url) throws IOException {
-        return getResponse(url).getText();
+       
+        WebResponse resp = getResponse(url);
+        assertEquals("Should respond with status 200", 200 , resp.getResponseCode());
+        return resp .getText();
     }
 
     public InputStream getDownload(String url) throws IOException {
