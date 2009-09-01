@@ -78,7 +78,7 @@ public final class Insert {
         super();
     }
 
-    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified, shadow) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_INSERT_PERM = "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -107,41 +107,60 @@ public final class Insert {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
-        final String folderId = folder.getID();
         try {
-            // Insert folder data
-            PreparedStatement stmt = null;
-            try {
-                stmt = con.prepareStatement(SQL_INSERT);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos++, folderId);
-                stmt.setString(pos++, folder.getParentID());
-                stmt.setString(pos++, folder.getName());
-                final int modifiedBy = folder.getModifiedBy();
-                if (modifiedBy == -1) {
-                    stmt.setNull(pos++, Types.INTEGER);
-                } else {
-                    stmt.setInt(pos++, modifiedBy);
-                }
-                final Date lastModified = folder.getLastModified();
-                if (lastModified == null) {
-                    stmt.setNull(pos, Types.BIGINT);
-                } else {
-                    stmt.setLong(pos, lastModified.getTime());
-                }
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
+            insertFolder(cid, tree, user, folder, con);
+        } finally {
+            databaseService.backWritable(cid, con);
+        }
+    }
+
+    /**
+     * Inserts specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folder The folder
+     * @param con The connection
+     * @throws FolderException If insertion fails
+     */
+    public static void insertFolder(final int cid, final int tree, final int user, final Folder folder, final Connection con) throws FolderException {
+        final String folderId = folder.getID();
+        // Insert folder data
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_INSERT);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos++, folderId);
+            stmt.setString(pos++, folder.getParentID());
+            stmt.setString(pos++, folder.getName());
+            final int modifiedBy = folder.getModifiedBy();
+            if (modifiedBy == -1) {
+                stmt.setNull(pos++, Types.INTEGER);
+            } else {
+                stmt.setInt(pos++, modifiedBy);
             }
-            // Insert permission data
+            final Date lastModified = folder.getLastModified();
+            if (lastModified == null) {
+                stmt.setNull(pos++, Types.BIGINT);
+            } else {
+                stmt.setLong(pos++, lastModified.getTime());
+            }
+            stmt.setString(pos, ""); // TODO: Shadow
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        // Insert permission data if non-null and not empty
+        final Permission[] permissions = folder.getPermissions();
+        if (null != permissions && permissions.length > 0) {
             try {
                 stmt = con.prepareStatement(SQL_INSERT_PERM);
-                final Permission[] permissions = folder.getPermissions();
                 for (int i = 0; i < permissions.length; i++) {
                     final Permission p = permissions[i];
                     int pos = 1;
@@ -165,23 +184,22 @@ public final class Insert {
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
-            // Insert subscription data
-            try {
-                stmt = con.prepareStatement(SQL_INSERT_SUBS);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
+        }
+        // Insert subscription data
+        try {
+            stmt = con.prepareStatement(SQL_INSERT_SUBS);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(cid, con);
+            DBUtils.closeSQLStuff(stmt);
         }
     }
+
 }
