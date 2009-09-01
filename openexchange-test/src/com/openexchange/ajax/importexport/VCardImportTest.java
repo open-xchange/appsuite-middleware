@@ -94,7 +94,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		super.setUp();
         folderManager = new FolderTestManager(client);
         testFolder = folderManager.generateFolder("VCard Interface Tests", Module.CONTACTS.getFolderConstant(), client.getValues().getPrivateContactFolder(), client.getValues().getUserId());
-        //contactFolderId = testFolder.getObjectID();
         folderManager.insertFolderOnServer(testFolder);
         contactFolderId = testFolder.getObjectID();
 	}
