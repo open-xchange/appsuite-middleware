@@ -98,7 +98,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(base + pubUrl);
         
-        System.out.println("=========");
+        System.out.println("=====["+pubUrl+"]====");
         System.out.println(website);
         System.out.println("=========");
         
@@ -109,7 +109,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         Pattern urlPattern = Pattern.compile("href=\"(.+?/publications/files/.+?/"+data.getId()+"/.+?)\"");
         Matcher matcher = urlPattern.matcher(website);
         matcher.find();
-        String downloadUrl = matcher.group(1);
+        String downloadUrl = matcher.group(1);  
 
         assertSameStream(new FileInputStream(upload), getDownload(downloadUrl));
     }
