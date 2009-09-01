@@ -70,7 +70,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 					actionOfLoginForm,
 					nameOfUserField,
 					nameOfPasswordField,
-					linkAvailableAfterLogin, 1);
+					linkAvailableAfterLogin, 1, "http://www.facebook.com");
 			step.execute(webClient);
 			HtmlPage pageAfterLogin = step.getOutput();
 			webClient.closeAllWindows();

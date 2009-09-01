@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -68,150 +67,216 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends AbstractStep implements
-		Step<Contact[], List<HtmlAnchor>> {
-	
-	private List<HtmlAnchor> anchors;
-	private Contact[] contactObjectsArray;
-	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
-	private PagePartSequence pageParts;
-	
-	
-	public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(String description, PagePartSequence pageParts) {
-		this.description = description;
-		this.pageParts = pageParts;
-	}
-	
-	public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(){
-		
-	}
+public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>> {
 
-	public void execute(WebClient webClient) {
-		Vector<Contact> contactObjects = new Vector<Contact>();
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-		//int counter=0;
-		for (HtmlAnchor anchor : anchors) {			
-    		try {
-    			//counter ++;
-    			//System.out.println("***** Contact No. " + Integer.toString(counter));
-    			//System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
-    			HtmlPage page = anchor.click();
-    			Contact contact = new Contact();
+    private List<HtmlAnchor> anchors;
 
-    			pageParts.setPage(page.getWebResponse().getContentAsString());
-    			HashMap<String, String> map = pageParts.retrieveInformation();
-    			
-    			//set the contact«s information
-    			if (map.containsKey("display_name")) contact.setDisplayName(map.get("display_name"));
-    			if (map.containsKey("first_name")) contact.setGivenName(map.get("first_name"));
-    			if (map.containsKey("last_name")) contact.setSurName(map.get("last_name"));
-    			if (map.containsKey("middle_name")) contact.setMiddleName(map.get("middle_name")); 
-    			if (map.containsKey("title")) contact.setTitle(map.get("title")); 
-    			if (map.containsKey("street_home")) contact.setStreetHome(map.get("street_home"));
-    			if (map.containsKey("postal_code_home")) contact.setPostalCodeHome(map.get("postal_code_home"));
-    			if (map.containsKey("city_home")) contact.setCityHome(map.get("city_home"));
-    			if (map.containsKey("state_home")) contact.setStateHome(map.get("state_home"));
-    			if (map.containsKey("country_home")) contact.setCountryHome(map.get("country_home"));
-    			if (map.containsKey("street_business")) contact.setStreetBusiness(map.get("street_business"));
-    			if (map.containsKey("postal_code_business")) contact.setPostalCodeBusiness(map.get("postal_code_business"));
-    			if (map.containsKey("city_business")) contact.setCityBusiness(map.get("city_business"));
-    			if (map.containsKey("state_business")) contact.setStateBusiness(map.get("state_business"));
-    			if (map.containsKey("country_business")) contact.setCountryBusiness(map.get("country_business"));    			
-    			if (map.containsKey("email1")) contact.setEmail1(map.get("email1"));
-    			if (map.containsKey("email2")) contact.setEmail2(map.get("email2"));
-    			if (map.containsKey("email3")) contact.setEmail3(map.get("email3"));
-    			if (map.containsKey("telephone_home1")) contact.setTelephoneHome1(map.get("telephone_home1"));
-    			if (map.containsKey("telephone_business1")) contact.setTelephoneBusiness1(map.get("telephone_business1"));    			
-    			if (map.containsKey("cellular_telephone1")) contact.setCellularTelephone1(map.get("cellular_telephone1"));
-    			if (map.containsKey("cellular_telephone2")) contact.setCellularTelephone2(map.get("cellular_telephone2"));    			
-    			if (map.containsKey("fax_home")) contact.setFaxHome(map.get("fax_home"));
-    			if (map.containsKey("fax_business")) contact.setFaxBusiness(map.get("fax_business"));
-    			if (map.containsKey("company")) contact.setCompany(map.get("company"));
-    			if (map.containsKey("position")) contact.setPosition(map.get("position"));
-    			if (map.containsKey("employee_type")) contact.setEmployeeType(map.get("employee_type"));
-    			if (map.containsKey("department")) contact.setDepartment(map.get("department"));
-    			if (map.containsKey("note")) contact.setNote(map.get("note"));    			    			    			
-    			if (map.containsKey("profession")) contact.setProfession(map.get("profession"));
-    			if (map.containsKey("url")) contact.setURL(map.get("url"));
-    			if (map.containsKey("instant_messenger1")) contact.setInstantMessenger1(map.get("instant_messenger1"));
-    			if (map.containsKey("instant_messenger2")) contact.setInstantMessenger2(map.get("instant_messenger2"));
-    	
-    			//TODO: handle birthdays somehow
-    			
-    			//add the image from a url to the contact
-    			if (map.containsKey("image")){
-    				OXContainerConverter.loadImageFromURL(contact, map.get("image"));
-    			}	
-    			
-    			SANITIZER.sanitize(contact);
-    			contactObjects.add(contact);
-    			
-    			
-    			
-    		} catch (final VersitException e){
-    			e.printStackTrace();
-    			this.exception = e;
-    		} catch (ConverterException e) {
-				e.printStackTrace();
-				this.exception = e;
-			} catch (IOException e) {
-				e.printStackTrace();
-				this.exception = e;
-			}
-			executedSuccessfully = true;
-		}
-		
-		contactObjectsArray = new Contact[contactObjects.size()];
-	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
-	    	contactObjectsArray[i] = contactObjects.get(i);
-	    }
-	    
-		
-	}
+    private Contact[] contactObjectsArray;
 
-	public String inputType() {
-		return LIST_OF_HTML_ANCHORS;
-	}
+    private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-	public String outputType() {
-		return LIST_OF_CONTACT_OBJECTS;
-	}
+    private PagePartSequence pageParts;
 
-	public Contact[] getOutput() {
-		return contactObjectsArray;
-	}
+    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
+        this.description = description;
+        this.pageParts = pageParts;
+    }
 
-	public void setInput(List<HtmlAnchor> input) {
-		this.anchors = input;
-	}
+    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep() {
 
-	public List<HtmlAnchor> getAnchors() {
-		return anchors;
-	}
+    }
 
-	public void setAnchors(List<HtmlAnchor> pages) {
-		this.anchors = pages;
-	}
+    public void execute(final WebClient webClient) {
+        final Vector<Contact> contactObjects = new Vector<Contact>();
+        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        // int counter=0;
+        for (final HtmlAnchor anchor : anchors) {
+            try {
+                // counter ++;
+                // System.out.println("***** Contact No. " + Integer.toString(counter));
+                // System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
+                final HtmlPage page = anchor.click();
+                final Contact contact = new Contact();
 
-	public Contact[] getContactObjectsArray() {
-		return contactObjectsArray;
-	}
+                pageParts.setPage(page.getWebResponse().getContentAsString());
+                final HashMap<String, String> map = pageParts.retrieveInformation();
 
-	public void setContactObjectsArray(Contact[] contactObjectsArray) {
-		this.contactObjectsArray = contactObjectsArray;
-	}
+                // set the contact«s information
+                if (map.containsKey("first_name")) {
+                    contact.setGivenName(map.get("first_name"));
+                }
+                if (map.containsKey("last_name")) {
+                    contact.setSurName(map.get("last_name"));
+                }
+                if (map.containsKey("first_name") & map.containsKey("last_name")){
+                    contact.setDisplayName(map.get("first_name") + " " + map.get("last_name"));
+                }
+                if (map.containsKey("display_name")) {
+                    contact.setDisplayName(map.get("display_name"));
+                }
+                if (map.containsKey("middle_name")) {
+                    contact.setMiddleName(map.get("middle_name"));
+                }
+                if (map.containsKey("title")) {
+                    contact.setTitle(map.get("title"));
+                }
+                if (map.containsKey("street_home")) {
+                    contact.setStreetHome(map.get("street_home"));
+                }
+                if (map.containsKey("postal_code_home")) {
+                    contact.setPostalCodeHome(map.get("postal_code_home"));
+                }
+                if (map.containsKey("city_home")) {
+                    contact.setCityHome(map.get("city_home"));
+                }
+                if (map.containsKey("state_home")) {
+                    contact.setStateHome(map.get("state_home"));
+                }
+                if (map.containsKey("country_home")) {
+                    contact.setCountryHome(map.get("country_home"));
+                }
+                if (map.containsKey("street_business")) {
+                    contact.setStreetBusiness(map.get("street_business"));
+                }
+                if (map.containsKey("postal_code_business")) {
+                    contact.setPostalCodeBusiness(map.get("postal_code_business"));
+                }
+                if (map.containsKey("city_business")) {
+                    contact.setCityBusiness(map.get("city_business"));
+                }
+                if (map.containsKey("state_business")) {
+                    contact.setStateBusiness(map.get("state_business"));
+                }
+                if (map.containsKey("country_business")) {
+                    contact.setCountryBusiness(map.get("country_business"));
+                }
+                if (map.containsKey("email1")) {
+                    contact.setEmail1(map.get("email1"));
+                }
+                if (map.containsKey("email2")) {
+                    contact.setEmail2(map.get("email2"));
+                }
+                if (map.containsKey("email3")) {
+                    contact.setEmail3(map.get("email3"));
+                }
+                if (map.containsKey("telephone_home1")) {
+                    contact.setTelephoneHome1(map.get("telephone_home1"));
+                }
+                if (map.containsKey("telephone_business1")) {
+                    contact.setTelephoneBusiness1(map.get("telephone_business1"));
+                }
+                if (map.containsKey("cellular_telephone1")) {
+                    contact.setCellularTelephone1(map.get("cellular_telephone1"));
+                }
+                if (map.containsKey("cellular_telephone2")) {
+                    contact.setCellularTelephone2(map.get("cellular_telephone2"));
+                }
+                if (map.containsKey("fax_home")) {
+                    contact.setFaxHome(map.get("fax_home"));
+                }
+                if (map.containsKey("fax_business")) {
+                    contact.setFaxBusiness(map.get("fax_business"));
+                }
+                if (map.containsKey("company")) {
+                    contact.setCompany(map.get("company"));
+                }
+                if (map.containsKey("position")) {
+                    contact.setPosition(map.get("position"));
+                }
+                if (map.containsKey("employee_type")) {
+                    contact.setEmployeeType(map.get("employee_type"));
+                }
+                if (map.containsKey("department")) {
+                    contact.setDepartment(map.get("department"));
+                }
+                if (map.containsKey("note")) {
+                    contact.setNote(map.get("note"));
+                }
+                if (map.containsKey("profession")) {
+                    contact.setProfession(map.get("profession"));
+                }
+                if (map.containsKey("url")) {
+                    contact.setURL(map.get("url"));
+                }
+                if (map.containsKey("instant_messenger1")) {
+                    contact.setInstantMessenger1(map.get("instant_messenger1"));
+                }
+                if (map.containsKey("instant_messenger2")) {
+                    contact.setInstantMessenger2(map.get("instant_messenger2"));
+                }
 
-	public static ContactSanitizer getSANITIZER() {
-		return SANITIZER;
-	}
+                // TODO: handle birthdays somehow
 
-	public PagePartSequence getPageParts() {
-		return pageParts;
-	}
+                // add the image from a url to the contact
+                if (map.containsKey("image")) {
+                    OXContainerConverter.loadImageFromURL(contact, map.get("image"));
+                }
 
-	public void setPageParts(PagePartSequence pageParts) {
-		this.pageParts = pageParts;
-	}
+                SANITIZER.sanitize(contact);
+                contactObjects.add(contact);
 
-	
+            } catch (final VersitException e) {
+                e.printStackTrace();
+                exception = e;
+            } catch (final ConverterException e) {
+                e.printStackTrace();
+                exception = e;
+            } catch (final IOException e) {
+                e.printStackTrace();
+                exception = e;
+            }
+            executedSuccessfully = true;
+        }
+
+        contactObjectsArray = new Contact[contactObjects.size()];
+        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
+            contactObjectsArray[i] = contactObjects.get(i);
+        }
+
+    }
+
+    public String inputType() {
+        return LIST_OF_HTML_ANCHORS;
+    }
+
+    public String outputType() {
+        return LIST_OF_CONTACT_OBJECTS;
+    }
+
+    public Contact[] getOutput() {
+        return contactObjectsArray;
+    }
+
+    public void setInput(final List<HtmlAnchor> input) {
+        anchors = input;
+    }
+
+    public List<HtmlAnchor> getAnchors() {
+        return anchors;
+    }
+
+    public void setAnchors(final List<HtmlAnchor> pages) {
+        anchors = pages;
+    }
+
+    public Contact[] getContactObjectsArray() {
+        return contactObjectsArray;
+    }
+
+    public void setContactObjectsArray(final Contact[] contactObjectsArray) {
+        this.contactObjectsArray = contactObjectsArray;
+    }
+
+    public static ContactSanitizer getSANITIZER() {
+        return SANITIZER;
+    }
+
+    public PagePartSequence getPageParts() {
+        return pageParts;
+    }
+
+    public void setPageParts(final PagePartSequence pageParts) {
+        this.pageParts = pageParts;
+    }
+
 }
