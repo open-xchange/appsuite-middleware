@@ -145,6 +145,56 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-124
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/cache.ccf
+   grep jcs.region.GlobalFolderCache $pfile >/dev/null || {
+cat<<EOF
+# Pre-defined cache regions for global folder objects.
+jcs.region.GlobalFolderCache=LTCP
+jcs.region.GlobalFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.GlobalFolderCache.cacheattributes.MaxObjects=10000000
+jcs.region.GlobalFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.GlobalFolderCache.cacheattributes.UseMemoryShrinker=true
+# Disable MaxMemoryIdleTimeSeconds cause some entries can be eternal
+# Shrinker removal works as follows:
+# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
+# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
+jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.GlobalFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.GlobalFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.GlobalFolderCache.elementattributes.IsEternal=false
+jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds=300
+jcs.region.GlobalFolderCache.elementattributes.IdleTime=180
+jcs.region.GlobalFolderCache.elementattributes.IsSpool=false
+jcs.region.GlobalFolderCache.elementattributes.IsRemote=false
+jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
+EOF
+}
+   grep jcs.region.UserFolderCache $pfile >/dev/null || {
+cat<<EOF
+# Pre-defined cache regions for user-sensitive folder objects.
+jcs.region.UserFolderCache=LTCP
+jcs.region.UserFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.UserFolderCache.cacheattributes.MaxObjects=10000000
+jcs.region.UserFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.UserFolderCache.cacheattributes.UseMemoryShrinker=true
+# Disable MaxMemoryIdleTimeSeconds cause some entries can be eternal
+# Shrinker removal works as follows:
+# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
+# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
+jcs.region.UserFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.UserFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.UserFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.UserFolderCache.elementattributes.IsEternal=false
+jcs.region.UserFolderCache.elementattributes.MaxLifeSeconds=300
+jcs.region.UserFolderCache.elementattributes.IdleTime=180
+jcs.region.UserFolderCache.elementattributes.IsSpool=false
+jcs.region.UserFolderCache.elementattributes.IsRemote=false
+jcs.region.UserFolderCache.elementattributes.IsLateral=false
+EOF
+}
+
    # SoftwareChange_Request-125
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/server.properties
