@@ -432,7 +432,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/xml");
 		req.setHeaderField(AUTHORIZATION, "Basic " + getAuthData(login, password));
-		final WebResponse resp = webCon.getResponse(req);
+		final WebResponse resp = webCon.getResource(req);
 		assertEquals(207, resp.getResponseCode());
 		bais = new ByteArrayInputStream(resp.getText().getBytes());
 		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT);
