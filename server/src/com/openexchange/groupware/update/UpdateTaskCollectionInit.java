@@ -330,6 +330,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // The collation of column uid in table login2user must be changed to utf8_bin to prevent a collision of login
             // names that are equal except some accent or some german umlaut.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation());
+            // Version 62
+            // Runs the task AlterUidCollation again. The schema creating scripts did not contain the fix for v6.10.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation2());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
