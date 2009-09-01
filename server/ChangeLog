@@ -6,6 +6,7 @@
 * 2009-09-01 - choeger@open-xchange.com
 
  - Bugfix #14403: log4j does not work on SLES11, file permission problem
+ - Bugfix #14395: Unable to install lang and lang-community packages at the same time
 
 * 2009-09-01 - francisco.laguna@open-xchange.com
 
