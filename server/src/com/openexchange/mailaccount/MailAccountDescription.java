@@ -857,7 +857,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             port = Integer.parseInt(server.substring(pos + 1));
         } catch (final NumberFormatException e) {
-            LOG.warn("Unable to parse port out of URL: " + server + ". Using default port instead.", e);
+            LOG.warn("Unable to parse port out of URL: " + server + ". Using default port instead: " + defaultPort, e);
             port = defaultPort;
         }
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
