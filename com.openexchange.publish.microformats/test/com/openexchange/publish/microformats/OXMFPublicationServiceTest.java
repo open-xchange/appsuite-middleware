@@ -74,14 +74,14 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     private final Publication oldPublication = new Publication();
 
-    public void setUp() {
+    public void setUp() throws Exception {
         PublicationErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.publish");
         PublicationErrorMessage.EXCEPTIONS.setComponent(new StringComponent("PUB"));
         
         publicationService = new OXMFPublicationService() {
 
             @Override
-            public Publication load(Context ctx, int publicationId) throws PublicationException {
+            public Publication loadInternally(Context ctx, int publicationId) throws PublicationException {
                 return oldPublication;
             }
             @Override
@@ -100,6 +100,9 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService.setTargetDisplayName("Banana Publications!");
         
         publicationService.setTemplateService(new FindEverythingTemplateService());
+        
+        oldPublication.setTarget(publicationService.getTarget());
+        
     }
 
     public void testModule() throws PublicationException {
