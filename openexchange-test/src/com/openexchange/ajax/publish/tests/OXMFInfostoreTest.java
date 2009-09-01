@@ -66,7 +66,7 @@ import com.openexchange.test.TestInit;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- */
+ */     
 public class OXMFInfostoreTest extends AbstractPublicationTest {
 
     public OXMFInfostoreTest(String name) {
