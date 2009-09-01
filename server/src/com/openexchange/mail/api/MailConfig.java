@@ -628,7 +628,8 @@ public abstract class MailConfig {
         result = prime * result + ((login == null) ? 0 : login.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + (getPort());
-        result = prime * result + ((getServer() == null) ? 0 : getServer().hashCode());
+        final String server = getServer();
+        result = prime * result + ((server == null) ? 0 : server.hashCode());
         return result;
     }
 
