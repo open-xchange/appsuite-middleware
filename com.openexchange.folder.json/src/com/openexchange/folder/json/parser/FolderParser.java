@@ -119,6 +119,13 @@ public final class FolderParser {
                 // TODO: Discovery service for types
             }
 
+            if (folderJsonObject.hasAndNotNull(FolderField.SUBSCRIBED.getName())) {
+                folder.setSubscribed(folderJsonObject.getInt(FolderField.SUBSCRIBED.getName()) > 0);
+            } else {
+                // If not present consider as subscribed
+                folder.setSubscribed(true);
+            }
+
             if (folderJsonObject.hasAndNotNull(FolderField.SUBFOLDERS.getName())) {
                 // TODO: Support for this?
             }

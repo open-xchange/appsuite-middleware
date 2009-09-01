@@ -53,18 +53,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.virtual.VirtualFolder;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
 import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -88,11 +97,11 @@ public final class Select {
 
     private static final String SQL_SELECT2 = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT2_BCK = "SELECT folderId FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT2_BCK = "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT_SUBF = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT_SUBF = "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
-    private static final String SQL_SELECT_SUBF_BCK = "SELECT folderId FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT_SUBF_BCK = "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     private static final String SQL_SELECT_PERMS = "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
@@ -101,6 +110,10 @@ public final class Select {
     private static final String SQL_SELECT_SUBSCRIPTION = "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBSCRIPTION_BCK = "SELECT subscribed FROM virtualBackupSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    private static final String SQL_SELECT2_SUBF = "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
+    private static final String SQL_SELECT2_SUBF_BCK = "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     /**
      * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
@@ -156,11 +169,12 @@ public final class Select {
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
+     * @param locale The user's locale (needed for proper sorting of possible subfolders)
      * @param virtualFolder The folder to fill
      * @param storageType The storage type to use
      * @throws FolderException If filling the folder fails
      */
-    public static void fillFolder(final int cid, final int tree, final int user, final VirtualFolder virtualFolder, final StorageType storageType) throws FolderException {
+    public static void fillFolder(final int cid, final int tree, final int user, final Locale locale, final VirtualFolder virtualFolder, final StorageType storageType) throws FolderException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -188,36 +202,45 @@ public final class Select {
                 stmt.setInt(pos++, user);
                 stmt.setString(pos, folderId);
                 rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, Integer.valueOf(tree));
+                }
                 pos = 1;
                 virtualFolder.setParentID(rs.getString(pos++));
                 virtualFolder.setName(rs.getString(pos++));
-                virtualFolder.setModifiedBy(rs.getInt(pos++));
-                virtualFolder.setLastModified(new Date(rs.getLong(pos)));
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-            }
-            // Select subfolders
-            try {
-                stmt = con.prepareStatement(working ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                rs = stmt.executeQuery();
-                pos = 1;
-                final List<String> subfolderIds = new ArrayList<String>();
-                while (rs.next()) {
-                    subfolderIds.add(rs.getString(pos));
+                // Set optional modified-by
+                {
+                    final int modifiedBy = rs.getInt(pos++);
+                    if (rs.wasNull()) {
+                        virtualFolder.setModifiedBy(-1);
+                    } else {
+                        virtualFolder.setModifiedBy(modifiedBy);
+                    }
                 }
-                virtualFolder.setSubfolderIDs(subfolderIds.toArray(new String[subfolderIds.size()]));
+                // Set optional last-modified time stamp
+                {
+                    final long date = rs.getLong(pos);
+                    if (rs.wasNull()) {
+                        virtualFolder.setLastModified(null);
+                    } else {
+                        virtualFolder.setLastModified(new Date(date));
+                    }
+                }
             } catch (final SQLException e) {
+                if (null != stmt) {
+                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                    if (LOG.isDebugEnabled()) {
+                        final String sql = getSQLString(stmt);
+                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    }
+                }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
+            stmt = null;
+            // Select subfolders
+            virtualFolder.setSubfolderIDs(getSubfolderIds(cid, tree, user, locale, folderId, storageType, con));
             // Select permissions
             try {
                 stmt = con.prepareStatement(working ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
@@ -241,14 +264,24 @@ public final class Select {
                     p.setSystem(rs.getInt(pos++));
                     permissions.add(p);
                 }
-                if (!permissions.isEmpty()) {
+                if (permissions.isEmpty()) {
+                    virtualFolder.setPermissions(null);
+                } else {
                     virtualFolder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
                 }
             } catch (final SQLException e) {
+                if (null != stmt) {
+                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                    if (LOG.isDebugEnabled()) {
+                        final String sql = getSQLString(stmt);
+                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    }
+                }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
+            stmt = null;
             // Select subscription
             try {
                 stmt = con.prepareStatement(working ? SQL_SELECT_SUBSCRIPTION : SQL_SELECT_SUBSCRIPTION_BCK);
@@ -265,6 +298,13 @@ public final class Select {
                 }
                 virtualFolder.setSubscribed(subscribed);
             } catch (final SQLException e) {
+                if (null != stmt) {
+                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                    if (LOG.isDebugEnabled()) {
+                        final String sql = getSQLString(stmt);
+                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                    }
+                }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
@@ -275,17 +315,18 @@ public final class Select {
     }
 
     /**
-     * Gets the identifier-name-pairs of the subfolders located below specified parent.
+     * Gets the sorted identifiers of the subfolders located below specified parent.
      * 
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
+     * @param locale The user's locale
      * @param parentId The parent identifier
      * @param storageType The storage type
-     * @return The identifier-name-pairs of the subfolders located below specified parent
+     * @return The sorted identifiers of the subfolders located below specified parent
      * @throws FolderException If subfolders cannot be detected
      */
-    public static String[][] getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws FolderException {
+    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType) throws FolderException {
         final DatabaseService databaseService;
         try {
             databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -300,52 +341,157 @@ public final class Select {
             throw new FolderException(e);
         }
         try {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                final boolean working = StorageType.WORKING.equals(storageType);
-                stmt = con.prepareStatement(working ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, parentId);
-                rs = stmt.executeQuery();
-                pos = 1;
-                final List<String> subfolderIds = new ArrayList<String>();
-                while (rs.next()) {
-                    subfolderIds.add(rs.getString(pos));
-                }
-                DBUtils.closeSQLStuff(rs, stmt);
-                final String[][] ret = new String[subfolderIds.size()][];
-                // Select names
-                final String sql = working ? SQL_SELECT : SQL_SELECT_BCK;
-                for (int i = 0; i < ret.length; i++) {
-                    final String subfolderId = subfolderIds.get(i);
-                    stmt = con.prepareStatement(sql);
-                    pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, tree);
-                    stmt.setInt(pos++, user);
-                    stmt.setString(pos, subfolderId);
-                    rs = stmt.executeQuery();
-                    pos = 2;
-                    if (rs.next()) {
-                        ret[i] = new String[] { subfolderId, rs.getString(pos) };
-                    } else {
-                        ret[i] = new String[] { subfolderId, null };
-                    }
-                    DBUtils.closeSQLStuff(rs, stmt);
-                }
-                return ret;
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-            }
+            return getSubfolderIds(cid, tree, user, locale, parentId, storageType, con);
         } finally {
             databaseService.backReadOnly(cid, con);
         }
     }
+
+    /**
+     * Gets the sorted identifiers of the subfolders located below specified parent.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param locale The user's locale
+     * @param parentId The parent identifier
+     * @param storageType The storage type
+     * @param con The connection to use
+     * @return The sorted identifiers of the subfolders located below specified parent
+     * @throws FolderException If subfolders cannot be detected
+     */
+    public static String[] getSubfolderIds(final int cid, final int tree, final int user, final Locale locale, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final boolean working = StorageType.WORKING.equals(storageType);
+            stmt = con.prepareStatement(working ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, parentId);
+            rs = stmt.executeQuery();
+            pos = 1;
+            final List<String> subfolderIds;
+            if (FolderStorage.ROOT_ID.equals(parentId)) {
+                /*
+                 * Proper sort of top level folders 1. Private 2. Public 3. Shared . . . n Sorted external email accounts
+                 */
+                final List<String[]> fns = new ArrayList<String[]>();
+                while (rs.next()) {
+                    final String[] sa = new String[2];
+                    sa[0] = rs.getString(pos); // ID
+                    sa[1] = rs.getString(2); // Name
+                    fns.add(sa);
+                }
+                Collections.sort(fns, new PrivateSubfolderIDComparator(locale));
+                subfolderIds = new ArrayList<String>(fns.size());
+                for (final String[] fn : fns) {
+                    subfolderIds.add(fn[0]);
+                }
+            } else {
+                final TreeMap<String, String> treeMap = new TreeMap<String, String>(new FolderNameComparator(locale));
+                final StringHelper stringHelper = new StringHelper(locale);
+                while (rs.next()) {
+                    treeMap.put(stringHelper.getString(rs.getString(2)), rs.getString(pos));
+                }
+                final Set<Entry<String, String>> entrySet = treeMap.entrySet();
+                subfolderIds = new ArrayList<String>(entrySet.size());
+                for (final Entry<String, String> entry : entrySet) {
+                    subfolderIds.add(entry.getValue());
+                }
+            }
+            return subfolderIds.toArray(new String[subfolderIds.size()]);
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static String getSQLString(final PreparedStatement stmt) {
+        final String toString = stmt.toString();
+        return toString.substring(toString.indexOf(": ") + 2);
+    }
+
+    private static final class FolderNameComparator implements Comparator<String> {
+
+        private final Collator collator;
+
+        public FolderNameComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final String o1, final String o2) {
+            return collator.compare(o1, o2);
+        }
+
+    } // End of FolderNameComparator
+
+    private static final class PrivateSubfolderIDComparator implements Comparator<String[]> {
+
+        private final Collator collator;
+
+        public PrivateSubfolderIDComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final String[] o1, final String[] o2) {
+            {
+                final String privateId = "1";
+                final Integer privateComp = conditionalCompare(privateId.equals(o1[0]), privateId.equals(o2[0]));
+                if (null != privateComp) {
+                    return privateComp.intValue();
+                }
+            }
+            {
+                final String publicId = "2";
+                final Integer publicComp = conditionalCompare(publicId.equals(o1[0]), publicId.equals(o2[0]));
+                if (null != publicComp) {
+                    return publicComp.intValue();
+                }
+            }
+            {
+                final String sharedId = "3";
+                final Integer sharedComp = conditionalCompare(sharedId.equals(o1[0]), sharedId.equals(o2[0]));
+                if (null != sharedComp) {
+                    return sharedComp.intValue();
+                }
+            }
+            {
+                final String uiName = "Unified Inbox";
+                final Integer unifiedInboxComp = conditionalCompare(uiName.equalsIgnoreCase(o1[1]), uiName.equalsIgnoreCase(o2[1]));
+                if (null != unifiedInboxComp) {
+                    return unifiedInboxComp.intValue();
+                }
+            }
+            return collator.compare(o1[1], o2[1]);
+        }
+
+        private Integer conditionalCompare(final boolean b1, final boolean b2) {
+            if (b1) {
+                if (!b2) {
+                    return Integer.valueOf(-1);
+                }
+                return Integer.valueOf(0);
+            } else if (b2) {
+                return Integer.valueOf(1);
+            }
+            return null;
+        }
+
+    } // End of FolderNameComparator
 
 }

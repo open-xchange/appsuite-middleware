@@ -111,102 +111,129 @@ public final class Delete {
             throw new FolderException(e);
         }
         try {
-            PreparedStatement stmt = null;
-
-            if (backup) {
-                // Backup subscribe data
-                try {
-                    stmt = con.prepareStatement(SQL_DELETE_INSERT_SUBS);
-                    int pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, tree);
-                    stmt.setInt(pos++, user);
-                    stmt.setString(pos, folderId);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    DBUtils.closeSQLStuff(stmt);
-                }
-            }
-            // Delete subscribe data
-            try {
-                stmt = con.prepareStatement(SQL_DELETE_SUBS);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-
-            if (backup) {
-                // Backup permission data
-                try {
-                    stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
-                    int pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, tree);
-                    stmt.setInt(pos++, user);
-                    stmt.setString(pos, folderId);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    DBUtils.closeSQLStuff(stmt);
-                }
-            }
-            // Delete permission data
-            try {
-                stmt = con.prepareStatement(SQL_DELETE_PERMS);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-
-            if (backup) {
-                // Backup folder data
-                try {
-                    stmt = con.prepareStatement(SQL_DELETE_INSERT);
-                    int pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, tree);
-                    stmt.setInt(pos++, user);
-                    stmt.setString(pos, folderId);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    DBUtils.closeSQLStuff(stmt);
-                }
-            }
-            // Delete folder data
-            try {
-                stmt = con.prepareStatement(SQL_DELETE);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
+            con.setAutoCommit(false); // BEGIN
+            deleteFolder(cid, tree, user, folderId, backup, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final FolderException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            DBUtils.autocommit(con);
             databaseService.backWritable(cid, con);
+        }
+    }
+
+    /**
+     * Deletes specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
+     * @param con The connection to use
+     * @throws FolderException If delete fails
+     */
+    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+
+        if (backup) {
+            // Backup subscribe data
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_INSERT_SUBS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+        // Delete subscribe data
+        try {
+            stmt = con.prepareStatement(SQL_DELETE_SUBS);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+
+        if (backup) {
+            // Backup permission data
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+        // Delete permission data
+        try {
+            stmt = con.prepareStatement(SQL_DELETE_PERMS);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+
+        if (backup) {
+            // Backup folder data
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_INSERT);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+        // Delete folder data
+        try {
+            stmt = con.prepareStatement(SQL_DELETE);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 

@@ -49,9 +49,8 @@
 
 package com.openexchange.folderstorage.virtual;
 
-import java.text.Collator;
-import java.util.Locale;
 import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.database.DatabaseId;
 
 /**
  * {@link VirtualId} - A virtual ID which orders subfolder by name in a locale-sensitive way.
@@ -60,29 +59,24 @@ import com.openexchange.folderstorage.SortableId;
  */
 public final class VirtualId implements SortableId {
 
-    private final Collator collator;
+    private final String folderId;
 
-    private final String id;
-
-    private final String name;
+    private final int ordinal;
 
     /**
-     * Initializes a new {@link VirtualId}.
+     * Initializes a new {@link DatabaseId}.
      * 
-     * @param id The (real) identifier
-     * @param name The folder name to sort by
-     * @param locale The locale to perform locale-sensitive <code>String</code> comparison
+     * @param folderId The folder identifier
+     * @param ordinal The ordinal
      */
-    public VirtualId(final String id, final String name, final Locale locale) {
+    public VirtualId(final String folderId, final int ordinal) {
         super();
-        this.id = id;
-        this.name = name;
-        collator = Collator.getInstance(locale);
-        collator.setStrength(Collator.SECONDARY);
+        this.folderId = folderId;
+        this.ordinal = ordinal;
     }
 
     public String getId() {
-        return id;
+        return folderId;
     }
 
     public Priority getPriority() {
@@ -90,9 +84,11 @@ public final class VirtualId implements SortableId {
     }
 
     public int compareTo(final SortableId o) {
-        // Compare by name
+        // Compare by ordinal
         if (o instanceof VirtualId) {
-            return collator.compare(name, ((VirtualId) o).name);
+            final int thisVal = this.ordinal;
+            final int anotherVal = ((VirtualId) o).ordinal;
+            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
         final int thisPrio = Priority.HIGH.ordinal();
         final int anotherPrio = (o).getPriority().ordinal();

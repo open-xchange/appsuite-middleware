@@ -120,14 +120,41 @@ public enum FolderField {
      * The total number of objects held by this folder
      */
     TOTAL(309, "total"),
+    /**
+     * The number of new objects held by this folder
+     */
     NEW(310, "new"),
+    /**
+     * The number of unread objects held by this folder
+     */
     UNREAD(311, "unread"),
+    /**
+     * The number of deleted objects held by this folder
+     */
     DELETED(312, "deleted"),
+    /**
+     * The folder's capabilities
+     */
     CAPABILITIES(313, "capabilities"),
+    /**
+     * Folder's subscription
+     */
     SUBSCRIBED(314, "subscribed"),
+    /**
+     * Subscribed subfolders
+     */
     SUBSCR_SUBFLDS(315, "subscr_subflds"),
+    /**
+     * The permissions bits
+     */
     BITS(-1, "bits"),
+    /**
+     * The permission's entity
+     */
     ENTITY(-1, "entity"),
+    /**
+     * The permission's group flag
+     */
     GROUP(-1, "group");
 
     private final int column;

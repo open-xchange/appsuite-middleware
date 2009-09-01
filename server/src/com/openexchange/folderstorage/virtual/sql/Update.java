@@ -49,8 +49,16 @@
 
 package com.openexchange.folderstorage.virtual.sql;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.server.ServiceException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Update} - SQL for updating a virtual folder.
@@ -76,8 +84,37 @@ public final class Update {
      * @throws FolderException If update fails
      */
     public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws FolderException {
-        Delete.deleteFolder(cid, tree, user, folder.getID(), false);
-        Insert.insertFolder(cid, tree, user, folder);
+        final DatabaseService databaseService;
+        try {
+            databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            con.setAutoCommit(false); // BEGIN
+            Delete.deleteFolder(cid, tree, user, folder.getID(), false, con);
+            Insert.insertFolder(cid, tree, user, folder, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final FolderException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(cid, con);
+        }
     }
 
 }

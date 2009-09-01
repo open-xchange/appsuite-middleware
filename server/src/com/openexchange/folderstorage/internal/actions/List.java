@@ -297,7 +297,7 @@ public final class List extends AbstractUserizedFolderAction {
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
                     }
                 }
-                ret = subfolders;
+                ret = trimArray(subfolders);
             }
         } catch (final FolderException e) {
             throw e;
@@ -467,14 +467,7 @@ public final class List extends AbstractUserizedFolderAction {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
         }
-        final java.util.List<UserizedFolder> subfolderList = new ArrayList<UserizedFolder>(subfolders.length);
-        for (int i = 0; i < subfolders.length; i++) {
-            final UserizedFolder uf = subfolders[i];
-            if (null != uf) {
-                subfolderList.add(uf);
-            }
-        }
-        return subfolderList.toArray(new UserizedFolder[subfolderList.size()]);
+        return trimArray(subfolders);
     }
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
@@ -487,6 +480,26 @@ public final class List extends AbstractUserizedFolderAction {
         }
         // 2 * AJP_WATCHER_MAX_RUNNING_TIME
         return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
+    }
+
+    /**
+     * Creates a newly allocated array containing all elements of specified array in the same order except <code>null</code> values.
+     * 
+     * @param userizedFolders The array to trim
+     * @return A newly allocated copy-array with <code>null</code> elements removed
+     */
+    private static UserizedFolder[] trimArray(final UserizedFolder[] userizedFolders) {
+        if (null == userizedFolders) {
+            return new UserizedFolder[0];
+        }
+        final java.util.List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
+        for (int i = 0; i < userizedFolders.length; i++) {
+            final UserizedFolder uf = userizedFolders[i];
+            if (null != uf) {
+                l.add(uf);
+            }
+        }
+        return l.toArray(new UserizedFolder[l.size()]);
     }
 
 }

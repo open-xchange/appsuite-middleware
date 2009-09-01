@@ -35,11 +35,12 @@ public interface FolderStorageDiscoverer {
     FolderStorage[] getFolderStoragesForTreeID(String treeId);
 
     /**
-     * Gets the real folder storages.
+     * Gets the tree folder storages. No cache folder storage is returned.
      * 
-     * @return The real folder storages or an empty array if none available
+     * @param treeId The tree identifier
+     * @return The tree folder storages or an empty array if none available
      */
-    FolderStorage[] getRealFolderStorages();
+    FolderStorage[] getTreeFolderStorages(String treeId);
 
     /**
      * Gets the folder storage capable to handle given content type in specified tree.

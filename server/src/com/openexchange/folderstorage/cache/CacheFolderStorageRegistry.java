@@ -221,11 +221,23 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
-    public FolderStorage[] getRealFolderStorages() {
+    public FolderStorage[] getTreeFolderStorages(final String treeId) {
+        if (!genStorages.isEmpty()) {
+            /*
+             * Check general storages first
+             */
+            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+                final FolderStorage folderStorage = iterator.next();
+                if (!StoragePriority.HIGHEST.equals(folderStorage.getStoragePriority()) && folderStorage.getFolderType().servesTreeId(
+                    treeId)) {
+                    return new FolderStorage[] { folderStorage };
+                }
+            }
+        }
         /*
          * Obtain candidates by tree identifier
          */
-        final List<FolderStorage> storages = registry.get(FolderStorage.REAL_TREE_ID);
+        final List<FolderStorage> storages = registry.get(treeId);
         if (null == storages) {
             return new FolderStorage[0];
         }

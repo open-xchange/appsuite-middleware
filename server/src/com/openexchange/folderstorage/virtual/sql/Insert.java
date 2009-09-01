@@ -78,7 +78,7 @@ public final class Insert {
         super();
     }
 
-    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified, shadow) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified, shadow) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_INSERT_PERM = "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -108,8 +108,20 @@ public final class Insert {
             throw new FolderException(e);
         }
         try {
+            con.setAutoCommit(false); // BEGIN
             insertFolder(cid, tree, user, folder, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final FolderException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            DBUtils.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -167,7 +179,7 @@ public final class Insert {
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, tree);
                     stmt.setInt(pos++, user);
-                    stmt.setString(pos, folderId);
+                    stmt.setString(pos++, folderId);
                     stmt.setInt(pos++, p.getEntity());
                     stmt.setInt(pos++, p.isGroup() ? 1 : 0);
                     stmt.setInt(pos++, p.getFolderPermission());
@@ -192,7 +204,7 @@ public final class Insert {
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
             stmt.setInt(pos++, user);
-            stmt.setString(pos, folderId);
+            stmt.setString(pos++, folderId);
             stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
             stmt.executeUpdate();
         } catch (final SQLException e) {

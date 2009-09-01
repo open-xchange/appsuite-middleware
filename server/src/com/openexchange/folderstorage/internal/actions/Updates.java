@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
@@ -141,10 +142,12 @@ public final class Updates extends AbstractUserizedFolderAction {
      */
     public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted, final ContentType[] includeContentTypes) throws FolderException {
         final List<FolderStorage> realFolderStorages = new ArrayList<FolderStorage>(
-            Arrays.asList(folderStorageDiscoverer.getRealFolderStorages()));
+            Arrays.asList(folderStorageDiscoverer.getTreeFolderStorages(FolderStorage.REAL_TREE_ID)));
         for (final FolderStorage folderStorage : realFolderStorages) {
             folderStorage.startTransaction(storageParameters, false);
         }
+        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(realFolderStorages.size() + 1);
+        openedStorages.addAll(realFolderStorages);
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         try {
             final UserConfiguration userConfiguration;
@@ -157,6 +160,22 @@ public final class Updates extends AbstractUserizedFolderAction {
                         user.getId(),
                         storageParameters.getContext());
                 }
+            }
+            final boolean isReal = FolderStorage.REAL_TREE_ID.equals(treeId);
+            final TreeChecker treeChecker;
+            if (isReal) {
+                treeChecker = TRUST_ALL_CHECKER;
+            } else {
+                /*
+                 * There's only one storage for non-real tree identifier
+                 */
+                final FolderStorage[] treeFolderStorages = folderStorageDiscoverer.getTreeFolderStorages(treeId);
+                if (null == treeFolderStorages || treeFolderStorages.length == 0) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, "*");
+                }
+                final FolderStorage treeStorage = treeFolderStorages[0];
+                checkOpenedStorage(treeStorage, false, openedStorages);
+                treeChecker = new TreeCheckerImpl(treeStorage, storageParameters);
             }
             final List<Folder> updatedList = new ArrayList<Folder>();
             final List<Folder> deletedList = ignoreDeleted ? null : new ArrayList<Folder>();
@@ -202,36 +221,43 @@ public final class Updates extends AbstractUserizedFolderAction {
                             /*
                              * Public
                              */
-                            final Folder parent = getFolder(FolderStorage.REAL_TREE_ID, f.getParentID(), realFolderStorages);
+                            final String parentID = f.getParentID();
+                            final Folder parent = getFolder(FolderStorage.REAL_TREE_ID, parentID, realFolderStorages);
                             final Permission parentPerm = getEffectivePermission(parent);
                             if (parentPerm.getFolderPermission() >= Permission.READ_FOLDER) {
                                 /*
                                  * Parent is visible
                                  */
-                                updatedList.add(parent);
+                                if (treeChecker.containsVirtualFolder(parentID, treeId, StorageType.WORKING)) {
+                                    updatedList.add(parent);
+                                }
                             } else {
                                 /*
                                  * Parent NOT visible. Update superior system folder to let the newly visible folder appear underneath
                                  * virtual "Other XYZ folders"
                                  */
                                 if (InfostoreContentType.getInstance().equals(f.getContentType())) {
-                                    updatedList.add(getFolder(
-                                        FolderStorage.REAL_TREE_ID,
-                                        String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID),
-                                        realFolderStorages));
+                                    final String infostoreId = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+                                    if (treeChecker.containsVirtualFolder(infostoreId, treeId, StorageType.WORKING)) {
+                                        updatedList.add(getFolder(FolderStorage.REAL_TREE_ID, infostoreId, realFolderStorages));
+                                    }
                                 } else {
-                                    updatedList.add(getFolder(
-                                        FolderStorage.REAL_TREE_ID,
-                                        String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID),
-                                        realFolderStorages));
+                                    final String publicId = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+                                    if (treeChecker.containsVirtualFolder(publicId, treeId, StorageType.WORKING)) {
+                                        updatedList.add(getFolder(FolderStorage.REAL_TREE_ID, publicId, realFolderStorages));
+                                    }
                                 }
                             }
                         }
-                        updatedList.add(f);
+                        if (treeChecker.containsVirtualFolder(f.getID(), treeId, StorageType.WORKING)) {
+                            updatedList.add(f);
+                        }
                     } else {
                         checkVirtualListFolders |= (PublicType.getInstance().equals(f.getType()));
                         if (deletedList != null) {
-                            deletedList.add(f);
+                            if (treeChecker.containsVirtualFolder(f.getID(), treeId, StorageType.WORKING)) {
+                                deletedList.add(f);
+                            }
                         }
                     }
                 }
@@ -244,25 +270,33 @@ public final class Updates extends AbstractUserizedFolderAction {
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                     if (userConfiguration.hasTask() && !set.contains(vid)) {
-                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
+                            deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        }
                     }
                 }
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
                     if (userConfiguration.hasCalendar() && !set.contains(vid)) {
-                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
+                            deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        }
                     }
                 }
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
                     if (userConfiguration.hasContact() && !set.contains(vid)) {
-                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
+                            deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        }
                     }
                 }
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
                     if (userConfiguration.hasInfostore() && !set.contains(vid)) {
-                        deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
+                            deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
+                        }
                     }
                 }
             }
@@ -270,55 +304,34 @@ public final class Updates extends AbstractUserizedFolderAction {
              * Check if shared folder must be updated, too
              */
             if (addSystemSharedFolder) {
-                updatedList.add(getFolder(
-                    FolderStorage.REAL_TREE_ID,
-                    String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID),
-                    realFolderStorages));
+                final String sharedId = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+                if (treeChecker.containsVirtualFolder(sharedId, treeId, StorageType.WORKING)) {
+                    updatedList.add(getFolder(FolderStorage.REAL_TREE_ID, sharedId, realFolderStorages));
+                }
             }
             /*
              * Get deleted folders
              */
-            if (!ignoreDeleted) {
+            if (!ignoreDeleted && deletedList != null) {
                 final List<Folder> deletedFolders = new ArrayList<Folder>();
                 for (final FolderStorage folderStorage : realFolderStorages) {
                     final String[] deletedFolderIDs = folderStorage.getDeletedFolderIDs(treeId, since, storageParameters);
                     for (int i = 0; i < deletedFolderIDs.length; i++) {
                         // Pass storage type to fetch folder from backup tables
-                        deletedFolders.add(folderStorage.getFolder(
-                            FolderStorage.REAL_TREE_ID,
-                            deletedFolderIDs[i],
-                            StorageType.BACKUP,
-                            storageParameters));
+                        final String folderId = deletedFolderIDs[i];
+                        if (treeChecker.containsVirtualFolder(folderId, treeId, StorageType.BACKUP)) {
+                            deletedFolders.add(folderStorage.getFolder(
+                                FolderStorage.REAL_TREE_ID,
+                                folderId,
+                                StorageType.BACKUP,
+                                storageParameters));
+                        }
                     }
                 }
                 /*
                  * Add previously gathered "deleted" folders
                  */
-                deletedFolders.addAll(deletedList);
-            }
-            /*
-             * Check tree
-             */
-            if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                /*
-                 * Check if folders are contained in given tree ID
-                 */
-                final FolderStorage fs = folderStorageDiscoverer.getFolderStoragesForTreeID(treeId)[0];
-                checkOpenedStorage(fs, false, realFolderStorages);
-                for (final Iterator<Folder> iterator = updatedList.iterator(); iterator.hasNext();) {
-                    final Folder folder = iterator.next();
-                    if (!fs.containsFolder(treeId, folder.getID(), storageParameters)) {
-                        iterator.remove();
-                    }
-                }
-                if (null != deletedList) {
-                    for (final Iterator<Folder> iterator = deletedList.iterator(); iterator.hasNext();) {
-                        final Folder folder = iterator.next();
-                        if (!fs.containsFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters)) {
-                            iterator.remove();
-                        }
-                    }
-                }
+                deletedList.addAll(deletedFolders);
             }
             /*
              * Generate array of modified folders
@@ -358,7 +371,7 @@ public final class Updates extends AbstractUserizedFolderAction {
             /*
              * Commit
              */
-            for (final FolderStorage folderStorage : realFolderStorages) {
+            for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);
             }
             if (LOG.isDebugEnabled()) {
@@ -370,16 +383,49 @@ public final class Updates extends AbstractUserizedFolderAction {
              */
             return new UserizedFolder[][] { modified, deleted };
         } catch (final FolderException e) {
-            for (final FolderStorage folderStorage : realFolderStorages) {
+            for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
         } catch (final Exception e) {
-            for (final FolderStorage folderStorage : realFolderStorages) {
+            for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static interface TreeChecker {
+
+        boolean containsVirtualFolder(String folderId, String treeId, StorageType storageType) throws FolderException;
+    }
+
+    private static final TreeChecker TRUST_ALL_CHECKER = new TreeChecker() {
+
+        public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws FolderException {
+            return true;
+        }
+    };
+
+    private static final class TreeCheckerImpl implements TreeChecker {
+
+        private final FolderStorage treeStorage;
+
+        private final StorageParameters storageParameters;
+
+        public TreeCheckerImpl(final FolderStorage treeStorage, final StorageParameters storageParameters) {
+            super();
+            this.treeStorage = treeStorage;
+            this.storageParameters = storageParameters;
+        }
+
+        public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws FolderException {
+            /*
+             * Check if folders are contained in given tree ID
+             */
+            return treeStorage.containsFolder(treeId, folderId, storageType, storageParameters);
+        }
+
     }
 
     private Permission getEffectivePermission(final Folder folder) throws FolderException {

@@ -169,6 +169,11 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String CONCURRENT_MODIFICATION_MSG = "The object has been changed in the meantime.";
 
     /**
+     * Folder "%1$s" could not be found in tree "%2$s".
+     */
+    public static final String NOT_FOUND_MSG = "Folder \"%1$s\" could not be found in tree \"%2$s\".";
+
+    /**
      * Initializes a new {@link FolderExceptionMessages}
      */
     private FolderExceptionMessages() {

@@ -144,10 +144,12 @@ public final class VirtualFolderStorage implements FolderStorage {
             virtualFolder.setTreeID(treeId);
         }
         // Load folder data from database
+        final User user = storageParameters.getUser();
         Select.fillFolder(
             storageParameters.getContext().getContextId(),
             Integer.parseInt(treeId),
-            storageParameters.getUser().getId(),
+            user.getId(),
+            user.getLocale(),
             virtualFolder,
             storageType);
         return virtualFolder;
@@ -162,17 +164,18 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
-        final String[][] idNamePairs = Select.getSubfolderIds(
+        final User user = storageParameters.getUser();
+        final Locale locale = user.getLocale();
+        final String[] ids = Select.getSubfolderIds(
             storageParameters.getContext().getContextId(),
             Integer.parseInt(treeId),
-            storageParameters.getUser().getId(),
+            user.getId(),
+            locale,
             parentId,
             StorageType.WORKING);
-        final SortableId[] ret = new SortableId[idNamePairs.length];
-        final Locale locale = storageParameters.getUser().getLocale();
-        for (int i = 0; i < idNamePairs.length; i++) {
-            final String[] idNamePair = idNamePairs[i];
-            ret[i] = new VirtualId(idNamePair[0], idNamePair[1], locale);
+        final SortableId[] ret = new SortableId[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            ret[i] = new VirtualId(ids[i], i);
         }
         return ret;
     }

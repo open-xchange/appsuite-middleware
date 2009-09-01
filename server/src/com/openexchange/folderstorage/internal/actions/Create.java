@@ -217,50 +217,54 @@ public final class Create extends AbstractAction {
     private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws FolderException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-        /*
-         * Check if real storage supports folder's content types
-         */
-        if (supportsContentType(folderContentType, realStorage)) {
-            checkOpenedStorage(realStorage, openedStorages);
-            /*
-             * 1. Create in real storage
-             */
-            realStorage.createFolder(toCreate, storageParameters);
-            /*
-             * 2. Create in virtual storage
-             */
-            // TODO: Pass this one? final Folder created = realStorage.getFolder(treeId, toCreate.getID(), storageParameters);
+        if (realStorage.equals(virtualStorage)) {
             virtualStorage.createFolder(toCreate, storageParameters);
         } else {
             /*
-             * Find the real storage which is capable to create the folder
+             * Check if real storage supports folder's content types
              */
-            final FolderStorage capStorage = folderStorageDiscoverer.getFolderStorageByContentType(
-                FolderStorage.REAL_TREE_ID,
-                folderContentType);
-            if (null == capStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
-            }
-            checkOpenedStorage(capStorage, openedStorages);
-            /*
-             * 1. Create at default location in capable real storage
-             */
-            {
-                final String realParentId = capStorage.getDefaultFolderID(
-                    user,
+            if (supportsContentType(folderContentType, realStorage)) {
+                checkOpenedStorage(realStorage, openedStorages);
+                /*
+                 * 1. Create in real storage
+                 */
+                realStorage.createFolder(toCreate, storageParameters);
+                /*
+                 * 2. Create in virtual storage
+                 */
+                // TODO: Pass this one? final Folder created = realStorage.getFolder(treeId, toCreate.getID(), storageParameters);
+                virtualStorage.createFolder(toCreate, storageParameters);
+            } else {
+                /*
+                 * Find the real storage which is capable to create the folder
+                 */
+                final FolderStorage capStorage = folderStorageDiscoverer.getFolderStorageByContentType(
                     FolderStorage.REAL_TREE_ID,
-                    capStorage.getDefaultContentType(),
-                    storageParameters);
-                // TODO: Check permission for obtained default folder ID?
-                final Folder clone4Real = (Folder) toCreate.clone();
-                clone4Real.setParentID(realParentId);
-                capStorage.createFolder(clone4Real, storageParameters);
-                toCreate.setID(clone4Real.getID());
+                    folderContentType);
+                if (null == capStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
+                }
+                checkOpenedStorage(capStorage, openedStorages);
+                /*
+                 * 1. Create at default location in capable real storage
+                 */
+                {
+                    final String realParentId = capStorage.getDefaultFolderID(
+                        user,
+                        FolderStorage.REAL_TREE_ID,
+                        capStorage.getDefaultContentType(),
+                        storageParameters);
+                    // TODO: Check permission for obtained default folder ID?
+                    final Folder clone4Real = (Folder) toCreate.clone();
+                    clone4Real.setParentID(realParentId);
+                    capStorage.createFolder(clone4Real, storageParameters);
+                    toCreate.setID(clone4Real.getID());
+                }
+                /*
+                 * 2. Create in virtual storage
+                 */
+                virtualStorage.createFolder(toCreate, storageParameters);
             }
-            /*
-             * 2. Create in virtual storage
-             */
-            virtualStorage.createFolder(toCreate, storageParameters);
         }
         return toCreate.getID();
         // TODO: Check for storage capabilities! Does storage support permissions? Etc.

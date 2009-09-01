@@ -150,7 +150,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * The object has been changed in the meantime.
      */
-    CONCURRENT_MODIFICATION(FolderExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CONCURRENT_MODIFICATION, 22);
+    CONCURRENT_MODIFICATION(FolderExceptionMessages.CONCURRENT_MODIFICATION_MSG, Category.CONCURRENT_MODIFICATION, 22),
+    /**
+     * Folder "%1$s" could not be found in tree "%2$s".
+     */
+    NOT_FOUND(FolderExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 23);
 
     private final Category category;
 

@@ -76,6 +76,8 @@ public final class VirtualFolder implements Folder {
 
     private String name;
 
+    private String localizedName;
+
     private String parent;
 
     private Permission[] permissions;
@@ -164,7 +166,10 @@ public final class VirtualFolder implements Folder {
     }
 
     public String getLocalizedName(final Locale locale) {
-        return new StringHelper(locale).getString(getName());
+        if (null == localizedName) {
+            localizedName = new StringHelper(locale).getString(getName());
+        }
+        return localizedName;
     }
 
     public String getName() {
@@ -213,6 +218,7 @@ public final class VirtualFolder implements Folder {
 
     public void setName(final String name) {
         this.name = name;
+        this.localizedName = null;
     }
 
     public void setParentID(final String parentId) {
@@ -248,7 +254,7 @@ public final class VirtualFolder implements Folder {
     }
 
     public boolean isGlobalID() {
-        return realFolder.isGlobalID();
+        return false;
     }
 
     public boolean isCacheable() {
