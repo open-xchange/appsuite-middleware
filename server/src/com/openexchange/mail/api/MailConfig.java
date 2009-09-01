@@ -289,10 +289,10 @@ public abstract class MailConfig {
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
                 throw new MailConfigException(
-                    new StringBuilder(128).append("Property \"").append("com.openexchange.mail.mailServer").append(
+                    new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
                         "\" not set in mail properties").toString());
             }
-            throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ").append(
+            throw new MailConfigException(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(
                 userId).append(" in context ").append(contextId).toString());
         }
         {
