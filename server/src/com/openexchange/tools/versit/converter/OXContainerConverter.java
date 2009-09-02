@@ -923,13 +923,6 @@ public class OXContainerConverter {
                     }
                 }
                 final ArrayList<?> A = (ArrayList<?>) property.getValue();
-                // fix for 7248
-                if (A != null) {
-                    for (int j = A.size(); j < 7; j++) {
-                        A.add(null);
-                    }
-                }
-                // fix:end, TODO: Entfuckeln
                 if (A == null || A.size() != 7) {
                     throw new ConverterException("Invalid property ADR");
                 }
