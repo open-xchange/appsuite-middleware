@@ -259,8 +259,8 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
             emailaddress,
             getHostName(),
             getSessionId());
-        assertTrue("Only one import?", importResult.length == 1);
-        assertFalse("Import worked?", importResult[0].hasError());
+        assertEquals("Should have one import only", 1, importResult.length);
+        assertFalse("Import does have error: " + importResult[0].getException(), importResult[0].hasError());
 
         final int contactId = Integer.parseInt(importResult[0].getObjectId());
         final Contact myImport = ContactTest.loadContact(
