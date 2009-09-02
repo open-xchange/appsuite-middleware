@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.List;
-import java.util.Vector;
 import org.ho.yaml.Yaml;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;

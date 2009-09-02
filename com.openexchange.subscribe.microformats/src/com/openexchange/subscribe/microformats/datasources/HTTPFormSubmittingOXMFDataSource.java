@@ -60,7 +60,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.parser.OXMFForm;

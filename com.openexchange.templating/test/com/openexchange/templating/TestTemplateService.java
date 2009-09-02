@@ -62,7 +62,6 @@ import com.openexchange.templating.impl.OXFolderHelper;
 import com.openexchange.templating.impl.OXInfostoreHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import freemarker.template.Template;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

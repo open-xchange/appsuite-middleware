@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.OXMFParser;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;

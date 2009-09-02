@@ -49,11 +49,8 @@
 
 package com.openexchange.subscribe.microformats.transformers;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import com.openexchange.subscribe.SubscriptionException;
 
 

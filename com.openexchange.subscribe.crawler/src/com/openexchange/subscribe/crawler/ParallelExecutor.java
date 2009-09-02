@@ -54,14 +54,12 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.openexchange.groupware.container.Contact;
 //import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.timer.TimerService;
 
 
 /**

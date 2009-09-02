@@ -50,14 +50,8 @@
 package com.openexchange.subscribe.microformats.datasources;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.subscribe.Subscription;
