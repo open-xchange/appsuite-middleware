@@ -5,6 +5,8 @@ workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageStep
+      baseUrl: "https://www.linkedin.com"
+      linkAvailableAfterLogin: /connections?trk=hb_side_cnts
       nameOfLoginForm: login
       nameOfPasswordField: session_password
       nameOfUserField: session_key
@@ -22,7 +24,34 @@ workflowString: |
       subpageLinkRegex: "(/connectionsnojs\\?split_page=).*"
       subpages: []
       subpagesHref: []
-    - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsStep
-      pictureUrl: "http://media.linkedin.com/mpr/mpr/shrink_80_80"
-      vcardUrl: /addressBookExport?exportMemberVCard
+    - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
+      pageParts: !com.openexchange.subscribe.crawler.PagePartSequence
+        page: ""
+        pageParts: 
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-Zäöü\\s]*\">)"
+            type: 1
+            typeOfInfo: image
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<h1 class=\"n fn\">)"
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(span class=\"given-name\">)([a-zA-Zäöü]*)(</span>)"
+            type: 1
+            typeOfInfo: first_name
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(span class=\"family-name\">)([a-zA-Zäöü]*)(</span>)"
+            type: 1
+            typeOfInfo: last_name
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<p class=\"title\">[\\s]*)([a-zA-Zäöü\\x20]*)([\\s]*</p>)"
+            type: 1
+            typeOfInfo: title
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<dt>Phone:</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([\\(\\)\\+\\s0-9]*)(<span class=\"type\">\\(Mobile\\))"
+            type: 1
+            typeOfInfo: cellular_telephone1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(mailto:)([a-z@A-Z0-9\\.-]*)(\")"
+            type: 1
+            typeOfInfo: email1
   

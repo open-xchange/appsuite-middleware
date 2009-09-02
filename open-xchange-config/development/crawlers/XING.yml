@@ -5,6 +5,8 @@ workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageStep
+      baseUrl: "https://www.xing.com"
+      linkAvailableAfterLogin: /app/contact
       nameOfLoginForm: loginform
       nameOfPasswordField: login_password
       nameOfUserField: login_user_name
