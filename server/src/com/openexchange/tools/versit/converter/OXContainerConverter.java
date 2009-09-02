@@ -929,7 +929,7 @@ public class OXContainerConverter {
                         A.add(null);
                     }
                 }
-                // fix:end
+                // fix:end, TODO: Entfuckeln
                 if (A == null || A.size() != 7) {
                     throw new ConverterException("Invalid property ADR");
                 }
