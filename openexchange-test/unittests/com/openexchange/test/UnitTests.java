@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.groupware.importexport.ImportExportStandaloneSuite;
 import com.openexchange.groupware.infostore.WebdavFolderAliasesTest;
 
 public class UnitTests {
@@ -160,6 +161,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
+        
+        tests.addTest(ImportExportStandaloneSuite.suite());
 
         // Slow Tests
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
@@ -174,7 +177,6 @@ public class UnitTests {
 
         // This test destroys the server service registry to prevent failing. So this must always be the last test.
         tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
-
         return tests;
     }
 }

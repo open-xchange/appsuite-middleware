@@ -56,6 +56,7 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
@@ -169,7 +170,8 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Checking nickname", nickname, compareNickname);
 	}
 	
-	public void testDateSwitchingForBug7552() throws ParseException, ContactException{
+	public void testDateSwitchingForBug7552() throws Exception{
+	    Init.startServer();
 		//preparations
 		Contact conObj = new Contact();
 		final ContactField field = ContactField.BIRTHDAY;
