@@ -63,9 +63,10 @@ public final class ImportExportServerSuite {
 		tests.addTest(ICalTestSuite.suite());
 
 		//VCARD
-		tests.addTestSuite(AbstractVCardImportTest.class);
+		tests.addTestSuite(VCardImportBugTests.class);
 		tests.addTestSuite(VCardExportTest.class);
 		tests.addTestSuite(Bug9475Test.class);
+		tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
 
 		//CSV
 		tests.addTestSuite(CSVImportExportServletTest.class);

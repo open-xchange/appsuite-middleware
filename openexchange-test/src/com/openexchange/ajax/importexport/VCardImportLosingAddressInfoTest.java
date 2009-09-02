@@ -86,7 +86,7 @@ public class VCardImportLosingAddressInfoTest extends AbstractVCardImportTest {
             + "END:VCARD\n";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
-            new ByteArrayInputStream(vcard.getBytes("Cp1252")),
+            new ByteArrayInputStream(vcard.getBytes("UTF-8")),
             testFolder.getObjectID(),
             timeZone,
             emailaddress,

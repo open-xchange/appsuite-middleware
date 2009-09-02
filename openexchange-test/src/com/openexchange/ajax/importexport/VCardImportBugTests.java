@@ -74,7 +74,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
 
     public void testImportVCard() throws Exception {
         final Contact contactObj = new Contact();
-        contactObj.setSurName("testImportVCard" + System.currentTimeMillis());
+        contactObj.setSurName("surname");
         contactObj.setGivenName("givenName");
         contactObj.setBirthday(simpleDateFormat.parse("2007-04-04"));
 
