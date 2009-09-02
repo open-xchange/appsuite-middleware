@@ -106,7 +106,7 @@ public class Activator implements BundleActivator {
     	for (File file : files){
     		try {
     			//System.out.println("***** File " + file.getPath());
-    			if (file.isFile()){
+    			if (file.isFile() && file.getPath().endsWith(".yml")){
     				crawlers.add((CrawlerDescription)Yaml.load(file));
     			}
 			} catch (FileNotFoundException e) {
