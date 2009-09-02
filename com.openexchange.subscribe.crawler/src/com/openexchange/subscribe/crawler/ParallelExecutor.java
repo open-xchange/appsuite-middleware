@@ -58,10 +58,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.json.JSONArray;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.timer.TimerService;
@@ -100,7 +98,7 @@ public class ParallelExecutor{
                 
             index ++;
         }
-        System.out.println("***** No. of tasks : "+sublists.size());
+        //System.out.println("***** No. of tasks : "+sublists.size());
         return sublists;
     }
     

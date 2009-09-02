@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Calendar;
 
 import org.ho.yaml.Yaml;
 
@@ -76,6 +77,8 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 
 	protected void findOutIfThereAreContactsForThisConfiguration(
 			String username, String password, CrawlerDescription crawler) {
+	            Calendar rightNow = Calendar.getInstance();
+	            long before = rightNow.getTime().getTime();
 				//create a GenericSubscribeService that uses this CrawlerDescription
 			    GenericSubscribeService service = new GenericSubscribeService(crawler.getDisplayName(), crawler.getId(), crawler.getWorkflowString());
 				
@@ -92,14 +95,19 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 					System.out.println("contact retrieved is : " + contact.getDisplayName());
 					System.out.println("contacts first name : " + contact.getGivenName());
 					System.out.println("contacts last name : " + contact.getSurName());
+					System.out.println("contacts title : " + contact.getTitle());
 					System.out.println("contacts email address : " + contact.getEmail1());
-					System.out.println("contacts birthday is : " + contact.getBirthday());					
-					System.out.println("contacts picture type is : " + contact.getImageContentType());
-					System.out.println("contacts city of work is : " + contact.getCityBusiness());
+					System.out.println("contacts mobile phone number : " + contact.getCellularTelephone1());
+					System.out.println("contacts birthday : " + contact.getBirthday());					
+					System.out.println("contacts picture type : " + contact.getImageContentType());
+					System.out.println("contacts city of work : " + contact.getCityBusiness());
 					
 			        System.out.println("----------");
 				}
 			    System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
+			    rightNow = Calendar.getInstance();
+			    long after = rightNow.getTime().getTime();
+			    System.out.println("Time : " + Long.toString((after - before)/1000) + " seconds");
 			}
 
 	/**

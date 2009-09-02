@@ -25,7 +25,7 @@ public class MultithreadedHtmlUnitTest extends TestCase {
             "login",
             "session_key",
             "session_password",
-            "LinkedIn | Home"));
+            "LinkedIn | Home", "https://www.linkedin.com"));
         listOfSteps.add(new PageByUrlStep(
             "Get to the contacts list", 
             "http://www.linkedin.com/connections?trk=hb_side_cnts"));

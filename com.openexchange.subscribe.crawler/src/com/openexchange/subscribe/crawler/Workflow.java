@@ -2,6 +2,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.List;
 import java.util.Vector;
+import org.ho.yaml.Yaml;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -21,6 +22,8 @@ public class Workflow {
     
 	private List<Step> steps;
 	
+	private String loginStepString;
+	
 	public Workflow() {
 		
 	}
@@ -32,21 +35,21 @@ public class Workflow {
 	// Convenience method for setting username and password after the workflow was created
 	public Contact[] execute(String username, String password) throws SubscriptionException{
 		for (Step currentStep : steps) {
-			if (currentStep instanceof LoginPageStep){
-				((LoginPageStep) currentStep).setUsername(username);
-				((LoginPageStep) currentStep).setPassword(password);
+			if (currentStep instanceof LoginStep){
+				((LoginStep) currentStep).setUsername(username);
+				((LoginStep) currentStep).setPassword(password);
+				loginStepString = Yaml.dump(currentStep);
+				//System.out.println("***** Dumping current step as LoginStep : " + currentStep);
 			}
-			if (currentStep instanceof LoginPageByFormActionStep){
-				((LoginPageByFormActionStep) currentStep).setUsername(username);
-				((LoginPageByFormActionStep) currentStep).setPassword(password);
+			if (currentStep instanceof NeedsLoginStepString && null != loginStepString){
+			    ((NeedsLoginStepString) currentStep).setLoginStepString(loginStepString);
+			    //System.out.println("***** Setting LoginStep for currentStep : " + currentStep);
 			}
 		}	
 		return execute();
 	}
 
 	public Contact[] execute()  throws SubscriptionException {
-		Vector<Contact> contactObjects = new Vector<Contact>();
-		boolean workflowComplete = true;
 		
 		// emulate a known client, hopefully keeping our profile low
 		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);

@@ -52,6 +52,9 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 
 import org.ho.yaml.Yaml;
+//import com.openexchange.server.services.ServerServiceRegistry;
+//import com.openexchange.timer.TimerService;
+//import com.openexchange.timer.internal.TimerImpl;
 
 
 /**
@@ -71,6 +74,11 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
 		crawler.setDisplayName("LinkedIn");
 		crawler.setId("com.openexchange.subscribe.linkedin");
 		
+		//initiate the TimerService for MultiThreading
+//		final TimerImpl timer = new TimerImpl();
+//        timer.start();
+//		ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
+		
 		ArrayList<Step> listOfSteps = new ArrayList<Step>();
         
         listOfSteps.add(new LoginPageStep(
@@ -81,7 +89,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "login",
             "session_key",
             "session_password",
-            "/connections?trk=hb_side_cnts"));
+            "/connections?trk=hb_side_cnts",
+            "https://www.linkedin.com"));
         listOfSteps.add(new PageByUrlStep(
             "Get to the contacts list", 
             "http://www.linkedin.com/connections?trk=hb_side_cnts"));
@@ -92,16 +101,23 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "Get all pages that link to a connections profile",
             "(/connectionsnojs\\?split_page=).*",
             "(/profile\\?viewProfile=).*(goback).*"));
-        listOfSteps.add(new ContactObjectsByHTMLAnchorsStep(
-            "Extract the contact information from these pages",
-            "/addressBookExport?exportMemberVCard",
-            "http://media.linkedin.com/mpr/mpr/shrink_80_80"));
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-ZŠšŸ\\s]*\">)","image"));
+        pageParts.add(new PagePart("(<h1 class=\"n fn\">)"));
+        pageParts.add(new PagePart("(span class=\"given-name\">)([a-zA-ZŠšŸ]*)(</span>)", "first_name"));
+        pageParts.add(new PagePart("(span class=\"family-name\">)([a-zA-ZŠšŸ]*)(</span>)", "last_name"));
+        pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-ZŠšŸ\\x20]*)([\\s]*</p>)","title"));
+        pageParts.add(new PagePart("(<dt>Phone:</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([\\(\\)\\+\\s0-9]*)(<span class=\"type\">\\(Mobile\\))","cellular_telephone1"));
+        pageParts.add(new PagePart("(mailto:)([a-z@A-Z0-9\\.-]*)(\")", "email1"));
+        
+        PagePartSequence sequence = new PagePartSequence(pageParts, "");
+        listOfSteps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep("Get the information of each contact from the individual webpages",sequence));
 
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
         
-        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
-        //uncomment this if the if the crawler description was updated to get the new config-files
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        //uncomment this if the crawler description was updated to get the new config-files
         //dumpThis(crawler, "conf/crawlers/", crawler.getDisplayName());
 	}
 }
