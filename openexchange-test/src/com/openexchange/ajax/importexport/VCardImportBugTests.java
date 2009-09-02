@@ -51,58 +51,26 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 
+
 /**
+ * {@link VCardImportBugTests}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class VCardImportTest extends AbstractVCardTest {
+public class VCardImportBugTests extends AbstractVCardImportTest {
 
-    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-    private FolderTestManager folderManager;
-
-    private AJAXClient client;
-
-    private FolderObject testFolder;
-
-    public VCardImportTest(final String name) throws Exception {
+    public VCardImportBugTests(String name) throws Exception {
         super(name);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        folderManager = new FolderTestManager(client);
-        testFolder = folderManager.generateFolder(
-            "VCard Interface Tests",
-            Module.CONTACTS.getFolderConstant(),
-            client.getValues().getPrivateContactFolder(),
-            client.getValues().getUserId());
-        folderManager.insertFolderOnServer(testFolder);
-        contactFolderId = testFolder.getObjectID();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        folderManager.cleanUp();
-        super.tearDown();
-    }
+    
 
     public void testImportVCard() throws Exception {
         final Contact contactObj = new Contact();
@@ -193,13 +161,13 @@ public class VCardImportTest extends AbstractVCardTest {
 
     public void test6823() throws TestException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
-        		"VERSION:3.0\n" +
-        		"N:;Svetlana;;;\n" +
-        		"FN:Svetlana\n" +
-        		"TEL;type=CELL;type=pref:6670373\n" +
-        		"CATEGORIES:Nicht abgelegt\n" +
-        		"X-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\n" +
-        		"END:VCARD";
+                "VERSION:3.0\n" +
+                "N:;Svetlana;;;\n" +
+                "FN:Svetlana\n" +
+                "TEL;type=CELL;type=pref:6670373\n" +
+                "CATEGORIES:Nicht abgelegt\n" +
+                "X-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\n" +
+                "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
             new ByteArrayInputStream(vcard.getBytes()),
@@ -215,17 +183,17 @@ public class VCardImportTest extends AbstractVCardTest {
 
     public void test6962followup() throws TestException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
-        		"VERSION:3.0\n" +
-        		"N:;Svetlana;;;\n" +
-        		"FN:Svetlana\n" +
-        		"TEL;type=CELL;type=pref:673730\n" +
-        		"END:VCARD\n" +
-        		"BEGIN:VCARD\n" +
-        		"VERSION:666\n" +
-        		"N:;Svetlana;;;\n" +
-        		"FN:Svetlana\n" +
-        		"TEL;type=CELL;type=pref:6670373\n" +
-        		"END:VCARD";
+                "VERSION:3.0\n" +
+                "N:;Svetlana;;;\n" +
+                "FN:Svetlana\n" +
+                "TEL;type=CELL;type=pref:673730\n" +
+                "END:VCARD\n" +
+                "BEGIN:VCARD\n" +
+                "VERSION:666\n" +
+                "N:;Svetlana;;;\n" +
+                "FN:Svetlana\n" +
+                "TEL;type=CELL;type=pref:6670373\n" +
+                "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
             new ByteArrayInputStream(vcard.getBytes()),
@@ -246,11 +214,11 @@ public class VCardImportTest extends AbstractVCardTest {
 
     public void test7106() throws TestException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
-        		"VERSION:3.0\n" +
-        		"N:;H\u00fcb\u00fcrt;;;\n" +
-        		"FN:H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n\n" +
-        		"TEL;type=CELL;type=pref:6670373\n" +
-        		"END:VCARD\n";
+                "VERSION:3.0\n" +
+                "N:;H\u00fcb\u00fcrt;;;\n" +
+                "FN:H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n\n" +
+                "TEL;type=CELL;type=pref:6670373\n" +
+                "END:VCARD\n";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
             new ByteArrayInputStream(vcard.getBytes("UTF-8")),
@@ -277,12 +245,12 @@ public class VCardImportTest extends AbstractVCardTest {
      */
     public void test7248() throws TestException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
-        		"VERSION:2.1\n" +
-        		"N:Colombara;Robert\n" +
-        		"FN:Robert Colombara\n" +
-        		"ADR;WORK:;;;;;;DE\n" +
-        		"ADR;HOME:;;;;;- / -\n" +
-        		"END:VCARD";
+                "VERSION:2.1\n" +
+                "N:Colombara;Robert\n" +
+                "FN:Robert Colombara\n" +
+                "ADR;WORK:;;;;;;DE\n" +
+                "ADR;HOME:;;;;;- / -\n" +
+                "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
             new ByteArrayInputStream(vcard.getBytes()),
@@ -310,10 +278,10 @@ public class VCardImportTest extends AbstractVCardTest {
      */
     public void test7249() throws TestException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
-        		"VERSION:2.1\n" +
-        		"FN:Conference_Room_Olpe\n" +
-        		"EMAIL;PREF;INTERNET:Conference_Room_Olpe_EMAIL\n" +
-        		"END:VCARD";
+                "VERSION:2.1\n" +
+                "FN:Conference_Room_Olpe\n" +
+                "EMAIL;PREF;INTERNET:Conference_Room_Olpe_EMAIL\n" +
+                "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
             new ByteArrayInputStream(vcard.getBytes()),
@@ -343,10 +311,10 @@ public class VCardImportTest extends AbstractVCardTest {
      */
     public void test7250() throws TestException, IOException, SAXException, JSONException, Exception {
         final String vcard = "BEGIN:VCARD\n" +
-        		"VERSION:2.1\n" +
-        		"N;CHARSET=Windows-1252:B\u00f6rnig;Anke;;;\n" +
-        		"FN;CHARSET=Windows-1252:Anke  B\u00f6rnig\n" +
-        		"END:VCARD";
+                "VERSION:2.1\n" +
+                "N;CHARSET=Windows-1252:B\u00f6rnig;Anke;;;\n" +
+                "FN;CHARSET=Windows-1252:Anke  B\u00f6rnig\n" +
+                "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
             new ByteArrayInputStream(vcard.getBytes("Cp1252")),
@@ -368,51 +336,5 @@ public class VCardImportTest extends AbstractVCardTest {
         assertEquals("Checking surname:", "B\u00f6rnig", myImport.getSurName());
     }
 
-    public void do_not_test14350() throws Exception {
-        String vcard = "BEGIN:VCARD\n"
-            + "VERSION:3.0\n"
-            + "PRODID:OPEN-XCHANGE\n"
-            + "FN:Prinz\\, Tobias\n"
-            + "N:Prinz;Tobias;;;\n"
-            + "NICKNAME:Tierlieb\n"
-            + "BDAY:19810501\n"
-            + "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;TŸbingen;Baden-WŸrttemberg;57621;Germany\n"
-            + "ADR;TYPE=home:;;Testroad 4711;Port de la VŽrde;Skol-upon-sea;37542;France\n"
-            + "ORG:- deactivated -\n" + "REV:20061204T160750.018Z\n"
-            + "UID:80@ox6.netline.de\n"
-            + "END:VCARD\n";
-        final ImportResult[] importResult = importVCard(
-            getWebConversation(),
-            new ByteArrayInputStream(vcard.getBytes("Cp1252")),
-            testFolder.getObjectID(),
-            timeZone,
-            emailaddress,
-            getHostName(),
-            getSessionId());
 
-        assertFalse("Worked?", importResult[0].hasError());
-
-        final int contactId = Integer.parseInt(importResult[0].getObjectId());
-        final Contact actual = ContactTest.loadContact(
-            getWebConversation(),
-            contactId,
-            testFolder.getObjectID(),
-            getHostName(),
-            getLogin(),
-            getPassword());
-
-        assertEquals("Checking name:", "Prinz", actual.getSurName());
-
-        assertEquals("Street, business", "Broadway 3131 / 5th Ave", actual.getStreetBusiness());
-        assertEquals("City, business", "TŸbingen", actual.getCityBusiness());
-        assertEquals("State, business", "Baden-WŸrttemberg", actual.getStateBusiness());
-        assertEquals("ZIP, business", "57621", actual.getPostalCodeBusiness());
-        assertEquals("Country, business", "Germany", actual.getCountryBusiness());
-
-        assertEquals("Street, home", "Testroad 4711", actual.getStreetHome());
-        assertEquals("City, home", "Port de la VŽrde", actual.getCityHome());
-        assertEquals("State, home", "Skol-upon-sea", actual.getStateHome());
-        assertEquals("ZIP, home", "37542", actual.getPostalCodeHome());
-        assertEquals("Country, home", "France", actual.getCountryHome());
-    }
 }

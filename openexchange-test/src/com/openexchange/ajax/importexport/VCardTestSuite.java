@@ -56,7 +56,7 @@ public class VCardTestSuite extends TestSuite{
 	
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
-		tests.addTestSuite( VCardImportTest.class );
+		tests.addTestSuite( VCardImportBugTests.class );
 		tests.addTestSuite( VCardExportTest.class );
         tests.addTestSuite(Bug9209Test.class);
 		tests.addTestSuite(Bug9475Test.class);

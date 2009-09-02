@@ -49,30 +49,49 @@
 
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.FolderTestManager;
 
 /**
- * This suite is meant to be used with a running OX.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class ImportExportServerSuite {
+public abstract class AbstractVCardImportTest extends AbstractVCardTest {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTest(ICalTestSuite.suite());
+    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-		//VCARD
-		tests.addTestSuite(AbstractVCardImportTest.class);
-		tests.addTestSuite(VCardExportTest.class);
-		tests.addTestSuite(Bug9475Test.class);
+    private FolderTestManager folderManager;
 
-		//CSV
-		tests.addTestSuite(CSVImportExportServletTest.class);
+    private AJAXClient client;
 
-		// Overall bug tests.
-		tests.addTestSuite(Bug9209Test.class);
+    protected FolderObject testFolder;
 
-		return tests;
-	}
+    public AbstractVCardImportTest(final String name) throws Exception {
+        super(name);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        folderManager = new FolderTestManager(client);
+        testFolder = folderManager.generateFolder(
+            "VCard Interface Tests",
+            Module.CONTACTS.getFolderConstant(),
+            client.getValues().getPrivateContactFolder(),
+            client.getValues().getUserId());
+        folderManager.insertFolderOnServer(testFolder);
+        contactFolderId = testFolder.getObjectID();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        folderManager.cleanUp();
+        super.tearDown();
+    }
 }
