@@ -99,6 +99,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
@@ -743,7 +744,7 @@ public class OXContainerConverter {
             ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.SUFFIX)), N.get(4), " ");
         }
         // NICKNAME
-        StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer.valueOf(Contact.NICKNAME)));
+        StringFromListProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer.valueOf(Contact.NICKNAME)));
         // PHOTO
         property = object.getProperty("PHOTO");
         if (property != null) {
@@ -1148,6 +1149,26 @@ public class OXContainerConverter {
             }
             final Object[] args = { property.getValue().toString() };
             setStringMethod.invoke(containerObj, args);
+            return true;
+        } catch (final Exception e) {
+            throw new ConverterException(e);
+        }
+    }
+
+    /**
+     * Bridges the gap between a Versit object  using a list and OX using a single string field 
+     */
+    private static boolean StringFromListProperty(final Object containerObj, final VersitObject object, final String VersitName, final Method setStringMethod) throws ConverterException {
+        try {
+            final Property property = object.getProperty(VersitName);
+            if (property == null) {
+                return false;
+            }
+            if( property.getValue() instanceof String) //hack to solve different behaviour of our VCard 2.1 parser
+                return StringProperty(containerObj, object, VersitName, setStringMethod);
+            
+            final List<String> args = (List<String>) property.getValue();
+            setStringMethod.invoke(containerObj, Strings.join(args, ", "));
             return true;
         } catch (final Exception e) {
             throw new ConverterException(e);
