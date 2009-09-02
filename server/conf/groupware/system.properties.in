@@ -24,10 +24,6 @@ UserConfigurationStorage=Caching
 # true or the database will get a lot more load.
 Cache=true
 
-# Location of the server.properties configuration file. This file configures
-# essential server settings.
-Server=@oxgroupwaresysconfdir@/server.properties
-
 # Location of the calendar.properties configuration file. This file configures
 # the calendar subsystem.
 Calendar=@oxgroupwaresysconfdir@/calendar.properties

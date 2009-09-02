@@ -77,7 +77,7 @@ public abstract class AJPv13Server {
      * @param instance The instance to use as singleton
      * @throws IllegalStateException If instance has already been set before
      */
-    public static void setInstrance(final AJPv13Server instance) {
+    public static void setInstance(final AJPv13Server instance) {
         AJPv13Server tmp = AJPv13Server.instance;
         if (null == tmp) {
             synchronized (AJPv13Server.class) {

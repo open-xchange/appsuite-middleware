@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactConfig;
 
@@ -77,29 +78,28 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public Object addingService(final ServiceReference reference) {
-        final ConfigurationService configuration = (ConfigurationService)
-            context.getService(reference);
-        ParticipantConfig.getInstance().initialize(configuration);
-        ContactConfig.getInstance().initialize(configuration);
-        return configuration;
+    public Object addingService(ServiceReference reference) {
+        ConfigurationService confService = (ConfigurationService) context.getService(reference);
+        ServerConfig.getInstance().initialize(confService);
+        ParticipantConfig.getInstance().initialize(confService);
+        ContactConfig.getInstance().initialize(confService);
+        return confService;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removedService(final ServiceReference reference,
-        final Object service) {
+    public void removedService(ServiceReference reference, final Object service) {
         // ConfigurationService is not referenced in ContactConfig.
         // ConfigurationService is not referenced in ParticipantConfig.
+        ServerConfig.getInstance().shutdown();
         context.ungetService(reference);
     }
 }

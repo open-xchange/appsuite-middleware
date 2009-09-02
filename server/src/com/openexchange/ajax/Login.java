@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -65,6 +66,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -100,12 +102,20 @@ public class Login extends AJAXServlet {
 
     public static final String COOKIE_PREFIX = "open-xchange-session-";
 
-    private static transient final Log LOG = LogFactory.getLog(Login.class);
+    private static final Log LOG = LogFactory.getLog(Login.class);
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
+    private boolean checkIP = true;
+
+    public Login() {
+        super();
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+    }
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final String action = req.getParameter(PARAMETER_ACTION);
@@ -304,7 +314,7 @@ public class Login extends AJAXServlet {
                         final String sessionId = cookie.getValue();
                         if (sessiondService.refreshSession(sessionId)) {
                             final Session session = sessiondService.getSession(sessionId);
-                            SessionServlet.checkIP(session.getLocalIp(), req.getRemoteAddr());
+                            SessionServlet.checkIP(checkIP, session, req.getRemoteAddr());
                             try {
                                 final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
                                 final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);

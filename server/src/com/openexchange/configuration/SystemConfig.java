@@ -155,7 +155,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      * {@inheritDoc}
      */
     public void stop() {
-        singleton.clearProperties();
+        clearProperties();
     }
 
     /**
@@ -182,10 +182,6 @@ public final class SystemConfig extends AbstractConfig implements Initialization
          * Defines if caching should be used.
          */
         CACHE("Cache"),
-        /**
-         * server.properties.
-         */
-        SERVER_CONFIG("Server"),
         /**
          * calendar.properties.
          */

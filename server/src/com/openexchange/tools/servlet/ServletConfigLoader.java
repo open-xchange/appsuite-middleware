@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import com.openexchange.configuration.ServerConfig;
 
 /**
  * The ServletConfigLoader is used to discover init parameters for servlets. Some 3rd party servlets prefer to be configured via init
@@ -184,9 +185,8 @@ public final class ServletConfigLoader {
                     m.putAll(loadProperties(f));
                 }
             }
-            return m;
         }
-        return null;
+        return m;
     }
 
     /**
@@ -251,7 +251,7 @@ public final class ServletConfigLoader {
 
     private File directory;
 
-    private Map<String, String> globalProps;
+    private final Map<String, String> globalProps; 
 
     /**
      * Remembers failed lookups on path property files
@@ -271,6 +271,7 @@ public final class ServletConfigLoader {
     public ServletConfigLoader(final File directory) {
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
+        globalProps.put(ServerConfig.Property.IP_CHECK.getPropertyName(), ServerConfig.getInstance().isCheckIP().toString());
     }
 
     /**
@@ -286,6 +287,7 @@ public final class ServletConfigLoader {
         defaultContext = servletContext;
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
+        globalProps.put(ServerConfig.Property.IP_CHECK.getPropertyName(), ServerConfig.getInstance().isCheckIP().toString());
     }
 
     /**
@@ -507,19 +509,5 @@ public final class ServletConfigLoader {
             throw new UnsupportedOperationException("Default servlet context must not be changed for default instance");
         }
         defaultContext = context;
-    }
-
-    /**
-     * Sets the directory in which all servlet configurations are kept
-     * 
-     * @param directory The configurations' directory
-     * @throws UnsupportedOperationException If this method is invoked on default instance obtained via {@link #getDefaultInstance()}
-     */
-    public void setDirectory(final File directory) {
-        if (this == defaultInstance) {
-            throw new UnsupportedOperationException("Default servlet context must not be changed for default instance");
-        }
-        this.directory = directory;
-        globalProps = loadDirProps(this.directory);
     }
 }

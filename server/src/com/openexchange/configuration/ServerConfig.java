@@ -51,37 +51,38 @@ package com.openexchange.configuration;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.tools.conf.AbstractConfig;
 
 /**
- * This class handles the configuration parameters read from the configuration
- * property file server.properties.
+ * This class handles the configuration parameters read from the configuration property file server.properties.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ServerConfig extends AbstractConfig {
+public final class ServerConfig {
 
     private static final Log LOG = LogFactory.getLog(ServerConfig.class);
-
-    /**
-     * Name of the property in the system.properties configuration file that
-     * value contains the filename of the server.properties file.
-     */
-    private static final SystemConfig.Property KEY = SystemConfig.Property.SERVER_CONFIG;
 
     /**
      * Singleton object.
      */
     private static final ServerConfig SINGLETON = new ServerConfig();
 
+    /**
+     * Name of the properties file.
+     */
+    private static final String FILENAME = "server.properties";
+
+    private final Properties props = new Properties();
+
     private String uploadDirectory = "/tmp/";
 
-    private int maxFileUplaodSize = 10000;
+    private int maxFileUploadSize = 10000;
 
     private int maxUploadIdleTimeMillis = 300000;
 
@@ -93,48 +94,39 @@ public final class ServerConfig extends AbstractConfig {
 
     private String jmxBindAddress;
 
+    private Boolean checkIP;
+
     /**
      * Prevent instantiation
      */
     private ServerConfig() {
         super();
-        try {
-            super.loadPropertiesInternal();
-        } catch (final ConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        reinit();
     }
 
     public static ServerConfig getInstance() {
         return SINGLETON;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getPropertyFileName() throws ConfigurationException {
-        final String filename = SystemConfig.getProperty(KEY);
-        if (null == filename) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING, KEY.getPropertyName());
+    public void initialize(ConfigurationService confService) {
+        final Properties props = confService.getFile(FILENAME);
+        if (null == props) {
+            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+        } else {
+            this.props.clear();
+            this.props.putAll(props);
+            LOG.info("Read configuration file " + FILENAME + ".");
         }
-        return filename;
+        reinit();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.tools.conf.AbstractConfig#reinit()
-     */
-    protected void reinit() {
-        /*
-         * UPLOAD_DIRECTORY
-         */
-        uploadDirectory = getPropertyInternal(Property.UploadDirectory.propertyName);
-        if (uploadDirectory == null) {
-            uploadDirectory = "/tmp/";
-        }
+    public void shutdown() {
+        props.clear();
+        reinit();
+    }
+
+    private void reinit() {
+        // UPLOAD_DIRECTORY
+        uploadDirectory = props.getProperty(Property.UploadDirectory.propertyName, "/tmp/");
         if (!uploadDirectory.endsWith("/")) {
             uploadDirectory += "/";
         }
@@ -149,39 +141,27 @@ public final class ServerConfig extends AbstractConfig {
         } catch (final Exception e) {
             LOG.error("Temporary upload directory could NOT be properly created");
         }
-        /*
-         * MAX_FILE_UPLOAD_SIZE
-         */
+        // MAX_FILE_UPLOAD_SIZE
         try {
-            maxFileUplaodSize = Integer.parseInt(getPropertyInternal(Property.MaxFileUploadSize.propertyName));
-        } catch (final Throwable t) {
-            maxFileUplaodSize = 10000;
+            maxFileUploadSize = Integer.parseInt(getProperty(Property.MaxFileUploadSize.propertyName));
+        } catch (final NumberFormatException e) {
+            maxFileUploadSize = 10000;
         }
-        /*
-         * MAX_UPLOAD_IDLE_TIME_MILLIS
-         */
+        // MAX_UPLOAD_IDLE_TIME_MILLIS
         try {
-            maxUploadIdleTimeMillis = Integer
-                    .parseInt(getPropertyInternal(Property.MaxUploadIdleTimeMillis.propertyName));
-        } catch (final Throwable t) {
+            maxUploadIdleTimeMillis = Integer.parseInt(getProperty(Property.MaxUploadIdleTimeMillis.propertyName));
+        } catch (final NumberFormatException e) {
             maxUploadIdleTimeMillis = 300000;
         }
-        /*
-         * PrefetchEnabled
-         */
-        prefetchEnabled = getBooleanInternal(Property.PrefetchEnabled.propertyName, false);
-        /*
-         * Default encoding
-         */
-        defaultEncoding = getPropertyInternal(Property.DefaultEncoding.propertyName, "UTF-8");
-        /*
-         * JMX port
-         */
-        jmxPort = Integer.parseInt(getPropertyInternal(Property.JMX_PORT.propertyName, "9999"));
-        /*
-         * JMX bind address
-         */
-        jmxBindAddress = getPropertyInternal(Property.JMX_BIND_ADDRESS.propertyName, "localhost");
+        // PrefetchEnabled
+        prefetchEnabled = Boolean.parseBoolean(props.getProperty(Property.PrefetchEnabled.propertyName, Boolean.FALSE.toString()));
+        // Default encoding
+        defaultEncoding = props.getProperty(Property.DefaultEncoding.propertyName, "UTF-8");
+        // JMX port
+        jmxPort = Integer.parseInt(props.getProperty(Property.JMX_PORT.propertyName, "9999"));
+        // JMX bind address
+        jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.propertyName, "localhost");
+        checkIP = Boolean.valueOf(props.getProperty(Property.IP_CHECK.getPropertyName(), Boolean.TRUE.toString()));
     }
 
     /**
@@ -194,7 +174,7 @@ public final class ServerConfig extends AbstractConfig {
      *         is not found.
      */
     private static String getProperty(final String key) {
-        return SINGLETON.getPropertyInternal(key);
+        return SINGLETON.props.getProperty(key);
     }
 
     /**
@@ -209,7 +189,7 @@ public final class ServerConfig extends AbstractConfig {
             value = SINGLETON.uploadDirectory;
             break;
         case MaxFileUploadSize:
-            value = String.valueOf(SINGLETON.maxFileUplaodSize);
+            value = String.valueOf(SINGLETON.maxFileUploadSize);
             break;
         case MaxUploadIdleTimeMillis:
             value = String.valueOf(SINGLETON.maxUploadIdleTimeMillis);
@@ -249,32 +229,16 @@ public final class ServerConfig extends AbstractConfig {
         if (Property.PrefetchEnabled == property) {
             value = SINGLETON.prefetchEnabled;
         } else {
-            value = getBoolean(property.propertyName);
+            value = Boolean.parseBoolean(SINGLETON.props.getProperty(property.propertyName));
         }
         return value;
-    }
-
-    /**
-     * Returns <code>true</code> if and only if the property named by the
-     * argument exists and is equal to the string <code>"true"</code>. The
-     * test of this string is case insensitive.
-     * <p>
-     * If there is no property with the specified name, or if the specified name
-     * is empty or null, then <code>false</code> is returned.
-     * 
-     * @param key
-     *            the property name.
-     * @return the <code>boolean</code> value of the property.
-     */
-    private static boolean getBoolean(final String key) {
-        return SINGLETON.getBooleanInternal(key);
     }
 
     public static Integer getInteger(Property property) throws ConfigurationException {
         final Integer value;
         switch (property) {
         case MaxFileUploadSize:
-            value = I(SINGLETON.maxFileUplaodSize);
+            value = I(SINGLETON.maxFileUploadSize);
             break;
         case MaxUploadIdleTimeMillis:
             value = I(SINGLETON.maxUploadIdleTimeMillis);
@@ -306,7 +270,7 @@ public final class ServerConfig extends AbstractConfig {
     public static int getInt(final Property property) throws ConfigurationException {
         final int value;
         if (Property.MaxFileUploadSize == property) {
-            value = SINGLETON.maxFileUplaodSize;
+            value = SINGLETON.maxFileUploadSize;
         } else if (Property.MaxUploadIdleTimeMillis == property) {
             value = SINGLETON.maxUploadIdleTimeMillis;
         } else if (Property.JMX_PORT == property) {
@@ -325,6 +289,10 @@ public final class ServerConfig extends AbstractConfig {
             }
         }
         return value;
+    }
+
+    public Boolean isCheckIP() {
+        return checkIP;
     }
 
     /**
@@ -373,7 +341,13 @@ public final class ServerConfig extends AbstractConfig {
          * Number of characters a search pattern must contain to prevent slow
          * search queries and big responses in large contexts.
          */
-        MINIMUM_SEARCH_CHARACTERS("com.openexchange.MinimumSearchCharacters");
+        MINIMUM_SEARCH_CHARACTERS("com.openexchange.MinimumSearchCharacters"),
+        /**
+         * On session validation of every request the client IP address is compared with the client IP address used for the login request.
+         * If this connfiguration parameter is set to <code>true</code> and the client IP addresses do not match the request will be denied.
+         * Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
+         */
+        IP_CHECK("com.openexchange.IPCheck");
 
         /**
          * Name of the property in the server.properties file.
@@ -388,6 +362,10 @@ public final class ServerConfig extends AbstractConfig {
          */
         private Property(final String propertyName) {
             this.propertyName = propertyName;
+        }
+
+        public String getPropertyName() {
+            return propertyName;
         }
     }
 }

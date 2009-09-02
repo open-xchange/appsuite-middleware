@@ -312,7 +312,9 @@ public final class ServerActivator extends DeferredActivator {
          * Add service trackers
          */
         // Configuration service load
-        serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
+        ServiceTracker confTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
+        confTracker.open(); // We need this for {@link Starter#start()}
+        serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
         serviceTrackerList.add(new ServiceTracker(context, DatabaseService.class.getName(), new DatabaseCustomizer(context)));
         // I18n service load

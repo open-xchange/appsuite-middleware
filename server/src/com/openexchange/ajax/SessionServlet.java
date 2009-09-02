@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Enumeration;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -63,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
@@ -102,23 +104,31 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Logger.
      */
-    private static transient final Log LOG = LogFactory.getLog(SessionServlet.class);
+    private static final Log LOG = LogFactory.getLog(SessionServlet.class);
 
     /**
      * Factory for creating exceptions.
      */
-    private static transient final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
+    private static final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
 
     /**
      * Name of the key to remember the session for the request.
      */
     public static final String SESSION_KEY = "sessionObject";
 
+    private boolean checkIP = true;
+
     /**
      * Default constructor.
      */
     protected SessionServlet() {
         super();
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
     }
 
     /**
@@ -144,7 +154,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 sessiondCon.removeSession(sessionId);
                 throw EXCEPTION.create(4);
             }
-            checkIP(session.getLocalIp(), req.getRemoteAddr());
+            checkIP(session, req.getRemoteAddr());
             rememberSession(req, new ServerSessionAdapter(session, ctx));
             super.service(req, resp);
         } catch (final SessiondException e) {
@@ -176,22 +186,32 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private void checkIP(Session session, String actual) throws SessiondException {
+        checkIP(checkIP, session, actual);
+    }
+
     /**
-     * Checks if the client IP address of the current request matches the one
-     * through that the session has been created.
-     * 
-     * @param remembered
-     *            IP address stored in the session object.
-     * @param actual
-     *            IP address of the current request.
+     * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * @param checkIP <code>true</code> to deny request with an exception.
+     * @param session session object
+     * @param actual IP address of the current request.
      * @throws SessionException
      *             if the IP addresses don't match.
      */
-    @OXThrows(category = Category.PERMISSION, desc = "If a session exists every request is checked for its client IP "
-            + "address to match the one while creating the session.", exceptionId = 5, msg = "Wrong client IP address.")
-    public static void checkIP(final String remembered, final String actual) throws SessiondException {
-        if (null == actual || !actual.equals(remembered)) {
-            throw EXCEPTION.create(5);
+    @OXThrows(
+        category = Category.PERMISSION,
+        desc = "If a session exists every request is checked for its client IP address to match the one while creating the session.",
+        exceptionId = 5,
+        msg = "Wrong client IP address."
+    )
+    public static void checkIP(boolean checkIP, Session session, String actual) throws SessiondException {
+        if (null == actual || !actual.equals(session.getLocalIp())) {
+            if (checkIP) {
+                throw EXCEPTION.create(5);
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session " + session.getSessionID() + " requests now from " + actual + " but login came from " + session.getLocalIp());
+            }
         }
     }
 
