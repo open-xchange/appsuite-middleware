@@ -56,7 +56,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 
 /**
- * {@link FolderStorageTracker} - TODO Short description of this class' purpose.
+ * {@link FolderStorageTracker} - The tracker for folder storages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
