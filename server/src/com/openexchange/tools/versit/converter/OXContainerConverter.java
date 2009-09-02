@@ -734,16 +734,8 @@ public class OXContainerConverter {
         Property property = object.getProperty("N");
         if (property != null) {
             final ArrayList<?> N = (ArrayList<?>) property.getValue();
-            // fix for 7248
-            if (N != null) {
-                for (int i = N.size(); i < 5; i++) {
-                    N.add(null);
-                }
-            }
-            // fix:end
-            if (N.size() != 5) {
-                throw new ConverterException("Invalid property N, has " + N.size() + " elements, not 5.");
-            }
+            
+            fillArrayUpTo(N, 5); // fix for 7248
             ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.SUR_NAME)), N.get(0), " ");
             ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.GIVEN_NAME)), N.get(1), " ");
             ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.MIDDLE_NAME)), N.get(2), " ");
@@ -923,7 +915,8 @@ public class OXContainerConverter {
                     }
                 }
                 final ArrayList<?> A = (ArrayList<?>) property.getValue();
-                if (A == null || A.size() != 7) {
+                fillArrayUpTo(A,7);
+                if (A == null) {
                     throw new ConverterException("Invalid property ADR");
                 }
                 if (isWork) {
@@ -1031,6 +1024,18 @@ public class OXContainerConverter {
         ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(Contact.CATEGORIES)), cats, ",");
 
         return contactContainer;
+    }
+
+    /**
+     * fills and array with null up to a specified amount
+     * */
+    private void fillArrayUpTo(ArrayList<?> a, int limit) {
+        if(a == null){
+            a = new ArrayList<Object>();
+        }
+        for(int i = a.size(); i < limit; i++ ){
+            a.add(null);
+        }
     }
 
     /**
