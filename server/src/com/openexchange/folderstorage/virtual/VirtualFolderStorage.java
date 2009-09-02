@@ -54,7 +54,7 @@ import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
-import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
@@ -66,7 +66,6 @@ import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
 import com.openexchange.folderstorage.virtual.sql.Update;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceException;
 
 /**
  * {@link VirtualFolderStorage} - The virtual folder storage.
@@ -115,14 +114,23 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
-        // Get real folder
-        final FolderService folderService;
-        try {
-            folderService = VirtualServiceRegistry.getServiceRegistry().getService(FolderService.class, true);
-        } catch (final ServiceException e) {
-            throw new FolderException(e);
+        // Get default folder
+        final FolderStorage byContentType = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
+        if (null == byContentType) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
-        return folderService.getDefaultFolder(user, FolderStorage.REAL_TREE_ID, contentType, storageParameters.getSession()).getID();
+        byContentType.startTransaction(storageParameters, false);
+        try {
+            final String defaultFolderID = byContentType.getDefaultFolderID(user, treeId, contentType, storageParameters);
+            byContentType.commitTransaction(storageParameters);
+            return defaultFolderID;
+        } catch (final FolderException e) {
+            byContentType.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            byContentType.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -132,14 +140,21 @@ public final class VirtualFolderStorage implements FolderStorage {
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         final VirtualFolder virtualFolder;
         {
-            // Get real folder
-            final FolderService folderService;
-            try {
-                folderService = VirtualServiceRegistry.getServiceRegistry().getService(FolderService.class, true);
-            } catch (final ServiceException e) {
-                throw new FolderException(e);
+            final Folder realFolder;
+            {
+                // Get real folder storage
+                final FolderStorage realFolderStorage = getRealFolderStorage(folderId, storageParameters, false);
+                try {
+                    realFolder = realFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+                    realFolderStorage.commitTransaction(storageParameters);
+                } catch (final FolderException e) {
+                    realFolderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    realFolderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
             }
-            final Folder realFolder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters.getSession());
             virtualFolder = new VirtualFolder(realFolder);
             virtualFolder.setTreeID(treeId);
         }
@@ -189,6 +204,23 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
+        final Folder storageFolder = getFolder(folder.getTreeID(), folder.getID(), storageParameters);
+        /*
+         * Ensure all field set
+         */
+
+        if (null == folder.getParentID()) {
+            folder.setParentID(storageFolder.getParentID());
+        }
+
+        if (null == folder.getPermissions()) {
+            folder.setPermissions(storageFolder.getPermissions());
+        }
+
+        if (folder.getName() == null) {
+            folder.setName(storageFolder.getName());
+        }
+
         Update.updateFolder(
             storageParameters.getContext().getContextId(),
             Integer.parseInt(folder.getTreeID()),
@@ -220,6 +252,29 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
         return new String[0];
+    }
+
+    /**
+     * Gets the real folder storage for given folder identifier. Returned storage is already opened with given storage parameters and given
+     * <code>modify</code> behavior.
+     * 
+     * @param folderId The folder identifier
+     * @param storageParameters The storage parameters to start a transaction on returned folder storage
+     * @param modify <code>true</code> if the operation to perform on returned storage is going to modify its data; otherwise
+     *            <code>false</code>
+     * @return The real folder storage for given folder identifier
+     * @throws FolderException If real folder storage cannot be returned
+     */
+    private static FolderStorage getRealFolderStorage(final String folderId, final StorageParameters storageParameters, final boolean modify) throws FolderException {
+        // Get real folder storage
+        final FolderStorage realFolderStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorage(
+            FolderStorage.REAL_TREE_ID,
+            folderId);
+        if (null == realFolderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+        }
+        realFolderStorage.startTransaction(storageParameters, modify);
+        return realFolderStorage;
     }
 
 }

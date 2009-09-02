@@ -60,17 +60,17 @@ import com.openexchange.groupware.ldap.User;
 public interface FolderStorage {
 
     /**
-     * The reserved tree identifier for real folder tree.
+     * The reserved tree identifier for real folder tree: <code>"0"</code>.
      */
     public static final String REAL_TREE_ID = "0";
 
     /**
-     * The reserved tree identifier for all folder trees.
+     * The reserved tree identifier for all folder trees: <code>"*"</code>.
      */
     public static final String ALL_TREE_ID = "*";
 
     /**
-     * The reserved identifier for root folder.
+     * The reserved identifier for root folder: <code>"0"</code>.
      */
     public static final String ROOT_ID = "0";
 

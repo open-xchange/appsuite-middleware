@@ -56,8 +56,8 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.VirtualFolderDeleteListener;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
@@ -78,6 +78,8 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
 
     private List<ServiceRegistration> serviceRegistrations;
 
+    private List<ServiceTracker> serviceTrackers;
+
     private final Dictionary<String, String> dictionary;
 
     /**
@@ -91,7 +93,7 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, FolderService.class };
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
@@ -128,6 +130,13 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
                     }
                 }
             }
+            // Trackers
+            serviceTrackers = new ArrayList<ServiceTracker>(1);
+            serviceTrackers.add(new ServiceTracker(context, FolderStorage.class.getName(), new VirtualFolderStorageServiceTracker(context)));
+            for (final ServiceTracker serviceTracker : serviceTrackers) {
+                serviceTracker.open();
+            }
+
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
             serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new VirtualFolderDeleteListener(), null));
@@ -152,6 +161,16 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
                 }
                 serviceRegistrations.clear();
                 serviceRegistrations = null;
+            }
+            /*
+             * Drop/close service trackers
+             */
+            if (null != serviceTrackers) {
+                for (final ServiceTracker serviceTracker : serviceTrackers) {
+                    serviceTracker.close();
+                }
+                serviceTrackers.clear();
+                serviceTrackers = null;
             }
             /*
              * Clear service registry

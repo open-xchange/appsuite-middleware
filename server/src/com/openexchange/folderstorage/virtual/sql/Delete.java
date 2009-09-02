@@ -130,7 +130,7 @@ public final class Delete {
     }
 
     /**
-     * Deletes specified folder.
+     * Deletes specified folder with specified connection.
      * 
      * @param cid The context identifier
      * @param tree The tree identifier
@@ -144,7 +144,41 @@ public final class Delete {
         PreparedStatement stmt = null;
 
         if (backup) {
-            // Backup subscribe data
+            /*
+             * Backup folder data
+             */
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_INSERT);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            /*
+             * Backup permission data
+             */
+            try {
+                stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+            /*
+             * Backup subscribe data
+             */
             try {
                 stmt = con.prepareStatement(SQL_DELETE_INSERT_SUBS);
                 int pos = 1;
@@ -159,7 +193,9 @@ public final class Delete {
                 DBUtils.closeSQLStuff(stmt);
             }
         }
-        // Delete subscribe data
+        /*
+         * Delete subscribe data
+         */
         try {
             stmt = con.prepareStatement(SQL_DELETE_SUBS);
             int pos = 1;
@@ -173,24 +209,9 @@ public final class Delete {
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-
-        if (backup) {
-            // Backup permission data
-            try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-        }
-        // Delete permission data
+        /*
+         * Delete permission data
+         */
         try {
             stmt = con.prepareStatement(SQL_DELETE_PERMS);
             int pos = 1;
@@ -204,24 +225,9 @@ public final class Delete {
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-
-        if (backup) {
-            // Backup folder data
-            try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-        }
-        // Delete folder data
+        /*
+         * Delete folder data
+         */
         try {
             stmt = con.prepareStatement(SQL_DELETE);
             int pos = 1;

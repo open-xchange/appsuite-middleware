@@ -126,7 +126,45 @@ public final class Delete extends AbstractAction {
             storageParameters.setTimeStamp(timeStamp);
         }
         try {
-            folderStorage.deleteFolder(treeId, folderId, storageParameters);
+            if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                /*
+                 * Real delete
+                 */
+                folderStorage.deleteFolder(treeId, folderId, storageParameters);
+            } else {
+                /*-
+                 * Virtual delete:
+                 * 
+                 * 1. Delete from virtual storage
+                 * 2. Delete from real storage
+                 */
+                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+                if (null == realStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+                }
+                if (folderStorage.equals(realStorage)) {
+                    folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                } else {
+                    /*
+                     * Delete from virtual storage
+                     */
+                    folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                    /*
+                     * And now from real storage
+                     */
+                    realStorage.startTransaction(storageParameters, true);
+                    try {
+                        realStorage.deleteFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+                        realStorage.commitTransaction(storageParameters);
+                    } catch (final FolderException e) {
+                        realStorage.rollback(storageParameters);
+                        throw e;
+                    } catch (final Exception e) {
+                        realStorage.rollback(storageParameters);
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Delete.doDelete() took ").append(duration).append("msec for folder: ").append(
