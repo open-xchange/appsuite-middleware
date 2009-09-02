@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountException;
 
 /**
- * {@link DeleteListenerRegistry} - TODO Short description of this class' purpose.
+ * {@link DeleteListenerRegistry} - Registry for mail account delete listeners.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
