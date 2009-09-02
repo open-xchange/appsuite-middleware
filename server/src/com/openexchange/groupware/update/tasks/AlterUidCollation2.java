@@ -62,7 +62,7 @@ public class AlterUidCollation2 extends AlterUidCollation {
 
     @Override
     public int addedWithVersion() {
-        return 76;
+        return 62;
     }
 
 }
