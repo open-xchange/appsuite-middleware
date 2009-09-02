@@ -75,8 +75,6 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class);
 
-    private final Dictionary<String, String> dictionary;
-
     private ServiceRegistration folderStorageRegistration;
 
     private CacheFolderStorage cacheFolderStorage;
@@ -88,8 +86,6 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
      */
     public CacheFolderStorageActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
     }
 
     @Override
@@ -196,6 +192,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         cacheFolderStorage = new CacheFolderStorage();
         cacheFolderStorage.onCacheAvailable();
         // Register folder storage
+        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
         folderStorageRegistration = context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary);
     }
 

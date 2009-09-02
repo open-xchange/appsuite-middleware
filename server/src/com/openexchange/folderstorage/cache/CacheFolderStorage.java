@@ -234,9 +234,11 @@ public final class CacheFolderStorage implements FolderStorage {
             final int userId = storageParameters.getUser().getId();
             globalCache.remove(newCacheKey(id, treeId, contextId));
             userCache.remove(newCacheKey(id, treeId, contextId, userId));
-            // Now for real tree, too
-            globalCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId));
-            userCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId, userId));
+            if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                // Now for real tree, too
+                globalCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId));
+                userCache.remove(newCacheKey(id, FolderStorage.REAL_TREE_ID, contextId, userId));
+            }
         } catch (final CacheException e) {
             throw new FolderException(e);
         }

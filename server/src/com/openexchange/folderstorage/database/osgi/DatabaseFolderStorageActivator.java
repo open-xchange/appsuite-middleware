@@ -69,8 +69,6 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorageActivator.class);
 
-    private final Dictionary<String, String> dictionary;
-
     private ServiceRegistration folderStorageRegistration;
 
     /**
@@ -78,8 +76,6 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
      */
     public DatabaseFolderStorageActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("tree", FolderStorage.REAL_TREE_ID);
     }
 
     @Override
@@ -121,6 +117,8 @@ public final class DatabaseFolderStorageActivator extends DeferredActivator {
                 }
             }
             // Register folder storage
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            dictionary.put("tree", FolderStorage.REAL_TREE_ID);
             folderStorageRegistration = context.registerService(FolderStorage.class.getName(), new DatabaseFolderStorage(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

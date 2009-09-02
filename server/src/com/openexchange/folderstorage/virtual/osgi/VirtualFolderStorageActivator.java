@@ -80,15 +80,11 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
 
     private List<ServiceTracker> serviceTrackers;
 
-    private final Dictionary<String, String> dictionary;
-
     /**
      * Initializes a new {@link VirtualFolderStorageActivator}.
      */
     public VirtualFolderStorageActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("tree", FolderStorage.ALL_TREE_ID);
     }
 
     @Override
@@ -142,6 +138,8 @@ public class VirtualFolderStorageActivator extends DeferredActivator {
             serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new VirtualFolderDeleteListener(), null));
             serviceRegistrations.add(context.registerService(UpdateTask.class.getName(), new VirtualTreeCreateTableTask(), null));
 
+            final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+            dictionary.put("tree", FolderStorage.ALL_TREE_ID);
             serviceRegistrations.add(context.registerService(FolderStorage.class.getName(), new VirtualFolderStorage(), dictionary));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
