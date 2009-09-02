@@ -67,7 +67,7 @@ public class VCardMimeTypeTest extends AbstractVCardUnitTest {
     		"N:Prinz;Tobias;;;\n" +
     		"NICKNAME:Tierlieb\n" +
     		"BDAY:19810501\n" +
-    		"ADR;TYPE=work:;;;Somewhere;NRW;58541;DE\n" +
+    		"ADR;TYPE=work:;;;Somewhere;NRW;58641;DE\n" +
     		"TEL;TYPE=home,voice:+49 2538 7921\n" +
     		"EMAIL:tobias.prinz@open-xchange.com\n" +
     		"ORG:- deactivated -\n" +
