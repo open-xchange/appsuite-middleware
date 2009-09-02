@@ -67,9 +67,9 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormActionStep extends AbstractStep implements Step<HtmlPage, Object>{
+public class LoginPageByFormActionStep extends AbstractStep implements Step<HtmlPage, Object>, LoginStep{
 
-	private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin;
+	private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 	private int numberOfForm;
 	private HtmlPage currentPage;
 	
@@ -77,7 +77,7 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		
 	}
 	
-	public LoginPageByFormActionStep (String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin, int numberOfForm) {
+	public LoginPageByFormActionStep (String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin, int numberOfForm, String baseUrl) {
 		this.description = description;
 		this.url = url;
 		this.username = username;
@@ -87,6 +87,7 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 		this.nameOfPasswordField = nameOfPasswordField;
 		this.linkAvailableAfterLogin = linkAvailableAfterLogin;
 		this.numberOfForm = numberOfForm;
+		this.baseUrl = baseUrl;
 	}
 	
 	public void execute(WebClient webClient) throws SubscriptionException{
@@ -231,6 +232,16 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 	public void setNumberOfForm(int numberOfForm) {
 		this.numberOfForm = numberOfForm;
 	}
+
+    
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 	
 	
 

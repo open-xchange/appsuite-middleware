@@ -67,16 +67,16 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object>{
+public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object>, LoginStep{
 
-	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin;
+	private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 	private HtmlPage currentPage;
 	
 	public LoginPageStep(){
 		
 	}
 	
-	public LoginPageStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin) {
+	public LoginPageStep (String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin, String baseUrl) {
 		this.description = description;
 		this.url = url;
 		this.username = username;
@@ -85,6 +85,7 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 		this.nameOfUserField = nameOfUserField;
 		this.nameOfPasswordField = nameOfPasswordField;
 		this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+		this.baseUrl = baseUrl;
 	}
 	
 	public void execute(WebClient webClient) throws SubscriptionException{
@@ -199,6 +200,26 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 	public void setPageTitleAfterLogin(String pageTitleAfterLogin) {
 		this.linkAvailableAfterLogin = pageTitleAfterLogin;
 	}
+
+    
+    public String getLinkAvailableAfterLogin() {
+        return linkAvailableAfterLogin;
+    }
+
+    
+    public void setLinkAvailableAfterLogin(String linkAvailableAfterLogin) {
+        this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+    }
+
+    
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 	
 	
 
