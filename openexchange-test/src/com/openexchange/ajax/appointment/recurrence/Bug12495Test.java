@@ -55,6 +55,7 @@ public class Bug12495Test extends AbstractAJAXSession {
 		appointment.setStartDate(calendar.getTime());
 		calendar.add(Calendar.HOUR, 1);
 		appointment.setEndDate(calendar.getTime());
+		appointment.setIgnoreConflicts(true);
 		return appointment;
 	}
 	
