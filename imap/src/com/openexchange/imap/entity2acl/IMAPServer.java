@@ -66,6 +66,11 @@ public enum IMAPServer {
             return new Object[] {
                 Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
         }
+    }, new GreetingMatcher() {
+
+        public boolean matches(final String greeting) {
+            return greeting.toLowerCase().indexOf(COURIER.name.toLowerCase()) >= 0;
+        }
     }),
     /**
      * Cyrus
@@ -74,6 +79,11 @@ public enum IMAPServer {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
             return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
+        }
+    }, new GreetingMatcher() {
+
+        public boolean matches(final String greeting) {
+            return greeting.toLowerCase().indexOf(CYRUS.name.toLowerCase()) >= 0;
         }
     }),
     /**
@@ -85,6 +95,26 @@ public enum IMAPServer {
             return new Object[] {
                 Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
         }
+    }, new GreetingMatcher() {
+
+        public boolean matches(final String greeting) {
+            return greeting.toLowerCase().indexOf(DOVECOT.name.toLowerCase()) >= 0;
+        }
+    }),
+    /**
+     * Dovecot
+     */
+    SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.class.getName(), new ArgumentGenerator() {
+
+        public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
+            return new Object[] {
+                Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
+        }
+    }, new GreetingMatcher() {
+
+        public boolean matches(final String greeting) {
+            return greeting.indexOf("Sun Java(tm) System Messaging Server") >= 0;
+        }
     });
 
     private final String impl;
@@ -93,10 +123,13 @@ public enum IMAPServer {
 
     private final ArgumentGenerator argumentGenerator;
 
-    private IMAPServer(final String name, final String impl, final ArgumentGenerator argumentGenerator) {
+    private final GreetingMatcher greetingMatcher;
+
+    private IMAPServer(final String name, final String impl, final ArgumentGenerator argumentGenerator, final GreetingMatcher greetingMatcher) {
         this.name = name;
         this.impl = impl;
         this.argumentGenerator = argumentGenerator;
+        this.greetingMatcher = greetingMatcher;
     }
 
     /**
@@ -132,6 +165,16 @@ public enum IMAPServer {
     }
 
     /**
+     * Checks if specified IMAP server greeting indicates the server to be this IMAP server.
+     * 
+     * @param greeting The IMAP server greeting to check against
+     * @return <code>true</code> if specified IMAP server greeting indicates the server to be this IMAP server; otherwise <code>false</code>
+     */
+    public boolean matches(final String greeting) {
+        return greetingMatcher.matches(greeting);
+    }
+
+    /**
      * Gets the class name of {@link Entity2ACL} implementation that corresponds to specified name.
      * 
      * @param name The IMAP server name
@@ -150,6 +193,11 @@ public enum IMAPServer {
     private static interface ArgumentGenerator {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator);
+    }
+
+    private static interface GreetingMatcher {
+
+        public boolean matches(String greeting);
     }
 
 }

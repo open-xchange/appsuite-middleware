@@ -184,8 +184,9 @@ public final class Entity2ACLAutoDetector {
         private IMAPServer mapInfo2IMAPServer(final String info, final InetSocketAddress address, final IMAPConfig imapConfig) throws Entity2ACLException {
             final IMAPServer[] imapServers = IMAPServer.values();
             for (int i = 0; i < imapServers.length; i++) {
-                if (toLowerCase(info).indexOf(toLowerCase(imapServers[i].getName())) > -1) {
-                    return imapServers[i];
+                final IMAPServer imapServer = imapServers[i];
+                if (imapServer.matches(info)) {
+                    return imapServer;
                 }
             }
             /*
