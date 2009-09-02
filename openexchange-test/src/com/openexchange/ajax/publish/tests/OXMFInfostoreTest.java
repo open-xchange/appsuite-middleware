@@ -96,7 +96,8 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String base = AJAXConfig.getProperty(Property.PROTOCOL) + "://" + AJAXConfig.getProperty(Property.HOSTNAME);
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(base + pubUrl);
-        
+
+        //note: This is very mucho _fragile_, a change in OXMF or the template might break these checks. 
         assertTrue("Should contain reference to a published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_0\">"));
         assertFalse("Should not contain reference to a second published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_1\">"));
         assertTrue("Should contain a link to the published infostore item", website.contains("ox_file"));
