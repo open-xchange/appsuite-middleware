@@ -160,7 +160,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
                 "groupFlag tinyint(3) unsigned NOT NULL, " + 
                 "system tinyint(3) unsigned NOT NULL default '0', " + 
                 "PRIMARY KEY (cid, tree, user, folderId, entity), " + 
-                "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualTree (cid, tree, user, folderId) " + 
+                "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualBackupTree (cid, tree, user, folderId) " + 
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -184,7 +184,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
                 "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
                 "subscribed tinyint(3) unsigned NOT NULL, " + 
                 "PRIMARY KEY (cid, tree, user, folderId), " + 
-                "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualTree (cid, tree, user, folderId) " + 
+                "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualBackupTree (cid, tree, user, folderId) " + 
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
