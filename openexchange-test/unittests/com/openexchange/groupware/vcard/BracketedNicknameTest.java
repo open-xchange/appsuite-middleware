@@ -47,60 +47,33 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.groupware.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import com.openexchange.groupware.container.Contact;
 
-import com.openexchange.groupware.vcard.BracketedNicknameTest;
-import com.openexchange.groupware.vcard.MissingAdressesAfterImportTest;
-import com.openexchange.groupware.vcard.VCardMimeTypeTest;
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
 
 /**
- * This suite is meant for tests without a running OX instance
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * Bug 14349
  *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ImportExportStandaloneSuite extends TestSuite {
-	
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		//basics
-		tests.addTestSuite( ImportExportWriterTest.class );
-		tests.addTestSuite( VCardTokenizerTest.class );
-		tests.addTestSuite( ContactFieldTester.class );
-		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
-		//tests.addTestSuite( com.openexchange.groupware.importexport.OXContainerConverterTest.class );
-		//tests.addTestSuite( com.openexchange.tools.versit.OXContainerConverterTest.class );
-		tests.addTest( SizedInputStreamTest.suite() );
-
-		//CSV
-		tests.addTest( CSVContactImportTest.suite() );
-		tests.addTest( CSVContactExportTest.suite() );
-		tests.addTest( OutlookCSVContactImportTest.suite() );
-		
-		//ICAL
-		tests.addTest( ICalImportTest.suite() );
-
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
-		tests.addTestSuite( BracketedNicknameTest.class );
-		
-		//separate tests for reported bugs
-		tests.addTest( Bug7732Test.suite() );
-//		tests.addTest( Bug7470Test.suite() ); //FIXME
-		tests.addTest( Bug8475.suite() );
-		tests.addTest( Bug8527.suite() );
-		tests.addTest( Bug8653.suite() );
-		tests.addTest( Bug8654.suite() );
-		tests.addTest( Bug8681Suite.suite() );
-		tests.addTestSuite( VCardMimeTypeTest.class);
-		tests.addTestSuite( MissingAdressesAfterImportTest.class);
-		tests.addTest( MessageFillerTest.suite() );
-		
-		return tests;
-	}
+public class BracketedNicknameTest extends AbstractVCardUnitTest {
+    private String vcard = "BEGIN:VCARD\n" +
+    		"VERSION:3.0\n" +
+    		"PRODID:OPEN-XCHANGE\n" +
+    		"FN:Nachname, Vorname\n" +
+    		"N:Nachname;Vorname;;;\n" +
+    		"NICKNAME:Spitzname\n" +
+    		"ADR;TYPE=work:;;;;;;\n" +
+    		"ADR;TYPE=home:;;;;;;\n" +
+    		"REV:20090902T125118.045Z\n" +
+    		"UID:39614@192.168.33.100\n" +
+    		"END:VCARD\n";
+    
+    public void testShouldNotPutBracketsAroundNickname() throws Exception{
+        List<Contact> list = performTest("Bracket-Test", vcard, mime2);
+        Contact contact = list.get(0);
+        assertEquals("Nickname should be same", "Spitzname", contact.getNickname());
+    }
 }
