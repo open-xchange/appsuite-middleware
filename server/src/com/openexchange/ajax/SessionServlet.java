@@ -207,11 +207,10 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void checkIP(boolean checkIP, Session session, String actual) throws SessiondException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             if (checkIP) {
+                LOG.info("Request with session " + session.getSessionID() + " denied. IP changed to " + actual + " but login came from " + session.getLocalIp());
                 throw EXCEPTION.create(5);
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Session " + session.getSessionID() + " requests now from " + actual + " but login came from " + session.getLocalIp());
-            }
+            LOG.debug("Session " + session.getSessionID() + " requests now from " + actual + " but login came from " + session.getLocalIp());
         }
     }
 
