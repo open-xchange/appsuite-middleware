@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -60,7 +59,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.services.ServerServiceRegistry;
+//import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.timer.TimerService;
 
@@ -103,8 +102,8 @@ public class ParallelExecutor{
     }
     
     public ArrayList<Contact> execute(List<Callable<ArrayList<Contact>>> callables) throws SubscriptionException{
-        final CompletionService<ArrayList<Contact>> completionService = new ExecutorCompletionService<ArrayList<Contact>>(
-            ServerServiceRegistry.getInstance().getService(TimerService.class).getExecutor());
+        final CompletionService<ArrayList<Contact>> completionService = null;/*new ExecutorCompletionService<ArrayList<Contact>>(
+            ServerServiceRegistry.getInstance().getService(TimerService.class).getExecutor());*/
         
         for (Callable callable : callables) {
             completionService.submit(callable);
