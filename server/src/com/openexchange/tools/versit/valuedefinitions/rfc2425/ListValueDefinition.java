@@ -75,10 +75,8 @@ public class ListValueDefinition extends ValueDefinition {
         final ArrayList<Object> retval = new ArrayList<Object>();
         while (true) {
             final Object val = Definition.createValue(s, property);
-            if (val != null) {
-                retval.add(val);
-            }
-            if (val == null || s.peek != Separator) {
+            retval.add(val);
+            if (s.peek != Separator) {
                 break;
             }
             s.read();
