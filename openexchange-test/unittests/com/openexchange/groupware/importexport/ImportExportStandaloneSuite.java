@@ -52,6 +52,8 @@ package com.openexchange.groupware.importexport;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import com.openexchange.groupware.vcard.MissingAdressesAfterImportTest;
+import com.openexchange.groupware.vcard.VCardMimeTypeTest;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
 
 /**
@@ -93,6 +95,8 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( Bug8653.suite() );
 		tests.addTest( Bug8654.suite() );
 		tests.addTest( Bug8681Suite.suite() );
+		tests.addTestSuite( VCardMimeTypeTest.class);
+		tests.addTestSuite( MissingAdressesAfterImportTest.class);
 		tests.addTest( MessageFillerTest.suite() );
 		
 		return tests;
