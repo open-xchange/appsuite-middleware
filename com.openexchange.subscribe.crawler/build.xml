@@ -42,6 +42,7 @@
     <property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="subscribejar" value="com.openexchange.subscribe.jar"/>
     <property name="commonjar" value="common.jar"/>
+    <property name="timerjar" value="com.openexchange.timer.jar"/>
 
      <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -62,6 +63,7 @@
         <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${subscribejar}"/>
+    	<pathelement location="${bundlesdir}/${timerjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
