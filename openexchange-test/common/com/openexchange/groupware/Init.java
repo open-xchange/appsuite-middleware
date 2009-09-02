@@ -72,6 +72,7 @@ import com.openexchange.charset.ModifyCharsetExtendedProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.ConversionService;
@@ -283,6 +284,7 @@ public final class Init {
         startAndInjectCalendarServices();
         startAndInjectExceptionFramework();
         startAndInjectConfigBundle();
+        startAndInjectServerConfiguration();
         startAndInjectNotification();
         startAndInjectDatabaseBundle();
         startAndInjectCache();
@@ -393,6 +395,11 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+    }
+
+    public static void startAndInjectServerConfiguration() {
+        final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+        ServerConfig.getInstance().initialize(config);
     }
 
     public static void startAndInjectNotification() {
