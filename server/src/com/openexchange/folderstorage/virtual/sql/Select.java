@@ -87,7 +87,7 @@ public final class Select {
     /**
      * Initializes a new {@link Select}.
      */
-    public Select() {
+    private Select() {
         super();
     }
 
