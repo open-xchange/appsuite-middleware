@@ -102,7 +102,7 @@ public enum IMAPServer {
         }
     }),
     /**
-     * Dovecot
+     * Sun Java(tm) System Messaging Server
      */
     SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.class.getName(), new ArgumentGenerator() {
 
