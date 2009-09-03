@@ -91,6 +91,8 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Default constructor.
+     * 
+     * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
     protected Refresher(final OXObjectFactory<T> factory, final String regionName) {
         super();
