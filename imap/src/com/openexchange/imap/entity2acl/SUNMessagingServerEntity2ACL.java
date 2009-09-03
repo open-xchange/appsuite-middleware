@@ -113,8 +113,6 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         return null;
     }
 
-    // session-user, fullname & delimiter
-
     /**
      * Default constructor
      */

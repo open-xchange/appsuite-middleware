@@ -114,6 +114,10 @@ public abstract class Entity2ACL {
         instancialized.set(true);
     }
 
+    /*-
+     * Member section
+     */
+
     /**
      * Initializes a new {@link Entity2ACL}
      */
