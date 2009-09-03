@@ -116,7 +116,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(VirtualTreeMigrationTask.class);
 
     public int addedWithVersion() {
-        return 76;
+        return 78;
     }
 
     public int getPriority() {
