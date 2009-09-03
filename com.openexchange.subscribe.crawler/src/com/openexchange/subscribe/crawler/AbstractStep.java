@@ -46,27 +46,37 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.subscribe.crawler;
 
 public class AbstractStep {
 
-	protected String description;
-	protected Exception exception;
-	protected boolean executedSuccessfully;
-	static final String HTML_PAGE = "HtmlPage";
-	static final String LIST_OF_HTML_PAGES = "List of HtmlPages";
-	static final String TEXT_PAGE = "TextPage";
-	static final String LIST_OF_TEXT_PAGES = "List of TextPages";
-	static final String URL_STRING = "URL String";
-	static final String LIST_OF_CONTACT_OBJECTS = "List of ContactObjects";
-	static final String LIST_OF_HTML_ANCHORS = "List of HtmlAnchors";
+    protected String description;
 
-	public boolean executedSuccessfully() {
-		return executedSuccessfully;
-	}
+    protected Exception exception;
 
-	public Exception getException() {
-		return this.exception;
-	}
+    protected boolean executedSuccessfully;
+
+    static final String HTML_PAGE = "HtmlPage";
+
+    static final String LIST_OF_HTML_PAGES = "List of HtmlPages";
+
+    static final String TEXT_PAGE = "TextPage";
+
+    static final String LIST_OF_TEXT_PAGES = "List of TextPages";
+
+    static final String URL_STRING = "URL String";
+
+    static final String LIST_OF_CONTACT_OBJECTS = "List of ContactObjects";
+
+    static final String LIST_OF_HTML_ANCHORS = "List of HtmlAnchors";
+
+    public boolean executedSuccessfully() {
+        return executedSuccessfully;
+    }
+
+    public Exception getException() {
+        return this.exception;
+    }
 
 }

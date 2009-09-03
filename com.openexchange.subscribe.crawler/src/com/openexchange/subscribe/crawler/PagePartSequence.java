@@ -54,68 +54,67 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
- * This describes a sequence of ->PageParts to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode.
- * To identify a particular bit of information two factors are used: 
- * - Its place in the sequence (e.g. in the page«s sourcecode the last name is listed after the first name)
- * - The sourcecode immediately surrounding it.
- * There are two kinds of page parts: 
- * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them
- * - Infos, containing a three-capture-group regex (immediately before, relevant part, immediately after) 
+ * This describes a sequence of ->PageParts to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode. To
+ * identify a particular bit of information two factors are used: - Its place in the sequence (e.g. in the page«s sourcecode the last name
+ * is listed after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts: - Fillers, only used to
+ * make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a three-capture-group
+ * regex (immediately before, relevant part, immediately after)
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PagePartSequence {
 
-	private ArrayList<PagePart> pageParts;
-	private String page;
-	
-	public PagePartSequence(){
-		
-	}
-	
-	public PagePartSequence (ArrayList<PagePart> pageParts, String page){
-		this.pageParts = pageParts; 
-		this.page = page;
-	}
-	
-	public HashMap<String,String> retrieveInformation(){
-		HashMap<String, String> retrievedInformation = new HashMap<String,String>();
-		
-		for(PagePart pagePart : pageParts){
-			Pattern pattern = Pattern.compile(pagePart.getRegex());
-			Matcher matcher = pattern.matcher(page);
-			//find out if the part matches the remaining page
-			if (matcher.find()){
-				int indexOfPageRest = matcher.end();
-				//if it is an info-part  and its info is not empty get its info and put it into the map
-				if (pagePart.getType() == PagePart.INFO && matcher.groupCount() == 3){
-					String info = matcher.group(2);
-					if (!info.equals("")) retrievedInformation.put(pagePart.getTypeOfInfo(), info);					
-				}
-				//set the page to the rest (after this part)
-				page = page.substring(indexOfPageRest);
-			}
-		}
-		
-		return retrievedInformation;
-	}
+    private ArrayList<PagePart> pageParts;
 
-	public ArrayList<PagePart> getPageParts() {
-		return pageParts;
-	}
+    private String page;
 
-	public void setPageParts(ArrayList<PagePart> pageParts) {
-		this.pageParts = pageParts;
-	}
+    public PagePartSequence() {
 
-	public String getPage() {
-		return page;
-	}
+    }
 
-	public void setPage(String page) {
-		this.page = page;
-	}
-	
+    public PagePartSequence(ArrayList<PagePart> pageParts, String page) {
+        this.pageParts = pageParts;
+        this.page = page;
+    }
+
+    public HashMap<String, String> retrieveInformation() {
+        HashMap<String, String> retrievedInformation = new HashMap<String, String>();
+
+        for (PagePart pagePart : pageParts) {
+            Pattern pattern = Pattern.compile(pagePart.getRegex());
+            Matcher matcher = pattern.matcher(page);
+            // find out if the part matches the remaining page
+            if (matcher.find()) {
+                int indexOfPageRest = matcher.end();
+                // if it is an info-part and its info is not empty get its info and put it into the map
+                if (pagePart.getType() == PagePart.INFO && matcher.groupCount() == 3) {
+                    String info = matcher.group(2);
+                    if (!info.equals(""))
+                        retrievedInformation.put(pagePart.getTypeOfInfo(), info);
+                }
+                // set the page to the rest (after this part)
+                page = page.substring(indexOfPageRest);
+            }
+        }
+
+        return retrievedInformation;
+    }
+
+    public ArrayList<PagePart> getPageParts() {
+        return pageParts;
+    }
+
+    public void setPageParts(ArrayList<PagePart> pageParts) {
+        this.pageParts = pageParts;
+    }
+
+    public String getPage() {
+        return page;
+    }
+
+    public void setPage(String page) {
+        this.page = page;
+    }
+
 }

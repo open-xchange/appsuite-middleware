@@ -50,37 +50,34 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
-
 import org.ho.yaml.Yaml;
+
 //import com.openexchange.server.services.ServerServiceRegistry;
 //import com.openexchange.timer.TimerService;
 //import com.openexchange.timer.internal.TimerImpl;
 
-
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServiceTestHelpers {
-	
-	public void testGenericSubscribeServiceForLinkedInTest(){
-		// insert valid credentials here
-		String username ="roxyexchanger@ox.io";
-		String password ="secret";
-		
-		//create a CrawlerDescription
-		CrawlerDescription crawler = new CrawlerDescription();
-		crawler.setDisplayName("LinkedIn");
-		crawler.setId("com.openexchange.subscribe.linkedin");
-		
-		//initiate the TimerService for MultiThreading
-//		final TimerImpl timer = new TimerImpl();
-//        timer.start();
-//		ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
-		
-		ArrayList<Step> listOfSteps = new ArrayList<Step>();
-        
+
+    public void testGenericSubscribeServiceForLinkedInTest() {
+        // insert valid credentials here
+        String username = "roxyexchanger@ox.io";
+        String password = "secret";
+
+        // create a CrawlerDescription
+        CrawlerDescription crawler = new CrawlerDescription();
+        crawler.setDisplayName("LinkedIn");
+        crawler.setId("com.openexchange.subscribe.linkedin");
+
+        // initiate the TimerService for MultiThreading
+        // final TimerImpl timer = new TimerImpl();
+        // timer.start();
+        // ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
+
+        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+
         listOfSteps.add(new LoginPageStep(
             "Login to www.linkedin.com",
             "https://www.linkedin.com/secure/login",
@@ -91,9 +88,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "session_password",
             "/connections?trk=hb_side_cnts",
             "https://www.linkedin.com"));
-        listOfSteps.add(new PageByUrlStep(
-            "Get to the contacts list", 
-            "http://www.linkedin.com/connections?trk=hb_side_cnts"));
+        listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
         listOfSteps.add(new PageByUrlStep(
             "Get to the no-javascript contacts list",
             "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
@@ -102,22 +97,28 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "(/connectionsnojs\\?split_page=).*",
             "(/profile\\?viewProfile=).*(goback).*"));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
-        pageParts.add(new PagePart("(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-ZŠšŸ\\s]*\">)","image"));
+        pageParts.add(new PagePart(
+            "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-ZŠšŸ\\s]*\">)",
+            "image"));
         pageParts.add(new PagePart("(<h1 class=\"n fn\">)"));
         pageParts.add(new PagePart("(span class=\"given-name\">)([a-zA-ZŠšŸ]*)(</span>)", "first_name"));
         pageParts.add(new PagePart("(span class=\"family-name\">)([a-zA-ZŠšŸ]*)(</span>)", "last_name"));
-        pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-ZŠšŸ\\x20]*)([\\s]*</p>)","title"));
-        pageParts.add(new PagePart("(<dt>Phone:</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([\\(\\)\\+\\s0-9]*)(<span class=\"type\">\\(Mobile\\))","cellular_telephone1"));
+        pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-ZŠšŸ\\x20]*)([\\s]*</p>)", "title"));
+        pageParts.add(new PagePart(
+            "(<dt>Phone:</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([\\(\\)\\+\\s0-9]*)(<span class=\"type\">\\(Mobile\\))",
+            "cellular_telephone1"));
         pageParts.add(new PagePart("(mailto:)([a-z@A-Z0-9\\.-]*)(\")", "email1"));
-        
+
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
-        listOfSteps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep("Get the information of each contact from the individual webpages",sequence));
+        listOfSteps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
+            "Get the information of each contact from the individual webpages",
+            sequence));
 
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
-        
+
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
-        //uncomment this if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
-	}
+        // uncomment this if the crawler description was updated to get the new config-files
+        // dumpThis(crawler, crawler.getDisplayName());
+    }
 }

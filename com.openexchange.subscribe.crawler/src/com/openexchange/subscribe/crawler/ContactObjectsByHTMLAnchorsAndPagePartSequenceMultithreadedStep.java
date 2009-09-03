@@ -69,7 +69,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes HtmlAnchors that each link to a page containing contact information and converts them to ContactObjects for OX
- * TimerService is used to execute multiple of the quite slow http-requests simultaneously. 
+ * TimerService is used to execute multiple of the quite slow http-requests simultaneously.
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -82,7 +82,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
     private PagePartSequence pageParts;
-    
+
     private String loginStepString;
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep(final String description, final PagePartSequence pageParts) {
@@ -96,20 +96,23 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
 
     public void execute(final WebClient webClient) throws SubscriptionException {
         List<Contact> contacts = new ArrayList<Contact>();
-        
+
         ParallelExecutor parallelExecutor = new ParallelExecutor();
         List<List<HtmlAnchor>> subsetsOfLinks = parallelExecutor.splitIntoTasks(anchors);
         List<Callable<ArrayList<Contact>>> callables = new ArrayList<Callable<ArrayList<Contact>>>();
-        for (List<HtmlAnchor> subset : subsetsOfLinks){
-            Callable callable = new ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(subset, Yaml.dump(pageParts), loginStepString);
+        for (List<HtmlAnchor> subset : subsetsOfLinks) {
+            Callable callable = new ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(
+                subset,
+                Yaml.dump(pageParts),
+                loginStepString);
             callables.add(callable);
         }
         contacts = parallelExecutor.execute(callables);
         contactObjectsArray = new Contact[contacts.size()];
-        for (int i=0; i<contactObjectsArray.length && i< contacts.size(); i++){
+        for (int i = 0; i < contactObjectsArray.length && i < contacts.size(); i++) {
             contactObjectsArray[i] = contacts.get(i);
         }
-        
+
         this.executedSuccessfully = true;
 
     }
@@ -158,50 +161,48 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
         this.pageParts = pageParts;
     }
 
-    
     public String getLoginStepString() {
         return loginStepString;
     }
 
-    
     public void setLoginStepString(String loginStep) {
         this.loginStepString = loginStep;
     }
 
-    private class ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable  implements Callable<List<Contact>>{
+    private class ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable implements Callable<List<Contact>> {
 
         private List<Contact> contacts;
+
         private List<HtmlAnchor> anchors;
+
         private PagePartSequence pageParts;
+
         private String loginStepString;
-        
-        public ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(List<HtmlAnchor> anchors, String pagePartSequence, String loginStepString){
+
+        public ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(List<HtmlAnchor> anchors, String pagePartSequence, String loginStepString) {
             contacts = new ArrayList<Contact>();
             this.anchors = anchors;
             this.pageParts = (PagePartSequence) Yaml.load(pagePartSequence);
             this.loginStepString = loginStepString;
         }
-        
+
         public List<Contact> call() throws Exception {
             WebClientCloser closer = new WebClientCloser();
             // emulate a known client, hopefully keeping our profile low
             final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
             // Javascript needs to be disabled for security reasons
             webClient.setJavaScriptEnabled(false);
-            //log in again as it is a separate instance
+            // log in again as it is a separate instance
             LoginStep loginStep = (LoginStep) Yaml.load(loginStepString);
             loginStep.execute(webClient);
-            
-            
-            try{
-                for (HtmlAnchor anchor:anchors){
+
+            try {
+                for (HtmlAnchor anchor : anchors) {
                     String string = loginStep.getBaseUrl() + anchor.getHrefAttribute();
-                    //System.out.println("***** String : "+string);
                     Page page = webClient.getPage(string);
-                    final Contact contact = new Contact();              
-                    if (null != page){
-                        if (page instanceof HtmlPage){
-                            
+                    final Contact contact = new Contact();
+                    if (null != page) {
+                        if (page instanceof HtmlPage) {
 
                             pageParts.setPage(page.getWebResponse().getContentAsString());
                             final HashMap<String, String> map = pageParts.retrieveInformation();
@@ -213,9 +214,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
                             if (map.containsKey("last_name")) {
                                 contact.setSurName(map.get("last_name"));
                             }
-                            if (map.containsKey("first_name") & map.containsKey("last_name")){
+                            if (map.containsKey("first_name") & map.containsKey("last_name")) {
                                 contact.setDisplayName(map.get("first_name") + " " + map.get("last_name"));
-                                System.out.println("***** " + map.get("first_name") + " " + map.get("last_name"));
                             }
                             if (map.containsKey("display_name")) {
                                 contact.setDisplayName(map.get("display_name"));
@@ -321,23 +321,20 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
                             SANITIZER.sanitize(contact);
                             contacts.add(contact);
                         }
-                    }     
+                    }
                 }
-            } catch (final VersitException e){
-                e.printStackTrace();
-                
+            } catch (final VersitException e) {
+
             } catch (ConverterException e) {
-                e.printStackTrace();
-                
+
             } catch (IOException e) {
-                e.printStackTrace();
-                
+
             } finally {
-            webClient.closeAllWindows();
-            closer.close(webClient);
+                webClient.closeAllWindows();
+                closer.close(webClient);
             }
-            
+
             return contacts;
-        } 
+        }
     }
 }

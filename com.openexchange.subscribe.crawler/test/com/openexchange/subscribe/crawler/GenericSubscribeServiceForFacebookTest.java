@@ -51,40 +51,39 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.ho.yaml.Yaml;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForFacebookTest extends GenericSubscribeServiceTestHelpers {
-	
-	public void testGenericSubscribeServiceForFacebook(){
-		// insert valid credentials here
-		String username = "";
-		String password = "";
-		
-		//create a CrawlerDescription
-		CrawlerDescription crawler = new CrawlerDescription();
-		crawler.setDisplayName("Facebook");
-		crawler.setId("com.openexchange.subscribe.crawler.facebook");
-		List<Step> steps = new LinkedList<Step>(); 
-        
+
+    public void testGenericSubscribeServiceForFacebook() {
+        // insert valid credentials here
+        String username = "";
+        String password = "";
+
+        // create a CrawlerDescription
+        CrawlerDescription crawler = new CrawlerDescription();
+        crawler.setDisplayName("Facebook");
+        crawler.setId("com.openexchange.subscribe.crawler.facebook");
+        List<Step> steps = new LinkedList<Step>();
+
         steps.add(new FacebookAPIStep(
-        		"Get a user«s friend information from facebook via facebook-java-api", 
-        		"",
-        		username,
-        		password,
-        		"https://login.facebook.com/login.php?login_attempt=1",
-        		"email",
-        		"pass",
-        		"(http://www.facebook.com/inbox/\\?ref=[a-z]*)"));
+            "Get a user«s friend information from facebook via facebook-java-api",
+            "",
+            username,
+            password,
+            "https://login.facebook.com/login.php?login_attempt=1",
+            "email",
+            "pass",
+            "(http://www.facebook.com/inbox/\\?ref=[a-z]*)"));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
-        
-        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
-        //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
-	}
+
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        // uncomment this if the if the crawler description was updated to get the new config-files
+        // dumpThis(crawler, crawler.getDisplayName());
+    }
 }

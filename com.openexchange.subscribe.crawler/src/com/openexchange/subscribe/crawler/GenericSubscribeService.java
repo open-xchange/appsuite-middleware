@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
@@ -67,18 +66,17 @@ import com.openexchange.subscribe.SubscriptionSource;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeService extends AbstractSubscribeService  {
-	
-	private static final String LOGIN = "login";
+public class GenericSubscribeService extends AbstractSubscribeService {
+
+    private static final String LOGIN = "login";
 
     private static final String PASSWORD = "password";
 
     private final SubscriptionSource SOURCE = new SubscriptionSource();
 
     private final DynamicFormDescription FORM = new DynamicFormDescription();
-    
-    private String workflowString;
 
+    private String workflowString;
 
     public GenericSubscribeService(String displayName, String id, String workflowString) {
         FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
@@ -90,7 +88,6 @@ public class GenericSubscribeService extends AbstractSubscribeService  {
         SOURCE.setFolderModule(FolderObject.CONTACT);
         this.workflowString = workflowString;
     }
-    
 
     public SubscriptionSource getSubscriptionSource() {
         return SOURCE;
@@ -101,24 +98,21 @@ public class GenericSubscribeService extends AbstractSubscribeService  {
     }
 
     public Collection<Contact> getContent(Subscription subscription) throws SubscriptionException {
-        
+
         Workflow linkedInWorkflow = getWorkflow();
         Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(linkedInWorkflow.execute((String)configuration.get("login"), (String) configuration.get("password")));
+        return Arrays.asList(linkedInWorkflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
     }
 
     protected Workflow getWorkflow() {
-    	Workflow workflow = new Workflow();    	
-    	try {
-			workflow = WorkflowFactory.createWorkflowByString(workflowString);
-		} catch (SubscriptionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return workflow;
-    }
+        Workflow workflow = new Workflow();
+        try {
+            workflow = WorkflowFactory.createWorkflowByString(workflowString);
+        } catch (SubscriptionException e) {
+        }
 
+        return workflow;
+    }
 
     @Override
     public void modifyIncoming(Subscription subscription) throws SubscriptionException {
@@ -132,7 +126,7 @@ public class GenericSubscribeService extends AbstractSubscribeService  {
         super.modifyOutgoing(subscription);
         Map<String, Object> configuration = subscription.getConfiguration();
         decrypt(configuration, PASSWORD);
-        subscription.setDisplayName( (String) subscription.getConfiguration().get(LOGIN) );
+        subscription.setDisplayName((String) subscription.getConfiguration().get(LOGIN));
     }
 
 }

@@ -51,12 +51,10 @@ package com.openexchange.subscribe.crawler;
 
 import com.openexchange.groupware.container.Contact;
 
-
 /**
  * {@link ContactSanitizer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ContactSanitizer {
 
@@ -64,21 +62,21 @@ public class ContactSanitizer {
      * @param contact
      */
     public void sanitize(Contact contact) {
-        for(int field : Contact.ALL_COLUMNS) {
-            if(field == Contact.LAST_MODIFIED_UTC) {
+        for (int field : Contact.ALL_COLUMNS) {
+            if (field == Contact.LAST_MODIFIED_UTC) {
                 continue;
             }
-            if(contact.contains(field)) {
+            if (contact.contains(field)) {
                 Object value = contact.get(field);
-                if(value != null && "".equals(value)) {
+                if (value != null && "".equals(value)) {
                     contact.remove(field);
                 }
             }
         }
-        if(contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
+        if (contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
             contact.removeImageContentType();
         }
-        if(contact.containsFileAs() && "".equals(contact.getFileAs())) {
+        if (contact.containsFileAs() && "".equals(contact.getFileAs())) {
             contact.removeFileAs();
         }
     }

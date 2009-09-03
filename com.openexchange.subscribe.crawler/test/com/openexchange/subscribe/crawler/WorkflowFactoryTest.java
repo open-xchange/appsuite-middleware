@@ -51,24 +51,21 @@ package com.openexchange.subscribe.crawler;
 
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
-
 import junit.framework.TestCase;
 
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class WorkflowFactoryTest extends TestCase {
-	
-	public static void testInvalidWorkflow() {
-		Workflow workflow = null;
-		try {
-			workflow = WorkflowFactory.createWorkflow("test-resources/InvalidWorkflow.yml");
-			fail("Exception expected");
-		} catch (SubscriptionException e) {
-			assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
-		}
-	}
+
+    public static void testInvalidWorkflow() {
+        Workflow workflow = null;
+        try {
+            workflow = WorkflowFactory.createWorkflow("test-resources/InvalidWorkflow.yml");
+            fail("Exception expected");
+        } catch (SubscriptionException e) {
+            assertEquals("Wrong exception", SubscriptionErrorMessage.INVALID_WORKFLOW.getDetailNumber(), e.getDetailNumber());
+        }
+    }
 
 }

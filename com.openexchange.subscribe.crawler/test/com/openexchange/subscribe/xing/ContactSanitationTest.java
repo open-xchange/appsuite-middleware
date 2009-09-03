@@ -51,19 +51,15 @@ package com.openexchange.subscribe.xing;
 
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.ContactSanitizer;
-
 import junit.framework.TestCase;
-
 
 /**
  * {@link ContactSanitationTest}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ContactSanitationTest extends TestCase {
-    
-    
+
     public void testSanitizesEmptyStrings() {
         Contact contact = new Contact();
         contact.setDisplayName("");
@@ -156,9 +152,9 @@ public class ContactSanitationTest extends TestCase {
         contact.setUserField20("");
         contact.setImageContentType("");
         contact.setFileAs("");
-        
+
         new ContactSanitizer().sanitize(contact);
-        
+
         assertFalse("DisplayName was not sanitized!", contact.containsDisplayName());
         assertFalse("GivenName was not sanitized!", contact.containsGivenName());
         assertFalse("SurName was not sanitized!", contact.containsSurName());

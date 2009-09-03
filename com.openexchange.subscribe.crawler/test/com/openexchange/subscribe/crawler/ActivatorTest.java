@@ -53,53 +53,49 @@ import java.util.ArrayList;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
-
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
-	
-	/**
-	 * Get all yml-files in the config directory and create crawlers out of them. Use each crawler with a specified testuser.
-	 */
-	public void testActivator(){
-		//credentials for LinkedIn
-		String linkedInUsername = "roxyexchanger@ox.io";
-		String linkedInPassword = "secret";
-		//credentials for Xing
-		String xingUsername = "rodeldodel@wolke7.net";
-		String xingPassword = "r0deld0del";
-		//credentials for Facebook
-		String facebookUsername = "rodeldodel@wolke7.net";
-		String facebookPassword = "r0deld0del";
-		//credentials for GoogleMail
-		String googleMailUsername = "peter.mueller113@googlemail.com";
-		String googleMailPassword = "r0deld0del";
-		
-		
-		SimConfigurationService config = new SimConfigurationService();
-		//test with the real crawlers
+
+    /**
+     * Get all yml-files in the config directory and create crawlers out of them. Use each crawler with a specified testuser.
+     */
+    public void testActivator() {
+        // credentials for LinkedIn
+        String linkedInUsername = "roxyexchanger@ox.io";
+        String linkedInPassword = "secret";
+        // credentials for Xing
+        String xingUsername = "";
+        String xingPassword = "";
+        // credentials for Facebook
+        String facebookUsername = "";
+        String facebookPassword = "";
+        // credentials for GoogleMail
+        String googleMailUsername = "";
+        String googleMailPassword = "";
+
+        SimConfigurationService config = new SimConfigurationService();
+        // test with the real crawlers
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
-		Activator activator = new Activator();
-		ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
-		for (CrawlerDescription crawler : crawlers){
-			if (crawler.getDisplayName().equals("LinkedIn")) {
-				System.out.println("***** Testing : " + crawler.getDisplayName());
-				findOutIfThereAreContactsForThisConfiguration(linkedInUsername, linkedInPassword, crawler);
-			} else if (crawler.getDisplayName().equals("XING")) {
-				System.out.println("***** Testing : " + crawler.getDisplayName());
-				findOutIfThereAreContactsForThisConfiguration(xingUsername, xingPassword, crawler);
-			} else if (crawler.getDisplayName().equals("Facebook")) {
-				System.out.println("***** Testing : " + crawler.getDisplayName());
-				findOutIfThereAreContactsForThisConfiguration(facebookUsername, facebookPassword, crawler);
-			} else if (crawler.getDisplayName().equals("GoogleMail")) {
-			System.out.println("***** Testing : " + crawler.getDisplayName());
-				findOutIfThereAreContactsForThisConfiguration(googleMailUsername, googleMailPassword, crawler);
-			}
-		}
-	
-	}
+        Activator activator = new Activator();
+        ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
+        for (CrawlerDescription crawler : crawlers) {
+            if (crawler.getDisplayName().equals("LinkedIn")) {
+                System.out.println("***** Testing : " + crawler.getDisplayName());
+                findOutIfThereAreContactsForThisConfiguration(linkedInUsername, linkedInPassword, crawler);
+            } else if (crawler.getDisplayName().equals("XING")) {
+                System.out.println("***** Testing : " + crawler.getDisplayName());
+                findOutIfThereAreContactsForThisConfiguration(xingUsername, xingPassword, crawler);
+            } else if (crawler.getDisplayName().equals("Facebook")) {
+                System.out.println("***** Testing : " + crawler.getDisplayName());
+                findOutIfThereAreContactsForThisConfiguration(facebookUsername, facebookPassword, crawler);
+            } else if (crawler.getDisplayName().equals("GoogleMail")) {
+                System.out.println("***** Testing : " + crawler.getDisplayName());
+                findOutIfThereAreContactsForThisConfiguration(googleMailUsername, googleMailPassword, crawler);
+            }
+        }
+
+    }
 
 }

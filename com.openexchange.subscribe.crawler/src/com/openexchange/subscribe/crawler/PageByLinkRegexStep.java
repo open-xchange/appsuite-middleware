@@ -51,7 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -60,96 +59,96 @@ import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 
 /**
- * This Step gets a page reachable via Url in the current context (WebClient) 
+ * This Step gets a page reachable via Url in the current context (WebClient)
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, HtmlPage>{
+public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, HtmlPage> {
 
-	private String linkRegex;
-	private HtmlPage currentPage, inputPage;
-	private Exception exception;
-	private boolean executedSuccessfully;
-	
-	public PageByLinkRegexStep(){
-		
-	}
-	
-	public PageByLinkRegexStep(String description, String linkRegex){
-		this.description = description;
-		this.linkRegex = linkRegex;
-	}
-	
-	public void execute(WebClient webClient)  throws SubscriptionException{
-		try {
-			for (HtmlAnchor link: inputPage.getAnchors()) {
-	    		if (link.getHrefAttribute().matches(linkRegex)){
-	    			currentPage = link.click();		
-	    			//System.out.println("***** Current Page : " + currentPage.getTitleText());
-	    		}
-	    	}
-			executedSuccessfully = true;
-		} catch (FailingHttpStatusCodeException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (MalformedURLException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		} catch (IOException e) {
-			throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-		}
-	}
+    private String linkRegex;
 
-	public boolean executedSuccessfully() {
-		return this.executedSuccessfully;
-	}
+    private HtmlPage currentPage, inputPage;
 
-	public Exception getException() {
-		return this.exception;
-	}
+    private Exception exception;
 
-	public String inputType() {
-		return HTML_PAGE;
-	}
+    private boolean executedSuccessfully;
 
-	public String outputType() {
-		return HTML_PAGE;
-	}
+    public PageByLinkRegexStep() {
 
-	public HtmlPage getOutput() {
-		return currentPage;
-	}
+    }
 
-	public void setInput(HtmlPage input) {
-		inputPage = input;
-	}
+    public PageByLinkRegexStep(String description, String linkRegex) {
+        this.description = description;
+        this.linkRegex = linkRegex;
+    }
 
-	public String getUrl() {
-		return linkRegex;
-	}
+    public void execute(WebClient webClient) throws SubscriptionException {
+        try {
+            for (HtmlAnchor link : inputPage.getAnchors()) {
+                if (link.getHrefAttribute().matches(linkRegex)) {
+                    currentPage = link.click();
+                }
+            }
+            executedSuccessfully = true;
+        } catch (FailingHttpStatusCodeException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (MalformedURLException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (IOException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        }
+    }
 
-	public void setUrl(String url) {
-		this.linkRegex = url;
-	}
+    public boolean executedSuccessfully() {
+        return this.executedSuccessfully;
+    }
 
-	public HtmlPage getCurrentPage() {
-		return currentPage;
-	}
+    public Exception getException() {
+        return this.exception;
+    }
 
-	public void setCurrentPage(HtmlPage currentPage) {
-		this.currentPage = currentPage;
-	}
+    public String inputType() {
+        return HTML_PAGE;
+    }
 
-	public boolean isExecutedSuccessfully() {
-		return executedSuccessfully;
-	}
+    public String outputType() {
+        return HTML_PAGE;
+    }
 
-	public void setExecutedSuccessfully(boolean executedSuccessfully) {
-		this.executedSuccessfully = executedSuccessfully;
-	}
+    public HtmlPage getOutput() {
+        return currentPage;
+    }
 
-	public void setException(Exception exception) {
-		this.exception = exception;
-	}
-	
-	
+    public void setInput(HtmlPage input) {
+        inputPage = input;
+    }
+
+    public String getUrl() {
+        return linkRegex;
+    }
+
+    public void setUrl(String url) {
+        this.linkRegex = url;
+    }
+
+    public HtmlPage getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(HtmlPage currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public boolean isExecutedSuccessfully() {
+        return executedSuccessfully;
+    }
+
+    public void setExecutedSuccessfully(boolean executedSuccessfully) {
+        this.executedSuccessfully = executedSuccessfully;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
 
 }

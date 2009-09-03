@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -67,131 +66,128 @@ import com.openexchange.subscribe.SubscriptionException;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextPage>, HtmlPage> {
-	
-	private HtmlPage htmlPage;
-	private String urlBeforeOffset, urlAfterOffset, linkpart;
-	private int offset;
-	
-	private List<TextPage> returnedPages = new ArrayList<TextPage>();
-	
-	public TextPagesByLinkStep() {
-		
-	}
-	
-	public TextPagesByLinkStep(String description, String urlBeforeOffset, int offset, String urlAfterOffset, String linkpart) {
-		this.description = description;
-		this.urlBeforeOffset = urlBeforeOffset;
-		this.urlAfterOffset = urlAfterOffset;
-		this.offset = offset;
-		this.linkpart = linkpart;
-	}
 
-	public void execute(WebClient webClient)  throws SubscriptionException{
-	    try {
-	    	
-	    	int tempOffset = 0;
-	    	boolean oneSuccess = true;
-	    	
-	    	while (oneSuccess) {
-	    		oneSuccess = false;
-				HtmlPage tempPage = webClient.getPage(urlBeforeOffset + Integer.toString(tempOffset) + urlAfterOffset);
-				List<HtmlAnchor> allLinks = tempPage.getAnchors();
-				for (HtmlAnchor link : allLinks){
-					if (link.getHrefAttribute().startsWith(linkpart)) {
-						oneSuccess = true;
-						TextPage tempTextPage = link.click();
-						returnedPages.add(tempTextPage);
-					}
-				}
-				tempOffset += offset;
-	    	}
-	    	executedSuccessfully = true;
-			
-		} catch (FailingHttpStatusCodeException e) {
-			e.printStackTrace();
-			this.exception = e;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			this.exception = e;
-		} catch (IOException e) {
-			e.printStackTrace();
-			this.exception = e;
-		}
-	    
-	}
+    private HtmlPage htmlPage;
 
-	public boolean executedSuccessfully() {
-		return executedSuccessfully;
-	}
+    private String urlBeforeOffset, urlAfterOffset, linkpart;
 
-	public Exception getException() {
-		return exception;
-	}
+    private int offset;
 
-	public String inputType() {
-		return HTML_PAGE;
-	}
+    private List<TextPage> returnedPages = new ArrayList<TextPage>();
 
-	public String outputType() {
-		return LIST_OF_TEXT_PAGES;
-	}
+    public TextPagesByLinkStep() {
 
-	public List<TextPage> getOutput() {
-		return returnedPages;
-	}
+    }
 
-	public void setInput(HtmlPage input) {
-		this.htmlPage = input;
-	}
+    public TextPagesByLinkStep(String description, String urlBeforeOffset, int offset, String urlAfterOffset, String linkpart) {
+        this.description = description;
+        this.urlBeforeOffset = urlBeforeOffset;
+        this.urlAfterOffset = urlAfterOffset;
+        this.offset = offset;
+        this.linkpart = linkpart;
+    }
 
-	public HtmlPage getHtmlPage() {
-		return htmlPage;
-	}
+    public void execute(WebClient webClient) throws SubscriptionException {
+        try {
 
-	public void setHtmlPage(HtmlPage htmlPage) {
-		this.htmlPage = htmlPage;
-	}
+            int tempOffset = 0;
+            boolean oneSuccess = true;
 
-	public List<TextPage> getReturnedPages() {
-		return returnedPages;
-	}
+            while (oneSuccess) {
+                oneSuccess = false;
+                HtmlPage tempPage = webClient.getPage(urlBeforeOffset + Integer.toString(tempOffset) + urlAfterOffset);
+                List<HtmlAnchor> allLinks = tempPage.getAnchors();
+                for (HtmlAnchor link : allLinks) {
+                    if (link.getHrefAttribute().startsWith(linkpart)) {
+                        oneSuccess = true;
+                        TextPage tempTextPage = link.click();
+                        returnedPages.add(tempTextPage);
+                    }
+                }
+                tempOffset += offset;
+            }
+            executedSuccessfully = true;
 
-	public void setReturnedPages(List<TextPage> returnedPages) {
-		this.returnedPages = returnedPages;
-	}
+        } catch (FailingHttpStatusCodeException e) {
+            this.exception = e;
+        } catch (MalformedURLException e) {
+            this.exception = e;
+        } catch (IOException e) {
+            this.exception = e;
+        }
 
-	public String getUrlBeforeOffset() {
-		return urlBeforeOffset;
-	}
+    }
 
-	public String getUrlAfterOffset() {
-		return urlAfterOffset;
-	}
+    public boolean executedSuccessfully() {
+        return executedSuccessfully;
+    }
 
-	public String getLinkpart() {
-		return linkpart;
-	}
+    public Exception getException() {
+        return exception;
+    }
 
-	public int getOffset() {
-		return offset;
-	}
+    public String inputType() {
+        return HTML_PAGE;
+    }
 
-	public void setUrlBeforeOffset(String urlBeforeOffset) {
-		this.urlBeforeOffset = urlBeforeOffset;
-	}
+    public String outputType() {
+        return LIST_OF_TEXT_PAGES;
+    }
 
-	public void setUrlAfterOffset(String urlAfterOffset) {
-		this.urlAfterOffset = urlAfterOffset;
-	}
+    public List<TextPage> getOutput() {
+        return returnedPages;
+    }
 
-	public void setLinkpart(String linkpart) {
-		this.linkpart = linkpart;
-	}
+    public void setInput(HtmlPage input) {
+        this.htmlPage = input;
+    }
 
-	public void setOffset(int offset) {
-		this.offset = offset;
-	}
-	
-	
+    public HtmlPage getHtmlPage() {
+        return htmlPage;
+    }
+
+    public void setHtmlPage(HtmlPage htmlPage) {
+        this.htmlPage = htmlPage;
+    }
+
+    public List<TextPage> getReturnedPages() {
+        return returnedPages;
+    }
+
+    public void setReturnedPages(List<TextPage> returnedPages) {
+        this.returnedPages = returnedPages;
+    }
+
+    public String getUrlBeforeOffset() {
+        return urlBeforeOffset;
+    }
+
+    public String getUrlAfterOffset() {
+        return urlAfterOffset;
+    }
+
+    public String getLinkpart() {
+        return linkpart;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setUrlBeforeOffset(String urlBeforeOffset) {
+        this.urlBeforeOffset = urlBeforeOffset;
+    }
+
+    public void setUrlAfterOffset(String urlAfterOffset) {
+        this.urlAfterOffset = urlAfterOffset;
+    }
+
+    public void setLinkpart(String linkpart) {
+        this.linkpart = linkpart;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
 
 }

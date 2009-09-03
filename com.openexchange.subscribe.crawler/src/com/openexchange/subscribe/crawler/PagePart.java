@@ -50,63 +50,64 @@
 package com.openexchange.subscribe.crawler;
 
 /**
- * This a page part to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode.
- * To identify a particular bit of information two factors are used: 
- * - Its place in a sequence (->PagePartSequence) (e.g. in the page«s sourcecode the last name is listed after the first name)
- * - The sourcecode immediately surrounding it.
- * There are two kinds of page parts (identified by their TYPE-Integer): 
- * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them
- * - Infos, containing a three-capture-group regex (immediately before, relevant part, immediately after) and the type of the info (e.g. Contact.LAST_NAME)
+ * This a page part to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode. To identify a particular bit of
+ * information two factors are used: - Its place in a sequence (->PagePartSequence) (e.g. in the page«s sourcecode the last name is listed
+ * after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts (identified by their TYPE-Integer):
+ * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a
+ * three-capture-group regex (immediately before, relevant part, immediately after) and the type of the info (e.g. Contact.LAST_NAME)
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 
 public class PagePart {
-	
-	public static int FILLER = 0;
-	public static int INFO = 1;
-	
-	private int type;
-	private String regex;
-	private String typeOfInfo;
-	
-	public PagePart(){
-		
-	}
-	
-	public PagePart(String regex, String typeOfInfo){
-		this.type = INFO;
-		this.regex = regex;
-		this.typeOfInfo = typeOfInfo;
-	}
-	
-	public PagePart(String regex){
-		this.type = FILLER;
-		this.regex = regex;
-	}
 
-	public int getType() {
-		return type;
-	}
+    public static int FILLER = 0;
 
-	public void setType(int type) {
-		this.type = type;
-	}
+    public static int INFO = 1;
 
-	public String getRegex() {
-		return regex;
-	}
+    private int type;
 
-	public void setRegex(String regex) {
-		this.regex = regex;
-	}
+    private String regex;
 
-	public String getTypeOfInfo() {
-		return typeOfInfo;
-	}
+    private String typeOfInfo;
 
-	public void setTypeOfInfo(String typeOfInfo) {
-		this.typeOfInfo = typeOfInfo;
-	}
+    public PagePart() {
+
+    }
+
+    public PagePart(String regex, String typeOfInfo) {
+        this.type = INFO;
+        this.regex = regex;
+        this.typeOfInfo = typeOfInfo;
+    }
+
+    public PagePart(String regex) {
+        this.type = FILLER;
+        this.regex = regex;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getRegex() {
+        return regex;
+    }
+
+    public void setRegex(String regex) {
+        this.regex = regex;
+    }
+
+    public String getTypeOfInfo() {
+        return typeOfInfo;
+    }
+
+    public void setTypeOfInfo(String typeOfInfo) {
+        this.typeOfInfo = typeOfInfo;
+    }
 
 }

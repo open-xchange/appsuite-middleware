@@ -57,52 +57,53 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.openexchange.groupware.container.Contact;
-//import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.groupware.container.Contact; //import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.subscribe.SubscriptionException;
 
-
 /**
- * {@link ParallelExecutor}
- * This executes several requests for HtmlPages containing contact info in parallel and unites their results.
- * This saves time normally lost waiting for web requests. 
+ * {@link ParallelExecutor} This executes several requests for HtmlPages containing contact info in parallel and unites their results. This
+ * saves time normally lost waiting for web requests.
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ParallelExecutor{
-    
+public class ParallelExecutor {
+
     private ArrayList<Contact> results;
-    
-    public ParallelExecutor(){
+
+    public ParallelExecutor() {
         results = new ArrayList<Contact>();
     }
-    
-    public List<List<HtmlAnchor>> splitIntoTasks(List<HtmlAnchor> list){
+
+    public List<List<HtmlAnchor>> splitIntoTasks(List<HtmlAnchor> list) {
         List<List<HtmlAnchor>> sublists = new ArrayList<List<HtmlAnchor>>();
         List<HtmlAnchor> sublist = new ArrayList<HtmlAnchor>();
         int index = 1;
-        for (HtmlAnchor anchor : list){
+        for (HtmlAnchor anchor : list) {
             sublist.add(anchor);
-            
-            if (index % 10 == 1){
+
+            if (index % 10 == 1) {
                 sublists.add(sublist);
             }
-            
+
             // create a new sublist for every 10 Links
-            if (index % 10 == 0){
-                
+            if (index % 10 == 0) {
+
                 sublist = new ArrayList<HtmlAnchor>();
             }
-                
-            index ++;
+
+            index++;
         }
-        //System.out.println("***** No. of tasks : "+sublists.size());
         return sublists;
     }
-    
-    public ArrayList<Contact> execute(List<Callable<ArrayList<Contact>>> callables) throws SubscriptionException{
-        final CompletionService<ArrayList<Contact>> completionService = null;/*new ExecutorCompletionService<ArrayList<Contact>>(
-            ServerServiceRegistry.getInstance().getService(TimerService.class).getExecutor());*/
-        
+
+    public ArrayList<Contact> execute(List<Callable<ArrayList<Contact>>> callables) throws SubscriptionException {
+        final CompletionService<ArrayList<Contact>> completionService = null;/*
+                                                                              * new ExecutorCompletionService<ArrayList<Contact>>(
+                                                                              * ServerServiceRegistry
+                                                                              * .getInstance().getService(TimerService.class
+                                                                              * ).getExecutor());
+                                                                              */
+
         for (Callable callable : callables) {
             completionService.submit(callable);
         }
@@ -111,25 +112,25 @@ public class ParallelExecutor{
          */
         final int maxRunningMillis = 60000;
         try {
-                for (int i = 0; i < callables.size(); i++) {
-                    final Future<ArrayList<Contact>> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
-                    if (null != f) {
-                        results.addAll((ArrayList<Contact>)f.get());
-                    }
-                }
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new SubscriptionException(null, null, null);
-            } catch (final ExecutionException e) {
-                final Throwable t = e.getCause();
-                if (t instanceof RuntimeException) {
-                    throw (RuntimeException) t;
-                } else if (t instanceof Error) {
-                    throw (Error) t;
-                } else {
-                    throw new IllegalStateException("Not unchecked", t);
+            for (int i = 0; i < callables.size(); i++) {
+                final Future<ArrayList<Contact>> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                if (null != f) {
+                    results.addAll((ArrayList<Contact>) f.get());
                 }
             }
-            return results;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SubscriptionException(null, null, null);
+        } catch (final ExecutionException e) {
+            final Throwable t = e.getCause();
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else if (t instanceof Error) {
+                throw (Error) t;
+            } else {
+                throw new IllegalStateException("Not unchecked", t);
+            }
+        }
+        return results;
     }
 }

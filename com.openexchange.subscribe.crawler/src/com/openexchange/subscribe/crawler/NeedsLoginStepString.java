@@ -49,14 +49,13 @@
 
 package com.openexchange.subscribe.crawler;
 
-
 /**
  * {@link NeedsLoginStepString}
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public interface NeedsLoginStepString {
-    
+
     void setLoginStepString(String loginStepString);
 
 }

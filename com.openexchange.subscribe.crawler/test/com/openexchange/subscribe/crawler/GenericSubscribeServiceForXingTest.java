@@ -51,40 +51,49 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.ho.yaml.Yaml;
 
-
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public class GenericSubscribeServiceForXingTest extends
-		GenericSubscribeServiceTestHelpers {
-	
-	public void testGenericSubscribeServiceForXing(){
-		// insert valid credentials here
-		String username ="";
-		String password ="";
-		
-		//create a CrawlerDescription
-		CrawlerDescription crawler = new CrawlerDescription();
-		crawler.setDisplayName("XING");
-		crawler.setId("com.openexchange.subscribe.xing");
-        
-		List<Step> steps = new LinkedList<Step>(); 
-        steps.add(new LoginPageStep("Login to www.xing.com", "https://www.xing.com", "", "", "loginform", "login_user_name", "login_password","/app/contact", "https://www.xing.com"));
-        steps.add(new TextPagesByLinkStep("Get all vcards as text pages", "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=", 10, "", "/app/contact?op=vcard;scr_id"));
+public class GenericSubscribeServiceForXingTest extends GenericSubscribeServiceTestHelpers {
+
+    public void testGenericSubscribeServiceForXing() {
+        // insert valid credentials here
+        String username = "";
+        String password = "";
+
+        // create a CrawlerDescription
+        CrawlerDescription crawler = new CrawlerDescription();
+        crawler.setDisplayName("XING");
+        crawler.setId("com.openexchange.subscribe.xing");
+
+        List<Step> steps = new LinkedList<Step>();
+        steps.add(new LoginPageStep(
+            "Login to www.xing.com",
+            "https://www.xing.com",
+            "",
+            "",
+            "loginform",
+            "login_user_name",
+            "login_password",
+            "/app/contact",
+            "https://www.xing.com"));
+        steps.add(new TextPagesByLinkStep(
+            "Get all vcards as text pages",
+            "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset=",
+            10,
+            "",
+            "/app/contact?op=vcard;scr_id"));
         steps.add(new ContactObjectsByVcardTextPagesStep());
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
-        
-        findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
-        //uncomment this if the if the crawler description was updated to get the new config-files
-        //file get written to /conf/crawlers in this bundle as well as /crawlers in open-xchange-development
-        //dumpThis(crawler, crawler.getDisplayName());
-	}
+
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        // uncomment this if the if the crawler description was updated to get the new config-files
+        // file get written to /conf/crawlers in this bundle as well as /crawlers in open-xchange-development
+        // dumpThis(crawler, crawler.getDisplayName());
+    }
 
 }

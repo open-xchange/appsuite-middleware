@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
@@ -70,84 +69,80 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements
-		Step<Contact[], List<TextPage>> {
-	
-	private List<TextPage> pages;
-	private Contact[] contactObjectsArray;
-	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
-	
-	public ContactObjectsByVcardTextPagesStep() {
-		
-	}
+public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements Step<Contact[], List<TextPage>> {
 
-	public void execute(WebClient webClient) {
-		Vector<Contact> contactObjects = new Vector<Contact>();
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-		
-		for (TextPage page : pages) {
-			byte[] vcard = page.getWebResponse().getContentAsBytes();
-    		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-    		VersitDefinition.Reader versitReader;
-				
-    		try {
-    			versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
-    			VersitObject versitObject = def.parse(versitReader);
-    			//System.out.println("***** VersitObject (ADR): " + versitObject.getProperty("ADR").getValue());
-    			Contact contactObject = oxContainerConverter.convertContact(versitObject);
-    			SANITIZER.sanitize(contactObject);
-    			contactObjects.add(contactObject);
-    		} catch (final VersitException e){
-    			e.printStackTrace();
-    			this.exception = e;
-    		} catch (ConverterException e) {
-				e.printStackTrace();
-				this.exception = e;
-			} catch (IOException e) {
-				e.printStackTrace();
-				this.exception = e;
-			}
-			executedSuccessfully = true;
-		}
-		
-		contactObjectsArray = new Contact[contactObjects.size()];
-	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
-	    	contactObjectsArray[i] = contactObjects.get(i);
-	    }
-	    
-		
-	}
+    private List<TextPage> pages;
 
-	public String inputType() {
-		return LIST_OF_TEXT_PAGES;
-	}
+    private Contact[] contactObjectsArray;
 
-	public String outputType() {
-		return LIST_OF_CONTACT_OBJECTS;
-	}
+    private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-	public Contact[] getOutput() {
-		return contactObjectsArray;
-	}
+    public ContactObjectsByVcardTextPagesStep() {
 
-	public void setInput(List<TextPage> input) {
-		this.pages = input;
-	}
+    }
 
-	public List<TextPage> getPages() {
-		return pages;
-	}
+    public void execute(WebClient webClient) {
+        Vector<Contact> contactObjects = new Vector<Contact>();
+        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
-	public void setPages(List<TextPage> pages) {
-		this.pages = pages;
-	}
+        for (TextPage page : pages) {
+            byte[] vcard = page.getWebResponse().getContentAsBytes();
+            final VersitDefinition def = Versit.getDefinition("text/x-vcard");
+            VersitDefinition.Reader versitReader;
 
-	public Contact[] getContactObjectsArray() {
-		return contactObjectsArray;
-	}
+            try {
+                versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
+                VersitObject versitObject = def.parse(versitReader);
+                Contact contactObject = oxContainerConverter.convertContact(versitObject);
+                SANITIZER.sanitize(contactObject);
+                contactObjects.add(contactObject);
+            } catch (final VersitException e) {
+                this.exception = e;
+            } catch (ConverterException e) {
+                this.exception = e;
+            } catch (IOException e) {
+                this.exception = e;
+            }
+            executedSuccessfully = true;
+        }
 
-	public void setContactObjectsArray(Contact[] contactObjectsArray) {
-		this.contactObjectsArray = contactObjectsArray;
-	}
+        contactObjectsArray = new Contact[contactObjects.size()];
+        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
+            contactObjectsArray[i] = contactObjects.get(i);
+        }
+
+    }
+
+    public String inputType() {
+        return LIST_OF_TEXT_PAGES;
+    }
+
+    public String outputType() {
+        return LIST_OF_CONTACT_OBJECTS;
+    }
+
+    public Contact[] getOutput() {
+        return contactObjectsArray;
+    }
+
+    public void setInput(List<TextPage> input) {
+        this.pages = input;
+    }
+
+    public List<TextPage> getPages() {
+        return pages;
+    }
+
+    public void setPages(List<TextPage> pages) {
+        this.pages = pages;
+    }
+
+    public Contact[] getContactObjectsArray() {
+        return contactObjectsArray;
+    }
+
+    public void setContactObjectsArray(Contact[] contactObjectsArray) {
+        this.contactObjectsArray = contactObjectsArray;
+    }
 
 }

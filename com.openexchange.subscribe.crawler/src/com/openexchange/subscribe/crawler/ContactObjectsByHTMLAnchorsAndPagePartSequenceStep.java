@@ -89,12 +89,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     public void execute(final WebClient webClient) {
         final Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-        // int counter=0;
         for (final HtmlAnchor anchor : anchors) {
             try {
-                // counter ++;
-                // System.out.println("***** Contact No. " + Integer.toString(counter));
-                // System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
                 final HtmlPage page = anchor.click();
                 final Contact contact = new Contact();
 
@@ -108,7 +104,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                 if (map.containsKey("last_name")) {
                     contact.setSurName(map.get("last_name"));
                 }
-                if (map.containsKey("first_name") & map.containsKey("last_name")){
+                if (map.containsKey("first_name") & map.containsKey("last_name")) {
                     contact.setDisplayName(map.get("first_name") + " " + map.get("last_name"));
                 }
                 if (map.containsKey("display_name")) {
@@ -216,13 +212,10 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                 contactObjects.add(contact);
 
             } catch (final VersitException e) {
-                e.printStackTrace();
                 exception = e;
             } catch (final ConverterException e) {
-                e.printStackTrace();
                 exception = e;
             } catch (final IOException e) {
-                e.printStackTrace();
                 exception = e;
             }
             executedSuccessfully = true;

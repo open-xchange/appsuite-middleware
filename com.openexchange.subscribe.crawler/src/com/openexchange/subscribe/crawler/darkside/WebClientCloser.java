@@ -108,7 +108,7 @@ public class WebClientCloser {
                 return null;
             }
             if (!HttpWebConnection.class.isInstance(webConnection)) {
-                LOG.error("Cannot close webclient: webConnection is not of class " + HttpWebConnection.class.getName()+" but of class "+webConnection.getClass().getName());
+                LOG.error("Cannot close webclient: webConnection is not of class " + HttpWebConnection.class.getName() + " but of class " + webConnection.getClass().getName());
                 return null;
             }
             Object httpClient = HTTP_CLIENT_FIELD.get(webConnection);
@@ -116,7 +116,7 @@ public class WebClientCloser {
                 return null;
             }
             if (!HttpClient.class.isInstance(httpClient)) {
-                LOG.error("Cannot close webclient: httpClient_ is not of class " + HttpClient.class.getName()+" but of class "+httpClient.getClass().getName());
+                LOG.error("Cannot close webclient: httpClient_ is not of class " + HttpClient.class.getName() + " but of class " + httpClient.getClass().getName());
                 return null;
             }
             Object manager = CONNECTION_MANAGER_FIELD.get(httpClient);
@@ -125,7 +125,7 @@ public class WebClientCloser {
             }
 
             if (!MultiThreadedHttpConnectionManager.class.isInstance(manager)) {
-                LOG.error("Cannot close webclient: httpConnectionManager is not of class " + MultiThreadedHttpConnectionManager.class.getName()+" but of class "+manager.getClass().getName());
+                LOG.error("Cannot close webclient: httpConnectionManager is not of class " + MultiThreadedHttpConnectionManager.class.getName() + " but of class " + manager.getClass().getName());
                 return null;
             }
 

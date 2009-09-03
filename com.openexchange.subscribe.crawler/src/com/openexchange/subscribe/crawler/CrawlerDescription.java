@@ -50,40 +50,38 @@
 package com.openexchange.subscribe.crawler;
 
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class CrawlerDescription {
-	
-	private String displayName, id, workflowString;
-	
-	public CrawlerDescription (){
-		
-	}
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    private String displayName, id, workflowString;
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
+    public CrawlerDescription() {
 
-	public String getId() {
-		return id;
-	}
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public String getWorkflowString() {
-		return workflowString;
-	}
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
-	public void setWorkflowString(String workflowString) {
-		this.workflowString = workflowString;
-	}
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getWorkflowString() {
+        return workflowString;
+    }
+
+    public void setWorkflowString(String workflowString) {
+        this.workflowString = workflowString;
+    }
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.SubscriptionException;
 
-
 /**
  * A Step in a crawling workflow
  * 
@@ -60,16 +59,16 @@ import com.openexchange.subscribe.SubscriptionException;
  * @param <O> The Output accessible if the step executed successfully
  * @param <I> The Input needed for the step to execute
  */
-public interface Step<O, I> extends HasOutput<O>, HasInput<I>{
-	
-	boolean executedSuccessfully();
-	
-	Exception getException();
-	
-	void execute(WebClient webClient)  throws SubscriptionException;
-	
-	String inputType();
-	
-	String outputType();
+public interface Step<O, I> extends HasOutput<O>, HasInput<I> {
+
+    boolean executedSuccessfully();
+
+    Exception getException();
+
+    void execute(WebClient webClient) throws SubscriptionException;
+
+    String inputType();
+
+    String outputType();
 
 }

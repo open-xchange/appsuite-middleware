@@ -51,9 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-
 import org.ho.yaml.Yaml;
-
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 
@@ -61,44 +59,41 @@ import com.openexchange.subscribe.SubscriptionException;
  * Gets a text input and creates Workflow
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
 public class WorkflowFactory {
 
-	public static Workflow createWorkflow(String filename) throws SubscriptionException{
-		
-		Workflow workflow = null;
-		try {
-			workflow = (Workflow) Yaml.load(new File(filename));
-			checkSanity(workflow);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+    public static Workflow createWorkflow(String filename) throws SubscriptionException {
 
-		return workflow;
-	}
-	
-	public static Workflow createWorkflowByString(String string) throws SubscriptionException{
-		
-		Workflow workflow = null;
-		
-			workflow = (Workflow) Yaml.load(string);
-			checkSanity(workflow);
+        Workflow workflow = null;
+        try {
+            workflow = (Workflow) Yaml.load(new File(filename));
+            checkSanity(workflow);
+        } catch (FileNotFoundException e) {
+        }
 
-		return workflow;
-	}
-	
-	private static void checkSanity(Workflow workflow) throws SubscriptionException {
-		Step previousStep = null;
-		for (Step currentStep : workflow.getSteps()){
-			if (previousStep != null){
-				if (!previousStep.outputType().equals(currentStep.inputType())){
-					//System.out.println(previousStep + " output : " + previousStep.outputType() +", "+ currentStep + " input : " + currentStep.inputType());
-					throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
-				}
-			}
-			previousStep = currentStep;
-		}
-	}
+        return workflow;
+    }
+
+    public static Workflow createWorkflowByString(String string) throws SubscriptionException {
+
+        Workflow workflow = null;
+
+        workflow = (Workflow) Yaml.load(string);
+        checkSanity(workflow);
+
+        return workflow;
+    }
+
+    private static void checkSanity(Workflow workflow) throws SubscriptionException {
+        Step previousStep = null;
+        for (Step currentStep : workflow.getSteps()) {
+            if (previousStep != null) {
+                if (!previousStep.outputType().equals(currentStep.inputType())) {
+                    throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
+                }
+            }
+            previousStep = currentStep;
+        }
+    }
 
 }
