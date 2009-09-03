@@ -197,11 +197,14 @@ public enum IMAPServer {
      * @return The lower-case string
      */
     static String toLowerCase(final String str) {
-        final char[] buf = new char[str.length()];
-        for (int i = 0; i < buf.length; i++) {
-            buf[i] = Character.toLowerCase(str.charAt(i));
+        if (null == str) {
+            return null;
         }
-        return new String(buf);
+        final char[] chars = str.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = Character.toLowerCase(chars[i]);
+        }
+        return new String(chars);
     }
 
     private static interface ArgumentGenerator {
