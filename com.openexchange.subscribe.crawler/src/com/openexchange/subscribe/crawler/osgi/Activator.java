@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -72,6 +74,8 @@ import com.openexchange.subscribe.crawler.GenericSubscribeService;
 public class Activator implements BundleActivator {
     
 	private ArrayList<ServiceRegistration> services;
+	
+	private static final Log LOG = LogFactory.getLog(Activator.class);
 	
 	public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
@@ -100,9 +104,18 @@ public class Activator implements BundleActivator {
     
     public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(ConfigurationService config){
     	ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
-    	File directory = new File(config.getProperty(PATH_PROPERTY));
+    	String path = config.getProperty(PATH_PROPERTY);
+    	if(path == null) {
+    	    LOG.warn(PATH_PROPERTY+" not set. Skipping crawler initialisation");
+    	    return crawlers;
+    	}
+        File directory = new File(path);
     	//System.out.println("***** File directory" + directory.getPath());
     	File[] files = directory.listFiles();
+    	if(files == null) {
+    	    LOG.warn("Could not find crawler descriptions in "+directory+". Skipping crawler initialisation.");
+    	    return crawlers;
+    	}
     	for (File file : files){
     		try {
     			//System.out.println("***** File " + file.getPath());
