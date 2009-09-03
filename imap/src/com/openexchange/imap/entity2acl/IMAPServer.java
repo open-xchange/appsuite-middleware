@@ -206,7 +206,7 @@ public enum IMAPServer {
          * @param accountId The account ID
          * @param imapServerAddress The IMAP server address
          * @param sessionUser The session user ID
-         * @param fullname The IMAP folder's fullname
+         * @param fullname The IMAP folder's full name
          * @param separator The IMAP folder's separator character
          * @return The arguments needed for a certain IMAP server to map ACL entity to a system user and vice versa
          */
