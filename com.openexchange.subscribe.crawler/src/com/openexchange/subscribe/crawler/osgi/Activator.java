@@ -52,19 +52,16 @@ package com.openexchange.subscribe.crawler.osgi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.GenericSubscribeService;
-
 
 /**
  * {@link Activator}
@@ -72,61 +69,59 @@ import com.openexchange.subscribe.crawler.GenericSubscribeService;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator implements BundleActivator {
-    
-	private ArrayList<ServiceRegistration> services;
-	
-	private static final Log LOG = LogFactory.getLog(Activator.class);
-	
-	public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
+
+    private ArrayList<ServiceRegistration> services;
+
+    private static final Log LOG = LogFactory.getLog(Activator.class);
+
+    public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
     public void start(BundleContext context) throws Exception {
-        services = new ArrayList<ServiceRegistration>();       
+        services = new ArrayList<ServiceRegistration>();
         ConfigurationService config = (ConfigurationService) context.getService(context.getServiceReference(ConfigurationService.class.getName()));
-        if (config != null){
-	        //System.out.println("***** Path from configuration service : " + config.getProperty(PATH_PROPERTY));
-	        ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
-	        for (CrawlerDescription crawler : crawlers){
-	        	//System.out.println("***** Crawler loaded : " + crawler.getDisplayName());
-		        GenericSubscribeService subscribeService = new GenericSubscribeService(crawler.getDisplayName(), crawler.getId(), crawler.getWorkflowString());
-		        ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
-		        services.add(serviceRegistration);
-	        }
+        if (config != null) {
+            ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
+            for (CrawlerDescription crawler : crawlers) {
+                GenericSubscribeService subscribeService = new GenericSubscribeService(
+                    crawler.getDisplayName(),
+                    crawler.getId(),
+                    crawler.getWorkflowString());
+                ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
+                services.add(serviceRegistration);
+            }
         } else {
-        	
+
         }
     }
 
     public void stop(BundleContext context) throws Exception {
-    	for (ServiceRegistration serviceRegistration : services){
-    		serviceRegistration.unregister();
-    	}
+        for (ServiceRegistration serviceRegistration : services) {
+            serviceRegistration.unregister();
+        }
     }
-    
-    public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(ConfigurationService config){
-    	ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
-    	String path = config.getProperty(PATH_PROPERTY);
-    	if(path == null) {
-    	    LOG.warn(PATH_PROPERTY+" not set. Skipping crawler initialisation");
-    	    return crawlers;
-    	}
+
+    public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(ConfigurationService config) {
+        ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
+        String path = config.getProperty(PATH_PROPERTY);
+        if (path == null) {
+            LOG.warn(PATH_PROPERTY + " not set. Skipping crawler initialisation");
+            return crawlers;
+        }
         File directory = new File(path);
-    	//System.out.println("***** File directory" + directory.getPath());
-    	File[] files = directory.listFiles();
-    	if(files == null) {
-    	    LOG.warn("Could not find crawler descriptions in "+directory+". Skipping crawler initialisation.");
-    	    return crawlers;
-    	}
-    	for (File file : files){
-    		try {
-    			//System.out.println("***** File " + file.getPath());
-    			if (file.isFile() && file.getPath().endsWith(".yml")){
-    				crawlers.add((CrawlerDescription)Yaml.load(file));
-    			}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-    	}
-    	return crawlers;
+        File[] files = directory.listFiles();
+        if (files == null) {
+            LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
+            return crawlers;
+        }
+        for (File file : files) {
+            try {
+                if (file.isFile() && file.getPath().endsWith(".yml")) {
+                    crawlers.add((CrawlerDescription) Yaml.load(file));
+                }
+            } catch (FileNotFoundException e) {
+            }
+        }
+        return crawlers;
     }
 
 }

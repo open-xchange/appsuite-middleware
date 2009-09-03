@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -69,15 +68,17 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes HtmlPages that each contain contact information and converts them to ContactObjects for OX
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
-        Step<Contact[], List<HtmlAnchor>> {
+public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>> {
 
     private List<HtmlAnchor> anchors;
+
     private Contact[] contactObjectsArray;
+
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
+
     private String vcardUrl, pictureUrl;
 
     public ContactObjectsByHTMLAnchorsStep(String description, String vcardUrl, String pictureUrl) {
@@ -86,7 +87,7 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
         this.pictureUrl = pictureUrl;
     }
 
-    public ContactObjectsByHTMLAnchorsStep(){
+    public ContactObjectsByHTMLAnchorsStep() {
 
     }
 
@@ -96,33 +97,29 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
         final VersitDefinition def = Versit.getDefinition("text/x-vcard");
         VersitDefinition.Reader versitReader;
         String encoding = "ISO-8859-1";
-        //int counter=0;
+        // int counter=0;
         for (HtmlAnchor anchor : anchors) {
             try {
-                //counter ++;
-                //System.out.println("***** Contact No. " + Integer.toString(counter));
-                //System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
                 HtmlPage page = anchor.click();
                 Contact contact = new Contact();
                 TextPage vcardPage = null;
                 String imageUrl = "";
 
-                for (HtmlAnchor link: page.getAnchors()){
-                    //if there is a vcard linked
+                for (HtmlAnchor link : page.getAnchors()) {
+                    // if there is a vcard linked
                     if (link.getHrefAttribute().startsWith(vcardUrl)) {
                         vcardPage = link.click();
                     }
                 }
 
-                //if there is a contact picture in an <img>-tag get its Url
-                if (page.getWebResponse().getContentAsString().contains(pictureUrl)){
+                // if there is a contact picture in an <img>-tag get its Url
+                if (page.getWebResponse().getContentAsString().contains(pictureUrl)) {
                     int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
                     String substring = page.getWebResponse().getContentAsString().substring(startIndex);
                     imageUrl = substring.substring(0, substring.indexOf("\""));
                 }
 
-
-                if (vcardPage != null){
+                if (vcardPage != null) {
                     byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 
                     versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
@@ -130,32 +127,28 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
                     contact = oxContainerConverter.convertContact(versitObject);
                 }
 
-                //add the image from a url to the contact
-                if (!imageUrl.equals("")){
+                // add the image from a url to the contact
+                if (!imageUrl.equals("")) {
                     OXContainerConverter.loadImageFromURL(contact, imageUrl);
                 }
 
                 SANITIZER.sanitize(contact);
                 contactObjects.add(contact);
 
-            } catch (final VersitException e){
-                e.printStackTrace();
+            } catch (final VersitException e) {
                 this.exception = e;
             } catch (ConverterException e) {
-                e.printStackTrace();
                 this.exception = e;
             } catch (IOException e) {
-                e.printStackTrace();
                 this.exception = e;
             }
             executedSuccessfully = true;
         }
 
         contactObjectsArray = new Contact[contactObjects.size()];
-        for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
+        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
             contactObjectsArray[i] = contactObjects.get(i);
         }
-
 
     }
 
@@ -210,6 +203,5 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
     public static ContactSanitizer getSANITIZER() {
         return SANITIZER;
     }
-
 
 }
