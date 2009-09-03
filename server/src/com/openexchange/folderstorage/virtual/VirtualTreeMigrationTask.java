@@ -415,7 +415,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
         return EXCEPTION.create(2, Integer.valueOf(contextId));
     }
 
-    private static int getMailAdmin(final int contextId) throws ServiceException, UpdateException {
+    private static int getMailAdmin(final int contextId) throws UpdateException {
         final Connection con;
         try {
             con = Database.get(contextId, false);
@@ -440,7 +440,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
         }
     }
 
-    private static boolean virtualTreeExists(final int user, final Context ctx) throws ServiceException, UpdateException {
+    private static boolean virtualTreeExists(final int user, final Context ctx) throws UpdateException {
         final Connection con;
         try {
             con = Database.get(ctx, false);
