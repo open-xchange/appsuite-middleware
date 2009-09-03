@@ -193,91 +193,13 @@
 			<table class="a_contact">
 				<@render_name contact=contact />
 				<@render key="ox_displayName" title="Display name" value=contact.displayName!"" />
-				<@render key="ox_streetHome" title="Street home" value=contact.streetHome!"" />
-				<@render key="ox_postalCodeHome" title="Postal code home" value=contact.postalCodeHome!"" />
-				<@render key="ox_cityHome" title="City home" value=contact.cityHome!"" /> 
-				<@render key="ox_stateHome" title="State home" value=contact.stateHome!"" /> 
-				<@render key="ox_countryHome" title="Country home" value=contact.countryHome!"" />
-				<@render key="ox_streetBusiness" title="Street business" value=contact.streetBusiness!"" /> 
-				<@render key="ox_postalCodeBusiness" title="Postal code business" value=contact.postalCodeBusiness!"" /> 
-				<@render key="ox_cityBusiness" title="City business" value=contact.cityBusiness!"" />
-				<@render key="ox_stateBusiness" title="State business" value=contact.stateBusiness!"" /> 
-				<@render key="ox_countryBusiness" title="Country business" value=contact.countryBusiness!"" />
-				<@render key="ox_streetOther" title="Street other" value=contact.streetOther!"" />
-				<@render key="ox_postalCodeOther" title="Postal code other" value=contact.postalCodeOther!"" />
-				<@render key="ox_cityOther" title="City other" value=contact.cityOther!"" /> 
-				<@render key="ox_stateOther" title="State other" value=contact.stateOther!"" /> 
-				<@render key="ox_countryOther" title="Country other" value=contact.countryOther!"" /> 
-				<#if contact.birthday??><tr><td class="key">Birthday:</td><td class="ox_birthday value">${contact.birthday?string("yyyy-MM-dd")}</td></tr></#if>
-				<@render key="ox_maritalStatus" title="Marital status" value=contact.maritalStatus!"" /> 
-				<@render key="ox_numberOfChildren" title="Number of children" value=contact.numberOfChildren!"" />
+				<@render key="ox_company" title="Company" value=contact.company!"" /> 
 				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
-				<@render key="ox_nickname" title="Nickname" value=contact.nickname!"" /> 
-				<@render key="ox_spouse_name" title="Spouse name" value=contact.spouseName!"" /> 
-				<#if contact.anniversary??><tr><td class="key">Anniversary:</td><td class="ox_anniversary value">${contact.anniversary?string("yyyy-MM-dd")}</td></tr></#if>
-				<@render key="ox_note" title="Note" value=contact.note!"" /> 
 				<@render key="ox_department" title="Department" value=contact.department!"" /> 
 				<@render key="ox_position" title="Position" value=contact.position!"" /> 
 				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
-				<@render key="ox_roomNumber" title="Room number" value=contact.roomNumber!"" /> 
-				<@render key="ox_numberOfEmployees" title="Number of employees" value=contact.numberOfEmployee!"" /> 
-				<@render key="ox_salesVolume" title="Sales volume" value=contact.salesVolume!"" /> 
-				<@render key="ox_taxId" title="Tax id" value=contact.taxID!"" /> 
-				<@render key="ox_commercialRegister" title="Commercial register" value=contact.commercialRegister!"" /> 
-				<@render key="ox_branches" title="Branches" value=contact.branches!"" /> 
-				<@render key="ox_businessCategory" title="Business category" value=contact.businessCategory!"" /> 
-				<@render key="ox_info" title="Info" value=contact.info!"" /> 
-				<@render key="ox_managerName" title="Manager name" value=contact.managerName!"" /> 
-				<@render key="ox_assistantName" title="Assistant name" value=contact.assistantName!"" /> 
-				<@render key="ox_telephoneHome1" title="Telephone home1" value=contact.telephoneHome1!"" /> 
-				<@render key="ox_telephoneHome2" title="Telephone home2" value=contact.telephoneHome2!"" /> 
-				<@render key="ox_telephoneBusiness1" title="Telephone business1" value=contact.telephoneBusiness1!"" /> 
-				<@render key="ox_telephoneBusiness2" title="Telephone business2" value=contact.telephoneBusiness2!"" /> 
-				<@render key="ox_telephoneOther" title="Telephone other" value=contact.telephoneOther!"" /> 
-				<@render key="ox_faxBusiness" title="Fax business" value=contact.faxBusiness!"" /> 
-				<@render key="ox_telephoneCallback" title="Telephone callback" value=contact.telephoneCallback!"" /> 
-				<@render key="ox_telephoneCar" title="Telephone car" value=contact.telephoneCar!"" /> 
-				<@render key="ox_telephoneCompany" title="Telephone company" value=contact.telephoneCompany!"" /> 
-				<@render key="ox_faxHome" title="Fax home" value=contact.faxHome!"" /> 
-				<@render key="ox_cellular_telephone1" title="Cellular telephone1" value=contact.cellularTelephone1!"" /> 
-				<@render key="ox_cellular_telephone2" title="Cellular telephone2" value=contact.cellularTelephone2!"" /> 
-				<@render key="ox_faxOther" title="Fax other" value=contact.faxOther!"" /> 
-				<@render_mail key="ox_email1" title="Email1" value=contact.email1!"" /> 
-				<@render_mail key="ox_email2" title="Email2" value=contact.email2!"" /> 
-				<@render_mail key="ox_email3" title="Email3" value=contact.email3!"" /> 
 				<@render key="ox_url" title="Url" value=contact.uRL!"" /> 
-				<@render key="ox_telephoneIsdn" title="Telephone isdn" value=contact.telephoneISDN!"" /> 
-				<@render key="ox_telephonePager" title="Telephone pager" value=contact.telephonePager!"" /> 
-				<@render key="ox_telephonePrimary" title="Telephone primary" value=contact.telephonePrimary!"" /> 
-				<@render key="ox_telephoneRadio" title="Telephone radio" value=contact.telephoneRadio!"" /> 
-				<@render key="ox_telephoneTelex" title="Telephone telex" value=contact.telephoneTelex!"" /> 
-				<@render key="ox_telephoneTtytdd" title="Telephone ttytdd" value=contact.telephoneTTYTTD!"" /> 
-				<@render key="ox_instantMessenger1" title="Instant messenger1" value=contact.instantMessenger1!"" /> 
-				<@render key="ox_instantMessenger2" title="Instant messenger2" value=contact.instantMessenger2!"" /> 
-				<@render key="ox_telephoneIp" title="Telephone ip" value=contact.telephoneIP!"" /> 
-				<@render key="ox_telephoneAssistant" title="Telephone assistant" value=contact.telephoneAssistant!"" /> 
-				<@render key="ox_company" title="Company" value=contact.company!"" /> 
-		
-				<@render key="ox_userfield01" title="Userfield01" value=contact.userField01!"" /> 
-				<@render key="ox_userfield02" title="Userfield02" value=contact.userField02!"" /> 
-				<@render key="ox_userfield03" title="Userfield03" value=contact.userField03!"" /> 
-				<@render key="ox_userfield04" title="Userfield04" value=contact.userField04!"" /> 
-				<@render key="ox_userfield05" title="Userfield05" value=contact.userField05!"" /> 
-				<@render key="ox_userfield06" title="Userfield06" value=contact.userField06!"" /> 
-				<@render key="ox_userfield07" title="Userfield07" value=contact.userField07!"" /> 
-				<@render key="ox_userfield08" title="Userfield08" value=contact.userField08!"" /> 
-				<@render key="ox_userfield09" title="Userfield09" value=contact.userField09!"" /> 
-				<@render key="ox_userfield10" title="Userfield10" value=contact.userField10!"" /> 
-				<@render key="ox_userfield11" title="Userfield11" value=contact.userField11!"" /> 
-				<@render key="ox_userfield12" title="Userfield12" value=contact.userField12!"" /> 
-				<@render key="ox_userfield13" title="Userfield13" value=contact.userField13!"" /> 
-				<@render key="ox_userfield14" title="Userfield14" value=contact.userField14!"" /> 
-				<@render key="ox_userfield15" title="Userfield15" value=contact.userField15!"" /> 
-				<@render key="ox_userfield16" title="Userfield16" value=contact.userField16!"" /> 
-				<@render key="ox_userfield17" title="Userfield17" value=contact.userField17!"" /> 
-				<@render key="ox_userfield18" title="Userfield18" value=contact.userField18!"" /> 
-				<@render key="ox_userfield19" title="Userfield19" value=contact.userField19!"" /> 
-				<@render key="ox_userfield20" title="Userfield20" value=contact.userField20!"" /> 
+				<@render key="ox_note" title="Note" value=contact.note!"" /> 
 			</table>
 		<div class="back"><a href="#nav">Back to the top</a></div>
 		</div>
