@@ -69,7 +69,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         public boolean matches(final String greeting) {
-            return toLowerCase(greeting).indexOf(toLowerCase(COURIER.name)) >= 0;
+            return toLowerCase(greeting).indexOf(toLowerCase(COURIER.getName())) >= 0;
         }
     }),
     /**
@@ -83,7 +83,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         public boolean matches(final String greeting) {
-            return toLowerCase(greeting).indexOf(toLowerCase(CYRUS.name)) >= 0;
+            return toLowerCase(greeting).indexOf(toLowerCase(CYRUS.getName())) >= 0;
         }
     }),
     /**
@@ -98,7 +98,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         public boolean matches(final String greeting) {
-            return toLowerCase(greeting).indexOf(toLowerCase(DOVECOT.name)) >= 0;
+            return toLowerCase(greeting).indexOf(toLowerCase(DOVECOT.getName())) >= 0;
         }
     }),
     /**
