@@ -50,7 +50,6 @@
 package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
@@ -63,7 +62,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public abstract class Entity2ACL {
 
-    private static final AtomicBoolean instancialized = new AtomicBoolean();
+    private static volatile boolean instantialized;
 
     /**
      * The constant reflecting the found group {@link OCLPermission#ALL_GROUPS_AND_USERS}.
@@ -83,17 +82,20 @@ public abstract class Entity2ACL {
      * @throws Entity2ACLException if the instance can't be created.
      */
     public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws Entity2ACLException {
-        if (!instancialized.get()) {
+        if (instantialized) {
             /*
-             * Auto-detect dependent on user's IMAP settings
+             * Auto-detection is turned off, return configured implementation
              */
-            try {
-                return Entity2ACLAutoDetector.getEntity2ACLImpl(imapConfig);
-            } catch (final IOException e) {
-                throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
-            }
+            return singleton;
         }
-        return singleton;
+        /*
+         * Auto-detect dependent on user's IMAP settings
+         */
+        try {
+            return Entity2ACLAutoDetector.getEntity2ACLImpl(imapConfig);
+        } catch (final IOException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.IO_ERROR, e, e.getMessage());
+        }
     }
 
     /**
@@ -101,7 +103,7 @@ public abstract class Entity2ACL {
      */
     final static void resetEntity2ACL() {
         singleton = null;
-        instancialized.set(false);
+        instantialized = false;
     }
 
     /**
@@ -111,7 +113,7 @@ public abstract class Entity2ACL {
      */
     final static void setInstance(final Entity2ACL singleton) {
         Entity2ACL.singleton = singleton;
-        instancialized.set(true);
+        instantialized = true;
     }
 
     /*-

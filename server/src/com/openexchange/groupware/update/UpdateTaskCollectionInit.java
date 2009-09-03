@@ -319,11 +319,11 @@ public final class UpdateTaskCollectionInit implements Initialization {
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.AlterChangeExceptionFieldLength());
             // Version 58
             // Due to a bug, there are several appointments with the String "null" in the recurrence pattern
-            // instead of sql NULL. This update task repairs these broken lines in the database.
+            // instead of SQL NULL. This update task repairs these broken lines in the database.
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.RepairRecurrencePatternNullValue());
             // Version 60
             // The collation of column uid in table login2user must be changed to utf8_bin to prevent a collision of login
-            // names that are equal except some accent or some german umlaut.
+            // names that are equal except some accent or some German umlauts.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation());
             // Version 62
             // Runs the task AlterUidCollation again. The schema creating scripts did not contain the fix for v6.10.
