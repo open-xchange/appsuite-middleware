@@ -65,11 +65,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -1403,8 +1401,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private static final Random rand = new Random(System.currentTimeMillis());
-
     private String getNextUnfilledSchemaFromDB(Integer poolId, Connection con) throws StorageException {
         if (null == poolId) {
             throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
@@ -2214,65 +2210,74 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     }
 
-    private void changeLoginMappingsForContext(final Context ctx, final Connection configdb_con) throws SQLException {
-
-        PreparedStatement prep = null;
-
+    private void changeLoginMappingsForContext(Context ctx, Connection con) throws SQLException, StorageException {
+        if (null == ctx.getLoginMappings() || ctx.getLoginMappings().size() == 0) {
+            return;
+        }
+        Set<String> loginMappings = ctx.getLoginMappings();
+        loginMappings.remove(ctx.getIdAsString()); // Deny change of mapping cid<->cid
         try {
-
-            if (ctx.getLoginMappings() != null && ctx.getLoginMappings().size() > 0) {
-
-                HashSet<String> login_map = ctx.getLoginMappings();
-                login_map.remove(ctx.getIdAsString()); // Deny change of
-                                                        // mapping cid<->cid
-
-                // first delete all mappings excluding default mapping from cid
-                // <-> cid
-                prep = configdb_con.prepareStatement("DELETE FROM login2context WHERE cid = ? AND login_info!=?");
-                prep.setInt(1, ctx.getId().intValue());
-                prep.setInt(2, ctx.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-
-                // now insert all mappings from the hashset if size >0
-                if (login_map.size() > 0) {
-                    Iterator<String> itr = login_map.iterator();
-                    while (itr.hasNext()) {
-                        String mapping_entry = (itr.next()).trim();
-                        if (mapping_entry.length() > 0) {
-
-                            // check if no mapping which the client wants to add
-                            // already exists for another context
-                            prep = configdb_con.prepareStatement("SELECT cid FROM login2context WHERE login_info = ?");
-                            prep.setString(1, mapping_entry);
-                            ResultSet rs = prep.executeQuery();
-                            if (rs.next()) {
-                                // throw exception back to client
-                                String err_msg = "A mapping with login info \"" + mapping_entry + "\" already exists in the system!";
-                                LOG.error(err_msg);
-                                throw new SQLException(err_msg);
-                            }
-                            rs.close();
-                            prep.close();
-
-                            prep = configdb_con.prepareStatement("INSERT INTO login2context (cid,login_info) values (?,?)");
-                            prep.setInt(1, ctx.getId().intValue());
-                            prep.setString(2, mapping_entry);
-                            prep.executeUpdate();
-                            prep.close();
-                        }
-                    }
-                }
-
-            } // end of updating login mappings ###
-        } finally {
+            checkForExistingLoginMapping(con, loginMappings);
+            // first delete all mappings excluding default mapping from cid <-> cid
+            PreparedStatement stmt = null;
             try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("SQL Error closing statement!", e);
+                stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=? AND login_info!=?");
+                stmt.setInt(1, ctx.getId().intValue());
+                stmt.setInt(2, ctx.getId().intValue());
+                stmt.executeUpdate();
+                stmt.close();
+            } finally {
+                closeSQLStuff(stmt);
             }
+            // now insert all mappings from the set
+            PreparedStatement stmt2 = null;
+            try {
+                stmt2 = con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
+                stmt2.setInt(1, ctx.getId().intValue());
+                for (String loginMapping : loginMappings) {
+                    if (loginMapping.length() == 0) {
+                        continue;
+                    }
+                    stmt.setString(2, loginMapping);
+                    stmt.executeUpdate();
+                }
+            } finally {
+                closeSQLStuff(stmt2);
+            }
+        } catch (StorageException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Check if no mapping which the client wants to add already exists for some context.
+     * @param con readable connection to the configuration database.
+     * @param loginMappings login mappings to check for existance.
+     */
+    private void checkForExistingLoginMapping(Connection con, Set<String> loginMappings) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid FROM login2context WHERE login_info=?");
+            for (String loginMapping : loginMappings) {
+                if (loginMapping.length() == 0) {
+                    LOG.warn("Ignoring empty login mapping.");
+                    continue;
+                }
+                stmt.setString(1, loginMapping);
+                try {
+                    result = stmt.executeQuery();
+                    if (result.next()) {
+                        throw new StorageException("A mapping with login info \"" + loginMapping + "\" already exists in the system!");
+                    }
+                } finally {
+                    closeSQLStuff(result);
+                }
+            }
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);            
+        } finally {
+            closeSQLStuff(result, stmt);
         }
     }
 
