@@ -114,9 +114,10 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 	 * Create a file of this CrawlerDescription for later use
 	 * @param crawler
 	 */
-	protected void dumpThis(CrawlerDescription crawler, String path, String filename) {
+	protected void dumpThis(CrawlerDescription crawler, String filename) {
 		try {
-			Yaml.dump(crawler, new File(path + filename + ".yml"));
+			Yaml.dump(crawler, new File("../open-xchange-development/crawlers/" + filename + ".yml"));
+			Yaml.dump(crawler, new File("conf/crawlers/" + filename + ".yml"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

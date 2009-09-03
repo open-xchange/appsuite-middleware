@@ -62,8 +62,8 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
 	
 	public void testGenericSubscribeServiceForGoogleMail(){
 		// insert valid credentials here
-		String username = "peter.mueller113@googlemail.com";
-		String password = "r0deld0del";
+		String username = "";
+		String password = "";
 		
 		
 		//create a CrawlerDescription
@@ -105,6 +105,6 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
         
         findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler,"conf/crawlers/", crawler.getDisplayName());
+        //dumpThis(crawler, crawler.getDisplayName());
 	}
 }

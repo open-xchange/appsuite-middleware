@@ -65,8 +65,8 @@ public class GenericSubscribeServiceForXingTest extends
 	
 	public void testGenericSubscribeServiceForXing(){
 		// insert valid credentials here
-		String username ="rodeldodel@wolke7.net";
-		String password ="r0deld0del";
+		String username ="";
+		String password ="";
 		
 		//create a CrawlerDescription
 		CrawlerDescription crawler = new CrawlerDescription();
@@ -83,7 +83,8 @@ public class GenericSubscribeServiceForXingTest extends
         
         findOutIfThereAreContactsForThisConfiguration(username, password,crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler,"conf/crawlers/", crawler.getDisplayName());
+        //file get written to /conf/crawlers in this bundle as well as /crawlers in open-xchange-development
+        //dumpThis(crawler, crawler.getDisplayName());
 	}
 
 }
