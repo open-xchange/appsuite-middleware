@@ -139,8 +139,19 @@ public class Storage implements EAVStorage {
     }
 
     public EAVTypeMetadataNode getTypes(Context ctx, EAVPath parent, EAVNode node) throws EAVException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection con = null;
+        try {
+            con = provider.getReadConnection(ctx);
+        } catch (TransactionException e) {
+            throw EAVStorageExceptionMessage.SQLException.create(e);
+        }
+        SQLStorage storage = new SQLStorage(ctx, getModule(parent), getObjectId(parent));
+        try {
+            storage.init(con);
+            return storage.getTypes(parent, node);
+        } finally {
+            provider.releaseReadConnection(ctx, con);
+        }
     }
 
     /* (non-Javadoc)

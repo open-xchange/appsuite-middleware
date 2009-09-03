@@ -64,5 +64,7 @@ public class Paths extends PathIndex {
     
     public static Column eavType = new Column("eavType");
     
+    public static Column containerType = new Column("containerType");
+    
     public static String pathsPrefix = "eav_";
 }

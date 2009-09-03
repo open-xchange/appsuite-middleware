@@ -1,5 +1,7 @@
 #@(#) Initial tables for EAV
 
+DROP TABLE IF EXISTS eav_pathIndex;
+
 CREATE TABLE eav_pathIndex (
     cid INT4 UNSIGNED NOT NULL,
     module INT1 UNSIGNED NOT NULL,
@@ -14,6 +16,8 @@ CREATE TABLE eav_pathIndex (
     PRIMARY KEY (cid, module, objectId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_paths1;
+
 CREATE TABLE eav_paths1 (
     cid INT4 UNSIGNED NOT NULL,
     module INT1 UNSIGNED NOT NULL,
@@ -22,51 +26,60 @@ CREATE TABLE eav_paths1 (
     name VARCHAR(128),
     parent INT4 UNSIGNED,
     eavType VARCHAR(64),
+    containerType VARCHAR(64),
     PRIMARY KEY (cid, nodeId),
     INDEX(cid, module, objectId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_int1;
+
 CREATE TABLE eav_int1 (
     cid INT4 UNSIGNED NOT NULL,
-    containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload INT8
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_bool1;
+
 CREATE TABLE eav_bool1 (
     cid INT4 UNSIGNED NOT NULL,
-    containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload BOOLEAN
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_varchar1;
+
 CREATE TABLE eav_varchar1 (
     cid INT4 UNSIGNED NOT NULL,
-    containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload VARCHAR(1024)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_text1;
+
 CREATE TABLE eav_text1 (
     cid INT4 UNSIGNED NOT NULL,
-    containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_blob1;
+
 CREATE TABLE eav_blob1 (
     cid INT4 UNSIGNED NOT NULL,
-    containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload BLOB
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE IF EXISTS eav_reference1;
+
 CREATE TABLE eav_reference1 (
     cid INT4 UNSIGNED NOT NULL,
-    containerType VARCHAR(64) NOT NULL,
     nodeId INT4 UNSIGNED NOT NULL,
     payload VARCHAR(1024)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS sequence_uid_eav_node;
 
 CREATE TABLE sequence_uid_eav_node (
     cid INT4 UNSIGNED NOT NULL,

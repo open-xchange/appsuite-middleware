@@ -58,8 +58,6 @@ public class AbstractDataTable extends AbstractColumns {
 
     public static Column eavType = new Column("eavType");
 
-    public static Column containerType = new Column("containerType");
-
     public static Column nodeId = new Column("nodeId");
 
     public static Column payload = new Column("payload");

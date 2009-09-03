@@ -62,12 +62,14 @@ import com.openexchange.eav.EAVContainerType;
 import com.openexchange.eav.EAVNode;
 import com.openexchange.eav.EAVPath;
 import com.openexchange.eav.EAVType;
+import com.openexchange.eav.EAVTypeMetadataNode;
 import com.openexchange.eav.storage.db.exception.EAVStorageException;
 import com.openexchange.eav.storage.db.exception.EAVStorageExceptionMessage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.IN;
+import com.openexchange.sql.grammar.Predicate;
 import com.openexchange.sql.grammar.SELECT;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
@@ -79,7 +81,6 @@ import static com.openexchange.eav.storage.db.sql.PathIndex.pathTable;
 import static com.openexchange.eav.storage.db.sql.Paths.*;
 import static com.openexchange.sql.tools.SQLTools.createLIST;
 import static com.openexchange.eav.storage.db.sql.AbstractDataTable.payload;
-import static com.openexchange.eav.storage.db.sql.AbstractDataTable.containerType;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -177,7 +178,40 @@ public class SQLStorage {
         Node n = getNode(path);
         return getEAVNode(n);
     }
+
+    public EAVTypeMetadataNode getTypes(EAVPath path, EAVNode filterNode) throws EAVStorageException {
+        Node n = getNode(path);
+        return getTypes(n, filterNode);
+    }
     
+    public EAVTypeMetadataNode getTypes(Node node, EAVNode filterNode) throws EAVStorageException {
+        EAVTypeMetadataNode retval = new EAVTypeMetadataNode();
+        if (node.type == null) {
+            writeInnerNode(retval, node, filterNode);
+        } else {
+            writeLeaf(retval, node, filterNode);
+        }
+        
+        return retval;
+    }
+    
+    private void writeLeaf(EAVTypeMetadataNode target, Node source, EAVNode filterNode) {
+        target.setName(source.getName());
+        target.setType(EAVType.getType(source.getType()));
+        target.setContainerType(EAVContainerType.getType(source.getContainerType()));
+    }
+
+    private void writeInnerNode(EAVTypeMetadataNode target, Node source, EAVNode filterNode) throws EAVStorageException {
+        target.setName(source.getName());
+        String[] names = new String[filterNode.getChildren().size()];
+        for (int i = 0; i < filterNode.getChildren().size(); i++) {
+            names[i] = filterNode.getChildren().get(i).getName();
+        }
+        for (Node childNode : getChildNodes(source.getNodeId(), names)) {
+            target.addChild(getTypes(childNode, filterNode.getChildByName(childNode.getName())));
+        }
+    }
+
     private EAVNode getEAVNode(Node n) throws EAVStorageException {
         EAVNode retval = new EAVNode();
         if (n.type == null) {
@@ -201,17 +235,34 @@ public class SQLStorage {
         }
     }
     
-    private List<Node> getChildNodes(int parentId) throws EAVStorageException {
+    /**
+     * Creates a List with childnodes of the given id. If names are set, the result is limited to these names.
+     * 
+     * @param parentId
+     * @param names
+     * @return
+     * @throws EAVStorageException
+     */
+    private List<Node> getChildNodes(int parentId, String...names) throws EAVStorageException {
         List<Node> retval = null;
-        SELECT select = new SELECT(ASTERISK).FROM(pathsTable)
-            .WHERE(new EQUALS(cid, PLACEHOLDER)
-                .AND(new EQUALS(module, PLACEHOLDER))
-                .AND(new EQUALS(parent, PLACEHOLDER)));
+        
+        Predicate predicate = new EQUALS(cid, PLACEHOLDER)
+            .AND(new EQUALS(module, PLACEHOLDER))
+            .AND(new EQUALS(parent, PLACEHOLDER));
         
         List<Object> values = new ArrayList<Object>();
         values.add(ctx.getContextId());
         values.add(mod);
         values.add(parentId);
+        
+        if (names.length != 0) {
+            predicate = predicate.AND(new IN(name, createLIST(names.length, PLACEHOLDER)));
+            for (String name : names) {
+                values.add(name);
+            }
+        }
+        
+        SELECT select = new SELECT(ASTERISK).FROM(pathsTable).WHERE(predicate);
         
         StatementBuilder sb = new StatementBuilder();
         ResultSet rs = null;
@@ -239,6 +290,7 @@ public class SQLStorage {
             n.setNodeId(rs.getInt(nodeId.getName()));
             n.setParent(rs.getInt(parent.getName()));
             n.setType(rs.getString(eavType.getName()));
+            n.setContainerType(rs.getString(containerType.getName()));
             retval.add(n);
         }
         
@@ -257,7 +309,7 @@ public class SQLStorage {
         }
         String table = (String) type.doSwitch(EAVType.tableSwitcher);
         
-        SELECT select = new SELECT(payload, containerType).FROM(tables.get(table))
+        SELECT select = new SELECT(payload).FROM(tables.get(table))
             .WHERE(new EQUALS(cid, PLACEHOLDER)
                 .AND(new EQUALS(nodeId, PLACEHOLDER)));
         
@@ -273,7 +325,7 @@ public class SQLStorage {
             rs = sb.executeQuery(con, select, values);
             
             if (rs.next()) {
-                cType = EAVContainerType.getType(rs.getString(containerType.getName()));
+                cType = EAVContainerType.getType(source.getContainerType());
                 if (cType == EAVContainerType.MULTISET || cType == EAVContainerType.SET) {
                     List<Object> list = new ArrayList<Object>();
                     list.add(rs.getObject(payload.getName()));
@@ -349,6 +401,7 @@ public class SQLStorage {
                 n.setNodeId(null);
             }
             n.setType(rs.getString(eavType.getName()));
+            n.setContainerType(rs.getString(containerType.getName()));
             
             nodes.put(n.getNodeId(), n);
             if (path.last().equals(n.getName())) {
@@ -398,11 +451,20 @@ public class SQLStorage {
         private String name;
         private Integer parent;
         private String type;
+        private String containerType;
         
         public Integer getNodeId() {
             return nodeId;
         }
         
+        public void setContainerType(String containerType) {
+            this.containerType = containerType;
+        }
+        
+        public String getContainerType() {
+            return containerType;
+        }
+
         public void setNodeId(Integer nodeId) {
             this.nodeId = nodeId;
         }

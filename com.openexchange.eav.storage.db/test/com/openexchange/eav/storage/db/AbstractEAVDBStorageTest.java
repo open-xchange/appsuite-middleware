@@ -133,12 +133,12 @@ public class AbstractEAVDBStorageTest extends SQLTestCase {
         createPathIndexEntry(cid, module, objectId, "eav_int1", "eav_text1", "eav_varchar1", "eav_blob1", "eav_bool1", "eav_reference1", "eav_paths1");
     }
     
-    protected void createPathEntry(int tableId, int cid, int module, int objectId, int nodeId, String name, int parent, String eavType) throws TransactionException, SQLException {
-        insert("eav_paths" + tableId, "cid", cid, "module", module, "objectId", objectId, "nodeId", nodeId, "name", name, "parent", parent == 0 ? null: parent, "eavType", eavType);
+    protected void createPathEntry(int tableId, int cid, int module, int objectId, int nodeId, String name, int parent, String eavType, String containerType) throws TransactionException, SQLException {
+        insert("eav_paths" + tableId, "cid", cid, "module", module, "objectId", objectId, "nodeId", nodeId, "name", name, "parent", parent == 0 ? null: parent, "eavType", eavType, "containerType", containerType);
     }
     
-    protected void createPayloadEntry(String table, int cid, String containerType, int nodeId, Object payload) throws TransactionException, SQLException {
-        insert(table, "cid", cid, "containerType", containerType, "nodeId", nodeId, "payload", payload);
+    protected void createPayloadEntry(String table, int cid, int nodeId, Object payload) throws TransactionException, SQLException {
+        insert(table, "cid", cid, "nodeId", nodeId, "payload", payload);
     }
     
     protected void removeAllPathIndexEntries() throws TransactionException, SQLException {
