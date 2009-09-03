@@ -174,16 +174,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public void delete(Context ctx) throws StorageException {
         LOG.debug("Fetching connection and scheme for context " + ctx.getId());
         // groupware context must be loaded before entry from user_setting_admin table is removed.
-        final com.openexchange.groupware.contexts.Context gwCtx;
+        com.openexchange.groupware.contexts.Context gwCtx = null;
         try {
             ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
             gwCtx = service.getContext(ctx.getId().intValue());
         } catch (ContextException e) {
             LOG.error(e.getMessage(), e);
-            throw new StorageException(e);
         } catch (ServiceException e) {
             LOG.error(e.getMessage(), e);
-            throw new StorageException(e);
         }
         // we need the right connection and scheme for this context
         final int poolId;
@@ -230,13 +228,24 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         try {
             // fetch infos for filestore from configdb before deleting on this connection
-            URI storageURI = FilestoreStorage.createURI(conForConfigDB, gwCtx);
+            final URI storageURI;
+            if (null != gwCtx) {
+                storageURI = FilestoreStorage.createURI(conForConfigDB, gwCtx);
+            } else {
+                storageURI = FilestoreStorage.createURI(conForConfigDB, ctx.getId().intValue());
+            }
             // Delete filestore directory of the context
             LOG.debug("Starting filestore delete(cid=" + ctx.getId() + ") from disc!");
+            boolean simpleDelete = null == gwCtx;
             try {
-                FileStorage.getInstance(storageURI, gwCtx, DBProvider.DUMMY).remove();
+                if (!simpleDelete) {
+                    FileStorage.getInstance(storageURI, gwCtx, DBProvider.DUMMY).remove();
+                }
             } catch (FileStorageException e) {
+                simpleDelete = true;
                 LOG.error("File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.", e);
+            }
+            if (simpleDelete) {
                 FileUtils.deleteDirectory(new File(storageURI));
             }
             LOG.debug("Filestore delete(cid=" + ctx.getId() + ") from disc finished!");
