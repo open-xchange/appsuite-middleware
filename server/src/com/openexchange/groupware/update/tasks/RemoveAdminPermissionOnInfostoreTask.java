@@ -80,7 +80,12 @@ import com.openexchange.tools.sql.DBUtils;
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(RemoveAdminPermissionOnInfostoreTask.class);
+    private final UpdateExceptionFactory exceptionFactory;
+
+    public RemoveAdminPermissionOnInfostoreTask() {
+        super();
+        exceptionFactory = new UpdateExceptionFactory(RemoveAdminPermissionOnInfostoreTask.class);
+    }
 
     public int addedWithVersion() {
         return 76;
@@ -135,7 +140,7 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         }
     }
 
-    private static Set<Integer> getAllContexts(final int contextId) throws UpdateException {
+    private Set<Integer> getAllContexts(final int contextId) throws UpdateException {
         final Connection con;
         try {
             con = Database.get(contextId, false);
@@ -163,7 +168,7 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         }
     }
 
-    private static void dropTopLevelInfostoreFolderPermissionFromAdmin(final int contextId) throws UpdateException {
+    private void dropTopLevelInfostoreFolderPermissionFromAdmin(final int contextId) throws UpdateException {
         /*
          * Get context's admin
          */
@@ -196,16 +201,16 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task RemoveAdminPermissionOnInfostoreTask: %1$s." })
-    private static UpdateException createSQLError(final SQLException e) {
-        return EXCEPTION.create(1, e, e.getMessage());
+    private UpdateException createSQLError(final SQLException e) {
+        return exceptionFactory.create(1, e, e.getMessage());
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "Error while performing task RemoveAdminPermissionOnInfostoreTask: No context admin exists for context %1$s." })
-    private static UpdateException missingAdminError(final int contextId) {
-        return EXCEPTION.create(2, Integer.valueOf(contextId));
+    private UpdateException missingAdminError(final int contextId) {
+        return exceptionFactory.create(2, Integer.valueOf(contextId));
     }
 
-    private static int getMailAdmin(final int contextId) throws UpdateException {
+    private int getMailAdmin(final int contextId) throws UpdateException {
         final Connection con;
         try {
             con = Database.get(contextId, false);
