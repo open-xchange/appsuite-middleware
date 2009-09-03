@@ -200,6 +200,16 @@ public enum IMAPServer {
 
     private static interface ArgumentGenerator {
 
+        /**
+         * Gets the arguments needed for a certain IMAP server to map ACL entity to a system user and vice versa.
+         * 
+         * @param accountId The account ID
+         * @param imapServerAddress The IMAP server address
+         * @param sessionUser The session user ID
+         * @param fullname The IMAP folder's fullname
+         * @param separator The IMAP folder's separator character
+         * @return The arguments needed for a certain IMAP server to map ACL entity to a system user and vice versa
+         */
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator);
     }
 
@@ -226,6 +236,12 @@ public enum IMAPServer {
             return new String(chars);
         }
 
+        /**
+         * Checks if given IMAP server greeting matches a certain IMAP server.
+         * 
+         * @param greeting The IMAP server greeting
+         * @return <code>true</code> if given IMAP server greeting matches a certain IMAP server; otherwise <code>false</code>
+         */
         public abstract boolean matches(String greeting);
     }
 
