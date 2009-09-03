@@ -69,147 +69,147 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes HtmlPages that each contain contact information and converts them to ContactObjects for OX
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements
-		Step<Contact[], List<HtmlAnchor>> {
-	
-	private List<HtmlAnchor> anchors;
-	private Contact[] contactObjectsArray;
-	private static final ContactSanitizer SANITIZER = new ContactSanitizer();
-	private String vcardUrl, pictureUrl;
-	
-	public ContactObjectsByHTMLAnchorsStep(String description, String vcardUrl, String pictureUrl) {
-		this.description = description;
-		this.vcardUrl = vcardUrl;
-		this.pictureUrl = pictureUrl;
-	}
-	
-	public ContactObjectsByHTMLAnchorsStep(){
-		
-	}
+        Step<Contact[], List<HtmlAnchor>> {
 
-	public void execute(WebClient webClient) {
-		Vector<Contact> contactObjects = new Vector<Contact>();
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-		final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-		VersitDefinition.Reader versitReader;
-		String encoding = "ISO-8859-1";
-		//int counter=0;
-		for (HtmlAnchor anchor : anchors) {			
-    		try {
-    			//counter ++;
-    			//System.out.println("***** Contact No. " + Integer.toString(counter));
-    			//System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
-    			HtmlPage page = anchor.click();
-    			Contact contact = new Contact();
-    			TextPage vcardPage = null;
-    			String imageUrl = "";
-    			
-    			for (HtmlAnchor link: page.getAnchors()){
-    				//if there is a vcard linked
-    				if (link.getHrefAttribute().startsWith(vcardUrl)) {
-    					vcardPage = link.click();
-    				}
-    			}
-    			
-    			//if there is a contact picture in an <img>-tag get its Url
-    			if (page.getWebResponse().getContentAsString().contains(pictureUrl)){
-	    			int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
-	    			String substring = page.getWebResponse().getContentAsString().substring(startIndex);
-	    			imageUrl = substring.substring(0, substring.indexOf("\""));
-	    		}	
-				
-    			
-    			if (vcardPage != null){
-    				byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
-    				
-    				versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
-        			VersitObject versitObject = def.parse(versitReader);
-        			contact = oxContainerConverter.convertContact(versitObject);
-    			}
-    			
-    			//add the image from a url to the contact
-    			if (!imageUrl.equals("")){
-    				OXContainerConverter.loadImageFromURL(contact, imageUrl);
-    			}	
-    			
-    			SANITIZER.sanitize(contact);
-    			contactObjects.add(contact);
-    			
-    		} catch (final VersitException e){
-    			e.printStackTrace();
-    			this.exception = e;
-    		} catch (ConverterException e) {
-				e.printStackTrace();
-				this.exception = e;
-			} catch (IOException e) {
-				e.printStackTrace();
-				this.exception = e;
-			}
-			executedSuccessfully = true;
-		}
-		
-		contactObjectsArray = new Contact[contactObjects.size()];
-	    for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
-	    	contactObjectsArray[i] = contactObjects.get(i);
-	    }
-	    
-		
-	}
+    private List<HtmlAnchor> anchors;
+    private Contact[] contactObjectsArray;
+    private static final ContactSanitizer SANITIZER = new ContactSanitizer();
+    private String vcardUrl, pictureUrl;
 
-	public String inputType() {
-		return LIST_OF_HTML_ANCHORS;
-	}
+    public ContactObjectsByHTMLAnchorsStep(String description, String vcardUrl, String pictureUrl) {
+        this.description = description;
+        this.vcardUrl = vcardUrl;
+        this.pictureUrl = pictureUrl;
+    }
 
-	public String outputType() {
-		return LIST_OF_CONTACT_OBJECTS;
-	}
+    public ContactObjectsByHTMLAnchorsStep(){
 
-	public Contact[] getOutput() {
-		return contactObjectsArray;
-	}
+    }
 
-	public void setInput(List<HtmlAnchor> input) {
-		this.anchors = input;
-	}
+    public void execute(WebClient webClient) {
+        Vector<Contact> contactObjects = new Vector<Contact>();
+        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        final VersitDefinition def = Versit.getDefinition("text/x-vcard");
+        VersitDefinition.Reader versitReader;
+        String encoding = "ISO-8859-1";
+        //int counter=0;
+        for (HtmlAnchor anchor : anchors) {
+            try {
+                //counter ++;
+                //System.out.println("***** Contact No. " + Integer.toString(counter));
+                //System.out.println("Free Memory"+Runtime.getRuntime().freeMemory());
+                HtmlPage page = anchor.click();
+                Contact contact = new Contact();
+                TextPage vcardPage = null;
+                String imageUrl = "";
 
-	public List<HtmlAnchor> getAnchors() {
-		return anchors;
-	}
+                for (HtmlAnchor link: page.getAnchors()){
+                    //if there is a vcard linked
+                    if (link.getHrefAttribute().startsWith(vcardUrl)) {
+                        vcardPage = link.click();
+                    }
+                }
 
-	public void setAnchors(List<HtmlAnchor> pages) {
-		this.anchors = pages;
-	}
+                //if there is a contact picture in an <img>-tag get its Url
+                if (page.getWebResponse().getContentAsString().contains(pictureUrl)){
+                    int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
+                    String substring = page.getWebResponse().getContentAsString().substring(startIndex);
+                    imageUrl = substring.substring(0, substring.indexOf("\""));
+                }
 
-	public Contact[] getContactObjectsArray() {
-		return contactObjectsArray;
-	}
 
-	public void setContactObjectsArray(Contact[] contactObjectsArray) {
-		this.contactObjectsArray = contactObjectsArray;
-	}
+                if (vcardPage != null){
+                    byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 
-	public String getVcardUrl() {
-		return vcardUrl;
-	}
+                    versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
+                    VersitObject versitObject = def.parse(versitReader);
+                    contact = oxContainerConverter.convertContact(versitObject);
+                }
 
-	public void setVcardUrl(String vcardUrl) {
-		this.vcardUrl = vcardUrl;
-	}
+                //add the image from a url to the contact
+                if (!imageUrl.equals("")){
+                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                }
 
-	public String getPictureUrl() {
-		return pictureUrl;
-	}
+                SANITIZER.sanitize(contact);
+                contactObjects.add(contact);
 
-	public void setPictureUrl(String pictureUrl) {
-		this.pictureUrl = pictureUrl;
-	}
+            } catch (final VersitException e){
+                e.printStackTrace();
+                this.exception = e;
+            } catch (ConverterException e) {
+                e.printStackTrace();
+                this.exception = e;
+            } catch (IOException e) {
+                e.printStackTrace();
+                this.exception = e;
+            }
+            executedSuccessfully = true;
+        }
 
-	public static ContactSanitizer getSANITIZER() {
-		return SANITIZER;
-	}
+        contactObjectsArray = new Contact[contactObjects.size()];
+        for (int i=0; i<contactObjectsArray.length && i< contactObjects.size(); i++){
+            contactObjectsArray[i] = contactObjects.get(i);
+        }
 
-	
+
+    }
+
+    public String inputType() {
+        return LIST_OF_HTML_ANCHORS;
+    }
+
+    public String outputType() {
+        return LIST_OF_CONTACT_OBJECTS;
+    }
+
+    public Contact[] getOutput() {
+        return contactObjectsArray;
+    }
+
+    public void setInput(List<HtmlAnchor> input) {
+        this.anchors = input;
+    }
+
+    public List<HtmlAnchor> getAnchors() {
+        return anchors;
+    }
+
+    public void setAnchors(List<HtmlAnchor> pages) {
+        this.anchors = pages;
+    }
+
+    public Contact[] getContactObjectsArray() {
+        return contactObjectsArray;
+    }
+
+    public void setContactObjectsArray(Contact[] contactObjectsArray) {
+        this.contactObjectsArray = contactObjectsArray;
+    }
+
+    public String getVcardUrl() {
+        return vcardUrl;
+    }
+
+    public void setVcardUrl(String vcardUrl) {
+        this.vcardUrl = vcardUrl;
+    }
+
+    public String getPictureUrl() {
+        return pictureUrl;
+    }
+
+    public void setPictureUrl(String pictureUrl) {
+        this.pictureUrl = pictureUrl;
+    }
+
+    public static ContactSanitizer getSANITIZER() {
+        return SANITIZER;
+    }
+
+
 }

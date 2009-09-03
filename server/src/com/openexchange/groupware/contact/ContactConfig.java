@@ -62,11 +62,13 @@ public class ContactConfig {
 
     private static final String FILENAME = "contact.properties";
 
-    private static final ContactConfig SINGLETON = new ContactConfig();;
+    private static final ContactConfig SINGLETON = new ContactConfig();
 
     private static final Log LOG = LogFactory.getLog(ContactConfig.class);
 
     private final Properties props = new Properties();
+
+    private long maxImageSize = 33750000;
 
     /**
      * Prevent instantiation.
@@ -79,11 +81,10 @@ public class ContactConfig {
         return SINGLETON;
     }
 
-
     /**
      * @param configuration the configuration service.
      */
-    public void initialize(final ConfigurationService configuration) {
+    public void initialize(ConfigurationService configuration) {
         final Properties props = configuration.getFile(FILENAME);
         if (null == props) {
             LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
@@ -91,6 +92,16 @@ public class ContactConfig {
             this.props.clear();
             this.props.putAll(props);
             LOG.info("Read configuration file " + FILENAME + ".");
+        }
+        parse();
+    }
+
+    private void parse() {
+        try {
+            maxImageSize = Long.parseLong(getString(Property.MAX_IMAGE_SIZE));
+        } catch (NumberFormatException e) {
+            LOG.error("Unable to parse value of property " + Property.MAX_IMAGE_SIZE.propertyName + " in " + FILENAME + '.', e);
+            maxImageSize = 33750000;
         }
     }
 
@@ -125,6 +136,11 @@ public class ContactConfig {
         }
     }
 
+    public long getMaxImageSize() {
+        logNotInitialized();
+        return maxImageSize;
+    }
+
     /**
      * Properties of the contact properties file.
      */
@@ -147,7 +163,11 @@ public class ContactConfig {
         /**
          * Enables/Disables the start letter based quick select of contacts
          */
-        CHARACTER_SEARCH("com.openexchange.contacts.characterSearch", Boolean.TRUE.toString());
+        CHARACTER_SEARCH("com.openexchange.contacts.characterSearch", Boolean.TRUE.toString()),
+        /**
+         * Maximum size in bytes of an image that may be stored.
+         */
+        MAX_IMAGE_SIZE("max_image_size", "33750000");
 
         /**
          * Name of the property in the participant.properties file.

@@ -51,6 +51,7 @@ package com.openexchange.tools.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,4 +105,18 @@ public final class IOUtils {
         }
     }
 
+    /**
+     * Convenience method for reading all from input stream and writing that to the output stream until end of file (EOF). This method does
+     * not close either of the streams.
+     * @param in some input stream
+     * @param out some output stream
+     * @throws IOException if some problem occurs.
+     */
+    public static void transfer(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[4096];
+        int length = -1;
+        while ((length = in.read(buffer)) != -1) {
+            out.write(buffer, 0, length);
+        }
+    }
 }
