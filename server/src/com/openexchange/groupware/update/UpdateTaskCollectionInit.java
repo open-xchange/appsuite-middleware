@@ -329,7 +329,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Runs the task AlterUidCollation again. The schema creating scripts did not contain the fix for v6.10.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation2());
             // Version 70
-            // New config parameters to set the default conifmration status of newly created appointments
+            // New config parameters to set the default confirmation status of newly created appointments
             // for participants in private an public folders
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DefaultConfirmStatusUpdateTask());
             // Version 72
@@ -338,6 +338,12 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 74
             // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete search
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch());
+
+
+            // TODO: Enable virtual folder tree update task when needed
+            // Version XY
+            // Migrates existing folder data to new outlook-like folder tree structure
+            // registry.addUpdateTask(new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask());
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully started");
