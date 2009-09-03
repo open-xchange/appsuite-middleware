@@ -55,14 +55,14 @@ import java.net.URI;
 import com.openexchange.cache.dynamic.OXNoRefresh;
 
 public interface Filestore extends Serializable {
-	
-	@OXNoRefresh
-	int getId();
 
-	long getMaxContext();
+    @OXNoRefresh
+    int getId();
 
-	long getSize();
+    long getMaxContext();
 
-	URI getUri();
+    long getSize();
+
+    URI getUri();
 
 }

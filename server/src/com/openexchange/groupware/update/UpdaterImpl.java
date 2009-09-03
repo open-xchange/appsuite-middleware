@@ -53,7 +53,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
@@ -82,17 +81,11 @@ public class UpdaterImpl extends Updater {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean isLocked(final Context context) throws UpdateException {
-        return getSchema(context).isLocked();
+    public boolean isLocked(int contextId) throws UpdateException {
+        return getSchema(contextId).isLocked();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @OXThrows(
         category = Category.CODE_ERROR,
         desc = "",
@@ -100,7 +93,7 @@ public class UpdaterImpl extends Updater {
         msg = "Update process initialization failed: %1$s."
     )
     @Override
-    public void startUpdate(final Context context) throws UpdateException {
+    public void startUpdate(int contextId) throws UpdateException {
         final TimerService timerService;
         try {
             timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
@@ -109,30 +102,27 @@ public class UpdaterImpl extends Updater {
         }
         UpdateProcess process;
         try {
-            process = new UpdateProcess(context);
+            process = new UpdateProcess(contextId);
         } catch (final SchemaException e) {
             throw EXCEPTION.create(1, e, e.getMessage());
         }
         timerService.schedule(process, 0);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean toUpdate(final Context context) throws UpdateException {
-        return toUpdateInternal(getSchema(context));
+    public boolean toUpdate(int contextId) throws UpdateException {
+        return toUpdateInternal(getSchema(contextId));
     }
 
     private static final boolean toUpdateInternal(final Schema schema) {
         return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
     }
 
-    private Schema getSchema(Context context) throws UpdateException {
+    private Schema getSchema(int contextId) throws UpdateException {
         final Schema schema;
         try {
             final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
-            schema = store.getSchema(context);
+            schema = store.getSchema(contextId);
         } catch (final SchemaException e) {
             throw new UpdateException(e);
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
@@ -73,9 +74,7 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * SQL select statement for loading a context.
      */
-    private static final String SELECT_CONTEXT =
-        "SELECT name,enabled,filestore_id,filestore_name,filestore_login,"
-        + "filestore_passwd,quota_max FROM context WHERE cid=?";
+    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
 
     /**
      * SQL select statement for resolving the login info to the context
@@ -104,11 +103,8 @@ public class RdbContextStorage extends ContextStorage {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-	public int getContextId(final String loginInfo) throws ContextException {
+    public int getContextId(String loginInfo) throws ContextException {
         Connection con = null;
         try {
             con = DBPool.pickup();
@@ -134,12 +130,6 @@ public class RdbContextStorage extends ContextStorage {
         return contextId;
     }
 
-    /**
-     * Reads the identifier of the mailadmin.
-     * @param ctx Context
-     * @return the unique identifier of mailadmin.
-     * @throws ContextException if an error occurs.
-     */
     private int getMailadmin(final Context ctx) throws ContextException {
         Connection con = null;
         try {
@@ -169,12 +159,6 @@ public class RdbContextStorage extends ContextStorage {
         return identifier;
     }
 
-    /**
-     * Reads the login information of a context.
-     * @param ctx Context.
-     * @return a string array with all login information of a context.
-     * @throws ContextException if loading the login information fails.
-     */
     private String[] getLoginInfos(final Context ctx) throws ContextException {
         Connection con = null;
         try {
@@ -201,17 +185,29 @@ public class RdbContextStorage extends ContextStorage {
         return loginInfo.toArray(new String[loginInfo.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-	public ContextExtended loadContext(final int contextId) throws ContextException {
+    public ContextExtended loadContext(int contextId) throws ContextException {
+        ContextImpl context = loadContextData(contextId);
+        context.setMailadmin(getMailadmin(context));
+        context.setLoginInfo(getLoginInfos(context));
+        return context;
+    }
+
+    public ContextImpl loadContextData(int contextId) throws ContextException {
         Connection con = null;
         try {
             con = DBPool.pickup();
-        } catch (final DBPoolingException e) {
+        } catch (DBPoolingException e) {
             throw new ContextException(Code.NO_CONNECTION, e);
         }
+        try {
+            return loadContextData(con, contextId);
+        } finally {
+            DBPool.closeReaderSilent(con);
+        }
+    }
+
+    public ContextImpl loadContextData(Connection con, int contextId) throws ContextException {
         ContextImpl context = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -232,17 +228,13 @@ public class RdbContextStorage extends ContextStorage {
                 context.setFilestoreAuth(auth);
                 context.setFileStorageQuota(result.getLong(pos++));
             } else {
-                throw new ContextException(Code.NOT_FOUND, Integer.valueOf(
-                    contextId));
+                throw new ContextException(Code.NOT_FOUND, I(contextId));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(con);
         }
-        context.setMailadmin(getMailadmin(context));
-        context.setLoginInfo(getLoginInfos(context));
         return context;
     }
 
@@ -250,7 +242,7 @@ public class RdbContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-	public List<Integer> getAllContextIds() throws ContextException {
+    public List<Integer> getAllContextIds() throws ContextException {
         final List<Integer> retval = new ArrayList<Integer>();
         Connection con = null;
         try {
@@ -275,11 +267,11 @@ public class RdbContextStorage extends ContextStorage {
         return retval;
     }
 
-	@Override
-	protected void shutDown() {
-	}
+    @Override
+    protected void shutDown() {
+    }
 
-	@Override
-	protected void startUp() {
-	}
+    @Override
+    protected void startUp() {
+    }
 }

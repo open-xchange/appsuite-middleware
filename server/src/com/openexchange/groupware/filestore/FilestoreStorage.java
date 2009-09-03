@@ -53,6 +53,9 @@ import java.net.URI;
 import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 
 public abstract class FilestoreStorage {
 
@@ -84,5 +87,17 @@ public abstract class FilestoreStorage {
         final FilestoreStorage storage = getInstance();
         final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
+    }
+
+    public static URI createURI(Connection con, int contextId) throws FilestoreException {
+        try {
+            RdbContextStorage ctxStorage = new RdbContextStorage();
+            Context ctx = ctxStorage.loadContextData(con, contextId);
+            FilestoreStorage storage = getInstance();
+            Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
+            return FilestoreTools.createLocation(store, ctx);
+        } catch (ContextException e) {
+            throw new FilestoreException(e);
+        }
     }
 }

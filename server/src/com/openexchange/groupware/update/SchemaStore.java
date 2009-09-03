@@ -137,7 +137,10 @@ public abstract class SchemaStore {
     public abstract void unlockSchema(final Schema schema, int contextId) throws SchemaException;
 
     public Schema getSchema(Context ctx) throws SchemaException {
-        int contextId = ctx.getContextId();
+        return getSchema(ctx.getContextId());
+    }
+
+    public Schema getSchema(int contextId) throws SchemaException {
         try {
             return getSchema(Database.resolvePool(contextId, true), Database.getSchema(contextId));
         } catch (DBPoolingException e) {

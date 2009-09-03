@@ -59,7 +59,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.exception.SchemaException;
@@ -75,15 +74,16 @@ public class UpdateProcess implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(UpdateProcess.class);
 
-    private final Context context;
+    private final int contextId;
 
     private final Lock updateLock;
 
     private final SchemaStore schemaStore;
 
-    public UpdateProcess(final Context context) throws SchemaException {
+    public UpdateProcess(int contextId) throws SchemaException {
+        super();
         schemaStore = SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName());
-        this.context = context;
+        this.contextId = contextId;
         this.updateLock = new ReentrantLock();
     }
 
@@ -100,7 +100,7 @@ public class UpdateProcess implements Runnable {
             /*
              * Load schema
              */
-            final Schema schema = schemaStore.getSchema(context);
+            final Schema schema = schemaStore.getSchema(contextId);
             if (schema.getDBVersion() >= UpdateTaskCollection.getHighestVersion()) {
                 /*
                  * Already been updated before by previous thread
@@ -125,8 +125,7 @@ public class UpdateProcess implements Runnable {
                 /*
                  * Get filtered & sorted list of update tasks
                  */
-                final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema
-                        .getDBVersion());
+                final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema.getDBVersion());
                 /*
                  * Perform updates
                  */
@@ -135,15 +134,12 @@ public class UpdateProcess implements Runnable {
                     final UpdateTask task = iter.next();
                     final String taskName = task.getClass().getSimpleName();
                     try {
-                        LOG.info("Starting update task "
-                            + taskName + " on schema "
-                            + schema.getSchema() + ".");
-                        task.perform(schema, context.getContextId());
-                    } catch (final AbstractOXException e) {
+                        LOG.info("Starting update task " + taskName + " on schema " + schema.getSchema() + ".");
+                        task.perform(schema, contextId);
+                    } catch (AbstractOXException e) {
                         LOG.error(e.getMessage(), e);
                     }
-                    LOG.info("Update task " + taskName + " on schema "
-                        + schema.getSchema() + " done.");
+                    LOG.info("Update task " + taskName + " on schema " + schema.getSchema() + " done.");
                 }
             } finally {
                 if (unlock) {
@@ -153,11 +149,11 @@ public class UpdateProcess implements Runnable {
                 // update process.
                 removeContexts();
             }
-        } catch (final SchemaException e) {
+        } catch (SchemaException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final DBPoolingException e) {
+        } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (final ContextException e) {
+        } catch (ContextException e) {
             LOG.error(e.getMessage(), e);
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -167,19 +163,18 @@ public class UpdateProcess implements Runnable {
     }
 
     private final void lockSchema(final Schema schema) throws SchemaException {
-        schemaStore.lockSchema(schema, context.getContextId());
+        schemaStore.lockSchema(schema, contextId);
     }
 
     private final void unlockSchema(final Schema schema) throws SchemaException {
-        schemaStore.unlockSchema(schema, context.getContextId());
+        schemaStore.unlockSchema(schema, contextId);
     }
 
     private final void removeContexts() throws DBPoolingException, ContextException {
-        final int[] contextIds = Database.getContextsInSameSchema(context.getContextId());
+        final int[] contextIds = Database.getContextsInSameSchema(contextId);
         final ContextStorage contextStorage = ContextStorage.getInstance();
         for (final int cid : contextIds) {
             contextStorage.invalidateContext(cid);
         }
     }
-
 }

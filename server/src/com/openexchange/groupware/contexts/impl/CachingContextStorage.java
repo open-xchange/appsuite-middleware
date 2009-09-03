@@ -146,9 +146,6 @@ public class CachingContextStorage extends ContextStorage {
     @Override
     public ContextExtended loadContext(final int contextId) throws ContextException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (cacheService == null) {
-            return persistantImpl.loadContext(contextId);
-        }
         final OXObjectFactory<ContextExtended> factory = new OXObjectFactory<ContextExtended>() {
             public Serializable getKey() {
                 return Integer.valueOf(contextId);
@@ -169,6 +166,9 @@ public class CachingContextStorage extends ContextStorage {
             }
         };
         try {
+            if (cacheService == null) {
+                return factory.load();
+            }
             return new ContextReloader(factory, REGION_NAME);
         } catch (final AbstractOXException e) {
             if (e instanceof ContextException) {

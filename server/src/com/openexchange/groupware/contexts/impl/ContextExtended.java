@@ -52,20 +52,18 @@ package com.openexchange.groupware.contexts.impl;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- *
  * ContextExtended - an extended version of <code>Context</code> interface
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public interface ContextExtended extends Context {
 
-	/**
-	 * Sets context's update status. This causes sessions that belong to a
-	 * updating context to die as fast as possible to be able to maintain these
-	 * contexts.
-	 * @param updating - the context's update status
-	 */
-	void setUpdating(boolean updating);
+    /**
+     * Sets context's update status. This causes sessions that belong to a
+     * updating context to die as fast as possible to be able to maintain these
+     * contexts.
+     * @param updating - the context's update status
+     */
+    void setUpdating(boolean updating);
 
 }

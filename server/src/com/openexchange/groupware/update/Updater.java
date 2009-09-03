@@ -110,34 +110,58 @@ public abstract class Updater {
     }
 
     /**
-     * @param context Context inside the schema.
+     * @param ctx Context inside the schema.
      * @return <code>true</code> if the schema must be updated.
      * @throws UpdateException if an exception occurs.
      */
-    public abstract boolean toUpdate(final Context context)
-        throws UpdateException;
+    public final boolean toUpdate(Context ctx) throws UpdateException {
+        return toUpdate(ctx.getContextId());
+    }
+
+    /**
+     * @param contextId Identifier of a context inside the schema.
+     * @return <code>true</code> if the schema must be updated.
+     * @throws UpdateException if an exception occurs.
+     */
+    public abstract boolean toUpdate(int contextId) throws UpdateException;
 
     /**
      * Starts the update process on a schema.
-     * @param context Context inside the schema.
+     * @param contextId Context inside the schema.
      * @throws UpdateException if an exception occurs.
      */
-    public abstract void startUpdate(final Context context)
-        throws UpdateException;
+    public final void startUpdate(Context ctx) throws UpdateException {
+        startUpdate(ctx.getContextId());
+    }
 
     /**
-     * @param context Context inside the schema.
+     * Starts the update process on a schema.
+     * @param contextId Identifier of a context inside the schema.
+     * @throws UpdateException if an exception occurs.
+     */
+    public abstract void startUpdate(int contextId) throws UpdateException;
+
+    /**
+     * @param ctx Context inside the schema.
      * @return <code>true</code> if the schema the context resides in is
      * currently updated.
      * @throws UpdateException if an exception occurs.
      */
-    public abstract boolean isLocked(final Context context)
-        throws UpdateException;
-    
+    public final boolean isLocked(Context ctx) throws UpdateException {
+        return isLocked(ctx.getContextId());
+    }
+
+    /**
+     * @param contextId Identifier of a context inside the schema.
+     * @return <code>true</code> if the schema the context resides in is currently updated.
+     * @throws UpdateException if an exception occurs.
+     */
+    public abstract boolean isLocked(int contextId) throws UpdateException;
+
     /**
      * Determines if given database schema is currently locked due to a running
      * update process
-     * 
+     *
      * @param schema -
      *            the schema name
      * @param writePoolId -
@@ -148,10 +172,10 @@ public abstract class Updater {
      */
     public abstract boolean isLocked(final String schema, final int writePoolId)
         throws UpdateException;
-    
+
     /**
      * Determines if given database schema needs to be updated
-     * 
+     *
      * @param schema -
      *            the schema name
      * @param writePoolId -
