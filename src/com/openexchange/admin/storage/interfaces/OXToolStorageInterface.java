@@ -73,7 +73,7 @@ public abstract class OXToolStorageInterface {
     private static Class<? extends OXToolStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXToolStorageInterface.class);
-    
+
     protected static AdminCache cache = null;
 
     protected static PropertyHandler prop = null;
@@ -131,7 +131,7 @@ public abstract class OXToolStorageInterface {
         }
     }
 
-    
+
     /**
      * Checks if given domain is used by any user,group or resource as mailaddress in given context.
      * @param domain
@@ -147,7 +147,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract Group[] domainInUseByGroup(final Context ctx,final String domain) throws StorageException;
-    
+
     /**
      * Checks if given domain is used as mail address of any resource in given context.
      * @param domain
@@ -166,7 +166,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Although this method get's a context Object it will only look after the cid
-     * 
+     *
      * @param ctx
      * @return
      * @throws StorageException
@@ -177,7 +177,7 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsContextLoginMappings(final Context ctx, final Connection configdb_connection) throws StorageException;
 
-    public abstract boolean existsDatabase(final int db_id) throws StorageException;    
+    public abstract boolean existsDatabase(final int db_id) throws StorageException;
 
     public abstract boolean existsGroup(final Context ctx, final Group[] grps) throws StorageException;
 
@@ -196,7 +196,7 @@ public abstract class OXToolStorageInterface {
      */
     public abstract boolean existsGroup(final Context ctx, final Connection con, final int id) throws StorageException;
 
-    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;    
+    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
 
     public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
 
@@ -209,13 +209,13 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsReason(final String reason) throws StorageException;
 
     public abstract boolean existsResource(final Context ctx, final int resource_id) throws StorageException;
-    
+
     public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
 
     public abstract boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException;
 
-    public abstract boolean existsServer(final int server_id) throws StorageException;   
-    
+    public abstract boolean existsServer(final int server_id) throws StorageException;
+
     public abstract boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException;
 
     public abstract boolean existsStore(final int store_id) throws StorageException;
@@ -224,12 +224,12 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsUser(final Context ctx, final int uid) throws StorageException;
 
-    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;    
+    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
 
     /**
      * This method will detect if a specified user exists. It check this through the user id and the
      * user name specified in the user object
-     * 
+     *
      * @param ctx
      * @param users
      * @return
@@ -239,15 +239,15 @@ public abstract class OXToolStorageInterface {
 
     /**
      * A convenience method for a single user object. See {@link #existsUser(Context, User[])}
-     * 
+     *
      * @param ctx
      * @param user
      * @return
      * @throws StorageException
      */
-    public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;    
-    
-    
+    public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;
+
+
     /**
      * Checks via group id and group name if it already exists in this context. Should be used in change method!
      * @param ctx
@@ -256,8 +256,8 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsGroupName(final Context ctx, final Group grp) throws StorageException;
-    
-    
+
+
     /**
      * Checks if given name is already used for a group in given context.Should be used in create method!
      * @param ctx
@@ -266,7 +266,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsGroupName(final Context ctx, final String groupName) throws StorageException;
-    
+
     /**
      * Checks via user id and user name if it already exists in this context. Should be used in change method!
      * @param ctx
@@ -275,7 +275,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsUserName(final Context ctx, final User usr) throws StorageException;
-    
+
     /**
      * Checks if given name is already used for an user in given context.Should be used in create method!
      * @param ctx
@@ -284,7 +284,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsUserName(final Context ctx, final String userName) throws StorageException;
-    
+
     /**
      * Checks via server id and server name if it already exists. Should be used in change method!
      * @param srv
@@ -292,7 +292,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsServerName(final Server srv) throws StorageException;
-    
+
     /**
      * Checks if given name is already used!Should be used in create method!
      * @param serverName
@@ -300,7 +300,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsServerName(final String serverName) throws StorageException;
-    
+
     /**
      * Checks via database id and database name if it already exists. Should be used in change method!
      * @param db
@@ -308,7 +308,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsDatabaseName(final Database db) throws StorageException;
-    
+
     /**
      *  Checks if given name is already used!Should be used in create method!
      * @param databaseName
@@ -316,7 +316,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsDatabaseName(final String databaseName) throws StorageException;
-    
+
     /**
      * Checks via resource id and resource name if it already exists. Should be used in change method!
      * @param ctx
@@ -325,7 +325,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsResourceName(final Context ctx, final Resource res) throws StorageException;
-    
+
     /**
      *  Checks if given name is already used for resource in given context!Should be used in create method!
      * @param ctx
@@ -334,7 +334,7 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsResourceName(final Context ctx, final String resourceName) throws StorageException;
-            
+
     /**
      * Checks via context id and context name if it already exists. Should be used in change method!
      * @param ctx
@@ -342,8 +342,8 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract boolean existsContextName(final Context ctx) throws StorageException;
-    
-    
+
+
     /**
      * Checks if given context name already exists!Should be used in create method!
      * @param contextName
@@ -353,20 +353,20 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsContextName(final String contextName) throws StorageException;
 
     public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
-    
+
     public abstract int getAdminForContext(final Context ctx) throws StorageException;
-    
+
     public abstract int getContextIDByContextname(final String ctxname) throws StorageException;
 
     public abstract int getDatabaseIDByDatabasename(final String dbname) throws StorageException;
-    
+
     public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
-    
+
     public abstract int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException;
 
     /**
      * Gets the system's GID for specified group.
-     * 
+     *
      * @param ctx The context
      * @param group_id The group ID
      * @param con A connection with at least read-only permission
@@ -380,63 +380,66 @@ public abstract class OXToolStorageInterface {
     public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
 
     public abstract int getResourceIDByResourcename(final Context ctx,final String resourcename) throws StorageException;
-    
+
     public abstract String getResourcenameByResourceID(final Context ctx,final int resource_id) throws StorageException;
 
     public abstract int getServerIDByServername(final String servername) throws StorageException;
 
     public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
-    
+
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
-    
+
     public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
 
     /**
      * This method determines if the user is the context admin. Therefore either the user_id or the username
      * have to be filled. Furthermore this methods sets the uid in the given user object to the correct
      * value if the object contains the name only.
-     * 
+     *
      * @param ctx
      * @param user
      * @return
      * @throws StorageException
      */
     public abstract boolean isContextAdmin(final Context ctx, User user) throws StorageException;
-    
+
     public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
-    
+
     /**
      * This method checks if the display name of the given user object is already used in for a system user. This method doesn't check
      * for display names in the contacts of the users
-     * 
+     *
      * @param ctx
      * @param usr
      * @return
      * @throws StorageException
      */
     public abstract boolean existsDisplayName(final Context ctx, final User usr) throws StorageException;
-    
+
     public abstract boolean isMasterDatabase(final int database_id) throws StorageException;
-    
+
     public abstract boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
-    
+
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
-    
+
     public abstract void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException;
-    
+
     public abstract void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException;
-    
-    public abstract boolean checkAndUpdateSchemaIfRequired(final Context ctx) throws StorageException;
-    
+
+    public final boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException {
+        return checkAndUpdateSchemaIfRequired(ctx.getId().intValue());
+    }
+
+    public abstract boolean checkAndUpdateSchemaIfRequired(int contextId) throws StorageException;
+
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
     public abstract boolean serverInUse(final int server_id) throws StorageException;
-    
+
     public abstract void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 
     public abstract boolean storeInUse(final int store_id) throws StorageException;
-    
-    public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 
+    public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 
 }
