@@ -9,7 +9,7 @@ workflowString: |
       linkAvailableAfterLogin: "(http://www.facebook.com/inbox/\\?ref=[a-z]*)"
       nameOfPasswordField: pass
       nameOfUserField: email
-      password: r0deld0del
+      password: ""
       url: ""
-      username: rodeldodel@wolke7.net
+      username: ""
   
