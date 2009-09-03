@@ -12,9 +12,9 @@ workflowString: |
       nameOfUserField: Email
       numberOfForm: 1
       pageTitleAfterLogin: "(\\?v=cl)|(\\?ui=html&zy=e)"
-      password: r0deld0del
+      password: ""
       url: "https://mail.google.com"
-      username: peter.mueller113@googlemail.com
+      username: ""
     - !com.openexchange.subscribe.crawler.PageByUrlStep
       url: "https://mail.google.com/mail/?ui=html&zy=e&v=cl&pnl=a"
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
