@@ -107,6 +107,12 @@ public final class JCSCacheService implements CacheService {
             return new JCSCache(JCS.getInstance(name));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getMessage());
+        } catch (final NullPointerException npe) {
+            /*
+             * Can't use JCS without a configuration file. It should fail more gracefully, but that's a minor concern in the eyes of JCS
+             * developer.
+             */
+            throw new CacheException(CacheException.Code.MISSING_CACHE_REGION, name);
         }
     }
 

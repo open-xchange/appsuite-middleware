@@ -83,9 +83,9 @@ public final class CacheException extends AbstractOXException {
          */
         MISSING_CONFIGURATION_PROPERTY("Missing configuration property: %1$s", Category.SETUP_ERROR, 4),
         /**
-         * The default element attributes could not be retrieved
+         * The default element attributes could not be retrieved.
          */
-        FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved", Category.CODE_ERROR, 5),
+        FAILED_ATTRIBUTE_RETRIEVAL("The default element attributes could not be retrieved.", Category.CODE_ERROR, 5),
         /**
          * A put into the cache failed.
          */
@@ -99,9 +99,13 @@ public final class CacheException extends AbstractOXException {
          */
         FAILED_REMOVE("Remove on cache failed", Category.CODE_ERROR, 8),
         /**
-         * The default element attributes could not be assigned
+         * The default element attributes could not be assigned.
          */
-        FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned", Category.CODE_ERROR, 5);
+        FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned.", Category.CODE_ERROR, 5),
+        /**
+         * No cache found for region name: %1$s
+         */
+        MISSING_CACHE_REGION("No cache found for region name: %1$s", Category.SETUP_ERROR, 6);
 
         private final String message;
 
