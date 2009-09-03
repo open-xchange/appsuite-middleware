@@ -83,6 +83,7 @@ import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
+import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -1776,7 +1777,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static boolean isKnownEntity(final String entity, final Entity2ACL entity2ACL, final Context ctx, final Entity2ACLArgs args) {
         try {
-            return entity2ACL.getEntityID(entity, ctx, args)[0] != -1;
+            return !UserGroupID.NULL.equals(entity2ACL.getEntityID(entity, ctx, args));
         } catch (final AbstractOXException e) {
             return false;
         }

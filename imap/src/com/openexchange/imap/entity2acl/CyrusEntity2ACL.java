@@ -122,7 +122,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
     }
 
     @Override
-    public int[] getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
+    public UserGroupID getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
         if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }

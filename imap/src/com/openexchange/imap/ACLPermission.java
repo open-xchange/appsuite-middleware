@@ -56,6 +56,7 @@ import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
+import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.ACL;
@@ -192,9 +193,9 @@ public final class ACLPermission extends MailPermission {
      * @throws AbstractOXException If given ACL cannot be applied to this permission
      */
     public void parseACL(final ACL acl, final Entity2ACLArgs args, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
-        final int[] res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
-        setEntity(res[0]);
-        setGroupPermission(res[1] > 0);
+        final UserGroupID res = Entity2ACL.getInstance(imapConfig).getEntityID(acl.getName(), ctx, args);
+        setEntity(res.getId());
+        setGroupPermission(res.isGroup());
         parseRights(acl.getRights(), imapConfig);
         this.acl = acl;
     }
@@ -315,11 +316,11 @@ public final class ACLPermission extends MailPermission {
     public Object clone() {
         try {
             final ACLPermission clone = (ACLPermission) super.clone();
-            //if (null == acl) {
-            //    clone.acl = null;
-            //} else {
-            //    clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
-            //}
+            // if (null == acl) {
+            // clone.acl = null;
+            // } else {
+            // clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
+            // }
             clone.acl = null;
             return clone;
         } catch (final CloneNotSupportedException e) {

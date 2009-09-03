@@ -68,7 +68,7 @@ public abstract class Entity2ACL {
     /**
      * The constant reflecting the found group {@link OCLPermission#ALL_GROUPS_AND_USERS}.
      */
-    protected static final int[] ALL_GROUPS_AND_USERS = { OCLPermission.ALL_GROUPS_AND_USERS, 1 };
+    protected static final UserGroupID ALL_GROUPS_AND_USERS = new UserGroupID(OCLPermission.ALL_GROUPS_AND_USERS, true);
 
     /**
      * Singleton
@@ -126,13 +126,16 @@ public abstract class Entity2ACL {
     }
 
     /**
-     * Returns a newly created array of <code>int</code> reflecting a found user.
+     * Returns a newly created {@link UserGroupID} instance reflecting a found user.
      * 
      * @param userId The user ID
-     * @return A newly created array of <code>int</code> reflecting a found user.
+     * @return A newly created {@link UserGroupID} instance reflecting a found user.
      */
-    protected final int[] getUserRetval(final int userId) {
-        return new int[] { userId, 0 };
+    protected final UserGroupID getUserRetval(final int userId) {
+        if (userId < 0) {
+            return UserGroupID.NULL;
+        }
+        return new UserGroupID(userId, false);
     }
 
     /**
@@ -152,11 +155,10 @@ public abstract class Entity2ACL {
      * @param pattern The pattern for either IMAP login or user name
      * @param ctx The context
      * @param args The arguments container
-     * @return An array of <code>int</code> with length 2. The first index contains the user/group ID whose IMAP login matches given
-     *         <code>pattern</code> or <code>-1</code> if none found. The second index reflects whether matched entity is a group or not:
-     *         &gt;= 1 means a group.
+     * @return An instance of {@link UserGroupID} providing the user/group identifier whose IMAP login matches given <code>pattern</code> or
+     *         {@link UserGroupID#NULL} if none found.
      * @throws AbstractOXException If user/group search fails
      */
-    public abstract int[] getEntityID(final String pattern, Context ctx, Entity2ACLArgs args) throws AbstractOXException;
+    public abstract UserGroupID getEntityID(final String pattern, Context ctx, Entity2ACLArgs args) throws AbstractOXException;
 
 }
