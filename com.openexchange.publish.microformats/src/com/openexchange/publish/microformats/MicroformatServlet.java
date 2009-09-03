@@ -67,6 +67,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.MicroformatStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.java.Strings;
@@ -86,18 +87,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final long serialVersionUID = 6727750981539640363L;
 
-    private static final String DISCLAIMER_PRIVACY = "Privacy:\n"
-        +   "The data and any references contained in this webpage are shared with you under the assumption "
-        +   "that the owner of the data was entitled to make them available to you. Neither Open-Xchange, "
-        +   "nor any of its subsidiaries or affiliates shall be liable for its publication or "
-        +   "re-publication.\n"
-        +   "Any unauthorized use or dissemination of this data is prohibited. If you intend to store, "
-        +   "process, or pass on this data, please make sure that you have the right to do so.\n"
-        +   "If you are one of the people listed or responsible for a resource listed on this page and you "
-        +   "don't agree with the publication, please send an email containing the URL (the link) to this "
-        +   "webpage to %s and the publisher of the data:\n"
-        +   "Data published by %s on %s\n";
-    
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
     private static final Log LOG = LogFactory.getLog(MicroformatServlet.class);
@@ -249,7 +238,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
     
     private String getPrivacyText(User user){
-        return translator.translate(user.getLocale(), DISCLAIMER_PRIVACY);
+        return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
     }
 
 }
