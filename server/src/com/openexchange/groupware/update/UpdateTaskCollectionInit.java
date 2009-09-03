@@ -338,6 +338,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 74
             // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete search
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch());
+            // Version 76
+            // Drops incorrect admin permission on top level infostore folder
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RemoveAdminPermissionOnInfostoreTask());
 
 
             // TODO: Enable virtual folder tree update task when needed

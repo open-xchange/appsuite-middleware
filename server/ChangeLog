@@ -1,4 +1,8 @@
-* 2009-04-02 - tobias.prinz@open-xchange.com
+* 2009-09-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #14445: Fixed incorrect admin permission on top level infostore folder
+
+* 2009-09-02 - tobias.prinz@open-xchange.com
 
  - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove workaround for bug 7248, too.
  - Bugfix #14349: VCard 3.0 allows for a list of nicknames. That led to the brackets around the nickname.

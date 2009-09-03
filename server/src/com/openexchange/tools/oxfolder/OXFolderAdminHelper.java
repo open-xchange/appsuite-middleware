@@ -394,6 +394,9 @@ public final class OXFolderAdminHelper {
         /*
          * Add mailadmin's folder rights to context's system folders and create his standard folders
          */
+        /*-
+         * Don't grant full access for admin on top level infostore folder
+         * 
         createSingleUserPermission(
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
             mailAdmin,
@@ -403,6 +406,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+         */
         createSingleUserPermission(
             FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
             mailAdmin,
