@@ -124,10 +124,10 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
             webClient.closeAllWindows();
 
             // fetch session key
-            // String session = client.auth_getSession(token);
+            String session = client.auth_getSession(token);
 
             // keep track of the logged in user id
-            // Long userId = client.users_getLoggedInUser();
+            Long userId = client.users_getLoggedInUser();
 
             // Get friends list
             client.friends_get();
