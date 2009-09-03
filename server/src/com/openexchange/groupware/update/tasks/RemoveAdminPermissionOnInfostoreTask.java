@@ -90,8 +90,8 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        final Set<Integer> set = getAllContexts(contextId);
+    public void perform(final Schema schema, final int triggeringContextId) throws AbstractOXException {
+        final Set<Integer> set = getAllContexts(triggeringContextId);
 
         final int size = set.size();
         final StringBuilder sb = new StringBuilder(128);
@@ -103,13 +103,13 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         }
 
         int processed = 0;
-        for (final Integer cid : set) {
+        for (final Integer contextId : set) {
             try {
-                dropTopLevelInfostoreFolderPermissionFromAdmin(cid.intValue());
+                dropTopLevelInfostoreFolderPermissionFromAdmin(contextId.intValue());
             } catch (final Exception e) {
                 sb.append("RemoveAdminPermissionOnInfostoreTask experienced an error while dropping ");
                 sb.append("incorrect admin permission on top level infostore folder in context ");
-                sb.append(cid);
+                sb.append(contextId);
                 sb.append(":\n");
                 sb.append(e.getMessage());
                 LOG.error(sb.toString(), e);
