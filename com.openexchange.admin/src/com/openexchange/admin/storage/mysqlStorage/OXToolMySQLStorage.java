@@ -69,16 +69,12 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.context.ContextService;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.server.ServiceException;
 
 /**
  * @author d7
@@ -1464,21 +1460,22 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException {
-        final ContextService contextService;
+    public boolean checkAndUpdateSchemaIfRequired(int contextId) throws StorageException {
         try {
-            contextService = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
-        } catch (ServiceException e) {
+            final Updater updater = Updater.getInstance();
+            if (updater.isLocked(contextId)) {
+                return true;
+            }
+            if (updater.toUpdate(contextId)) {
+                updater.startUpdate(contextId);
+                return true;
+            }
+        } catch (UpdateException e) {
             throw new StorageException(e.getMessage(), e);
         }
-        try {
-            com.openexchange.groupware.contexts.Context gwCtx = contextService.loadContext(ctx.getId().intValue());
-            return gwCtx.isUpdating();
-        } catch (ContextException e) {
-            throw new StorageException(e.getMessage(), e);
-        }
+        return false;
     }
-
+    
     private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doupdate, final Context ctx) throws StorageException {
         Updater updater;
         try {

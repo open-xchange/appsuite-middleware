@@ -149,5 +149,4 @@ public abstract class OXCommonImpl {
             throw databaseUpdateException;
         }
     }
-
 }
