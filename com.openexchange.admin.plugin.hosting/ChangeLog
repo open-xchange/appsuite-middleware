@@ -1,3 +1,7 @@
+* 2009-09-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
+
 * 2009-07-27 - marcus.klein@open-xchange.com
 
  - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
