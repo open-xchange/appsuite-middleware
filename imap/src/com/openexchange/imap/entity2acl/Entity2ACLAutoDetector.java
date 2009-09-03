@@ -213,14 +213,6 @@ public final class Entity2ACLAutoDetector {
             throw new Entity2ACLException(Entity2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
         }
 
-        private static String toLowerCase(final String str) {
-            final char[] buf = new char[str.length()];
-            for (int i = 0; i < buf.length; i++) {
-                buf[i] = Character.toLowerCase(str.charAt(i));
-            }
-            return new String(buf);
-        }
-
     } // End of Entity2ACLCallable
 
 }

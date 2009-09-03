@@ -69,7 +69,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         public boolean matches(final String greeting) {
-            return greeting.toLowerCase().indexOf(COURIER.name.toLowerCase()) >= 0;
+            return toLowerCase(greeting).indexOf(toLowerCase(COURIER.name)) >= 0;
         }
     }),
     /**
@@ -83,7 +83,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         public boolean matches(final String greeting) {
-            return greeting.toLowerCase().indexOf(CYRUS.name.toLowerCase()) >= 0;
+            return toLowerCase(greeting).indexOf(toLowerCase(CYRUS.name)) >= 0;
         }
     }),
     /**
@@ -98,7 +98,7 @@ public enum IMAPServer {
     }, new GreetingMatcher() {
 
         public boolean matches(final String greeting) {
-            return greeting.toLowerCase().indexOf(DOVECOT.name.toLowerCase()) >= 0;
+            return toLowerCase(greeting).indexOf(toLowerCase(DOVECOT.name)) >= 0;
         }
     }),
     /**
@@ -188,6 +188,20 @@ public enum IMAPServer {
             }
         }
         return null;
+    }
+
+    /**
+     * Turns specified {@link String} instance into lower-case.
+     * 
+     * @param str The string
+     * @return The lower-case string
+     */
+    static String toLowerCase(final String str) {
+        final char[] buf = new char[str.length()];
+        for (int i = 0; i < buf.length; i++) {
+            buf[i] = Character.toLowerCase(str.charAt(i));
+        }
+        return new String(buf);
     }
 
     private static interface ArgumentGenerator {
