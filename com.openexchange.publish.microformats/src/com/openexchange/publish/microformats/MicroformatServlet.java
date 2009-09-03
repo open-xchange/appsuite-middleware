@@ -65,7 +65,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.api2.OXException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MicroformatStrings;
 import com.openexchange.groupware.ldap.User;
@@ -75,6 +80,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
 import com.openexchange.publish.microformats.tools.UncloseableWriter;
+import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.user.UserService;
 
@@ -108,6 +114,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static ConfigurationService configService;
 
+    private static ContactInterfaceDiscoveryService contacts;
+
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -140,6 +148,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         additionalTemplateVariables.put(module, additionalVars);
     }
 
+    public static void setContactInterfaceDiscoveryService(ContactInterfaceDiscoveryService service) {
+        contacts = service;
+    }
+
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
@@ -168,6 +181,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
             HashMap<String, Object> variables = new HashMap<String, Object>();
             User user = getUser(publication);
+            Contact userContact = getContact(new PublicationSession(publication), publication.getContext(), user.getContactId());
+            
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             variables.put("request", req);
@@ -182,7 +197,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 user,
                 new Date());
             variables.put("privacy", privacyText ); //TODO Use lastmodified once someone implements this.
-             
+            variables.put("userContact", userContact); 
 
             if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
@@ -197,6 +212,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             t.printStackTrace(resp.getWriter());
         }
     }
+
+    private Contact getContact(PublicationSession publicationSession, Context context, int contactId) throws OXException {
+        ContactInterface contactInterface = contacts.getContactInterfaceProvider(FolderObject.SYSTEM_LDAP_FOLDER_ID, context.getContextId()).newContactInterface(publicationSession);
+        Contact contact = contactInterface.getObjectById(contactId, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        return contact;
+    }
+
 
     private String formatPrivacyText(String privacyText, String adminAddress, User user, Date creationDate) {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
@@ -240,5 +262,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     private String getPrivacyText(User user){
         return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
     }
+
 
 }

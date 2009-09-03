@@ -148,6 +148,7 @@ public class ServletActivator extends DeferredActivator {
         MicroformatServlet microformatServlet = new MicroformatServlet();
         
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
+        MicroformatServlet.setContactInterfaceDiscoveryService(contacts);
 
         InfostoreFileServlet.setUserConfigs(userConfigs);
         InfostoreFileServlet.setUsers(users);
