@@ -82,7 +82,7 @@ public interface UpdateTask {
      * lower than this version. Remember to register your update task in the configuration file for update tasks or to publish it as an OSGi
      * service.
      * 
-     * @return The schema version with that this update task was introduced.
+     * @return The schema version with which this update task was introduced.
      */
     int addedWithVersion();
 

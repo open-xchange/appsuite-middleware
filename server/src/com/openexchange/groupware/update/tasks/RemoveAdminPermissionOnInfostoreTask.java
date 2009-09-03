@@ -82,6 +82,9 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
 
     private final UpdateExceptionFactory exceptionFactory;
 
+    /**
+     * Initializes a new {@link RemoveAdminPermissionOnInfostoreTask}.
+     */
     public RemoveAdminPermissionOnInfostoreTask() {
         super();
         exceptionFactory = new UpdateExceptionFactory(RemoveAdminPermissionOnInfostoreTask.class);
