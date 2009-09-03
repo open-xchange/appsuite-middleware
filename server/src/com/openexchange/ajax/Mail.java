@@ -2667,14 +2667,18 @@ public class Mail extends PermissionServlet implements UploadListener {
             {
                 mm = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), body.getBytes("US-ASCII"));
                 final String fromAddr = mm.getHeader(MessageHeaders.HDR_FROM, null);
-                if (isEmpty(fromAddr)) {
-                    // Add from address
-                    from = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-                    mm.setFrom(from);
-                    m = MIMEMessageConverter.convertMessage(mm);
-                } else {
-                    from = new QuotedInternetAddress(fromAddr, true);
-                    m = MIMEMessageConverter.convertMessage(mm);
+                try {
+                    if (isEmpty(fromAddr)) {
+                        // Add from address
+                        from = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+                        mm.setFrom(from);
+                        m = MIMEMessageConverter.convertMessage(mm);
+                    } else {
+                        from = new QuotedInternetAddress(fromAddr, true);
+                        m = MIMEMessageConverter.convertMessage(mm);
+                    }
+                } catch (final AddressException e) {
+                    throw MIMEMailException.handleMessagingException(e);
                 }
             }
             try {
