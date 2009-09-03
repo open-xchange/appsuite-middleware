@@ -1,3 +1,7 @@
+* 2009-09-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
+
 * 2009-09-01 - marcus.klein@open-xchange.com
 
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
