@@ -69,7 +69,7 @@ import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
- * {@link VirtualTreeCreateTableTask} - Inserts necessary tables to support missing POP3 features.
+ * {@link VirtualTreeCreateTableTask} - Inserts necessary tables to support virtual folder trees.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

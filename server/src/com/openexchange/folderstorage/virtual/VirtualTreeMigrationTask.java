@@ -104,7 +104,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * {@link VirtualTreeMigrationTask} - Inserts necessary tables to support missing POP3 features.
+ * {@link VirtualTreeMigrationTask} - Migrates folder data to new outlook-like tree structure.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
