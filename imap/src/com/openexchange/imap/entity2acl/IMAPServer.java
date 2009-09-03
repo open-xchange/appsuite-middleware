@@ -225,7 +225,7 @@ public enum IMAPServer {
          * @param str The string
          * @return The lower-case string
          */
-        protected String toLowerCase(final String str) {
+        protected final String toLowerCase(final String str) {
             if (null == str) {
                 return null;
             }
