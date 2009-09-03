@@ -68,6 +68,7 @@ public enum IMAPServer {
         }
     }, new GreetingMatcher() {
 
+        @Override
         public boolean matches(final String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(COURIER.getName())) >= 0;
         }
@@ -82,6 +83,7 @@ public enum IMAPServer {
         }
     }, new GreetingMatcher() {
 
+        @Override
         public boolean matches(final String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(CYRUS.getName())) >= 0;
         }
@@ -97,6 +99,7 @@ public enum IMAPServer {
         }
     }, new GreetingMatcher() {
 
+        @Override
         public boolean matches(final String greeting) {
             return toLowerCase(greeting).indexOf(toLowerCase(DOVECOT.getName())) >= 0;
         }
@@ -112,6 +115,7 @@ public enum IMAPServer {
         }
     }, new GreetingMatcher() {
 
+        @Override
         public boolean matches(final String greeting) {
             return greeting.indexOf("Sun Java(tm) System Messaging Server") >= 0;
         }
@@ -190,31 +194,39 @@ public enum IMAPServer {
         return null;
     }
 
-    /**
-     * Turns specified {@link String} instance into lower-case.
-     * 
-     * @param str The string
-     * @return The lower-case string
+    /*-
+     * Helper classes/interfaces
      */
-    static String toLowerCase(final String str) {
-        if (null == str) {
-            return null;
-        }
-        final char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = Character.toLowerCase(chars[i]);
-        }
-        return new String(chars);
-    }
 
     private static interface ArgumentGenerator {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator);
     }
 
-    private static interface GreetingMatcher {
+    private static abstract class GreetingMatcher {
 
-        public boolean matches(String greeting);
+        protected GreetingMatcher() {
+            super();
+        }
+
+        /**
+         * Turns specified {@link String} instance into lower-case.
+         * 
+         * @param str The string
+         * @return The lower-case string
+         */
+        protected String toLowerCase(final String str) {
+            if (null == str) {
+                return null;
+            }
+            final char[] chars = str.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                chars[i] = Character.toLowerCase(chars[i]);
+            }
+            return new String(chars);
+        }
+
+        public abstract boolean matches(String greeting);
     }
 
 }
