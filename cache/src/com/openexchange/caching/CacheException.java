@@ -71,9 +71,9 @@ public final class CacheException extends AbstractOXException {
          */
         CACHE_ERROR("A cache error occurred: %1$s", Category.CODE_ERROR, 1),
         /**
-         * Missing cache config file at location: %1$s
+         * Missing cache configuration file at location: %1$s
          */
-        MISSING_CACHE_CONFIG_FILE("Missing cache config file at location: %1$s", Category.SETUP_ERROR, 2),
+        MISSING_CACHE_CONFIG_FILE("Missing cache configuration file at location: %1$s", Category.SETUP_ERROR, 2),
         /**
          * An I/O error occurred: %1$s
          */
