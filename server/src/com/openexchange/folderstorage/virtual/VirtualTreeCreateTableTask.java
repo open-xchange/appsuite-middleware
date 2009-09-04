@@ -184,13 +184,13 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
 
     private static final String getDelTable3() {
         return "CREATE TABLE virtualBackupSubscription (" + 
-        "cid INT4 unsigned NOT NULL, " + 
-        "tree INT4 unsigned NOT NULL, " + 
-        "user INT4 unsigned NOT NULL, " + 
-        "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
-        "subscribed tinyint(3) unsigned NOT NULL, " + "PRIMARY KEY (cid, tree, user, folderId), " + 
-        "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualBackupTree (cid, tree, user, folderId) " + 
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+            "cid INT4 unsigned NOT NULL, " + 
+            "tree INT4 unsigned NOT NULL, " + 
+            "user INT4 unsigned NOT NULL, " + 
+            "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + 
+            "subscribed tinyint(3) unsigned NOT NULL, " + "PRIMARY KEY (cid, tree, user, folderId), " + 
+            "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualBackupTree (cid, tree, user, folderId) " + 
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
