@@ -87,7 +87,7 @@ public final class Entity2ACLInit implements Initialization {
 
     public void start() throws AbstractOXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(Entity2ACLInit.class.getName() + " already started");
+            LOG.error(MessageFormat.format("{0} already started", Entity2ACLInit.class.getName()));
             return;
         }
         Entity2ACLAutoDetector.initEntity2ACLMappings();
