@@ -49,12 +49,12 @@
 
 package com.openexchange.ajp13;
 
+import static com.openexchange.tools.Collections.newHashMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -91,9 +91,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE",
         "BASELINE_CONTROL", "MKACTIVITY" };
 
-    private static final Map<Integer, String> httpHeaderMapping = new HashMap<Integer, String>(14);
+    private static final Map<Integer, String> httpHeaderMapping;
 
-    private static final Map<Integer, String> attributeMapping = new HashMap<Integer, String>(14);
+    private static final Map<Integer, String> attributeMapping;
 
     /**
      * A "set" to keep track of known JSESSIONIDs
@@ -122,6 +122,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     private static final int REQUEST_TERMINATOR = 0xFF;
 
     static {
+        httpHeaderMapping = newHashMap(14);
         httpHeaderMapping.put(Integer.valueOf(0x01), "accept");
         httpHeaderMapping.put(Integer.valueOf(0x02), "accept-charset");
         httpHeaderMapping.put(Integer.valueOf(0x03), "accept-encoding");
@@ -136,6 +137,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         httpHeaderMapping.put(Integer.valueOf(0x0c), "pragma");
         httpHeaderMapping.put(Integer.valueOf(0x0d), "referer");
         httpHeaderMapping.put(Integer.valueOf(0x0e), "user-agent");
+
+        attributeMapping = newHashMap(14);
         attributeMapping.put(Integer.valueOf(0x01), "context");
         attributeMapping.put(Integer.valueOf(0x02), "servlet_path");
         attributeMapping.put(Integer.valueOf(0x03), "remote_user");

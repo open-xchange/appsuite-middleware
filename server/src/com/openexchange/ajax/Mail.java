@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.tools.Collections.newHashMap;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.BufferedWriter;
@@ -63,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1808,7 +1808,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (length != 1) {
             throw new IllegalArgumentException("JSON array's length is not 1");
         }
-        final Map<String, String> map = new HashMap<String, String>(2);
+        final Map<String, String> map = newHashMap(2);
         for (int i = 0; i < length; i++) {
             final JSONObject folderAndID = paths.getJSONObject(i);
             map.put(PARAMETER_FOLDERID, folderAndID.getString(PARAMETER_FOLDERID));
@@ -1856,7 +1856,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (length != 1) {
             throw new IllegalArgumentException("JSON array's length is not 1");
         }
-        final Map<String, String> map = new HashMap<String, String>(2);
+        final Map<String, String> map = newHashMap(2);
         for (int i = 0; i < length; i++) {
             final JSONObject folderAndID = paths.getJSONObject(i);
             map.put(PARAMETER_FOLDERID, folderAndID.getString(PARAMETER_FOLDERID));
@@ -2299,7 +2299,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Pre-Select field writers
                  */
                 final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-                final Map<String, List<String>> idMap = new HashMap<String, List<String>>(4);
+                final Map<String, List<String>> idMap = newHashMap(4);
                 fillMapByArray(idMap, jsonIDs, length);
                 final int size = idMap.size();
                 if (size == 0) {

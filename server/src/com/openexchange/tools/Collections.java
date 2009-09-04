@@ -58,13 +58,14 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Methods for easy handling of collections.
- * TODO use Collections in com.openexchange.tools.arrays.
+ * Methods for easy handling of collections. TODO use Collections in com.openexchange.tools.arrays.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
@@ -79,6 +80,39 @@ public final class Collections {
      */
     private Collections() {
         super();
+    }
+
+    /**
+     * Creates a new {@link HashMap} instance.
+     * <p>
+     * Convenience method substitute<br>
+     * <i> Map&lt;String, String&gt; m = new HashMap&lt;String, String&gt;(); </i><br>
+     * with<br>
+     * <i> Map&lt;String, String&gt; m = newHashMap(); </i>
+     * 
+     * @param <K> The key instances' type
+     * @param <V> The value instances' type
+     * @return A new {@link HashMap} instance
+     */
+    public static <K, V> HashMap<K, V> newHashMap() {
+        return new HashMap<K, V>();
+    }
+
+    /**
+     * Creates a new {@link HashMap} instance.
+     * <p>
+     * Convenience method substitute<br>
+     * <i> Map&lt;String, String&gt; m = new HashMap&lt;String, String&gt;(initialCapacity); </i><br>
+     * with<br>
+     * <i> Map&lt;String, String&gt; m = newHashMap(initialCapacity); </i>
+     * 
+     * @param <K> The key instances' type
+     * @param <V> The value instances' type
+     * @param initialCapacity The initial capacity
+     * @return A new {@link HashMap} instance
+     */
+    public static <K, V> HashMap<K, V> newHashMap(final int initialCapacity) {
+        return new HashMap<K, V>(initialCapacity);
     }
 
     /**

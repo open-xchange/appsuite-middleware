@@ -49,11 +49,10 @@
 
 package com.openexchange.ajax.fields;
 
+import static com.openexchange.tools.Collections.newHashMap;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.groupware.search.Order;
 
 /**
@@ -97,8 +96,9 @@ public final class OrderFields {
         WRITE_MAP = new EnumMap<Order, String>(Order.class);
         WRITE_MAP.put(Order.ASCENDING, "asc");
         WRITE_MAP.put(Order.DESCENDING, "desc");
-        final Map<String, Order> tmp = new HashMap<String, Order>();
-        for (final Order order : Order.values()) {
+        final Order[] values = Order.values();
+        final Map<String, Order> tmp = newHashMap(values.length);
+        for (final Order order : values) {
             tmp.put(WRITE_MAP.get(order), order);
         }
         PARSE_MAP = Collections.unmodifiableMap(tmp);
