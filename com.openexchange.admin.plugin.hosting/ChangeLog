@@ -1,6 +1,7 @@
 * 2009-09-04 - marcus.klein@open-xchange.com
 
  - Bugfix #14449: Fixed wrong variable reference introduced by fixing bug 12168.
+ - Bugfix #14451: Fixed adding another login mapping introduced by fixing bug 12168.
 
 * 2009-09-03 - marcus.klein@open-xchange.com
 

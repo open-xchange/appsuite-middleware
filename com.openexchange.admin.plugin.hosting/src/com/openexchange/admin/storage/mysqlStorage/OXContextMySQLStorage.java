@@ -2217,7 +2217,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Set<String> loginMappings = ctx.getLoginMappings();
         loginMappings.remove(ctx.getIdAsString()); // Deny change of mapping cid<->cid
         try {
-            checkForExistingLoginMapping(con, loginMappings);
             // first delete all mappings excluding default mapping from cid <-> cid
             PreparedStatement stmt = null;
             try {
@@ -2229,6 +2228,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } finally {
                 closeSQLStuff(stmt);
             }
+            // now check if some other context uses one of the login mappings
+            checkForExistingLoginMapping(con, loginMappings);
             // now insert all mappings from the set
             PreparedStatement stmt2 = null;
             try {
