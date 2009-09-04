@@ -51,6 +51,7 @@ package com.openexchange.ajax.config.actions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -73,6 +74,9 @@ public class GetResponse extends AbstractAJAXResponse {
     private void fetchValue() {
         if (null == value) {
             value = getData();
+            if (JSONObject.NULL.equals(value)) {
+                value = null;
+            }
         }
     }
 
