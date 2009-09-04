@@ -51,8 +51,6 @@ package com.openexchange.imap.entity2acl;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -93,25 +91,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SUNMessagingServerEntity2ACL.class);
 
-    private static final String ALIAS_OWNER = "owner";
-
     private static final String ALIAS_ANYONE = "anyone";
-
-    private static final String SHARED_PREFIX = "#shared";
-
-    private static final String getSharedFolderOwner(final String sharedFolderName, final char delim) {
-        if (!sharedFolderName.startsWith(SHARED_PREFIX, 0)) {
-            return null;
-        }
-        final String quotedDelim = Pattern.quote(String.valueOf(delim));
-        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{ASCII}&&[^").append(
-            quotedDelim).append("]]+)").append(quotedDelim).append("\\p{ASCII}+").toString();
-        final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
-        if (m.matches()) {
-            return m.group(1).replaceAll("\\s+", String.valueOf(delim));
-        }
-        return null;
-    }
 
     /**
      * Default constructor
@@ -122,47 +102,10 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
 
     @Override
     public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws AbstractOXException {
-        if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
+        if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return ALIAS_ANYONE;
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.SUN_MESSAGING_SERVER);
-        if (args == null || args.length == 0) {
-            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
-        }
-        final int accountId = ((Integer) args[0]).intValue();
-        final InetSocketAddress imapAddr = (InetSocketAddress) args[1];
-        final int sessionUser = ((Integer) args[2]).intValue();
-        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
-        if (null == sharedOwner) {
-            /*
-             * A non-shared folder
-             */
-            if (sessionUser == userId) {
-                /*
-                 * Logged-in user is equal to given user
-                 */
-                return ALIAS_OWNER;
-            }
-            return getACLNameInternal(userId, ctx, accountId, imapAddr);
-        }
-        /*
-         * A shared folder
-         */
-        final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser);
-        if (sharedOwnerID == userId) {
-            /*
-             * Owner is equal to given user
-             */
-            return ALIAS_OWNER;
-        }
-        return getACLNameInternal(userId, ctx, accountId, imapAddr);
-    }
-
-    private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws AbstractOXException {
         final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
-        if (null == storageService) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, MailAccountStorageService.class.getName());
-        }
         final String userLoginInfo;
         {
             final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
@@ -171,14 +114,20 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
             }
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }
+        final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
+        if (args == null || args.length == 0) {
+            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
+        }
         try {
-            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
+            return MailConfig.getMailLogin(
+                storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()),
+                userLoginInfo);
         } catch (final MailAccountException e) {
             throw new Entity2ACLException(
                 Entity2ACLException.Code.UNKNOWN_USER,
                 Integer.valueOf(userId),
                 Integer.valueOf(ctx.getContextId()),
-                imapAddr);
+                args[1].toString());
         }
     }
 
@@ -187,34 +136,19 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.SUN_MESSAGING_SERVER);
+        final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
         if (args == null || args.length == 0) {
             throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
         }
-        final int accountId = ((Integer) args[0]).intValue();
-        final InetSocketAddress imapAddr = (InetSocketAddress) args[1];
-        final int sessionUser = ((Integer) args[2]).intValue();
-        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
-        if (null == sharedOwner) {
-            /*
-             * A non-shared folder
-             */
-            if (ALIAS_OWNER.equalsIgnoreCase(pattern)) {
-                /*
-                 * Map alias "owner" to logged-in user
-                 */
-                return getUserRetval(sessionUser);
-            }
-            return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
-        }
-        /*
-         * A shared folder
-         */
-        if (ALIAS_OWNER.equalsIgnoreCase(pattern)) {
-            /*
-             * Map alias "owner" to shared folder owner
-             */
-            return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, imapAddr, sessionUser));
+        final int accountId;
+        final InetSocketAddress imapAddr;
+        final int sessionUser;
+        try {
+            accountId = ((Integer) args[0]).intValue();
+            imapAddr = (InetSocketAddress) args[1];
+            sessionUser = ((Integer) args[2]).intValue();
+        } catch (final ClassCastException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
         }
         return getUserRetval(getUserIDInternal(pattern, ctx, accountId, imapAddr, sessionUser));
     }
