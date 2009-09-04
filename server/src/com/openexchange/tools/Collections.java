@@ -85,7 +85,7 @@ public final class Collections {
     /**
      * Creates a new {@link HashMap} instance.
      * <p>
-     * Convenience method substitute<br>
+     * Convenience method to substitute<br>
      * <i> Map&lt;String, String&gt; m = new HashMap&lt;String, String&gt;(); </i><br>
      * with<br>
      * <i> Map&lt;String, String&gt; m = newHashMap(); </i>
@@ -101,7 +101,7 @@ public final class Collections {
     /**
      * Creates a new {@link HashMap} instance.
      * <p>
-     * Convenience method substitute<br>
+     * Convenience method to substitute<br>
      * <i> Map&lt;String, String&gt; m = new HashMap&lt;String, String&gt;(initialCapacity); </i><br>
      * with<br>
      * <i> Map&lt;String, String&gt; m = newHashMap(initialCapacity); </i>
