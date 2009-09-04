@@ -69,7 +69,8 @@ import com.openexchange.session.Session;
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccessCacheEventListener.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(MailAccessCacheEventListener.class);
 
     private ServiceRegistration serviceRegistration;
 
@@ -80,11 +81,11 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         super();
     }
 
-    @SuppressWarnings("unchecked")
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         if ("com/openexchange/sessiond/remove/container".equals(topic)) {
-            final Map<String, Session> sessions = (Map<String, Session>) event.getProperty("com.openexchange.sessiond.container");
+            final @SuppressWarnings("unchecked") Map<String, Session> sessions =
+                (Map<String, Session>) event.getProperty("com.openexchange.sessiond.container");
             final MailAccessCache mac;
             try {
                 mac = MailAccessCache.getInstance();

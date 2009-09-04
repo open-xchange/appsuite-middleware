@@ -90,9 +90,8 @@ public class GeoValueDefinition extends ValueDefinition {
     private static DecimalFormat Format = new DecimalFormat("0.################");
 
     @Override
-    @SuppressWarnings("unchecked")
     public String writeValue(final Object value) {
-        final ArrayList<Double> geo = (ArrayList<Double>) value;
+        final @SuppressWarnings("unchecked") ArrayList<Double> geo = (ArrayList<Double>) value;
         return new StringBuilder().append(Format.format(geo.get(0).doubleValue())).append(';').append(
             Format.format(geo.get(1).doubleValue())).toString();
     }

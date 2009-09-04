@@ -149,9 +149,10 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param filter An array containing unsupported classes of {@link SearchTerm} to filter against
      * @return A new search term with the unsupported search terms removed
      */
-    @SuppressWarnings(UNCHECKED)
-    public SearchTerm<?> filter(final Class<? extends SearchTerm>[] filter) {
-        return filter(new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter)));
+    public SearchTerm<?> filter(final @SuppressWarnings("unchecked") Class<? extends SearchTerm>[] filter) {
+        final @SuppressWarnings("unchecked") HashSet<Class<? extends SearchTerm>> filterSet =
+            new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter));
+        return filter(filterSet);
     }
 
     /**
@@ -176,8 +177,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param filterSet The filter set containing classes unsupported search terms
      * @return A new search term with the unsupported search terms removed
      */
-    @SuppressWarnings(UNCHECKED)
-    public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+    public SearchTerm<?> filter(final @SuppressWarnings(UNCHECKED) Set<Class<? extends SearchTerm>> filterSet) {
         if (filterSet.contains(getClass())) {
             return BooleanTerm.FALSE;
         }

@@ -136,13 +136,14 @@ public abstract class ServiceHolder<S> {
             return result;
         }
 
-        @SuppressWarnings("unchecked")
         public S newProxyInstance() {
             if (proxyService == null) {
-                proxyService = (S) java.lang.reflect.Proxy.newProxyInstance(
-                    delegate.getClass().getClassLoader(),
-                    delegate.getClass().getInterfaces(),
-                    this);
+                final @SuppressWarnings("unchecked") S s =
+                    (S) java.lang.reflect.Proxy.newProxyInstance(
+                        delegate.getClass().getClassLoader(),
+                        delegate.getClass().getInterfaces(),
+                        this);
+                proxyService = s;
             }
             return proxyService;
         }

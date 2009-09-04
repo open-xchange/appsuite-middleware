@@ -138,9 +138,8 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
         return terms[0].matches(mailMessage) && terms[1].matches(mailMessage);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+    public SearchTerm<?> filter(final @SuppressWarnings("unchecked") Set<Class<? extends SearchTerm>> filterSet) {
         if (filterSet.contains(getClass())) {
             return BooleanTerm.FALSE;
         }

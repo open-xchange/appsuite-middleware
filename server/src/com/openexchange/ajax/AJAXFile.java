@@ -285,7 +285,6 @@ public final class AJAXFile extends PermissionServlet {
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         /*
@@ -318,10 +317,8 @@ public final class AJAXFile extends PermissionServlet {
                     throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_TYPE);
                 }
                 final ServerSession sessionObj = getSessionObject(req);
-                final UploadQuotaChecker checker = UploadQuotaChecker.getUploadQuotaChecker(
-                    getModuleInteger(moduleParam),
-                    sessionObj,
-                    sessionObj.getContext());
+                final UploadQuotaChecker checker =
+                    UploadQuotaChecker.getUploadQuotaChecker(getModuleInteger(moduleParam), sessionObj, sessionObj.getContext());
                 upload.setSizeMax(checker.getQuotaMax());
                 upload.setFileSizeMax(checker.getFileQuotaMax());
                 /*
@@ -340,7 +337,8 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 final List<FileItem> items;
                 try {
-                    items = upload.parseRequest(req);
+                    final @SuppressWarnings("unchecked") List<FileItem> tmp = upload.parseRequest(req);
+                    items = tmp;
                 } catch (final FileUploadException e) {
                     throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
                 }
@@ -375,9 +373,10 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 final Response response = new Response();
                 response.setData(jArray);
-                final String jsResponse = JS_FRAGMENT.replaceFirst(
-                    JS_FRAGMENT_JSON,
-                    Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(JS_FRAGMENT_ACTION, action);
+                final String jsResponse =
+                    JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
+                        JS_FRAGMENT_ACTION,
+                        action);
                 final Writer writer = resp.getWriter();
                 writer.write(jsResponse);
                 writer.flush();

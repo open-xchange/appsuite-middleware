@@ -1386,14 +1386,13 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void deleteValidatedFolders(final HashMap<Integer, HashMap<?, ?>> deleteableIDs, final long lastModified, final int type) throws OXException {
         final int deleteableIDsSize = deleteableIDs.size();
         final Iterator<Map.Entry<Integer, HashMap<?, ?>>> iter = deleteableIDs.entrySet().iterator();
         for (int i = 0; i < deleteableIDsSize; i++) {
             final Map.Entry<Integer, HashMap<?, ?>> entry = iter.next();
             final Integer folderID = entry.getKey();
-            final HashMap<Integer, HashMap<?, ?>> hashMap = (HashMap<Integer, HashMap<?, ?>>) entry.getValue();
+            final @SuppressWarnings("unchecked") HashMap<Integer, HashMap<?, ?>> hashMap = (HashMap<Integer, HashMap<?, ?>>) entry.getValue();
             /*
              * Delete subfolders first, if any exist
              */

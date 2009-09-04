@@ -142,7 +142,6 @@ public final class SessiondEventHandler implements EventHandler {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
@@ -151,15 +150,14 @@ public final class SessiondEventHandler implements EventHandler {
                 listener.handleSessionRemoval(session);
             }
         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-            final Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+            final @SuppressWarnings("unchecked") Map<String, Session> sessions =
+                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
             for (final SessiondEventListener listener : listeners) {
                 listener.handleContainerRemoval(sessions);
             }
         } else {
-            final SessiondException error = new SessiondException(
-                SessiondException.Code.UNKNOWN_EVENT_TOPIC,
-                null,
-                topic == null ? "null" : topic);
+            final SessiondException error =
+                new SessiondException(SessiondException.Code.UNKNOWN_EVENT_TOPIC, null, topic == null ? "null" : topic);
             for (final SessiondEventListener listener : listeners) {
                 listener.handleError(error);
             }

@@ -95,9 +95,9 @@ public class FIFOQueue<T> {
      * @param maxsize - the max. size of this queue
      * @param isSynchronized - whether this queue is synchronized (mutually exclusive) for multiple threads accessing this queue
      */
-    @SuppressWarnings("unchecked")
     public FIFOQueue(final int maxsize, final boolean isSynchronized) {
-        array = (T[]) new Object[maxsize];
+        final @SuppressWarnings("unchecked") T[] ts = (T[]) new Object[maxsize];
+        array = ts;
         start = end = 0;
         full = false;
         this.isSynchronized = isSynchronized;
