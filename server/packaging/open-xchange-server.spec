@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -439,7 +439,19 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
-* Mon Aug 31 2009 - marcus.klein@open-xchange.com
+* Thu Sep 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14445: Fixed incorrect admin permission on top level infostore folder
+* Thu Sep 03 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
+* Wed Sep 02 2009 - tobias.prinz@open-xchange.com
+ - Bugfix #14350: Removed special handling of empty cells in parser, these are now treated as null. That made it possible to remove workaround for bug 7248, too.
+ - Bugfix #14349: VCard 3.0 allows for a list of nicknames. That led to the brackets around the nickname.
+* Tue Sep 01 2009 - francisco.laguna@open-xchange.com
+ - Bugfix 14428: Don't overwrite existing secrets.
+* Tue Sep 01 2009 - choeger@open-xchange.com
+ - Bugfix #14403: log4j does not work on SLES11, file permission problem
+ - Bugfix #14395: Unable to install lang and lang-community packages at the same time
+* Tue Sep 01 2009 - marcus.klein@open-xchange.com
  - Bugfix #14178: Additionally to check on the database a String.equals() check is added. The collation is changed to utf_8_bin on column
    uid of table login2user.
 * Mon Aug 31 2009 - thorben.betten@open-xchange.com

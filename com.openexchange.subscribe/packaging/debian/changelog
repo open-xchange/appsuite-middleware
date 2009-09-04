@@ -1,3 +1,9 @@
+open-xchange-subscribe (6.12.0.0-1) unstable; urgency=low
+
+  * first build for 6.12 Rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri,  4 Sep 2009 10:00:32 +0200
+
 open-xchange-subscribe (6.11.0.0-7) unstable; urgency=low
 
   * first build for 6.11 Rev7
