@@ -50,10 +50,13 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -76,6 +79,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
     private PagePartSequence pageParts;
+
+    private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
         this.description = description;
@@ -200,8 +205,19 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                 if (map.containsKey("instant_messenger2")) {
                     contact.setInstantMessenger2(map.get("instant_messenger2"));
                 }
-
-                // TODO: handle birthdays somehow
+                //handle birthdays
+                Calendar cal = null;
+                if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
+                    cal = Calendar.getInstance();
+                    int date = Integer.valueOf(map.get("birthday_day"));
+                    int month = Integer.valueOf(map.get("birthday_month"));
+                    int year = 2009;
+                    if (map.containsKey("birthday_year")) {
+                        year = Integer.valueOf(map.get("birthday_year"));
+                    }
+                    cal.set(year, month, date);
+                    contact.setBirthday(cal.getTime());
+                }
 
                 // add the image from a url to the contact
                 if (map.containsKey("image")) {
@@ -214,6 +230,9 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             } catch (final VersitException e) {
                 exception = e;
             } catch (final ConverterException e) {
+                // TODO: Die zusätzliche Information über Context, User und Folder gibt es leider nur um Crawler-Bundle
+                // as information in case of a timeout i would expect: cause,uid,cid,fid,url,time
+                //LOG.error(new SubscriptionException());
                 exception = e;
             } catch (final IOException e) {
                 exception = e;
