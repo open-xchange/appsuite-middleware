@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.F;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -112,16 +113,24 @@ public class Bug14450Test extends AbstractTaskTest {
         assertEquals("Target duration has wrong value.", task.getTargetDuration(), toTest.getTargetDuration());
         assertFalse("Task contains actual duration but should not.", toTest.containsActualDuration());
         assertEquals("Actual duration has wrong value.", task.getActualDuration(), toTest.getActualDuration());
+        assertFalse("Task contains target costs but should not.", toTest.containsTargetCosts());
+        assertEquals("Target costs has wrong value.", F(task.getTargetCosts()), F(toTest.getTargetCosts()));
+        assertFalse("Task contains actual costs but should not.", toTest.containsActualCosts());
+        assertEquals("Actual costs has wrong value.", F(task.getActualCosts()), F(toTest.getActualCosts()));
     }
 
     public void testListRequest() throws AjaxException, IOException, SAXException, JSONException {
         ListIDs ids = ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() });
-        ListRequest request = new ListRequest(ids, new int[] { Task.TARGET_DURATION, Task.ACTUAL_DURATION });
+        ListRequest request = new ListRequest(ids, new int[] { Task.TARGET_DURATION, Task.ACTUAL_DURATION, Task.TARGET_COSTS, Task.ACTUAL_COSTS });
         CommonListResponse response = client.execute(request);
         Object targetDuration = response.getValue(0, Task.TARGET_DURATION);
         assertNull("Target duration should not be set.", targetDuration);
         Object actualDuration = response.getValue(0, Task.ACTUAL_DURATION);
         assertNull("Actual duration should not be set.", actualDuration);
+        Object targetCosts = response.getValue(0, Task.TARGET_COSTS);
+        assertNull("Target costs should not be set.", targetCosts);
+        Object actualCosts = response.getValue(0, Task.ACTUAL_COSTS);
+        assertNull("Actual costs should not be set.", actualCosts);
     }
     
     private static final class NullSendingInsertRequest extends InsertRequest {
@@ -135,6 +144,8 @@ public class Bug14450Test extends AbstractTaskTest {
             JSONObject json = super.getBody();
             json.put(TaskFields.TARGET_DURATION, JSONObject.NULL);
             json.put(TaskFields.ACTUAL_DURATION, JSONObject.NULL);
+            json.put(TaskFields.TARGET_COSTS, JSONObject.NULL);
+            json.put(TaskFields.ACTUAL_COSTS, JSONObject.NULL);
             return json;
         }
     }
