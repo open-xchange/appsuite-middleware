@@ -51,7 +51,6 @@ package com.openexchange.server.impl;
 
 import java.io.Serializable;
 import java.security.acl.Permission;
-
 import com.openexchange.group.GroupStorage;
 import com.openexchange.tools.OXCloneable;
 
@@ -635,10 +634,10 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         return sb.toString();
     }
 
-    @SuppressWarnings("cast")
     @Override
     public Object clone() throws CloneNotSupportedException {
-        return ((OCLPermission) super.clone());
+        final OCLPermission clone = (OCLPermission) super.clone();
+        return clone;
     }
 
     public OCLPermission deepClone() {
