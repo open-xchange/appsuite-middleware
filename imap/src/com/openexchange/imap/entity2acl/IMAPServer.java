@@ -110,8 +110,7 @@ public enum IMAPServer {
     SUN_MESSAGING_SERVER("Sun", SUNMessagingServerEntity2ACL.class.getName(), new ArgumentGenerator() {
 
         public Object[] getArguments(final int accountId, final InetSocketAddress imapServerAddress, final int sessionUser, final String fullname, final char separator) {
-            return new Object[] {
-                Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
+            return new Object[] { Integer.valueOf(accountId), imapServerAddress, Integer.valueOf(sessionUser) };
         }
     }, new GreetingMatcher() {
 

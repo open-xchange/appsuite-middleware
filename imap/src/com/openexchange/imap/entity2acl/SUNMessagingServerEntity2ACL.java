@@ -118,10 +118,14 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         if (args == null || args.length == 0) {
             throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
         }
+        final int accountId;
         try {
-            return MailConfig.getMailLogin(
-                storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()),
-                userLoginInfo);
+            accountId = ((Integer) args[0]).intValue();
+        } catch (final ClassCastException e) {
+            throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG, e, new Object[0]);
+        }
+        try {
+            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
         } catch (final MailAccountException e) {
             throw new Entity2ACLException(
                 Entity2ACLException.Code.UNKNOWN_USER,
