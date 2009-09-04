@@ -103,7 +103,8 @@ public final class ManagedMimeMessage extends MimeMessage {
         }
         flags = new Flags(); // empty Flags object
         final byte[][] splitted = split(sourceBytes);
-        headers = splitted[0].length == 0 ? new InternetHeaders() : new InternetHeaders(new UnsynchronizedByteArrayInputStream(splitted[0]));
+        headers =
+            splitted[0].length == 0 ? new InternetHeaders() : new InternetHeaders(new UnsynchronizedByteArrayInputStream(splitted[0]));
         final byte[] contentBytes = splitted[1];
         if (contentBytes.length > maxInMemorySize) {
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
@@ -143,12 +144,51 @@ public final class ManagedMimeMessage extends MimeMessage {
         }
     }
 
+    /*-
+     * ######################################## Helpers ########################################
+     */
+
+    private static final byte[] DOUBLE_CRLF = { '\r', '\n', '\r', '\n' };
+
+    private static final byte[] DOUBLE_LF = { '\n', '\n' };
+
+    private static final int[] COMPUTED_FAILURE_DOUBLE_CRLF;
+
+    private static final int[] COMPUTED_FAILURE_DOUBL_LF;
+
+    static {
+        class TMP {
+
+            int[] computeFailure(final byte[] pattern) {
+                if (pattern == null) {
+                    return null;
+                }
+                final int[] failure = new int[pattern.length];
+
+                int j = 0;
+                for (int i = 1; i < pattern.length; i++) {
+                    while (j > 0 && pattern[j] != pattern[i]) {
+                        j = failure[j - 1];
+                    }
+                    if (pattern[j] == pattern[i]) {
+                        j++;
+                    }
+                    failure[i] = j;
+                }
+                return failure;
+            }
+        }
+        final TMP tmp = new TMP();
+        COMPUTED_FAILURE_DOUBLE_CRLF = tmp.computeFailure(DOUBLE_CRLF);
+        COMPUTED_FAILURE_DOUBL_LF = tmp.computeFailure(DOUBLE_LF);
+    }
+
     private static final byte[][] split(final byte[] sourceBytes) {
         if (null == sourceBytes) {
             return new byte[][] { new byte[] {}, new byte[] {} };
         }
-        byte[] pattern = new byte[] { '\r', '\n', '\r', '\n' };
-        int pos = indexOf(sourceBytes, pattern, 0, computeFailure(pattern));
+        byte[] pattern = DOUBLE_CRLF;
+        int pos = indexOf(sourceBytes, pattern, 0, COMPUTED_FAILURE_DOUBLE_CRLF);
         if (pos >= 0) {
             // Double CRLF found
             final byte[] a = new byte[pos];
@@ -158,8 +198,8 @@ public final class ManagedMimeMessage extends MimeMessage {
             System.arraycopy(sourceBytes, endPos, b, 0, b.length);
             return new byte[][] { a, b };
         }
-        pattern = new byte[] { '\n', '\n' };
-        pos = indexOf(sourceBytes, pattern, 0, computeFailure(pattern));
+        pattern = DOUBLE_LF;
+        pos = indexOf(sourceBytes, pattern, 0, COMPUTED_FAILURE_DOUBL_LF);
         if (pos >= 0) {
             // Double LF found
             final byte[] a = new byte[pos];
@@ -196,25 +236,6 @@ public final class ManagedMimeMessage extends MimeMessage {
             }
         }
         return -1;
-    }
-
-    private static int[] computeFailure(final byte[] pattern) {
-        if (pattern == null) {
-            return null;
-        }
-        final int[] failure = new int[pattern.length];
-
-        int j = 0;
-        for (int i = 1; i < pattern.length; i++) {
-            while (j > 0 && pattern[j] != pattern[i]) {
-                j = failure[j - 1];
-            }
-            if (pattern[j] == pattern[i]) {
-                j++;
-            }
-            failure[i] = j;
-        }
-        return failure;
     }
 
 }
