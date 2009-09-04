@@ -156,11 +156,6 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
     }
 
     /**
-     * The object type "TABLE"
-     */
-    private static final String[] types = { "TABLE" };
-
-    /**
      * Check a table's existence
      * 
      * @param tableName The table name to check
@@ -171,7 +166,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
     private static boolean tableExists(final String tableName, final DatabaseMetaData dbmd) throws SQLException {
         ResultSet resultSet = null;
         try {
-            resultSet = dbmd.getTables(null, null, tableName, types);
+            resultSet = dbmd.getTables(null, null, tableName, new String[] { "TABLE" });
             return resultSet.next();
         } finally {
             closeSQLStuff(resultSet, null);
