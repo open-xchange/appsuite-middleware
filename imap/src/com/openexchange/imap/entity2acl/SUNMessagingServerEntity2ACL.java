@@ -114,7 +114,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
             }
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
+        final Object[] args = entity2AclArgs.getArguments(IMAPServer.SUN_MESSAGING_SERVER);
         if (args == null || args.length == 0) {
             throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
         }
@@ -136,7 +136,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
             return ALL_GROUPS_AND_USERS;
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.CYRUS);
+        final Object[] args = entity2AclArgs.getArguments(IMAPServer.SUN_MESSAGING_SERVER);
         if (args == null || args.length == 0) {
             throw new Entity2ACLException(Entity2ACLException.Code.MISSING_ARG);
         }
