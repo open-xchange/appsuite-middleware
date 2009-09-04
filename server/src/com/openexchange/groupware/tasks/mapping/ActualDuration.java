@@ -49,92 +49,65 @@
 
 package com.openexchange.groupware.tasks.mapping;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * Methods for dealing with the recurrence count of tasks.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Methods for iterated processing of the actual duration of task objects.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RecurrenceCount implements Mapper<Integer> {
+public final class ActualDuration implements Mapper<Long> {
 
     /**
      * Singleton instance.
      */
-    public static final Mapper<Integer> SINGLETON = new RecurrenceCount();
+    public static final ActualDuration SINGLETON = new ActualDuration();
 
-    /**
-     * Prevent instantiation.
-     */
-    protected RecurrenceCount() {
+    protected ActualDuration() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getId() {
-        return Task.RECURRENCE_COUNT;
+        return Task.ACTUAL_DURATION;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isSet(Task task) {
-        return task.containsOccurrence();
+        return task.containsActualDuration();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getDBColumnName() {
-        return "recurrence_count"; // TODO rename this
+        return "actual_duration";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (0 == task.getOccurrence()) {
-            stmt.setNull(pos, Types.INTEGER);
+        if (0 == task.getActualDuration() && task.containsActualDuration()) {
+            stmt.setNull(pos, Types.BIGINT);
         } else {
-            stmt.setInt(pos, task.getOccurrence());
+            stmt.setLong(pos, task.getActualDuration());
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        int occurence = result.getInt(pos);
+        long actualDuration = result.getLong(pos);
         if (!result.wasNull()) {
-            task.setOccurrence(occurence);
+            task.setActualDuration(actualDuration);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean equals(Task task1, Task task2) {
-        return task1.getOccurrence() == task2.getOccurrence();
+        return task1.getActualDuration() == task2.getActualDuration();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Integer get(Task task) {
-        return Integer.valueOf(task.getOccurrence());
+    public Long get(Task task) {
+        return L(task.getActualDuration());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void set(Task task, Integer value) {
-        task.setOccurrence(value.intValue());
+    public void set(Task task, Long value) {
+        task.setActualDuration(value.longValue());
     }
 }

@@ -1,3 +1,7 @@
+* 2009-09-04 - marcus.klein@open-xchange.com
+
+ - Bugfix #14450: Storing sent null value for task attributes target and actual duration as null and not as zero.
+
 * 2009-09-03 - marcus.klein@open-xchange.com
 
  - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.

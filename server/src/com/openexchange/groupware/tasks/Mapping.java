@@ -66,9 +66,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.groupware.tasks.mapping.ActualDuration;
 import com.openexchange.groupware.tasks.mapping.ObjectID;
 import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
+import com.openexchange.groupware.tasks.mapping.TargetDuration;
 
 /**
  * This class contains the methods for mapping object attributes to database+
@@ -548,68 +550,8 @@ public final class Mapping {
                 task.setProjectID(value.intValue());
             }
         },
-        new Mapper<Long>() {
-            public int getId() {
-                return Task.TARGET_DURATION;
-            }
-            public boolean isSet(final Task task) {
-                return task.containsTargetDuration();
-            }
-            public String getDBColumnName() {
-                return "target_duration";
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setLong(pos, task.getTargetDuration());
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final long targetDuration = result.getLong(pos);
-                if (!result.wasNull()) {
-                    task.setTargetDuration(targetDuration);
-                }
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getTargetDuration() == task2.getTargetDuration();
-            }
-            public Long get(final Task task) {
-                return Long.valueOf(task.getTargetDuration());
-            }
-            public void set(final Task task, final Long value) {
-                task.setTargetDuration(value.longValue());
-            }
-        },
-        new Mapper<Long>() {
-            public int getId() {
-                return Task.ACTUAL_DURATION;
-            }
-            public boolean isSet(final Task task) {
-                return task.containsActualDuration();
-            }
-            public String getDBColumnName() {
-                return "actual_duration";
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setLong(pos, task.getActualDuration());
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final long actualDuration = result.getLong(pos);
-                if (!result.wasNull()) {
-                    task.setActualDuration(actualDuration);
-                }
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getActualDuration() == task2.getActualDuration();
-            }
-            public Long get(final Task task) {
-                return Long.valueOf(task.getActualDuration());
-            }
-            public void set(final Task task, final Long value) {
-                task.setActualDuration(value.longValue());
-            }
-        },
+        TargetDuration.SINGLETON,
+        ActualDuration.SINGLETON,
         new Mapper<Float>() {
             public int getId() {
                 return Task.TARGET_COSTS;

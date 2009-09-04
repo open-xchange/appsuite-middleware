@@ -193,15 +193,14 @@ public class DataWriter {
      *            The name to which the value is bound
      * @param value
      *            The <code>String</code> value
-     * @param jsonObj
+     * @param json
      *            The JSON object to put into
      * @throws JSONException
      *             If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final String value,
-        final JSONObject jsonObj) throws JSONException {
+    public static void writeParameter(String name, String value, JSONObject json) throws JSONException {
         if (value != null && value.length() > 0) {
-            jsonObj.put(name, value);
+            json.put(name, value);
         }
     }
 
@@ -255,13 +254,12 @@ public class DataWriter {
      *
      * @param name The value's name
      * @param value The <code>long</code> value
-     * @param jsonObj The JSON object to put into
+     * @param json The JSON object to put into
      * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final long value,
-        final JSONObject jsonObj) throws JSONException {
+    public static void writeParameter(String name, long value, JSONObject json) throws JSONException {
         // Large values of long must be written as string. See bug 11311.
-        writeParameter(name, String.valueOf(value), jsonObj);
+        writeParameter(name, String.valueOf(value), json);
     }
 
     /**
