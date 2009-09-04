@@ -177,7 +177,8 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param filterSet The filter set containing classes unsupported search terms
      * @return A new search term with the unsupported search terms removed
      */
-    public SearchTerm<?> filter(final @SuppressWarnings(UNCHECKED) Set<Class<? extends SearchTerm>> filterSet) {
+    @SuppressWarnings(UNCHECKED)
+    public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
         if (filterSet.contains(getClass())) {
             return BooleanTerm.FALSE;
         }
