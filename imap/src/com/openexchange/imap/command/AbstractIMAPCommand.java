@@ -168,12 +168,11 @@ public abstract class AbstractIMAPCommand<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public final T doCommand() throws MessagingException {
         final long start = System.currentTimeMillis();
-        final Object obj = imapFolder.doCommand(protocolCommand);
+        final @SuppressWarnings("unchecked") T obj = (T) imapFolder.doCommand(protocolCommand);
         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        return (T) obj;
+        return obj;
     }
 
     /**
