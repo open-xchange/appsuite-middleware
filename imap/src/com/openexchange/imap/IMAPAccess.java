@@ -59,6 +59,7 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtensionInit;
+import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
@@ -268,12 +269,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession = setConnectProperties(
-                config.getPort(),
-                config.isSecure(),
-                imapConfProps.getImapTimeout(),
-                imapConfProps.getImapConnectionTimeout(),
-                imapProps);
+            final javax.mail.Session imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -349,12 +351,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession = setConnectProperties(
-                config.getPort(),
-                config.isSecure(),
-                imapConfProps.getImapTimeout(),
-                imapConfProps.getImapConnectionTimeout(),
-                imapProps);
+            imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -499,6 +502,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected void startup() throws MailException {
         initMaps();
         IMAPCapabilityAndGreetingCache.init();
+        MBoxEnabledCache.init();
         try {
             ACLExtensionInit.getInstance().start();
         } catch (final MailException e) {
@@ -545,6 +549,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             throw new MailException(e);
         }
         IMAPCapabilityAndGreetingCache.tearDown();
+        MBoxEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
         dropMaps();
     }
@@ -669,9 +674,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected IMailProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
             return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final ServiceException e) {
             throw new IMAPException(e);

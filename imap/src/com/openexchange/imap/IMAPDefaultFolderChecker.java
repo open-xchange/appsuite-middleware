@@ -66,6 +66,7 @@ import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
@@ -261,16 +262,8 @@ public final class IMAPDefaultFolderChecker {
                      * Check for mbox
                      */
                     final int type;
-                    final boolean mboxEnabled;
-                    {
-                        final String param = MailSessionParameterNames.getParamMBox(accountId);
-                        Boolean mbox = (Boolean) session.getParameter(param);
-                        if (null == mbox) {
-                            mbox = Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(inboxFolder, FOLDER_TYPE, prefix));
-                            session.setParameter(param, mbox);
-                        }
-                        mboxEnabled = mbox.booleanValue();
-                    }
+                    final boolean mboxEnabled =
+                        MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), inboxFolder, prefix);
                     if (mboxEnabled) {
                         type = IMAPFolder.HOLDS_MESSAGES;
                     } else {
@@ -282,10 +275,11 @@ public final class IMAPDefaultFolderChecker {
                     final boolean isSpamOptionEnabled;
                     final MailAccount mailAccount;
                     try {
-                        mailAccount = IMAPServiceRegistry.getService(MailAccountStorageService.class, true).getMailAccount(
-                            accountId,
-                            session.getUserId(),
-                            session.getContextId());
+                        mailAccount =
+                            IMAPServiceRegistry.getService(MailAccountStorageService.class, true).getMailAccount(
+                                accountId,
+                                session.getUserId(),
+                                session.getContextId());
                         final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                         isSpamOptionEnabled = usm.isSpamOptionEnabled();
                     } catch (final ServiceException e) {
@@ -296,22 +290,20 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Check default folders
                      */
-                    final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(
-                        accountId,
-                        session.getUserId(),
-                        session.getContextId());
-                    final String[] defaultFolderFullnames = defaultFolderNamesProvider.getDefaultFolderFullnames(
-                        mailAccount,
-                        isSpamOptionEnabled);
+                    final DefaultFolderNamesProvider defaultFolderNamesProvider =
+                        new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
+                    final String[] defaultFolderFullnames =
+                        defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, isSpamOptionEnabled);
                     final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, isSpamOptionEnabled);
                     final SpamHandler spamHandler;
                     {
-                        spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
+                        spamHandler =
+                            isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                     }
                     final CompletionService<Object> completionService;
                     try {
-                        completionService = new ExecutorCompletionService<Object>(
-                            IMAPServiceRegistry.getService(TimerService.class, true).getExecutor());
+                        completionService =
+                            new ExecutorCompletionService<Object>(IMAPServiceRegistry.getService(TimerService.class, true).getExecutor());
                     } catch (final ServiceException e) {
                         throw new IMAPException(e);
                     }
@@ -460,11 +452,8 @@ public final class IMAPDefaultFolderChecker {
             /*
              * Examine root folder if subfolders allowed
              */
-            final boolean rootInferiors = RootSubfolderCache.canCreateSubfolders(
-                (DefaultFolder) imapStore.getDefaultFolder(),
-                true,
-                session,
-                accountId).booleanValue();
+            final boolean rootInferiors =
+                RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue();
             /*
              * Determine where to create default folders and store as a prefix for folder fullname
              */
@@ -598,9 +587,8 @@ public final class IMAPDefaultFolderChecker {
                             throw new MessagingException("Unexpected index: " + index);
                         }
                         try {
-                            final MailAccountStorageService storageService = IMAPServiceRegistry.getService(
-                                MailAccountStorageService.class,
-                                true);
+                            final MailAccountStorageService storageService =
+                                IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
                             storageService.updateMailAccount(
                                 mad,
                                 attributes,

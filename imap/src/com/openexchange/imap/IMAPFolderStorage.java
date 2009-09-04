@@ -73,6 +73,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
+import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
@@ -86,7 +87,6 @@ import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -487,17 +487,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
              * Check if IMAP server is in MBox format; meaning folder either hold messages or subfolders but not both
              */
             final char separator = parent.getSeparator();
-            final boolean mboxEnabled;
-            {
-                final String param = MailSessionParameterNames.getParamMBox(accountId);
-                Boolean mbox = (Boolean) session.getParameter(param);
-                if (null == mbox) {
-                    mbox = Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(parent, FOLDER_TYPE, new StringBuilder(
-                        parent.getFullName()).append(separator).toString()));
-                    session.setParameter(param, mbox);
-                }
-                mboxEnabled = mbox.booleanValue();
-            }
+            final boolean mboxEnabled =
+                MBoxEnabledCache.isMBoxEnabled(
+                    imapConfig.getImapServerSocketAddress(),
+                    parent,
+                    new StringBuilder(parent.getFullName()).append(separator).toString());
             if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
                 throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
             }
@@ -507,7 +501,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                  */
                 createMe = (IMAPFolder) imapStore.getFolder(name);
             } else {
-                createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(separator).append(name).toString());
+                createMe =
+                    (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(separator).append(name).toString());
             }
             if (createMe.exists()) {
                 throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
@@ -725,7 +720,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (getChecker().isDefaultFolder(oldFullname)) {
                     throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, oldFullname);
                 }
-                IMAPFolder destFolder = ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
+                IMAPFolder destFolder =
+                    ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
                 if (!destFolder.exists()) {
                     destFolder = checkForNamespaceFolder(newParent);
                     if (null == destFolder) {
@@ -767,17 +763,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         }
                     }
                 }
-                final boolean mboxEnabled;
-                {
-                    final String param = MailSessionParameterNames.getParamMBox(accountId);
-                    Boolean mbox = (Boolean) session.getParameter(param);
-                    if (null == mbox) {
-                        mbox = Boolean.valueOf(!IMAPCommandsCollection.supportsFolderType(destFolder, FOLDER_TYPE, new StringBuilder(
-                            destFolder.getFullName()).append(separator).toString()));
-                        session.setParameter(param, mbox);
-                    }
-                    mboxEnabled = mbox.booleanValue();
-                }
+                final boolean mboxEnabled =
+                    MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), destFolder, new StringBuilder(
+                        destFolder.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
                     throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
                 }
@@ -835,15 +823,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     }
                     tmp.append(newName);
                     renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
-                    final String param = MailSessionParameterNames.getParamMBox(accountId);
-                    // Check for MBox format
-                    Boolean mbox = (Boolean) session.getParameter(param);
-                    if (null == mbox) {
-                        mbox = Boolean.valueOf(IMAPCommandsCollection.supportsFolderType(par, FOLDER_TYPE, new StringBuilder(
-                            par.getFullName()).append(separator).toString()));
-                        session.setParameter(param, mbox);
-                    }
-                    mboxEnabled = mbox.booleanValue();
+                    /*
+                     * Check for MBox
+                     */
+                    mboxEnabled =
+                        MBoxEnabledCache.isMBoxEnabled(
+                            imapConfig.getImapServerSocketAddress(),
+                            par,
+                            new StringBuilder(par.getFullName()).append(separator).toString());
                 }
                 if (renameFolder.exists()) {
                     throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
@@ -1014,8 +1001,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         /*
          * Delete moved folder if operation failed
          */
-        final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(new StringBuilder(destFolder.getFullName()).append(
-            destFolder.getSeparator()).append(name).toString());
+        final IMAPFolder tmp =
+            (IMAPFolder) imapStore.getFolder(new StringBuilder(destFolder.getFullName()).append(destFolder.getSeparator()).append(name).toString());
         if (tmp.exists()) {
             try {
                 tmp.delete(true);
@@ -1059,15 +1046,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     final String name = deleteMe.getName();
                     int appendix = 1;
                     final StringBuilder sb = new StringBuilder();
-                    IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
-                        deleteMe.getSeparator()).append(name).toString());
+                    IMAPFolder newFolder =
+                        (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(name).toString());
                     while (newFolder.exists()) {
                         /*
                          * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
                          */
                         sb.setLength(0);
-                        newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
-                            name).append('_').append(++appendix).toString());
+                        newFolder =
+                            (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
+                                name).append('_').append(++appendix).toString());
                     }
                     try {
                         moveFolder(deleteMe, trashFolder, newFolder, false);
@@ -1132,7 +1120,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     return;
                 }
                 String trashFullname = null;
-                final boolean backup = (!hardDelete && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname = getTrashFolder()))));
+                final boolean backup =
+                    (!hardDelete && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname =
+                        getTrashFolder()))));
                 if (backup) {
                     imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                 }
@@ -1531,10 +1521,11 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         /*
          * Ensure that owner still holds full rights
          */
-        final String ownerACLName = Entity2ACL.getInstance(imapConfig).getACLName(
-            session.getUserId(),
-            ctx,
-            IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
+        final String ownerACLName =
+            Entity2ACL.getInstance(imapConfig).getACLName(
+                session.getUserId(),
+                ctx,
+                IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
         for (int i = 0; i < newACLs.length; i++) {
             if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
                 return true;
