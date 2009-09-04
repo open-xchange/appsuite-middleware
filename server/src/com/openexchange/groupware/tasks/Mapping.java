@@ -66,10 +66,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.groupware.tasks.mapping.ActualCosts;
 import com.openexchange.groupware.tasks.mapping.ActualDuration;
 import com.openexchange.groupware.tasks.mapping.ObjectID;
 import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
+import com.openexchange.groupware.tasks.mapping.TargetCosts;
 import com.openexchange.groupware.tasks.mapping.TargetDuration;
 
 /**
@@ -552,68 +554,8 @@ public final class Mapping {
         },
         TargetDuration.SINGLETON,
         ActualDuration.SINGLETON,
-        new Mapper<Float>() {
-            public int getId() {
-                return Task.TARGET_COSTS;
-            }
-            public boolean isSet(final Task task) {
-                return task.containsTargetCosts();
-            }
-            public String getDBColumnName() {
-                return "target_costs";
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setDouble(pos, task.getTargetCosts());
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final float targetCosts = result.getFloat(pos);
-                if (!result.wasNull()) {
-                    task.setTargetCosts(targetCosts);
-                }
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getTargetCosts() == task2.getTargetCosts();
-            }
-            public Float get(final Task task) {
-                return Float.valueOf(task.getTargetCosts());
-            }
-            public void set(final Task task, final Float value) {
-                task.setTargetCosts(value.floatValue());
-            }
-        },
-        new Mapper<Float>() {
-            public int getId() {
-                return Task.ACTUAL_COSTS;
-            }
-            public boolean isSet(final Task task) {
-                return task.containsActualCosts();
-            }
-            public String getDBColumnName() {
-                return "actual_costs";
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setDouble(pos, task.getActualCosts());
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final float actualCosts = result.getFloat(pos);
-                if (!result.wasNull()) {
-                    task.setActualCosts(actualCosts);
-                }
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getActualCosts() == task2.getActualCosts();
-            }
-            public Float get(final Task task) {
-                return Float.valueOf(task.getActualCosts());
-            }
-            public void set(final Task task, final Float value) {
-                task.setActualCosts(value.floatValue());
-            }
-        },
+        TargetCosts.SINGLETON,
+        ActualCosts.SINGLETON,
         new Mapper<String>() {
             public int getId() {
                 return Task.CURRENCY;
