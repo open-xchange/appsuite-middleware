@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.entity2acl;
 
+import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.IMAPProperties;
@@ -110,7 +111,7 @@ public final class Entity2ACLInit implements Initialization {
                 implementingClass = className == null ? Class.forName(classNameProp).asSubclass(Entity2ACL.class) : Class.forName(
                     className).asSubclass(Entity2ACL.class);
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Used IMAP server implementation: " + implementingClass.getName());
+                    LOG.info(MessageFormat.format("Used IMAP server implementation: {0}", implementingClass.getName()));
                 }
                 Entity2ACL.setInstance(implementingClass.newInstance());
             }
