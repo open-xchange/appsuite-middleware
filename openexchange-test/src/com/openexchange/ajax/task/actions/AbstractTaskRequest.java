@@ -88,20 +88,17 @@ public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implem
         return TASKS_URL;
     }
 
-    protected JSONObject convert(final Task task, final TimeZone timeZone) throws JSONException {
-        final JSONObject retval = new JSONObject();
+    protected JSONObject convert(Task task, TimeZone timeZone) throws JSONException {
+        JSONObject retval = new JSONObject();
         new TaskWriter(timeZone).writeTask(task, retval);
         // Add explicit values for start and end date if they are set and null
         // this may have to be put somewhere else.
-
         if (task.getStartDate() == null && task.containsStartDate()) {
             retval.put(TaskFields.START_DATE, JSONObject.NULL);
         }
-
         if (task.getEndDate() == null && task.containsEndDate()) {
             retval.put(TaskFields.END_DATE, JSONObject.NULL);
         }
-
         return retval;
     }
 

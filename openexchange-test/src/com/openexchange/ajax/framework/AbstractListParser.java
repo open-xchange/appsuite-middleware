@@ -51,6 +51,7 @@ package com.openexchange.ajax.framework;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 
@@ -93,6 +94,9 @@ public abstract class AbstractListParser<T extends CommonListResponse> extends A
             values[i] = new Object[inner.length()];
             for (int j = 0; j < inner.length(); j++) {
                 values[i][j] = inner.get(j);
+                if (JSONObject.NULL.equals(values[i][j])) {
+                    values[i][j] = null;
+                }
             }
         }
         return values;
