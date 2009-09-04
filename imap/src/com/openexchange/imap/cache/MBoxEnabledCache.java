@@ -110,7 +110,7 @@ public final class MBoxEnabledCache {
      * @param imapFolder The IMAP folder to test with
      * @param prefix The fullname prefix to use
      * @return <code>true</code> if MBox feature is enabled; otherwise <code>false</code>
-     * @throws MessagingException
+     * @throws MessagingException If a messaging error occurs
      */
     public static boolean isMBoxEnabled(final InetSocketAddress imapServer, final IMAPFolder imapFolder, final String prefix) throws MessagingException {
         Future<Boolean> f = MAP.get(imapServer);
