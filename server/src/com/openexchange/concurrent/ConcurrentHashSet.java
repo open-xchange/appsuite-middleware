@@ -225,11 +225,11 @@ public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         final int size = size();
         if (a.length < size) {
-            a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+            final @SuppressWarnings("unchecked") T[] newInstance = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+            a = newInstance;
         }
         final Iterator<E> it = iterator();
         final Object[] result = a;
