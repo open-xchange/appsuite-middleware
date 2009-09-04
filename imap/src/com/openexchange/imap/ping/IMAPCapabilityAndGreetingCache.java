@@ -188,12 +188,11 @@ public final class IMAPCapabilityAndGreetingCache {
     }
 
     private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
-        final ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> map = MAP;
-        Future<CapabilityAndGreeting> f = map.get(address);
+        Future<CapabilityAndGreeting> f = MAP.get(address);
         if (null == f) {
             final FutureTask<CapabilityAndGreeting> ft =
                 new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
-            f = map.putIfAbsent(address, ft);
+            f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
