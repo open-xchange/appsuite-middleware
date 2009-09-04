@@ -2238,8 +2238,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     if (loginMapping.length() == 0) {
                         continue;
                     }
-                    stmt.setString(2, loginMapping);
-                    stmt.executeUpdate();
+                    stmt2.setString(2, loginMapping);
+                    stmt2.executeUpdate();
                 }
             } finally {
                 closeSQLStuff(stmt2);
