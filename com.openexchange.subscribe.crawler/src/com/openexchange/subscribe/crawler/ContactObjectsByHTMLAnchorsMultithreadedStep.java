@@ -57,6 +57,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.TextPage;
@@ -81,7 +83,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 // TODO: Expand this to handle single fields (consisting of fieldname and a regex) of a contact by extracting them from a webpage
 public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>> {
-
+    
+    private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep.class);
+    
     private List<HtmlAnchor> anchors;
 
     private Contact[] contactObjectsArray;
@@ -231,8 +235,11 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep i
                 passwordfield.setValueAttribute("");
                 final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
             } catch (FailingHttpStatusCodeException e) {
+                LOG.error(e.getMessage(), e);
             } catch (MalformedURLException e) {
+                LOG.error(e.getMessage(), e);
             } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
 
