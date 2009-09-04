@@ -142,6 +142,7 @@ public final class ManagedMimeMessage extends MimeMessage {
                 throw new MessagingException(e.getMessage(), e);
             }
         }
+        managedFile = null;
     }
 
     /*-
