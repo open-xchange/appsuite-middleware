@@ -56,6 +56,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.facebook.api.FacebookException;
 import com.facebook.api.FacebookJaxbRestClient;
 import com.facebook.api.ProfileField;
@@ -71,6 +73,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Object> {
 
+    private static final Log LOG = LogFactory.getLog(FacebookAPIStep.class);
+    
     private Contact[] contactObjectsArray;
 
     private static String API_KEY = "d36ebc9e274a89e3bd0c239cea4acb48";
@@ -224,9 +228,13 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
                 contactObjects.add(contact);
             }
         } catch (FacebookException e) {
+            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
         } catch (SubscriptionException e) {
+            LOG.error(e.getMessage(), e);
         } catch (ConverterException e) {
+            LOG.error(e.getMessage(), e);
         }
         executedSuccessfully = true;
         contactObjectsArray = new Contact[contactObjects.size()];
