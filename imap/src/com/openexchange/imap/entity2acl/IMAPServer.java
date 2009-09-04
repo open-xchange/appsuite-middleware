@@ -136,7 +136,7 @@ public enum IMAPServer {
     }
 
     /**
-     * Gets the class name of {@link Entity2ACL} implementation
+     * Gets the class name of {@link Entity2ACL} implementation.
      * 
      * @return The class name of {@link Entity2ACL} implementation
      */
@@ -145,7 +145,7 @@ public enum IMAPServer {
     }
 
     /**
-     * Gets the IMAP server's alias name
+     * Gets the IMAP server's alias name.
      * 
      * @return The IMAP server's alias name
      */
