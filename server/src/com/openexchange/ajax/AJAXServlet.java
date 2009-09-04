@@ -332,9 +332,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     // Javascript
 
-    public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "parent.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
+    public static final String JS_FRAGMENT =
+        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "parent.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
 
-    protected static final String JS_FRAGMENT_POPUP = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "window.opener.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
+    protected static final String JS_FRAGMENT_POPUP =
+        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "window.opener.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
 
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
@@ -396,20 +398,21 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
      * 
-     * @param req http servlet request.
-     * @return a string with the complete body.
-     * @throws IOException if an error occurs while reading the body.
+     * @param req The HTTP servlet request.
+     * @return A string with the complete body.
+     * @throws IOException If an error occurs while reading the body.
      */
     public static String getBody(final HttpServletRequest req) throws IOException {
         InputStreamReader isr = null;
         try {
             int count = 0;
-            isr = new InputStreamReader(
-                req.getInputStream(),
-                null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
-            final char[] c = new char[8192];
+            isr =
+                new InputStreamReader(
+                    req.getInputStream(),
+                    null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
+            final char[] c = new char[8192]; // 8K buffer
             if ((count = isr.read(c)) > 0) {
-                final StringBuilder sb = new StringBuilder(16384);
+                final StringBuilder sb = new StringBuilder(16384); // Initialize with 16K
                 do {
                     sb.append(c, 0, count);
                 } while ((count = isr.read(c)) > 0);
@@ -442,9 +445,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static String getServletSpecificURI(final HttpServletRequest req) {
         String uri;
         try {
-            uri = URLDecoder.decode(
-                req.getRequestURI(),
-                req.getCharacterEncoding() == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : req.getCharacterEncoding());
+            uri =
+                URLDecoder.decode(
+                    req.getRequestURI(),
+                    req.getCharacterEncoding() == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : req.getCharacterEncoding());
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
@@ -622,7 +626,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                  * Fill upload event instance
                  */
                 final int size = items.size();
-                final String charEnc = req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+                final String charEnc =
+                    req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
                 NextFileItem: for (int i = 0; i < size; i++) {
                     final FileItem fileItem = items.get(i);
                     if (fileItem.isFormField()) {
