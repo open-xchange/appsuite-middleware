@@ -256,6 +256,8 @@ public final class IMAPConfig extends MailConfig {
         if (null == imapServerAddress) {
             try {
                 imapServerAddress = InetAddress.getByName(imapServer);
+                // TODO: Touch address for proper equality check?
+                // imapServerAddress.toString();
             } catch (final UnknownHostException e) {
                 throw IMAPException.create(IMAPException.Code.IO_ERROR, e, e.getMessage());
             }
