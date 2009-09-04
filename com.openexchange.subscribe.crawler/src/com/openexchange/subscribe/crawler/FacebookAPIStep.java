@@ -71,7 +71,7 @@ import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Object> {
+public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Object>, LoginStep {
 
     private static final Log LOG = LogFactory.getLog(FacebookAPIStep.class);
     
@@ -223,7 +223,11 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
                 }
                 // add the image from a url to the contact
                 if (user.getPic() != null) {
-                    OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
+                    try {
+                        OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
+                    } catch (ConverterException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
                 contactObjects.add(contact);
             }
@@ -232,8 +236,6 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         } catch (SubscriptionException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (ConverterException e) {
             LOG.error(e.getMessage(), e);
         }
         executedSuccessfully = true;
@@ -313,6 +315,13 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
 
     public void setLinkAvailableAfterLogin(String linkAvailableAfterLogin) {
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.crawler.LoginStep#getBaseUrl()
+     */
+    public String getBaseUrl() {
+        return url;
     }
 
 }

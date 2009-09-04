@@ -72,8 +72,8 @@ public class GenericSubscribeServiceForFacebookTest extends GenericSubscribeServ
         steps.add(new FacebookAPIStep(
             "Get a user«s friend information from facebook via facebook-java-api",
             "",
-            username,
-            password,
+            "",
+            "",
             "https://login.facebook.com/login.php?login_attempt=1",
             "email",
             "pass",
