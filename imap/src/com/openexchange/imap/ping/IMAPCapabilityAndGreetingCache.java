@@ -72,9 +72,10 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class IMAPCapabilityAndGreetingCache {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class);
 
-    private static ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> MAP;
+    private static volatile ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> MAP;
 
     /**
      * Initializes a new {@link IMAPCapabilityAndGreetingCache}.
@@ -88,8 +89,12 @@ public final class IMAPCapabilityAndGreetingCache {
      */
     public static void init() {
         if (MAP == null) {
-            MAP = new ConcurrentHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
-            // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
+            synchronized (IMAPCapabilityAndGreetingCache.class) {
+                if (MAP == null) {
+                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
+                    // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
+                }
+            }
         }
     }
 
@@ -98,8 +103,12 @@ public final class IMAPCapabilityAndGreetingCache {
      */
     public static void tearDown() {
         if (MAP != null) {
-            clear();
-            MAP = null;
+            synchronized (IMAPCapabilityAndGreetingCache.class) {
+                if (MAP != null) {
+                    clear();
+                    MAP = null;
+                }
+            }
         }
     }
 
@@ -179,13 +188,12 @@ public final class IMAPCapabilityAndGreetingCache {
     }
 
     private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
-        Future<CapabilityAndGreeting> f = MAP.get(address);
+        final ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> map = MAP;
+        Future<CapabilityAndGreeting> f = map.get(address);
         if (null == f) {
-            final FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(
-                address,
-                isSecure,
-                imapProperties));
-            f = MAP.putIfAbsent(address, ft);
+            final FutureTask<CapabilityAndGreeting> ft =
+                new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
+            f = map.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
                 ft.run();

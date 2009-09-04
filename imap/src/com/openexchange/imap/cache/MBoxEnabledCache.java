@@ -68,7 +68,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class MBoxEnabledCache {
 
-    private static ConcurrentMap<InetSocketAddress, Future<Boolean>> MAP;
+    private static volatile ConcurrentMap<InetSocketAddress, Future<Boolean>> MAP;
 
     /**
      * Initializes a new {@link MBoxEnabledCache}.
@@ -82,7 +82,11 @@ public final class MBoxEnabledCache {
      */
     public static void init() {
         if (MAP == null) {
-            MAP = new ConcurrentHashMap<InetSocketAddress, Future<Boolean>>();
+            synchronized (MBoxEnabledCache.class) {
+                if (MAP == null) {
+                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<Boolean>>();
+                }
+            }
         }
     }
 
@@ -91,8 +95,12 @@ public final class MBoxEnabledCache {
      */
     public static void tearDown() {
         if (MAP != null) {
-            clear();
-            MAP = null;
+            synchronized (MBoxEnabledCache.class) {
+                if (MAP != null) {
+                    clear();
+                    MAP = null;
+                }
+            }
         }
     }
 
@@ -113,10 +121,11 @@ public final class MBoxEnabledCache {
      * @throws MessagingException If a messaging error occurs
      */
     public static boolean isMBoxEnabled(final InetSocketAddress imapServer, final IMAPFolder imapFolder, final String prefix) throws MessagingException {
-        Future<Boolean> f = MAP.get(imapServer);
+        final ConcurrentMap<InetSocketAddress, Future<Boolean>> map = MAP;
+        Future<Boolean> f = map.get(imapServer);
         if (null == f) {
             final FutureTask<Boolean> ft = new FutureTask<Boolean>(new MBoxEnabledCallable(imapFolder, prefix));
-            f = MAP.putIfAbsent(imapServer, ft);
+            f = map.putIfAbsent(imapServer, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
