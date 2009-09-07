@@ -58,8 +58,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,6 +84,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -722,7 +723,58 @@ public final class HTMLProcessing {
         return properties;
     }
 
-    private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new StringWriter());
+    private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
+
+        @Override
+        public void close() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final char cbuf[]) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final String str) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public Writer append(final CharSequence csq) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Writer append(final char c) throws IOException {
+            return this;
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            // Nothing to do
+        }
+    });
 
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
@@ -738,7 +790,7 @@ public final class HTMLProcessing {
         /*
          * Run tidy, providing a reader and writer
          */
-        final StringWriter writer = new StringWriter(htmlContent.length());
+        final Writer writer = new UnsynchronizedStringWriter(htmlContent.length());
         tidy.parse(new StringReader(htmlContent), writer);
         return writer.toString();
     }
