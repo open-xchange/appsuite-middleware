@@ -658,9 +658,11 @@ public final class HTMLProcessing {
      * @return The configuration for JTidy
      */
     private static Properties getTidyConfiguration() {
-        if (null == properties) {
+        Properties tmp = properties;
+        if (null == tmp) {
             synchronized (HTMLProcessing.class) {
-                if (null == properties) {
+                tmp = properties;
+                if (null == tmp) {
                     final Properties properties = new Properties();
                     final String tidyConfigFilename = SystemConfig.getProperty(SystemConfig.Property.TidyConfiguration);
                     boolean useDefaultConfig = true;
@@ -716,11 +718,11 @@ public final class HTMLProcessing {
                             LOG.error(e.getMessage(), e);
                         }
                     }
-                    HTMLProcessing.properties = properties;
+                    tmp = HTMLProcessing.properties = properties;
                 }
             }
         }
-        return properties;
+        return tmp;
     }
 
     private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
