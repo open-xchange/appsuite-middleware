@@ -421,10 +421,11 @@ public final class HTMLProcessing {
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
             final StringBuilder sb = new StringBuilder(htmlContent.length());
+            final String endingComment = "-->";
             StringBuilder tmp = null;
             do {
                 final String match = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
-                if (match.indexOf("-->") == -1) {
+                if (match.indexOf(endingComment) == -1) {
                     // No additional HTML comments
                     mr.appendReplacement(sb, "$1$2$3");
                 } else {
