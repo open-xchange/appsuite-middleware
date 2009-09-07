@@ -353,8 +353,9 @@ public final class HTMLProcessing {
         /*
          * Check for meta tag in validated html content which indicates documents content type. Add if missing.
          */
-        final int start = html.indexOf(TAG_S_HEAD) + 6;
-        if (start >= 6) {
+        final int headTagLen = TAG_S_HEAD.length();
+        final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
+        if (start >= headTagLen) {
             final Matcher m = PAT_META_CT.matcher(html.substring(start, html.indexOf(TAG_E_HEAD)));
             if (!m.find()) {
                 final StringBuilder sb = new StringBuilder(html);
@@ -368,17 +369,25 @@ public final class HTMLProcessing {
 
     private static final Pattern PATTERN_XHTML_CDATA;
 
+    private static final Pattern PATTERN_UNQUOTE1;
+
+    private static final Pattern PATTERN_UNQUOTE2;
+
     private static final Pattern PATTERN_XHTML_COMMENT;
 
     static {
-        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>[\r\n]*", true);
+        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>\\s*", true);
 
-        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "[\r\n]*");
+        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "\\s*");
 
-        final String group2 =
-            RegexUtility.group(RegexUtility.concat(RegexUtility.quote("<!--"), ".*", RegexUtility.quote("-->"), "[\r\n]*"), true);
+        final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
 
-        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "[\r\n]*");
+        final String commentEnd =
+            RegexUtility.concat(RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false), "\\s*");
+
+        final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
+
+        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "\\s*");
 
         final String group3 = RegexUtility.group(RegexUtility.quote("</style>"), true);
 
@@ -386,8 +395,13 @@ public final class HTMLProcessing {
 
         PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-        PATTERN_XHTML_COMMENT =
-            Pattern.compile(RegexUtility.concat(RegexUtility.quote("<!--"), ".*?", RegexUtility.quote("-->")), Pattern.DOTALL);
+        final String commentEnd2 = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false);
+
+        PATTERN_XHTML_COMMENT = Pattern.compile(RegexUtility.concat(commentStart, ".*?", commentEnd2), Pattern.DOTALL);
+
+        PATTERN_UNQUOTE1 = Pattern.compile(RegexUtility.quote("&lt;!--"), Pattern.CASE_INSENSITIVE);
+
+        PATTERN_UNQUOTE2 = Pattern.compile(RegexUtility.quote("--&gt;"), Pattern.CASE_INSENSITIVE);
     }
 
     /**
@@ -416,7 +430,7 @@ public final class HTMLProcessing {
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
-    private static String removeXHTMLCData(final String htmlContent) {
+    public static String removeXHTMLCData(final String htmlContent) {
         final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
@@ -424,10 +438,13 @@ public final class HTMLProcessing {
             final String endingComment = "-->";
             StringBuilder tmp = null;
             do {
-                final String match = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
-                if (match.indexOf(endingComment) == -1) {
+                // Un-quote
+                final String match = PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->");
+                // Prepare to search for additional HTML comments
+                final String test = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
+                if (test.indexOf(endingComment) == -1) {
                     // No additional HTML comments
-                    mr.appendReplacement(sb, "$1$2$3");
+                    mr.appendReplacement(sb, "$1" + match + "$3");
                 } else {
                     // Additional HTML comments
                     if (null == tmp) {
