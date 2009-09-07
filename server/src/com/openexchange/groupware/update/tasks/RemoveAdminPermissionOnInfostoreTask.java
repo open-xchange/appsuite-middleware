@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -99,6 +100,7 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
     }
 
     public void perform(final Schema schema, final int triggeringContextId) throws AbstractOXException {
+        final long started = System.currentTimeMillis();
         final Set<Integer> set = getAllContexts(triggeringContextId);
 
         final int size = set.size();
@@ -139,7 +141,8 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         }
 
         if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'RemoveAdminPermissionOnInfostoreTask' successfully performed!");
+            final long duration = System.currentTimeMillis() - started;
+            LOG.info(MessageFormat.format("UpdateTask ''RemoveAdminPermissionOnInfostoreTask'' successfully performed in {0}msec!", Long.valueOf(duration)));
         }
     }
 
