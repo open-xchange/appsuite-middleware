@@ -444,7 +444,12 @@ public final class HTMLProcessing {
                 final String test = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
                 if (test.indexOf(endingComment) == -1) {
                     // No additional HTML comments
-                    mr.appendReplacement(sb, "$1" + match + "$3");
+                    if (null == tmp) {
+                        tmp = new StringBuilder(match.length() + 16);
+                    } else {
+                        tmp.setLength(0);
+                    }
+                    mr.appendReplacement(sb, tmp.append("$1").append(match).append("$3").toString());
                 } else {
                     // Additional HTML comments
                     if (null == tmp) {
