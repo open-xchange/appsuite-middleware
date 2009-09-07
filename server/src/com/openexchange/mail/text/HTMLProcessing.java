@@ -155,8 +155,9 @@ public final class HTMLProcessing {
      * @return The formatted content
      */
     public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
-        String retval = isHtml ? getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset) : content;
+        String retval = null;
         if (isHtml) {
+            retval = getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset);
             if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                 /*
                  * Filter according to white-list
@@ -181,6 +182,7 @@ public final class HTMLProcessing {
             // }
             // }
         } else {
+            retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
                     retval = htmlFormat(retval, true, getHrefPositions(retval));
@@ -201,9 +203,10 @@ public final class HTMLProcessing {
      * <p>
      * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link is too large. Usages should handle this case.
      */
-    public static final Pattern PATTERN_HREF = Pattern.compile(
-        "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
-        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    public static final Pattern PATTERN_HREF =
+        Pattern.compile(
+            "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     private static int[][] getHrefPositions(final String content) {
         try {
@@ -372,9 +375,8 @@ public final class HTMLProcessing {
 
         final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "[\r\n]*");
 
-        final String group2 = RegexUtility.group(
-            RegexUtility.concat(RegexUtility.quote("<!--"), ".*", RegexUtility.quote("-->"), "[\r\n]*"),
-            true);
+        final String group2 =
+            RegexUtility.group(RegexUtility.concat(RegexUtility.quote("<!--"), ".*", RegexUtility.quote("-->"), "[\r\n]*"), true);
 
         final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "[\r\n]*");
 
@@ -384,9 +386,8 @@ public final class HTMLProcessing {
 
         PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-        PATTERN_XHTML_COMMENT = Pattern.compile(
-            RegexUtility.concat(RegexUtility.quote("<!--"), ".*?", RegexUtility.quote("-->")),
-            Pattern.DOTALL);
+        PATTERN_XHTML_COMMENT =
+            Pattern.compile(RegexUtility.concat(RegexUtility.quote("<!--"), ".*?", RegexUtility.quote("-->")), Pattern.DOTALL);
     }
 
     /**
@@ -758,9 +759,8 @@ public final class HTMLProcessing {
         }
     }
 
-    private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile(
-        "(?:(<blockquote.*?>)|(</blockquote>))",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_BLOCKQUOTE =
+        Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Converts given HTML content into plain text, but keeps <code>&lt;blockquote&gt;</code> tags if any present.<br>
@@ -1187,8 +1187,8 @@ public final class HTMLProcessing {
 
     private static final String DEFAULT_COLOR = "#0026ff";
 
-    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px;" + 
-        " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
+    private static final String BLOCKQUOTE_START_TEMPLATE =
+        "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px;" + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 
     /**
      * Determines the quote color for given <code>quotelevel</code>.
@@ -1306,13 +1306,11 @@ public final class HTMLProcessing {
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern CID_PATTERN = Pattern.compile(
-        "(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern CID_PATTERN =
+        Pattern.compile("(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern FILENAME_PATTERN = Pattern.compile(
-        "src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?",
-        Pattern.CASE_INSENSITIVE);
+    private static final Pattern FILENAME_PATTERN =
+        Pattern.compile("src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
 
     // private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
