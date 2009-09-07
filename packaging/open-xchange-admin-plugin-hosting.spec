@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -145,6 +145,7 @@ mv doc javadoc
 %changelog
 * Fri Sep 04 2009 - marcus.klein@open-xchange.com
  - Bugfix #14449: Fixed wrong variable reference introduced by fixing bug 12168.
+ - Bugfix #14451: Fixed adding another login mapping introduced by fixing bug 12168.
 * Thu Sep 03 2009 - marcus.klein@open-xchange.com
  - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
  - Bugfix #12168: Check for existing login mapping now throws a StorageException to have a good looking command line output.
