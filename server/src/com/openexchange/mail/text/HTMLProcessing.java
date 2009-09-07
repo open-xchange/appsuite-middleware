@@ -430,7 +430,7 @@ public final class HTMLProcessing {
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
-    public static String removeXHTMLCData(final String htmlContent) {
+    private static String removeXHTMLCData(final String htmlContent) {
         final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
@@ -440,9 +440,8 @@ public final class HTMLProcessing {
             do {
                 // Un-quote
                 final String match = PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->");
-                // Prepare to search for additional HTML comments
-                final String test = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
-                if (test.indexOf(endingComment) == -1) {
+                // Check for additional HTML comments
+                if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
                     // No additional HTML comments
                     if (null == tmp) {
                         tmp = new StringBuilder(match.length() + 16);
