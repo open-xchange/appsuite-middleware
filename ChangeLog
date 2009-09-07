@@ -1,3 +1,7 @@
+* 2009-09-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
+
 * 2009-09-04 - marcus.klein@open-xchange.com
 
  - Bugfix #14449: Fixed wrong variable reference introduced by fixing bug 12168.
