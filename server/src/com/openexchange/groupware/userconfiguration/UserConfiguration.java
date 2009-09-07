@@ -625,16 +625,16 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Checks if user has access to given module.
      * 
      * @param module The module carrying a value defined in constants <code>
-	 *            {@link FolderObject#TASK}</code> , <code>
-	 *            {@link FolderObject#CALENDAR}</code>
+     *            {@link FolderObject#TASK}</code> , <code>
+     *            {@link FolderObject#CALENDAR}</code>
      *            , <code>
-	 *            {@link FolderObject#CONTACT}</code> , <code>
-	 *            {@link FolderObject#UNBOUND}</code>, <code>
-	 *            {@link FolderObject#SYSTEM_MODULE}</code>
+     *            {@link FolderObject#CONTACT}</code> , <code>
+     *            {@link FolderObject#UNBOUND}</code>, <code>
+     *            {@link FolderObject#SYSTEM_MODULE}</code>
      *            , <code>
-	 *            {@link FolderObject#PROJECT}</code>, <code>
-	 *            {@link FolderObject#MAIL}</code> , <code>
-	 *            {@link FolderObject#INFOSTORE}</code>
+     *            {@link FolderObject#PROJECT}</code>, <code>
+     *            {@link FolderObject#MAIL}</code> , <code>
+     *            {@link FolderObject#INFOSTORE}</code>
      * @return <code>true</code> if user configuration permits access to given module; otherwise <code>false</code>
      */
     public boolean hasModuleAccess(final int module) {
@@ -789,7 +789,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Sets if this user is able to use Exchange Active Sync
      */
-    public void setHasActiveSync(boolean eas) {
+    public void setActiveSync(boolean eas) {
         setPermission(eas, ACTIVE_SYNC);
     }
     
@@ -798,14 +798,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Cheks if this user configuration indicates that the user may use USM.
      */
     public boolean hasUSM() {
-    	return hasPermission(USM);
+        return hasPermission(USM);
     }
 
     /**
-	 * Sets if this user is able to user USM.
+     * Sets if this user is able to user USM.
      */
-    public void setHasUSM(boolean usm) {
-    	setPermission(usm, USM);
+    public void setUSM(boolean usm) {
+        setPermission(usm, USM);
     }
 
     /**
