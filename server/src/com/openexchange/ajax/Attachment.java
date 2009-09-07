@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -105,6 +104,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -589,7 +589,7 @@ public class Attachment extends PermissionServlet {
         Writer writer = null;
 
         try {
-            writer = new StringWriter();
+            writer = new UnsynchronizedStringWriter();
             ResponseWriter.write(resp, writer);
             res.getWriter().write(
                 substitute((fragmentOverride != null) ? fragmentOverride : JS_FRAGMENT, "json", writer.toString(), "action", action));

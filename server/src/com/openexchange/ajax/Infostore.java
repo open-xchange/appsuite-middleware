@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
@@ -104,6 +103,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -173,7 +173,7 @@ public class Infostore extends PermissionServlet {
             if (req.getParameter(PARAMETER_ID) == null) {
                 final Response resp = new Response();
                 resp.setException(new AbstractOXException("You must provide a value for " + PARAMETER_ID));
-                final StringWriter w = new StringWriter();
+                final UnsynchronizedStringWriter w = new UnsynchronizedStringWriter();
                 try {
                     ResponseWriter.write(resp, w);
                 } catch (final JSONException e) {
@@ -259,7 +259,7 @@ public class Infostore extends PermissionServlet {
             LOG.error(e.getMessage(), e);
         } catch (final OXPermissionException e) {
             LOG.error("Not possible, obviously: " + e.getMessage(), e);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
@@ -353,7 +353,7 @@ public class Infostore extends PermissionServlet {
             }
         } catch (final JSONException e) {
             handleOXException(res, e, action, true, null);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             final Response resp = new Response();
             resp.setException(new AbstractOXException(t.getMessage())); // FIXME
             try {
@@ -671,7 +671,7 @@ public class Infostore extends PermissionServlet {
 
             try {
                 if (post) {
-                    writer = new StringWriter();
+                    writer = new UnsynchronizedStringWriter();
                 } else {
                     writer = res.getWriter();
                 }

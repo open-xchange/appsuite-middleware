@@ -50,7 +50,6 @@
 package com.openexchange.tools;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -573,7 +572,7 @@ public final class StringCollection {
     public static String getStackAsString() {
         final Throwable t = new Throwable();
         t.fillInStackTrace();
-        final StringWriter sw = new StringWriter();
+        final UnsynchronizedStringWriter sw = new UnsynchronizedStringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);
         return sw.toString();

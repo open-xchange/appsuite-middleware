@@ -51,18 +51,16 @@ package com.openexchange.ajax.container;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * Response data object.
@@ -259,7 +257,7 @@ public final class Response {
      */
     @Override
     public String toString() {
-        final StringWriter writer = new StringWriter();
+        final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter();
         final JSONObject json = new JSONObject();
         try {
             ResponseWriter.write(this, json);

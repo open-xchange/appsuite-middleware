@@ -50,17 +50,14 @@
 package com.openexchange.ajax.helper;
 
 import java.io.IOException;
-import java.io.StringWriter;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -91,7 +88,7 @@ public final class Send {
     public static void sendCallbackResponse(final Response response,
         final String module, final HttpServletResponse resp) throws
         IOException {
-        final StringWriter sWriter = new StringWriter();
+        final UnsynchronizedStringWriter sWriter = new UnsynchronizedStringWriter();
         try {
             ResponseWriter.write(response, sWriter);
         } catch (final JSONException e) {

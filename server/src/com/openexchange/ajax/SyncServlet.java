@@ -54,7 +54,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -194,7 +194,7 @@ public class SyncServlet extends PermissionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
+		final UnsynchronizedStringWriter strWriter = new UnsynchronizedStringWriter();
 		final JSONWriter jsonWriter = new JSONWriter(strWriter);
 		Date lastModifiedDate = null;
 		/*

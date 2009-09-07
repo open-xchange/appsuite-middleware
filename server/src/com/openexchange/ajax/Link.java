@@ -65,6 +65,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -92,7 +93,7 @@ public class Link extends DataServlet {
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
 		final Response response = new Response();
-		final StringWriter sw = new StringWriter();
+		final UnsynchronizedStringWriter sw = new UnsynchronizedStringWriter();
 
 		try {
 			final Session sessionObj = getSessionObject(httpServletRequest);
