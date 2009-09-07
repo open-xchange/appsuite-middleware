@@ -421,6 +421,7 @@ public final class HTMLProcessing {
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
             final StringBuilder sb = new StringBuilder(htmlContent.length());
+            StringBuilder tmp = null;
             do {
                 final String match = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
                 if (match.indexOf("-->") == -1) {
@@ -428,7 +429,12 @@ public final class HTMLProcessing {
                     mr.appendReplacement(sb, "$1$2$3");
                 } else {
                     // Additional HTML comments
-                    mr.appendReplacement(sb, "$1<!--\n" + match + "$3");
+                    if (null == tmp) {
+                        tmp = new StringBuilder(match.length() + 16);
+                    } else {
+                        tmp.setLength(0);
+                    }
+                    mr.appendReplacement(sb, tmp.append("$1<!--\n").append(match).append("$3").toString());
                 }
             } while (m.find());
             mr.appendTail(sb);
