@@ -101,6 +101,99 @@ public final class OXFolderIteratorSQL {
 
     private static final String STR_SELECT = "SELECT ";
 
+    public static final class Parameter {
+
+        private final int user;
+
+        private final int[] groups;
+
+        private final UserConfiguration userConfig;
+
+        private final Context ctx;
+
+        private Date since;
+
+        private Connection con;
+
+        private int folderId;
+
+        private int module;
+
+        private int type;
+
+        /**
+         * Initializes a new {@link Parameter}.
+         * 
+         * @param user The user ID
+         * @param groups The user's group IDs
+         * @param userConfig The user configuration
+         * @param ctx The context
+         */
+        public Parameter(final int user, final int[] groups, final UserConfiguration userConfig, final Context ctx) {
+            super();
+            this.user = user;
+            this.groups = groups;
+            this.userConfig = userConfig;
+            this.ctx = ctx;
+        }
+
+        /**
+         * Sets the since time stamp.
+         * 
+         * @param since The since time stamp
+         * @return This parameter object with since time stamp applied
+         */
+        public Parameter since(final Date since) {
+            this.since = since;
+            return this;
+        }
+
+        /**
+         * Sets the connection.
+         * 
+         * @param con The connection
+         * @return This parameter object with connection applied
+         */
+        public Parameter connection(final Connection con) {
+            this.con = con;
+            return this;
+        }
+
+        /**
+         * Sets the folder ID.
+         * 
+         * @param folderId The folder ID
+         * @return This parameter object with folder ID applied
+         */
+        public Parameter folderId(final int folderId) {
+            this.folderId = folderId;
+            return this;
+        }
+
+        /**
+         * Sets the module.
+         * 
+         * @param module The module
+         * @return This parameter object with module applied
+         */
+        public Parameter module(final int module) {
+            this.module = module;
+            return this;
+        }
+
+        /**
+         * Sets the type.
+         * 
+         * @param type The type
+         * @return This parameter object with type applied
+         */
+        public Parameter type(final int type) {
+            this.type = type;
+            return this;
+        }
+
+    }
+
     private OXFolderIteratorSQL() {
         super();
     }
@@ -261,9 +354,10 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static final Pattern PAT_ORDER_BY = Pattern.compile(
-        "( *ORDER +BY +)(?:([a-zA-Z0-9_.]+)(?: *ASC *| *DESC *)?)(?:, *[a-zA-Z0-9_.]+(?: *ASC *| *DESC *)?)?",
-        Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_ORDER_BY =
+        Pattern.compile(
+            "( *ORDER +BY +)(?:([a-zA-Z0-9_.]+)(?: *ASC *| *DESC *)?)(?:, *[a-zA-Z0-9_.]+(?: *ASC *| *DESC *)?)?",
+            Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PAT_FIELD = Pattern.compile("(?:([a-zA-Z0-9_.]+)(?: *ASC| *DESC)?)", Pattern.CASE_INSENSITIVE);
 
@@ -369,20 +463,21 @@ public final class OXFolderIteratorSQL {
      * @throws SearchIteratorException If a search iterator error occurs
      */
     public static SearchIterator<FolderObject> getUserRootFoldersIterator(final int userId, final int[] memberInGroups, final UserConfiguration userConfig, final Context ctx) throws OXException, SearchIteratorException {
-        StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.SYSTEM_TYPE).append(
-            ") AND (ot.parent = 0)");
+        StringBuilder condBuilder =
+            new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.SYSTEM_TYPE).append(") AND (ot.parent = 0)");
         if (!userConfig.hasFullSharedFolderAccess()) {
             condBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_SHARED_FOLDER_ID).append(')');
         }
         if (!userConfig.hasInfostore()) {
             condBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL(STR_OT),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(userConfig.getAccessibleModules()),
-            condBuilder.toString(),
-            getRootOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                condBuilder.toString(),
+                getRootOrderBy(STR_OT));
         condBuilder = null;
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -455,15 +550,19 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's private folder.
      */
     private static SearchIterator<FolderObject> getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PRIVATE).append(
-            " AND ot.created_from = ").append(userId).append(") AND (ot.parent = ").append(FolderObject.SYSTEM_PRIVATE_FOLDER_ID).append(
-            ')');
+        final StringBuilder condBuilder =
+            new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from = ").append(userId).append(
+                ") AND (ot.parent = ").append(FolderObject.SYSTEM_PRIVATE_FOLDER_ID).append(')');
         if (since != null) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), StringCollection.getSqlInString(
-            userId,
-            groups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, groups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -542,14 +641,19 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's public folder.
      */
     private static SearchIterator<FolderObject> getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PUBLIC).append(
-            ") AND (ot.parent = ").append(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).append(')');
+        final StringBuilder condBuilder =
+            new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PUBLIC).append(") AND (ot.parent = ").append(
+                FolderObject.SYSTEM_PUBLIC_FOLDER_ID).append(')');
         if (null != since) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), StringCollection.getSqlInString(
-            userId,
-            groups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, groups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -611,9 +715,13 @@ public final class OXFolderIteratorSQL {
         if (null != since) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), StringCollection.getSqlInString(
-            userId,
-            memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -657,17 +765,22 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances of user-visible shared folders.
      */
     public static SearchIterator<FolderObject> getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PRIVATE).append(
-            " AND ot.created_from != ").append(userId).append(')');
+        final StringBuilder condBuilder =
+            new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ").append(userId).append(
+                ')');
         if (owner > -1) {
             condBuilder.append(" AND (ot.created_from = ").append(owner).append(')');
         }
         if (since != null) {
             condBuilder.append(" AND (changing_date > ").append(since.getTime()).append(')');
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), StringCollection.getSqlInString(
-            userId,
-            memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -757,7 +870,8 @@ public final class OXFolderIteratorSQL {
 
     private static final String SQL_SEL_ALL_PUB = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? ORDER BY fuid";
 
-    private static final String SQL_SEL_ALL_PUB_MODULE = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND module = ? ORDER BY fuid";
+    private static final String SQL_SEL_ALL_PUB_MODULE =
+        "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND module = ? ORDER BY fuid";
 
     private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeView(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx, final Connection readCon) throws OXException {
         Connection rc = readCon;
@@ -779,12 +893,13 @@ public final class OXFolderIteratorSQL {
                 if (null != module) {
                     condBuilder.append(" AND ot.module = ").append(module.intValue());
                 }
-                final String sqlSelectStr = getSQLUserVisibleFolders(
-                    FolderObjectIterator.getFieldsForSQL(STR_OT),
-                    StringCollection.getSqlInString(userId, groups),
-                    StringCollection.getSqlInString(userConfig.getAccessibleModules()),
-                    condBuilder.toString(),
-                    getOrderBy(STR_OT, "module", "fname"));
+                final String sqlSelectStr =
+                    getSQLUserVisibleFolders(
+                        FolderObjectIterator.getFieldsForSQL(STR_OT),
+                        StringCollection.getSqlInString(userId, groups),
+                        StringCollection.getSqlInString(userConfig.getAccessibleModules()),
+                        condBuilder.toString(),
+                        getOrderBy(STR_OT, "module", "fname"));
                 stmt = rc.prepareStatement(sqlSelectStr);
             }
             stmt.setInt(pos++, contextId);
@@ -917,12 +1032,13 @@ public final class OXFolderIteratorSQL {
                     final StringHelper strHelper = new StringHelper(locale);
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
-                final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
-                    FolderObject.SHARED_PREFIX + fo.getCreatedBy(),
-                    creatorDisplayName,
-                    FolderObject.SYSTEM_MODULE,
-                    true,
-                    FolderObject.SYSTEM_TYPE);
+                final FolderObject virtualOwnerFolder =
+                    FolderObject.createVirtualFolderObject(
+                        FolderObject.SHARED_PREFIX + fo.getCreatedBy(),
+                        creatorDisplayName,
+                        FolderObject.SYSTEM_MODULE,
+                        true,
+                        FolderObject.SYSTEM_TYPE);
                 folderList.add(virtualOwnerFolder);
                 /*
                  * Set folder to system shared folder
@@ -993,36 +1109,31 @@ public final class OXFolderIteratorSQL {
             publicParent = true;
             break;
         case FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.getFolderString(
-                FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
-                locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+            specialFolder =
+                FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.getFolderString(
+                    FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
+                    locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
             publicParent = true;
             break;
         case FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(
-                FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, locale),
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            specialFolder =
+                FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, FolderObject.getFolderString(
+                    FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                    locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
             publicParent = true;
             break;
         case FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(
-                FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
-                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, locale),
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            specialFolder =
+                FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.getFolderString(
+                    FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
+                    locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
             publicParent = true;
             break;
         case FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(
-                FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
-                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, locale),
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            specialFolder =
+                FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.getFolderString(
+                    FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
+                    locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
             publicParent = false;
             break;
         default:
@@ -1088,12 +1199,13 @@ public final class OXFolderIteratorSQL {
         final int contextId = ctx.getContextId();
         try {
             readCon = DBPool.pickup(ctx);
-            stmt = readCon.prepareStatement(getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, memberInGroups),
-                StringCollection.getSqlInString(accessibleModules),
-                condBuilder.toString(),
-                getSubfolderOrderBy(STR_OT)));
+            stmt =
+                readCon.prepareStatement(getSQLUserVisibleFolders(
+                    FolderObjectIterator.getFieldsForSQL(STR_OT),
+                    StringCollection.getSqlInString(userId, memberInGroups),
+                    StringCollection.getSqlInString(accessibleModules),
+                    condBuilder.toString(),
+                    getSubfolderOrderBy(STR_OT)));
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1133,12 +1245,13 @@ public final class OXFolderIteratorSQL {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
     public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection readConArg) throws OXException, SearchIteratorException {
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL(STR_OT),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
-            getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(accessibleModules),
+                new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
+                getSubfolderOrderBy(STR_OT));
         final Connection readCon;
         final boolean closeReadCon = (readConArg == null);
         final int contextId = ctx.getContextId();
@@ -1211,15 +1324,12 @@ public final class OXFolderIteratorSQL {
      */
     public static SearchIterator<FolderObject> getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
         final String fields = FolderObjectIterator.getFieldsForSQL(STR_OT);
-        final String condition = since == null ? null : new StringBuilder(" AND (ot.changing_date > ").append(since.getTime()).append(')').toString();
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            "del_oxfolder_tree",
-            "del_oxfolder_permissions",
-            fields,
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            condition,
-            "ORDER by ot.fuid");
+        final String condition =
+            since == null ? null : new StringBuilder(" AND (ot.changing_date > ").append(since.getTime()).append(')').toString();
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders("del_oxfolder_tree", "del_oxfolder_permissions", fields, StringCollection.getSqlInString(
+                userId,
+                memberInGroups), StringCollection.getSqlInString(accessibleModules), condition, "ORDER by ot.fuid");
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -1273,14 +1383,19 @@ public final class OXFolderIteratorSQL {
      * @throws SearchIteratorException If a search iterator error occurs
      */
     public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final boolean userFoldersOnly, final Context ctx) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (changing_date > ").append(since.getTime()).append(
-            ") AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES).append(')');
+        final StringBuilder condBuilder =
+            new StringBuilder(32).append("AND (changing_date > ").append(since.getTime()).append(") AND (module IN ").append(
+                FolderObject.SQL_IN_STR_STANDARD_MODULES).append(')');
         if (userFoldersOnly) {
             condBuilder.append(" AND (ot.created_from = ").append(userId).append(") ");
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), StringCollection.getSqlInString(
-            userId,
-            memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), getSubfolderOrderBy(STR_OT));
+        final String sqlSelectStr =
+            getSQLUserVisibleFolders(
+                FolderObjectIterator.getFieldsForSQL(STR_OT),
+                StringCollection.getSqlInString(userId, memberInGroups),
+                StringCollection.getSqlInString(accessibleModules),
+                condBuilder.toString(),
+                getSubfolderOrderBy(STR_OT));
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1316,8 +1431,9 @@ public final class OXFolderIteratorSQL {
         return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
     }
 
-    private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append(STR_SELECT).append(
-        FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(" WHERE (cid = ?) ").toString();
+    private static final String SQL_SELECT_FOLDERS_START =
+        new StringBuilder(200).append(STR_SELECT).append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(
+            " WHERE (cid = ?) ").toString();
 
     /**
      * Gets <b>all</b> modified folders since given time stamp.
@@ -1363,9 +1479,10 @@ public final class OXFolderIteratorSQL {
      * @throws SearchIteratorException If a search iterator error occurs
      */
     public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException, SearchIteratorException {
-        final String sqlSelectStr = new StringBuilder(256).append(SQL_SELECT_FOLDERS_START).append(
-            "AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(
-            OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
+        final String sqlSelectStr =
+            new StringBuilder(256).append(SQL_SELECT_FOLDERS_START).append("AND (changing_date > ?) AND (module IN ").append(
+                FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(
+                OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
