@@ -469,20 +469,23 @@ public final class HTMLProcessing {
      */
     private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
         final Matcher m = PATTERN_CC.matcher(htmlContent);
-        if (m.find()) {
-            int lastMatch = 0;
-            final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
-            do {
-                sb.append(htmlContent.substring(lastMatch, m.start()));
-                sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
-                sb.append(m.group(3));
-                sb.append(CC_ENDIF);
-                lastMatch = m.end();
-            } while (m.find());
-            sb.append(htmlContent.substring(lastMatch));
-            return sb.toString();
+        if (!m.find()) {
+            /*
+             * No conditional comments found
+             */
+            return htmlContent;
         }
-        return htmlContent;
+        int lastMatch = 0;
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
+        do {
+            sb.append(htmlContent.substring(lastMatch, m.start()));
+            sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
+            sb.append(m.group(3));
+            sb.append(CC_ENDIF);
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(htmlContent.substring(lastMatch));
+        return sb.toString();
     }
 
     /**
