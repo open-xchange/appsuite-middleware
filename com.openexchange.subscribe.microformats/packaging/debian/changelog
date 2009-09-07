@@ -1,8 +1,8 @@
-open-xchange-subscribe-microformats (6.13.0.0-0) unstable; urgency=low
+open-xchange-subscribe-microformats (6.12.0.0-2) unstable; urgency=low
 
-  * 6.13 unstable cycle
+  * first build for 6.12 Rev2
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  7 Sep 2009 13:22:33 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  7 Sep 2009 17:22:09 +0200
 
 open-xchange-subscribe-microformats (6.12.0.0-1) unstable; urgency=low
 
