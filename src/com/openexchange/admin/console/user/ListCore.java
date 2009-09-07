@@ -78,12 +78,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends UserAbstraction {
 
-    private static final String FALSE_STRING = "false";
-    private static final String TRUE_STRING = "true";
-
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        
+
         setCSVOutputOption(parser);
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededQuadState.notneeded);
         setFurtherOptions(parser);
@@ -116,7 +113,7 @@ public abstract class ListCore extends UserAbstraction {
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
                 final HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
-                
+
                 for (final User user : allusers) {
                     // fetch module access for every user
                     usr2axs.put(user.getId(), oxusr.getModuleAccess(ctx, user, auth));
@@ -136,36 +133,24 @@ public abstract class ListCore extends UserAbstraction {
 
     /**
      * This method is used to define how a date value is transferred to string
-     * 
+     *
      * @param date
      * @return the string representation of this date
      */
     protected final String datetostring(final Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
-        if (null != date) {
-            return sdf.format(date);
-        } else {
-            return null;
-        }
+        return null == date ? null : sdf.format(date);
     }
 
     /**
-     * This method is used to define how a boolean value is transferred to string
-     * 
+     * We need <code>null</code> instead of "null", so using {@link String#valueOf(Object)} is not sufficient.
+     *
      * @param boolean1
      * @return the string representation of this boolean
      */
     protected final String booleantostring(final Boolean boolean1) {
-        if (null != boolean1) {
-            if (boolean1) {
-                return TRUE_STRING;
-            } else {
-                return FALSE_STRING;
-            }
-        } else {
-            return null;
-        }
+        return null == boolean1 ? null : boolean1.toString();
     }
 
     protected final String hashtostring(final HashSet<?> set) {
@@ -179,15 +164,14 @@ public abstract class ListCore extends UserAbstraction {
             sb.deleteCharAt(sb.length()-1);
             sb.deleteCharAt(sb.length()-1);
             return sb.toString();
-        } else {
-            return null;
         }
+        return null;
     }
 
     protected final String maptostring(final Map<?,?> map) {
         if (null != map && map.size() > 0) {
             final HashMap<String, String> hashMap = (HashMap<String,String>)map;
-            final Iterator<Entry<String, String>> i = hashMap.entrySet().iterator(); 
+            final Iterator<Entry<String, String>> i = hashMap.entrySet().iterator();
             final StringBuilder sb = new StringBuilder();
             while( i.hasNext() ) {
                 final Entry<String, String> e = i.next();
@@ -199,9 +183,8 @@ public abstract class ListCore extends UserAbstraction {
             sb.deleteCharAt(sb.length()-1);
             sb.deleteCharAt(sb.length()-1);
             return sb.toString();
-        } else {
-            return null;
         }
+        return null;
     }
 
     protected final void sysoutOutput(final User[] users) throws InvalidDataException {
@@ -211,7 +194,7 @@ public abstract class ListCore extends UserAbstraction {
             printExtensionsError(user);
             data.add(makeStandardData(user));
         }
-        
+
 //        doOutput(new String[] { "3r", "30l", "30l", "14l" },
         doOutput(new String[] { "r", "l", "l", "l" },
                  new String[] { "Id", "Name", "Displayname", "Email" }, data);
@@ -219,23 +202,23 @@ public abstract class ListCore extends UserAbstraction {
 
     private ArrayList<String> makeStandardData(final User user) {
         final ArrayList<String> res_data = new ArrayList<String>();
-        
+
         res_data.add(String.valueOf(user.getId())); // id
-    
+
         final String name = user.getName();
         if (name != null && name.trim().length() > 0) {
             res_data.add(name); // name
         } else {
             res_data.add(null); // name
         }
-    
+
         final String displayname = user.getDisplay_name();
         if (displayname != null && displayname.trim().length() > 0) {
             res_data.add(displayname); // displayname
         } else {
             res_data.add(null); // displayname
         }
-    
+
         final String email = user.getPrimaryEmail();
         if (email != null && email.trim().length() > 0) {
             res_data.add(email); // email
@@ -252,11 +235,11 @@ public abstract class ListCore extends UserAbstraction {
     /**
      * This methods collects the information from the user object and calls the
      * general cvs output method
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
-     * @throws IllegalArgumentException 
-     * @throws InvalidDataException 
-     * 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvalidDataException
+     *
      */
     private void precsvinfos(final User[] users,final HashMap<Integer, UserModuleAccess> access_map) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
         final Method[] methods = User.class.getMethods();
@@ -266,15 +249,15 @@ public abstract class ListCore extends UserAbstraction {
         notallowedOrReplace.put("Spam_filter_enabled", "");
         notallowedOrReplace.put("Gui_spam_filter_enabled", "GUI_Spam_filter_capabilities_enabled");
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, notallowedOrReplace);
-        
+
         final ArrayList<String> columnnames = new ArrayList<String>();
         for (final MethodAndNames methodandnames : methArrayList) {
             columnnames.add(methodandnames.getName());
         }
-        
+
         if (users.length > 0) {
             columnnames.addAll(getColumnsOfAllExtensions(users[0]));
-            
+
             // module access columns
             columnnames.add(UserAbstraction.OPT_ACCESS_CALENDAR);
             columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
@@ -302,10 +285,9 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
-            
-            
-            
-        }        
+            columnnames.add(UserAbstraction.OPT_ACCESS_USM);
+
+        }
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final User user : users) {
             final ArrayList<String> datarow = new ArrayList<String>();
@@ -333,7 +315,7 @@ public abstract class ListCore extends UserAbstraction {
             }
             datarow.addAll(getDataOfAllExtensions(user));
 
-            // add module access 
+            // add module access
             final UserModuleAccess access = access_map.get(user.getId());
             datarow.add(String.valueOf(access.getCalendar()));
             datarow.add(String.valueOf(access.getContacts()));
@@ -360,7 +342,8 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isMultipleMailAccounts()));
             datarow.add(String.valueOf(access.isSubscription()));
             datarow.add(String.valueOf(access.isPublication()));
-
+            datarow.add(String.valueOf(access.isActiveSync()));
+            datarow.add(String.valueOf(access.isUSM()));
             data.add(datarow);
             printExtensionsError(user);
         }

@@ -1,3 +1,7 @@
+* 2009-09-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
+
 * 2009-09-03 - marcus.klein@open-xchange.com
 
  - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
