@@ -2301,11 +2301,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void myChangeInsertModuleAccess(final Context ctx, final int user_id, final UserModuleAccess access, final boolean insert_or_update, final Connection read_ox_con, final Connection write_ox_con, final int[] groups) throws StorageException {
-
+    private void myChangeInsertModuleAccess(Context ctx, int user_id, UserModuleAccess access, boolean insert_or_update, Connection read_ox_con, Connection write_ox_con, int[] groups) throws StorageException {
         try {
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, groups, ctx.getId(), read_ox_con);
-
+            UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, groups, ctx.getId().intValue(), read_ox_con);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
             user.setForum(access.getForum());
@@ -2331,26 +2329,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setMultipleMailAccounts(access.isMultipleMailAccounts());
             user.setSubscription(access.isSubscription());
             user.setPublication(access.isPublication());
-            user.setHasActiveSync(access.getActiveSync());
-            user.setHasUSM(access.getUSM());
-
+            user.setActiveSync(access.isActiveSync());
+            user.setUSM(access.isUSM());
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
-            
-            if( ! insert_or_update ) {
-                final com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId());
-                final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
+            if (!insert_or_update) {
+                com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId().intValue());
+                UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
                 uConfStor.removeUserConfiguration(user.getUserId(), tmp);
             }
-        } catch (final DBPoolingException pole) {
-            log.error("DBPooling Error", pole);
-            throw new StorageException(pole.toString());
-        } catch (final SQLException sqle) {
-            log.error("SQL Error", sqle);
-            throw new StorageException(sqle.toString());
-        } catch (final ContextException e) {
+        } catch (DBPoolingException e) {
+            log.error("DBPooling Error", e);
+            throw new StorageException(e.toString());
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (ContextException e) {
             log.error("Context Error", e);
             throw new StorageException(e.toString());
-        } catch (final UserConfigurationException e) {
+        } catch (UserConfigurationException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
         }

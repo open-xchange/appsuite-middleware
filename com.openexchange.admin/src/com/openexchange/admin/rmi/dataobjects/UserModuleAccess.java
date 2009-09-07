@@ -55,7 +55,6 @@ import java.lang.reflect.Field;
 /**
  * Object for setting/getting access informations to the different ox modules
  *
- *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -67,8 +66,8 @@ public class UserModuleAccess implements Serializable {
      * For serialization
      */
     private static final long serialVersionUID = -5336341908204911967L;
-    
-    // ALL ACCESS MODULES; 
+
+    // ALL ACCESS MODULES;
     // MAKE SURE YOU REWRITE THE "equals" METHOD
     // IF YOU CHANGE SOMETHING HERE!!!
     private boolean calendar = true;
@@ -108,24 +107,24 @@ public class UserModuleAccess implements Serializable {
     private boolean Webmail = true;
 
     private boolean EditGroup = true;
-    
+
     private boolean EditResource = true;
-    
+
     private boolean EditPassword = true;
 
     private boolean CollectEmailAddresses = true;
 
     private boolean MultipleMailAccounts = true;
-    
+
     private boolean Subscription = true;
-    
+
     private boolean Publication = true;
-    
+
     private boolean ActiveSync = true;
-    
+
     private boolean USM = true;
-    
-    
+
+
     /**
      * Creates a new instance of UserModuleAccess
      */
@@ -178,71 +177,71 @@ public class UserModuleAccess implements Serializable {
     }
 
     /**
-     * Enable all modules  
+     * Enable all modules
      */
     public void enableAll() {
-    	this.calendar = true;
-    	this.contacts = true;
-    	this.delegateTask = true;
-    	this.editPublicFolders = true;
-    	this.forum = true;
-    	this.ical = true;
-    	this.infostore = true;
-    	this.PinboardWrite = true;
-    	this.Projects = true;
-    	this.readCreateSharedFolders = true;
-    	this.RssBookmarks = true;
-    	this.RssPortal = true;
-    	this.Syncml = true;
-    	this.Tasks = true;
-    	this.Vcard = true;
-    	this.Webdav = true;
-    	this.WebdavXml = true;
-    	this.Webmail = true;
-    	this.EditGroup = true;
-    	this.EditResource = true;
-    	this.EditPassword = true;
-    	this.CollectEmailAddresses = true;
-    	this.MultipleMailAccounts = true;
-    	this.Subscription = true;
-    	this.Publication = true;
-    	this.ActiveSync = true;
-    	this.USM = true;
+        this.calendar = true;
+        this.contacts = true;
+        this.delegateTask = true;
+        this.editPublicFolders = true;
+        this.forum = true;
+        this.ical = true;
+        this.infostore = true;
+        this.PinboardWrite = true;
+        this.Projects = true;
+        this.readCreateSharedFolders = true;
+        this.RssBookmarks = true;
+        this.RssPortal = true;
+        this.Syncml = true;
+        this.Tasks = true;
+        this.Vcard = true;
+        this.Webdav = true;
+        this.WebdavXml = true;
+        this.Webmail = true;
+        this.EditGroup = true;
+        this.EditResource = true;
+        this.EditPassword = true;
+        this.CollectEmailAddresses = true;
+        this.MultipleMailAccounts = true;
+        this.Subscription = true;
+        this.Publication = true;
+        this.ActiveSync = true;
+        this.USM = true;
     }
-    
+
     /**
-     * Disable all modules  
+     * Disable all modules
      */
     public void disableAll() {
-    	this.calendar = false;
-    	this.contacts = false;
-    	this.delegateTask = false;
-    	this.editPublicFolders = false;
-    	this.forum = false;
-    	this.ical = false;
-    	this.infostore = false;
-    	this.PinboardWrite = false;
-    	this.Projects = false;
-    	this.readCreateSharedFolders = false;
-    	this.RssBookmarks = false;
-    	this.RssPortal = false;
-    	this.Syncml = false;
-    	this.Tasks = false;
-    	this.Vcard = false;
-    	this.Webdav = false;
-    	this.WebdavXml = false;
-    	this.Webmail = false;
-    	this.EditGroup = false;
-    	this.EditResource = false;
-    	this.EditPassword = false;
-    	this.CollectEmailAddresses = false;
+        this.calendar = false;
+        this.contacts = false;
+        this.delegateTask = false;
+        this.editPublicFolders = false;
+        this.forum = false;
+        this.ical = false;
+        this.infostore = false;
+        this.PinboardWrite = false;
+        this.Projects = false;
+        this.readCreateSharedFolders = false;
+        this.RssBookmarks = false;
+        this.RssPortal = false;
+        this.Syncml = false;
+        this.Tasks = false;
+        this.Vcard = false;
+        this.Webdav = false;
+        this.WebdavXml = false;
+        this.Webmail = false;
+        this.EditGroup = false;
+        this.EditResource = false;
+        this.EditPassword = false;
+        this.CollectEmailAddresses = false;
         this.MultipleMailAccounts = false;
         this.Subscription = false;
         this.Publication = false;
         this.ActiveSync = false;
         this.USM = false;
     }
-    
+
     public boolean getEditGroup() {
         return EditGroup;
     }
@@ -266,7 +265,7 @@ public class UserModuleAccess implements Serializable {
     public void setEditPassword(final boolean editPassword) {
         EditPassword = editPassword;
     }
-    
+
     /**
      * Gets the collect-email-addresses access.
      *
@@ -341,7 +340,7 @@ public class UserModuleAccess implements Serializable {
 
     /**
      * Shows if a user has access to the calendar module of ox.
-     * 
+     *
      * @return Returns <CODE>true</CODE> if user has access to calendar module
      *         or <CODE>false</CODE> if he has now access!
      */
@@ -351,7 +350,7 @@ public class UserModuleAccess implements Serializable {
 
     /**
      * Defines if a user has access to the calendar module of ox.
-     * 
+     *
      * @param val
      *            Set to <CODE>true</CODE> if user should be able to access
      *            the calendar module!
@@ -362,7 +361,7 @@ public class UserModuleAccess implements Serializable {
 
     /**
      * Shows if a user has access to the contact module of ox.
-     * 
+     *
      * @return Returns <CODE>true</CODE> if user has access to contact module
      *         or <CODE>false</CODE> if he has now access!
      */
@@ -372,7 +371,7 @@ public class UserModuleAccess implements Serializable {
 
     /**
      * Defines if a user has access to the contact module of ox.
-     * 
+     *
      * @param val
      *            Set to <CODE>true</CODE> if user should be able to access
      *            the contact module!
@@ -383,7 +382,7 @@ public class UserModuleAccess implements Serializable {
 
     /**
      * Shows if a user has the right to delegate tasks in the ox groupware.
-     * 
+     *
      * @return Returns <CODE>true</CODE> if user has the right to delegate
      *         tasks in the ox groupware. Or <CODE>false</CODE> if he has no
      *         right to delegate tasks!
@@ -394,7 +393,7 @@ public class UserModuleAccess implements Serializable {
 
     /**
      * Defines if a user has the right to delegate tasks in the ox groupware.
-     * 
+     *
      * @param val
      *            Set to <CODE>true</CODE> if user should be able to delegate
      *            tasks in the ox groupware.
@@ -450,7 +449,7 @@ public class UserModuleAccess implements Serializable {
     public void setPinboardWrite(final boolean val) {
         this.PinboardWrite = val;
     }
-    
+
     /**
      * Currently NOT in use!
      */
@@ -544,25 +543,23 @@ public class UserModuleAccess implements Serializable {
     public void setWebmail(final boolean val) {
         this.Webmail = val;
     }
-    
-	public boolean getActiveSync() {
-		return ActiveSync;
-	}
-	
-	public void setActiveSync(boolean activeSync) {
-		this.ActiveSync = activeSync;
-	}
 
-	   
-	public boolean getUSM() {
-		return USM;
-	}
-	
-	public void setUSM(boolean val) {
-		this.USM = val;
-	}
+    public boolean isActiveSync() {
+        return ActiveSync;
+    }
 
-	
+    public void setActiveSync(boolean activeSync) {
+        this.ActiveSync = activeSync;
+    }
+
+    public boolean isUSM() {
+        return USM;
+    }
+
+    public void setUSM(boolean val) {
+        this.USM = val;
+    }
+
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder();
@@ -588,7 +585,7 @@ public class UserModuleAccess implements Serializable {
         return ret.toString();
     }
 
-	@Override
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
