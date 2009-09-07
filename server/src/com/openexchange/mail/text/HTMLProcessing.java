@@ -60,6 +60,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -155,9 +156,8 @@ public final class HTMLProcessing {
      * @return The formatted content
      */
     public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
-        String retval = null;
+        String retval = isHtml ? getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset) : content;
         if (isHtml) {
-            retval = getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset);
             if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                 /*
                  * Filter according to white-list
@@ -182,7 +182,6 @@ public final class HTMLProcessing {
             // }
             // }
         } else {
-            retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
                     retval = htmlFormat(retval, true, getHrefPositions(retval));
@@ -203,10 +202,9 @@ public final class HTMLProcessing {
      * <p>
      * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link is too large. Usages should handle this case.
      */
-    public static final Pattern PATTERN_HREF =
-        Pattern.compile(
-            "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    public static final Pattern PATTERN_HREF = Pattern.compile(
+        "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
+        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     private static int[][] getHrefPositions(final String content) {
         try {
@@ -368,17 +366,25 @@ public final class HTMLProcessing {
 
     private static final Pattern PATTERN_XHTML_CDATA;
 
+    private static final Pattern PATTERN_UNQUOTE1;
+
+    private static final Pattern PATTERN_UNQUOTE2;
+
     private static final Pattern PATTERN_XHTML_COMMENT;
 
     static {
-        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>[\r\n]*", true);
+        final String group1 = RegexUtility.group("<style[^>]*type=\"text/(?:css|javascript)\"[^>]*>\\s*", true);
 
-        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "[\r\n]*");
+        final String ignore1 = RegexUtility.concat(RegexUtility.quote("/*<![CDATA[*/"), "\\s*");
 
-        final String group2 =
-            RegexUtility.group(RegexUtility.concat(RegexUtility.quote("<!--"), ".*", RegexUtility.quote("-->"), "[\r\n]*"), true);
+        final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
 
-        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "[\r\n]*");
+        final String commentEnd =
+            RegexUtility.concat(RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false), "\\s*");
+
+        final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
+
+        final String ignore2 = RegexUtility.concat(RegexUtility.quote("/*]]>*/"), "\\s*");
 
         final String group3 = RegexUtility.group(RegexUtility.quote("</style>"), true);
 
@@ -386,8 +392,13 @@ public final class HTMLProcessing {
 
         PATTERN_XHTML_CDATA = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-        PATTERN_XHTML_COMMENT =
-            Pattern.compile(RegexUtility.concat(RegexUtility.quote("<!--"), ".*?", RegexUtility.quote("-->")), Pattern.DOTALL);
+        final String commentEnd2 = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false);
+
+        PATTERN_XHTML_COMMENT = Pattern.compile(RegexUtility.concat(commentStart, ".*?", commentEnd2), Pattern.DOTALL);
+
+        PATTERN_UNQUOTE1 = Pattern.compile(RegexUtility.quote("&lt;!--"), Pattern.CASE_INSENSITIVE);
+
+        PATTERN_UNQUOTE2 = Pattern.compile(RegexUtility.quote("--&gt;"), Pattern.CASE_INSENSITIVE);
     }
 
     /**
@@ -424,10 +435,17 @@ public final class HTMLProcessing {
             final String endingComment = "-->";
             StringBuilder tmp = null;
             do {
-                final String match = PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("");
-                if (match.indexOf(endingComment) == -1) {
+                // Un-quote
+                final String match = PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->");
+                // Check for additional HTML comments
+                if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
                     // No additional HTML comments
-                    mr.appendReplacement(sb, "$1$2$3");
+                    if (null == tmp) {
+                        tmp = new StringBuilder(match.length() + 16);
+                    } else {
+                        tmp.setLength(0);
+                    }
+                    mr.appendReplacement(sb, tmp.append("$1").append(match).append("$3").toString());
                 } else {
                     // Additional HTML comments
                     if (null == tmp) {
@@ -476,23 +494,20 @@ public final class HTMLProcessing {
      */
     private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
         final Matcher m = PATTERN_CC.matcher(htmlContent);
-        if (!m.find()) {
-            /*
-             * No conditional comments found
-             */
-            return htmlContent;
+        if (m.find()) {
+            int lastMatch = 0;
+            final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
+            do {
+                sb.append(htmlContent.substring(lastMatch, m.start()));
+                sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
+                sb.append(m.group(3));
+                sb.append(CC_ENDIF);
+                lastMatch = m.end();
+            } while (m.find());
+            sb.append(htmlContent.substring(lastMatch));
+            return sb.toString();
         }
-        int lastMatch = 0;
-        final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
-        do {
-            sb.append(htmlContent.substring(lastMatch, m.start()));
-            sb.append(CC_START_IF).append(m.group(2)).append(CC_END_IF);
-            sb.append(m.group(3));
-            sb.append(CC_ENDIF);
-            lastMatch = m.end();
-        } while (m.find());
-        sb.append(htmlContent.substring(lastMatch));
-        return sb.toString();
+        return htmlContent;
     }
 
     /**
@@ -701,7 +716,58 @@ public final class HTMLProcessing {
         return properties;
     }
 
-    private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new StringWriter());
+    private static final PrintWriter TIDY_DUMMY_PRINT_WRITER = new PrintWriter(new Writer() {
+
+        @Override
+        public void close() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final char cbuf[]) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final String str) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        public Writer append(final CharSequence csq) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
+            return this;
+        }
+
+        @Override
+        public Writer append(final char c) throws IOException {
+            return this;
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            // Nothing to do
+        }
+    });
 
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library.
@@ -717,7 +783,7 @@ public final class HTMLProcessing {
         /*
          * Run tidy, providing a reader and writer
          */
-        final StringWriter writer = new StringWriter(htmlContent.length());
+        final Writer writer = new StringWriter(htmlContent.length());
         tidy.parse(new StringReader(htmlContent), writer);
         return writer.toString();
     }
@@ -769,8 +835,9 @@ public final class HTMLProcessing {
         }
     }
 
-    private static final Pattern PATTERN_BLOCKQUOTE =
-        Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile(
+        "(?:(<blockquote.*?>)|(</blockquote>))",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Converts given HTML content into plain text, but keeps <code>&lt;blockquote&gt;</code> tags if any present.<br>
@@ -1197,8 +1264,7 @@ public final class HTMLProcessing {
 
     private static final String DEFAULT_COLOR = "#0026ff";
 
-    private static final String BLOCKQUOTE_START_TEMPLATE =
-        "<blockquote type=\"cite\" style=\"margin-left: 0px; margin-right: 0px;" + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
+    private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px;" + " padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
 
     /**
      * Determines the quote color for given <code>quotelevel</code>.
@@ -1316,11 +1382,13 @@ public final class HTMLProcessing {
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern CID_PATTERN =
-        Pattern.compile("(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern CID_PATTERN = Pattern.compile(
+        "(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern FILENAME_PATTERN =
-        Pattern.compile("src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FILENAME_PATTERN = Pattern.compile(
+        "src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?",
+        Pattern.CASE_INSENSITIVE);
 
     // private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
