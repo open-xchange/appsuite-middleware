@@ -1,3 +1,9 @@
+open-xchange-monitoring (6.13.0.0-0) unstable; urgency=low
+
+  * 6.13 unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  7 Sep 2009 13:21:22 +0200
+
 open-xchange-monitoring (6.12.0.0-1) unstable; urgency=low
 
   * first build for 6.12 Rev1

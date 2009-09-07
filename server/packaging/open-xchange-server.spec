@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 0
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -439,6 +439,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Sep 04 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14450: Storing sent null value for task attributes target duration, actual duration, target costs and actual costs as null and
+   not as zero.
 * Thu Sep 03 2009 - thorben.betten@open-xchange.com
  - Bugfix #14445: Fixed incorrect admin permission on top level infostore folder
 * Thu Sep 03 2009 - marcus.klein@open-xchange.com
