@@ -58,7 +58,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link VirtualFolder} - A virtual folder.
+ * {@link VirtualFolder} - A virtual folder backed by a real folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
