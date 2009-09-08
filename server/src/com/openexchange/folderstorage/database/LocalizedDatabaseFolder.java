@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.database;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -70,7 +71,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LocalizedDatabaseFolder.class);
 
-    private final ConcurrentMap<Locale, Future<String>> localizedNames;
+    private ConcurrentMap<Locale, Future<String>> localizedNames;
 
     /**
      * Initializes an empty {@link LocalizedDatabaseFolder}.
@@ -106,6 +107,24 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
     public LocalizedDatabaseFolder(final FolderObject folderObject, final boolean cacheable) {
         super(folderObject, cacheable);
         localizedNames = new ConcurrentHashMap<Locale, Future<String>>();
+    }
+
+    @Override
+    public Object clone() {
+        final LocalizedDatabaseFolder clone = (LocalizedDatabaseFolder) super.clone();
+        // Locale-sensitive names
+        final ConcurrentMap<Locale, Future<String>> thisMap = this.localizedNames;
+        if (null == localizedNames) {
+            clone.localizedNames = null;
+        } else {
+            final ConcurrentMap<Locale, Future<String>> cloneMap = new ConcurrentHashMap<Locale, Future<String>>(thisMap.size());
+            for (final Map.Entry<Locale, Future<String>> entry : thisMap.entrySet()) {
+                cloneMap.put(entry.getKey(), entry.getValue());
+            }
+            clone.localizedNames = cloneMap;
+        }
+        // Return
+        return clone;
     }
 
     @Override
