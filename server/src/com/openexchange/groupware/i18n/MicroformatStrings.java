@@ -68,9 +68,7 @@ public final class MicroformatStrings {
     +   "webpage to %s and the publisher of the data:\n"
     +   "Data published by %s on %s\n";
 
-    private MicroformatStrings() {
+    public MicroformatStrings() {
         super();
     }
-
-    
 }
