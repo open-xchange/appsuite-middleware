@@ -109,7 +109,39 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertTrue("Similarity score for matching birthdays should be bigger", newScore > score);
         score = newScore;
         
-        // To discuss: Email Addresses
+    }
+    
+    public void testNameChangedButMailAdressStayedTheSame() throws AbstractOXException {
+        // First name is not enough
+        Contact contact = new Contact();
+        contact.setGivenName("Hans");
+        contact.setSurName("Dampf");
+        contact.setEmail1("hans@example.com");
+        
+        Contact contact2 = new Contact();
+        contact2.setGivenName("Hans");
+        contact2.setSurName("Wurst");
+        contact2.setEmail1("hans@example.com");
+
+        int score = strategy.calculateSimilarityScore(contact, contact2, null);
+        
+        assertTrue("First name and email address should suffice", score >= strategy.getThreshhold(null));
+
+        
+    }
+    
+    public void testNullValuesShouldNotChangeResult() throws AbstractOXException {
+        Contact contact = new Contact();
+        contact.setGivenName("Hans");
+        contact.setEmail1(null);
+        
+        Contact contact2 = new Contact();
+        contact.setGivenName("Hans");
+        contact.setEmail1(null);
+        
+        int score = strategy.calculateSimilarityScore(contact, contact2, null);
+        
+        assertTrue("Null values should not change result", score < strategy.getThreshhold(null));
     }
     
 }

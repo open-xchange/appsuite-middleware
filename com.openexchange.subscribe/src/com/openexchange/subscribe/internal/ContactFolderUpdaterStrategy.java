@@ -62,61 +62,78 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link ContactFolderUpdaterStrategy}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
-    
+
     private static final int SQL_INTERFACE = 1;
+
     private static final int SUBSCRIPTION = 2;
-    
+
     private static final int[] COMPARISON_COLUMNS = {
-        Contact.OBJECT_ID,
-        Contact.FOLDER_ID,
-        Contact.GIVEN_NAME,
-        Contact.SUR_NAME,
-        Contact.BIRTHDAY
-    };
-    
+        Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.DISPLAY_NAME, Contact.EMAIL1,
+        Contact.EMAIL2, Contact.EMAIL3 };
+
     public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
         int score = 0;
-        if(eq(original.getGivenName(), candidate.getGivenName())) {
+        // For the sake of simplicity we assume that equal names mean equal contacts
+        // TODO: This needs to be diversified in the form of "unique-in-context" later (if there«s only one "Max Mustermann" in a folder it
+        // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
+        if (eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
         }
-        if(eq(original.getSurName(), candidate.getSurName())) {
+        if (eq(original.getSurName(), candidate.getSurName())) {
             score += 5;
         }
-        if(original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
+        if (eq(original.getDisplayName(), candidate.getDisplayName())) {
+            score += 10;
+        }
+        // an email-address is unique so if this is identical the contact should be the same
+        if (eq(original.getEmail1(), candidate.getEmail1())) {
+            score += 10;
+        }
+        if (eq(original.getEmail2(), candidate.getEmail2())) {
+            score += 10;
+        }
+        if (eq(original.getEmail3(), candidate.getEmail3())) {
+            score += 10;
+        }
+        if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             score += 5;
         }
-        
+
         return score;
     }
-    
+
     protected boolean eq(Object o1, Object o2) {
-        if(o1 == null) {
-            return o2 == null;
+        if (o1 == null || o2 == null) {
+            return false;
         } else {
             return o1.equals(o2);
         }
     }
 
     public void closeSession(Object session) throws AbstractOXException {
-        
+
     }
 
     public Collection<Contact> getData(Subscription subscription, Object session) throws AbstractOXException {
         RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
-        
+
         int folderId = subscription.getFolderIdAsInt();
         int numberOfContacts = contacts.getNumberOfContacts(folderId);
-        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folderId, 0, numberOfContacts, Contact.OBJECT_ID, "ASC", COMPARISON_COLUMNS);
+        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(
+            folderId,
+            0,
+            numberOfContacts,
+            Contact.OBJECT_ID,
+            "ASC",
+            COMPARISON_COLUMNS);
         List<Contact> retval = new ArrayList<Contact>();
-        while(contactsInFolder.hasNext()) {
+        while (contactsInFolder.hasNext()) {
             retval.add(contactsInFolder.next());
         }
         return retval;
@@ -134,10 +151,9 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         RdbContactSQLImpl contacts = (RdbContactSQLImpl) getFromSession(SQL_INTERFACE, session);
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
-        
+
         contacts.insertContactObject(newElement);
     }
-
 
     private Object getFromSession(int key, Object session) {
         return ((Map<Integer, Object>) session).get(key);
