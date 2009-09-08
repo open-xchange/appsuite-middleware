@@ -135,10 +135,7 @@ public class CacheKeyImpl implements CacheKey {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof CacheKeyImpl)) {
             return false;
         }
         final CacheKeyImpl other = (CacheKeyImpl) obj;
