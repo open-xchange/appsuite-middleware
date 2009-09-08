@@ -91,6 +91,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
             final UserizedFolderImpl clone = (UserizedFolderImpl) super.clone();
             clone.folder = (Folder) clone.folder.clone();
             clone.ownPermission = (Permission) clone.ownPermission.clone();
+            clone.lastModifiedUTC = null == lastModifiedUTC ? null : new Date(lastModifiedUTC.getTime());
+            clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
