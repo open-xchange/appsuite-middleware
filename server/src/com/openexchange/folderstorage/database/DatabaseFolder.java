@@ -77,7 +77,7 @@ public class DatabaseFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -4035221612481906228L;
 
-    private final boolean cacheable;
+    private boolean cacheable;
 
     protected boolean global;
 
@@ -138,6 +138,14 @@ public class DatabaseFolder extends AbstractFolder {
             this.lastModified = null == d ? null : new Date(d.getTime());
         }
         this.subscribed = true;
+    }
+
+    @Override
+    public Object clone() {
+        final DatabaseFolder clone = (DatabaseFolder) super.clone();
+        clone.cacheable = cacheable;
+        clone.global = global;
+        return clone;
     }
 
     @Override
