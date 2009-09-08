@@ -62,6 +62,9 @@ import junit.framework.TestCase;
  */
 public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 
+    public static final String VALID_EMAIL_REGEX = "([a-z@A-Z0-9\\.-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)";
+    public static final String VALID_NAME = "([a-zA-Z\\sŠšŸ§-]*)";
+    
     public GenericSubscribeServiceTestHelpers() {
         super();
     }

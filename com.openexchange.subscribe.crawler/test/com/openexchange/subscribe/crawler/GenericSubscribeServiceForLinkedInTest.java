@@ -107,7 +107,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         pageParts.add(new PagePart(
             "(<dt>Phone:</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([\\(\\)\\+\\s0-9]*)(<span class=\"type\">\\(Mobile\\))",
             "cellular_telephone1"));
-        pageParts.add(new PagePart("(mailto:)([a-z@A-Z0-9\\.-]*)(\")", "email1"));
+        pageParts.add(new PagePart("(mailto:)"+VALID_EMAIL_REGEX+"(\")", "email1"));
 
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
         listOfSteps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
@@ -119,6 +119,6 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
         // uncomment this if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+        //dumpThis(crawler, crawler.getDisplayName());
     }
 }
