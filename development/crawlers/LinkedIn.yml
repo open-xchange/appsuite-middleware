@@ -51,7 +51,7 @@ workflowString: |
             type: 1
             typeOfInfo: cellular_telephone1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(mailto:)([a-z@A-Z0-9\\.-]*)(\")"
+            regex: "(mailto:)([a-z@A-Z0-9\\.-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)(\")"
             type: 1
             typeOfInfo: email1
   
