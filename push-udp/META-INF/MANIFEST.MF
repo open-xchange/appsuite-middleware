@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.push.udp
 Bundle-Version: 6.13.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.api2,
- com.openexchange.config,
+Import-Package: com.openexchange.config,
  com.openexchange.context,
  com.openexchange.event,
  com.openexchange.folder,
@@ -16,16 +15,15 @@ Import-Package: com.openexchange.api2,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.infostore,
- com.openexchange.groupware.ldap,
  com.openexchange.groupware.tasks,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.server.osgiservice,
- com.openexchange.session,
+ com.openexchange.timer,
  com.openexchange.tools,
+ com.openexchange.tools.encoding,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.osgi.framework;version="1.3.0",
- org.osgi.service.event;version="1.1.0",
+ org.osgi.service.event,
  org.osgi.util.tracker;version="1.3.3"
 Bundle-Activator: com.openexchange.push.udp.osgi.PushUDPActivator

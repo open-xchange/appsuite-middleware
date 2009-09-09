@@ -47,29 +47,71 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.push.udp;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.net.InetAddress;
+import java.util.Set;
 
 /**
- * {@link ServerTimer} - Provides a singleton instance of {@link Timer} that should be used throughout the server to schedule individual
- * instances of {@link TimerTask}.
- * TODO remove when push bundle uses timer bundle.
+ * PushConfigInterface
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServerTimer {
 
-    private static final Timer t = new Timer("OXTimer");
+public interface PushConfig {
 
-    /**
-     * Returns the server's singleton instance of {@link Timer}
-     * 
-     * @return The server's singleton instance of {@link Timer}
-     */
-    public static Timer getTimer() {
-        return t;
-    }
+    public boolean isPushEnabled();
+
+    public void setPushEnabled(boolean isPushEnabled);
+
+    public boolean isMultiCastEnabled();
+
+    public void setMultiCastEnabled(boolean multicastEnabled);
+
+    public int getMultiCastPort();
+
+    public InetAddress getMultiCastAddress();
+
+    public void setMultiCastAddress(InetAddress inetAddress);
+
+    public Set<RemoteHostObject> getRemoteHost();
+
+    public void setRemoteHost(Set<RemoteHostObject> remoteHost);
+
+    public int getRegisterTimeout();
+
+    public void setRegisterTimeout(int registerTimeout);
+
+    public int getOutputQueueDelay();
+
+    public void setOutputQueueDelay(int outputQueueDelay);
+
+    public int getRegisterPort();
+
+    public void setRegisterPort(int registerPort);
+
+    public boolean isRegisterDistributionEnabled();
+
+    public void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled);
+
+    public boolean isEventDistributionEnabled();
+
+    public void setEventDistributionEnabled(boolean isEventDistributionEnabled);
+
+    public InetAddress getSenderAddress();
+
+    public void setSenderAddress(InetAddress senderAddress);
+
+    public int getRemoteHostTimeOut();
+
+    public void setRemoteHostTimeOut(int remoteHostTimeOut);
+
+    public int getRemoteHostRefresh();
+
+    public void setRemoteHostRefresh(int remoteHostRefresh);
+
+    public void setHostName(InetAddress hostname);
+
+    public InetAddress getHostName();
 
 }

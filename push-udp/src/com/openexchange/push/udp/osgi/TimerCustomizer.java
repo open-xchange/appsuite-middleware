@@ -47,71 +47,62 @@
  *
  */
 
-package com.openexchange.push.udp;
+package com.openexchange.push.udp.osgi;
 
-import java.net.InetAddress;
-import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.push.udp.PushConfig;
+import com.openexchange.push.udp.PushInit;
+import com.openexchange.push.udp.PushDiscoverySender;
+import com.openexchange.timer.TimerService;
 
 /**
- * PushConfigInterface
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link TimerCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+public final class TimerCustomizer implements ServiceTrackerCustomizer {
 
-public interface PushConfigInterface {
+    private static final Log LOG = LogFactory.getLog(TimerCustomizer.class);
 
-    public boolean isPushEnabled();
+    private final BundleContext context;
 
-    public void setPushEnabled(boolean isPushEnabled);
+    private PushDiscoverySender sender;
 
-    public boolean isMultiCastEnabled();
+    /**
+     * Initializes a new {@link TimerCustomizer}.
+     */
+    public TimerCustomizer(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    public void setMultiCastEnabled(boolean multicastEnabled);
+    public Object addingService(ServiceReference reference) {
+        TimerService timer = (TimerService) context.getService(reference);
+        PushConfig config = PushInit.getInstance().getConfig();
+        if (config.isMultiCastEnabled()) {
+            LOG.info("Starting push multicast discovery sender.");
+            sender = new PushDiscoverySender(config);
+            sender.startSender(timer);
+        } else {
+            LOG.info("Push multicast discovery is disabled.");
+        }
+        return timer;
+    }
 
-    public int getMultiCastPort();
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
 
-    public InetAddress getMultiCastAddress();
-
-    public void setMultiCastAddress(InetAddress inetAddress);
-
-    public Set<RemoteHostObject> getRemoteHost();
-
-    public void setRemoteHost(Set<RemoteHostObject> remoteHost);
-
-    public int getRegisterTimeout();
-
-    public void setRegisterTimeout(int registerTimeout);
-
-    public int getOutputQueueDelay();
-
-    public void setOutputQueueDelay(int outputQueueDelay);
-
-    public int getRegisterPort();
-
-    public void setRegisterPort(int registerPort);
-
-    public boolean isRegisterDistributionEnabled();
-
-    public void setRegisterDistributionEnabled(boolean isRegisterDistributionEnabled);
-
-    public boolean isEventDistributionEnabled();
-
-    public void setEventDistributionEnabled(boolean isEventDistributionEnabled);
-
-    public InetAddress getSenderAddress();
-
-    public void setSenderAddress(InetAddress senderAddress);
-
-    public int getRemoteHostTimeOut();
-
-    public void setRemoteHostTimeOut(int remoteHostTimeOut);
-
-    public int getRemoteHostRefresh();
-
-    public void setRemoteHostRefresh(int remoteHostRefresh);
-
-    public void setHostName(InetAddress hostname);
-
-    public InetAddress getHostName();
-
+    public void removedService(ServiceReference reference, Object service) {
+        if (null != sender) {
+            LOG.info("Stopping push multicast discovery sender.");
+            sender.stopSender();
+            sender = null;
+        }
+        context.ungetService(reference);
+    }
 }

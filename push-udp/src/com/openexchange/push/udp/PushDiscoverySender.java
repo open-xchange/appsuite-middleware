@@ -49,103 +49,77 @@
 
 package com.openexchange.push.udp;
 
-import java.io.StringWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.encoding.Charsets;
 
 /**
  * PushOutputQueue
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
+public class PushDiscoverySender implements Runnable {
 
-public class PushMulticastRequestTimer extends TimerTask {
+    private static final Log LOG = LogFactory.getLog(PushDiscoverySender.class);
 
-    private static PushConfigInterface pushConfigInterface;
+    private final int multicastPort;
 
-    private static int multicastPort;
+    private final InetAddress multicastAddress;
 
-    private static InetAddress multicastAddress;
+    private final int remoteHostFresh;
 
-    private static int remoteHostFresh = 30000;
+    private final String discoveryData;
 
-    private static String MULTICAST_REQUEST_DATA;
+    private final String packetData;
 
-    private static String MULTICAST_REQUEST;
+    private final byte[] packetBytes;
 
-    private static byte[] MULTICAST_REQUEST_BYTES;
+    private ScheduledTimerTask task;
 
-    private static final Log LOG = LogFactory.getLog(PushMulticastRequestTimer.class);
-
-    public PushMulticastRequestTimer(final PushConfigInterface pushConfigInterface) {
-        PushMulticastRequestTimer.pushConfigInterface = pushConfigInterface;
+    public PushDiscoverySender(final PushConfig pushConfigInterface) {
+        super();
 
         InetAddress hostname = pushConfigInterface.getHostName();
-
         if (hostname == null) {
             try {
                 hostname = InetAddress.getLocalHost();
-            } catch (final UnknownHostException exc) {
+            } catch (UnknownHostException exc) {
                 LOG.warn("unable to resolv local address", exc);
             }
         }
 
-        MULTICAST_REQUEST_DATA = new StringWriter().append(String.valueOf(PushRequest.REMOTE_HOST_REGISTER)).append('\1').append(
-            hostname == null ? "localhost" : hostname.getHostName()).append('\1').append(
-            String.valueOf(pushConfigInterface.getRegisterPort())).toString();
+        discoveryData = String.valueOf(PushRequest.REMOTE_HOST_REGISTER) + '\1' + (hostname == null ? "localhost" : hostname.getHostName())
+            + '\1' + String.valueOf(pushConfigInterface.getRegisterPort());
+        packetData = String.valueOf(PushRequest.MAGIC) + '\1' + String.valueOf(discoveryData.length()) + '\1' + discoveryData;
+        packetBytes = Charsets.getBytes(packetData, Charsets.US_ASCII);
 
-        MULTICAST_REQUEST = new StringWriter().append(String.valueOf(PushRequest.MAGIC)).append('\1').append(
-            String.valueOf(MULTICAST_REQUEST_DATA.length())).append('\1').append(MULTICAST_REQUEST_DATA).toString();
+        multicastPort = pushConfigInterface.getMultiCastPort();
+        multicastAddress = pushConfigInterface.getMultiCastAddress();
+        remoteHostFresh = pushConfigInterface.getRemoteHostRefresh();
+    }
 
-        MULTICAST_REQUEST_BYTES = MULTICAST_REQUEST.getBytes();
-
-        if (pushConfigInterface.isMultiCastEnabled()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting MulticastRequest");
-            }
-
-            multicastPort = pushConfigInterface.getMultiCastPort();
-
-            multicastAddress = pushConfigInterface.getMultiCastAddress();
-
-            remoteHostFresh = pushConfigInterface.getRemoteHostRefresh();
-
-            final Timer t = ServerTimer.getTimer();
-            t.schedule(this, new Date(), remoteHostFresh);
-        } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("MulticastRequest is disabled");
-            }
+    public void run() {
+        try {
+            LOG.debug("Sending multicast discovery package: \"" + packetData + "\".");
+            MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
+            DatagramPacket datagramPacket = new DatagramPacket(packetBytes, packetBytes.length, multicastAddress, multicastPort);
+            multicastSocket.send(datagramPacket);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.util.TimerTask#run()
-     */
-    @Override
-    public void run() {
-        try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("sending MulticastRequestPackage: " + new String(MULTICAST_REQUEST_BYTES));
-            }
-            final MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
-            final DatagramPacket datagramPacket = new DatagramPacket(
-                MULTICAST_REQUEST_BYTES,
-                MULTICAST_REQUEST_BYTES.length,
-                multicastAddress,
-                multicastPort);
-            multicastSocket.send(datagramPacket);
-        } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
-        }
+    public void startSender(TimerService service) {
+        task = service.scheduleAtFixedRate(this, 0, remoteHostFresh);
+    }
+
+    public void stopSender() {
+        task.cancel();        
     }
 }

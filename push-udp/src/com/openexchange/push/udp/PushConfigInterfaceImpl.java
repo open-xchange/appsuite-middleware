@@ -63,7 +63,7 @@ import com.openexchange.config.ConfigurationService;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
-public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements PushConfigInterface {
+public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements PushConfig {
 
     private boolean isPushEnabled;
 
@@ -91,7 +91,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 
     private int remoteHostTimeOut = 3600000;
 
-    private int remoteHostRefresh = 1200000;
+    private int remoteHostRefresh = 30000;
 
     private boolean isInit;
 

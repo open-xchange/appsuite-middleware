@@ -67,6 +67,7 @@ import com.openexchange.push.udp.PushInit;
 import com.openexchange.push.udp.registry.RegistryCustomizer;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link PushUDPActivator} - OSGi bundle activator for the push UDP.
@@ -142,6 +143,7 @@ public class PushUDPActivator extends DeferredActivator {
                 context,
                 EventFactoryService.class.getName(),
                 new RegistryCustomizer<EventFactoryService>(context, EventFactoryService.class)));
+            serviceTrackers.add(new ServiceTracker(context, TimerService.class.getName(), new TimerCustomizer(context)));
             // Open service trackers
             for (final ServiceTracker tracker : serviceTrackers) {
                 tracker.open();

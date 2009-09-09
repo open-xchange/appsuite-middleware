@@ -74,15 +74,18 @@ public class PushInit implements Initialization {
      */
     private static final Log LOG = LogFactory.getLog(PushInit.class);
 
-    private PushMulticastRequestTimer requestTimer;
-
     private PushMulticastSocket multicast;
 
     private PushOutputQueue output;
 
     private PushSocket input;
 
-    private PushConfigInterface config;
+    private PushConfig config;
+
+    
+    public PushConfig getConfig() {
+        return config;
+    }
 
     private final AtomicBoolean started = new AtomicBoolean();
 
@@ -122,7 +125,6 @@ public class PushInit implements Initialization {
         output = new PushOutputQueue(config);
 
         multicast = new PushMulticastSocket(config);
-        requestTimer = new PushMulticastRequestTimer(config);
     }
 
     public void stop() {
@@ -130,9 +132,6 @@ public class PushInit implements Initialization {
             LOG.error("Duplicate push component shutdown.");
             return;
         }
-
-        requestTimer.cancel();
-        requestTimer = null;
         multicast.close();
         multicast = null;
         output.close();
@@ -141,5 +140,4 @@ public class PushInit implements Initialization {
         input = null;
         config = null;
     }
-
 }
