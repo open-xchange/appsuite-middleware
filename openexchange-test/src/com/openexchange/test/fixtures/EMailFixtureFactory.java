@@ -48,9 +48,12 @@
  */
 package com.openexchange.test.fixtures;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -59,6 +62,7 @@ import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
@@ -81,7 +85,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
 		this.fixtureLoader = fixtureLoader;
 	}
 	
-    public Fixtures<MailMessage> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {	
+    public Fixtures<MailMessage> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new EMailFixture(fixtureName, entries, datapath, fixtureLoader);
     }
 
@@ -120,9 +124,38 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 throw new FixtureException("Mandatory value \"eml\" missing in entry " + entryName);
             }
             
-            final File mailpath =  new File(dataPath, "emails");
-            //DataPath.TESTDATA + DataPath.SEPARATOR + "emails" + DataPath.SEPARATOR;
-            final MailMessage mail = getMessage(new File(mailpath, (String)values.get("eml")));
+            final File mailpath =  new File(new File(dataPath, "emails"), (String) values.get("eml"));
+            
+            final MailMessage mail;
+            
+            if (values.containsKey("append_v_card") && "true".equals(String.valueOf(values.get("append_v_card")))) {
+                final String emlAsString;
+                try {
+                    emlAsString = readFileAsString(mailpath);
+                } catch (IOException e) {
+                    throw new FixtureException(e);
+                }
+
+                final String from = values.get("from").substring(values.get("from").indexOf(":") + 1);
+                final Contact contact = fixtureLoader.getFixtures("users", SimpleCredentials.class).getEntry(from).getEntry().asContact();
+
+                final String displayName;
+                
+                if (contact.containsDisplayName()) {
+                    displayName = contact.getDisplayName();
+                } else {
+                    displayName = contact.getGivenName() + contact.getSurName();
+                }
+
+                mail = getMessage(emlAsString.replace("TobiasFriedrich.vcf", displayName.replace(" ", "") + ".vcf")
+                                             .replace("FN:Tobias Friedrich", "FN:" + displayName)
+                                             .replace("N:Friedrich;Tobias", "N:" + contact.getSurName() + ";" + contact.getGivenName())
+                                             .replace("EMAIL:tfriedrich@oxhemail.open-xchange.com", "EMAIL:" + contact.getEmail1())
+                                 );
+            } else {
+                mail = getMessage(mailpath);
+            }
+
 
             if (values.containsKey("to")) { mail.removeTo(); }
             if (values.containsKey("cc")) { mail.removeCc(); }
@@ -139,35 +172,82 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             return fixture;
         }
         
-    	private MailMessage getMessage(final File fdir) throws FixtureException {
-			final MimeMessage msg;
-			final Session session = Session.getInstance(getDefaultSessionProperties());
-			InputStream in = null;
-			try {
-				in = new FileInputStream(fdir);
-				msg = new MimeMessage(session, in);
-			} catch (FileNotFoundException e) {
-				throw new FixtureException(e);
-			} catch (MessagingException e) {
-				throw new FixtureException(e);
-			} finally {
-				if (null != in) {
-					try {
-						in.close();
-					} catch (final IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
+        /**
+         * Reads a file and converts it into a String
+         * 
+         * @param filePath the name of the file to open.
+         * @throws IOException
+         */
+        private String readFileAsString(File file) throws IOException {
+            final StringBuffer fileData = new StringBuffer();
+            final BufferedReader reader = new BufferedReader(new FileReader(file));
+            final char[] buf = new char[1024];
+            int numRead = 0;
+            while ((numRead = reader.read(buf)) != -1) {
+                fileData.append(buf, 0, numRead);
+            }
+            reader.close();
+            return fileData.toString();
+        }
 
-			MailMessage retval;
-			try {
-				retval = MIMEMessageConverter.convertMessage(msg);
-			} catch (MailException e) {
-				throw new FixtureException(e);
-			}
-			return retval;
-		}
+        
+    	private MailMessage getMessage(final File fdir) throws FixtureException {
+            final MimeMessage msg;
+            final Session session = Session.getInstance(getDefaultSessionProperties());
+            InputStream in = null;
+            try {
+                in = new FileInputStream(fdir);
+                msg = new MimeMessage(session, in);
+            } catch (FileNotFoundException e) {
+                throw new FixtureException(e);
+            } catch (MessagingException e) {
+                throw new FixtureException(e);
+            } finally {
+                if (null != in) {
+                    try {
+                        in.close();
+                    } catch (final IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            MailMessage retval;
+            try {
+                retval = MIMEMessageConverter.convertMessage(msg);
+            } catch (MailException e) {
+                throw new FixtureException(e);
+            }
+            return retval;
+        }
+    	
+        private MailMessage getMessage(final String string) throws FixtureException {
+            final MimeMessage msg;
+            final Session session = Session.getInstance(getDefaultSessionProperties());
+            InputStream in = null;
+            try {
+                in =  new ByteArrayInputStream(string.getBytes());
+                msg = new MimeMessage(session, in);
+            } catch (MessagingException e) {
+                throw new FixtureException(e);
+            } finally {
+                if (null != in) {
+                    try {
+                        in.close();
+                    } catch (final IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            MailMessage retval;
+            try {
+                retval = MIMEMessageConverter.convertMessage(msg);
+            } catch (MailException e) {
+                throw new FixtureException(e);
+            }
+            return retval;
+        }
     	
     	/**
 		 * Gets the default session properties
