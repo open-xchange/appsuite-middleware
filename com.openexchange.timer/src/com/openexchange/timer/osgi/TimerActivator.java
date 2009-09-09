@@ -76,6 +76,9 @@ public final class TimerActivator implements BundleActivator {
     }
 
     public void start(final BundleContext context) throws Exception {
+        if (true) {
+            return;
+        }
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.timer");
@@ -90,6 +93,9 @@ public final class TimerActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
+        if (true) {
+            return;
+        }
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.timer");
