@@ -104,10 +104,11 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private static final String[] getDirectories() {
-        List<String> tmp = new ArrayList<String>();
-        for (String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
-            if (null != System.getProperty(property)) {
-                tmp.add(System.getProperty(property));
+        final List<String> tmp = new ArrayList<String>();
+        for (final String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
+            final String sysProp = System.getProperty(property);
+            if (null != sysProp) {
+                tmp.add(sysProp);
             }
         }
         return tmp.toArray(new String[tmp.size()]);
@@ -118,7 +119,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      * 
      * @param directory The directory where property files are located
      */
-    public ConfigurationImpl(String[] directories) {
+    public ConfigurationImpl(final String[] directories) {
         super();
         if (null == directories || directories.length == 0) {
             throw new IllegalArgumentException("Missing configuration directory path.");
@@ -167,9 +168,9 @@ public final class ConfigurationImpl implements ConfigurationService {
             for (int i = 0; i < size; i++) {
                 final Entry<Object, Object> e = iter.next();
                 final String propName = e.getKey().toString().trim();
-                String otherValue = properties.get(propName);
+                final String otherValue = properties.get(propName);
                 if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
-                    String otherFile = propertiesFiles.get(propName);
+                    final String otherFile = propertiesFiles.get(propName);
                     LOG.warn("Overwriting property " + propName + " from file '" + otherFile + "' with property from file '" + propFile.getPath() + "', overwriting value '" + otherValue + "' with value '" + e.getValue() + "'.");
                 }
                 properties.put(propName, e.getValue().toString().trim());
@@ -279,7 +280,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
         final Properties retval = new Properties();
         final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        for (File dir : dirs) {
+        for (final File dir : dirs) {
             folderName = dir.getAbsolutePath() + "/" + folderName + "/";
             while (iter.hasNext()) {
                 final Entry<String, String> entry = iter.next();
