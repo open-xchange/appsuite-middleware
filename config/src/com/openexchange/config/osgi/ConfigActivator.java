@@ -56,7 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.internal.ConfigurationImpl;
 
 /**
- * {@link ConfigActivator} - Activator for <code>Open-Xchange Config</code> bundle
+ * {@link ConfigActivator} - Activator for <code>com.openexchange.config</code> bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
