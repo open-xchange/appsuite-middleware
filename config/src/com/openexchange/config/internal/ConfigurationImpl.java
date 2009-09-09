@@ -146,7 +146,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
-            LOG.info(MessageFormat.format("Can''t read {0}. Skipping.", dir));
+            LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
             return;
         }
         for (int i = 0; i < files.length; i++) {
