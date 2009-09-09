@@ -30,7 +30,7 @@
 	<property name="configjar" value="com.openexchange.configread.jar"/>
 	<property name="cachejar" value="com.openexchange.caching.jar"/>
 	<property name="managementjar" value="com.openexchange.management.jar"/>
-	<property name="timerjar" value="com.openexchange.timer.jar"/>
+	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -42,7 +42,7 @@
 		<pathelement location="${bundlesdir}/${configjar}"/>
     	<pathelement location="${bundlesdir}/${cachejar}"/>
     	<pathelement location="${bundlesdir}/${managementjar}"/>
-    	<pathelement location="${bundlesdir}/${timerjar}"/>
+    	<pathelement location="${bundlesdir}/${threadpooljar}"/>
     </path>
 
     <!-- Compile -->
