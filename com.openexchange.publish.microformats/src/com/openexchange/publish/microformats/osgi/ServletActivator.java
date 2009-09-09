@@ -81,7 +81,7 @@ public class ServletActivator extends DeferredActivator {
 
     private ServiceTracker tracker;
     
-    private PublicationServicesActivator activator = new PublicationServicesActivator();
+    private final PublicationServicesActivator activator = new PublicationServicesActivator();
 
     private boolean registered;
 
@@ -97,12 +97,12 @@ public class ServletActivator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         registerServlet();
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         unregisterServlet();
     }
 
@@ -117,21 +117,24 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        tracker.close();
+        if (null != tracker) {
+            tracker.close();
+            tracker = null;
+        }
         activator.stop(context);
         unregisterServlet();
     }
 
     private void registerServlet() {
-        HttpService httpService = getService(HttpService.class);
-        PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
-        ContextService contexts = getService(ContextService.class);
-        TemplateService templates = getService(TemplateService.class);
-        ContactInterfaceDiscoveryService contacts = getService(ContactInterfaceDiscoveryService.class);
-        InfostoreFacade infostore = getService(InfostoreFacade.class);
-        UserConfigurationService userConfigs = getService(UserConfigurationService.class);
-        UserService users = getService(UserService.class);
-        ConfigurationService configService = getService(ConfigurationService.class);
+        final HttpService httpService = getService(HttpService.class);
+        final PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
+        final ContextService contexts = getService(ContextService.class);
+        final TemplateService templates = getService(TemplateService.class);
+        final ContactInterfaceDiscoveryService contacts = getService(ContactInterfaceDiscoveryService.class);
+        final InfostoreFacade infostore = getService(InfostoreFacade.class);
+        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        final UserService users = getService(UserService.class);
+        final ConfigurationService configService = getService(ConfigurationService.class);
 
         if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null) {
             return;
@@ -145,7 +148,7 @@ public class ServletActivator extends DeferredActivator {
         MicroformatServlet.setUserService(users);
         MicroformatServlet.setStringTranslator(customizer);
         MicroformatServlet.setConfigService(configService);
-        MicroformatServlet microformatServlet = new MicroformatServlet();
+        final MicroformatServlet microformatServlet = new MicroformatServlet();
         
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
         MicroformatServlet.setContactInterfaceDiscoveryService(contacts);
@@ -155,33 +158,34 @@ public class ServletActivator extends DeferredActivator {
         InfostoreFileServlet.setInfostore(infostore);
 
         registered = true;
-        for (String alias : activator.getAliases()) {
+        for (final String alias : activator.getAliases()) {
             try {
                 httpService.registerServlet(alias + "/*", microformatServlet, null, null);
-            } catch (ServletException e) {
+            } catch (final ServletException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (NamespaceException e) {
+            } catch (final NamespaceException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
         try {
             httpService.registerServlet("/publications/contactPictures/*", new ContactPictureServlet(), null, null);
             httpService.registerServlet("/publications/files/*", new InfostoreFileServlet(), null, null);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NamespaceException e) {
+        } catch (final NamespaceException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
     private void unregisterServlet() {
-        if (!registered)
+        if (!registered) {
             return;
+        }
         registered = false;
 
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
 
-        for (String alias : activator.getAliases()) {
+        for (final String alias : activator.getAliases()) {
             httpService.unregister(alias + "/*");
         }
     }
