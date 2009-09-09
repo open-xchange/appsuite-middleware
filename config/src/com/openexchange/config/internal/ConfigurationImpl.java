@@ -172,7 +172,12 @@ public final class ConfigurationImpl implements ConfigurationService {
                 final String otherValue = properties.get(propName);
                 if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
                     final String otherFile = propertiesFiles.get(propName);
-                    LOG.warn("Overwriting property " + propName + " from file '" + otherFile + "' with property from file '" + propFile.getPath() + "', overwriting value '" + otherValue + "' with value '" + e.getValue() + "'.");
+                    if (LOG.isWarnEnabled()) {
+                        final StringBuilder sb = new StringBuilder(64).append("Overwriting property ").append(propName).append(" from file '");
+                        sb.append(otherFile).append("' with property from file '").append(propFile.getPath()).append("', overwriting value '");
+                        sb.append(otherValue).append("' with value '").append(e.getValue()).append("'.");
+                        LOG.warn(sb.toString());
+                    }
                 }
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFile.getPath());
