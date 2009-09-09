@@ -1,3 +1,7 @@
+* 2009-09-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #14454: Escaped dash character in email regex for crawling contact from Google.
+
 * 2009-09-04 - marcus.klein@open-xchange.com
 
  - Bugfix #14450: Storing sent null value for task attributes target duration, actual duration, target costs and actual costs as null and
