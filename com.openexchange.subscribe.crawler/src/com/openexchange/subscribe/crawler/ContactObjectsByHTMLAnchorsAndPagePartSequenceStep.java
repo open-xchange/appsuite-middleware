@@ -229,10 +229,12 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
 
             } catch (final VersitException e) {
                 exception = e;
-            } catch (final ConverterException e) {
-                // TODO: Die zusätzliche Information über Context, User und Folder gibt es leider nur um Crawler-Bundle
-                // as information in case of a timeout i would expect: cause,uid,cid,fid,url,time
-                //LOG.error(new SubscriptionException());
+            } catch (final ConverterException e) {                
+                LOG.error(e.getMessage() 
+                    + " for Context : " + workflow.getSubscription().getContext().getContextId() 
+                    + ", User : " + workflow.getSubscription().getUserId()
+                    + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                
                 exception = e;
             } catch (final IOException e) {
                 exception = e;

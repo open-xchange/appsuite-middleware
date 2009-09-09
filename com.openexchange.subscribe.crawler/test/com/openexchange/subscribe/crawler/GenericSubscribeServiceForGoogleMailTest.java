@@ -101,7 +101,7 @@ public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeSe
         pageParts.add(new PagePart(
             "(<input[\\s]size=[\"]*[0-9]{2}[\"]*[\\s]name=\"ctsf_00_03_i\"[\\s]value=\")([a-z\\.@A-Z0-9]*)(\">)",
             "instant_messenger2"));
-        pageParts.add(new PagePart("(<input[\\s]size=[\"]*[0-9]{2}[\"]*[\\s]name=\"ctsf_01_00_e\"[\\s]value=\")([a-zA-Z@0-9\\.-]*)(\">)", "email3"));
+        pageParts.add(new PagePart("(<input[\\s]size=[\"]*[0-9]{2}[\"]*[\\s]name=\"ctsf_01_00_e\"[\\s]value=\")"+VALID_EMAIL_REGEX+"(\">)", "email3"));
         pageParts.add(new PagePart(
             "(<input[\\s]size=[\"]*[0-9]{2}[\"]*[\\s]name=\"ctsf_01_01_p\"[\\s]value=\")([+0-9\\s]*)(\">)",
             "telephone_business1"));

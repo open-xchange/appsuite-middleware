@@ -70,5 +70,7 @@ public interface Step<O, I> extends HasOutput<O>, HasInput<I> {
     String inputType();
 
     String outputType();
+    
+    void setWorkflow(Workflow workflow);
 
 }

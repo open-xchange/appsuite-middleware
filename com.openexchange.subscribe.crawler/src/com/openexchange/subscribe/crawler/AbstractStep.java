@@ -56,6 +56,8 @@ public class AbstractStep {
     protected Exception exception;
 
     protected boolean executedSuccessfully;
+    
+    protected Workflow workflow;
 
     static final String HTML_PAGE = "HtmlPage";
 
@@ -77,6 +79,10 @@ public class AbstractStep {
 
     public Exception getException() {
         return this.exception;
+    }
+    
+    public void setWorkflow (Workflow workflow){
+        this.workflow = workflow;
     }
 
 }

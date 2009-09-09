@@ -54,6 +54,7 @@ import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.darkside.WebClientCloser;
@@ -70,6 +71,8 @@ public class Workflow {
     private List<Step> steps;
 
     private String loginStepString;
+    
+    private Subscription subscription;
 
     public Workflow() {
 
@@ -108,6 +111,7 @@ public class Workflow {
                 if (previousStep != null) {
                     currentStep.setInput(previousStep.getOutput());
                 }
+                currentStep.setWorkflow(this);
                 currentStep.execute(webClient);
                 previousStep = currentStep;
                 if (!currentStep.executedSuccessfully()) {
@@ -130,4 +134,15 @@ public class Workflow {
         this.steps = steps;
     }
 
+    
+    public Subscription getSubscription() {
+        return subscription;
+    }
+
+    
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
+
+    
 }

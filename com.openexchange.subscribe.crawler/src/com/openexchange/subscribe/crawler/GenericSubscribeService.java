@@ -99,9 +99,10 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     public Collection<Contact> getContent(Subscription subscription) throws SubscriptionException {
 
-        Workflow linkedInWorkflow = getWorkflow();
+        Workflow workflow = getWorkflow();
+        workflow.setSubscription(subscription);
         Map<String, Object> configuration = subscription.getConfiguration();
-        return Arrays.asList(linkedInWorkflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
+        return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
     }
 
     protected Workflow getWorkflow() {
