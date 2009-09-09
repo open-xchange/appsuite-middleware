@@ -66,7 +66,7 @@
     <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="commonjar" value="common.jar"/>
     <property name="xmlbundlejar" value="com.openexchange.xml.jar"/>
-    <property name="timerjar" value="com.openexchange.timer.jar"/>
+    <property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
     <property name="publishjar" value="com.openexchange.publish.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
@@ -107,7 +107,7 @@
         <pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
-        <pathelement location="${bundlesdir}/${timerjar}"/>
+        <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
