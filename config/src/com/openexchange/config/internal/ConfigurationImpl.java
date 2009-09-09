@@ -54,6 +54,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -134,9 +135,9 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             dirs[i] = new File(directories[i]);
             if (!dirs[i].exists()) {
-                throw new IllegalArgumentException("Not found: \"" + directories[i] + "\".");
+                throw new IllegalArgumentException(MessageFormat.format("Not found: \"{0}\".", directories[i]));
             } else if (!dirs[i].isDirectory()) {
-                throw new IllegalArgumentException("Not a directory: " + directories[i]);
+                throw new IllegalArgumentException(MessageFormat.format("Not a directory: {0}", directories[i]));
             }
             processDirectory(dirs[i], fileFilter, properties, propertiesFiles);
         }
@@ -145,7 +146,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
-            LOG.info("Can't read " + dir + ". Skipping.");
+            LOG.info(MessageFormat.format("Can''t read {0}. Skipping.", dir));
             return;
         }
         for (int i = 0; i < files.length; i++) {
