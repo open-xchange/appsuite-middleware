@@ -201,6 +201,26 @@ jcs.region.UserFolderCache.elementattributes.IsRemote=false
 jcs.region.UserFolderCache.elementattributes.IsLateral=false
 EOF
 }
+  grep jcs.region.MailAccount $pfile >/dev/null || {
+cat<<EOF
+# Pre-defined cache region for mail account
+jcs.region.MailAccount=LTCP
+jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.MailAccount.cacheattributes.MaxObjects=1000
+jcs.region.MailAccount.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.MailAccount.cacheattributes.UseMemoryShrinker=true
+jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.MailAccount.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.MailAccount.cacheattributes.MaxSpoolPerRun=500
+jcs.region.MailAccount.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.MailAccount.elementattributes.IsEternal=false
+jcs.region.MailAccount.elementattributes.MaxLifeSeconds=300
+jcs.region.MailAccount.elementattributes.IdleTime=180
+jcs.region.MailAccount.elementattributes.IsSpool=false
+jcs.region.MailAccount.elementattributes.IsRemote=false
+jcs.region.MailAccount.elementattributes.IsLateral=false
+EOF
+}
 
    # SoftwareChange_Request-125
    # -----------------------------------------------------------------------
