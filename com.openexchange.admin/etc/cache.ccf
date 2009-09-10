@@ -218,10 +218,10 @@ jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180
 jcs.region.MailAccount.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.MailAccount.cacheattributes.MaxSpoolPerRun=500
 jcs.region.MailAccount.elementattributes=org.apache.jcs.engine.ElementAttributes
-jcs.region.MailAccountr.elementattributes.IsEternal=false
+jcs.region.MailAccount.elementattributes.IsEternal=false
 jcs.region.MailAccount.elementattributes.MaxLifeSeconds=300
-jcs.region.MailAccountr.elementattributes.IdleTime=180
-jcs.region.MailAccountr.elementattributes.IsSpool=false
+jcs.region.MailAccount.elementattributes.IdleTime=180
+jcs.region.MailAccount.elementattributes.IsSpool=false
 jcs.region.MailAccount.elementattributes.IsRemote=false
 jcs.region.MailAccount.elementattributes.IsLateral=false
 
