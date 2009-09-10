@@ -30,6 +30,7 @@
     <property name="cachingjar" value="com.openexchange.caching.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
+	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
 
     <property name="commonjar" value="common.jar"/>
 	<property name="mailjar" value="mail-1.4.2.jar" />
@@ -41,6 +42,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${configjar}"/>
 		<pathelement location="${bundlesdir}/${monitoringjar}"/>
+    	<pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
     
