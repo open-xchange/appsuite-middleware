@@ -59,7 +59,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class MissingAdressesAfterImportTest extends AbstractVCardUnitTest {
+public class MissingAddressesAfterImportTest extends AbstractVCardUnitTest {
 
     public String vcard = 
         "BEGIN:VCARD\n" + 
@@ -69,8 +69,8 @@ public class MissingAdressesAfterImportTest extends AbstractVCardUnitTest {
         "N:Prinz;Tobias;;;\n" + 
         "NICKNAME:Tierlieb\n" + 
         "BDAY:19810501\n" + 
-        "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;TŸbingen;Baden-WŸrttemberg;57621;Germany\n" + 
-        "ADR;TYPE=home:;;Testroad 4711;Port de la VŽrde;Skol-upon-sea;37542;France\n" + 
+        "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;T\u00fcbingen;Baden-W\u00fcrttemberg;57621;Germany\n" + 
+        "ADR;TYPE=home:;;Testroad 4711;Port de la V\u00e9rde;Skol-upon-sea;37542;France\n" + 
         "ORG:- deactivated -\n" + 
         "REV:20061204T160750.018Z\n" + 
         "UID:80@ox6.netline.de\n" + 
@@ -89,13 +89,13 @@ public class MissingAdressesAfterImportTest extends AbstractVCardUnitTest {
         Contact actual = list.get(0);
 
         assertEquals("Broadway 3131 / 5th Ave", actual.getStreetBusiness());
-        assertEquals("TŸbingen", actual.getCityBusiness());
-        assertEquals("Baden-WŸrttemberg", actual.getStateBusiness());
+        assertEquals("T\u00fcbingen", actual.getCityBusiness());
+        assertEquals("Baden-W\u00fcrttemberg", actual.getStateBusiness());
         assertEquals("57621", actual.getPostalCodeBusiness());
         assertEquals("Germany", actual.getCountryBusiness());
 
         assertEquals("Testroad 4711", actual.getStreetHome());
-        assertEquals("Port de la VŽrde", actual.getCityHome());
+        assertEquals("Port de la V\u00e9rde", actual.getCityHome());
         assertEquals("Skol-upon-sea", actual.getStateHome());
         assertEquals("37542", actual.getPostalCodeHome());
         assertEquals("France", actual.getCountryHome());
