@@ -62,7 +62,7 @@ import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.AJPv13TimerTaskStarter;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
-import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
+import com.openexchange.ajp13.monitoring.AJPv13TaskMonitorMBean;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
@@ -78,12 +78,12 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private static final DecimalFormat DF = new DecimalFormat("0000");
 
-    static final AJPv13ListenerMonitor LISTENER_MONITOR;
+    static final AJPv13TaskMonitor LISTENER_MONITOR;
 
     static {
-        AJPv13ListenerMonitor tmp = null;
+        AJPv13TaskMonitor tmp = null;
         try {
-            tmp = new AJPv13ListenerMonitor();
+            tmp = new AJPv13TaskMonitor();
         } catch (final NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -95,7 +95,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
      * 
      * @return The listener monitor.
      */
-    public static AJPv13ListenerMonitorMBean getListenerMonitor() {
+    public static AJPv13TaskMonitorMBean getListenerMonitor() {
         return LISTENER_MONITOR;
     }
 

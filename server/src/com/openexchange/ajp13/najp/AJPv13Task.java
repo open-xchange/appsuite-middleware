@@ -51,12 +51,17 @@ package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.threadpool.Task;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
@@ -65,9 +70,31 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13Task implements Runnable {
+public final class AJPv13Task implements Task<Object> {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class);
+
+    /**
+     * Creates a new {@link AJPv13Task} instance.
+     * 
+     * @param client The client socket to process
+     * @param listenerMonitor The listener monitor
+     * @param watcher The task watcher
+     * @return A newly created AJP task
+     */
+    public static AJPv13Task newAJPTask(final Socket client, final AJPv13TaskMonitor listenerMonitor, final AJPv13TaskWatcher watcher) {
+        return new AJPv13Task(client, listenerMonitor, watcher);
+    }
+
+    /**
+     * The atomic integer to count active AJP tasks.
+     */
+    private static final AtomicInteger numRunning = new AtomicInteger();
+
+    /**
+     * The counter to generate a (temporary) unique number for each AJP task.
+     */
+    private static final AtomicLong COUNTER = new AtomicLong();
 
     /**
      * The accepted AJP client socket.
@@ -102,7 +129,7 @@ public final class AJPv13Task implements Runnable {
     /**
      * The listener monitor
      */
-    private final AJPv13ListenerMonitor listenerMonitor;
+    private final AJPv13TaskMonitor listenerMonitor;
 
     /**
      * Whether this task is long-running.
@@ -110,18 +137,51 @@ public final class AJPv13Task implements Runnable {
     private volatile boolean longRunning;
 
     /**
-     * Initializes a new {@link AJPv13Task}.
-     * 
-     * @param client The client socket to process
+     * The (temporary) unique task number.
      */
-    public AJPv13Task(final Socket client, final AJPv13ListenerMonitor listenerMonitor) {
+    private final Long num;
+
+    /**
+     * The task watcher reference.
+     */
+    private final AJPv13TaskWatcher watcher;
+
+    /**
+     * Control for AJP task.
+     */
+    private volatile Future<Object> control;
+
+    /**
+     * Initializes a new {@link AJPv13Task}.
+     */
+    private AJPv13Task(final Socket client, final AJPv13TaskMonitor listenerMonitor, final AJPv13TaskWatcher watcher) {
         super();
+        this.num = Long.valueOf(COUNTER.incrementAndGet());
         this.client = client;
         this.listenerMonitor = listenerMonitor;
+        this.watcher = watcher;
     }
 
     /**
-     * Cancels this AJP task; meaning to close the client socket.
+     * Sets the control for this AJP task.
+     * 
+     * @param control The control
+     */
+    public void setControl(final Future<Object> control) {
+        this.control = control;
+    }
+
+    /**
+     * Gets the (temporary) unique task number.
+     * 
+     * @return The (temporary) unique task number
+     */
+    public Long getNum() {
+        return num;
+    }
+
+    /**
+     * Cancels this AJP task; meaning to close the client socket and to stop its execution.
      */
     public void cancel() {
         if (null != client) {
@@ -134,6 +194,9 @@ public final class AJPv13Task implements Runnable {
             } finally {
                 client = null;
             }
+        }
+        if (control != null) {
+            control.cancel(false);
         }
     }
 
@@ -259,18 +322,18 @@ public final class AJPv13Task implements Runnable {
      * <p>
      * The client socket is closed, when executing thread leaves this <code>run()</code> method.
      */
-    public void run() {
+    public Object call() {
         final Thread t = thread = Thread.currentThread();
-        final Socket s = client;
-        if (!t.isInterrupted() && s != null && !s.isClosed()) {
+        if (!t.isInterrupted() && client != null && !client.isClosed()) {
             final long start = System.currentTimeMillis();
             /*
              * Assign a connection to this listener
              */
             final AJPv13ConnectionImpl ajpCon = new AJPv13ConnectionImpl(this);
             ajpConnection = ajpCon;
+            final AJPv13TaskMonitor monitor = listenerMonitor;
             try {
-                s.setKeepAlive(true);
+                client.setKeepAlive(true);
                 /*
                  * Keep on processing underlying stream's data as long as accepted client socket is alive, its input is not shut down and no
                  * communication failure occurred.
@@ -284,7 +347,7 @@ public final class AJPv13Task implements Runnable {
                             /*
                              * Just for safety reason to ensure END_RESPONSE package is going to be sent.
                              */
-                            writeEndResponse(s, false);
+                            writeEndResponse(client, false);
                         }
                     } catch (final UploadServletException e) {
                         LOG.error(e.getMessage(), e);
@@ -321,12 +384,12 @@ public final class AJPv13Task implements Runnable {
                         closeAndKeepAlive(ajpCon);
                     }
                     ajpCon.resetConnection(false);
-                    listenerMonitor.decrementNumProcessing();
-                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
-                    listenerMonitor.incrementNumRequests();
+                    monitor.decrementNumProcessing();
+                    monitor.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    monitor.incrementNumRequests();
                     processing = false;
-                    s.getOutputStream().flush();
-                } while (!t.isInterrupted() && !s.isClosed()); // End of loop processing an AJP socket's data
+                    flush();
+                } while (!t.isInterrupted() && client != null && !client.isClosed()); // End of loop processing an AJP socket's data
             } catch (final AJPv13SocketClosedException e) {
                 /*
                  * Just as debug info
@@ -347,18 +410,78 @@ public final class AJPv13Task implements Runnable {
                 waitingOnAJPSocket = false;
                 thread = null;
                 if (processing) {
-                    listenerMonitor.decrementNumProcessing();
-                    listenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
-                    listenerMonitor.incrementNumRequests();
+                    monitor.decrementNumProcessing();
+                    monitor.addProcessingTime(System.currentTimeMillis() - processingStart);
+                    monitor.incrementNumRequests();
                     processing = false;
                 }
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
             }
             final long duration = System.currentTimeMillis() - start;
-            listenerMonitor.addUseTime(duration);
+            monitor.addUseTime(duration);
+        }
+        return null;
+    }
+
+    /**
+     * Checks if this task was canceled before it completed normally.
+     * 
+     * @return <code>true</code> if this task was canceled before it completed normally; otherwise <code>false</code>
+     */
+    public boolean isCancelled() {
+        return control.isCancelled();
+    }
+
+    /**
+     * Checks if this task completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these cases,
+     * this method will return <code>true</code>.
+     * 
+     * @return <code>true</code> if this task completed; otherwise <code>false</code>
+     */
+    public boolean isDone() {
+        return control.isDone();
+    }
+
+    public void afterExecute(final Throwable t) {
+        watcher.removeTask(this);
+        changeNumberOfRunningAJPTasks(false);
+        listenerMonitor.decrementNumActive();
+    }
+
+    public void beforeExecute(final Thread t) {
+        watcher.addTask(this);
+        changeNumberOfRunningAJPTasks(true);
+        listenerMonitor.incrementNumActive();
+    }
+
+    public void setThreadName(final Thread thread) {
+        final String tname = thread.getName();
+        final int pos = tname.indexOf('-');
+        if (pos > 0) {
+            thread.setName(new StringBuilder(16).append("AJPListener").append(tname.substring(pos)).toString());
+        } else {
+            thread.setName(new StringBuilder(16).append("AJPListener-").append(numRunning.toString()).toString());
         }
     }
 
+    /**
+     * Increments/decrements the number of running AJP tasks.
+     * 
+     * @param increment whether to increment or to decrement
+     */
+    private static void changeNumberOfRunningAJPTasks(final boolean increment) {
+        MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning.decrementAndGet());
+    }
+
+    /**
+     * Writes pending data to client and closes current AJP cycle (End-Response package) but keeps socket connection alive.
+     * 
+     * @param resp The HTTP response for writing possibly outstanding header package
+     * @param data The pending data
+     * @param ajpCon The AJP connection
+     * @throws AJPv13Exception If an AJP error occurs
+     * @throws IOException If an I/O error occurs
+     */
     private void closeAndKeepAlive(final HttpServletResponseWrapper resp, final byte[] data, final AJPv13ConnectionImpl ajpCon) throws AJPv13Exception, IOException {
         final Socket s = client;
         if (null != s) {
@@ -382,6 +505,20 @@ public final class AJPv13Task implements Runnable {
         }
     }
 
+    private void flush() throws IOException {
+        final Socket s = client;
+        if (null != s) {
+            s.getOutputStream().flush();
+        }
+    }
+
+    /**
+     * Closes current AJP cycle (End-Response package) but keeps socket connection alive.
+     * 
+     * @param ajpCon The AJP connection
+     * @throws AJPv13Exception If an AJP error occurs
+     * @throws IOException If an I/O error occurs
+     */
     private void closeAndKeepAlive(final AJPv13ConnectionImpl ajpCon) throws AJPv13Exception, IOException {
         final Socket s = client;
         if (null != s) {

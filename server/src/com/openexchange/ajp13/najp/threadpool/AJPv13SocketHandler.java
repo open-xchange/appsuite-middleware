@@ -50,15 +50,13 @@
 package com.openexchange.ajp13.najp.threadpool;
 
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
-import com.openexchange.ajp13.najp.AJPv13ListenerMonitor;
 import com.openexchange.ajp13.najp.AJPv13Task;
+import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.najp.AJPv13TaskWatcher;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AJPv13SocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP task.
@@ -69,23 +67,39 @@ public final class AJPv13SocketHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13SocketHandler.class);
 
-    private final AtomicBoolean started;
+    /**
+     * The atomic boolean to track started status.
+     */
+    private volatile boolean started;
 
-    private final AJPv13ListenerMonitor listenerMonitor;
+    /**
+     * The AJP task monitor for JMX interface.
+     */
+    private final AJPv13TaskMonitor listenerMonitor;
 
+    /**
+     * The refused execution behavior initialized on start-up.
+     */
+    private AJPv13RefusedExecutionBehavior behavior;
+
+    /**
+     * The AJP task watcher initialized on start-up.
+     */
     private AJPv13TaskWatcher watcher;
 
-    private AJPv13ThreadPoolExecutor pool;
+    /**
+     * The thread pool service used to submit AJP tasks for execution.
+     */
+    private ThreadPoolService pool;
 
     /**
      * Initializes a new {@link AJPv13SocketHandler}.
      */
     public AJPv13SocketHandler() {
         super();
-        started = new AtomicBoolean();
-        AJPv13ListenerMonitor tmp = null;
+        AJPv13TaskMonitor tmp = null;
         try {
-            tmp = new AJPv13ListenerMonitor(this);
+            tmp = new AJPv13TaskMonitor();
         } catch (final NotCompliantMBeanException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -96,32 +110,39 @@ public final class AJPv13SocketHandler {
      * Starts this pool that creates new threads as needed, but will reuse previously constructed threads when they are available.
      */
     public void startUp() {
-        if (!started.compareAndSet(false, true)) {
-            LOG.info("AJP executor pool already started; start-up aborted.");
-            return;
+        if (!started) {
+            synchronized (this) {
+                if (!started) {
+                    watcher = new AJPv13TaskWatcher();
+                    behavior = new AJPv13RefusedExecutionBehavior(watcher);
+                    pool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                    AJPv13Monitors.setListenerMonitor(listenerMonitor);
+                    started = true;
+                }
+            }
         }
-        watcher = new AJPv13TaskWatcher();
-        pool = new AJPv13ThreadPoolExecutor(10L, TimeUnit.SECONDS, watcher);
-        pool.prestartAllCoreThreads();
-        AJPv13Monitors.setListenerMonitor(listenerMonitor);
     }
 
     /**
      * Attempts to stop all actively executing tasks, halts the processing of waiting tasks, and returns a list of the tasks that were
      * awaiting execution.
      */
-    public List<Runnable> shutDownNow() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.info("AJP executor not started; abrupt shut-down aborted.");
-            return new ArrayList<Runnable>(0);
-        }
-        try {
-            watcher.stop();
-            return pool.shutdownNow();
-        } finally {
-            watcher = null;
-            pool = null;
-            AJPv13Monitors.releaseListenerMonitor();
+    public void shutDownNow() {
+        if (started) {
+            synchronized (this) {
+                if (started) {
+                    try {
+                        watcher.stop();
+                        // pool.shutdownNow();
+                    } finally {
+                        watcher = null;
+                        pool = null;
+                        behavior = null;
+                        AJPv13Monitors.releaseListenerMonitor();
+                        started = false;
+                    }
+                }
+            }
         }
     }
 
@@ -130,36 +151,50 @@ public final class AJPv13SocketHandler {
      * additional effect if already shut down.
      */
     public void shutDown() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.info("AJP executor not started; graceful shut-down aborted.");
-            return;
-        }
-        try {
-            pool.shutdown();
-            pool.awaitTermination(10L, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            // Restore interrupted flag for borrowed thread if not already set
-            if (!Thread.currentThread().isInterrupted()) {
-                Thread.currentThread().interrupt();
+        if (started) {
+            synchronized (this) {
+                if (started) {
+                    try {
+                        watcher.stop();
+                        // pool.shutdownNow();
+                    } finally {
+                        watcher = null;
+                        pool = null;
+                        behavior = null;
+                        AJPv13Monitors.releaseListenerMonitor();
+                        started = false;
+                    }
+                }
             }
-        } finally {
-            watcher.stop();
-            watcher = null;
-            pool = null;
-            AJPv13Monitors.releaseListenerMonitor();
         }
+
+        // try {
+        // pool.shutdown();
+        // pool.awaitTermination(10L, TimeUnit.SECONDS);
+        // } catch (final InterruptedException e) {
+        // // Restore interrupted flag for borrowed thread if not already set
+        // if (!Thread.currentThread().isInterrupted()) {
+        // Thread.currentThread().interrupt();
+        // }
+        // } finally {
+        // watcher.stop();
+        // watcher = null;
+        // behavior = null;
+        // pool = null;
+        // AJPv13Monitors.releaseListenerMonitor();
+        // }
     }
 
     /**
-     * Checks if this executor has been shut down or has not been started.
+     * Checks if this socket handler has been shut down or has not been started.
      * 
-     * @return <code>true</code> if this executor has been shut down or has not been started; otherwise <code>false</code>
+     * @return <code>true</code> if this socket handler has been shut down or has not been started; otherwise <code>false</code>
      */
     public boolean isShutdown() {
-        if (!started.get()) {
+        if (!started) {
             return true;
         }
-        return pool.isShutdown();
+        return (null == watcher);
     }
 
     /**
@@ -168,26 +203,11 @@ public final class AJPv13SocketHandler {
      * @param client The client socket to handle
      */
     public void handleSocket(final Socket client) {
-        final AJPv13TaskWatcher.WatcherFutureTask task = watcher.new WatcherFutureTask(new AJPv13Task(client, listenerMonitor));
-        pool.execute(task);
-        watcher.addListener(task);
+        final AJPv13Task task = AJPv13Task.newAJPTask(client, listenerMonitor, watcher);
+        /*
+         * Submit AJP task and set returned Future as its control object
+         */
+        task.setControl(pool.submit(task, behavior));
     }
 
-    /**
-     * Returns the current number of threads in the pool.
-     * 
-     * @return The current number of threads in the pool.
-     */
-    public int getPoolSize() {
-        return pool == null ? 0 : pool.getPoolSize();
-    }
-
-    /**
-     * Returns the approximate number of threads that are actively executing tasks.
-     * 
-     * @return The approximate number of threads that are actively executing tasks.
-     */
-    public int getActiveCount() {
-        return pool == null ? 0 : pool.getActiveCount();
-    }
 }

@@ -69,16 +69,16 @@ public final class AJPv13Monitors {
     public static final AJPv13ServerThreadsMonitor AJP_MONITOR_SERVER_THREADS = new AJPv13ServerThreadsMonitor();
 
     /**
-     * The instance of {@link AJPv13ListenerMonitorMBean}.
+     * The instance of {@link AJPv13TaskMonitorMBean}.
      */
-    private static volatile AJPv13ListenerMonitorMBean listenerMonitor;
+    private static volatile AJPv13TaskMonitorMBean listenerMonitor;
 
     /**
      * Sets the listener monitor instance.
      * 
      * @param listenerMonitor
      */
-    public static void setListenerMonitor(final AJPv13ListenerMonitorMBean listenerMonitor) {
+    public static void setListenerMonitor(final AJPv13TaskMonitorMBean listenerMonitor) {
         AJPv13Monitors.listenerMonitor = listenerMonitor;
     }
 
@@ -94,7 +94,7 @@ public final class AJPv13Monitors {
      * 
      * @return The listener monitor instance.
      */
-    public static AJPv13ListenerMonitorMBean getListenerMonitor() {
+    public static AJPv13TaskMonitorMBean getListenerMonitor() {
         return listenerMonitor;
     }
 

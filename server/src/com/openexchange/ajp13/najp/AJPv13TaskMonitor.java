@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13.stable;
+package com.openexchange.ajp13.najp;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -55,28 +55,22 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitorMBean;
+import com.openexchange.ajp13.monitoring.AJPv13TaskMonitorMBean;
 
 /**
- * {@link AJPv13ListenerMonitor} - The listener monitor MBean implementation.
+ * {@link AJPv13TaskMonitor} - The task monitor MBean implementation monitoring AJP tasks processed by global thread pool.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13ListenerMonitorMBean {
-
-    private final AtomicInteger poolSize = new AtomicInteger();
-
-    private final AtomicInteger numActive = new AtomicInteger();
-
-    private final AtomicInteger numIdle = new AtomicInteger();
+public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonitorMBean {
 
     private final AtomicInteger numWaiting = new AtomicInteger();
 
     private final AtomicInteger numProcessing = new AtomicInteger();
 
-    private final AtomicLong numRequests = new AtomicLong();
+    private final AtomicInteger numActive = new AtomicInteger();
 
-    private static final int USE_TIME_COUNT = 1000;
+    private final AtomicLong numRequests = new AtomicLong();
 
     private final long[] avgUseTimeArr;
 
@@ -99,68 +93,58 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
     private final Lock processingTimeLock = new ReentrantLock();
 
     /**
-     * Initializes a new {@link AJPv13ListenerMonitor}.
+     * Initializes a new {@link AJPv13TaskMonitor}.
      * 
      * @throws NotCompliantMBeanException If MBean is not compliant
      */
-    public AJPv13ListenerMonitor() throws NotCompliantMBeanException {
-        super(AJPv13ListenerMonitorMBean.class);
-        avgUseTimeArr = new long[USE_TIME_COUNT];
-        avgProcessingTimeArr = new long[USE_TIME_COUNT];
+    public AJPv13TaskMonitor() throws NotCompliantMBeanException {
+        super(AJPv13TaskMonitorMBean.class);
+        avgUseTimeArr = new long[1000];
+        avgProcessingTimeArr = new long[1000];
     }
 
     public int getPoolSize() {
-        return poolSize.get();
-    }
-
-    public void incrementPoolSize() {
-        poolSize.incrementAndGet();
-    }
-
-    public void decrementPoolSize() {
-        poolSize.decrementAndGet();
-    }
-
-    public void setPoolSize(final int poolSize) {
-        this.poolSize.set(poolSize);
+        // There is no more a thread pool for AJP tasks
+        return 0;
     }
 
     public int getNumActive() {
         return numActive.get();
     }
 
+    /**
+     * Atomically increments the number of active AJP tasks.
+     */
     public void incrementNumActive() {
         numActive.incrementAndGet();
     }
 
+    /**
+     * Atomically decrements the number of active AJP tasks.
+     */
     public void decrementNumActive() {
         numActive.decrementAndGet();
     }
 
     public int getNumIdle() {
-        return numIdle.get();
-    }
-
-    public void incrementNumIdle() {
-        numIdle.incrementAndGet();
-    }
-
-    public void decrementNumIdle() {
-        numIdle.decrementAndGet();
-    }
-
-    public void setNumIdle(final int numIdle) {
-        this.numIdle.set(numIdle);
+        // There is no more a thread pool for AJP tasks
+        return 0;
     }
 
     public int getNumWaiting() {
         return numWaiting.get();
     }
 
+    /**
+     * Atomically increments the number of AJP tasks currently waiting on an incoming AJP package.
+     */
     public void incrementNumWaiting() {
         numWaiting.incrementAndGet();
     }
 
+    /**
+     * Atomically decrements the number of AJP tasks currently waiting on an incoming AJP package.
+     */
     public void decrementNumWaiting() {
         numWaiting.decrementAndGet();
     }
@@ -169,10 +153,16 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         return numProcessing.get();
     }
 
+    /**
+     * Atomically increments the number of AJP tasks currently processing a received AJP package.
+     */
     public void incrementNumProcessing() {
         numProcessing.incrementAndGet();
     }
 
+    /**
+     * Atomically decrements the number of AJP tasks currently processing a received AJP package.
+     */
     public void decrementNumProcessing() {
         numProcessing.decrementAndGet();
     }
@@ -181,6 +171,9 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         return numRequests.get();
     }
 
+    /**
+     * Atomically increments the number of received AJP requests.
+     */
     public void incrementNumRequests() {
         numRequests.incrementAndGet();
     }
@@ -190,9 +183,14 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         for (int i = 0; i < avgUseTimeArr.length; i++) {
             duration += avgUseTimeArr[i];
         }
-        return (duration / avgUseTimeArr.length);
+        return (((double) duration) / (avgUseTimeArr.length));
     }
 
+    /**
+     * Adds the total time in milliseconds an AJP thread processed a client socket until socket closure.
+     * 
+     * @param time The total time in milliseconds
+     */
     public void addUseTime(final long time) {
         if (useTimeLock.tryLock()) {
             /*
@@ -216,7 +214,7 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
     /**
      * Sets the max use time to the maximum of given <code>maxUseTime</code> and existing value
      */
-    private final void setMaxUseTime(final long maxUseTime) {
+    private void setMaxUseTime(final long maxUseTime) {
         this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
     }
 
@@ -233,7 +231,7 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         return minUseTime;
     }
 
-    private final void setMinUseTime(final long minUseTime) {
+    private void setMinUseTime(final long minUseTime) {
         this.minUseTime = Math.min(minUseTime, this.minUseTime);
     }
 
@@ -250,6 +248,12 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         return 0;
     }
 
+    /**
+     * Adds the time in milliseconds an AJP thread processed an AJP cycle; meaning from initial FORWARD-REQUEST until terminating
+     * END-RESPONSE.
+     * 
+     * @param time The time in milliseconds
+     */
     public void addProcessingTime(final long time) {
         if (processingTimeLock.tryLock()) {
             /*
@@ -266,11 +270,11 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         }
     }
 
-    private final void setMaxProcessingTime(final long maxProcessingTime) {
+    private void setMaxProcessingTime(final long maxProcessingTime) {
         this.maxProcessingTime = Math.max(this.maxProcessingTime, maxProcessingTime);
     }
 
-    private final void setMinProcessingTime(final long minProcessingTime) {
+    private void setMinProcessingTime(final long minProcessingTime) {
         this.minProcessingTime = Math.min(this.minProcessingTime, minProcessingTime);
     }
 
@@ -287,7 +291,7 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
         for (int i = 0; i < avgProcessingTimeArr.length; i++) {
             duration += avgProcessingTimeArr[i];
         }
-        return (duration / avgProcessingTimeArr.length);
+        return (((double) duration) / avgProcessingTimeArr.length);
     }
 
     public void resetMaxProcessingTime() {
@@ -297,4 +301,5 @@ public class AJPv13ListenerMonitor extends StandardMBean implements AJPv13Listen
     public void resetMinProcessingTime() {
         minProcessingTime = Long.MAX_VALUE;
     }
+
 }

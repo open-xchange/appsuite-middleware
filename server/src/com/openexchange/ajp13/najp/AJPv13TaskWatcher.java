@@ -59,11 +59,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -77,8 +75,8 @@ import com.openexchange.timer.TimerService;
 /**
  * {@link AJPv13TaskWatcher} - Keeps track of submitted AJP tasks.
  * <p>
- * AJP tasks are actively put right after their submission, but automatically removed through wrapping
- * {@link java.util.concurrent.FutureTask future task}'s <i><code>done()</code></i> method.
+ * AJP tasks are actively put right after their submission, but automatically removed through {@link AJPv13Task#afterExecute(Throwable)}
+ * method.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -86,94 +84,48 @@ public class AJPv13TaskWatcher {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class);
 
-    static final AtomicLong COUNTER = new AtomicLong();
-
-    /**
-     * A wrapping future task to cancel an AJP task and remove from watcher when finished.
-     */
-    public final class WatcherFutureTask extends FutureTask<Object> {
-
-        private final Long num;
-
-        private final AJPv13Task ajpTask;
-
-        /**
-         * Initializes a new {@link WatcherFutureTask}.
-         * 
-         * @param ajpTask The AJP task to wrap
-         */
-        public WatcherFutureTask(final AJPv13Task ajpTask) {
-            super(ajpTask, null);
-            this.num = Long.valueOf(COUNTER.incrementAndGet());
-            this.ajpTask = ajpTask;
-        }
-
-        @Override
-        protected void done() {
-            removeListener(this);
-        }
-
-        @Override
-        public boolean cancel(final boolean mayInterruptIfRunning) {
-            ajpTask.cancel();
-            return super.cancel(mayInterruptIfRunning);
-        }
-
-        /**
-         * Gets the AJP task associated with this future task.
-         * 
-         * @return The AJP task associated with this future task.
-         */
-        public AJPv13Task getAjpTask() {
-            return ajpTask;
-        }
-
-        public Long getNum() {
-            return num;
-        }
-    }
-
     private ScheduledTimerTask task;
 
-    private final ConcurrentMap<Long, WatcherFutureTask> listeners;
+    private final ConcurrentMap<Long, AJPv13Task> tasks;
 
     /**
      * Initializes a new {@link AJPv13TaskWatcher}.
      */
     public AJPv13TaskWatcher() {
         super();
-        listeners = new ConcurrentHashMap<Long, WatcherFutureTask>();
+        tasks = new ConcurrentHashMap<Long, AJPv13Task>();
         if (AJPv13Config.getAJPWatcherEnabled()) {
             /*
              * Start task if enabled
              */
             final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
-                task = timer.scheduleWithFixedDelay(
-                    new Task(listeners.values(), LOG),
-                    1000,
-                    AJPv13Config.getAJPWatcherFrequency(),
-                    TimeUnit.MILLISECONDS);
+                task =
+                    timer.scheduleWithFixedDelay(
+                        new Task(tasks.values(), LOG),
+                        1000,
+                        AJPv13Config.getAJPWatcherFrequency(),
+                        TimeUnit.MILLISECONDS);
             }
         }
     }
 
-    public void addListener(final WatcherFutureTask task) {
-        listeners.putIfAbsent(task.getNum(), task);
+    public void addTask(final AJPv13Task task) {
+        tasks.putIfAbsent(task.getNum(), task);
     }
 
-    public void removeListener(final WatcherFutureTask task) {
-        listeners.remove(task.getNum());
+    public void removeTask(final AJPv13Task task) {
+        tasks.remove(task.getNum());
     }
 
     public void stop() {
-        for (final Iterator<WatcherFutureTask> i = listeners.values().iterator(); i.hasNext();) {
-            i.next().cancel(true);
+        for (final Iterator<AJPv13Task> i = tasks.values().iterator(); i.hasNext();) {
+            i.next().cancel();
             i.remove();
         }
-        listeners.clear();
+        tasks.clear();
         if (null != task) {
-            task.cancel(true);
+            task.cancel(false);
             task = null;
             final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
@@ -184,7 +136,7 @@ public class AJPv13TaskWatcher {
 
     private static class Task implements Runnable {
 
-        private final Collection<WatcherFutureTask> listeners;
+        private final Collection<AJPv13Task> tasks;
 
         private final org.apache.commons.logging.Log log;
 
@@ -193,16 +145,16 @@ public class AJPv13TaskWatcher {
         /**
          * Initializes a new {@link Task}
          * 
-         * @param listeners The map to iterate
+         * @param tasks The map to iterate
          * @param log The logger instance to use
          */
-        public Task(final Collection<WatcherFutureTask> listeners, final org.apache.commons.logging.Log log) {
+        public Task(final Collection<AJPv13Task> tasks, final org.apache.commons.logging.Log log) {
             super();
-            this.listeners = listeners;
+            this.tasks = tasks;
             this.log = log;
             final BlockingQueue<Runnable> queue = AJPv13SynchronousQueueProvider.getInstance().newSynchronousQueue();
-            executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 1L, TimeUnit.SECONDS, queue, new AJPv13ThreadFactory(
-                "AJPTaskWatcher-"));
+            executorService =
+                new ThreadPoolExecutor(0, Integer.MAX_VALUE, 1L, TimeUnit.SECONDS, queue, new AJPv13ThreadFactory("AJPTaskWatcher-"));
         }
 
         public void run() {
@@ -224,8 +176,8 @@ public class AJPv13TaskWatcher {
                  * Create a list of tasks
                  */
                 final Collection<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
-                for (final Iterator<WatcherFutureTask> iter = listeners.iterator(); iter.hasNext();) {
-                    tasks.add(new TaskRunCallable(iter.next().getAjpTask(), enabled, countWaiting, countProcessing, countExceeded, log));
+                for (final Iterator<AJPv13Task> iter = this.tasks.iterator(); iter.hasNext();) {
+                    tasks.add(new TaskRunCallable(iter.next(), enabled, countWaiting, countProcessing, countExceeded, log));
                 }
                 /*
                  * Invoke all and wait for being executed

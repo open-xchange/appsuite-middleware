@@ -51,7 +51,12 @@ package com.openexchange.ajp13.monitoring;
 
 import com.openexchange.monitoring.MonitorMBean;
 
-public interface AJPv13ListenerMonitorMBean extends MonitorMBean {
+/**
+ * {@link AJPv13TaskMonitorMBean} - The AJP task monitor MBean.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface AJPv13TaskMonitorMBean extends MonitorMBean {
 
     /**
      * Gets the number of AJP threads currently waiting on an incoming AJP package.

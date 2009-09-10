@@ -73,14 +73,16 @@ public final class AJPv13TimerTaskStarter implements Initialization {
      * @return The singleton instance of {@link AJPv13TimerTaskStarter}
      */
     public static AJPv13TimerTaskStarter getInstance() {
-        if (instance == null) {
+        AJPv13TimerTaskStarter tmp = instance;
+        if (tmp == null) {
             synchronized (AJPv13TimerTaskStarter.class) {
-                if (instance == null) {
-                    instance = new AJPv13TimerTaskStarter();
+                tmp = instance;
+                if (tmp == null) {
+                    tmp = instance = new AJPv13TimerTaskStarter();
                 }
             }
         }
-        return instance;
+        return tmp;
     }
 
     /**
@@ -90,9 +92,10 @@ public final class AJPv13TimerTaskStarter implements Initialization {
         if (instance != null) {
             synchronized (AJPv13TimerTaskStarter.class) {
                 if (instance != null) {
-                    if (instance.task != null && instance.started.compareAndSet(false, true)) {
-                        instance.task.cancel(false);
-                        instance.task = null;
+                    final AJPv13TimerTaskStarter tmp = instance;
+                    if (tmp.task != null && tmp.started.compareAndSet(false, true)) {
+                        tmp.task.cancel(false);
+                        tmp.task = null;
                         final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                         if (null != timer) {
                             timer.purge();

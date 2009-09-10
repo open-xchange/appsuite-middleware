@@ -164,6 +164,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.systemname.internal.JVMRouteSystemNameImpl;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.user.UserService;
@@ -192,14 +193,18 @@ public final class ServerActivator extends DeferredActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_SERVICES_ADMIN = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, CalendarAdministrationService.class,
-        CalendarCollectionService.class };
+    private static final Class<?>[] NEEDED_SERVICES_ADMIN =
+        {
+            ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, ThreadPoolService.class,
+            CalendarAdministrationService.class, CalendarCollectionService.class
+        };
 
-    private static final Class<?>[] NEEDED_SERVICES_SERVER = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
-        TimerService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class,
-        ReminderDeleteInterface.class };
+    private static final Class<?>[] NEEDED_SERVICES_SERVER =
+        {
+            ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
+            TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
+            CalendarCollectionService.class, ReminderDeleteInterface.class
+        };
 
     private final List<ServiceRegistration> registrationList;
 
@@ -312,7 +317,7 @@ public final class ServerActivator extends DeferredActivator {
          * Add service trackers
          */
         // Configuration service load
-        ServiceTracker confTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
+        final ServiceTracker confTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
