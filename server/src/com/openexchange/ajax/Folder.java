@@ -65,10 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -123,6 +120,10 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.CompletionFuture;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -672,76 +673,79 @@ public class Folder extends SessionServlet {
                                  */
                                 final int size = accounts.size();
                                 final JSONArray[] arrays = new JSONArray[size];
-                                final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(
-                                    ServerServiceRegistry.getInstance().getService(com.openexchange.timer.TimerService.class).getExecutor());
-                                for (int i = 0; i < size; i++) {
-                                    final int index = i;
-                                    final MailAccount mailAccount = accounts.get(index);
-                                    completionService.submit(new Callable<Object>() {
+                                final CompletionFuture<Object> completionFuture;
+                                {
+                                    final List<Task<Object>> tasks = new ArrayList<Task<Object>>(size);
+                                    for (int i = 0; i < size; i++) {
+                                        final int index = i;
+                                        final MailAccount mailAccount = accounts.get(index);
+                                        tasks.add(new AbstractTask<Object>() {
 
-                                        public Object call() throws Exception {
-                                            final MailFolder rootFolder;
-                                            final MailAccess<?, ?> mailAccess;
-                                            try {
-                                                mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                                                rootFolder = mailAccess.getRootFolder();
-                                            } catch (final MailException e) {
-                                                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
-                                                    if (LOG.isDebugEnabled()) {
-                                                        LOG.debug(e.getMessage(), e);
+                                            public Object call() throws Exception {
+                                                final MailFolder rootFolder;
+                                                final MailAccess<?, ?> mailAccess;
+                                                try {
+                                                    mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                                    rootFolder = mailAccess.getRootFolder();
+                                                } catch (final MailException e) {
+                                                    if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                                                        if (LOG.isDebugEnabled()) {
+                                                            LOG.debug(e.getMessage(), e);
+                                                        }
+                                                    } else {
+                                                        LOG.error(e.getMessage(), e);
                                                     }
-                                                } else {
-                                                    LOG.error(e.getMessage(), e);
+                                                    arrays[index] = null;
+                                                    return null;
                                                 }
-                                                arrays[index] = null;
+                                                try {
+                                                    final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                                        columns,
+                                                        mailAccess.getMailConfig());
+                                                    final JSONArray ja = new JSONArray();
+                                                    if (mailAccount.isDefaultAccount()) {
+                                                        for (int i = 0; i < mailFolderWriters.length; i++) {
+                                                            mailFolderWriters[i].writeField(
+                                                                ja,
+                                                                mailAccount.getId(),
+                                                                rootFolder,
+                                                                false,
+                                                                MailFolder.DEFAULT_FOLDER_NAME,
+                                                                1,
+                                                                MailFolderUtility.prepareFullname(
+                                                                    mailAccount.getId(),
+                                                                    MailFolder.DEFAULT_FOLDER_ID),
+                                                                FolderObject.SYSTEM_MODULE,
+                                                                false);
+                                                        }
+                                                    } else {
+                                                        for (int i = 0; i < mailFolderWriters.length; i++) {
+                                                            mailFolderWriters[i].writeField(
+                                                                ja,
+                                                                mailAccount.getId(),
+                                                                rootFolder,
+                                                                false,
+                                                                mailAccount.getName(),
+                                                                1,
+                                                                MailFolderUtility.prepareFullname(
+                                                                    mailAccount.getId(),
+                                                                    MailFolder.DEFAULT_FOLDER_ID),
+                                                                FolderObject.SYSTEM_MODULE,
+                                                                false);
+                                                        }
+                                                    }
+                                                    arrays[index] = ja;
+                                                } catch (final MailException e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                    arrays[index] = null;
+                                                } finally {
+                                                    mailAccess.close(true);
+                                                }
                                                 return null;
                                             }
-                                            try {
-                                                final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                                    columns,
-                                                    mailAccess.getMailConfig());
-                                                final JSONArray ja = new JSONArray();
-                                                if (mailAccount.isDefaultAccount()) {
-                                                    for (int i = 0; i < mailFolderWriters.length; i++) {
-                                                        mailFolderWriters[i].writeField(
-                                                            ja,
-                                                            mailAccount.getId(),
-                                                            rootFolder,
-                                                            false,
-                                                            MailFolder.DEFAULT_FOLDER_NAME,
-                                                            1,
-                                                            MailFolderUtility.prepareFullname(
-                                                                mailAccount.getId(),
-                                                                MailFolder.DEFAULT_FOLDER_ID),
-                                                            FolderObject.SYSTEM_MODULE,
-                                                            false);
-                                                    }
-                                                } else {
-                                                    for (int i = 0; i < mailFolderWriters.length; i++) {
-                                                        mailFolderWriters[i].writeField(
-                                                            ja,
-                                                            mailAccount.getId(),
-                                                            rootFolder,
-                                                            false,
-                                                            mailAccount.getName(),
-                                                            1,
-                                                            MailFolderUtility.prepareFullname(
-                                                                mailAccount.getId(),
-                                                                MailFolder.DEFAULT_FOLDER_ID),
-                                                            FolderObject.SYSTEM_MODULE,
-                                                            false);
-                                                    }
-                                                }
-                                                arrays[index] = ja;
-                                            } catch (final MailException e) {
-                                                LOG.error(e.getMessage(), e);
-                                                arrays[index] = null;
-                                            } finally {
-                                                mailAccess.close(true);
-                                            }
-                                            return null;
-                                        }
-                                    });
+                                        });
+                                    }
+                                    completionFuture = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
                                 }
                                 /*
                                  * Wait for completion
@@ -749,7 +753,7 @@ public class Folder extends SessionServlet {
                                 final int maxRunningMillis = getMaxRunningMillis();
                                 try {
                                     for (int i = 0; i < size; i++) {
-                                        final Future<Object> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                                        final Future<Object> f = completionFuture.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
                                         if (null != f) {
                                             f.get();
                                         }
@@ -1420,97 +1424,100 @@ public class Folder extends SessionServlet {
                     }
                     final int accountSize = accounts.size();
                     final JSONArray[] arrays = new JSONArray[accountSize];
-                    final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(
-                        ServerServiceRegistry.getInstance().getService(com.openexchange.timer.TimerService.class).getExecutor());
-                    for (int i = 0; i < accountSize; i++) {
-                        final MailAccount mailAccount = accounts.get(i);
-                        final int index = i;
-                        /*
-                         * Check if current account has been initialized before that is if its default folders were checked.
-                         */
-                        final boolean initialized;
-                        {
-                            final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(mailAccount.getId()));
-                            initialized = (b != null) && b.booleanValue();
-                        }
-                        if (initialized) {
+                    final CompletionFuture<Object> completionFuture;
+                    {
+                        final List<Task<Object>> tasks = new ArrayList<Task<Object>>(accountSize);
+                        for (int i = 0; i < accountSize; i++) {
+                            final MailAccount mailAccount = accounts.get(i);
+                            final int index = i;
                             /*
-                             * Clean session caches
+                             * Check if current account has been initialized before that is if its default folders were checked.
                              */
-                            SessionMailCache.getInstance(session, mailAccount.getId()).clear();
-                            /*
-                             * Add root folders
-                             */
-                            completionService.submit(new Callable<Object>() {
+                            final boolean initialized;
+                            {
+                                final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(mailAccount.getId()));
+                                initialized = (b != null) && b.booleanValue();
+                            }
+                            if (initialized) {
+                                /*
+                                 * Clean session caches
+                                 */
+                                SessionMailCache.getInstance(session, mailAccount.getId()).clear();
+                                /*
+                                 * Add root folders
+                                 */
+                                tasks.add(new AbstractTask<Object>() {
 
-                                public Object call() throws Exception {
-                                    final MailFolder rootFolder;
-                                    final MailAccess<?, ?> mailAccess;
-                                    try {
-                                        mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                                        rootFolder = mailAccess.getRootFolder();
-                                    } catch (final MailException e) {
-                                        LOG.error(e.getMessage(), e);
+                                    public Object call() throws Exception {
+                                        final MailFolder rootFolder;
+                                        final MailAccess<?, ?> mailAccess;
+                                        try {
+                                            mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+                                            rootFolder = mailAccess.getRootFolder();
+                                        } catch (final MailException e) {
+                                            LOG.error(e.getMessage(), e);
+                                            arrays[index] = null;
+                                            return null;
+                                        }
+                                        try {
+                                            final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                                columns,
+                                                mailAccess.getMailConfig());
+                                            final JSONArray ja = new JSONArray();
+                                            if (mailAccount.isDefaultAccount()) {
+                                                for (int i = 0; i < mailFolderWriters.length; i++) {
+                                                    mailFolderWriters[i].writeField(
+                                                        ja,
+                                                        mailAccount.getId(),
+                                                        rootFolder,
+                                                        false,
+                                                        MailFolder.DEFAULT_FOLDER_NAME,
+                                                        1,
+                                                        MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
+                                                        FolderObject.SYSTEM_MODULE,
+                                                        false);
+                                                }
+                                            } else {
+                                                for (int i = 0; i < mailFolderWriters.length; i++) {
+                                                    mailFolderWriters[i].writeField(
+                                                        ja,
+                                                        mailAccount.getId(),
+                                                        rootFolder,
+                                                        false,
+                                                        mailAccount.getName(),
+                                                        1,
+                                                        MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
+                                                        FolderObject.SYSTEM_MODULE,
+                                                        false);
+                                                }
+                                            }
+                                            arrays[index] = ja;
+                                        } catch (final MailException e) {
+                                            LOG.error(e.getMessage(), e);
+                                            arrays[index] = null;
+                                        } finally {
+                                            mailAccess.close(true);
+                                        }
+                                        return null;
+                                    }
+                                });
+                            } else {
+                                // Add dummy callable
+                                tasks.add(new AbstractTask<Object>() {
+
+                                    public Object call() throws Exception {
                                         arrays[index] = null;
                                         return null;
                                     }
-                                    try {
-                                        final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                            columns,
-                                            mailAccess.getMailConfig());
-                                        final JSONArray ja = new JSONArray();
-                                        if (mailAccount.isDefaultAccount()) {
-                                            for (int i = 0; i < mailFolderWriters.length; i++) {
-                                                mailFolderWriters[i].writeField(
-                                                    ja,
-                                                    mailAccount.getId(),
-                                                    rootFolder,
-                                                    false,
-                                                    MailFolder.DEFAULT_FOLDER_NAME,
-                                                    1,
-                                                    MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
-                                                    FolderObject.SYSTEM_MODULE,
-                                                    false);
-                                            }
-                                        } else {
-                                            for (int i = 0; i < mailFolderWriters.length; i++) {
-                                                mailFolderWriters[i].writeField(
-                                                    ja,
-                                                    mailAccount.getId(),
-                                                    rootFolder,
-                                                    false,
-                                                    mailAccount.getName(),
-                                                    1,
-                                                    MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID),
-                                                    FolderObject.SYSTEM_MODULE,
-                                                    false);
-                                            }
-                                        }
-                                        arrays[index] = ja;
-                                    } catch (final MailException e) {
-                                        LOG.error(e.getMessage(), e);
-                                        arrays[index] = null;
-                                    } finally {
-                                        mailAccess.close(true);
-                                    }
-                                    return null;
-                                }
-                            });
-                        } else {
-                            // Add dummy callable
-                            completionService.submit(new Callable<Object>() {
-
-                                public Object call() throws Exception {
-                                    arrays[index] = null;
-                                    return null;
-                                }
-                            });
+                                });
+                            }
                         }
+                        completionFuture = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
                     }
                     // Wait for completion
                     try {
                         for (int i = 0; i < accountSize; i++) {
-                            completionService.take().get();
+                            completionFuture.take().get();
                         }
                     } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
