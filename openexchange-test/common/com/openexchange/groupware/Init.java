@@ -135,8 +135,11 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
+import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
+import com.openexchange.threadpool.internal.ThreadPoolProperties;
+import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.timer.TimerService;
-import com.openexchange.timer.internal.TimerImpl;
+import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
@@ -279,11 +282,11 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
-        startAndInjectTimerBundle();
+        startAndInjectConfigBundle();
+        startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
         startAndInjectCalendarServices();
         startAndInjectExceptionFramework();
-        startAndInjectConfigBundle();
         startAndInjectServerConfiguration();
         startAndInjectNotification();
         startAndInjectDatabaseBundle();
@@ -304,9 +307,17 @@ public final class Init {
         startAndInjectXMLServices();
     }
 
-    private static void startAndInjectTimerBundle() {
-        final TimerImpl timer = new TimerImpl();
-        timer.start();
+    public static void startAndInjectConfigBundle() {
+        final ConfigurationService config = new ConfigurationImpl();
+        services.put(ConfigurationService.class, config);
+        ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+    }
+
+    private static void startAndInjectThreadPoolBundle() {
+        final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+        ThreadPoolProperties props = new ThreadPoolProperties().init(config);
+        ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getRefusedExecutionBehavior());
+        TimerService timer = new CustomThreadPoolExecutorTimerService((CustomThreadPoolExecutor) threadPool.getExecutor());
         services.put(TimerService.class, timer);
         ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
     }
@@ -324,14 +335,10 @@ public final class Init {
         } catch (final IllegalAccessException e) {
             throw getWrappingOXException(e);
         }
-        services.put(ContextService.class, new ContextServiceImpl());
-        services.put(UserService.class, new UserServiceImpl());
         services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
         new ContactInterfaceDiscoveryInitialization().start();
         services.put(ContactInterfaceDiscoveryService.class, ContactInterfaceDiscoveryServiceImpl.getInstance());
 
-        ServerServiceRegistry.getInstance().addService(ContextService.class, services.get(ContextService.class));
-        ServerServiceRegistry.getInstance().addService(UserService.class, services.get(UserService.class));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
         ServerServiceRegistry.getInstance().addService(
             ContactInterfaceDiscoveryService.class,
@@ -389,12 +396,6 @@ public final class Init {
 
     private static void startAndInjectExceptionFramework() {
         services.put(ComponentRegistry.class, new ComponentRegistryImpl());
-    }
-
-    public static void startAndInjectConfigBundle() {
-        final ConfigurationService config = new ConfigurationImpl();
-        services.put(ConfigurationService.class, config);
-        ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
     public static void startAndInjectServerConfiguration() {
