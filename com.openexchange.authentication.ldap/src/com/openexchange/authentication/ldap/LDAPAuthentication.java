@@ -55,6 +55,8 @@ import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 
@@ -74,6 +76,18 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class LDAPAuthentication implements AuthenticationService {
 
+    private enum PropertyNames {
+        baseDN("baseDN"),
+        uidAttribute("uidAttribute"),
+        ldapReturnField("ldapReturnField");
+        
+        public String name;
+        
+        private PropertyNames(final String propertyname) {
+            this.name = propertyname;
+        }
+    }
+    
     /**
      * Logger.
      */
@@ -87,7 +101,7 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * attribute name and base DN.
      */
-    private String uidAttribute, baseDN;
+    private String uidAttribute, baseDN, ldapReturnField;
 
     /**
      * Default constructor.
@@ -110,13 +124,17 @@ public class LDAPAuthentication implements AuthenticationService {
         if ("".equals(uid) || "".equals(password)) {
             throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS);
         }
-        bind(uid, password);
+        final String returnstring = bind(uid, password);
         return new Authenticated() {
             public String getContextInfo() {
                 return splitted[0];
             }
             public String getUserInfo() {
-                return splitted[1];
+                if (null != returnstring) {
+                    return returnstring;
+                } else {
+                    return splitted[1];
+                }
             }
         };
     }
@@ -127,15 +145,22 @@ public class LDAPAuthentication implements AuthenticationService {
      * @param password password.
      * @throws LoginException if some problem occurs.
      */
-    private void bind(final String uid, final String password)
+    private String bind(final String uid, final String password)
         throws LoginException {
         LdapContext context = null;
         try {
             context = createContext();
-            context.addToEnvironment(Context.SECURITY_PRINCIPAL, uidAttribute
-                + "=" + uid + "," + baseDN);
+            final String dn = uidAttribute + "=" + uid + "," + baseDN;
+            context.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
+            if (null != ldapReturnField && ldapReturnField.length() > 0) {
+                final Attributes userDnAttributes = context.getAttributes(dn);
+                final Attribute attribute = userDnAttributes.get(ldapReturnField);
+                return (String) attribute.get();
+            } else {
+                return null;
+            }
         } catch (final InvalidNameException e) {
             throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
         } catch (final AuthenticationException e) {
@@ -173,14 +198,14 @@ public class LDAPAuthentication implements AuthenticationService {
      * @throws LoginException if configuration fails.
      */
     private void init() throws LoginException {
-        if (!props.containsKey("uidAttribute")) {
-            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, "uidAttribute");
+        if (!props.containsKey(PropertyNames.uidAttribute.name)) {
+            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, PropertyNames.uidAttribute.name);
         }
-        uidAttribute = props.getProperty("uidAttribute");
-        if (!props.containsKey("baseDN")) {
-            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, "baseDN");
+        uidAttribute = props.getProperty(PropertyNames.uidAttribute.name);
+        if (!props.containsKey(PropertyNames.baseDN.name)) {
+            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, PropertyNames.baseDN.name);
         }
-        baseDN = props.getProperty("baseDN");
+        baseDN = props.getProperty(PropertyNames.baseDN.name);
         props.put(LdapContext.INITIAL_CONTEXT_FACTORY,
             "com.sun.jndi.ldap.LdapCtxFactory");
         final String url = props.getProperty(LdapContext.PROVIDER_URL);
@@ -190,6 +215,7 @@ public class LDAPAuthentication implements AuthenticationService {
             props.put("java.naming.ldap.factory.socket",
                 TrustAllSSLSocketFactory.class.getName());
         }
+        this.ldapReturnField = props.getProperty(PropertyNames.ldapReturnField.name);
     }
 
     /**
