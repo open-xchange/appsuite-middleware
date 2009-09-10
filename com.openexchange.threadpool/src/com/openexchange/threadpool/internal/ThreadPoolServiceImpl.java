@@ -77,7 +77,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPoolServiceImpl.class);
 
     /**
-     * Creates a new <tt>ThreadPoolExecutor</tt> with the given initial parameters.
+     * Creates a new {@link ThreadPoolServiceImpl} with the given initial parameters.
      * 
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize The maximum number of threads to allow in the pool.

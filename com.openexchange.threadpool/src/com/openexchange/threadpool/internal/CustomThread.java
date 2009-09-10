@@ -58,6 +58,8 @@ public final class CustomThread extends Thread {
 
     private String originalName;
 
+    private boolean changed;
+
     /**
      * Initializes a new {@link CustomThread}.
      */
@@ -142,7 +144,7 @@ public final class CustomThread extends Thread {
     }
 
     /**
-     * Gets the original name
+     * Gets the original name.
      * 
      * @return The original name
      */
@@ -151,12 +153,19 @@ public final class CustomThread extends Thread {
     }
 
     /**
-     * Sets the original name
+     * Sets the original name.
      * 
      * @param originalName The original name to set
      */
     public void setOriginalName(final String originalName) {
         this.originalName = originalName;
+    }
+
+    /**
+     * Restores the original name.
+     */
+    public void restoreName() {
+        setName(originalName);
     }
 
 }

@@ -47,58 +47,52 @@
  *
  */
 
-package com.openexchange.threadpool.osgi;
+package com.openexchange.threadpool.internal;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import com.openexchange.threadpool.ThreadPoolInformationMBean;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link AddingTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for adding into {@link ThreadPoolServiceRegistry
- * service registry}.
+ * {@link ThreadPoolInformation} - The thread pool information implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AddingTrackerCustomizer<S> implements ServiceTrackerCustomizer {
+public final class ThreadPoolInformation extends StandardMBean implements ThreadPoolInformationMBean {
 
-    private final BundleContext context;
-
-    private final Class<S> serviceClass;
+    private final ThreadPoolService threadPoolService;
 
     /**
-     * Initializes a new {@link AddingTrackerCustomizer}.
+     * Initializes a new {@link ThreadPoolInformation}.
      * 
-     * @param context The bundle context
-     * @param clazz The service class
+     * @param threadPoolService The thread pool service
+     * @throws NotCompliantMBeanException If the MBean interface does not follow JMX design patterns for Management Interfaces, or if this
+     *             does not implement the specified interface.
      */
-    public AddingTrackerCustomizer(final BundleContext context, final Class<S> clazz) {
-        super();
-        this.context = context;
-        this.serviceClass = clazz;
+    public ThreadPoolInformation(final ThreadPoolService threadPoolService) throws NotCompliantMBeanException {
+        super(ThreadPoolInformationMBean.class);
+        this.threadPoolService = threadPoolService;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        if (!serviceClass.isInstance(service)) {
-            context.ungetService(reference);
-            return null;
-        }
-        ThreadPoolServiceRegistry.getServiceRegistry().addService(serviceClass, service);
-        return service;
+    public int getActiveCount() {
+        return threadPoolService.getActiveCount();
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
-        // Nothing to do
+    public long getCompletedTaskCount() {
+        return threadPoolService.getCompletedTaskCount();
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
-        if (null != service && serviceClass.isInstance(service)) {
-            try {
-                ThreadPoolServiceRegistry.getServiceRegistry().removeService(serviceClass);
-            } finally {
-                context.ungetService(reference);
-            }
-        }
+    public int getLargestPoolSize() {
+        return threadPoolService.getLargestPoolSize();
+    }
+
+    public int getPoolSize() {
+        return threadPoolService.getPoolSize();
+    }
+
+    public long getTaskCount() {
+        return threadPoolService.getTaskCount();
     }
 
 }

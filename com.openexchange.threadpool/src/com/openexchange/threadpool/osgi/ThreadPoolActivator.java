@@ -127,9 +127,9 @@ public final class ThreadPoolActivator extends DeferredActivator {
              * Service trackers
              */
             trackers = new ArrayList<ServiceTracker>(1);
-            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new AddingTrackerCustomizer<ManagementService>(
+            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTrackerCustomizer(
                 context,
-                ManagementService.class)));
+                threadPool)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }

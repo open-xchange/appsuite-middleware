@@ -81,9 +81,10 @@ public final class DelegatingRejectedExecutionHandler implements RejectedExecuti
     public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
         if (r instanceof CustomFutureTask<?>) {
             // Perform task's handler or default if null
-            final RefusedExecutionBehavior reb = ((CustomFutureTask<?>) r).getRefusedExecutionBehavior();
+            final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
+            final RefusedExecutionBehavior reb = customFutureTask.getRefusedExecutionBehavior();
             if (null != reb) {
-                reb.refusedExecution(r, threadPool);
+                reb.refusedExecution(customFutureTask.getTask(), threadPool);
                 return;
             }
         }

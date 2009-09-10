@@ -49,25 +49,55 @@
 
 package com.openexchange.threadpool;
 
-import java.util.concurrent.RejectedExecutionException;
-
 /**
- * {@link RefusedExecutionBehavior} - The behavior for tasks that cannot be executed by a {@link ThreadPoolService}.
+ * {@link ThreadPoolInformationMBean} - The MBean for thread pool information.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface RefusedExecutionBehavior {
+public interface ThreadPoolInformationMBean {
 
     /**
-     * Method that may be invoked by a {@link ThreadPoolService} when <tt>submit()</tt> method cannot accept a task. This may occur when no
-     * more threads or queue slots are available because their bounds would be exceeded, or upon shutdown of the thread pool. In the absence
-     * other alternatives, the method may throw an unchecked {@link RejectedExecutionException}, which will be propagated to the caller of
-     * <tt>submit()</tt>.
-     * 
-     * @param task The task requested to be executed
-     * @param threadPool The thread pool attempting to execute this task
-     * @throws RejectedExecutionException if there is no remedy
+     * The thread pool domain.
      */
-    void refusedExecution(Task<?> task, ThreadPoolService threadPool);
+    public static final String THREAD_POOL_DOMAIN = "com.openexchange.threadpool";
+
+    /**
+     * Returns the current number of threads in the pool.
+     * 
+     * @return The number of threads
+     */
+    int getPoolSize();
+
+    /**
+     * Returns the approximate number of threads that are actively executing tasks.
+     * 
+     * @return The number of threads
+     */
+    int getActiveCount();
+
+    /**
+     * Returns the largest number of threads that have ever simultaneously been in the pool.
+     * 
+     * @return The number of threads
+     */
+    int getLargestPoolSize();
+
+    /**
+     * Returns the approximate total number of tasks that have been scheduled for execution. Because the states of tasks and threads may
+     * change dynamically during computation, the returned value is only an approximation, but one that does not ever decrease across
+     * successive calls.
+     * 
+     * @return The number of tasks
+     */
+    long getTaskCount();
+
+    /**
+     * Returns the approximate total number of tasks that have completed execution. Because the states of tasks and threads may change
+     * dynamically during computation, the returned value is only an approximation, but one that does not ever decrease across successive
+     * calls.
+     * 
+     * @return The number of tasks
+     */
+    long getCompletedTaskCount();
 
 }

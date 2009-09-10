@@ -619,7 +619,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             Object[] entries = delayedWorkQueue.toArray();
             for (int i = 0; i < entries.length; ++i) {
                 final Object e = entries[i];
-                if (e instanceof ScheduledFutureTask) {
+                if (e instanceof ScheduledFutureTask<?>) {
                     final ScheduledFutureTask<?> t = (ScheduledFutureTask<?>) e;
                     if (t.isPeriodic() ? !keepPeriodic : !keepDelayed) {
                         t.cancel(false);
@@ -810,7 +810,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (other == this) {
                 return 0;
             }
-            if (other instanceof ScheduledFutureTask) {
+            if (other instanceof ScheduledFutureTask<?>) {
                 final ScheduledFutureTask<?> x = (ScheduledFutureTask<?>) other;
                 final long diff = time - x.time;
                 if (diff < 0) {
@@ -925,7 +925,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     private static class DelayedWorkQueue extends AbstractCollection<Runnable> implements BlockingQueue<Runnable> {
 
-        private final DelayQueue<ScheduledFutureTask> dq = new DelayQueue<ScheduledFutureTask>();
+        private final DelayQueue<ScheduledFutureTask<?>> dq = new DelayQueue<ScheduledFutureTask<?>>();
 
         public DelayedWorkQueue() {
             super();
@@ -949,19 +949,19 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         @Override
         public boolean add(final Runnable x) {
-            return dq.add((ScheduledFutureTask) x);
+            return dq.add((ScheduledFutureTask<?>) x);
         }
 
         public boolean offer(final Runnable x) {
-            return dq.offer((ScheduledFutureTask) x);
+            return dq.offer((ScheduledFutureTask<?>) x);
         }
 
         public void put(final Runnable x) {
-            dq.put((ScheduledFutureTask) x);
+            dq.put((ScheduledFutureTask<?>) x);
         }
 
         public boolean offer(final Runnable x, final long timeout, final TimeUnit unit) {
-            return dq.offer((ScheduledFutureTask) x, timeout, unit);
+            return dq.offer((ScheduledFutureTask<?>) x, timeout, unit);
         }
 
         public Runnable remove() {
@@ -1023,7 +1023,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         public Iterator<Runnable> iterator() {
             return new Iterator<Runnable>() {
 
-                private final Iterator<ScheduledFutureTask> it = dq.iterator();
+                private final Iterator<ScheduledFutureTask<?>> it = dq.iterator();
 
                 public boolean hasNext() {
                     return it.hasNext();
@@ -1224,11 +1224,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         super.afterExecute(r, throwable);
         if (r instanceof CustomFutureTask<?>) {
             ((CustomFutureTask<?>) r).getTask().afterExecute(throwable);
-            final Thread currentThread = Thread.currentThread();
-            if (currentThread instanceof CustomThread) {
-                final CustomThread ct = (CustomThread) currentThread;
-                ct.setName(ct.getOriginalName());
-            }
+            /*
+             * Restore original name
+             */
+            ((CustomThread) Thread.currentThread()).restoreName();
+        } else if (r instanceof ScheduledFutureTask<?>) {
+            ((CustomThread) Thread.currentThread()).restoreName();
         }
     }
 
@@ -1238,6 +1239,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             final Task<?> task = ((CustomFutureTask<?>) r).getTask();
             task.setThreadName(thread);
             task.beforeExecute(thread);
+        } else if (r instanceof ScheduledFutureTask<?>) {
+            final String tname = thread.getName();
+            final int pos = tname.indexOf('-');
+            if (pos > 0) {
+                thread.setName(new StringBuilder(16).append("OXTimer").append(tname.substring(pos)).toString());
+            }
         }
         super.beforeExecute(thread, r);
     }
@@ -1531,7 +1538,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     @Override
     public boolean remove(final Runnable task) {
-        if (task instanceof ScheduledFutureTask) {
+        if (task instanceof ScheduledFutureTask<?>) {
             return delayedWorkQueue.remove(task);
         }
         return workQueue.remove(task);
