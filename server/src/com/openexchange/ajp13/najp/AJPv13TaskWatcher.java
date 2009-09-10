@@ -54,21 +54,16 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
-import com.openexchange.ajp13.najp.threadpool.AJPv13ThreadFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -90,8 +85,10 @@ public class AJPv13TaskWatcher {
 
     /**
      * Initializes a new {@link AJPv13TaskWatcher}.
+     * 
+     * @param threadPoolService The thread pool service
      */
-    public AJPv13TaskWatcher() {
+    public AJPv13TaskWatcher(final ThreadPoolService threadPoolService) {
         super();
         tasks = new ConcurrentHashMap<Long, AJPv13Task>();
         if (AJPv13Config.getAJPWatcherEnabled()) {
@@ -102,7 +99,7 @@ public class AJPv13TaskWatcher {
             if (null != timer) {
                 task =
                     timer.scheduleWithFixedDelay(
-                        new Task(tasks.values(), LOG),
+                        new Task(tasks.values(), threadPoolService, LOG),
                         1000,
                         AJPv13Config.getAJPWatcherFrequency(),
                         TimeUnit.MILLISECONDS);
@@ -140,21 +137,20 @@ public class AJPv13TaskWatcher {
 
         private final org.apache.commons.logging.Log log;
 
-        private final ExecutorService executorService;
+        private final ThreadPoolService threadPoolService;
 
         /**
          * Initializes a new {@link Task}
          * 
          * @param tasks The map to iterate
+         * @param threadPoolService The thread pool service
          * @param log The logger instance to use
          */
-        public Task(final Collection<AJPv13Task> tasks, final org.apache.commons.logging.Log log) {
+        public Task(final Collection<AJPv13Task> tasks, final ThreadPoolService threadPoolService, final org.apache.commons.logging.Log log) {
             super();
             this.tasks = tasks;
             this.log = log;
-            final BlockingQueue<Runnable> queue = AJPv13SynchronousQueueProvider.getInstance().newSynchronousQueue();
-            executorService =
-                new ThreadPoolExecutor(0, Integer.MAX_VALUE, 1L, TimeUnit.SECONDS, queue, new AJPv13ThreadFactory("AJPTaskWatcher-"));
+            this.threadPoolService = threadPoolService;
         }
 
         public void run() {
@@ -175,14 +171,15 @@ public class AJPv13TaskWatcher {
                 /*
                  * Create a list of tasks
                  */
-                final Collection<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+                final Collection<com.openexchange.threadpool.Task<Object>> tasks =
+                    new ArrayList<com.openexchange.threadpool.Task<Object>>();
                 for (final Iterator<AJPv13Task> iter = this.tasks.iterator(); iter.hasNext();) {
                     tasks.add(new TaskRunCallable(iter.next(), enabled, countWaiting, countProcessing, countExceeded, log));
                 }
                 /*
                  * Invoke all and wait for being executed
                  */
-                executorService.invokeAll(tasks);
+                threadPoolService.invokeAll(tasks);
                 /*
                  * All threads are listening longer than specified max listener running time
                  */
@@ -217,7 +214,7 @@ public class AJPv13TaskWatcher {
         }
     } // End of class Task
 
-    private static final class TaskRunCallable implements Callable<Object> {
+    private static final class TaskRunCallable implements com.openexchange.threadpool.Task<Object> {
 
         private final AJPv13Task task;
 
@@ -354,6 +351,18 @@ public class AJPv13TaskWatcher {
 
         private static int parseInt(final byte[] payloadData) {
             return ((payloadData[0] & 0xff) << 8) + (payloadData[1] & 0xff);
+        }
+
+        public void afterExecute(final Throwable t) {
+            // NOP
+        }
+
+        public void beforeExecute(final Thread t) {
+            // NOP
+        }
+
+        public void setThreadName(final Thread thread) {
+            // NOP
         }
 
     } // End of TaskRunCallable class

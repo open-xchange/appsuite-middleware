@@ -113,9 +113,9 @@ public final class AJPv13SocketHandler {
         if (!started) {
             synchronized (this) {
                 if (!started) {
-                    watcher = new AJPv13TaskWatcher();
-                    behavior = new AJPv13RefusedExecutionBehavior(watcher);
                     pool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                    watcher = new AJPv13TaskWatcher(pool);
+                    behavior = new AJPv13RefusedExecutionBehavior(watcher);
                     AJPv13Monitors.setListenerMonitor(listenerMonitor);
                     started = true;
                 }
