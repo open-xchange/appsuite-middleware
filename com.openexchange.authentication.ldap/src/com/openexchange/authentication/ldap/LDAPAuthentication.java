@@ -77,20 +77,17 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 public class LDAPAuthentication implements AuthenticationService {
 
     private enum PropertyNames {
-        baseDN("baseDN"),
-        uidAttribute("uidAttribute"),
-        ldapReturnField("ldapReturnField");
-        
+        BASE_DN("baseDN"),
+        UID_ATTRIBUTE("uidAttribute"),
+        LDAP_RETURN_FIELD("ldapReturnField");
+
         public String name;
-        
-        private PropertyNames(final String propertyname) {
-            this.name = propertyname;
+
+        private PropertyNames(String name) {
+            this.name = name;
         }
     }
-    
-    /**
-     * Logger.
-     */
+
     private static final Log LOG = LogFactory.getLog(LDAPAuthentication.class);
 
     /**
@@ -107,7 +104,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * Default constructor.
      * @throws LoginException if setup fails.
      */
-    public LDAPAuthentication(final Properties props) throws LoginException {
+    public LDAPAuthentication(Properties props) throws LoginException {
         super();
         this.props = props;
         init();
@@ -116,13 +113,12 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo)
-        throws LoginException {
+    public Authenticated handleLoginInfo(LoginInfo loginInfo) throws LoginException {
         final String[] splitted = split(loginInfo.getUsername());
         final String uid = splitted[1];
         final String password = loginInfo.getPassword();
         if ("".equals(uid) || "".equals(password)) {
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS);
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
         final String returnstring = bind(uid, password);
         return new Authenticated() {
@@ -130,11 +126,7 @@ public class LDAPAuthentication implements AuthenticationService {
                 return splitted[0];
             }
             public String getUserInfo() {
-                if (null != returnstring) {
-                    return returnstring;
-                } else {
-                    return splitted[1];
-                }
+                return null == returnstring ? splitted[1] : returnstring;
             }
         };
     }
@@ -145,11 +137,14 @@ public class LDAPAuthentication implements AuthenticationService {
      * @param password password.
      * @throws LoginException if some problem occurs.
      */
-    private String bind(final String uid, final String password)
-        throws LoginException {
-        LdapContext context = null;
+    private String bind(String uid, String password) throws LoginException {
+        final LdapContext context;
         try {
-            context = createContext();
+            context = new InitialLdapContext(props, null);
+        } catch (NamingException e) {
+            throw LoginExceptionCodes.COMMUNICATION.create(e);
+        }
+        try {
             final String dn = uidAttribute + "=" + uid + "," + baseDN;
             context.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
@@ -158,38 +153,21 @@ public class LDAPAuthentication implements AuthenticationService {
                 final Attributes userDnAttributes = context.getAttributes(dn);
                 final Attribute attribute = userDnAttributes.get(ldapReturnField);
                 return (String) attribute.get();
-            } else {
-                return null;
             }
-        } catch (final InvalidNameException e) {
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
-        } catch (final AuthenticationException e) {
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
-        } catch (final NamingException e) {
+            return null;
+        } catch (InvalidNameException e) {
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
+        } catch (AuthenticationException e) {
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
+        } catch (NamingException e) {
             LOG.error(e.getMessage(), e);
-            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
+            throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
-            if (null != context) {
-                try {
-                    context.close();
-                } catch (final NamingException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+            try {
+                context.close();
+            } catch (NamingException e) {
+                LOG.error(e.getMessage(), e);
             }
-        }
-    }
-
-    /**
-     * Creates a new context to the ldap server.
-     * @return a new context to the ldap server.
-     * @throws LoginException
-     *             if creating a context fails.
-     */
-    private LdapContext createContext() throws LoginException {
-        try {
-            return new InitialLdapContext(props, null);
-        } catch (final NamingException e) {
-            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
         }
     }
 
@@ -198,24 +176,22 @@ public class LDAPAuthentication implements AuthenticationService {
      * @throws LoginException if configuration fails.
      */
     private void init() throws LoginException {
-        if (!props.containsKey(PropertyNames.uidAttribute.name)) {
-            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, PropertyNames.uidAttribute.name);
+        if (!props.containsKey(PropertyNames.UID_ATTRIBUTE.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.UID_ATTRIBUTE.name);
         }
-        uidAttribute = props.getProperty(PropertyNames.uidAttribute.name);
-        if (!props.containsKey(PropertyNames.baseDN.name)) {
-            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, PropertyNames.baseDN.name);
+        uidAttribute = props.getProperty(PropertyNames.UID_ATTRIBUTE.name);
+        if (!props.containsKey(PropertyNames.BASE_DN.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.BASE_DN.name);
         }
-        baseDN = props.getProperty(PropertyNames.baseDN.name);
-        props.put(LdapContext.INITIAL_CONTEXT_FACTORY,
-            "com.sun.jndi.ldap.LdapCtxFactory");
+        baseDN = props.getProperty(PropertyNames.BASE_DN.name);
+        props.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         final String url = props.getProperty(LdapContext.PROVIDER_URL);
         if (null == url) {
-            throw new LoginException(LoginExceptionCodes.MISSING_PROPERTY, LdapContext.PROVIDER_URL);
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(LdapContext.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
-            props.put("java.naming.ldap.factory.socket",
-                TrustAllSSLSocketFactory.class.getName());
+            props.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
         }
-        this.ldapReturnField = props.getProperty(PropertyNames.ldapReturnField.name);
+        this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);
     }
 
     /**
@@ -224,7 +200,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * @return a string array with context and user name (in this order).
      * @throws LoginException if no separator is found.
      */
-    private String[] split(final String loginInfo) {
+    private String[] split(String loginInfo) {
         return split(loginInfo, '@');
     }
 
@@ -235,7 +211,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * @return a string array with context and user name (in this order).
      * @throws LoginException if no separator is found.
      */
-    private String[] split(final String loginInfo, final char separator) {
+    private String[] split(String loginInfo, char separator) {
         final int pos = loginInfo.lastIndexOf(separator);
         final String[] splitted = new String[2];
         if (-1 == pos) {
