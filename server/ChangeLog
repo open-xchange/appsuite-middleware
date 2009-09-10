@@ -1,3 +1,7 @@
+* 2009-09-10 - thorben.betten@open-xchange.com
+
+ - Bugfix 14489: Auto-Detecting charset of a RFC 2047 "encoded-word" if unknown
+
 * 2009-09-09 - marcus.klein@open-xchange.com
 
  - Bugfix #14454: Escaped dash character in email regex for crawling contact from Google.

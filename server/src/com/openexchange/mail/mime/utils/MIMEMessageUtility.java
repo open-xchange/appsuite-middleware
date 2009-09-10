@@ -76,6 +76,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -91,9 +94,11 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -510,8 +515,10 @@ public final class MIMEMessageUtility {
                     sb.append(MimeUtility.decodeWord(m.group()));
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.error("Unsupported character-encoding in encoded-word: " + m.group(), e);
-                    sb.append(m.group());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                    }
+                    sb.append(handleUnsupportedEncoding(m));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
@@ -521,6 +528,50 @@ public final class MIMEMessageUtility {
             return sb.toString();
         }
         return hdrVal;
+    }
+
+    private static String handleUnsupportedEncoding(final Matcher m) {
+        final String asciiText = m.group(3);
+        final String detectedCharset;
+        final byte[] rawBytes;
+        try {
+            final String transferEncoding = m.group(2);
+            if ("Q".equalsIgnoreCase(transferEncoding)) {
+                try {
+                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(asciiText.getBytes("US-ASCII"));
+                } catch (final DecoderException e) {
+                    /*
+                     * Invalid quoted-printable
+                     */
+                    LOG.warn("Cannot decode quoted-printable: " + e.getMessage(), e);
+                    return asciiText;
+                }
+            } else if ("B".equalsIgnoreCase(transferEncoding)) {
+                rawBytes = Base64.decodeBase64(asciiText.getBytes("US-ASCII"));
+            } else {
+                /*
+                 * Unknown transfer-encoding; just return current match
+                 */
+                LOG.warn("Unknown transfer-encoding: " + transferEncoding);
+                return asciiText;
+            }
+            detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
+        } catch (final UnsupportedEncodingException ignore) {
+            // Cannot occur
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(ignore.getMessage(), ignore);
+            }
+            return asciiText;
+        }
+        try {
+            return new String(rawBytes, detectedCharset);
+        } catch (final UnsupportedEncodingException e) {
+            /*
+             * Even detected charset is unknown... giving up
+             */
+            LOG.warn("Unknown character-encoding: " + detectedCharset);
+            return asciiText;
+        }
     }
 
     /**
