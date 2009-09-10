@@ -119,7 +119,7 @@ public interface ThreadPoolService {
      * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
      * @throws RejectedExecutionException If any task cannot be scheduled for execution
      */
-    <T> List<Future<T>> invokeAll(Collection<Task<T>> tasks) throws InterruptedException;
+    <T> List<Future<T>> invokeAll(Collection<? extends Task<T>> tasks) throws InterruptedException;
 
     /**
      * Executes the given tasks, returning a list of Futures holding their status and results when all complete or the timeout expires,
@@ -136,7 +136,7 @@ public interface ThreadPoolService {
      * @throws NullPointerException If tasks, or any of its elements are <tt>null</tt>
      * @throws RejectedExecutionException If any task cannot be scheduled for execution
      */
-    <T> List<Future<T>> invokeAll(Collection<Task<T>> tasks, long timeout) throws InterruptedException;
+    <T> List<Future<T>> invokeAll(Collection<? extends Task<T>> tasks, long timeout) throws InterruptedException;
 
     /**
      * Executes the given task using this thread pool. Returned {@link CompletionFuture} can then be used to await completion of given
@@ -179,7 +179,7 @@ public interface ThreadPoolService {
      * @throws RejectedExecutionException If task cannot be scheduled for execution
      * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
      */
-    <T> CompletionFuture<T> invoke(Collection<Task<T>> tasks);
+    <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks);
 
     /**
      * Executes the given task using this thread pool. Given refused execution behavior is triggered for each task that cannot be executed.
@@ -224,7 +224,7 @@ public interface ThreadPoolService {
      * @throws RejectedExecutionException If task cannot be scheduled for execution
      * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
      */
-    <T> CompletionFuture<T> invoke(Collection<Task<T>> tasks, RefusedExecutionBehavior refusedExecutionBehavior);
+    <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks, RefusedExecutionBehavior refusedExecutionBehavior);
 
     /**
      * Gets the {@link Executor} view on this thread pool.

@@ -209,7 +209,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return threadPoolExecutor.getTaskCount();
     }
 
-    public <T> List<Future<T>> invokeAll(final Collection<Task<T>> tasks) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks) throws InterruptedException {
         if (tasks == null) {
             throw new NullPointerException();
         }
@@ -243,7 +243,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
     }
 
-    public <T> List<Future<T>> invokeAll(final Collection<Task<T>> tasks, final long timeout) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(final Collection<? extends Task<T>> tasks, final long timeout) throws InterruptedException {
         if (tasks == null) {
             throw new NullPointerException();
         }
@@ -300,7 +300,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
     }
 
-    public <T> CompletionFuture<T> invoke(final Collection<Task<T>> tasks) {
+    public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks) {
         if (tasks == null) {
             throw new NullPointerException();
         }
@@ -311,7 +311,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
-    public <T> CompletionFuture<T> invoke(final Collection<Task<T>> tasks, final RefusedExecutionBehavior behavior) {
+    public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior behavior) {
         if (tasks == null) {
             throw new NullPointerException();
         }
