@@ -53,15 +53,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -296,7 +300,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
     }
 
-    public <T> CompletionService<T> invoke(final Collection<Task<T>> tasks) {
+    public <T> CompletionFuture<T> invoke(final Collection<Task<T>> tasks) {
         if (tasks == null) {
             throw new NullPointerException();
         }
@@ -304,7 +308,18 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         for (final Task<T> task : tasks) {
             completionService.submit(task);
         }
-        return completionService;
+        return new CompletionFutureImpl<T>(completionService);
+    }
+
+    public <T> CompletionFuture<T> invoke(final Collection<Task<T>> tasks, final RefusedExecutionBehavior behavior) {
+        if (tasks == null) {
+            throw new NullPointerException();
+        }
+        final CompletionService<T> completionService = new CustomExecutorCompletionService<T>(threadPoolExecutor, behavior);
+        for (final Task<T> task : tasks) {
+            completionService.submit(task);
+        }
+        return new CompletionFutureImpl<T>(completionService);
     }
 
     public Executor getExecutor() {
@@ -336,5 +351,98 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         threadPoolExecutor.execute(ftask);
         return ftask;
     }
+
+    /*-
+     * ######################## HELPER CLASSES ########################
+     */
+
+    private static final class CustomExecutorCompletionService<V> implements CompletionService<V> {
+
+        private final Executor executor;
+
+        private final RefusedExecutionBehavior behavior;
+
+        private final BlockingQueue<Future<V>> completionQueue;
+
+        /**
+         * FutureTask extension to enqueue upon completion
+         */
+        private class CustomQueueingFuture extends CustomFutureTask<V> {
+
+            CustomQueueingFuture(final Task<V> task) {
+                super(task, behavior);
+            }
+
+            @Override
+            protected void done() {
+                completionQueue.add(this);
+            }
+        }
+
+        /**
+         * Creates an {@link CustomExecutorCompletionService} using the supplied executor for base task execution and a
+         * {@link LinkedBlockingQueue} as a completion queue.
+         * 
+         * @param executor the executor to use
+         * @throws NullPointerException if executor is <tt>null</tt>
+         */
+        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior behavior) {
+            if (executor == null) {
+                throw new NullPointerException();
+            }
+            this.behavior = behavior;
+            this.executor = executor;
+            this.completionQueue = new LinkedBlockingQueue<Future<V>>();
+        }
+
+        public Future<V> submit(final Callable<V> task) {
+            if (task == null) {
+                throw new NullPointerException();
+            }
+            final CustomQueueingFuture f = new CustomQueueingFuture((Task<V>) task);
+            executor.execute(f);
+            return f;
+        }
+
+        public Future<V> submit(final Runnable task, final V result) {
+            throw new UnsupportedOperationException("ThreadPoolServiceImpl.CustomExecutorCompletionService.submit()");
+        }
+
+        public Future<V> take() throws InterruptedException {
+            return completionQueue.take();
+        }
+
+        public Future<V> poll() {
+            return completionQueue.poll();
+        }
+
+        public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+            return completionQueue.poll(timeout, unit);
+        }
+
+    }
+
+    private static final class CompletionFutureImpl<V> implements CompletionFuture<V> {
+
+        private final CompletionService<V> completionService;
+
+        public CompletionFutureImpl(final CompletionService<V> completionService) {
+            super();
+            this.completionService = completionService;
+        }
+
+        public Future<V> poll() {
+            return completionService.poll();
+        }
+
+        public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+            return completionService.poll(timeout, unit);
+        }
+
+        public Future<V> take() throws InterruptedException {
+            return completionService.take();
+        }
+
+    } // End of CompletionFutureImpl
 
 }

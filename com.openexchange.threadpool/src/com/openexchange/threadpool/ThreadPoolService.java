@@ -51,7 +51,6 @@ package com.openexchange.threadpool;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -140,9 +139,9 @@ public interface ThreadPoolService {
     <T> List<Future<T>> invokeAll(Collection<Task<T>> tasks, long timeout) throws InterruptedException;
 
     /**
-     * Executes the given task using a {@link CompletionService} which can then be used to await completion of given tasks. Unlike
-     * <tt>invokeAll()</tt> tasks' execution is completely decoupled from the consumption of the tasks through returned
-     * {@link CompletionService}.
+     * Executes the given task using this thread pool. Returned {@link CompletionFuture} can then be used to await completion of given
+     * tasks. Unlike <tt>invokeAll()</tt> tasks' execution is completely decoupled from the consumption of the tasks through returned
+     * {@link CompletionFuture}.
      * <p>
      * When awaiting completion of given tasks, programmer should obey the following pattern:
      * 
@@ -150,7 +149,7 @@ public interface ThreadPoolService {
      * try {
      *     for (int i = tasks.size(); i &gt; 0; i--) {
      *         // Awaits until next task has completed; otherwise poll() method needs to be used to define a timeout
-     *         final Future&lt;V&gt; f = completionService.take();
+     *         final Future&lt;V&gt; f = completionFuture.take();
      *         /* Do something &#42;/
      *     }
      * } catch (InterruptedException e) {
@@ -176,11 +175,56 @@ public interface ThreadPoolService {
      * </pre>
      * 
      * @param tasks The collection of tasks
-     * @return A {@link CompletionService} instance executing givens tasks by using this thread pool
+     * @return A {@link CompletionFuture} instance to await completion of given tasks
      * @throws RejectedExecutionException If task cannot be scheduled for execution
      * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
      */
-    <T> CompletionService<T> invoke(Collection<Task<T>> tasks);
+    <T> CompletionFuture<T> invoke(Collection<Task<T>> tasks);
+
+    /**
+     * Executes the given task using this thread pool. Given refused execution behavior is triggered for each task that cannot be executed.
+     * Returned {@link CompletionFuture} can then be used to await completion of given tasks. Unlike <tt>invokeAll()</tt> tasks' execution
+     * is completely decoupled from the consumption of the tasks through returned {@link CompletionFuture}.
+     * <p>
+     * When awaiting completion of given tasks, programmer should obey the following pattern:
+     * 
+     * <pre>
+     * try {
+     *     for (int i = tasks.size(); i &gt; 0; i--) {
+     *         // Awaits until next task has completed; otherwise poll() method needs to be used to define a timeout
+     *         final Future&lt;V&gt; f = completionFuture.take();
+     *         /* Do something &#42;/
+     *     }
+     * } catch (InterruptedException e) {
+     *     // Keep interrupted status
+     *     Thread.currentThread().interrupt();
+     *     throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+     * } catch (CancellationException e) {
+     *     // Can only occur if task was canceled
+     *     /* Do something &#42;/
+     * } catch (ExecutionException e) {
+     *     final Throwable t = e.getCause();
+     *     if (t instanceof ExpectedException) {
+     *         // An expected exception type
+     *         throw (ExpectedException) t;
+     *     } else if (t instanceof RuntimeException) {
+     *         throw (RuntimeException) t;
+     *     } else if (t instanceof Error) {
+     *         throw (Error) t;
+     *     } else {
+     *         throw new IllegalStateException(&quot;Not unchecked&quot;, t);
+     *     }
+     * }
+     * </pre>
+     * 
+     * @param tasks The collection of tasks
+     * @param refusedExecutionBehavior The behavior to obey when execution is rejected or <code>null</code> to use pool's configured default
+     *            behavior
+     * @return A {@link CompletionFuture} instance to await completion of given tasks
+     * @throws RejectedExecutionException If task cannot be scheduled for execution
+     * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
+     */
+    <T> CompletionFuture<T> invoke(Collection<Task<T>> tasks, RefusedExecutionBehavior refusedExecutionBehavior);
 
     /**
      * Gets the {@link Executor} view on this thread pool.

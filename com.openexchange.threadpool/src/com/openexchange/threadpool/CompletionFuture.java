@@ -47,60 +47,45 @@
  *
  */
 
-package com.openexchange.threadpool.internal;
+package com.openexchange.threadpool;
 
-import java.util.concurrent.FutureTask;
-import com.openexchange.threadpool.RefusedExecutionBehavior;
-import com.openexchange.threadpool.Task;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link CustomFutureTask} - A custom {@link FutureTask}.
+ * {@link CompletionFuture} - Consumers <tt>take</tt> completed tasks and process their results in the order they complete. A
+ * <tt>CompletionFuture</tt> can for example be used to manage asynchronous IO, in which tasks that perform reads are submitted in one part
+ * of a program or system, and then acted upon in a different part of the program when the reads complete, possibly in a different order
+ * than they were requested..
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CustomFutureTask<V> extends FutureTask<V> {
-
-    private final Task<V> task;
-
-    private final RefusedExecutionBehavior refusedExecutionBehavior;
+public interface CompletionFuture<V> {
 
     /**
-     * Initializes a new {@link CustomFutureTask}.
+     * Retrieves and removes the Future representing the next completed task, waiting if none are yet present.
      * 
-     * @param task The task
+     * @return the Future representing the next completed task
+     * @throws InterruptedException if interrupted while waiting.
      */
-    public CustomFutureTask(final Task<V> task) {
-        this(task, null);
-    }
+    Future<V> take() throws InterruptedException;
 
     /**
-     * Initializes a new {@link CustomFutureTask}.
+     * Retrieves and removes the Future representing the next completed task or <tt>null</tt> if none are present.
      * 
-     * @param task The task
-     * @param refusedExecutionBehavior The refused execution behavior
+     * @return the Future representing the next completed task, or <tt>null</tt> if none are present.
      */
-    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior refusedExecutionBehavior) {
-        super(task);
-        this.task = task;
-        this.refusedExecutionBehavior = refusedExecutionBehavior;
-    }
+    Future<V> poll();
 
     /**
-     * Gets the task performed by this future task.
+     * Retrieves and removes the Future representing the next completed task, waiting if necessary up to the specified wait time if none are
+     * yet present.
      * 
-     * @return The task
+     * @param timeout how long to wait before giving up, in units of <tt>unit</tt>
+     * @param unit a <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
+     * @return the Future representing the next completed task or <tt>null</tt> if the specified waiting time elapses before one is present.
+     * @throws InterruptedException if interrupted while waiting.
      */
-    public Task<V> getTask() {
-        return task;
-    }
-
-    /**
-     * Gets the refused execution behavior.
-     * 
-     * @return The refused execution behavior or <code>null</code> if task has no individual behavior
-     */
-    public RefusedExecutionBehavior getRefusedExecutionBehavior() {
-        return refusedExecutionBehavior;
-    }
+    Future<V> poll(long timeout, TimeUnit unit) throws InterruptedException;
 
 }
