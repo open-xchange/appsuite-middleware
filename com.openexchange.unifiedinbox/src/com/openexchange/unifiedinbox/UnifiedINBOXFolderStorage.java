@@ -59,7 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.config.ConfigurationService;
@@ -79,12 +79,12 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.converters.UnifiedINBOXFolderConverter;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
 
@@ -238,7 +238,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             throw new UnifiedINBOXException(e);
         }
         final int nAccounts = accounts.length;
-        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(nAccounts);
+        final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
         final TrackingCompletionService<int[][]> completionService = new UnifiedINBOXCompletionService<int[][]>(executor);
         // Create a task for each account
         for (int i = 0; i < nAccounts; i++) {
@@ -305,19 +305,12 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             } else {
                 throw new IllegalStateException("Not unchecked", t);
             }
-        } finally {
-            try {
-                executor.shutdownNow();
-                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
     private MailFolder[] getRootSubfoldersByFolder() throws MailException {
         final MailFolder[] retval = new MailFolder[5];
-        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(retval.length << 4);
+        final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
         final TrackingCompletionService<Retval> completionService = new UnifiedINBOXCompletionService<Retval>(executor);
         // Init names
         final String[][] names = new String[5][];
@@ -395,13 +388,6 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             } else {
                 throw new IllegalStateException("Not unchecked", t);
             }
-        } finally {
-            try {
-                executor.shutdownNow();
-                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
         }
     }
 
@@ -427,7 +413,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         }
         final int unifiedInboxAccountId = access.getAccountId();
         final int length = accounts.length;
-        final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
+        final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
         final TrackingCompletionService<MailFolder> completionService = new UnifiedINBOXCompletionService<MailFolder>(executor);
         for (final MailAccount mailAccount : accounts) {
             completionService.submit(new LoggingCallable<MailFolder>(session) {
@@ -491,13 +477,6 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 throw (Error) t;
             } else {
                 throw new IllegalStateException("Not unchecked", t);
-            }
-        } finally {
-            try {
-                executor.shutdownNow();
-                executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
             }
         }
     }

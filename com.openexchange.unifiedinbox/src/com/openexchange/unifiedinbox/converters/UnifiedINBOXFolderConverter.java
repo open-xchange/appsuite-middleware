@@ -53,8 +53,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -69,12 +68,12 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
@@ -170,7 +169,7 @@ public final class UnifiedINBOXFolderConverter {
      * @return The appropriately filled instance of {@link MailFolder}
      * @throws MailException If converting mail folder fails
      */
-    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final ExecutorService executor) throws MailException {
+    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws MailException {
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified INBOX, so every folder is "subscribed"
         tmp.setSubscribed(true);
@@ -209,7 +208,7 @@ public final class UnifiedINBOXFolderConverter {
         return tmp;
     }
 
-    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final ExecutorService executor) throws UnifiedINBOXException, MailException {
+    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, MailException {
         final MailAccount[] accounts;
         try {
             final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
@@ -231,14 +230,11 @@ public final class UnifiedINBOXFolderConverter {
         }
         // Create completion service for simultaneous access
         final int length = accounts.length;
-        final ExecutorService exec;
-        final boolean shutdown;
+        final Executor exec;
         if (executor == null) {
-            exec = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            shutdown = true;
+            exec = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
         } else {
             exec = executor;
-            shutdown = false;
         }
         final TrackingCompletionService<int[]> completionService = new UnifiedINBOXCompletionService<int[]>(exec);
         final AtomicBoolean retval = new AtomicBoolean();
@@ -317,15 +313,6 @@ public final class UnifiedINBOXFolderConverter {
                 throw (Error) t;
             } else {
                 throw new IllegalStateException("Not unchecked", t);
-            }
-        } finally {
-            if (shutdown) {
-                try {
-                    exec.shutdownNow();
-                    exec.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         }
     }

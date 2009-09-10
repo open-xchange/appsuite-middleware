@@ -57,10 +57,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -83,12 +81,13 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.copy.UnifiedINBOXMessageCopier;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 import com.openexchange.user.UserService;
 
@@ -99,7 +98,8 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
 
     /**
      * Serial version UID
@@ -203,9 +203,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
             // Create completion service for simultaneous access
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
-            final TrackingCompletionService<GetMessagesResult> completionService = new UnifiedINBOXCompletionService<GetMessagesResult>(
-                executor);
+            final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            final TrackingCompletionService<GetMessagesResult> completionService =
+                new UnifiedINBOXCompletionService<GetMessagesResult>(executor);
             // Iterate parsed map and submit a task for each iteration
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
             for (int i = 0; i < size; i++) {
@@ -299,13 +299,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 } else {
                     throw new IllegalStateException("Not unchecked", t);
                 }
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
             // Return properly filled array
             return messages;
@@ -384,9 +377,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
             final MailAccount[] accounts;
             try {
-                final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
                 final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
                 for (int i = 0; i < tmp.length; i++) {
@@ -403,9 +395,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
             // Create completion service for simultaneous access
             final int length = accounts.length;
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            final TrackingCompletionService<List<MailMessage>> completionService = new UnifiedINBOXCompletionService<List<MailMessage>>(
-                executor);
+            final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            final TrackingCompletionService<List<MailMessage>> completionService =
+                new UnifiedINBOXCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
@@ -426,13 +418,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 return Collections.emptyList();
                             }
                             // Get account's messages
-                            final MailMessage[] accountMails = mailAccess.getMessageStorage().searchMessages(
-                                fn,
-                                indexRange,
-                                sortField,
-                                order,
-                                searchTerm,
-                                fields);
+                            final MailMessage[] accountMails =
+                                mailAccess.getMessageStorage().searchMessages(fn, indexRange, sortField, order, searchTerm, fields);
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
                             for (int i = 0; i < accountMails.length; i++) {
@@ -476,13 +463,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 } else {
                     throw new IllegalStateException("Not unchecked", t);
                 }
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         }
         final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
@@ -492,13 +472,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             mailAccess.connect();
             close = true;
             // Get account's messages
-            final MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(
-                fa.getFullname(),
-                indexRange,
-                sortField,
-                order,
-                searchTerm,
-                fields);
+            final MailMessage[] mails =
+                mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
             for (int i = 0; i < mails.length; i++) {
                 mails[i].setFolder(fullname);
             }
@@ -518,9 +493,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
             final MailAccount[] accounts;
             try {
-                final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
                 final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
                 for (int i = 0; i < tmp.length; i++) {
@@ -536,9 +510,9 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 throw new UnifiedINBOXException(e);
             }
             final int length = accounts.length;
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(length);
-            final TrackingCompletionService<List<MailMessage>> completionService = new UnifiedINBOXCompletionService<List<MailMessage>>(
-                executor);
+            final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            final TrackingCompletionService<List<MailMessage>> completionService =
+                new UnifiedINBOXCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
@@ -559,12 +533,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 return Collections.emptyList();
                             }
                             // Get account's unread messages
-                            final MailMessage[] accountMails = mailAccess.getMessageStorage().getUnreadMessages(
-                                fn,
-                                sortField,
-                                order,
-                                fields,
-                                limit);
+                            final MailMessage[] accountMails =
+                                mailAccess.getMessageStorage().getUnreadMessages(fn, sortField, order, fields, limit);
                             final UnifiedINBOXUID helper = new UnifiedINBOXUID();
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             for (int i = 0; i < accountMails.length; i++) {
@@ -608,13 +578,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 } else {
                     throw new IllegalStateException("Not unchecked", t);
                 }
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         }
         final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
@@ -647,7 +610,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final int size = parsed.size();
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
             // Collection of Callables
-            final Collection<Callable<Object>> collection = new ArrayList<Callable<Object>>(size);
+            final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
             for (int i = 0; i < size; i++) {
 
                 collection.add(new LoggingCallable<Object>(session) {
@@ -682,7 +645,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
+            final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             try {
                 // Invoke all and wait for being executed
                 if (LOG.isDebugEnabled()) {
@@ -697,13 +660,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
@@ -759,7 +715,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final int size = parsed.size();
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
             // Collection of Callables
-            final Collection<Callable<Object>> collection = new ArrayList<Callable<Object>>(size);
+            final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
             for (int i = 0; i < size; i++) {
                 collection.add(new LoggingCallable<Object>(session) {
 
@@ -793,7 +749,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
+            final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             try {
                 // Invoke all and wait for being executed
                 if (LOG.isDebugEnabled()) {
@@ -808,13 +764,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);
@@ -843,7 +792,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final int size = parsed.size();
             final Iterator<Map.Entry<Integer, Map<String, List<String>>>> iter = parsed.entrySet().iterator();
             // Collection of Callables
-            final Collection<Callable<Object>> collection = new ArrayList<Callable<Object>>(size);
+            final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
             for (int i = 0; i < size; i++) {
                 collection.add(new LoggingCallable<Object>(session) {
 
@@ -880,7 +829,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ExecutorService executor = UnifiedINBOXExecutors.newCachedThreadPool(size);
+            final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             try {
                 // Invoke all and wait for being executed
                 if (LOG.isDebugEnabled()) {
@@ -895,13 +844,6 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
-            } finally {
-                try {
-                    executor.shutdownNow();
-                    executor.awaitTermination(10000L, TimeUnit.MILLISECONDS);
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullname);

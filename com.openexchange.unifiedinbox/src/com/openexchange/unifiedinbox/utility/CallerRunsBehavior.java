@@ -49,88 +49,44 @@
 
 package com.openexchange.unifiedinbox.utility;
 
-import java.util.concurrent.Callable;
-import com.openexchange.session.Session;
+import java.util.concurrent.RejectedExecutionException;
+import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link LoggingCallable} - Extends {@link Callable} interface.
+ * {@link CallerRunsBehavior} - Implements "Caller-Runs" behavior.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class LoggingCallable<V> implements Task<V> {
+public final class CallerRunsBehavior implements RefusedExecutionBehavior {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoggingCallable.class);
-
-    private final Session session;
-
-    private final int accountId;
+    private static final CallerRunsBehavior BEHAVIOR = new CallerRunsBehavior();
 
     /**
-     * Initializes a new {@link LoggingCallable}.
+     * Gets the behavior instance.
+     * 
+     * @return The behavior instance
      */
-    public LoggingCallable() {
-        this(null);
+    public static CallerRunsBehavior getInstance() {
+        return BEHAVIOR;
     }
 
     /**
-     * Initializes a new {@link LoggingCallable}.
-     * 
-     * @param session The session
+     * Initializes a new {@link CallerRunsBehavior}.
      */
-    public LoggingCallable(final Session session) {
-        this(session, -1);
-    }
-
-    /**
-     * Initializes a new {@link LoggingCallable}.
-     * 
-     * @param session The session
-     * @param accountId The account ID
-     */
-    public LoggingCallable(final Session session, final int accountId) {
+    private CallerRunsBehavior() {
         super();
-        this.session = session;
-        this.accountId = accountId;
     }
 
-    /**
-     * Gets the logger.
-     * 
-     * @return The logger
-     */
-    public org.apache.commons.logging.Log getLogger() {
-        return LOG;
-    }
-
-    /**
-     * Gets the session.
-     * 
-     * @return The session or <code>null</code> if not set
-     */
-    public Session getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the account ID
-     * 
-     * @return The account ID or <code>-1</code> if not set
-     */
-    public int getAccountId() {
-        return accountId;
-    }
-
-    public void afterExecute(final Throwable t) {
-        // NOP
-    }
-
-    public void beforeExecute(final Thread t) {
-        // NOP
-    }
-
-    public void setThreadName(final Thread thread) {
-        // NOP
+    public void refusedExecution(final Task<?> task, final ThreadPoolService threadPool) {
+        if (!threadPool.isShutdown()) {
+            try {
+                task.call();
+            } catch (final Exception e) {
+                throw new RejectedExecutionException(e);
+            }
+        }
     }
 
 }

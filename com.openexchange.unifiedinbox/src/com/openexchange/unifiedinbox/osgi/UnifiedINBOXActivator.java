@@ -61,6 +61,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.UnifiedINBOXProvider;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXSynchronousQueueProvider;
 import com.openexchange.user.UserService;
@@ -90,7 +91,8 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class };
+            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class,
+            ThreadPoolService.class };
     }
 
     @Override

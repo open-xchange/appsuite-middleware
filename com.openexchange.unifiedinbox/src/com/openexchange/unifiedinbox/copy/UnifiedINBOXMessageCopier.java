@@ -52,21 +52,21 @@ package com.openexchange.unifiedinbox.copy;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.CompletionFuture;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.UnifiedINBOXUID;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXExecutors;
+import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.utility.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
@@ -145,13 +145,8 @@ public final class UnifiedINBOXMessageCopier {
             callable.addIdAndIndex(tmp.getId(), Integer.valueOf(i));
         }
         // Perform callables
-        final ExecutorService executorService = UnifiedINBOXExecutors.newUnlimitedCachedThreadPool("UnifiedINBOXMessageCopier-");
-        final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executorService);
-        try {
-            performCallables(callableMap.values(), completionService);
-        } finally {
-            executorService.shutdown();
-        }
+        final ThreadPoolService threadPoolService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        performCallables(callableMap.values(), threadPoolService);
         // Delete messages on move
         if (move) {
             access.getMessageStorage().deleteMessages(sourceFolder, mailIds, true);
@@ -206,14 +201,9 @@ public final class UnifiedINBOXMessageCopier {
             }
         }
         // Perform callables
-        final ExecutorService executorService = UnifiedINBOXExecutors.newUnlimitedCachedThreadPool("UnifiedINBOXMessageCopier-");
-        final CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executorService);
-        try {
-            performCallables(callableMap.values(), completionService);
-            performCallables(otherCallableMap.values(), completionService);
-        } finally {
-            executorService.shutdown();
-        }
+        final ThreadPoolService threadPoolService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        performCallables(callableMap.values(), threadPoolService);
+        performCallables(otherCallableMap.values(), threadPoolService);
         return retval;
     }
 
@@ -291,15 +281,13 @@ public final class UnifiedINBOXMessageCopier {
         return retval;
     }
 
-    private static void performCallables(final Collection<? extends Callable<Object>> callables, final CompletionService<Object> completionService) throws MailException {
-        for (final Callable<Object> callable : callables) {
-            completionService.submit(callable);
-        }
+    private static void performCallables(final Collection<? extends Task<Object>> callables, final ThreadPoolService threadPoolService) throws MailException {
+        final CompletionFuture<Object> completionFuture = threadPoolService.invoke(callables, CallerRunsBehavior.getInstance());
         // Wait for completion
         try {
             final int nCallables = callables.size();
             for (int k = 0; k < nCallables; k++) {
-                completionService.take().get();
+                completionFuture.take().get();
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -51,12 +51,12 @@ package com.openexchange.unifiedinbox.copy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.Task;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
-final class KF2KFCallable implements Callable<Object> {
+final class KF2KFCallable implements Task<Object> {
 
     private final int accountId;
 
@@ -113,6 +113,18 @@ final class KF2KFCallable implements Callable<Object> {
             mailAccess.close(true);
         }
         return null;
+    }
+
+    public void afterExecute(final Throwable t) {
+        // Nothing to do
+    }
+
+    public void beforeExecute(final Thread t) {
+        // Nothing to do
+    }
+
+    public void setThreadName(final Thread thread) {
+        // Nothing to do
     }
 
 }
