@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.List;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.Subscription;
@@ -103,6 +104,7 @@ public class Workflow {
         final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
         // Javascript needs to be disabled for security reasons
         webClient.setJavaScriptEnabled(false);
+        webClient.setRefreshHandler(new ThreadedRefreshHandler());
         try {
 
             Step previousStep = null;

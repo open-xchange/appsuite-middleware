@@ -96,7 +96,6 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
         try {
             // add the first page as there should always be results there
             subpages.add(htmlPage);
-
             // search for subpages
             for (HtmlAnchor link : htmlPage.getAnchors()) {
                 // get the subpages

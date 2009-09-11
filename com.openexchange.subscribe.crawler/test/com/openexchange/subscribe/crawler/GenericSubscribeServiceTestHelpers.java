@@ -62,8 +62,9 @@ import junit.framework.TestCase;
  */
 public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 
-    public static final String VALID_EMAIL_REGEX = "([a-z@A-Z0-9\\.-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)";
+    public static final String VALID_EMAIL_REGEX = "([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)";
     public static final String VALID_NAME = "([a-zA-Z\\sŠšŸ§-]*)";
+    public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-]*)";
     
     public GenericSubscribeServiceTestHelpers() {
         super();
@@ -98,6 +99,8 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             System.out.println("contacts title : " + contact.getTitle());
             System.out.println("contacts email address : " + contact.getEmail1());
             System.out.println("contacts mobile phone number : " + contact.getCellularTelephone1());
+            System.out.println("contacts work phone number : " + contact.getTelephoneBusiness1());
+            System.out.println("contacts home phone number : " + contact.getTelephoneHome1());
             System.out.println("contacts birthday : " + contact.getBirthday());
             System.out.println("contacts picture type : " + contact.getImageContentType());
             System.out.println("contacts city of work : " + contact.getCityBusiness());

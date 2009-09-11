@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -98,8 +99,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             try {
                 final HtmlPage page = anchor.click();
                 final Contact contact = new Contact();
-
-                pageParts.setPage(page.getWebResponse().getContentAsString());
+                String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
+                pageParts.setPage(pageString);
                 final HashMap<String, String> map = pageParts.retrieveInformation();
 
                 // set the contact«s information
