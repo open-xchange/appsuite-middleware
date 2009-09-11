@@ -100,7 +100,12 @@ public final class DelegatingRejectedExecutionHandler implements RejectedExecuti
         final RefusedExecutionBehavior<V> reb = cft.getRefusedExecutionBehavior();
         if (null != reb) {
             final V result = reb.refusedExecution(cft.getTask(), threadPool);
-            if (RefusedExecutionBehavior.DISCARDED != result) {
+            if (RefusedExecutionBehavior.DISCARDED == result) {
+                /*
+                 * TODO: What to do on discarded task? If cft's set() method is never invoked (either through innerRun() or innerSet()), a
+                 * call to get() will block forever.
+                 */
+            } else {
                 cft.set(result);
             }
         }

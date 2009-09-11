@@ -913,6 +913,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     continue;
                 }
                 if (r == null) {
+                    /*
+                     * TODO: Periodic or one-time command could not be fed into work queue
+                     */
                     rejectCustom(command);
                     continue;
                 }
