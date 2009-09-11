@@ -51,7 +51,7 @@ package com.openexchange.threadpool;
 
 /**
  * {@link AbstractTask} - An abstract {@link Task} which leaves {@link #afterExecute(Throwable)}, {@link #beforeExecute(Thread)}, and
- * {@link #setThreadName(Thread)} empty.
+ * {@link #setThreadName(ThreadRenamer)} empty.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,7 +72,7 @@ public abstract class AbstractTask<V> implements Task<V> {
         // NOP
     }
 
-    public void setThreadName(final Thread thread) {
+    public void setThreadName(final ThreadRenamer threadRenamer) {
         // NOP
     }
 

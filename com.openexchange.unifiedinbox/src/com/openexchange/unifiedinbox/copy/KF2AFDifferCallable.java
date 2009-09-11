@@ -55,6 +55,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 
 final class KF2AFDifferCallable implements Task<Object> {
 
@@ -144,7 +145,7 @@ final class KF2AFDifferCallable implements Task<Object> {
         // NOP
     }
 
-    public void setThreadName(final Thread thread) {
+    public void setThreadName(final ThreadRenamer threadRenamer) {
         // NOP
     }
 

@@ -62,6 +62,7 @@ import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
@@ -454,14 +455,8 @@ public final class AJPv13Task implements Task<Object> {
         listenerMonitor.incrementNumActive();
     }
 
-    public void setThreadName(final Thread thread) {
-        final String tname = thread.getName();
-        final int pos = tname.indexOf('-');
-        if (pos > 0) {
-            thread.setName(new StringBuilder(16).append("AJPListener").append(tname.substring(pos)).toString());
-        } else {
-            thread.setName(new StringBuilder(16).append("AJPListener-").append(numRunning.toString()).toString());
-        }
+    public void setThreadName(final ThreadRenamer threadRenamer) {
+        threadRenamer.renamePrefix("AJPListener");
     }
 
     /**

@@ -75,9 +75,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link CustomThreadPoolExecutor} - Copied from Java6's <tt>ThreadPoolExecutor</tt> written by Doug Lea.
@@ -1237,7 +1238,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     protected void beforeExecute(final Thread thread, final Runnable r) {
         if (r instanceof CustomFutureTask<?>) {
             final Task<?> task = ((CustomFutureTask<?>) r).getTask();
-            task.setThreadName(thread);
+            task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
         } else if (r instanceof ScheduledFutureTask<?>) {
             final String tname = thread.getName();

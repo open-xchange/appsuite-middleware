@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 final class KF2KFCallable implements Task<Object> {
@@ -123,7 +124,7 @@ final class KF2KFCallable implements Task<Object> {
         // Nothing to do
     }
 
-    public void setThreadName(final Thread thread) {
+    public void setThreadName(final ThreadRenamer threadRenamer) {
         // Nothing to do
     }
 

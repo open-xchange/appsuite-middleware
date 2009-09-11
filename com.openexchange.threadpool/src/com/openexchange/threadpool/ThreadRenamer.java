@@ -47,91 +47,33 @@
  *
  */
 
-package com.openexchange.unifiedinbox.utility;
-
-import java.util.concurrent.Callable;
-import com.openexchange.session.Session;
-import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadRenamer;
+package com.openexchange.threadpool;
 
 /**
- * {@link LoggingCallable} - Extends {@link Callable} interface.
+ * {@link ThreadRenamer} - Offers methods for thread renaming.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class LoggingCallable<V> implements Task<V> {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoggingCallable.class);
-
-    private final Session session;
-
-    private final int accountId;
+public interface ThreadRenamer {
 
     /**
-     * Initializes a new {@link LoggingCallable}.
-     */
-    public LoggingCallable() {
-        this(null);
-    }
-
-    /**
-     * Initializes a new {@link LoggingCallable}.
+     * Renames thread's name to given <tt>newName</tt>.
      * 
-     * @param session The session
+     * @param newName The new name
      */
-    public LoggingCallable(final Session session) {
-        this(session, -1);
-    }
+    public void rename(String newName);
 
     /**
-     * Initializes a new {@link LoggingCallable}.
+     * Renames thread's prefix to given <tt>newPrefix</tt>.
+     * <p>
+     * A thread's name is often built according to following pattern:<br>
+     * <tt>&lt;prefix&gt;'-'&lt;number&gt;</tt>, e.g. <tt>&quot;MyThread-001&quot;</tt><br>
+     * Hence only the first part is renamed to keep thread's number appendix.
+     * <p>
+     * <b>Note</b>: If thread's name does not obey described pattern, this method does the same as {@link #rename(String)} does.
      * 
-     * @param session The session
-     * @param accountId The account ID
+     * @param newPrefix The new prefix
      */
-    public LoggingCallable(final Session session, final int accountId) {
-        super();
-        this.session = session;
-        this.accountId = accountId;
-    }
-
-    /**
-     * Gets the logger.
-     * 
-     * @return The logger
-     */
-    public org.apache.commons.logging.Log getLogger() {
-        return LOG;
-    }
-
-    /**
-     * Gets the session.
-     * 
-     * @return The session or <code>null</code> if not set
-     */
-    public Session getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the account ID
-     * 
-     * @return The account ID or <code>-1</code> if not set
-     */
-    public int getAccountId() {
-        return accountId;
-    }
-
-    public void afterExecute(final Throwable t) {
-        // NOP
-    }
-
-    public void beforeExecute(final Thread t) {
-        // NOP
-    }
-
-    public void setThreadName(final ThreadRenamer threadRenamer) {
-        // NOP
-    }
+    public void renamePrefix(String newPrefix);
 
 }

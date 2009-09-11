@@ -49,14 +49,18 @@
 
 package com.openexchange.threadpool.internal;
 
+import com.openexchange.threadpool.ThreadRenamer;
+
 /**
  * {@link CustomThread} - Enhances {@link Thread} class by a setter/getter method for a thread's original name.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CustomThread extends Thread {
+public final class CustomThread extends Thread implements ThreadRenamer {
 
     private String originalName;
+
+    private String appendix;
 
     private boolean changed;
 
@@ -83,7 +87,7 @@ public final class CustomThread extends Thread {
      */
     public CustomThread(final String name) {
         super(name);
-        originalName = name;
+        applyName(name);
     }
 
     /**
@@ -104,7 +108,7 @@ public final class CustomThread extends Thread {
      */
     public CustomThread(final ThreadGroup group, final String name) {
         super(group, name);
-        originalName = name;
+        applyName(name);
     }
 
     /**
@@ -115,7 +119,7 @@ public final class CustomThread extends Thread {
      */
     public CustomThread(final Runnable target, final String name) {
         super(target, name);
-        originalName = name;
+        applyName(name);
     }
 
     /**
@@ -127,7 +131,7 @@ public final class CustomThread extends Thread {
      */
     public CustomThread(final ThreadGroup group, final Runnable target, final String name) {
         super(group, target, name);
-        originalName = name;
+        applyName(name);
     }
 
     /**
@@ -140,7 +144,17 @@ public final class CustomThread extends Thread {
      */
     public CustomThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
         super(group, target, name, stackSize);
+        applyName(name);
+    }
+
+    private void applyName(final String name) {
         originalName = name;
+        final int pos = originalName.indexOf('-');
+        if (pos > 0) {
+            appendix = name.substring(pos);
+        } else {
+            appendix = null;
+        }
     }
 
     /**
@@ -153,19 +167,27 @@ public final class CustomThread extends Thread {
     }
 
     /**
-     * Sets the original name.
-     * 
-     * @param originalName The original name to set
-     */
-    public void setOriginalName(final String originalName) {
-        this.originalName = originalName;
-    }
-
-    /**
      * Restores the original name.
      */
     public void restoreName() {
+        if (!changed) {
+            return;
+        }
         setName(originalName);
+    }
+
+    public void rename(final String newName) {
+        setName(newName);
+        changed = true;
+    }
+
+    public void renamePrefix(final String newPrefix) {
+        if (null == appendix) {
+            setName(newPrefix);
+        } else {
+            setName(new StringBuilder(16).append(newPrefix).append(appendix).toString());
+        }
+        changed = true;
     }
 
 }

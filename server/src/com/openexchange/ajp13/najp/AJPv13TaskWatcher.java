@@ -64,6 +64,7 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -361,7 +362,7 @@ public class AJPv13TaskWatcher {
             // NOP
         }
 
-        public void setThreadName(final Thread thread) {
+        public void setThreadName(final ThreadRenamer threadRenamer) {
             // NOP
         }
 

@@ -63,9 +63,9 @@ public interface Task<V> extends Callable<V> {
      * <p>
      * Implementations may leave this method empty if given thread needs not to be renamed.
      * 
-     * @param thread The executing thread
+     * @param threadRenamer The thread renamer
      */
-    void setThreadName(Thread thread);
+    void setThreadName(ThreadRenamer threadRenamer);
 
     /**
      * Invoked prior to executing this task in the given thread. This method is invoked by pooled thread <tt>t</tt> that will execute this
