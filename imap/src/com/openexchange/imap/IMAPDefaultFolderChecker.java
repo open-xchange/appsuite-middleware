@@ -55,10 +55,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import javax.mail.Folder;
@@ -71,6 +68,7 @@ import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.util.CallerRunsBehavior;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -89,7 +87,10 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
-import com.openexchange.timer.TimerService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.CompletionFuture;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -300,56 +301,59 @@ public final class IMAPDefaultFolderChecker {
                         spamHandler =
                             isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
                     }
-                    final CompletionService<Object> completionService;
-                    try {
-                        completionService =
-                            new ExecutorCompletionService<Object>(IMAPServiceRegistry.getService(TimerService.class, true).getExecutor());
-                    } catch (final ServiceException e) {
-                        throw new IMAPException(e);
-                    }
-                    int count = 0;
-                    for (int i = 0; i < defaultFolderNames.length; i++) {
-                        final String fullname = defaultFolderFullnames[i];
-                        final int index = i;
-                        if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
-                            if (spamHandler.isCreateConfirmedHam()) {
-                                submitFolderCheckTask(
-                                    completionService,
-                                    index,
-                                    prefix,
-                                    fullname,
-                                    defaultFolderNames[index],
-                                    sep,
-                                    type,
-                                    spamHandler.isUnsubscribeSpamFolders() ? 0 : -1);
-                                count++;
-                            } else if (LOG.isDebugEnabled()) {
-                                LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                    final CompletionFuture<Object> completionFuture;
+                    final int count;
+                    {
+                        final List<Task<Object>> tasks = new ArrayList<Task<Object>>(defaultFolderNames.length);
+                        for (int i = 0; i < defaultFolderNames.length; i++) {
+                            final String fullname = defaultFolderFullnames[i];
+                            final int index = i;
+                            if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
+                                if (spamHandler.isCreateConfirmedHam()) {
+                                    submitFolderCheckTask(
+                                        tasks,
+                                        index,
+                                        prefix,
+                                        fullname,
+                                        defaultFolderNames[index],
+                                        sep,
+                                        type,
+                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1);
+                                } else if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                                }
+                            } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
+                                if (spamHandler.isCreateConfirmedSpam()) {
+                                    submitFolderCheckTask(
+                                        tasks,
+                                        index,
+                                        prefix,
+                                        fullname,
+                                        defaultFolderNames[index],
+                                        sep,
+                                        type,
+                                        spamHandler.isUnsubscribeSpamFolders() ? 0 : -1);
+                                } else if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                                }
+                            } else {
+                                submitFolderCheckTask(tasks, index, prefix, fullname, defaultFolderNames[index], sep, type, 1);
                             }
-                        } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
-                            if (spamHandler.isCreateConfirmedSpam()) {
-                                submitFolderCheckTask(
-                                    completionService,
-                                    index,
-                                    prefix,
-                                    fullname,
-                                    defaultFolderNames[index],
-                                    sep,
-                                    type,
-                                    spamHandler.isUnsubscribeSpamFolders() ? 0 : -1);
-                                count++;
-                            } else if (LOG.isDebugEnabled()) {
-                                LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
-                            }
-                        } else {
-                            submitFolderCheckTask(completionService, index, prefix, fullname, defaultFolderNames[index], sep, type, 1);
-                            count++;
                         }
+                        try {
+                            completionFuture =
+                                IMAPServiceRegistry.getService(ThreadPoolService.class, true).invoke(
+                                    tasks,
+                                    CallerRunsBehavior.getInstance());
+                        } catch (final ServiceException e) {
+                            throw new IMAPException(e);
+                        }
+                        count = tasks.size();
                     }
                     final long start = System.currentTimeMillis();
                     try {
                         for (int i = 0; i < count; i++) {
-                            final Future<Object> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                            final Future<Object> f = completionFuture.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
                             if (null == f) {
                                 // Waiting time elapsed
                                 throw new MailException(
@@ -389,8 +393,8 @@ public final class IMAPDefaultFolderChecker {
         }
     }
 
-    private void submitFolderCheckTask(final CompletionService<Object> completionService, final int index, final String prefix, final String fullname, final String defaultFolderName, final char sep, final int type, final int subscribe) {
-        completionService.submit(new AbstractCallable(imapConfig, session) {
+    private void submitFolderCheckTask(final List<Task<Object>> tasks, final int index, final String prefix, final String fullname, final String defaultFolderName, final char sep, final int type, final int subscribe) {
+        tasks.add(new AbstractCallable(imapConfig, session) {
 
             public Object call() throws MailException {
                 try {
@@ -868,7 +872,7 @@ public final class IMAPDefaultFolderChecker {
         }
     } // End of StringWriter
 
-    private static abstract class AbstractCallable implements Callable<Object> {
+    private static abstract class AbstractCallable extends AbstractTask<Object> {
 
         protected final IMAPConfig config;
 
