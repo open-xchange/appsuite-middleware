@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-timer
+Name:           open-xchange-threadpool
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-management >= @OXVERSION@
