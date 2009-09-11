@@ -577,9 +577,6 @@ public final class MimeReply {
     /**
      * Gathers all text bodies and appends them to given text builder.
      * 
-     * @param multipartMail The multipart mail
-     * @param retvalContentType The return value's content type
-     * @param textBuilder The text builder
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
      * @throws MailException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
