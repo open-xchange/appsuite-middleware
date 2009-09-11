@@ -387,7 +387,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param firstTask the task the new thread should run first (or null if none)
      * @return true if successful.
      */
-    private boolean addIfUnderCorePoolSize(final Runnable firstTask) {
+    boolean addIfUnderCorePoolSize(final Runnable firstTask) {
         Thread t = null;
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -412,7 +412,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param firstTask the task the new thread should run first (or null if none)
      * @return null on failure, else the first task to be run by new thread.
      */
-    private Runnable addIfUnderMaximumPoolSize(final Runnable firstTask) {
+    Runnable addIfUnderMaximumPoolSize(final Runnable firstTask) {
         Thread t = null;
         Runnable next = null;
         final ReentrantLock mainLock = this.mainLock;
@@ -611,7 +611,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Cancel and clear the queue of all tasks that should not be run due to shutdown policy.
      */
-    private void cancelUnwantedTasks() {
+    void cancelUnwantedTasks() {
         final boolean keepDelayed = getExecuteExistingDelayedTasksAfterShutdownPolicy();
         final boolean keepPeriodic = getContinueExistingPeriodicTasksAfterShutdownPolicy();
         if (!keepDelayed && !keepPeriodic) {
@@ -883,45 +883,66 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
 
         public void run() {
-            final boolean run = true;
-            final Thread currentThread = Thread.currentThread();
-            while (run && !currentThread.isInterrupted()) {
-                final Runnable command;
-                try {
-                    command = delayedWorkQueue.take();
-                } catch (final InterruptedException e) {
-                    // Ignore
-                    continue;
-                }
-
-                if (isShutdown()) {
-                    if (cancelTasksOnShutdown) {
-                        // An orderly shutdown
-                        cancelUnwantedTasks();
+            try {
+                final boolean run = true;
+                final Thread currentThread = Thread.currentThread();
+                while (run && !currentThread.isInterrupted()) {
+                    final Runnable command;
+                    try {
+                        command = delayedWorkQueue.take();
+                    } catch (final InterruptedException e) {
+                        // Ignore
+                        continue;
                     }
-                    return;
-                }
-
-                if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
-                    continue;
-                }
-                if (workQueue.offer(command)) {
-                    continue;
-                }
-                final Runnable r = addIfUnderMaximumPoolSize(command);
-                if (r == command) {
-                    continue;
-                }
-                if (r == null) {
                     /*
-                     * TODO: Periodic or one-time command could not be fed into work queue
+                     * Loop until scheduled task was fed to work queue
                      */
-                    rejectCustom(command);
-                    continue;
+                    for (;;) {
+                        if (isShutdown()) {
+                            if (cancelTasksOnShutdown) {
+                                // An orderly shutdown
+                                cancelUnwantedTasks();
+                            }
+                            return;
+                        }
+                        /*
+                         * Delegate task to a new thread if under core pool size
+                         */
+                        if ((getPoolSize() < getCorePoolSize()) && addIfUnderCorePoolSize(command)) {
+                            continue;
+                        }
+                        /*
+                         * Offer task to work queue to let it be executed by an existing thread
+                         */
+                        if (getQueue().offer(command)) {
+                            continue;
+                        }
+                        /*
+                         * At last spawn a new thread if under max. pool size
+                         */
+                        final Runnable r = addIfUnderMaximumPoolSize(command);
+                        if (r == command) {
+                            continue;
+                        }
+                        /*
+                         * All trials failed
+                         */
+                        if (r == null) {
+                            /*-
+                             * TODO: Periodic or one-time command could not be fed into work queue, by now "just try again!"
+                             * Otherwise uncomment following lines to trigger rejected execution handler, but:
+                             * For what caller?! Actually the caller is this thread which should not throw an exception!
+                             */
+                            // rejectCustom(command);
+                            // continue;
+                        }
+                        // else retry
+                    }
                 }
+            } catch (final Exception e) {
+                LOG.fatal("DelayedQueueConsumer thread aborted execution due to an exception! TimerService is no more active!", e);
             }
         }
-
     }
 
     /**
