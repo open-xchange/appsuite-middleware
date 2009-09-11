@@ -47,29 +47,19 @@
  *
  */
 
-package com.openexchange.admin.tools.monitoring;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.rmi.server.RMIServerSocketFactory;
+package com.openexchange.admin.monitoring;
 
 /**
+ * Defines the attributes to be monitored. 
  * @author cutmasta
- *
  */
-public class CustomAddressServerSocketFactory implements RMIServerSocketFactory {
-    private final InetAddress address;
-    /**
-     * 
-     */
-    public CustomAddressServerSocketFactory(InetAddress addr) {
-        this.address = addr;
-    }
+public interface MonitorMBean {
 
-    
-    public ServerSocket createServerSocket(int port) throws IOException {
-        return new ServerSocket(port, 0, address);
-    }
+    long getNumberOfCreateResourceCalled();
 
+    long getNumberOfCreateContextCalled();
+
+    long getNumberOfCreateUserCalled();
+
+    long getNumberOfCreateGroupCalled();
 }

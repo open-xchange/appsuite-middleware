@@ -56,6 +56,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.PluginStarter;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.management.ManagementService;
 
 public class Activator implements BundleActivator {
 
@@ -66,8 +67,9 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         trackers.push(new ServiceTracker(context, ContextService.class.getName(), new AdminServiceRegisterer(ContextService.class, context)));
         trackers.push(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-        for (int i = trackers.size() - 1; i >= 0; i--) {
-            trackers.get(i).open();
+        trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementCustomizer(context)));
+        for (ServiceTracker tracker : trackers) {
+            tracker.open();
         }
         this.starter = new PluginStarter();
         this.starter.start(context);

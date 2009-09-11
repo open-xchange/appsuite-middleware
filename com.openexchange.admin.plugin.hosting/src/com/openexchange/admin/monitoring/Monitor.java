@@ -46,52 +46,63 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.tools.monitoring;
+package com.openexchange.admin.monitoring;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 
  * @author cutmasta
  */
-public class Monitor implements MonitorMBean {
+public final class Monitor implements MonitorMBean {
 
-    private static long numberOfCreateResourceCalled = 0;
+    private static final Monitor SINGLETON = new Monitor();
 
-    private static long numberOfCreateContextCalled = 0;
+    private AtomicLong createResourceCalls = new AtomicLong(0);
 
-    private static long numberOfCreateUserCalled = 0;
+    private AtomicLong createContextCalls = new AtomicLong(0);
 
-    private static long numberOfCreateGroupCalled = 0;
+    private AtomicLong createUserCalls = new AtomicLong(0);
 
-    public synchronized static void incrementNumberOfCreateResourceCalled() {
-        numberOfCreateResourceCalled++;
+    private AtomicLong createGroupCalls = new AtomicLong(0);
+
+    public Monitor() {
+        super();
     }
 
-    public synchronized static void incrementNumberOfCreateContextCalled() {
-        numberOfCreateContextCalled++;
+    public static Monitor getInstance() {
+        return SINGLETON;
     }
 
-    public synchronized static void incrementNumberOfCreateUserCalled() {
-        numberOfCreateUserCalled++;
+    public void incrementNumberOfCreateResourceCalled() {
+        createResourceCalls.incrementAndGet();
     }
 
-    public synchronized static void incrementNumberOfCreateGroupCalled() {
-        numberOfCreateGroupCalled++;
+    public void incrementNumberOfCreateContextCalled() {
+        createContextCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateUserCalled() {
+        createUserCalls.incrementAndGet();
+    }
+
+    public void incrementNumberOfCreateGroupCalled() {
+        createGroupCalls.incrementAndGet();
     }
 
     public long getNumberOfCreateResourceCalled() {
-        return numberOfCreateResourceCalled;
+        return createResourceCalls.get();
     }
 
     public long getNumberOfCreateContextCalled() {
-        return numberOfCreateContextCalled;
+        return createContextCalls.get();
     }
 
     public long getNumberOfCreateUserCalled() {
-        return numberOfCreateUserCalled;
+        return createUserCalls.get();
     }
 
     public long getNumberOfCreateGroupCalled() {
-        return numberOfCreateGroupCalled;
+        return createGroupCalls.get();
     }
-
 }

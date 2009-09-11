@@ -49,8 +49,6 @@
 
 package com.openexchange.admin;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
@@ -64,13 +62,11 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
-import com.openexchange.admin.tools.monitoring.MonitorAgent;
 
 public class PluginStarter {
     private static Registry registry = null;
@@ -80,7 +76,6 @@ public class PluginStarter {
     private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
 
     private static PropertyHandlerExtended prop = null;
-    private static MonitorAgent moni = null;
 
     public PluginStarter() {
         super();
@@ -102,7 +97,7 @@ public class PluginStarter {
             registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
             registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
 
-            startJMX();
+//            startJMX();
             
             if (log.isDebugEnabled()) {
                 log.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
@@ -122,7 +117,6 @@ public class PluginStarter {
 
     public void stop() throws AccessException, RemoteException, NotBoundException {
         try {
-            stopJMX();
             if (null != registry) {
                 registry.unbind(OXContextInterface.RMI_NAME);
                 registry.unbind(OXUtilInterface.RMI_NAME);
@@ -139,30 +133,7 @@ public class PluginStarter {
         }
 
     }
-    
-    private void startJMX() {
-        final int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
-        final String addr = prop.getProp("JMX_BIND_ADDRESS","localhost");
-        InetAddress iaddr = null;
-        
-        // bind only on specified interfaces
-        try {
-            iaddr = InetAddress.getByName(addr);
 
-            moni = new MonitorAgent(jmx_port,iaddr);
-            moni.start();
-        } catch (final UnknownHostException e) {
-            log.error("Could NOT start start JMX monitor ",e);
-        }
-        
-        final String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
-        log.info("Admindaemon Name: " + servername);
-    }
-    
-    private void stopJMX() {
-        moni.stop();
-    }
-    
     private void initCache() {
         final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
