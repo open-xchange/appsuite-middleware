@@ -91,7 +91,7 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object
         if (!threadPool.isShutdown()) {
             return task.call();
         }
-        throw new RejectedExecutionException("Thread pool is shutted down");
+        return DISCARDED;
     }
 
 }
