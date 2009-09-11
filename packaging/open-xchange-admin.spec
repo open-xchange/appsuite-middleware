@@ -146,7 +146,7 @@ if [ ${1:-0} -eq 2 ]; then
   # -----------------------------------------------------------------------
   pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
   grep jcs.region.GlobalFolderCache $pfile >/dev/null || {
-cat<<EOF
+cat<<EOF >> $pfile
 # Pre-defined cache regions for global folder objects.
 jcs.region.GlobalFolderCache=LTCP
 jcs.region.GlobalFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
@@ -169,7 +169,7 @@ jcs.region.GlobalFolderCache.elementattributes.IsLateral=false
 EOF
 }
   grep jcs.region.UserFolderCache $pfile >/dev/null || {
-cat<<EOF
+cat<<EOF >> $pfile
 # Pre-defined cache regions for user-sensitive folder objects.
 jcs.region.UserFolderCache=LTCP
 jcs.region.UserFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
@@ -192,7 +192,7 @@ jcs.region.UserFolderCache.elementattributes.IsLateral=false
 EOF
 }
   grep jcs.region.MailAccount $pfile >/dev/null || {
-cat<<EOF
+cat<<EOF >> $pfile
 # Pre-defined cache region for mail account
 jcs.region.MailAccount=LTCP
 jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
