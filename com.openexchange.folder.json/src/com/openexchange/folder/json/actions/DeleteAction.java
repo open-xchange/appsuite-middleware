@@ -119,6 +119,8 @@ public final class DeleteAction extends AbstractFolderAction {
                 try {
                     folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final FolderException e) {
+                    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(DeleteAction.class);
+                    log.error(e.getMessage(), e);
                     responseArray.put(folderId);
                 }
             }
