@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior {
+final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior<Object> {
 
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(AJPv13RefusedExecutionBehavior.class);
@@ -84,58 +84,57 @@ final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior {
         this.watcher = watcher;
     }
 
-    public void refusedExecution(final Task<?> task, final ThreadPoolService threadPoolService) {
+    public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPoolService) {
         if (threadPoolService.isShutdown()) {
             // Proper logging
-            LOG.error(
-                "AJP task cannot be executed since thread pool has been shut down. Please restart AJP module.",
-                new RejectedExecutionException());
-        } else {
-            // Still running, but task rejected (by synchronous queue if used)
-            if (task instanceof AJPv13Task) {
-                // Uncomment this to run in calling thread.
-                // r.run();
-                final AJPv13Task rejectedTask = (AJPv13Task) task;
-                try {
-                    final Socket client = rejectedTask.getSocket();
-                    if (null != client) {
-                        LOG.error(new StringBuilder(64).append("Rejected AJP request from: \"").append(client.getRemoteSocketAddress()).append(
-                            "\". Trying to terminate AJP cycle").toString());
-                        try {
-                            final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
-                            final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
-                            // Write headers
-                            client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(response));
-                            client.getOutputStream().flush();
-                            // Write error message
-                            client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(errMsg));
-                            client.getOutputStream().flush();
-                            // Write END-RESPONSE
-                            client.getOutputStream().write(AJPv13Response.getEndResponseBytes(true));
-                            client.getOutputStream().flush();
-                            // Close socket since Web Server does not reliably close the socket even though END-RESPONSE indicates to
-                            // close the connection.
-                            rejectedTask.cancel();
-                            LOG.info(new StringBuilder("AJP cycle terminated. Closed connection to \"").append(
-                                client.getRemoteSocketAddress()).append('"').toString());
-                        } catch (final AJPv13Exception e) {
-                            LOG.error(new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(), e);
-                        } catch (final IOException e) {
-                            LOG.error(new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(), e);
-                        }
-                    }
-                } finally {
-                    watcher.removeTask(rejectedTask);
-                }
-            } else {
-                // Huh..?! No AJP task? Then run in calling thread
-                try {
-                    task.call();
-                } catch (final Exception e) {
-                    throw new RejectedExecutionException(e);
-                }
+            final RejectedExecutionException e = new RejectedExecutionException("Thread pool is shutted down");
+            LOG.error("AJP task cannot be executed since thread pool has been shut down. Please restart AJP module.", e);
+            throw e;
+        }
+        // Still running, but task rejected (by synchronous queue if used)
+        if (!(task instanceof AJPv13Task)) {
+            // Huh..?! No AJP task? Then run in calling thread
+            try {
+                return task.call();
+            } catch (final Exception e) {
+                throw new RejectedExecutionException(e);
             }
         }
+        // Uncomment this to run in calling thread.
+        // r.run();
+        final AJPv13Task rejectedTask = (AJPv13Task) task;
+        try {
+            final Socket client = rejectedTask.getSocket();
+            if (null != client) {
+                LOG.error(new StringBuilder(64).append("Rejected AJP request from: \"").append(client.getRemoteSocketAddress()).append(
+                    "\". Trying to terminate AJP cycle").toString());
+                try {
+                    final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
+                    final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
+                    // Write headers
+                    client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(response));
+                    client.getOutputStream().flush();
+                    // Write error message
+                    client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(errMsg));
+                    client.getOutputStream().flush();
+                    // Write END-RESPONSE
+                    client.getOutputStream().write(AJPv13Response.getEndResponseBytes(true));
+                    client.getOutputStream().flush();
+                    // Close socket since Web Server does not reliably close the socket even though END-RESPONSE indicates to
+                    // close the connection.
+                    rejectedTask.cancel();
+                    LOG.info(new StringBuilder("AJP cycle terminated. Closed connection to \"").append(client.getRemoteSocketAddress()).append(
+                        '"').toString());
+                } catch (final AJPv13Exception e) {
+                    LOG.error(new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(), e);
+                } catch (final IOException e) {
+                    LOG.error(new StringBuilder(64).append("Could not terminate AJP cycle: ").append(e.getMessage()).toString(), e);
+                }
+            }
+        } finally {
+            watcher.removeTask(rejectedTask);
+        }
+        return null;
     }
 
 }
