@@ -90,6 +90,7 @@ public class DatabaseFolder extends AbstractFolder {
         super();
         this.cacheable = cacheable;
         global = true;
+        this.subscribed = true;
     }
 
     /**
