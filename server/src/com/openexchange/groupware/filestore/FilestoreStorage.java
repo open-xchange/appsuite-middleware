@@ -54,7 +54,6 @@ import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 
 public abstract class FilestoreStorage {

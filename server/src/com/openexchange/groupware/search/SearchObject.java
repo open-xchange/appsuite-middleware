@@ -54,7 +54,6 @@ import static com.openexchange.java.Autoboxing.I2i;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.java.Autoboxing;
 
 /**
  * SearchObject
