@@ -53,36 +53,34 @@ import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
 
 /**
- * {@link DiscardOldestBehavior} - Implements "Discard-Oldest" behavior.
+ * {@link AbortIfRunningBehavior} - Implements "Abort-If-Running" behavior.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Object> {
+public final class AbortIfRunningBehavior implements RefusedExecutionBehavior<Object> {
 
-    private static final DiscardOldestBehavior INSTANCE = new DiscardOldestBehavior();
+    private static final AbortIfRunningBehavior BEHAVIOR = new AbortIfRunningBehavior();
 
     /**
-     * Gets the "Discard-Oldest" behavior.
+     * Gets the "Abort-If-Running" behavior.
      * 
-     * @return The "Discard-Oldest" behavior
+     * @return The "Abort-If-Running" behavior
      */
-    public static <V> RefusedExecutionBehavior<V> newInstance() {
-        return (RefusedExecutionBehavior<V>) INSTANCE;
+    public static <V> RefusedExecutionBehavior<V> getInstance() {
+        return (RefusedExecutionBehavior<V>) BEHAVIOR;
     }
 
     /**
-     * Initializes a new {@link DiscardOldestBehavior}.
+     * Initializes a new {@link AbortIfRunningBehavior}.
      */
-    private DiscardOldestBehavior() {
+    private AbortIfRunningBehavior() {
         super();
     }
 
     /**
-     * Obtains and ignores the next task that the executor would otherwise execute, if one is immediately available, and then retries
-     * execution of task r, unless the executor is shut down, in which case task r is instead discarded.
+     * Throws {@link RejectedExecutionException} if provided thread pool is not shut down; otherwise the task is discarded.
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
@@ -91,8 +89,7 @@ public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Obj
      */
     public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
-            ((CustomThreadPoolExecutor) threadPool.getExecutor()).getQueue().poll();
-            return task.call();
+            throw new RejectedExecutionException();
         }
         return DISCARDED;
     }
