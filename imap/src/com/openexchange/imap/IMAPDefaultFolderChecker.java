@@ -344,7 +344,7 @@ public final class IMAPDefaultFolderChecker {
                             completionFuture =
                                 IMAPServiceRegistry.getService(ThreadPoolService.class, true).invoke(
                                     tasks,
-                                    CallerRunsBehavior.newInstance());
+                                    CallerRunsBehavior.getInstance());
                         } catch (final ServiceException e) {
                             throw new IMAPException(e);
                         }

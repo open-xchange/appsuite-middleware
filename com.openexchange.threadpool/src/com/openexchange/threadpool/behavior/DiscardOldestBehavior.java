@@ -65,9 +65,9 @@ public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Obj
     private static final DiscardOldestBehavior INSTANCE = new DiscardOldestBehavior();
 
     /**
-     * Creates a new "Discard-Oldest" behavior instance.
+     * Gets the "Discard-Oldest" behavior.
      * 
-     * @return A new "Discard-Oldest" behavior instance
+     * @return The "Discard-Oldest" behavior
      */
     public static <V> RefusedExecutionBehavior<V> newInstance() {
         return (RefusedExecutionBehavior<V>) INSTANCE;

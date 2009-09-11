@@ -282,7 +282,7 @@ public final class UnifiedINBOXMessageCopier {
     }
 
     private static void performCallables(final Collection<? extends Task<Object>> callables, final ThreadPoolService threadPoolService) throws MailException {
-        final CompletionFuture<Object> completionFuture = threadPoolService.invoke(callables, CallerRunsBehavior.newInstance());
+        final CompletionFuture<Object> completionFuture = threadPoolService.invoke(callables, CallerRunsBehavior.getInstance());
         // Wait for completion
         try {
             final int nCallables = callables.size();

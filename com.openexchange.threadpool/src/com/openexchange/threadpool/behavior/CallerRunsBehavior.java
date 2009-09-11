@@ -64,9 +64,9 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object
     private static final CallerRunsBehavior INSTANCE = new CallerRunsBehavior();
 
     /**
-     * Gets the "Caller-Runs" behavior instance.
+     * Gets the "Caller-Runs" behavior.
      * 
-     * @return The "Caller-Runs" behavior instance
+     * @return The "Caller-Runs" behavior
      */
     public static <V> RefusedExecutionBehavior<V> getInstance() {
         return (RefusedExecutionBehavior<V>) INSTANCE;
