@@ -34,7 +34,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.configread"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.timer"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/javax.activation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.charset"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/net.freeutils.jcharset"/>
