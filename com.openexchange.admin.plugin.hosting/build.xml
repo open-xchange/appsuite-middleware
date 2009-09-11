@@ -35,6 +35,7 @@
     <property name="globalbundle"         value="com.openexchange.global.jar"/>
 	<property name="configbundle"         value="com.openexchange.config.jar"/>
 	<property name="serverbundle"         value="com.openexchange.server.jar"/>
+    <property name="managementbundle"     value="com.openexchange.management.jar"/>
 	<property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
 	<property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
 	<property name="cachebundle"          value="com.openexchange.caching.jar"/>
@@ -51,6 +52,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${junit}"/>
         <pathelement location="${bundlesdir}/${osgibundle}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
+	    <pathelement location="${bundlesdir}/${managementbundle}"/>
 		<pathelement location="${bundlesdir}/${serverbundle}"/>
 		<pathelement location="${bundlesdir}/${globalbundle}"/>
 		<pathelement location="${bundlesdir}/${cachebundle}"/>
