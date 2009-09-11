@@ -1,6 +1,7 @@
 * 2009-09-10 - thorben.betten@open-xchange.com
 
  - Bugfix #14467: Fixed reply of multipart/related message without HTML content
+ - Bugfix #14466: Fixed HttpSessionWrapper.invalidate() method
 
 * 2009-09-11 - thorben.betten@open-xchange.com
 

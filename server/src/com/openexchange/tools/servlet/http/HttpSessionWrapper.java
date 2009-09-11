@@ -49,10 +49,12 @@
 
 package com.openexchange.tools.servlet.http;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -157,16 +159,19 @@ public class HttpSessionWrapper implements HttpSession {
 
     public void invalidate() {
         lastAccessedTime = System.currentTimeMillis();
-        int size = attributes.size();
-        Iterator<String> iter = attributes.keySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final String attributeName = iter.next();
+        /*
+         * Remove attributes
+         */
+        final List<String> toRemove = new ArrayList<String>(attributes.keySet());
+        for (final String attributeName : toRemove) {
             removeAttribute(attributeName);
         }
-        size = values.size();
-        iter = values.keySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final String valueName = iter.next();
+        /*
+         * Remove values
+         */
+        toRemove.clear();
+        toRemove.addAll(values.keySet());
+        for (final String valueName : toRemove) {
             removeValue(valueName);
         }
         servletContext = null;
