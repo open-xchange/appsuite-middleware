@@ -308,7 +308,7 @@ public final class FolderWriter {
         m.put(Integer.valueOf(FolderField.SUBSCRIBED.getColumn()), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                jsonPutter.put(FolderField.SUBSCRIBED.getName(), Boolean.valueOf(folder.isSubscribed()));
+                jsonPutter.put(FolderField.SUBSCRIBED.getName(), folder.isSubscribed() ? Integer.valueOf(1) : Integer.valueOf(0));
             }
         });
         m.put(Integer.valueOf(FolderField.SUBSCR_SUBFLDS.getColumn()), new FolderFieldWriter() {
