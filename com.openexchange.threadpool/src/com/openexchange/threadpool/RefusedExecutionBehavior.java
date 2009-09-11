@@ -69,8 +69,8 @@ public interface RefusedExecutionBehavior<V> {
     /**
      * Method that may be invoked by a {@link ThreadPoolService} when <tt>submit()</tt> method cannot accept a task. This may occur when no
      * more threads or queue slots are available because their bounds would be exceeded, or upon shutdown of the thread pool. In the absence
-     * other alternatives, the method may throw an unchecked {@link RejectedExecutionException}, which will be propagated to the caller of
-     * <tt>submit()</tt>.
+     * of other alternatives, the method may throw an unchecked {@link RejectedExecutionException}, which will be propagated to the caller
+     * of <tt>submit()</tt>.
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
