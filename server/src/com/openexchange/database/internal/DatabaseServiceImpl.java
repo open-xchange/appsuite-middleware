@@ -70,18 +70,15 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(DatabaseServiceImpl.class);
 
-    private static boolean forceWriteOnly;
+    private boolean forceWriteOnly;
 
-    private static Pools pools;
+    private Pools pools;
 
-    private static AssignmentStorage assignmentStorage;
+    private AssignmentStorage assignmentStorage;
 
-    private static ConfigDatabaseService configDatabaseService;
+    private ConfigDatabaseService configDatabaseService;
 
     /**
      * Default constructor.
@@ -90,12 +87,12 @@ public final class DatabaseServiceImpl implements DatabaseService {
         super();
     }
 
-    public static int resolvePool(int contextId, boolean write) throws DBPoolingException {
+    public int resolvePool(int contextId, boolean write) throws DBPoolingException {
         Assignment assign = assignmentStorage.getAssignment(contextId);
         return write || forceWriteOnly ? assign.getWritePoolId() : assign.getReadPoolId();
     }
 
-    public static String getSchema(int contextId) throws DBPoolingException {
+    public String getSchema(int contextId) throws DBPoolingException {
         return assignmentStorage.getAssignment(contextId).getSchema();
     }
 
@@ -106,7 +103,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * @return a connection to the database of the specified context.
      * @throws DBPoolingException if no connection can be obtained.
      */
-    public static Connection get(Context ctx, boolean write) throws DBPoolingException {
+    public Connection get(Context ctx, boolean write) throws DBPoolingException {
         return get(ctx.getContextId(), write);
     }
 
@@ -117,7 +114,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * @return a connection to the database of the context.
      * @throws DBPoolingException if no connection can be obtained.
      */
-    public static Connection get(int contextId, boolean write) throws DBPoolingException {
+    public Connection get(int contextId, boolean write) throws DBPoolingException {
         return get(contextId, write, false);
     }
 
@@ -128,11 +125,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * @return a connection to the database of the context.
      * @throws DBPoolingException if no connection can be obtained.
      */
-    public static Connection getNoTimeout(int contextId, boolean write) throws DBPoolingException {
+    public Connection getNoTimeout(int contextId, boolean write) throws DBPoolingException {
         return get(contextId, write, true);
     }
 
-    private static Connection get(int contextId, boolean write, boolean noTimeout) throws DBPoolingException {
+    private Connection get(int contextId, boolean write, boolean noTimeout) throws DBPoolingException {
         final Assignment assign = assignmentStorage.getAssignment(contextId);
         final int poolId;
         if (write || forceWriteOnly) {
@@ -143,7 +140,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return get(poolId, assign.getSchema(), noTimeout);
     }
 
-    private static Connection get(int poolId, String schema, boolean noTimeout) throws DBPoolingException {
+    private Connection get(int poolId, String schema, boolean noTimeout) throws DBPoolingException {
         final Connection con;
         try {
             final ConnectionPool pool = pools.getPool(poolId);
@@ -177,7 +174,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * @param write <code>true</code> if you obtained a writable connection.
      * @param con Connection to return.
      */
-    public static void back(Context ctx, boolean write, Connection con) {
+    public void back(Context ctx, boolean write, Connection con) {
         back(ctx.getContextId(), write, con);
     }
 
@@ -187,7 +184,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * @param write <code>true</code> if you obtained a writable connection.
      * @param con Connection to return.
      */
-    public static void back(int contextId, boolean write, Connection con) {
+    public void back(int contextId, boolean write, Connection con) {
         back(contextId, write, con, false);
     }
 
@@ -198,11 +195,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * @param write <code>true</code> if you obtained a writable connection.
      * @param con Connection to return.
      */
-    public static void backNoTimeout(int contextId, boolean write, Connection con) {
+    public void backNoTimeout(int contextId, boolean write, Connection con) {
         back(contextId, write, con, true);
     }
 
-    private static void back(int contextId, boolean write, Connection con, boolean noTimeout) {
+    private void back(int contextId, boolean write, Connection con, boolean noTimeout) {
         final int poolId;
         try {
             poolId = resolvePool(contextId, write);
@@ -213,7 +210,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         back(poolId, con, noTimeout);
     }
 
-    private static void back(int poolId, Connection con, boolean noTimeout) {
+    private void back(int poolId, Connection con, boolean noTimeout) {
         try {
             final ConnectionPool pool = pools.getPool(poolId);
             if (noTimeout) {
@@ -239,17 +236,17 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * sent to the database to verify that the connection still works.
      * @param checkTime new check time.
      */
-    public static void setCheckTime(long checkTime) {
+    public void setCheckTime(long checkTime) {
         for (final ConnectionPool pool : pools.getPools()) {
             pool.setCheckTime(checkTime);
         }
     }
 
-    public static int getNumConnections(Context ctx, boolean write) {
+    public int getNumConnections(Context ctx, boolean write) {
         return getNumConnections(ctx.getContextId(), write);
     }
 
-    public static int getNumConnections(int contextId, boolean write) {
+    public int getNumConnections(int contextId, boolean write) {
         int retval = -1;
         try {
             final int poolId = resolvePool(contextId, write);
@@ -264,7 +261,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     /**
      * @return the total number of database connections.
      */
-    public static int getNumConnections() {
+    public int getNumConnections() {
         int connections = 0;
         for (final ConnectionPool pool : pools.getPools()) {
             connections += pool.getPoolSize();
@@ -272,20 +269,20 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return connections;
     }
 
-    public static void setPools(Pools pools) {
-        DatabaseServiceImpl.pools = pools;
+    public void setPools(Pools pools) {
+        this.pools = pools;
     }
 
-    public static void setAssignmentStorage(AssignmentStorage assignementStorage) {
-        DatabaseServiceImpl.assignmentStorage = assignementStorage;
+    public void setAssignmentStorage(AssignmentStorage assignementStorage) {
+        this.assignmentStorage = assignementStorage;
     }
 
-    public static void setForceWrite(final boolean forceWriteOnly) {
-        DatabaseServiceImpl.forceWriteOnly = forceWriteOnly;
+    public void setForceWrite(boolean forceWriteOnly) {
+        this.forceWriteOnly = forceWriteOnly;
     }
 
-    static void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
-        DatabaseServiceImpl.configDatabaseService = configDatabaseService;
+    void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
+        this.configDatabaseService = configDatabaseService;
     }
 
     // Delegate config database service methods.

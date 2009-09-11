@@ -60,7 +60,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.timer.TimerService;
 
@@ -112,8 +111,8 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
         if (needsRegistration) {
             LOG.info("Publishing DatabaseService.");
             try {
-                Initialization.getInstance().start(configurationService, timerService);
-                serviceRegistration = context.registerService(DatabaseService.class.getName(), new DatabaseServiceImpl(), null);
+                DatabaseService service = Initialization.getInstance().start(configurationService, timerService);
+                serviceRegistration = context.registerService(DatabaseService.class.getName(), service, null);
             } catch (DBPoolingException e) {
                 LOG.error("Publishing the DatabaseService failed.", e);
             }

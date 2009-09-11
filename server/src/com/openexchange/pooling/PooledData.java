@@ -117,7 +117,7 @@ public class PooledData<T> {
         if (!(obj instanceof PooledData)) {
             return false;
         }
-        return pooled.equals(((PooledData) obj).pooled);
+        return pooled.equals(((PooledData<?>) obj).pooled);
     }
 
     /**

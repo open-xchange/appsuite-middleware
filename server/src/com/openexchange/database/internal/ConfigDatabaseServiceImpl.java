@@ -68,11 +68,11 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static final Log LOG = LogFactory.getLog(ConfigDatabaseServiceImpl.class);
 
-    private static Pools pools;
+    private Pools pools;
 
-    private static AssignmentStorage assignmentStorage;
+    private AssignmentStorage assignmentStorage;
 
-    private static boolean forceWriteOnly;
+    private boolean forceWriteOnly;
 
     /**
      * Initializes a new {@link ConfigDatabaseServiceImpl}.
@@ -81,30 +81,19 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         super();
     }
 
-    public static void setPools(Pools pools) {
-        ConfigDatabaseServiceImpl.pools = pools;
+    public void setPools(Pools pools) {
+        this.pools = pools;
     }
 
-    public static void setAssignmentStorage(AssignmentStorage assignementStorage) {
-        ConfigDatabaseServiceImpl.assignmentStorage = assignementStorage;
+    public void setAssignmentStorage(AssignmentStorage assignementStorage) {
+        this.assignmentStorage = assignementStorage;
     }
 
-    public static void setForceWrite(final boolean forceWriteOnly) {
-        ConfigDatabaseServiceImpl.forceWriteOnly = forceWriteOnly;
+    public void setForceWrite(final boolean forceWriteOnly) {
+        this.forceWriteOnly = forceWriteOnly;
     }
 
-    static int resolvePool(final int contextId, final boolean write) throws DBPoolingException {
-        final Assignment assign = assignmentStorage.getAssignment(contextId);
-        final int poolId;
-        if (write || forceWriteOnly) {
-            poolId = assign.getWritePoolId();
-        } else {
-            poolId = assign.getReadPoolId();
-        }
-        return poolId;
-    }
-
-    private static Connection get(final boolean write) throws DBPoolingException {
+    private Connection get(final boolean write) throws DBPoolingException {
         final Assignment assign = assignmentStorage.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
@@ -124,7 +113,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
      * @param write <code>true</code> if you obtained a writable connection.
      * @param con Connection to return.
      */
-    private static void back(final boolean write, final Connection con) {
+    private void back(final boolean write, final Connection con) {
         // TODO remove null check to produce more error messages
         final Assignment assign = assignmentStorage.getConfigDBAssignment();
         final int poolId;
@@ -136,16 +125,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         back(poolId, con, false);
     }
 
-    /**
-     * Returns the given connection to a pool.
-     * @param poolId unique identifier of the pool
-     * @param con connection to return.
-     */
-    public static void back(final int poolId, final Connection con) {
-        back(poolId, con, false);
-    }
-
-    private static void back(final int poolId, final Connection con, final boolean noTimeout) {
+    private void back(final int poolId, final Connection con, final boolean noTimeout) {
         try {
             final ConnectionPool pool = pools.getPool(poolId);
             if (noTimeout) {

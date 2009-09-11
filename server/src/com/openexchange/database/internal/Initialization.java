@@ -54,6 +54,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
 
@@ -80,6 +81,8 @@ public final class Initialization {
 
     private ConfigDatabaseServiceImpl configDatabaseService;
 
+    private DatabaseServiceImpl databaseService;
+
     /**
      * Prevent instantiation.
      */
@@ -95,7 +98,7 @@ public final class Initialization {
         return null != configuration;
     }
 
-    public void start(ConfigurationService configurationService, TimerService timerService) throws DBPoolingException {
+    public DatabaseService start(ConfigurationService configurationService, TimerService timerService) throws DBPoolingException {
         configuration = new Configuration();
         configuration.readConfiguration(configurationService);
         // Setting up database connection pools.
@@ -111,10 +114,10 @@ public final class Initialization {
         }
         // Initialize service for connections to config database.
         configDatabaseService = new ConfigDatabaseServiceImpl();
-        ConfigDatabaseServiceImpl.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
-        ConfigDatabaseServiceImpl.setPools(pools);
+        configDatabaseService.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+        configDatabaseService.setPools(pools);
         pools.setConnectionDataStorage(new ConnectionDataStorage(configDatabaseService));
-        ConfigDatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
+        configDatabaseService.setAssignmentStorage(assignmentStorage);
         assignmentStorage.setConfigDatabaseService(configDatabaseService);
 
         Server.setConfigDatabaseService(configDatabaseService);
@@ -125,17 +128,27 @@ public final class Initialization {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
 
-        DatabaseServiceImpl.setConfigDatabaseService(configDatabaseService);
-        DatabaseServiceImpl.setPools(pools);
-        DatabaseServiceImpl.setAssignmentStorage(assignmentStorage);
-        DatabaseServiceImpl.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+        databaseService = new DatabaseServiceImpl();
+        databaseService.setConfigDatabaseService(configDatabaseService);
+        databaseService.setPools(pools);
+        databaseService.setAssignmentStorage(assignmentStorage);
+        databaseService.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+        return databaseService;
     }
 
     public void stop() {
-        DatabaseServiceImpl.setAssignmentStorage(null);
-        assignmentStorage.stop();
+        databaseService.setAssignmentStorage(null);
+        databaseService.setPools(null);
+        databaseService.setConfigDatabaseService(null);
+        databaseService = null;
+        assignmentStorage.setConfigDatabaseService(null);
+        configDatabaseService.setAssignmentStorage(null);
+        pools.setConnectionDataStorage(null);
+        configDatabaseService.setPools(null);
+        configDatabaseService = null;
+        assignmentStorage.removeCacheService();
         assignmentStorage = null;
-        DatabaseServiceImpl.setPools(null);
+        pools.removeManagementService();
         pools.stop();
         pools = null;
         configuration.clear();

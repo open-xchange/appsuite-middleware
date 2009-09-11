@@ -76,13 +76,7 @@ import com.openexchange.database.DBPoolingException;
  * Extends the pool API especially for database connections.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ConnectionPool extends ReentrantLockPool<Connection> implements
-    ConnectionPoolMBean {
-
-    /**
-     * The close method of the Connection interface.
-     */
-//    private static final Method CLOSE;
+public class ConnectionPool extends ReentrantLockPool<Connection> implements ConnectionPoolMBean {
 
     /**
      * Logger.
@@ -105,33 +99,10 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
      * @param info Properties for the connections.
      * @param config pool configuration parameters.
      */
-    public ConnectionPool(final String url, final Properties info,
-        final ReentrantLockPool.Config config) {
+    public ConnectionPool(final String url, final Properties info, final ReentrantLockPool.Config config) {
         super(new ConnectionLifecycle(url, info), config);
-        lifecycle = (ConnectionLifecycle) super.getLifecycle();
+        lifecycle = (ConnectionLifecycle) getLifecycle();
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    public Connection getNew() throws PoolingException {
-//        final Connection con = super.get();
-//        return (Connection) Proxy.newProxyInstance(
-//            this.getClass().getClassLoader(),
-//            new Class[] { Connection.class },
-//            new InvocationHandler() {
-//                public Object invoke(final Object proxy, final Method method,
-//                    final Object[] args) throws Throwable {
-//                    if (CLOSE.equals(method)) {
-//                        back((Connection) proxy);
-//                        return null;
-//                    } else {
-//                        return method.invoke(con, args);
-//                    }
-//                }
-//            }
-//        );
-//    }
 
     /**
      * Gets a connection that does not have any timeouts.
@@ -163,7 +134,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
      * {@inheritDoc}
      */
     public int getNumberOfDBConnections() {
-        return DatabaseServiceImpl.getNumConnections();
+        return getPoolSize();
     }
     
     /**
@@ -179,8 +150,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
     /**
      * Life cycle for database connections.
      */
-    private static class ConnectionLifecycle implements
-        PoolableLifecycle<Connection> {
+    private static class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         /**
          * SQL command for checking the connection.
          */

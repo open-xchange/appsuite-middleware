@@ -229,10 +229,6 @@ public final class AssignmentStorage {
         this.configDatabaseService = configDatabaseService;
     }
 
-    void stop() {
-        removeCacheService();
-    }
-
     void setCacheService(final CacheService service) {
         this.cacheService = service;
         try {

@@ -49,6 +49,7 @@
 
 package com.openexchange.database.osgi;
 
+import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -69,11 +70,7 @@ import com.openexchange.timer.TimerService;
  */
 public class Activator implements BundleActivator {
 
-    private ServiceTracker configurationTimerTracker;
-
-    private ServiceTracker managementTracker;
-
-    private ServiceTracker cacheTracker;
+    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
     private ComponentRegistration dbpoolingComponent;
 
@@ -84,18 +81,18 @@ public class Activator implements BundleActivator {
             "com.openexchange.database",
             DBPoolingExceptionFactory.getInstance());
         Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        configurationTimerTracker = new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context));
-        configurationTimerTracker.open();
-        managementTracker = new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context));
-        managementTracker.open();
-        cacheTracker = new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context));
-        cacheTracker.open();
+        trackers.push(new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context)));
+        trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context)));
+        trackers.push(new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context)));
+        for (ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
     }
 
     public void stop(BundleContext context) throws Exception {
-        cacheTracker.close();
-        managementTracker.close();
-        configurationTimerTracker.close();
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
+        }
         dbpoolingComponent.unregister();
     }
 }

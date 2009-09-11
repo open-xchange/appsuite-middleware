@@ -68,9 +68,6 @@ import com.openexchange.timer.TimerService;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(ReentrantLockPool.class);
 
     /* --- Constants --- */
@@ -200,7 +197,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     /**
      * @return the lifecycle
      */
-    protected PoolableLifecycle<T> getLifecycle() {
+    protected final PoolableLifecycle<T> getLifecycle() {
         return lifecycle;
     }
 
@@ -317,22 +314,19 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     other = data.getByThread(thread);
                     if (other != null && thread.equals(other.getThread())) {
                         if (LOG.isDebugEnabled()) {
-                            PoolingException e = new PoolingException(
-                                "Found thread using two objects. First get.");
+                            PoolingException e = new PoolingException("Found thread using two objects. First get.");
                             if (null != other.getTrace()) {
                                 e.setStackTrace(other.getTrace());
                             }
                             LOG.debug(e.getMessage(), e);
-                            e = new PoolingException(
-                                "Found thread using two objects. Second get.");
+                            e = new PoolingException("Found thread using two objects. Second get.");
                             e.fillInStackTrace();
                             LOG.debug(e.getMessage(), e);
                         }
                     }
                 }
                 retval = data.popIdle();
-                if (null == retval && maxActive > 0
-                    && data.numActive() >= maxActive) {
+                if (null == retval && maxActive > 0 && data.numActive() >= maxActive) {
                     // now we are getting in trouble. no more idle objects, a
                     // maximum number of active is defined and we reached this
                     // border.
@@ -345,27 +339,21 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         boolean timedOut = true;
                         try {
                             if (maxWait > 0) {
-                                timedOut = !idleAvailable.await(maxWait
-                                    - getWaitTime(startTime),
-                                    TimeUnit.MILLISECONDS);
+                                timedOut = !idleAvailable.await(maxWait - getWaitTime(startTime), TimeUnit.MILLISECONDS);
                             } else {
                                 idleAvailable.await();
                             }
-                        } catch (final InterruptedException e) {
+                        } catch (InterruptedException e) {
                             LOG.error("Thread was interrupted.", e);
                         }
                         if (timedOut) {
                             idleAvailable.signal();
-                            throw new PoolingException("Wait time exceeded. "
-                                + "Active: " + data.numActive() + ", Idle: "
-                                + data.numIdle() + ", Waiting: "
-                                + lock.getWaitQueueLength(idleAvailable)
-                                + ", Time: " + getWaitTime(startTime));
+                            throw new PoolingException("Wait time exceeded. Active: " + data.numActive() + ", Idle: " + data.numIdle()
+                                + ", Waiting: " + lock.getWaitQueueLength(idleAvailable) + ", Time: " + getWaitTime(startTime));
                         }
                         continue;
                     default:
-                        throw new IllegalStateException(
-                            "Unknown exhausted action: " + exhaustedAction);
+                        throw new IllegalStateException("Unknown exhausted action: " + exhaustedAction);
                     }
                 }
                 // create
@@ -374,36 +362,19 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     final T pooled;
                     try {
                         pooled = lifecycle.create();
-                    } catch (final Exception e) {
-//                        lock.lock();
-//                        try {
-                            idleAvailable.signal();
-//                        } finally {
-//                            lock.unlock();
-//                        }
-                        throw new PoolingException(
-                            "Cannot create pooled object.", e);
+                    } catch (Exception e) {
+                        idleAvailable.signal();
+                        throw new PoolingException("Cannot create pooled object.", e);
                     }
                     retval = new PooledData<T>(pooled);
-                    // maybe we add here more than maxActive objects. this happens
-                    // if this thread successfully passed the to full check above
-                    // and the create takes a long time while another thread got an
-                    // idle object. we accept this because creation can take a long
-                    // time.
-//                    lock.lock();
-//                    try {
-                        data.addActive(retval);
-//                    } finally {
-//                        lock.unlock();
-//                    }
+                    data.addActive(retval);
                     created = true;
                 }
             } finally {
                 lock.unlock();
             }
             // LifeCycle
-            if (!lifecycle.activate(retval)
-                || (testOnActivate && !lifecycle.validate(retval))) {
+            if (!lifecycle.activate(retval) || (testOnActivate && !lifecycle.validate(retval))) {
                 lock.lock();
                 try {
                     data.removeActive(retval);
@@ -414,8 +385,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 numBroken++;
                 lifecycle.destroy(retval.getPooled());
                 if (created) {
-                    throw new PoolingException(
-                        "Problem while creating new object.");
+                    throw new PoolingException("Problem while creating new object.");
                 }
                 continue;
             }
@@ -432,15 +402,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
             }
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: "
-                    + created);
+                LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: " + created);
             }
             return retval.getPooled();
         }
         throw new PoolingException("Pool has been stopped.");
     }
 
-    private static final long getWaitTime(final long startTime) {
+    private static final long getWaitTime(long startTime) {
         return System.currentTimeMillis() - startTime;
     }
 
@@ -560,7 +529,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     private ScheduledTimerTask cleaner;
 
-    public void registerCleaner(final TimerService timerService, final long interval) {
+    public void registerCleaner(TimerService timerService, long interval) {
         cleaner = timerService.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 try {
@@ -569,7 +538,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     thread.setName("PoolCleaner");
                     ReentrantLockPool.this.run();
                     thread.setName(origName);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
