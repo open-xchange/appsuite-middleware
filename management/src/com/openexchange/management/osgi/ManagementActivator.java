@@ -52,8 +52,6 @@ package com.openexchange.management.osgi;
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
@@ -72,8 +70,6 @@ public final class ManagementActivator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(ManagementActivator.class);
 
-    private static final String BUNDLE_ID_ADMIN = "com.openexchange.admin";
-
     private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
     private ServiceRegistration serviceRegistration;
@@ -83,15 +79,6 @@ public final class ManagementActivator extends DeferredActivator {
      */
     public ManagementActivator() {
         super();
-    }
-
-    private static boolean isAdminBundleInstalled(final BundleContext context) {
-        for (final Bundle bundle : context.getBundles()) {
-            if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -130,10 +117,6 @@ public final class ManagementActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.management");
-        if (isAdminBundleInstalled(context)) {
-            LOG.info("Canceling start of com.openexchange.management since admin bundle is running");
-            return;
-        }
         /*
          * Fill service registry
          */
@@ -154,10 +137,6 @@ public final class ManagementActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.management");
-        if (isAdminBundleInstalled(context)) {
-            LOG.info("Canceling stop of com.openexchange.management since admin bundle is running");
-            return;
-        }
         stopInternal();
         /*
          * Clear service registry
