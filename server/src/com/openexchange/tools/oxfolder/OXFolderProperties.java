@@ -131,10 +131,10 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
              * Remove listener from property
              */
             final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (configurationService == null) {
-                LOG.error("Cannot look-up configuration service");
-            } else {
+            if (configurationService != null) {
                 configurationService.removePropertyListener("ENABLE_INTERNAL_USER_EDIT", propertyListener);
+            } else if (LOG.isDebugEnabled()) {
+                LOG.debug("Cannot look-up configuration service to remove property listener.");
             }
         }
         final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
@@ -212,46 +212,44 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         /*
          * ENABLE_INTERNAL_USER_EDIT and add listener
          */
-        value = configurationService.getProperty(
-            "ENABLE_INTERNAL_USER_EDIT",
-            (propertyListener = new PropertyListener() {
+        value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT", (propertyListener = new PropertyListener() {
 
-                public void onPropertyChange(final PropertyEvent event) {
-                    if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                        final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
-                        if (enableInternalUsersEditNew == enableInternalUsersEdit) {
-                            /*
-                             * Changed to same value; ignore
-                             */
-                            return;
-                        }
-                        enableInternalUsersEdit = enableInternalUsersEditNew;
-                    } else {
-                        if (!enableInternalUsersEdit) {
-                            /*
-                             * Already set to false
-                             */
-                            return;
-                        }
-                        enableInternalUsersEdit = false;
+            public void onPropertyChange(final PropertyEvent event) {
+                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
+                    final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
+                    if (enableInternalUsersEditNew == enableInternalUsersEdit) {
+                        /*
+                         * Changed to same value; ignore
+                         */
+                        return;
                     }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Property 'ENABLE_INTERNAL_USER_EDIT' change propagated." + " ENABLE_INTERNAL_USER_EDIT=" + enableInternalUsersEdit);
+                    enableInternalUsersEdit = enableInternalUsersEditNew;
+                } else {
+                    if (!enableInternalUsersEdit) {
+                        /*
+                         * Already set to false
+                         */
+                        return;
                     }
-                    /*
-                     * Clear folder cache to ensure removal of all cached instances of global address book
-                     */
-                    if (FolderCacheManager.isInitialized()) {
-                        try {
-                            FolderCacheManager.getInstance().clearAll();
-                        } catch (final FolderCacheNotEnabledException e) {
-                            LOG.error(e.getMessage(), e);
-                        } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                    enableInternalUsersEdit = false;
+                }
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Property 'ENABLE_INTERNAL_USER_EDIT' change propagated." + " ENABLE_INTERNAL_USER_EDIT=" + enableInternalUsersEdit);
+                }
+                /*
+                 * Clear folder cache to ensure removal of all cached instances of global address book
+                 */
+                if (FolderCacheManager.isInitialized()) {
+                    try {
+                        FolderCacheManager.getInstance().clearAll();
+                    } catch (final FolderCacheNotEnabledException e) {
+                        LOG.error(e.getMessage(), e);
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
                     }
                 }
-            }));
+            }
+        }));
         if (null == value) {
             LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
         } else {
