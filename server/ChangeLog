@@ -1,5 +1,9 @@
 * 2009-09-10 - thorben.betten@open-xchange.com
 
+ - Bugfix #14467: Fixed reply of multipart/related message without HTML content
+
+* 2009-09-11 - thorben.betten@open-xchange.com
+
  - Bugfix 14489: Auto-Detecting charset of a RFC 2047 "encoded-word" if unknown
 
 * 2009-09-09 - marcus.klein@open-xchange.com

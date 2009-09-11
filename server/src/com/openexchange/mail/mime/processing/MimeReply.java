@@ -161,12 +161,14 @@ public final class MimeReply {
                 mailAccess.connect();
                 try {
                     final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-                    preferToAsRecipient = originalMailFolder.equals(folderStorage.getSentFolder()) || originalMailFolder.equals(folderStorage.getDraftsFolder());
+                    preferToAsRecipient =
+                        originalMailFolder.equals(folderStorage.getSentFolder()) || originalMailFolder.equals(folderStorage.getDraftsFolder());
                 } finally {
                     mailAccess.close(false);
                 }
             } else {
-                preferToAsRecipient = originalMailFolder.equals(arr[StorageUtility.INDEX_SENT]) || originalMailFolder.equals(arr[StorageUtility.INDEX_DRAFTS]);
+                preferToAsRecipient =
+                    originalMailFolder.equals(arr[StorageUtility.INDEX_SENT]) || originalMailFolder.equals(arr[StorageUtility.INDEX_DRAFTS]);
             }
         }
         return getReplyMail(
@@ -197,9 +199,8 @@ public final class MimeReply {
     private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws MailException {
         try {
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(
-                session.getUserId(),
-                ctx) : userSettingMail;
+            final UserSettingMail usm =
+                userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
             /*
              * New MIME message with a dummy session
              */
@@ -215,8 +216,9 @@ public final class MimeReply {
             final String rawSubject = unfold(subjectHdrValue);
             {
                 final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(rawSubject);
-                final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(
-                    subjectPrefix).append(decodedSubject).toString();
+                final String newSubject =
+                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(subjectPrefix).append(
+                        decodedSubject).toString();
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
             }
             /*
@@ -497,16 +499,9 @@ public final class MimeReply {
         final ContentType contentType = msg.getContentType();
         boolean found = false;
         if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-            found |= gatherAllTextContents(
-                msg,
-                contentType,
-                retvalContentType,
-                textBuilder,
-                strHelper,
-                usm,
-                mailSession,
-                locale,
-                replyTexts);
+            final ParameterContainer pc =
+                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, locale, replyTexts);
+            found |= gatherAllTextContents(msg, contentType, pc);
         } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             if (retvalContentType.getPrimaryType() == null) {
                 final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
@@ -524,8 +519,9 @@ public final class MimeReply {
             {
                 final Date date = msg.getSentDate();
                 try {
-                    replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                        date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
+                    replyPrefix =
+                        PATTERN_DATE.matcher(replyPrefix).replaceFirst(
+                            date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -534,8 +530,9 @@ public final class MimeReply {
                 }
 
                 try {
-                    replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                        date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+                    replyPrefix =
+                        PATTERN_TIME.matcher(replyPrefix).replaceFirst(
+                            date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -545,17 +542,18 @@ public final class MimeReply {
             }
             {
                 final InternetAddress[] from = msg.getFrom();
-                replyPrefix = PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
-                    from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+                replyPrefix =
+                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(from == null || from.length == 0 ? "" : from[0].toUnicodeString());
             }
             {
                 final char nextLine = '\n';
                 if (isHtml) {
-                    replyPrefix = HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(
-                        nextLine).append(nextLine).toString());
+                    replyPrefix =
+                        HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(
+                            nextLine).append(nextLine).toString());
                 } else {
-                    replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(nextLine).append(
-                        nextLine).toString();
+                    replyPrefix =
+                        new StringBuilder(replyPrefix.length() + 1).append(nextLine).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*
@@ -583,90 +581,30 @@ public final class MimeReply {
      * @param retvalContentType The return value's content type
      * @param textBuilder The text builder
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
-     * @throws MailException
-     * @throws MessagingException
-     * @throws IOException
+     * @throws MailException If a mail error occurs
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
      */
-    private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Locale locale, final List<String> replyTexts) throws MailException, MessagingException, IOException {
+    private static boolean gatherAllTextContents(final MailPart multipartPart, final ContentType mpContentType, final ParameterContainer pc) throws MailException, MessagingException, IOException {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         boolean found = false;
-        if ((mpContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) || mpContentType.isMimeType(MIMETypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
+        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && count >= 2) {
             /*
-             * Get html content
+             * Prefer HTML content within multipart/alternative part
              */
-            for (int i = 0; i < count; i++) {
-                final MailPart part = multipartPart.getEnclosedMailPart(i);
-                partContentType.setContentType(part.getContentType());
-                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
-                    if (retvalContentType.getPrimaryType() == null) {
-                        retvalContentType.setContentType(partContentType);
-                        final String charset = MessageUtility.checkCharset(part, partContentType);
-                        retvalContentType.setCharsetParameter(charset);
-                        textBuilder.append(MimeProcessingUtility.readContent(part, charset));
-                    } else {
-                        final String charset = MessageUtility.checkCharset(part, partContentType);
-                        partContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(
-                            part,
-                            partContentType,
-                            usm.isDisplayHtmlInlineContent());
-                        MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
-                    }
-                    found = true;
-                } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-                    found |= gatherAllTextContents(
-                        part,
-                        partContentType,
-                        retvalContentType,
-                        textBuilder,
-                        strHelper,
-                        usm,
-                        mailSession,
-                        locale,
-                        replyTexts);
-                }
+            found = getTextContent(true, multipartPart, count, partContentType, pc);
+            if (!found) {
+                /*
+                 * No HTML part found, retry with any text part
+                 */
+                found = getTextContent(false, multipartPart, count, partContentType, pc);
             }
         } else {
             /*
              * Get any text content
              */
-            for (int i = 0; i < count; i++) {
-                final MailPart part = multipartPart.getEnclosedMailPart(i);
-                partContentType.setContentType(part.getContentType());
-                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
-                    if (retvalContentType.getPrimaryType() == null) {
-                        retvalContentType.setContentType(partContentType);
-                        final String charset = MessageUtility.checkCharset(part, partContentType);
-                        retvalContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(
-                            part,
-                            retvalContentType,
-                            usm.isDisplayHtmlInlineContent());
-                        textBuilder.append(text);
-                    } else {
-                        final String charset = MessageUtility.checkCharset(part, partContentType);
-                        partContentType.setCharsetParameter(charset);
-                        final String text = MimeProcessingUtility.handleInlineTextPart(
-                            part,
-                            partContentType,
-                            usm.isDisplayHtmlInlineContent());
-                        MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);
-                    }
-                    found = true;
-                } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-                    found |= gatherAllTextContents(
-                        part,
-                        partContentType,
-                        retvalContentType,
-                        textBuilder,
-                        strHelper,
-                        usm,
-                        mailSession,
-                        locale,
-                        replyTexts);
-                }
-            }
+            found = getTextContent(false, multipartPart, count, partContentType, pc);
         }
         /*
          * Look for enclosed messages in any case
@@ -676,7 +614,8 @@ public final class MimeReply {
             partContentType.setContentType(part.getContentType());
             if (partContentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
                 final MailMessage enclosedMsg = (MailMessage) part.getContent();
-                found |= generateReplyText(enclosedMsg, retvalContentType, strHelper, locale, usm, mailSession, replyTexts);
+                found |=
+                    generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
             } else if (MimeProcessingUtility.fileNameEndsWith(".eml", part, partContentType)) {
                 /*
                  * Create message from input stream
@@ -690,7 +629,41 @@ public final class MimeReply {
                 }
                 final MailMessage attachedMsg = MIMEMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
                 // part.getInputStream());
-                found |= generateReplyText(attachedMsg, retvalContentType, strHelper, locale, usm, mailSession, replyTexts);
+                found |=
+                    generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
+            }
+        }
+        return found;
+    }
+
+    private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws MailException, MessagingException, IOException {
+        boolean found = false;
+        for (int i = 0; i < count; i++) {
+            final MailPart part = multipartPart.getEnclosedMailPart(i);
+            partContentType.setContentType(part.getContentType());
+            if (partContentType.isMimeType(preferHTML ? MIMETypes.MIME_TEXT_HTM_ALL : MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(
+                part,
+                partContentType)) {
+                if (pc.retvalContentType.getPrimaryType() == null) {
+                    pc.retvalContentType.setContentType(partContentType);
+                    final String charset = MessageUtility.checkCharset(part, partContentType);
+                    pc.retvalContentType.setCharsetParameter(charset);
+                    final String text =
+                        preferHTML ? MimeProcessingUtility.readContent(part, charset) : MimeProcessingUtility.handleInlineTextPart(
+                            part,
+                            pc.retvalContentType,
+                            pc.usm.isDisplayHtmlInlineContent());
+                    pc.textBuilder.append(text);
+                } else {
+                    final String charset = MessageUtility.checkCharset(part, partContentType);
+                    partContentType.setCharsetParameter(charset);
+                    final String text =
+                        MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
+                    MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
+                }
+                found = true;
+            } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+                found |= gatherAllTextContents(part, partContentType, pc);
             }
         }
         return found;
@@ -704,7 +677,8 @@ public final class MimeReply {
 
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
 
-    private static final String BLOCKQUOTE_START = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
+    private static final String BLOCKQUOTE_START =
+        "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
 
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
@@ -733,4 +707,36 @@ public final class MimeReply {
         }
         return sb.toString();
     }
+
+    private static final class ParameterContainer {
+
+        final ContentType retvalContentType;
+
+        final StringBuilder textBuilder;
+
+        final StringHelper strHelper;
+
+        final UserSettingMail usm;
+
+        final javax.mail.Session mailSession;
+
+        final Locale locale;
+
+        final List<String> replyTexts;
+
+        public ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder,
+          final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession,
+          final Locale locale, final List<String> replyTexts) {
+            super();
+            this.retvalContentType = retvalContentType;
+            this.textBuilder = textBuilder;
+            this.strHelper = strHelper;
+            this.usm = usm;
+            this.mailSession = mailSession;
+            this.locale = locale;
+            this.replyTexts = replyTexts;
+        }
+
+    }
+
 }
