@@ -103,4 +103,15 @@ public class CustomFutureTask<V> extends FutureTask<V> {
         return refusedExecutionBehavior;
     }
 
+    /**
+     * Causes this future to report an <tt>ExecutionException</tt> with the given throwable as its cause, unless this Future has already
+     * been set or has been canceled.
+     * 
+     * @param t The cause of failure.
+     */
+    @Override
+    public void setException(final Throwable t) {
+        super.setException(t);
+    }
+
 }

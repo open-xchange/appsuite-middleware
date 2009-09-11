@@ -49,7 +49,6 @@
 
 package com.openexchange.unifiedinbox.utility;
 
-import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -79,13 +78,9 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior {
         super();
     }
 
-    public void refusedExecution(final Task<?> task, final ThreadPoolService threadPool) {
+    public void refusedExecution(final Task<?> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
-            try {
-                task.call();
-            } catch (final Exception e) {
-                throw new RejectedExecutionException(e);
-            }
+            task.call();
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.internal;
 
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
@@ -81,10 +82,18 @@ public final class DelegatingRejectedExecutionHandler implements RejectedExecuti
     public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
         if (r instanceof CustomFutureTask<?>) {
             // Perform task's handler or default if null
-            final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
-            final RefusedExecutionBehavior reb = customFutureTask.getRefusedExecutionBehavior();
+            final CustomFutureTask<?> cft = (CustomFutureTask<?>) r;
+            final RefusedExecutionBehavior reb = cft.getRefusedExecutionBehavior();
             if (null != reb) {
-                reb.refusedExecution(customFutureTask.getTask(), threadPool);
+                try {
+                    reb.refusedExecution(cft.getTask(), threadPool);
+                } catch (final RejectedExecutionException e) {
+                    // No remedy
+                    throw e;
+                } catch (final Exception e) {
+                    // Signal failed execution
+                    cft.setException(e);
+                }
                 return;
             }
         }

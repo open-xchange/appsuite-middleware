@@ -66,8 +66,9 @@ public interface RefusedExecutionBehavior {
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
-     * @throws RejectedExecutionException if there is no remedy
+     * @throws Exception If task execution fails
+     * @throws RejectedExecutionException If there is no remedy
      */
-    void refusedExecution(Task<?> task, ThreadPoolService threadPool);
+    void refusedExecution(Task<?> task, ThreadPoolService threadPool) throws Exception;
 
 }
