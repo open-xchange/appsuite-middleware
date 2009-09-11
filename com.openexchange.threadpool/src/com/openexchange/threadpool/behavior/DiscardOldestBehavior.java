@@ -82,7 +82,7 @@ public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Obj
 
     /**
      * Obtains and ignores the next task that the executor would otherwise execute, if one is immediately available, and then retries
-     * execution of task r, unless the executor is shut down, in which case task r is instead discarded.
+     * execution of task, unless the executor is shut down, in which case task is instead discarded.
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
