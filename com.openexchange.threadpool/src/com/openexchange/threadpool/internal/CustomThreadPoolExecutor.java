@@ -226,7 +226,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CustomThreadPoolExecutor.class);
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CustomThreadPoolExecutor.class);
 
     /**
      * Only used to force toArray() to produce a Runnable[].
@@ -852,7 +852,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 } else {
                     time = triggerTime(-p);
                 }
-                delayedWorkQueue.add(this);
+                getDelayedWorkQueue().add(this);
             }
             // This might have been the final executed delayed
             // task. Wake up threads to check.
@@ -890,7 +890,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 while (run && !currentThread.isInterrupted()) {
                     final Runnable command;
                     try {
-                        command = delayedWorkQueue.take();
+                        command = getDelayedWorkQueue().take();
                     } catch (final InterruptedException e) {
                         // Ignore
                         continue;
@@ -953,7 +953,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     private static class DelayedWorkQueue extends AbstractCollection<Runnable> implements BlockingQueue<Runnable> {
 
-        private final DelayQueue<ScheduledFutureTask<?>> dq = new DelayQueue<ScheduledFutureTask<?>>();
+        final DelayQueue<ScheduledFutureTask<?>> dq = new DelayQueue<ScheduledFutureTask<?>>();
 
         public DelayedWorkQueue() {
             super();
@@ -1551,6 +1551,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     public BlockingQueue<Runnable> getQueue() {
         return workQueue;
+    }
+
+    /**
+     * Gets the delayed work queue.
+     * 
+     * @return The delayed work queue
+     */
+    DelayedWorkQueue getDelayedWorkQueue() {
+        return delayedWorkQueue;
     }
 
     /**
