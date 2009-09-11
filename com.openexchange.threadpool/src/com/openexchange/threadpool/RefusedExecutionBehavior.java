@@ -61,7 +61,8 @@ public interface RefusedExecutionBehavior<V> {
     /**
      * The result constant representing a discarded task.
      * <p>
-     * This constant is supposed to be returned by {@link #refusedExecution(Task, ThreadPoolService)} when obeying "Discard" behavior.
+     * This constant is supposed to be returned by {@link #refusedExecution(Task, ThreadPoolService)} to signal that task has been
+     * discarded.
      */
     public static final Object DISCARDED = new Object();
 
