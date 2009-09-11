@@ -86,6 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -295,11 +296,8 @@ public final class CacheFolderStorage implements FolderStorage {
                     final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContext().getContextId());
                     globalCache.remove(key);
                 } else {
-                    final CacheKey key = newCacheKey(
-                        folderId,
-                        treeId,
-                        storageParameters.getContext().getContextId(),
-                        storageParameters.getUser().getId());
+                    final CacheKey key =
+                        newCacheKey(folderId, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
                     userCache.remove(key);
                 }
             } catch (final CacheException e) {
@@ -385,8 +383,9 @@ public final class CacheFolderStorage implements FolderStorage {
             try {
                 final java.util.List<SortableId> allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
                 {
-                    final CompletionService<java.util.List<SortableId>> completionService = new ExecutorCompletionService<java.util.List<SortableId>>(
-                        CacheServiceRegistry.getServiceRegistry().getService(com.openexchange.timer.TimerService.class).getExecutor());
+                    final CompletionService<java.util.List<SortableId>> completionService =
+                        new ExecutorCompletionService<java.util.List<SortableId>>(CacheServiceRegistry.getServiceRegistry().getService(
+                            ThreadPoolService.class).getExecutor());
                     /*
                      * Get all visible subfolders from each storage
                      */
@@ -397,10 +396,8 @@ public final class CacheFolderStorage implements FolderStorage {
                                 final StorageParameters newParameters = newStorageParameters(storageParameters);
                                 neededStorage.startTransaction(newParameters, false);
                                 try {
-                                    final java.util.List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(
-                                        treeId,
-                                        parentId,
-                                        newParameters));
+                                    final java.util.List<SortableId> l =
+                                        Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
                                     neededStorage.commitTransaction(newParameters);
                                     return l;
                                 } catch (final Exception e) {
@@ -546,18 +543,16 @@ public final class CacheFolderStorage implements FolderStorage {
         final UserizedFolder[] folders;
         final boolean ignoreDelete = index == 0;
         if (null == session) {
-            folders = new Updates(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdates(
-                treeId,
-                timeStamp,
-                ignoreDelete,
-                includeContentTypes)[index];
-        } else {
-            try {
-                folders = new Updates(new ServerSessionAdapter(session), registry).doUpdates(
+            folders =
+                new Updates(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdates(
                     treeId,
                     timeStamp,
                     ignoreDelete,
                     includeContentTypes)[index];
+        } else {
+            try {
+                folders =
+                    new Updates(new ServerSessionAdapter(session), registry).doUpdates(treeId, timeStamp, ignoreDelete, includeContentTypes)[index];
             } catch (final ContextException e) {
                 throw new FolderException(e);
             }
