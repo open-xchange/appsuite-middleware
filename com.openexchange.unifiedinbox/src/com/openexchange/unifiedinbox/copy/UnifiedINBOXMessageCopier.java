@@ -62,11 +62,11 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.UnifiedINBOXUID;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
-import com.openexchange.unifiedinbox.utility.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
@@ -282,7 +282,7 @@ public final class UnifiedINBOXMessageCopier {
     }
 
     private static void performCallables(final Collection<? extends Task<Object>> callables, final ThreadPoolService threadPoolService) throws MailException {
-        final CompletionFuture<Object> completionFuture = threadPoolService.invoke(callables, CallerRunsBehavior.getInstance());
+        final CompletionFuture<Object> completionFuture = threadPoolService.invoke(callables, CallerRunsBehavior.newInstance());
         // Wait for completion
         try {
             final int nCallables = callables.size();

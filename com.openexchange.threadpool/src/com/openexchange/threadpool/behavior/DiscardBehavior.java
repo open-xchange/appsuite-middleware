@@ -47,36 +47,48 @@
  *
  */
 
-package com.openexchange.threadpool;
+package com.openexchange.threadpool.behavior;
 
 import java.util.concurrent.RejectedExecutionException;
+import com.openexchange.threadpool.RefusedExecutionBehavior;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link RefusedExecutionBehavior} - The behavior for tasks that cannot be executed by a {@link ThreadPoolService}.
+ * {@link DiscardBehavior} - Implements "Discard" behavior.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface RefusedExecutionBehavior<V> {
+public final class DiscardBehavior implements RefusedExecutionBehavior<Object> {
+
+    private static final DiscardBehavior BEHAVIOR = new DiscardBehavior();
 
     /**
-     * The result constant representing a discarded task.
-     * <p>
-     * This constant is supposed to be returned by {@link #refusedExecution(Task, ThreadPoolService)} when obeying "Discard" behavior.
+     * Gets the "Discard" behavior.
+     * 
+     * @return The "Discard behavior
      */
-    public static final Object DISCARDED = new Object();
+    public static <V> RefusedExecutionBehavior<V> getInstance() {
+        return (RefusedExecutionBehavior<V>) BEHAVIOR;
+    }
 
     /**
-     * Method that may be invoked by a {@link ThreadPoolService} when <tt>submit()</tt> method cannot accept a task. This may occur when no
-     * more threads or queue slots are available because their bounds would be exceeded, or upon shutdown of the thread pool. In the absence
-     * other alternatives, the method may throw an unchecked {@link RejectedExecutionException}, which will be propagated to the caller of
-     * <tt>submit()</tt>.
+     * Initializes a new {@link DiscardBehavior}.
+     */
+    private DiscardBehavior() {
+        super();
+    }
+
+    /**
+     * Does nothing, which has the effect of silently discarding task.
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
-     * @return Task's result or <code>null</code>
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */
-    V refusedExecution(Task<V> task, ThreadPoolService threadPool) throws Exception;
+    public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
+        return RefusedExecutionBehavior.DISCARDED;
+    }
 
 }

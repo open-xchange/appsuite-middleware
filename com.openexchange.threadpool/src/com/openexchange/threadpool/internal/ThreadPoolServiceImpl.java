@@ -311,7 +311,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
-    public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior behavior) {
+    public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior<T> behavior) {
         if (tasks == null) {
             throw new NullPointerException();
         }
@@ -343,7 +343,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return ftask;
     }
 
-    public <T> Future<T> submit(final Task<T> task, final RefusedExecutionBehavior refusedExecutionBehavior) {
+    public <T> Future<T> submit(final Task<T> task, final RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         if (task == null) {
             throw new NullPointerException();
         }

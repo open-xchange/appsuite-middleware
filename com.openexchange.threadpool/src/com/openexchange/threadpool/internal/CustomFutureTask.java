@@ -62,7 +62,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
 
     private final Task<V> task;
 
-    private final RefusedExecutionBehavior refusedExecutionBehavior;
+    private final RefusedExecutionBehavior<V> refusedExecutionBehavior;
 
     /**
      * Initializes a new {@link CustomFutureTask}.
@@ -79,7 +79,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
      * @param task The task
      * @param refusedExecutionBehavior The refused execution behavior
      */
-    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior refusedExecutionBehavior) {
+    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior<V> refusedExecutionBehavior) {
         super(task);
         this.task = task;
         this.refusedExecutionBehavior = refusedExecutionBehavior;
@@ -99,8 +99,18 @@ public class CustomFutureTask<V> extends FutureTask<V> {
      * 
      * @return The refused execution behavior or <code>null</code> if task has no individual behavior
      */
-    public RefusedExecutionBehavior getRefusedExecutionBehavior() {
+    public RefusedExecutionBehavior<V> getRefusedExecutionBehavior() {
         return refusedExecutionBehavior;
+    }
+
+    /**
+     * Sets the result of this future to the given value unless this future has already been set or has been canceled.
+     * 
+     * @param v The value
+     */
+    @Override
+    public void set(final V v) {
+        super.set(v);
     }
 
     /**

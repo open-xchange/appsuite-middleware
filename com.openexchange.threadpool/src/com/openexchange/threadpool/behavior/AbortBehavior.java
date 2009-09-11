@@ -47,41 +47,48 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.threadpool.behavior;
 
+import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link CallerRunsBehavior} - Implements "Caller-Runs" behavior.
+ * {@link AbortBehavior} - Implements "Abort" behavior.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CallerRunsBehavior implements RefusedExecutionBehavior {
+public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
 
-    private static final CallerRunsBehavior BEHAVIOR = new CallerRunsBehavior();
+    private static final AbortBehavior BEHAVIOR = new AbortBehavior();
 
     /**
-     * Gets the behavior instance.
+     * Gets the "Abort" behavior.
      * 
-     * @return The behavior instance
+     * @return The "Abort" behavior
      */
-    public static CallerRunsBehavior getInstance() {
-        return BEHAVIOR;
+    public static <V> RefusedExecutionBehavior<V> getInstance() {
+        return (RefusedExecutionBehavior<V>) BEHAVIOR;
     }
 
     /**
-     * Initializes a new {@link CallerRunsBehavior}.
+     * Initializes a new {@link AbortBehavior}.
      */
-    private CallerRunsBehavior() {
+    private AbortBehavior() {
         super();
     }
 
-    public void refusedExecution(final Task<?> task, final ThreadPoolService threadPool) throws Exception {
-        if (!threadPool.isShutdown()) {
-            task.call();
-        }
+    /**
+     * Always throws {@link RejectedExecutionException}.
+     * 
+     * @param task The task requested to be executed
+     * @param threadPool The thread pool attempting to execute this task
+     * @throws Exception If task execution fails
+     * @throws RejectedExecutionException If there is no remedy
+     */
+    public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
+        throw new RejectedExecutionException();
     }
 
 }

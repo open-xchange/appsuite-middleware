@@ -68,7 +68,6 @@ import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.imap.util.CallerRunsBehavior;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -91,6 +90,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -344,7 +344,7 @@ public final class IMAPDefaultFolderChecker {
                             completionFuture =
                                 IMAPServiceRegistry.getService(ThreadPoolService.class, true).invoke(
                                     tasks,
-                                    CallerRunsBehavior.getInstance());
+                                    CallerRunsBehavior.newInstance());
                         } catch (final ServiceException e) {
                             throw new IMAPException(e);
                         }

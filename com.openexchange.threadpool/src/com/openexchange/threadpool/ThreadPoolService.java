@@ -104,7 +104,7 @@ public interface ThreadPoolService {
      * @throws RejectedExecutionException If task cannot be scheduled for execution
      * @throws NullPointerException If task is <code>null</code>
      */
-    <T> Future<T> submit(Task<T> task, RefusedExecutionBehavior refusedExecutionBehavior);
+    <T> Future<T> submit(Task<T> task, RefusedExecutionBehavior<T> refusedExecutionBehavior);
 
     /**
      * Executes the given tasks, returning a list of Futures holding their status and results when all complete. {@link Future#isDone} is
@@ -113,8 +113,8 @@ public interface ThreadPoolService {
      * progress.
      * 
      * @param tasks The collection of tasks
-     * @return A list of PendingCompletions representing the tasks, in the same sequential order as produced by the iterator for the given
-     *         task list, each of which has completed.
+     * @return A list of Futures representing the tasks, in the same sequential order as produced by the iterator for the given task list,
+     *         each of which has completed.
      * @throws InterruptedException If interrupted while waiting, in which case unfinished tasks are canceled.
      * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
      * @throws RejectedExecutionException If any task cannot be scheduled for execution
@@ -224,7 +224,7 @@ public interface ThreadPoolService {
      * @throws RejectedExecutionException If task cannot be scheduled for execution
      * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
      */
-    <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks, RefusedExecutionBehavior refusedExecutionBehavior);
+    <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks, RefusedExecutionBehavior<T> refusedExecutionBehavior);
 
     /**
      * Gets the {@link Executor} view on this thread pool.

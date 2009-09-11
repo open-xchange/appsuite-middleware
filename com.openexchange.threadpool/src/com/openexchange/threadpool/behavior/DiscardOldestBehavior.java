@@ -47,41 +47,52 @@
  *
  */
 
-package com.openexchange.unifiedinbox.utility;
+package com.openexchange.threadpool.behavior;
 
+import java.util.concurrent.RejectedExecutionException;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
 
 /**
- * {@link CallerRunsBehavior} - Implements "Caller-Runs" behavior.
+ * {@link DiscardOldestBehavior} - Implements "Discard-Oldest" behavior.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CallerRunsBehavior implements RefusedExecutionBehavior {
-
-    private static final CallerRunsBehavior BEHAVIOR = new CallerRunsBehavior();
+public final class DiscardOldestBehavior<V> implements RefusedExecutionBehavior<V> {
 
     /**
-     * Gets the behavior instance.
+     * Creates a new "Discard-Oldest" behavior instance.
      * 
-     * @return The behavior instance
+     * @return A new "Discard-Oldest" behavior instance
      */
-    public static CallerRunsBehavior getInstance() {
-        return BEHAVIOR;
+    public static <V> DiscardOldestBehavior<V> newInstance() {
+        return new DiscardOldestBehavior<V>();
     }
 
     /**
-     * Initializes a new {@link CallerRunsBehavior}.
+     * Initializes a new {@link DiscardOldestBehavior}.
      */
-    private CallerRunsBehavior() {
+    private DiscardOldestBehavior() {
         super();
     }
 
-    public void refusedExecution(final Task<?> task, final ThreadPoolService threadPool) throws Exception {
+    /**
+     * Obtains and ignores the next task that the executor would otherwise execute, if one is immediately available, and then retries
+     * execution of task r, unless the executor is shut down, in which case task r is instead discarded.
+     * 
+     * @param task The task requested to be executed
+     * @param threadPool The thread pool attempting to execute this task
+     * @throws Exception If task execution fails
+     * @throws RejectedExecutionException If there is no remedy
+     */
+    public V refusedExecution(final Task<V> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
-            task.call();
+            ((CustomThreadPoolExecutor) threadPool.getExecutor()).getQueue().poll();
+            return task.call();
         }
+        throw new RejectedExecutionException("Thread pool is shutted down");
     }
 
 }
