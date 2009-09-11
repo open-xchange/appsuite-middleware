@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.internal;
 
+import java.text.MessageFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
@@ -883,9 +884,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
 
         public void run() {
+            final Thread currentThread = Thread.currentThread();
             try {
                 final boolean run = true;
-                final Thread currentThread = Thread.currentThread();
                 while (run && !currentThread.isInterrupted()) {
                     final Runnable command;
                     try {
@@ -940,7 +941,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             } catch (final Exception e) {
-                LOG.fatal("DelayedQueueConsumer thread aborted execution due to an exception! TimerService is no more active!", e);
+                LOG.fatal(MessageFormat.format(
+                    "{0} thread aborted execution due to an exception! TimerService is no more active!",
+                    currentThread.getName()), e);
             }
         }
     }
