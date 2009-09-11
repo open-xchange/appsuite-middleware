@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -234,7 +235,9 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     enableInternalUsersEdit = false;
                 }
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Property 'ENABLE_INTERNAL_USER_EDIT' change propagated." + " ENABLE_INTERNAL_USER_EDIT=" + enableInternalUsersEdit);
+                    LOG.info(MessageFormat.format(
+                        "Property ''ENABLE_INTERNAL_USER_EDIT'' change propagated. ENABLE_INTERNAL_USER_EDIT={0}",
+                        Boolean.valueOf(enableInternalUsersEdit)));
                 }
                 /*
                  * Clear folder cache to ensure removal of all cached instances of global address book
