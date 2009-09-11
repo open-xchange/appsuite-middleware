@@ -59,15 +59,17 @@ import com.openexchange.threadpool.ThreadPoolService;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CallerRunsBehavior<V> implements RefusedExecutionBehavior<V> {
+public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object> {
+
+    private static final CallerRunsBehavior INSTANCE = new CallerRunsBehavior();
 
     /**
-     * Creates a new "Caller-Runs" behavior instance.
+     * Gets the "Caller-Runs" behavior instance.
      * 
-     * @return A new "Caller-Runs" behavior instance
+     * @return The "Caller-Runs" behavior instance
      */
-    public static <V> CallerRunsBehavior<V> newInstance() {
-        return new CallerRunsBehavior<V>();
+    public static <V> RefusedExecutionBehavior<V> getInstance() {
+        return (RefusedExecutionBehavior<V>) INSTANCE;
     }
 
     /**
@@ -85,7 +87,7 @@ public final class CallerRunsBehavior<V> implements RefusedExecutionBehavior<V> 
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */
-    public V refusedExecution(final Task<V> task, final ThreadPoolService threadPool) throws Exception {
+    public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
             return task.call();
         }

@@ -60,15 +60,17 @@ import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DiscardOldestBehavior<V> implements RefusedExecutionBehavior<V> {
+public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Object> {
+
+    private static final DiscardOldestBehavior INSTANCE = new DiscardOldestBehavior();
 
     /**
      * Creates a new "Discard-Oldest" behavior instance.
      * 
      * @return A new "Discard-Oldest" behavior instance
      */
-    public static <V> DiscardOldestBehavior<V> newInstance() {
-        return new DiscardOldestBehavior<V>();
+    public static <V> RefusedExecutionBehavior<V> newInstance() {
+        return (RefusedExecutionBehavior<V>) INSTANCE;
     }
 
     /**
@@ -87,7 +89,7 @@ public final class DiscardOldestBehavior<V> implements RefusedExecutionBehavior<
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */
-    public V refusedExecution(final Task<V> task, final ThreadPoolService threadPool) throws Exception {
+    public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPool) throws Exception {
         if (!threadPool.isShutdown()) {
             ((CustomThreadPoolExecutor) threadPool.getExecutor()).getQueue().poll();
             return task.call();
