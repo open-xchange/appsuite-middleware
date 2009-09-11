@@ -267,7 +267,7 @@ public final class LoginPerformer {
                     }
                     return null;
                 }
-            }, CallerRunsBehavior.newInstance());
+            }, CallerRunsBehavior.getInstance());
         }
     }
 
@@ -285,7 +285,7 @@ public final class LoginPerformer {
                     }
                     return null;
                 }
-            }, CallerRunsBehavior.newInstance());
+            }, CallerRunsBehavior.getInstance());
         }
     }
 
