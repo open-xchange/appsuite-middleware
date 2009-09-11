@@ -136,6 +136,7 @@ import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
+import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.timer.TimerService;
@@ -314,10 +315,30 @@ public final class Init {
     }
 
     private static void startAndInjectThreadPoolBundle() {
+        String property = System.getProperty("java.specification.version");
+        if (null == property) {
+            property = System.getProperty("java.runtime.version");
+            if (null == property) {
+                // JRE not detectable, use fallback
+                QueueProvider.initInstance(false);
+            } else {
+                // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
+                QueueProvider.initInstance(!property.startsWith("1.5"));
+            }
+        } else {
+            // "java.specification.version=1.5" OR "java.specification.version=1.6"
+            QueueProvider.initInstance("1.5".compareTo(property) < 0);
+        }
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
-        ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-        ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getRefusedExecutionBehavior());
-        TimerService timer = new CustomThreadPoolExecutorTimerService((CustomThreadPoolExecutor) threadPool.getExecutor());
+        final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
+        final ThreadPoolServiceImpl threadPool =
+            ThreadPoolServiceImpl.newInstance(
+                props.getCorePoolSize(),
+                props.getMaximumPoolSize(),
+                props.getKeepAliveTime(),
+                props.getWorkQueue(),
+                props.getRefusedExecutionBehavior());
+        final TimerService timer = new CustomThreadPoolExecutorTimerService((CustomThreadPoolExecutor) threadPool.getExecutor());
         services.put(TimerService.class, timer);
         ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
     }
