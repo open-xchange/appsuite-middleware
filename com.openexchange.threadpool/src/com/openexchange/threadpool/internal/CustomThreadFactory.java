@@ -68,6 +68,8 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
 
     /**
      * Initializes a new {@link CustomThreadFactory}.
+     * 
+     * @param namePrefix The name prefix
      */
     public CustomThreadFactory(final String namePrefix) {
         super();
