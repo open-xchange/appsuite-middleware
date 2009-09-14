@@ -851,7 +851,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          * Run a periodic task
          */
         private void runPeriodic() {
-            final boolean ok = ScheduledFutureTask.super.runAndReset();
+            final boolean ok = super.runAndReset();
             final boolean down = isShutdown();
             // Reschedule if not canceled and not shutdown or policy allows
             if (ok && (!down || (getContinueExistingPeriodicTasksAfterShutdownPolicy() && !isTerminating()))) {
@@ -878,7 +878,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (isPeriodic()) {
                 runPeriodic();
             } else {
-                ScheduledFutureTask.super.run();
+                super.run();
             }
         }
     }
