@@ -65,15 +65,15 @@ public interface CompletionFuture<V> {
     /**
      * Retrieves and removes the Future representing the next completed task, waiting if none are yet present.
      * 
-     * @return the Future representing the next completed task
-     * @throws InterruptedException if interrupted while waiting.
+     * @return The Future representing the next completed task
+     * @throws InterruptedException If interrupted while waiting.
      */
     Future<V> take() throws InterruptedException;
 
     /**
      * Retrieves and removes the Future representing the next completed task or <tt>null</tt> if none are present.
      * 
-     * @return the Future representing the next completed task, or <tt>null</tt> if none are present.
+     * @return The Future representing the next completed task, or <tt>null</tt> if none are present.
      */
     Future<V> poll();
 
@@ -81,10 +81,10 @@ public interface CompletionFuture<V> {
      * Retrieves and removes the Future representing the next completed task, waiting if necessary up to the specified wait time if none are
      * yet present.
      * 
-     * @param timeout how long to wait before giving up, in units of <tt>unit</tt>
-     * @param unit a <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
-     * @return the Future representing the next completed task or <tt>null</tt> if the specified waiting time elapses before one is present.
-     * @throws InterruptedException if interrupted while waiting.
+     * @param timeout How long to wait before giving up, in units of <tt>unit</tt>
+     * @param unit A <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
+     * @return The Future representing the next completed task or <tt>null</tt> if the specified waiting time elapses before one is present.
+     * @throws InterruptedException If interrupted while waiting.
      */
     Future<V> poll(long timeout, TimeUnit unit) throws InterruptedException;
 
