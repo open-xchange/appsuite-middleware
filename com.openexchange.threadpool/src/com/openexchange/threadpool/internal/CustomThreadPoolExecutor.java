@@ -910,20 +910,20 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                          * Delegate task to a new thread if under core pool size
                          */
                         if ((getPoolSize() < getCorePoolSize()) && addIfUnderCorePoolSize(command)) {
-                            continue;
+                            break;
                         }
                         /*
                          * Offer task to work queue to let it be executed by an existing thread
                          */
                         if (getQueue().offer(command)) {
-                            continue;
+                            break;
                         }
                         /*
                          * At last spawn a new thread if under max. pool size
                          */
                         final Runnable r = addIfUnderMaximumPoolSize(command);
                         if (r == command) {
-                            continue;
+                            break;
                         }
                         /*
                          * All trials failed
@@ -944,7 +944,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 LOG.error(e.getMessage(), e);
                             }
                             // rejectCustom(command);
-                            continue;
+                            break;
                         }
                         // else retry
                     }
@@ -1277,11 +1277,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
         } else if (r instanceof ScheduledFutureTask<?>) {
-            final String tname = thread.getName();
-            final int pos = tname.indexOf('-');
-            if (pos > 0) {
-                thread.setName(new StringBuilder(16).append("OXTimer").append(tname.substring(pos)).toString());
-            }
+            ((ThreadRenamer) thread).renamePrefix("OXTimer");
         }
         super.beforeExecute(thread, r);
     }
