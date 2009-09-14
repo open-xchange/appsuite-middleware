@@ -70,6 +70,38 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-135
+   # -----------------------------------------------------------------------
+   ofile=/opt/open-xchange/etc/groupware/server.properties
+   nfile=/opt/open-xchange/etc/groupware/management.properties
+   for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
+       if ox_exists_property $prop $ofile; then
+           oldval=$(ox_read_property $prop $ofile)
+           ox_set_property $prop "$oldval" $nfile
+           ox_remove_property $prop $ofile
+       fi
+   done
+   ofile=/opt/open-xchange/etc/admindaemon/plugin/hosting.properties
+   nfile=/opt/open-xchange/etc/admindaemon/management.properties
+   for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
+       if ox_exists_property $prop $ofile; then
+           oldval=$(ox_read_property $prop $ofile)
+           ox_set_property $prop "$oldval" $nfile
+           ox_remove_property $prop $ofile
+       fi
+   done
+
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles
