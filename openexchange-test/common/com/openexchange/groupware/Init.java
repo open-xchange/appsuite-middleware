@@ -87,8 +87,8 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.DBPoolingExceptionFactory;
-import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
@@ -436,8 +436,8 @@ public final class Init {
         registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
         final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
         final TimerService timerService = (TimerService) services.get(TimerService.class);
-        com.openexchange.database.internal.Initialization.getInstance().start(configurationService, timerService);
-        Database.setDatabaseService(new DatabaseServiceImpl());
+        DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, timerService);
+        Database.setDatabaseService(dbService);
     }
 
     private static void startAndInjectMonitoringBundle() {
