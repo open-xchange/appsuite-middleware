@@ -567,9 +567,9 @@ public final class Init {
         // for (final Initialization init: started) {
         // init.stop();
         // }
-        stopMailBundle();
-        stopDatabaseBundle();
-        stopThreadPoolBundle();
+//        stopMailBundle();
+//        stopDatabaseBundle();
+//        stopThreadPoolBundle();
     }
 
     public static void stopMailBundle() {
