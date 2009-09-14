@@ -50,7 +50,6 @@
 package com.openexchange.threadpool.internal;
 
 import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * {@link RejectedExecutionType} - The rejected execution type.
@@ -62,15 +61,15 @@ public enum RejectedExecutionType {
     /**
      * Aborts execution by throwing an appropriate exception to the caller.
      */
-    ABORT("abort", new ThreadPoolExecutor.AbortPolicy()),
+    ABORT("abort", new CustomThreadPoolExecutor.AbortPolicy()),
     /**
      * The caller is considered to run the task if thread pool is unable to do so.
      */
-    CALLER_RUNS("caller-runs", new ThreadPoolExecutor.CallerRunsPolicy()),
+    CALLER_RUNS("caller-runs", new CustomThreadPoolExecutor.CallerRunsPolicy()),
     /**
      * The task is silently discarded. No exception is thrown.
      */
-    DISCARD("discard", new ThreadPoolExecutor.DiscardPolicy());
+    DISCARD("discard", new CustomThreadPoolExecutor.DiscardPolicy());
 
     private final String identifier;
 
