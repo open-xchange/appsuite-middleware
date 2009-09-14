@@ -46,27 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.groupware.calendar;
 
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertResourceParticipants;
 import static com.openexchange.groupware.calendar.tools.CalendarAssertions.assertUserParticipants;
-
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.ConflictHandler;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestFolderToolkit;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestFolderToolkit;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -119,13 +115,13 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     @Override
-	public void tearDown() throws AbstractOXException, SQLException {
+	public void tearDown() throws Exception {
         Init.stopServer();
         appointments.removeAll(user, clean);
     }
 
      // Node 1077
-    public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
+    public void testShouldSupplyConflictingUserParticipants() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants( user, participant1, participant2);  // User is added in private folder anyway
         appointments.save( appointment ); clean.add( appointment );
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants( user, participant1, participant3);
@@ -141,7 +137,7 @@ public class ConflictHandlerTest extends TestCase {
     }
 
     // Node 1077
-    public void testShouldSupplyConflictingResourceParticipants() throws SQLException, OXException {
+    public void testShouldSupplyConflictingResourceParticipants() throws OXException {
         final CalendarDataObject appointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource2);
         appointments.save( appointment );  clean.add( appointment );
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource3);

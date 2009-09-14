@@ -58,7 +58,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.CommonEvent;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -117,7 +116,7 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     @Override
-	public void tearDown() throws AbstractOXException {
+	public void tearDown() throws Exception {
         deleteAll();
         Init.stopServer();
     }

@@ -69,7 +69,6 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
@@ -427,7 +426,7 @@ public class AbstractContactTest {
 	}
 	
 	@AfterClass
-	public static void debrief() throws AbstractOXException {
+	public static void debrief() throws Exception {
 		deleteTestFolder(folderId);
         Init.stopServer();
     }

@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 /**
@@ -60,6 +58,7 @@ public class Bug13446Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -82,7 +81,8 @@ public class Bug13446Test extends CalendarSqlTest {
         }
     }
 
-    public void tearDown() throws AbstractOXException, SQLException {
+    @Override
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 }

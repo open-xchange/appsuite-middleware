@@ -50,8 +50,6 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
-import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.ConfigHook;
@@ -65,6 +63,7 @@ public class UserStory1906Test extends CalendarSqlTest {
     
     private boolean parameterValue;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -97,7 +96,8 @@ public class UserStory1906Test extends CalendarSqlTest {
         assertNull("Expected no conflicts", conflicts);
     }
 
-    public void tearDown() throws AbstractOXException, SQLException {
+    @Override
+    public void tearDown() throws Exception {
         ConfigHook.setUndefinedStatusConflict(parameterValue);
         
         if (appointment.getObjectID() > 0) {

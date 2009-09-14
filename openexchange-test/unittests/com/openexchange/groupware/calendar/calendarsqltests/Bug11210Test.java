@@ -49,14 +49,12 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 
@@ -73,6 +71,7 @@ public class Bug11210Test extends CalendarSqlTest {
     
     private int THIS_YEAR, THIS_MONTH;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         THIS_YEAR = Calendar.getInstance().get(Calendar.YEAR);
@@ -95,7 +94,8 @@ public class Bug11210Test extends CalendarSqlTest {
         setIgnoreConflicts(false);
     }
 
-    public void tearDown() throws AbstractOXException, SQLException {
+    @Override
+    public void tearDown() throws Exception {
         super.tearDown();
     }
     

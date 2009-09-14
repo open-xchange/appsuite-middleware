@@ -79,7 +79,7 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
 	}
 
     @AfterClass
-    public static void shutdown() {
+    public static void shutdown() throws Exception {
         Init.stopServer();
     }
 

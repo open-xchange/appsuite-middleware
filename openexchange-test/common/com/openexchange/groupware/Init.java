@@ -135,6 +135,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
 import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
@@ -284,7 +285,7 @@ public final class Init {
         // This method duplicates statically what the OSGi container
         // handles dynamically
         startAndInjectConfigBundle();
-//        startAndInjectThreadPoolBundle();
+        startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
         startAndInjectCalendarServices();
         startAndInjectExceptionFramework();
@@ -338,6 +339,7 @@ public final class Init {
                 props.getKeepAliveTime(),
                 props.getWorkQueue(),
                 props.getRefusedExecutionBehavior());
+        services.put(ThreadPoolService.class, threadPool);
         final TimerService timer = new CustomThreadPoolExecutorTimerService((CustomThreadPoolExecutor) threadPool.getExecutor());
         services.put(TimerService.class, timer);
         ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
@@ -560,11 +562,18 @@ public final class Init {
         ServerServiceRegistry.getInstance().addService(ConversionService.class, conversionService);
     }
 
-    public static void stopServer() {
+    public static void stopServer() throws Exception {
+        stopThreadPoolBundle();
         // This causes NPEs everywhere in the tests.
         // for (final Initialization init: started) {
         // init.stop();
         // }
+    }
+
+    public static void stopThreadPoolBundle() throws Exception {
+        ThreadPoolServiceImpl threadPool = (ThreadPoolServiceImpl) services.get(ThreadPoolService.class);
+        threadPool.shutdownNow();
+        threadPool.awaitTermination(10000);
     }
 
     public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {

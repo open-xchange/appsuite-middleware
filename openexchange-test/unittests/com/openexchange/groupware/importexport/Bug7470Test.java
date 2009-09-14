@@ -51,25 +51,19 @@ package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -106,7 +100,7 @@ public class Bug7470Test extends AbstractContactTest {
 	}
 
     @AfterClass
-    public static void shutdown() throws AbstractOXException {
+    public static void shutdown() throws Exception {
         Init.stopServer();
     }
 
@@ -118,7 +112,7 @@ public class Bug7470Test extends AbstractContactTest {
 	/*
 	 * Imported appointment loses participants
 	 */
-	@Test public void test7470() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+	@Test public void test7470() throws SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
 		final String email = "cbartkowiak@oxhemail.open-xchange.com";
 		final String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";

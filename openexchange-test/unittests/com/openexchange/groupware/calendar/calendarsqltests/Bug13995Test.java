@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import java.sql.SQLException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,6 +60,7 @@ public class Bug13995Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -80,7 +79,8 @@ public class Bug13995Test extends CalendarSqlTest {
         assertEquals("Wrong status", CalendarObject.ACCEPT, loadedAppointment.getUsers()[0].getConfirm());
     }
 
-    public void tearDown() throws AbstractOXException, SQLException {
+    @Override
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 }

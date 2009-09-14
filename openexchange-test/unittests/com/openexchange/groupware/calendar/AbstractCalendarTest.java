@@ -1,7 +1,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,7 +13,6 @@ import org.json.JSONObject;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.container.Appointment;
@@ -139,7 +137,7 @@ public abstract class AbstractCalendarTest extends TestCase {
     }
 
     @Override
-    public void tearDown() throws AbstractOXException, SQLException {
+    public void tearDown() throws Exception {
         appointments.removeAll(user, clean);
         folders.removeAll(session, cleanFolders);
         Init.stopServer();
