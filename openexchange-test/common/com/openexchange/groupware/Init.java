@@ -284,7 +284,7 @@ public final class Init {
         // This method duplicates statically what the OSGi container
         // handles dynamically
         startAndInjectConfigBundle();
-        startAndInjectThreadPoolBundle();
+//        startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
         startAndInjectCalendarServices();
         startAndInjectExceptionFramework();
