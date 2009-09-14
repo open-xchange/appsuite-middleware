@@ -112,7 +112,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  * <dd>New threads are created using a {@link java.util.concurrent.ThreadFactory}. If not otherwise specified, a
  * {@link Executors#defaultThreadFactory} is used, that creates threads to all be in the same {@link ThreadGroup} and with the same
  * <tt>NORM_PRIORITY</tt> priority and non-daemon status. By supplying a different ThreadFactory, you can alter the thread's name, thread
- * group, priority, daemon status, etc. If a <tt>ThreadFactory</tt> fails to create a thread when asked by returning null from
+ * group, priority, daemon status, etc. If a <tt>ThreadFactory</tt> fails to create a thread when asked by returning <code>null</code> from
  * <tt>newThread</tt>, the executor will continue, but might not be able to execute any tasks.</dd>
  * <dt>Keep-alive times</dt>
  * <dd>If the pool currently has more than corePoolSize threads, excess threads will be terminated if they have been idle for more than the
@@ -365,13 +365,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Create and return a new thread running firstTask as its first task. Call only while holding mainLock
      * 
-     * @param firstTask the task the new thread should run first (or null if none)
-     * @return the new thread, or null if threadFactory fails to create thread
+     * @param firstTask the task the new thread should run first (or <code>null</code> if none)
+     * @return the new thread, or <code>null</code> if threadFactory fails to create thread
      */
     private Thread addThread(final Runnable firstTask) {
         final Worker w = new Worker(firstTask);
         final Thread t = threadFactory.newThread(w);
-        if (t != null) {
+        if (null != t) {
             w.thread = t;
             workers.add(w);
             final int nt = ++poolSize;
@@ -385,7 +385,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Create and start a new thread running firstTask as its first task, only if fewer than corePoolSize threads are running.
      * 
-     * @param firstTask the task the new thread should run first (or null if none)
+     * @param firstTask the task the new thread should run first (or <code>null</code> if none)
      * @return true if successful.
      */
     boolean addIfUnderCorePoolSize(final Runnable firstTask) {
@@ -399,7 +399,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } finally {
             mainLock.unlock();
         }
-        if (t == null) {
+        if (null == t) {
             return false;
         }
         t.start();
@@ -410,8 +410,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Create and start a new thread only if fewer than maximumPoolSize threads are running. The new thread runs as its first task the next
      * task in queue, or if there is none, the given task.
      * 
-     * @param firstTask the task the new thread should run first (or null if none)
-     * @return null on failure, else the first task to be run by new thread.
+     * @param firstTask the task the new thread should run first (or <code>null</code> if none)
+     * @return <code>null</code> on failure, else the first task to be run by new thread.
      */
     Runnable addIfUnderMaximumPoolSize(final Runnable firstTask) {
         Thread t = null;
@@ -421,7 +421,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             if (poolSize < maximumPoolSize) {
                 next = workQueue.poll();
-                if (next == null) {
+                if (null == next) {
                     next = firstTask;
                 }
                 t = addThread(next);
@@ -429,7 +429,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } finally {
             mainLock.unlock();
         }
-        if (t == null) {
+        if (null == t) {
             return null;
         }
         t.start();
@@ -461,7 +461,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                  * Prefer "normal" work queue before taking from delayed work queue
                  */
                 final Runnable r = workQueue.poll(timeout, TimeUnit.NANOSECONDS);
-                if (r != null) {
+                if (null != r) {
                     return r;
                 }
                 if (poolSize > corePoolSize) {
@@ -474,7 +474,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             case SHUTDOWN: {
                 // Help drain queue
                 final Runnable r = workQueue.poll();
-                if (r != null) {
+                if (null != r) {
                     return r;
                 }
 
@@ -547,7 +547,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 // that will sometime later become runnable.
                 if (!workQueue.isEmpty()) {
                     final Thread t = addThread(null);
-                    if (t != null) {
+                    if (null != t) {
                         t.start();
                     }
                     return;
@@ -600,7 +600,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private long overflowFree(final long delay) {
         final Delayed head = (Delayed) delayedWorkQueue.peek();
         long d = delay;
-        if (head != null) {
+        if (null != head) {
             final long headDelay = head.getDelay(TimeUnit.NANOSECONDS);
             if (headDelay < 0 && (delay - headDelay < 0)) {
                 d = Long.MAX_VALUE + headDelay;
@@ -748,7 +748,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             try {
                 Runnable task = firstTask;
                 firstTask = null;
-                while (task != null || (task = getTaskCustom()) != null) {
+                while ((null != task) || (null != (task = getTaskCustom()))) {
                     runTask(task);
                     task = null; // unnecessary but can help GC
                 }
@@ -928,7 +928,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         /*
                          * All trials failed
                          */
-                        if (r == null) {
+                        if (null == r) {
                             /*-
                              * TODO: Periodic or one-time command could not be fed into work queue, by now "just try again!"
                              * Otherwise uncomment following lines to trigger rejected execution handler, but:
@@ -1092,7 +1092,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *            submitted by the <tt>execute</tt> method.
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
-     * @throws NullPointerException if <tt>workQueue</tt> is null
+     * @throws NullPointerException if <tt>workQueue</tt> is <code>null</code>
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue) {
         this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, Executors.defaultThreadFactory(), defaultHandler);
@@ -1111,7 +1111,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param threadFactory the factory to use when the executor creates a new thread.
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
-     * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are null.
+     * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory) {
         this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, defaultHandler);
@@ -1130,7 +1130,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param handler the handler to use when execution is blocked because the thread bounds and queue capacities are reached.
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
-     * @throws NullPointerException if <tt>workQueue</tt> or <tt>handler</tt> are null.
+     * @throws NullPointerException if <tt>workQueue</tt> or <tt>handler</tt> are <code>null</code>.
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final RejectedExecutionHandler handler) {
         this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, Executors.defaultThreadFactory(), handler);
@@ -1150,14 +1150,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * @param handler the handler to use when execution is blocked because the thread bounds and queue capacities are reached.
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
-     * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> or <tt>handler</tt> are null.
+     * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> or <tt>handler</tt> are <code>null</code>.
      */
     public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory, final RejectedExecutionHandler handler) {
         super(0, 1, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
-        if (corePoolSize < 0 || maximumPoolSize <= 0 || maximumPoolSize < corePoolSize || keepAliveTime < 0) {
+        if ((corePoolSize < 0) || (maximumPoolSize <= 0) || (maximumPoolSize < corePoolSize) || (keepAliveTime < 0)) {
             throw new IllegalArgumentException();
         }
-        if (workQueue == null || threadFactory == null || handler == null) {
+        if ((null == workQueue) || (null == threadFactory) || (null == handler)) {
             throw new NullPointerException();
         }
         this.corePoolSize = corePoolSize;
@@ -1177,7 +1177,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     public ScheduledFuture<?> schedule(final Runnable command, final long delay, final TimeUnit unit) {
-        if (command == null || unit == null) {
+        if ((null == command) || (null == unit)) {
             throw new NullPointerException();
         }
         final ScheduledFutureTask<?> t = new ScheduledFutureTask<Boolean>(command, null, triggerTime(delay, unit));
@@ -1190,7 +1190,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     public <V> ScheduledFuture<V> schedule(final Callable<V> callable, final long delay, final TimeUnit unit) {
-        if (callable == null || unit == null) {
+        if ((null == callable) || (null == unit)) {
             throw new NullPointerException();
         }
         final ScheduledFutureTask<V> t = new ScheduledFutureTask<V>(callable, triggerTime(delay, unit));
@@ -1203,7 +1203,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
-        if (command == null || unit == null) {
+        if ((null == command) || (null == unit)) {
             throw new NullPointerException();
         }
         if (period <= 0) {
@@ -1220,7 +1220,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
-        if (command == null || unit == null) {
+        if ((null == command) || (null == unit)) {
             throw new NullPointerException();
         }
         if (delay <= 0) {
@@ -1248,7 +1248,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     @Override
     public <T> Future<T> submit(final Callable<T> task) {
-        if (task == null) {
+        if (null == task) {
             throw new NullPointerException();
         }
         final CustomFutureTask<T> ftask = new CustomFutureTask<T>((Task<T>) task);
@@ -1293,11 +1293,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * 
      * @param command the task to execute
      * @throws RejectedExecutionException at discretion of <tt>RejectedExecutionHandler</tt>, if task cannot be accepted for execution
-     * @throws NullPointerException if command is null
+     * @throws NullPointerException if command is <code>null</code>
      */
     @Override
     public void execute(final Runnable command) {
-        if (command == null) {
+        if (null == command) {
             throw new NullPointerException();
         }
         for (;;) {
@@ -1315,7 +1315,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             if (r == command) {
                 return;
             }
-            if (r == null) {
+            if (null == r) {
                 rejectCustom(command);
                 return;
             }
@@ -1353,14 +1353,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 // Check if caller can modify worker threads. This
                 // might not be true even if passed above check, if
                 // the SecurityManager treats some threads specially.
-                if (security != null) {
+                if (null != security) {
                     for (final Worker w : workers) {
                         security.checkAccess(w.thread);
                     }
                 }
 
                 final int state = runState;
-                if (state == RUNNING) {
+                if (RUNNING == state) {
                     runState = SHUTDOWN;
                 }
 
@@ -1496,6 +1496,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     @Override
     protected void finalize() {
+        super.finalize();
         shutdown();
     }
 
@@ -1503,12 +1504,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Sets the thread factory used to create new threads.
      * 
      * @param threadFactory the new thread factory
-     * @throws NullPointerException if threadFactory is null
+     * @throws NullPointerException if threadFactory is <code>null</code>
      * @see #getThreadFactory
      */
     @Override
     public void setThreadFactory(final ThreadFactory threadFactory) {
-        if (threadFactory == null) {
+        if (null == threadFactory) {
             throw new NullPointerException();
         }
         this.threadFactory = threadFactory;
@@ -1529,12 +1530,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Sets a new handler for unexecutable tasks.
      * 
      * @param handler the new handler
-     * @throws NullPointerException if handler is null
+     * @throws NullPointerException if handler is <code>null</code>
      * @see #getRejectedExecutionHandler
      */
     @Override
     public void setRejectedExecutionHandler(final RejectedExecutionHandler handler) {
-        if (handler == null) {
+        if (null == handler) {
             throw new NullPointerException();
         }
         this.handler = handler;

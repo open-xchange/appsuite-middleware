@@ -123,7 +123,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue) {
         final QueueType queueType = QueueType.getQueueType(workQueue);
         if (null == queueType) {
-            throw new IllegalArgumentException("Unknown queue type: " + queueType);
+            throw new IllegalArgumentException("Unknown queue type: " + workQueue);
         }
         threadPoolExecutor =
             new CustomThreadPoolExecutor(
