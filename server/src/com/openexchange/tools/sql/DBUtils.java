@@ -226,6 +226,9 @@ public final class DBUtils {
      * @param con connection that should go into autocommit mode.
      */
     public static void autocommit(final Connection con) {
+        if (null == con) {
+            return;
+        }
         try {
             con.setAutoCommit(true);
         } catch (final SQLException e) {
