@@ -563,15 +563,29 @@ public final class Init {
     }
 
     public static void stopServer() throws Exception {
-        stopThreadPoolBundle();
         // This causes NPEs everywhere in the tests.
         // for (final Initialization init: started) {
         // init.stop();
         // }
+        stopMailBundle();
+        stopDatabaseBundle();
+        stopThreadPoolBundle();
+    }
+
+    public static void stopMailBundle() {
+        IMAPServiceRegistry.getServiceRegistry().removeService(TimerService.class);
+    }
+
+    public static void stopDatabaseBundle() {
+        Database.setDatabaseService(null);
+        com.openexchange.database.internal.Initialization.getInstance().stop();
+        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
+        registry.deregisterComponent(EnumComponent.DB_POOLING);
     }
 
     public static void stopThreadPoolBundle() throws Exception {
-        ThreadPoolServiceImpl threadPool = (ThreadPoolServiceImpl) services.get(ThreadPoolService.class);
+        services.remove(TimerService.class);
+        ThreadPoolServiceImpl threadPool = (ThreadPoolServiceImpl) services.remove(ThreadPoolService.class);
         threadPool.shutdownNow();
         threadPool.awaitTermination(10000);
     }
