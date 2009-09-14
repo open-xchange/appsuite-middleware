@@ -67,9 +67,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
@@ -287,23 +285,6 @@ public final class LoginPerformer {
                 }
             }, CallerRunsBehavior.getInstance());
         }
-    }
-
-    /*-
-     * #####################################################################
-     */
-
-    private static abstract class LoginPerformerTask extends AbstractTask<Object> {
-
-        protected LoginPerformerTask() {
-            super();
-        }
-
-        @Override
-        public void setThreadName(final ThreadRenamer threadRenamer) {
-            threadRenamer.renamePrefix("LoginPerformer");
-        }
-
     }
 
 }
