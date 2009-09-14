@@ -71,6 +71,24 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-134
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+   if ! ox_exists_property ldapReturnField $pfile; then
+       ox_set_property ldapReturnField "" $pfile
+   fi
+
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
