@@ -54,42 +54,44 @@ import java.net.MalformedURLException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 
+
 /**
- * This Step gets a page reachable via Url in the current context (WebClient)
- * 
+ * {@link ConditionalPageByLinkRegexStep}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, HtmlPage> {
+public class ConditionalPageByLinkRegexStep extends PageByLinkRegexStep {
 
-    protected String linkRegex;
-
-    protected HtmlPage currentPage;
-
-    protected HtmlPage inputPage;
-
-    private Exception exception;
-
-    protected boolean executedSuccessfully;
-
-    public PageByLinkRegexStep() {
-
+    /**
+     * Default constructor needed for YAML
+     * Initializes a new {@link ConditionalPageByLinkRegexStep}.
+     */
+    public ConditionalPageByLinkRegexStep(){
+        
     }
-
-    public PageByLinkRegexStep(String description, String linkRegex) {
-        this.description = description;
-        this.linkRegex = linkRegex;
+    
+    /**
+     * Initializes a new {@link ConditionalPageByLinkRegexStep}.
+     */
+    public ConditionalPageByLinkRegexStep(String description, String linkRegex) {
+        super(description, linkRegex);
     }
-
+    
     public void execute(WebClient webClient) throws SubscriptionException {
         try {
+            boolean found = false;
             for (HtmlAnchor link : inputPage.getAnchors()) {
                 if (link.getHrefAttribute().matches(linkRegex)) {
                     currentPage = link.click();
+                    found = true;
                     break;
+                }
+                //if the conditional link is not find pass through the input page
+                if (!found){
+                    currentPage = inputPage;
                 }
             }
                        
@@ -101,58 +103,6 @@ public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, 
         } catch (IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
-    }
-
-    public boolean executedSuccessfully() {
-        return this.executedSuccessfully;
-    }
-
-    public Exception getException() {
-        return this.exception;
-    }
-
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    public String outputType() {
-        return HTML_PAGE;
-    }
-
-    public HtmlPage getOutput() {
-        return currentPage;
-    }
-
-    public void setInput(HtmlPage input) {
-        inputPage = input;
-    }
-
-    public String getUrl() {
-        return linkRegex;
-    }
-
-    public void setUrl(String url) {
-        this.linkRegex = url;
-    }
-
-    public HtmlPage getCurrentPage() {
-        return currentPage;
-    }
-
-    public void setCurrentPage(HtmlPage currentPage) {
-        this.currentPage = currentPage;
-    }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(Exception exception) {
-        this.exception = exception;
     }
 
 }

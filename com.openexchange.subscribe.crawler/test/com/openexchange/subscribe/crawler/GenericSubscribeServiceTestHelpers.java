@@ -103,7 +103,14 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             System.out.println("contacts home phone number : " + contact.getTelephoneHome1());
             System.out.println("contacts birthday : " + contact.getBirthday());
             System.out.println("contacts picture type : " + contact.getImageContentType());
+            System.out.println("contacts street of work : " + contact.getStreetBusiness());
+            System.out.println("contacts postal code of work : " + contact.getPostalCodeBusiness());
             System.out.println("contacts city of work : " + contact.getCityBusiness());
+            System.out.println("contacts country of work : " + contact.getCountryBusiness());
+            System.out.println("contacts street of private address : " + contact.getStreetHome());
+            System.out.println("contacts postal code of private address : " + contact.getPostalCodeHome());
+            System.out.println("contacts city of private address : " + contact.getCityHome());
+            System.out.println("contacts country of private address : " + contact.getCountryHome());
 
             System.out.println("----------");
         }

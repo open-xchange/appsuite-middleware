@@ -108,21 +108,25 @@ public class Workflow {
         try {
 
             Step previousStep = null;
+            Object result = null;
 
             for (Step currentStep : steps) {
                 if (previousStep != null) {
                     currentStep.setInput(previousStep.getOutput());
                 }
-                currentStep.setWorkflow(this);
-                currentStep.execute(webClient);
+                currentStep.setWorkflow(this);                
+                currentStep.execute(webClient);                
                 previousStep = currentStep;
                 if (!currentStep.executedSuccessfully()) {
                     throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
                 }
+                if (!(currentStep instanceof LogoutStep)){
+                    result = currentStep.getOutput();
+                }
             }
 
             webClient.closeAllWindows();
-            return (Contact[]) previousStep.getOutput();
+            return (Contact[]) result;
         } finally {
             closer.close(webClient);
         }

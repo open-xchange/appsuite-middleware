@@ -83,10 +83,10 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
             "(\\/online\\/.*)",
             2,
             ""));
-        steps.add(new PageByLinkRegexStep(
-            "Hit the first /online/ link that is not help as we cannot know about the logout-status.",
-            "(/online/[^h]+.*)"));
-        steps.add(new PageByLinkRegexStep("Use the site without frames", "/online/startseite/.*"));
+        steps.add(new ConditionalPageByLinkRegexStep(
+            "Hit the link to web.de freemail if the user did not log out last time.",
+            "(/online/frame.*)"));
+        steps.add(new PageByLinkRegexStep("Use the site without frames", "/online/[^h]+.*"));
         steps.add(new PageByLinkRegexStep("This is a fancy page that does not appear in the browser.", "/online/adressbuch/.*"));
         steps.add(new PageByLinkRegexStep("Go to the contacts list.", "/online/adressbuch/.*"));
         steps.add(new AnchorsByLinkRegexStep("Get each contact.", "", "adr_show.*"));
@@ -97,7 +97,15 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         pageParts.add(new PagePart("(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_home1"));
         pageParts.add(new PagePart("(<b>Mobil<\\/b><\\/td><td class=\"b\" width=\"277\">[^>]*>)"+VALID_PHONE_REGEX+"(<)", "cellular_telephone1"));
         pageParts.add(new PagePart("(<b>BŸro<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_business1"));
-        //(<b>Privat<\/b><\/td><td class="b" width="277">)
+        pageParts.add(new PagePart("(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)", "street_home"));
+        pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
+        pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_home"));
+        pageParts.add(new PagePart("(>)([a-zA-ZŠšŸ]*)(<\\/td>)", "country_home"));
+        pageParts.add(new PagePart("(<b>BŸro<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)", "street_business"));
+        pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_business"));
+        pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_business"));
+        pageParts.add(new PagePart("(>)([a-zA-ZŠšŸ]*)(<\\/td>)", "country_business"));
+        
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
 
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(

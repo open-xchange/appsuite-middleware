@@ -127,4 +127,19 @@ public class PagePartSequenceTest extends TestCase {
         assertEquals("business@im.com", map.get("instant_messenger1"));
 
     }
+    
+    public void testWebDeSubpage(){
+        String page =">51379ÊLeverkusen<br>Germany</td>";
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
+        pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_home"));
+        pageParts.add(new PagePart("(>)([a-zA-ZŠšŸ]*)(<\\/td>)", "country_home"));
+        
+        PagePartSequence sequence = new PagePartSequence(pageParts, page);
+        HashMap<String, String> map = sequence.retrieveInformation();
+
+        assertEquals("51379", map.get("postal_code_home"));
+        assertEquals("Leverkusen", map.get("city_home"));
+        assertEquals("Germany", map.get("country_home"));
+    }
 }

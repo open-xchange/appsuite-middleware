@@ -93,7 +93,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
-        try {
+        try {         
             // add the first page as there should always be results there
             subpages.add(htmlPage);
             // search for subpages
@@ -112,7 +112,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
             }
             // traverse the subpages
             for (HtmlPage subpage : subpages) {
-                for (HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {
+                for (HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {                    
                     // get the result pages
                     if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex) && !resultpageLinks.contains(possibleLinkToResultpage)) {
                         resultpageLinks.add(possibleLinkToResultpage);
