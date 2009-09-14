@@ -363,6 +363,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     /**
+     * Sequence number to break scheduling ties, and in turn to guarantee FIFO order among tied entries.
+     * 
+     * @return The sequencer
+     */
+    AtomicLong getSequencer() {
+        return sequencer;
+    }
+
+    /**
      * Create and return a new thread running firstTask as its first task. Call only while holding mainLock
      * 
      * @param firstTask the task the new thread should run first (or <code>null</code> if none)
@@ -781,7 +790,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             super(r, result);
             this.time = ns;
             this.period = 0;
-            this.sequenceNumber = sequencer.getAndIncrement();
+            this.sequenceNumber = getSequencer().getAndIncrement();
         }
 
         /**
@@ -791,7 +800,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             super(r, result);
             this.time = ns;
             this.period = period;
-            this.sequenceNumber = sequencer.getAndIncrement();
+            this.sequenceNumber = getSequencer().getAndIncrement();
         }
 
         /**
@@ -801,7 +810,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             super(callable);
             this.time = ns;
             this.period = 0;
-            this.sequenceNumber = sequencer.getAndIncrement();
+            this.sequenceNumber = getSequencer().getAndIncrement();
         }
 
         public long getDelay(final TimeUnit unit) {
@@ -1209,8 +1218,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (period <= 0) {
             throw new IllegalArgumentException();
         }
-        final ScheduledFutureTask<?> t =
-            new ScheduledFutureTask<Object>(command, null, triggerTime(initialDelay, unit), unit.toNanos(period));
+        final ScheduledFutureTask<?> t = new ScheduledFutureTask<Object>(
+            command,
+            null,
+            triggerTime(initialDelay, unit),
+            unit.toNanos(period));
         if (runState != RUNNING) {
             rejectCustom(t);
         } else {
@@ -1226,8 +1238,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (delay <= 0) {
             throw new IllegalArgumentException();
         }
-        final ScheduledFutureTask<?> t =
-            new ScheduledFutureTask<Boolean>(command, null, triggerTime(initialDelay, unit), unit.toNanos(-delay));
+        final ScheduledFutureTask<?> t = new ScheduledFutureTask<Boolean>(
+            command,
+            null,
+            triggerTime(initialDelay, unit),
+            unit.toNanos(-delay));
         if (runState != RUNNING) {
             rejectCustom(t);
         } else {
