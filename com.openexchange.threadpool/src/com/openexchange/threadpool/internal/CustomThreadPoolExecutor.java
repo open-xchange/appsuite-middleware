@@ -932,10 +932,19 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             /*-
                              * TODO: Periodic or one-time command could not be fed into work queue, by now "just try again!"
                              * Otherwise uncomment following lines to trigger rejected execution handler, but:
-                             * For what caller?! Actually the caller is this thread which should not throw an exception!
+                             * For what caller?! Actually the caller is this thread therefore the handler should not throw
+                             * an exception!
                              */
+                            /*
+                             * Run in this thread
+                             */
+                            try {
+                                command.run();
+                            } catch (final Exception e) {
+                                LOG.error(e.getMessage(), e);
+                            }
                             // rejectCustom(command);
-                            // continue;
+                            continue;
                         }
                         // else retry
                     }
