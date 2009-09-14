@@ -95,7 +95,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  * Use the following guide when manually configuring and tuning this class:
  * <dl>
  * <dt>Core and maximum pool sizes</dt>
- * <dd>A <tt>Java6ThreadPoolExecutor</tt> will automatically adjust the pool size (see {@link CustomThreadPoolExecutor#getPoolSize})
+ * <dd>A <tt>CustomThreadPoolExecutor</tt> will automatically adjust the pool size (see {@link CustomThreadPoolExecutor#getPoolSize})
  * according to the bounds set by corePoolSize (see {@link CustomThreadPoolExecutor#getCorePoolSize}) and maximumPoolSize (see
  * {@link CustomThreadPoolExecutor#getMaximumPoolSize}). When a new task is submitted in method {@link CustomThreadPoolExecutor#execute},
  * and fewer than corePoolSize threads are running, a new thread is created to handle the request, even if other worker threads are idle. If
@@ -184,7 +184,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  * subclass that adds a simple pause/resume feature:
  * 
  * <pre>
- * class PausableThreadPoolExecutor extends Java6ThreadPoolExecutor {
+ * class PausableThreadPoolExecutor extends CustomThreadPoolExecutor {
  *   private boolean isPaused;
  *   private ReentrantLock pauseLock = new ReentrantLock();
  *   private Condition unpaused = pauseLock.newCondition();
@@ -1080,7 +1080,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     // Public methods
 
     /**
-     * Creates a new <tt>Java6ThreadPoolExecutor</tt> with the given initial parameters and default thread factory and handler. It may be
+     * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters and default thread factory and handler. It may be
      * more convenient to use one of the {@link Executors} factory methods instead of this general purpose constructor.
      * 
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
@@ -1099,7 +1099,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     /**
-     * Creates a new <tt>Java6ThreadPoolExecutor</tt> with the given initial parameters.
+     * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
      * 
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
@@ -1118,7 +1118,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     /**
-     * Creates a new <tt>Java6ThreadPoolExecutor</tt> with the given initial parameters.
+     * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
      * 
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
@@ -1137,7 +1137,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     }
 
     /**
-     * Creates a new <tt>Java6ThreadPoolExecutor</tt> with the given initial parameters.
+     * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
      * 
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
