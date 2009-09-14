@@ -106,7 +106,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         if (obj == null) {
             return false;
         }
-        if (!ParameterizedHeader.class.isInstance(obj)) {
+        if (!(obj instanceof ParameterizedHeader)) {
             return false;
         }
         final ParameterizedHeader other = (ParameterizedHeader) obj;

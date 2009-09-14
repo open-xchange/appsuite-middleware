@@ -78,15 +78,15 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 return -1;
             }
 
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 Integer value = ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
                 if (value == null) {
-                    value = new Integer(0);
+                    value = Integer.valueOf(0);
                 }
                 setting.setSingleValue(value);
             }
 
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
 
@@ -94,7 +94,7 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
+            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
                 Integer value;
                 try {
                     value = new Integer(String.valueOf(setting.getSingleValue()));

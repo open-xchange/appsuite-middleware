@@ -299,7 +299,7 @@ public final class BrowserDetector {
             browserPlatform = UNIX;
         }
 
-        if (browserPlatform == WINDOWS) {
+        if (browserPlatform.equals(WINDOWS)) {
             if (browserName.equals(MOZILLA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;
@@ -308,20 +308,20 @@ public final class BrowserDetector {
                 if (browserVersion >= 4.0) {
                     cssOK = true;
                 }
-            } else if (browserName == MSIE) {
+            } else if (browserName.equals(MSIE)) {
                 if (browserVersion >= 4.0) {
                     javascriptOK = true;
                     fileUploadOK = true;
                     cssOK = true;
                 }
-            } else if (browserName == OPERA) {
+            } else if (browserName.equals(OPERA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;
                     fileUploadOK = true;
                     cssOK = true;
                 }
             }
-        } else if (browserPlatform == MACINTOSH) {
+        } else if (browserPlatform.equals(MACINTOSH)) {
             if (browserName.equals(MOZILLA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;
@@ -330,7 +330,7 @@ public final class BrowserDetector {
                 if (browserVersion >= 4.0) {
                     cssOK = true;
                 }
-            } else if (browserName == MSIE) {
+            } else if (browserName.equals(MSIE)) {
                 if (browserVersion >= 4.0) {
                     javascriptOK = true;
                     fileUploadOK = true;
@@ -339,7 +339,7 @@ public final class BrowserDetector {
                     cssOK = true;
                 }
             }
-        } else if (browserPlatform == UNIX) {
+        } else if (browserPlatform.equals(UNIX)) {
             if (browserName.equals(MOZILLA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;

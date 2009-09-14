@@ -52,7 +52,6 @@ package com.openexchange.mail.mime;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
-import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link HeaderName} - Supports an ignore-case string implementation.
@@ -72,35 +71,35 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         /*
          * Frequently requested headers
          */
-        CACHE.put(MessageHeaders.HDR_BCC, MessageHeaders.BCC);
-        CACHE.put(MessageHeaders.HDR_CC, MessageHeaders.CC);
-        CACHE.put(MessageHeaders.HDR_CONTENT_DISPOSITION, MessageHeaders.CONTENT_DISPOSITION);
-        CACHE.put(MessageHeaders.HDR_CONTENT_ID, MessageHeaders.CONTENT_ID);
-        CACHE.put(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, MessageHeaders.CONTENT_TRANSFER_ENC);
-        CACHE.put(MessageHeaders.HDR_CONTENT_TYPE, MessageHeaders.CONTENT_TYPE);
-        CACHE.put(MessageHeaders.HDR_DATE, MessageHeaders.DATE);
-        CACHE.put(MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.DISP_NOT_TO);
-        CACHE.put(MessageHeaders.HDR_DISPOSITION, MessageHeaders.DISPOSITION);
-        CACHE.put(MessageHeaders.HDR_FROM, MessageHeaders.FROM);
-        CACHE.put(MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.IN_REPLY_TO);
-        CACHE.put(MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.MESSAGE_ID);
-        CACHE.put(MessageHeaders.HDR_MIME_VERSION, MessageHeaders.MIME_VERSION);
-        CACHE.put(MessageHeaders.HDR_ORGANIZATION, MessageHeaders.ORGANIZATION);
-        CACHE.put(MessageHeaders.HDR_RECEIVED, MessageHeaders.RECEIVED);
-        CACHE.put(MessageHeaders.HDR_REFERENCES, MessageHeaders.REFERENCES);
-        CACHE.put(MessageHeaders.HDR_REPLY_TO, MessageHeaders.REPLY_TO);
-        CACHE.put(MessageHeaders.HDR_SUBJECT, MessageHeaders.SUBJECT);
-        CACHE.put(MessageHeaders.HDR_TO, MessageHeaders.TO);
-        CACHE.put(MessageHeaders.HDR_X_MAILER, MessageHeaders.X_MAILER);
-        CACHE.put(MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.X_OX_MARKER);
-        CACHE.put(MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.X_OXMSGREF);
-        CACHE.put(MessageHeaders.HDR_X_PRIORITY, MessageHeaders.X_PRIORITY);
-        CACHE.put(MessageHeaders.HDR_X_SPAM_FLAG, MessageHeaders.X_SPAM_FLAG);
+        CACHE.put("Bcc", HeaderName.valueOf("Bcc"));
+        CACHE.put("Cc", HeaderName.valueOf("Cc"));
+        CACHE.put("Content-Disposition", HeaderName.valueOf("Content-Disposition"));
+        CACHE.put("Content-ID", HeaderName.valueOf("Content-ID"));
+        CACHE.put("Content-Transfer-Encoding", HeaderName.valueOf("Content-Transfer-Encoding"));
+        CACHE.put("Content-Type", HeaderName.valueOf("Content-Type"));
+        CACHE.put("Date", HeaderName.valueOf("Date"));
+        CACHE.put("Disposition-Notification-To", HeaderName.valueOf("Disposition-Notification-To"));
+        CACHE.put("Content-Disposition", HeaderName.valueOf("Content-Disposition"));
+        CACHE.put("From", HeaderName.valueOf("From"));
+        CACHE.put("In-Reply-To", HeaderName.valueOf("In-Reply-To"));
+        CACHE.put("Message-ID", HeaderName.valueOf("Message-ID"));
+        CACHE.put("MIME-Version", HeaderName.valueOf("MIME-Version"));
+        CACHE.put("Organization", HeaderName.valueOf("Organization"));
+        CACHE.put("Received", HeaderName.valueOf("Received"));
+        CACHE.put("References", HeaderName.valueOf("References"));
+        CACHE.put("Reply-To", HeaderName.valueOf("Reply-To"));
+        CACHE.put("Subject", HeaderName.valueOf("Subject"));
+        CACHE.put("To", HeaderName.valueOf("To"));
+        CACHE.put("X-Mailer", HeaderName.valueOf("X-Mailer"));
+        CACHE.put("X-OX-Marker", HeaderName.valueOf("X-OX-Marker"));
+        CACHE.put("X-OXMsgref", HeaderName.valueOf("X-OXMsgref"));
+        CACHE.put("X-Priority", HeaderName.valueOf("X-Priority"));
+        CACHE.put("X-Spam-Flag", HeaderName.valueOf("X-Spam-Flag"));
         /*
          * User flags
          */
-        CACHE.put(MailMessage.USER_FORWARDED, new HeaderName(MailMessage.USER_FORWARDED));
-        CACHE.put(MailMessage.USER_READ_ACK, new HeaderName(MailMessage.USER_READ_ACK));
+        CACHE.put("$Forwarded", new HeaderName("$Forwarded"));
+        CACHE.put("$MDNSent", new HeaderName("$MDNSent"));
     }
 
     private final String s;
