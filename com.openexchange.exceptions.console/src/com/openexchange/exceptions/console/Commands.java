@@ -225,7 +225,7 @@ public class Commands implements CommandProvider {
             intp.print("Please provide a detailNumber in the query.");
             return null;
         }
-        final int detailNumber = Integer.valueOf(detailNumberS);
+        final int detailNumber = Integer.parseInt(detailNumberS);
         final Exceptions exceptions = components.getExceptionsForComponent(new StringComponent(component));
         if(exceptions == null) {
             intp.print("Could not find registration for component "+component);
