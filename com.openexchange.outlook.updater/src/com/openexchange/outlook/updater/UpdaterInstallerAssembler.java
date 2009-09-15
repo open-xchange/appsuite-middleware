@@ -74,7 +74,8 @@ public class UpdaterInstallerAssembler {
     }
     
     public InputStream buildInstaller(String updateURL, String file) throws IOException {
-        ByteArrayInputStream config = new ByteArrayInputStream(configGenerator.getConfiguration(updateURL, file+".msi").getBytes("UTF-8"));
+        String configurationString = configGenerator.getConfiguration(updateURL, file);
+        ByteArrayInputStream config = new ByteArrayInputStream(configurationString.getBytes("UTF-8"));
 
         return new CompositeInputStream(loader.get(AUTO_EXTRACTER), config, loader.get(file+".7z"));
     }

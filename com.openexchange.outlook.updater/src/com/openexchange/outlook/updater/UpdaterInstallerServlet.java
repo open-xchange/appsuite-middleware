@@ -85,7 +85,7 @@ public class UpdaterInstallerServlet extends PermissionServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String name = getFilePath(req);
-        String installerName = name + "-install.exe";
+        String installerName = name.substring(0, name.lastIndexOf('.')) + "-install.exe";
         
         StringBuilder builder = new StringBuilder();
         builder.append("https://").append(req.getServerName()).append("/ajax/updater/outlook_oxtender.xml");
