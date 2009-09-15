@@ -224,7 +224,7 @@ public final class MALPollActivator extends DeferredActivator {
                         }
                     }
                     if (log.isDebugEnabled()) {
-                        log.debug("Run for checking new mails done.");
+                        log.debug("Global run for checking new mails done.");
                     }
                 } catch (final Exception e) {
                     log.error(e.getMessage(), e);
