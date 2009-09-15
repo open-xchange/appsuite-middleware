@@ -166,6 +166,14 @@ public final class MALPollPushListener implements PushListener {
         this.ignoreOnGlobal = ignoreOnGlobal;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(128).append("session-ID=").append(session.getSessionID());
+        sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
+        sb.append(", startTimerTask=").append(!ignoreOnGlobal);
+        return sb.toString();
+    }
+
     /**
      * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
      * 
