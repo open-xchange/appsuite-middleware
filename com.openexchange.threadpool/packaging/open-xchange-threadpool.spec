@@ -48,6 +48,8 @@ Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Thread Pool Bundle
 Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-management >= @OXVERSION@
 #
+Conflicts:	open-xchange-timer
+Obsoletes:	open-xchange-timer
 
 %description
 The Open-Xchange Thread Pool Bundle
