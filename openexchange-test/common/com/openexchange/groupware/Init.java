@@ -457,6 +457,7 @@ public final class Init {
         imapServiceRegistry.addService(UserService.class, services.get(UserService.class));
         imapServiceRegistry.addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
         imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
+        imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
         imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
 
         /*
