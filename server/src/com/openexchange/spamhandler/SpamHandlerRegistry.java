@@ -124,7 +124,7 @@ public final class SpamHandlerRegistry {
             LOG.error(e.getMessage(), e);
             return false;
         }
-        return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler);
+        return handler == null ? false : !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName());
     }
 
     /**
