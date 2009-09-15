@@ -104,10 +104,8 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
         }
 
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            synchronized (generalStorages) {
-                generalStorages.clear();
-                generalStorages.addAll(replacement);
-            }
+            generalStorages.clear();
+            generalStorages.addAll(replacement);
         }
 
     }

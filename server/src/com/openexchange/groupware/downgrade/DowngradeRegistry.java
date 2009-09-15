@@ -56,10 +56,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.infostore.InfostoreDowngrade;
 import com.openexchange.groupware.tasks.TasksDowngrade;
@@ -155,21 +153,16 @@ public final class DowngradeRegistry {
 		}
 	};
 
-	private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
-
 	private static DowngradeRegistry instance;
 
 	/**
 	 * Initializes the singleton instance of {@link DowngradeRegistry}
 	 */
 	static void initInstance() {
-		if (!INITIALIZED.get()) {
-			synchronized (INITIALIZED) {
-				if (instance == null) {
-					instance = new DowngradeRegistry();
-					instance.init();
-					INITIALIZED.set(true);
-				}
+		synchronized (DowngradeRegistry.class) {
+			if (instance == null) {
+				instance = new DowngradeRegistry();
+				instance.init();
 			}
 		}
 	}
@@ -178,12 +171,9 @@ public final class DowngradeRegistry {
 	 * Releases the singleton instance of {@link DowngradeRegistry}
 	 */
 	static void releaseInstance() {
-		if (INITIALIZED.get()) {
-			synchronized (INITIALIZED) {
-				if (instance != null) {
-					instance = null;
-					INITIALIZED.set(false);
-				}
+		synchronized (DowngradeRegistry.class) {
+			if (instance != null) {
+				instance = null;
 			}
 		}
 	}
