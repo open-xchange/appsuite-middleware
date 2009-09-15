@@ -105,4 +105,28 @@ public final class CacheSortableId implements SortableId {
         return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
+        result = prime * result + ordinal;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CacheSortableId)) {
+            return false;
+        }
+        final CacheSortableId other = (CacheSortableId) obj;
+        if (ordinal != other.ordinal) {
+            return false;
+        }
+        return true;
+    }
+
 }
