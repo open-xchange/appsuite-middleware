@@ -79,6 +79,12 @@ public final class MALPollActivator extends DeferredActivator {
 
     private ScheduledTimerTask scheduledTimerTask;
 
+    private long period;
+
+    private String folder;
+
+    private boolean global;
+
     /**
      * Initializes a new {@link MALPollActivator}.
      */
@@ -96,6 +102,13 @@ public final class MALPollActivator extends DeferredActivator {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
+        if (TimerService.class == clazz) {
+            MALPollPushListenerRegistry.getInstance().openAll();
+            // Start global if configured
+            if (global) {
+                startScheduledTask(getService(TimerService.class), period);
+            }
+        }
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 
@@ -105,7 +118,8 @@ public final class MALPollActivator extends DeferredActivator {
             LOG.warn("Absent service: " + clazz.getName());
         }
         if (TimerService.class == clazz) {
-            MALPollPushListenerRegistry.getInstance().clear();
+            MALPollPushListenerRegistry.getInstance().closeAll();
+            stopScheduledTask(getService(TimerService.class));
         }
         getServiceRegistry().removeService(clazz);
     }
@@ -131,7 +145,7 @@ public final class MALPollActivator extends DeferredActivator {
              * Read configuration
              */
             final ConfigurationService configurationService = getService(ConfigurationService.class);
-            long period = 300000L;
+            period = 300000L;
             {
                 final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.period");
                 if (null != tmp) {
@@ -145,14 +159,14 @@ public final class MALPollActivator extends DeferredActivator {
                     }
                 }
             }
-            String folder = "INBOX";
+            folder = "INBOX";
             {
                 final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.folder");
                 if (null != tmp) {
                     folder = tmp.trim();
                 }
             }
-            boolean global = true;
+            global = true;
             {
                 final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.global");
                 if (null != tmp) {
@@ -200,6 +214,12 @@ public final class MALPollActivator extends DeferredActivator {
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
+            /*
+             * Reset
+             */
+            global = true;
+            folder = null;
+            period = 300000L;
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
