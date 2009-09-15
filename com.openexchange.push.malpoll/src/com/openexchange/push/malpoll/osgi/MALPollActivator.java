@@ -97,26 +97,6 @@ public final class MALPollActivator extends DeferredActivator {
             LOG.info("Re-available service: " + clazz.getName());
         }
         getServiceRegistry().addService(clazz, getService(clazz));
-        if (TimerService.class == clazz) {
-            final ConfigurationService configurationService = getService(ConfigurationService.class);
-            if (null != configurationService) {
-                long period = 300000L;
-                {
-                    final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.period");
-                    if (null != tmp) {
-                        try {
-                            period = Long.parseLong(tmp.trim());
-                        } catch (final NumberFormatException e) {
-                            LOG.error(MessageFormat.format(
-                                "Unable to parse com.openexchange.push.malpoll.period: {0}. Using default 300000 (5 Minutes) instead.",
-                                tmp));
-                            period = 300000L;
-                        }
-                    }
-                }
-                startScheduledTask(getService(TimerService.class), period);
-            }
-        }
     }
 
     @Override
@@ -125,7 +105,7 @@ public final class MALPollActivator extends DeferredActivator {
             LOG.warn("Absent service: " + clazz.getName());
         }
         if (TimerService.class == clazz) {
-            stopScheduledTask(getService(TimerService.class));
+            MALPollPushListenerRegistry.getInstance().clear();
         }
         getServiceRegistry().removeService(clazz);
     }
@@ -172,11 +152,25 @@ public final class MALPollActivator extends DeferredActivator {
                     folder = tmp.trim();
                 }
             }
+            boolean global = true;
+            {
+                final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.global");
+                if (null != tmp) {
+                    global = Boolean.parseBoolean(tmp.trim());
+                }
+            }
             /*
              * Start-up
              */
             MALPollPushListener.setFolder(folder);
-            startScheduledTask(getService(TimerService.class), period);
+            MALPollPushListener.setPeriodMillis(period);
+            MALPollPushManagerService.setStartTimerTaskPerListener(!global);
+            if (global) {
+                startScheduledTask(getService(TimerService.class), period);
+            }
+            /*
+             * Register push manager
+             */
             serviceRegistration = context.registerService(PushManagerService.class.getName(), new MALPollPushManagerService(), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -187,12 +181,21 @@ public final class MALPollActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            /*
+             * Unregister push manager
+             */
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
             }
+            /*
+             * Shut down
+             */
             stopScheduledTask(getService(TimerService.class));
             MALPollPushListener.setFolder(null);
+            MALPollPushManagerService.setStartTimerTaskPerListener(true);
+            MALPollPushListener.setPeriodMillis(0L);
+            MALPollPushListenerRegistry.getInstance().clear();
             /*
              * Clear service registry
              */
@@ -209,20 +212,25 @@ public final class MALPollActivator extends DeferredActivator {
             private final org.apache.commons.logging.Log log = LOG;
 
             public void run() {
-                for (final Iterator<MALPollPushListener> pushListeners = MALPollPushListenerRegistry.getInstance().getPushListeners(); pushListeners.hasNext();) {
-                    final MALPollPushListener l = pushListeners.next();
-                    try {
-                        l.checkNewMail();
-                    } catch (final PushException e) {
-                        log.error(e.getMessage(), e);
+                try {
+                    for (final Iterator<MALPollPushListener> pushListeners = MALPollPushListenerRegistry.getInstance().getPushListeners(); pushListeners.hasNext();) {
+                        final MALPollPushListener l = pushListeners.next();
+                        if (!l.isIgnoreOnGlobal()) {
+                            try {
+                                l.checkNewMail();
+                            } catch (final PushException e) {
+                                log.error(e.getMessage(), e);
+                            }
+                        }
                     }
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Run for checking new mails done.");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Run for checking new mails done.");
+                    }
+                } catch (final Exception e) {
+                    log.error(e.getMessage(), e);
                 }
             }
         };
-        // By now every 5 minutes -> TODO: Configurable
         scheduledTimerTask = timerService.scheduleWithFixedDelay(r, 1000, periodMillis);
     }
 

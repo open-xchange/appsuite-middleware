@@ -84,6 +84,18 @@ public final class MALPollPushListenerRegistry {
     }
 
     /**
+     * Clears this registry. <br>
+     * <b>Note</b>: {@link MALPollPushListener#close()} is called for each instance.
+     */
+    public void clear() {
+        for (final Iterator<MALPollPushListener> i = map.values().iterator(); i.hasNext();) {
+            i.next().close();
+            i.remove();
+        }
+        map.clear();
+    }
+
+    /**
      * Adds specified push listener.
      * 
      * @param contextId The context identifier
@@ -102,7 +114,10 @@ public final class MALPollPushListenerRegistry {
      * @param userId The user identifier
      */
     public void removePushListener(final int contextId, final int userId) {
-        map.remove(SimpleKey.valueOf(contextId, userId));
+        final MALPollPushListener listener = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null != listener) {
+            listener.close();
+        }
     }
 
     /**

@@ -60,6 +60,17 @@ import com.openexchange.session.Session;
  */
 public final class MALPollPushManagerService implements PushManagerService {
 
+    private static boolean startTimerTaskPerListener;
+
+    /**
+     * Sets whether to start a timer task per listener.
+     * 
+     * @param startTimerTaskPerListener <code>true</code> to start a timer task per listener; otherwise <code>false</code>
+     */
+    public static void setStartTimerTaskPerListener(final boolean startTimerTaskPerListener) {
+        MALPollPushManagerService.startTimerTaskPerListener = startTimerTaskPerListener;
+    }
+
     /**
      * Initializes a new {@link MALPollPushManagerService}.
      */
@@ -68,7 +79,7 @@ public final class MALPollPushManagerService implements PushManagerService {
     }
 
     public PushListener startListener(final Session session) {
-        final MALPollPushListener pushListener = new MALPollPushListener(session);
+        final MALPollPushListener pushListener = MALPollPushListener.newInstance(session, startTimerTaskPerListener);
         if (MALPollPushListenerRegistry.getInstance().addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
             return pushListener;
         }

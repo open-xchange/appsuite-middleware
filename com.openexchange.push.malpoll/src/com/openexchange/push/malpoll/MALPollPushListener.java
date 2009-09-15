@@ -68,6 +68,8 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MALPollPushListener} - The MAL poll {@link PushListener}.
@@ -76,9 +78,40 @@ import com.openexchange.session.Session;
  */
 public final class MALPollPushListener implements PushListener {
 
+    private static final class MALPollRunnable implements Runnable {
+
+        private final MALPollPushListener listener;
+
+        private final org.apache.commons.logging.Log log;
+
+        MALPollRunnable(final MALPollPushListener listenerInstance, final org.apache.commons.logging.Log log) {
+            super();
+            this.listener = listenerInstance;
+            this.log = log;
+        }
+
+        public void run() {
+            try {
+                if (listener.isIgnoreOnGlobal()) {
+                    try {
+                        listener.checkNewMail();
+                    } catch (final PushException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            } catch (final Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MALPollPushListener.class);
+
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
     private static String folder;
+
+    private static long periodMillis;
 
     /**
      * Sets static folder fullname.
@@ -89,7 +122,43 @@ public final class MALPollPushListener implements PushListener {
         MALPollPushListener.folder = folder;
     }
 
+    /**
+     * Sets static period millis.
+     * 
+     * @param periodMillis The period millis
+     */
+    public static void setPeriodMillis(final long periodMillis) {
+        MALPollPushListener.periodMillis = periodMillis;
+    }
+
+    /**
+     * Initializes a new {@link MALPollPushListener}.
+     * 
+     * @param session The needed session to obtain and connect mail access instance
+     * @param startTimerTask <code>true</code> to start a timer task for this listener
+     * @return A new {@link MALPollPushListener}.
+     */
+    public static MALPollPushListener newInstance(final Session session, final boolean startTimerTask) {
+        final MALPollPushListener newInst = new MALPollPushListener(session, !startTimerTask);
+        if (startTimerTask) {
+            final TimerService timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class);
+            if (null == timerService) {
+                return null;
+            }
+            newInst.timerTask = timerService.scheduleWithFixedDelay(new MALPollRunnable(newInst, LOG), 1000, periodMillis);
+        }
+        return newInst;
+    }
+
+    /*
+     * Member section
+     */
+
     private final Session session;
+
+    private final boolean ignoreOnGlobal;
+
+    private ScheduledTimerTask timerTask;
 
     private volatile Set<String> uids;
 
@@ -97,10 +166,35 @@ public final class MALPollPushListener implements PushListener {
      * Initializes a new {@link MALPollPushListener}.
      * 
      * @param session The needed session to obtain and connect mail access instance
+     * @param ignoreOnGlobal <code>true</code> to ignore during global run
      */
-    public MALPollPushListener(final Session session) {
+    private MALPollPushListener(final Session session, final boolean ignoreOnGlobal) {
         super();
         this.session = session;
+        this.ignoreOnGlobal = ignoreOnGlobal;
+    }
+
+    /**
+     * Closes this listener
+     */
+    public void close() {
+        if (null != timerTask) {
+            timerTask.cancel();
+            timerTask = null;
+            final TimerService timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class);
+            if (null != timerService) {
+                timerService.purge();
+            }
+        }
+    }
+
+    /**
+     * Checks whether to ignore this listener on global run.
+     * 
+     * @return <code>true</code> to ignore this listener on global run; otherwise <code>false</code>
+     */
+    public boolean isIgnoreOnGlobal() {
+        return ignoreOnGlobal;
     }
 
     /**
