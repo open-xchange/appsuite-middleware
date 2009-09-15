@@ -141,19 +141,23 @@ public final class MALPollPushListenerRegistry {
 
         private final int user;
 
+        private final int hash;
+
         private SimpleKey(final int cid, final int user) {
             super();
             this.cid = cid;
             this.user = user;
-        }
-
-        @Override
-        public int hashCode() {
+            // hash code
             final int prime = 31;
             int result = 1;
             result = prime * result + cid;
             result = prime * result + user;
-            return result;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
         }
 
         @Override
