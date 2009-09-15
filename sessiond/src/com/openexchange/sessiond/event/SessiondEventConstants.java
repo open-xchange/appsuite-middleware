@@ -53,8 +53,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 
 /**
- * {@link SessiondEventConstants} - Provides both constants for {@link EventConstants#EVENT_TOPIC event topic} and property names accessible
- * by an {@link Event event}.
+ * {@link SessiondEventConstants} - Provides constants for {@link EventConstants#EVENT_TOPIC event topic} and property names accessible by
+ * an {@link Event event}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
