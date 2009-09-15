@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import static com.openexchange.tools.io.IOTools.reallyBloodySkip;
-
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,14 +59,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavGetAction extends WebdavHeadAction {
@@ -217,25 +213,50 @@ public class WebdavGetAction extends WebdavHeadAction {
 		}
 	}
 
-	private static final class ByteRange implements Comparable{
-		public long startOffset;
-		public long endOffset;
-		
-		public ByteRange(final long start, final long end){
-			startOffset = start;
-			endOffset = end;
-		}
+    private static final class ByteRange implements Comparable<ByteRange> {
 
-		public int compareTo(final Object arg0) {
-			final ByteRange other = (ByteRange) arg0;
-			return ((Long)startOffset).compareTo(other.startOffset);
-		}
-		
-		@Override
-		public String toString(){
-			return String.format("%d-%d", startOffset, endOffset);
-		}
-		
-	}
+        public final long startOffset;
+
+        public final long endOffset;
+
+        public ByteRange(final long start, final long end) {
+            startOffset = start;
+            endOffset = end;
+        }
+
+        public int compareTo(final ByteRange arg0) {
+            final ByteRange other = arg0;
+            return (Long.valueOf(startOffset)).compareTo(Long.valueOf(other.startOffset));
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%d-%d", Long.valueOf(startOffset), Long.valueOf(endOffset));
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (int) (startOffset ^ (startOffset >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof ByteRange)) {
+                return false;
+            }
+            final ByteRange other = (ByteRange) obj;
+            if (startOffset != other.startOffset) {
+                return false;
+            }
+            return true;
+        }
+
+    }
 
 }

@@ -105,4 +105,27 @@ public final class DatabaseId implements SortableId {
         return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ordinal;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DatabaseId)) {
+            return false;
+        }
+        final DatabaseId other = (DatabaseId) obj;
+        if (ordinal != other.ordinal) {
+            return false;
+        }
+        return true;
+    }
+
 }
