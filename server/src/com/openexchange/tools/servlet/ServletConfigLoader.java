@@ -61,7 +61,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import com.openexchange.configuration.ServerConfig;
@@ -87,8 +86,6 @@ public final class ServletConfigLoader {
      * The file extension for property files
      */
     private static final String FILEEXT_PROPERTIES = ".properties";
-
-    private static final AtomicBoolean initialized = new AtomicBoolean();
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletConfigLoader.class);
 
@@ -157,17 +154,14 @@ public final class ServletConfigLoader {
      * @param servletConfigDir The servlet config directory
      */
     public static void initDefaultInstance(final String servletConfigDir) {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (initialized.get()) {
-                    return;
-                }
-                final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
-                final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
-                servletConfig.setServletContextWrapper(servletContext);
-                defaultInstance = new ServletConfigLoader(servletConfig, servletContext, new File(servletConfigDir));
-                initialized.set(true);
+        synchronized (ServletConfigLoader.class) {
+            if (null != defaultInstance) {
+                return;
             }
+            final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
+            final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
+            servletConfig.setServletContextWrapper(servletContext);
+            defaultInstance = new ServletConfigLoader(servletConfig, servletContext, new File(servletConfigDir));
         }
     }
 
@@ -224,13 +218,9 @@ public final class ServletConfigLoader {
      * Resets the default instance
      */
     public static void resetDefaultInstance() {
-        if (initialized.get()) {
-            synchronized (initialized) {
-                if (!initialized.get()) {
-                    return;
-                }
+        synchronized (ServletConfigLoader.class) {
+            if (null != defaultInstance) {
                 defaultInstance = null;
-                initialized.set(false);
             }
         }
     }
@@ -249,7 +239,7 @@ public final class ServletConfigLoader {
 
     private transient ServletContext defaultContext;
 
-    private File directory;
+    private final File directory;
 
     private final Map<String, String> globalProps; 
 

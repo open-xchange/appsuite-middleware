@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpSession;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -68,8 +67,6 @@ public final class HttpSessionManagement {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpSessionManagement.class);
 
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
     private static Map<String, HttpSessionWrapper> sessions;
 
     private static ScheduledTimerTask sessionRemover;
@@ -78,15 +75,12 @@ public final class HttpSessionManagement {
      * Initializes HTTP session management
      */
     static void init() {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (!initialized.get()) {
-                    sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
-                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                    if (null != timer) {
-                        sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(), 100, 3600000);
-                    }
-                    initialized.set(true);
+        synchronized (HttpSessionManagement.class) {
+            if (null == sessions) {
+                sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
+                final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                if (null != timer) {
+                    sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(), 100, 3600000);
                 }
             }
         }
@@ -96,19 +90,16 @@ public final class HttpSessionManagement {
      * Resets HTTP session management
      */
     static void reset() {
-        if (initialized.get()) {
-            synchronized (initialized) {
-                if (initialized.get()) {
-                    sessions.clear();
-                    sessions = null;
-                    sessionRemover.cancel(false);
-                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                    if (null != timer) {
-                        timer.purge();
-                    }
-                    sessionRemover = null;
-                    initialized.set(false);
+        synchronized (HttpSessionManagement.class) {
+            if (null != sessions) {
+                sessions.clear();
+                sessions = null;
+                sessionRemover.cancel(false);
+                final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                if (null != timer) {
+                    timer.purge();
                 }
+                sessionRemover = null;
             }
         }
     }

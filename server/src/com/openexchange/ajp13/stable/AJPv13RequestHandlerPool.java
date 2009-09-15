@@ -51,7 +51,6 @@ package com.openexchange.ajp13.stable;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.AJPv13Config;
 
 /**
@@ -65,8 +64,6 @@ public class AJPv13RequestHandlerPool {
 
     private static BlockingQueue<AJPv13RequestHandlerImpl> REQUEST_HANDLER_POOL;
 
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
     private AJPv13RequestHandlerPool() {
         super();
     }
@@ -77,24 +74,21 @@ public class AJPv13RequestHandlerPool {
      * @return <code>true</code> if initialized; otherwise <code>false</code>
      */
     static boolean isInitialized() {
-        return initialized.get();
+        return null != REQUEST_HANDLER_POOL;
     }
 
     /**
      * Initializes the AJP request handler pool
      */
     static void initPool() {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (null == REQUEST_HANDLER_POOL) {
-                    final int poolSize = AJPv13Config.getAJPRequestHandlerPoolSize();
-                    REQUEST_HANDLER_POOL = new ArrayBlockingQueue<AJPv13RequestHandlerImpl>(poolSize);
-                    for (int i = 0; i < poolSize; i++) {
-                        REQUEST_HANDLER_POOL.add(new AJPv13RequestHandlerImpl());
-                    }
-                    initialized.set(true);
-                    LOG.info("AJPv13-RequestHandler-Pool initialized with " + poolSize);
+        synchronized (AJPv13RequestHandlerPool.class) {
+            if (null == REQUEST_HANDLER_POOL) {
+                final int poolSize = AJPv13Config.getAJPRequestHandlerPoolSize();
+                REQUEST_HANDLER_POOL = new ArrayBlockingQueue<AJPv13RequestHandlerImpl>(poolSize);
+                for (int i = 0; i < poolSize; i++) {
+                    REQUEST_HANDLER_POOL.add(new AJPv13RequestHandlerImpl());
                 }
+                LOG.info("AJPv13-RequestHandler-Pool initialized with " + poolSize);
             }
         }
     }
@@ -103,13 +97,10 @@ public class AJPv13RequestHandlerPool {
      * Resets the AJP request handler pool
      */
     static void resetPool() {
-        if (initialized.get()) {
-            synchronized (initialized) {
-                if (null != REQUEST_HANDLER_POOL) {
-                    REQUEST_HANDLER_POOL.clear();
-                    REQUEST_HANDLER_POOL = null;
-                    initialized.set(false);
-                }
+        synchronized (AJPv13RequestHandlerPool.class) {
+            if (null != REQUEST_HANDLER_POOL) {
+                REQUEST_HANDLER_POOL.clear();
+                REQUEST_HANDLER_POOL = null;
             }
         }
     }

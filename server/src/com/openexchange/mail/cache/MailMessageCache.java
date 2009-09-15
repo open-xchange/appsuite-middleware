@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -383,11 +382,9 @@ public final class MailMessageCache {
 
     static final String REGION_NAME = "MailMessageCache";
 
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-
     private static final ConcurrentMap<CacheKey, ReadWriteLock> contextLocks = new ConcurrentHashMap<CacheKey, ReadWriteLock>();
 
-    private static MailMessageCache singleton;
+    private static volatile MailMessageCache singleton;
 
     /*-
      * Field members
@@ -474,26 +471,26 @@ public final class MailMessageCache {
      * @throws OXCachingException If instance initialization failed
      */
     public static MailMessageCache getInstance() throws OXCachingException {
-        if (!initialized.get()) {
-            synchronized (initialized) {
-                if (null == singleton) {
-                    singleton = new MailMessageCache();
-                    initialized.set(true);
+        MailMessageCache tmp = singleton;
+        if (null == tmp) {
+            synchronized (MailMessageCache.class) {
+                tmp = singleton;
+                if (null == tmp) {
+                    tmp = singleton = new MailMessageCache();
                 }
             }
         }
-        return singleton;
+        return tmp;
     }
 
     /**
      * Releases the singleton instance.
      */
     public static void releaseInstance() {
-        if (initialized.get()) {
-            synchronized (initialized) {
+        if (null != singleton) {
+            synchronized (MailMessageCache.class) {
                 if (null != singleton) {
                     singleton = null;
-                    initialized.set(false);
                 }
             }
         }
