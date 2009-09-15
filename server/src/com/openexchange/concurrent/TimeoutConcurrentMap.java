@@ -74,7 +74,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     private TimeoutListener<V> defaultTimeoutListener;
 
-    private boolean disposed;
+    private volatile boolean disposed;
 
     /**
      * Initializes a new {@link TimeoutConcurrentMap}.
