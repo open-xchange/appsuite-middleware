@@ -584,12 +584,14 @@ public class DatabaseImpl extends DBService {
         final StringBuilder changeversioninbasetable = new StringBuilder(
             "UPDATE " + basetablename + " SET version=? " + " WHERE id=? AND  " + basetablename + ".cid=?");
 
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
             startDBTransaction();
-            PreparedStatement stmt = writecon.prepareStatement(version_select.toString());
+            stmt = writecon.prepareStatement(version_select.toString());
             stmt.setString(1, identifier);
             stmt.setInt(2, ctx.getContextId());
-            ResultSet result = stmt.executeQuery();
+            result = stmt.executeQuery();
             if (result.next()) {
                 version_nr = result.getInt(1);
                 infostore_id = result.getInt(2);
@@ -608,6 +610,7 @@ public class DatabaseImpl extends DBService {
                 set.add(Integer.valueOf(result.getInt(1)));
             }
             set.remove(Integer.valueOf(version_nr));
+            stmt.close();
 
             if (version_nr == current_version) {
                 stmt = writecon.prepareStatement(changeversioninbasetable.toString());
@@ -628,6 +631,7 @@ public class DatabaseImpl extends DBService {
             rollbackDBTransaction();
             throw new OXException("Error while removing documents from table.", e);
         } finally {
+            close(stmt, result);
             finishDBTransaction();
             releaseWriteConnection(ctx, writecon);
         }
