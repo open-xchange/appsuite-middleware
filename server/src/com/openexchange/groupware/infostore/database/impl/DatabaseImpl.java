@@ -652,13 +652,16 @@ public class DatabaseImpl extends DBService {
 
         final StringBuilder updatedatabase = new StringBuilder(
             "UPDATE " + documentstable + " SET file_store_location=?,  description=?, file_mimetype=? " + "WHERE file_store_location=? AND cid=?");
+        
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
             startDBTransaction();
             String olddescription = null;
-            PreparedStatement stmt = writecon.prepareStatement(select_description.toString());
+            stmt = writecon.prepareStatement(select_description.toString());
             stmt.setString(1, oldidentifier);
             stmt.setInt(2, ctx.getContextId());
-            final ResultSet result = stmt.executeQuery();
+            result = stmt.executeQuery();
             if (result.next()) {
                 olddescription = result.getString(1);
             }
@@ -682,6 +685,7 @@ public class DatabaseImpl extends DBService {
             rollbackDBTransaction();
             throw new OXException("Error while getting permissions for folder.", e);
         } finally {
+            close(stmt, result);
             finishDBTransaction();
             releaseWriteConnection(ctx, writecon);
         }
@@ -1438,7 +1442,7 @@ public class DatabaseImpl extends DBService {
             if (fs == null) {
                 fs = getFileStorage(ctx);
             }
-            List<String> files = new ArrayList<String>(versions.size());
+            final List<String> files = new ArrayList<String>(versions.size());
             for (final DocumentMetadata version : versions) {
                 if (null != version.getFilestoreLocation()) {
                     files.add(version.getFilestoreLocation());
@@ -1472,16 +1476,16 @@ public class DatabaseImpl extends DBService {
                 return;
             }
 
-            List<String> files = new LinkedList<String>();
+            final List<String> files = new LinkedList<String>();
             holder = new PreparedStatementHolder(getProvider().getWriteConnection(session.getContext()));
             
             
-            for (FolderObject folder : foldersWithPrivateItems) {
+            for (final FolderObject folder : foldersWithPrivateItems) {
                 clearFolder(folder, session, files, holder);
             }
 
-            FileStorage fileStorage = getFileStorage(ctx);
-            String[] filesArray = files.toArray(new String[files.size()]);
+            final FileStorage fileStorage = getFileStorage(ctx);
+            final String[] filesArray = files.toArray(new String[files.size()]);
             fileStorage.deleteFile(filesArray);
         } catch (final SQLException x) {
             LOG.error(x.getMessage(), x);
@@ -1496,27 +1500,27 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    private void clearFolder(FolderObject folder, ServerSession session, List<String> files, PreparedStatementHolder holder) throws AbstractOXException, SQLException {
-        com.openexchange.groupware.infostore.database.impl.InfostoreIterator allDocumentsInFolder = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.documents(
+    private void clearFolder(final FolderObject folder, final ServerSession session, final List<String> files, final PreparedStatementHolder holder) throws AbstractOXException, SQLException {
+        final com.openexchange.groupware.infostore.database.impl.InfostoreIterator allDocumentsInFolder = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.documents(
             folder.getObjectID(),
             Metadata.VALUES_ARRAY,
             Metadata.ID_LITERAL,
             InfostoreFacade.ASC,
             getProvider(),
             session.getContext());
-        List<DocumentMetadata> parents = new ArrayList<DocumentMetadata>();
+        final List<DocumentMetadata> parents = new ArrayList<DocumentMetadata>();
 
         while (allDocumentsInFolder.hasNext()) {
-            DocumentMetadata documentMetadata = allDocumentsInFolder.next();
+            final DocumentMetadata documentMetadata = allDocumentsInFolder.next();
             parents.add(documentMetadata);
             discoverAllFiles(documentMetadata, session, files);
         }
-        InfostoreQueryCatalog queries = new InfostoreQueryCatalog();
+        final InfostoreQueryCatalog queries = new InfostoreQueryCatalog();
             
-        String parentDelete = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
-        String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);
+        final String parentDelete = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
+        final String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);
         final Integer contextId = Autoboxing.I(session.getContextId());
-        for(DocumentMetadata documentMetadata : parents) {
+        for(final DocumentMetadata documentMetadata : parents) {
             final Integer id = Autoboxing.I(documentMetadata.getId());
             holder.execute(allChildrenDelete, id, contextId);
             holder.execute(parentDelete, id, contextId);
@@ -1525,17 +1529,17 @@ public class DatabaseImpl extends DBService {
         
         
         final EventClient ec = new EventClient(session);
-        for (DocumentMetadata documentMetadata : parents) {
+        for (final DocumentMetadata documentMetadata : parents) {
             try {
                 ec.delete(documentMetadata);
-            } catch (EventException e) {
+            } catch (final EventException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
     }
 
-    private void discoverAllFiles(DocumentMetadata documentMetadata, ServerSession session, List<String> files) throws AbstractOXException {
-        com.openexchange.groupware.infostore.database.impl.InfostoreIterator allVersions = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.versions(
+    private void discoverAllFiles(final DocumentMetadata documentMetadata, final ServerSession session, final List<String> files) throws AbstractOXException {
+        final com.openexchange.groupware.infostore.database.impl.InfostoreIterator allVersions = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.versions(
             documentMetadata.getId(),
             Metadata.VALUES_ARRAY,
             Metadata.ID_LITERAL,
@@ -1544,7 +1548,7 @@ public class DatabaseImpl extends DBService {
             session.getContext());
 
         while (allVersions.hasNext()) {
-            DocumentMetadata version = allVersions.next();
+            final DocumentMetadata version = allVersions.next();
             if (version.getFilestoreLocation() != null) {
                 files.add(version.getFilestoreLocation());
             }
@@ -2116,14 +2120,14 @@ public class DatabaseImpl extends DBService {
     }
 
     @OXThrows(category = Category.CODE_ERROR, desc = "An invalid SQL Query was sent to the server.", exceptionId = 34, msg = "Invalid SQL Query : %s")
-    public int getMaxActiveVersion(final int id, final Context context, List<DocumentMetadata> ignoreVersions) throws OXException {
+    public int getMaxActiveVersion(final int id, final Context context, final List<DocumentMetadata> ignoreVersions) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        StringBuilder ignoreVersionsList = new StringBuilder(ignoreVersions.size() * 4 + 2);
+        final StringBuilder ignoreVersionsList = new StringBuilder(ignoreVersions.size() * 4 + 2);
         ignoreVersionsList.append('(');
-        for (DocumentMetadata documentMetadata : ignoreVersions) {
+        for (final DocumentMetadata documentMetadata : ignoreVersions) {
             ignoreVersionsList.append(documentMetadata.getVersion()).append(",");
         }
         ignoreVersionsList.setCharAt(ignoreVersionsList.length() - 1, ')');
