@@ -57,7 +57,7 @@ import java.util.TimeZone;
  * Data object for a reminder.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class ReminderObject {
+public class ReminderObject implements Cloneable {
 
     private Date lastModified;
 
