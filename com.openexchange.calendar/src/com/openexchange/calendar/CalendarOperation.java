@@ -399,6 +399,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 if (!cdao.containsTimezone()) {
                     cdao.setTimezone(timezone);
                 }
+                cdao.setRecurrenceID(edao.getRecurrenceID());
                 recColl.fillDAO(cdao);
             } else if (edao.isSequence() && edao.getObjectID() != edao.getRecurrenceID()) {
                 // this is a change exception.
@@ -437,6 +438,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 // Not overwriting the recurrence position. This must give the exception INVALID_RECURRENCE_POSITION_CHANGE.
                 // Keep the recurrence pattern
                 cdao.setRecurrence(edao.getRecurrence());
+                cdao.setRecurrenceID(edao.getRecurrenceID());
             }
 
             if (cdao.containsParentFolderID() && inFolder != cdao.getParentFolderID()) {

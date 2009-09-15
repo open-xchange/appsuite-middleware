@@ -1,3 +1,7 @@
+* 2009-09-15 - martin.herfurth@open-xchange.com
+
+ - Bugfix #12050: Series conflicts with own exceptions.
+
 * 2009-09-10 - thorben.betten@open-xchange.com
 
  - Bugfix #14467: Fixed reply of multipart/related message without HTML content

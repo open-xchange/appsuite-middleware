@@ -211,6 +211,9 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 owner = rs.getInt(9);
                 cdao.setCreatedBy(owner);
                 final int recid = rs.getInt(10);
+                if (recid != 0) {
+                    cdao.setRecurrenceID(recid);
+                }
                 if (!rs.wasNull() && recid == oid) {
                     cdao.setRecurrenceCalculator(rs.getInt(11));
                     cdao.setRecurrence(rs.getString(12));
@@ -218,7 +221,6 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                     cdao.setDelExceptions(rs.getString(13));
                     cdao.setExceptions(rs.getString(14));
                     cdao.setTimezone(rs.getString(15));
-                    cdao.setRecurrenceID(recid);
                     if (recColl.fillDAO(cdao)) {
                         try {
                             rrs = recColl.calculateRecurring(cdao, range_start, range_end, 0);

@@ -229,7 +229,7 @@ public class ConflictHandler {
                         li = new ArrayList<CalendarDataObject>();
                     }
 
-                    if ((create || cdao.getObjectID() != conflict_dao.getObjectID())) { // Same id should never conflict if we are running an update
+                    if (shouldConflict(cdao, conflict_dao)) { // Same id should never conflict if we are running an update
                         if (!conflict_dao.containsRecurrencePosition()) {
                             if (!recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                                 li.add(conflict_dao);
@@ -276,6 +276,19 @@ public class ConflictHandler {
                 DBPool.push(ctx, readcon);
             }
         }
+    }
+    
+    boolean shouldConflict(CalendarDataObject cdao, CalendarDataObject conflictDao) {
+        if (create) {
+            return true;
+        }
+        if (cdao.getRecurrenceID() == conflictDao.getObjectID() || conflictDao.getRecurrenceID() == cdao.getObjectID()) {
+            return false;
+        }
+        if (cdao.getObjectID() != conflictDao.getObjectID()) {
+            return true;
+        }
+        return false;
     }
 
     private List<UserParticipant> getConflictUsers() {
