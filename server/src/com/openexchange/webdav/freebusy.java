@@ -108,13 +108,13 @@ public class freebusy extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
-        Context context = getContext(request);
+        final Context context = getContext(request);
         if (null == context) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine context.");
             return;
         }
 
-        int period = getPeriod(request);
+        final int period = getPeriod(request);
         final Date start;
         final Date end;
         if (-1 == period) {
@@ -129,7 +129,7 @@ public class freebusy extends HttpServlet {
                 return;
             }
         } else {
-            Calendar calendar = Calendar.getInstance();
+            final Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.MONTH, -period);
             start = calendar.getTime();
             calendar.setTimeInMillis(System.currentTimeMillis());
@@ -137,7 +137,7 @@ public class freebusy extends HttpServlet {
             end = calendar.getTime();
         }
 
-        String mailAddress = getMailAddress(request);
+        final String mailAddress = getMailAddress(request);
         if (null == mailAddress) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine mail address.");
             return;
@@ -147,19 +147,19 @@ public class freebusy extends HttpServlet {
         try {
             // TODO Replace with UserService
             user = UserStorage.getInstance().searchUser(mailAddress, context);
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             LOG.debug("User '" + mailAddress + "' not found.");
         }
         Resource resource = null;
         try {
             // TODO Replace with ResourceService
             if (null == user) {
-                Resource[] resources = ResourceStorage.getInstance().searchResourcesByMail(mailAddress, context);
+                final Resource[] resources = ResourceStorage.getInstance().searchResourcesByMail(mailAddress, context);
                 if (1 == resources.length) {
                     resource = resources[0];
                 }
             }
-        } catch (LdapException e) {
+        } catch (final LdapException e) {
             LOG.error("Resource '" + mailAddress + "' not found.");
         }
         final int principalId;
@@ -180,35 +180,35 @@ public class freebusy extends HttpServlet {
         writeVCalendar(context, start, end, mailAddress, principalId, type, request.getRemoteHost(), printWriter);
     }
 
-    private String getMailAddress(HttpServletRequest request) {
+    private String getMailAddress(final HttpServletRequest request) {
         if (null == request.getParameter("username") || null == request.getParameter("server")) {
             return null;
         }
         return request.getParameter("username") + '@' + request.getParameter("server");
     }
 
-    private Date getStart(HttpServletRequest request) {
+    private Date getStart(final HttpServletRequest request) {
         if (null == request.getParameter("start")) {
             return null;
         }
         final Date start;
         try {
             start = inputFormat.parse(request.getParameter("start"));
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             LOG.debug("Unable to parse parameter start.", e);
             return null;
         }
         return start;
     }
 
-    private Date getEnd(HttpServletRequest request) {
+    private Date getEnd(final HttpServletRequest request) {
         if (null == request.getParameter("end")) {
             return null;
         }
         final Date end;
         try {
             end = inputFormat.parse(request.getParameter("end"));
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             LOG.debug("Unable to parse parameter end.", e);
             return null;
         }
@@ -222,62 +222,66 @@ public class freebusy extends HttpServlet {
         final int contextId;
         try {
             contextId = Integer.parseInt(request.getParameter("contextid"));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             LOG.error("Unable to parse context identifier.", e);
             return null;
         }
         // TODO Replace with ContextService
-        ContextStorage service = ContextStorage.getInstance();
+        final ContextStorage service = ContextStorage.getInstance();
         final Context context;
         try {
             context = service.getContext(contextId);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.error("Can not load context.", e);
             return null;
         }
         return context;
     }
 
-    private int getPeriod(HttpServletRequest request) {
+    private int getPeriod(final HttpServletRequest request) {
         if (null == request.getParameter("period")) {
             return -1;
         }
         final int period;
         try {
             period = Integer.parseInt(request.getParameter("period"));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             LOG.error("Unable to parse period parameter.", e);
             return -1;
         }
         return period;
     }
 
-    private void writeVCalendar(Context context, Date start, Date end, String mailAddress, int principalId, int type, String remoteHost, PrintWriter printWriter) {
+    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId, final int type, final String remoteHost, final PrintWriter printWriter) {
         printWriter.println("BEGIN:VCALENDAR");
         printWriter.println("PRODID:-//www.open-xchange.org//");
         printWriter.println("VERSION:2.0");
         printWriter.println("METHOD:PUBLISH");
         printWriter.println("BEGIN:VFREEBUSY");
         printWriter.println("ORGANIZER:" + mailAddress);
-        printWriter.println("DTSTART:" + outputFormat.format(start));
-        printWriter.println("DTEND:" + outputFormat.format(end));
+        synchronized (outputFormat) {
+            printWriter.println("DTSTART:" + outputFormat.format(start));
+            printWriter.println("DTEND:" + outputFormat.format(end));
+        }
         try {
             final Session sessionObj = SessionObjectWrapper.createSessionObject(context.getMailadmin(), context, "freebusysessionobject");
             final AppointmentSQLInterface appointmentInterface = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true).createAppointmentSql(sessionObj);
-            SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
+            final SearchIterator<Appointment> it = appointmentInterface.getFreeBusyInformation(principalId, type, start, end);
             try {
-                while (it.hasNext()) {
-                    writeFreeBusy(it.next(), printWriter, outputFormat);
-                    printWriter.flush();
+                synchronized (outputFormat) {
+                    while (it.hasNext()) {
+                        writeFreeBusy(it.next(), printWriter, outputFormat);
+                        printWriter.flush();
+                    }
                 }
             } finally {
                 it.close();
             }
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             LOG.error("Calendar service not found.", e);
         }
         printWriter.println("END:VFREEBUSY");
