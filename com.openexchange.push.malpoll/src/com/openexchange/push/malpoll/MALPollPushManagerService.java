@@ -49,6 +49,7 @@
 
 package com.openexchange.push.malpoll;
 
+import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
@@ -78,9 +79,10 @@ public final class MALPollPushManagerService implements PushManagerService {
         super();
     }
 
-    public PushListener startListener(final Session session) {
+    public PushListener startListener(final Session session) throws PushException {
         final MALPollPushListener pushListener = MALPollPushListener.newInstance(session, startTimerTaskPerListener);
         if (MALPollPushListenerRegistry.getInstance().addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
+            pushListener.open();
             return pushListener;
         }
         return null;

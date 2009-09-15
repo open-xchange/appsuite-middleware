@@ -123,9 +123,9 @@ public final class MALPollPushListener implements PushListener {
     }
 
     /**
-     * Sets static period millis.
+     * Sets static period milliseconds.
      * 
-     * @param periodMillis The period millis
+     * @param periodMillis The period milliseconds
      */
     public static void setPeriodMillis(final long periodMillis) {
         MALPollPushListener.periodMillis = periodMillis;
@@ -139,15 +139,7 @@ public final class MALPollPushListener implements PushListener {
      * @return A new {@link MALPollPushListener}.
      */
     public static MALPollPushListener newInstance(final Session session, final boolean startTimerTask) {
-        final MALPollPushListener newInst = new MALPollPushListener(session, !startTimerTask);
-        if (startTimerTask) {
-            final TimerService timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class);
-            if (null == timerService) {
-                return null;
-            }
-            newInst.timerTask = timerService.scheduleWithFixedDelay(new MALPollRunnable(newInst, LOG), 1000, periodMillis);
-        }
-        return newInst;
+        return new MALPollPushListener(session, !startTimerTask);
     }
 
     /*
@@ -175,12 +167,38 @@ public final class MALPollPushListener implements PushListener {
     }
 
     /**
-     * Closes this listener
+     * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
+     * 
+     * @throws PushException If listener cannot be opened
+     */
+    public void open() throws PushException {
+        if (!ignoreOnGlobal) {
+            /*
+             * This listener gets its own timer task and is not considered during global run
+             */
+            final TimerService timerService;
+            try {
+                timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class, true);
+            } catch (final ServiceException e) {
+                throw new PushException(e);
+            }
+            timerTask = timerService.scheduleWithFixedDelay(new MALPollRunnable(this, LOG), 1000, periodMillis);
+        }
+    }
+
+    /**
+     * Closes this listener.
      */
     public void close() {
         if (null != timerTask) {
+            /*
+             * Release all timer task resources
+             */
             timerTask.cancel();
             timerTask = null;
+            /*
+             * ... and purge from timer service
+             */
             final TimerService timerService = MALPollServiceRegistry.getServiceRegistry().getService(TimerService.class);
             if (null != timerService) {
                 timerService.purge();
@@ -237,8 +255,13 @@ public final class MALPollPushListener implements PushListener {
         try {
             final String fullname = folder;
             final Set<String> uidSet = new HashSet<String>(mailAccess.getFolderStorage().getFolder(fullname).getMessageCount());
-            final MailMessage[] messages =
-                mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+            final MailMessage[] messages = mailAccess.getMessageStorage().searchMessages(
+                fullname,
+                null,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                null,
+                FIELDS);
             for (final MailMessage mailMessage : messages) {
                 uidSet.add(mailMessage.getMailId());
             }
