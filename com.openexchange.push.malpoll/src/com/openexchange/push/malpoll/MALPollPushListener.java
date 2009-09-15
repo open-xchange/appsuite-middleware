@@ -103,6 +103,11 @@ public final class MALPollPushListener implements PushListener {
         this.session = session;
     }
 
+    /**
+     * Check for new mails
+     * 
+     * @throws PushException If check for new mails fails
+     */
     public void checkNewMail() throws PushException {
         final MailService mailService;
         try {
