@@ -71,7 +71,7 @@ public class TableWriter {
     /**
      * Initializes a new {@link TableWriter}.
      */
-    public TableWriter(PrintStream ps, ColumnFormat[] formats, List<List<Object>> data) {
+    public TableWriter(final PrintStream ps, final ColumnFormat[] formats, final List<List<Object>> data) {
         super();
         this.ps = ps;
         this.formats = formats;
@@ -91,13 +91,13 @@ public class TableWriter {
         private final Align align;
         private int width;
         private final Conversion conversion;
-        public ColumnFormat(Align align) {
+        public ColumnFormat(final Align align) {
             this(align, AUTO_WIDTH, Conversion.STRING);
         }
-        public ColumnFormat(Align align, Conversion conversion) {
+        public ColumnFormat(final Align align, final Conversion conversion) {
             this(align, AUTO_WIDTH, conversion);
         }
-        public ColumnFormat(Align align, int width, Conversion conversion) {
+        public ColumnFormat(final Align align, final int width, final Conversion conversion) {
             super();
             this.align = align;
             this.width = width;
@@ -109,7 +109,7 @@ public class TableWriter {
         public int getWidth() {
             return width;
         }
-        public void setWidth(int width) {
+        public void setWidth(final int width) {
             this.width = width;
         }
         public Conversion getConversion() {
@@ -120,7 +120,7 @@ public class TableWriter {
     private void determineAutoWidth() {
         for (int i = 0; i < formats.length; i++) {
             if (formats[i].getWidth() == ColumnFormat.AUTO_WIDTH) {
-                for (List<Object> row : data) {
+                for (final List<Object> row : data) {
                     formats[i].setWidth(Math.max(formats[i].getWidth(), toString(row.get(i)).length()));
                 }
             }
@@ -128,8 +128,8 @@ public class TableWriter {
     }
 
     private String generateFormatString() {
-        StringBuilder retval = new StringBuilder();
-        for (ColumnFormat format : formats) {
+        final StringBuilder retval = new StringBuilder();
+        for (final ColumnFormat format : formats) {
             retval.append('%');
             switch (format.getAlign()) {
             case LEFT:
@@ -153,21 +153,23 @@ public class TableWriter {
         return retval.toString();
     }
 
-    private String toString(Object obj) {
+    private String toString(final Object obj) {
         if (obj instanceof String) {
             return (String) obj;
         }
         if (obj instanceof Date) {
-            return DATE_FORMAT.format((Date) obj);
+            synchronized (DATE_FORMAT) {
+                return DATE_FORMAT.format((Date) obj);
+            }
         }
         return obj.toString();
     }
 
     public void write() {
         determineAutoWidth();
-        String format = generateFormatString();
-        for (List<Object> row : data) {
-            Object[] args = new Object[row.size()];
+        final String format = generateFormatString();
+        for (final List<Object> row : data) {
+            final Object[] args = new Object[row.size()];
             for (int i = 0; i < row.size(); i++) {
                 args[i] = toString(row.get(i));
             }

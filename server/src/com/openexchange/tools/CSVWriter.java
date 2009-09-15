@@ -76,16 +76,16 @@ public class CSVWriter {
     /**
      * Initializes a new {@link CSVWriter}.
      */
-    public CSVWriter(PrintStream ps, List<List<Object>> data) {
+    public CSVWriter(final PrintStream ps, final List<List<Object>> data) {
         super();
         this.ps = ps;
         this.data = data;
     }
 
     public void write() {
-        StringBuilder sb = new StringBuilder();
-        for (List<Object> row : data) {
-            for (Object entry : row) {
+        final StringBuilder sb = new StringBuilder();
+        for (final List<Object> row : data) {
+            for (final Object entry : row) {
                 sb.append(quote(toString(entry)));
                 sb.append(CELL_DELIMITER);
             }
@@ -95,18 +95,20 @@ public class CSVWriter {
         }
     }
 
-    private static String toString(Object obj) {
+    private static String toString(final Object obj) {
         if (obj instanceof String) {
             return (String) obj;
         }
         if (obj instanceof Date) {
-            return DATE_FORMAT.format((Date) obj);
+            synchronized (DATE_FORMAT) {
+                return DATE_FORMAT.format((Date) obj);
+            }
         }
         return obj.toString();
     }
 
-    private String quote(String s) {
-        StringBuilder tmp = new StringBuilder();
+    private String quote(final String s) {
+        final StringBuilder tmp = new StringBuilder();
         tmp.append('"');
         tmp.append(s.replaceAll("\"", "\"\""));
         tmp.append('"');

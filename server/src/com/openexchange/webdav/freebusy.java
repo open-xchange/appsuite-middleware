@@ -193,7 +193,9 @@ public class freebusy extends HttpServlet {
         }
         final Date start;
         try {
-            start = inputFormat.parse(request.getParameter("start"));
+            synchronized (inputFormat) {
+                start = inputFormat.parse(request.getParameter("start"));
+            }
         } catch (final ParseException e) {
             LOG.debug("Unable to parse parameter start.", e);
             return null;
@@ -207,7 +209,9 @@ public class freebusy extends HttpServlet {
         }
         final Date end;
         try {
-            end = inputFormat.parse(request.getParameter("end"));
+            synchronized (inputFormat) {
+                end = inputFormat.parse(request.getParameter("end"));
+            }
         } catch (final ParseException e) {
             LOG.debug("Unable to parse parameter end.", e);
             return null;
