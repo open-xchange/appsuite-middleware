@@ -78,7 +78,16 @@ public final class MALPollPushListener implements PushListener {
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
-    private static final String INBOX = "INBOX";
+    private static String folder;
+
+    /**
+     * Sets static folder fullname.
+     * 
+     * @param folder The folder fullname
+     */
+    public static void setFolder(final String folder) {
+        MALPollPushListener.folder = folder;
+    }
 
     private final Session session;
 
@@ -127,9 +136,10 @@ public final class MALPollPushListener implements PushListener {
         final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session);
         mailAccess.connect();
         try {
-            final Set<String> uidSet = new HashSet<String>(mailAccess.getFolderStorage().getFolder(INBOX).getMessageCount());
+            final String fullname = folder;
+            final Set<String> uidSet = new HashSet<String>(mailAccess.getFolderStorage().getFolder(fullname).getMessageCount());
             final MailMessage[] messages =
-                mailAccess.getMessageStorage().searchMessages(INBOX, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+                mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
             for (final MailMessage mailMessage : messages) {
                 uidSet.add(mailMessage.getMailId());
             }
@@ -153,7 +163,7 @@ public final class MALPollPushListener implements PushListener {
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
         properties.put(PushEventConstants.PROPERTY_SESSION, session);
-        properties.put(PushEventConstants.PROPERTY_FOLDER, INBOX);
+        properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
         /*
          * Create event with push topic
          */

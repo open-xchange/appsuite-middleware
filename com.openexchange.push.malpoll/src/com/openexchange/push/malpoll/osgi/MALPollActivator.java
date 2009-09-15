@@ -50,9 +50,11 @@
 package com.openexchange.push.malpoll.osgi;
 
 import static com.openexchange.push.malpoll.services.MALPollServiceRegistry.getServiceRegistry;
+import java.text.MessageFormat;
 import java.util.Iterator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushManagerService;
@@ -86,7 +88,7 @@ public final class MALPollActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, EventAdmin.class, TimerService.class };
+        return new Class<?>[] { MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class };
     }
 
     @Override
@@ -96,7 +98,24 @@ public final class MALPollActivator extends DeferredActivator {
         }
         getServiceRegistry().addService(clazz, getService(clazz));
         if (TimerService.class == clazz) {
-            startScheduledTask(getService(TimerService.class));
+            final ConfigurationService configurationService = getService(ConfigurationService.class);
+            if (null != configurationService) {
+                long period = 300000L;
+                {
+                    final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.period");
+                    if (null != tmp) {
+                        try {
+                            period = Long.parseLong(tmp.trim());
+                        } catch (final NumberFormatException e) {
+                            LOG.error(MessageFormat.format(
+                                "Unable to parse com.openexchange.push.malpoll.period: {0}. Using default 300000 (5 Minutes) instead.",
+                                tmp));
+                            period = 300000L;
+                        }
+                    }
+                }
+                startScheduledTask(getService(TimerService.class), period);
+            }
         }
     }
 
@@ -128,7 +147,36 @@ public final class MALPollActivator extends DeferredActivator {
                     }
                 }
             }
-            startScheduledTask(getService(TimerService.class));
+            /*
+             * Read configuration
+             */
+            final ConfigurationService configurationService = getService(ConfigurationService.class);
+            long period = 300000L;
+            {
+                final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.period");
+                if (null != tmp) {
+                    try {
+                        period = Long.parseLong(tmp.trim());
+                    } catch (final NumberFormatException e) {
+                        LOG.error(MessageFormat.format(
+                            "Unable to parse com.openexchange.push.malpoll.period: {0}. Using default 300000 (5 Minutes) instead.",
+                            tmp));
+                        period = 300000L;
+                    }
+                }
+            }
+            String folder = "INBOX";
+            {
+                final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.folder");
+                if (null != tmp) {
+                    folder = tmp.trim();
+                }
+            }
+            /*
+             * Start-up
+             */
+            MALPollPushListener.setFolder(folder);
+            startScheduledTask(getService(TimerService.class), period);
             serviceRegistration = context.registerService(PushManagerService.class.getName(), new MALPollPushManagerService(), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -144,6 +192,7 @@ public final class MALPollActivator extends DeferredActivator {
                 serviceRegistration = null;
             }
             stopScheduledTask(getService(TimerService.class));
+            MALPollPushListener.setFolder(null);
             /*
              * Clear service registry
              */
@@ -154,7 +203,7 @@ public final class MALPollActivator extends DeferredActivator {
         }
     }
 
-    private void startScheduledTask(final TimerService timerService) {
+    private void startScheduledTask(final TimerService timerService, final long periodMillis) {
         final Runnable r = new Runnable() {
 
             private final org.apache.commons.logging.Log log = LOG;
@@ -174,7 +223,7 @@ public final class MALPollActivator extends DeferredActivator {
             }
         };
         // By now every 5 minutes -> TODO: Configurable
-        scheduledTimerTask = timerService.scheduleWithFixedDelay(r, 1000, 300000);
+        scheduledTimerTask = timerService.scheduleWithFixedDelay(r, 1000, periodMillis);
     }
 
     private void stopScheduledTask(final TimerService timerService) {
