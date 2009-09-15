@@ -60,7 +60,6 @@ public class SevenZipConfigGenerator {
     private static final String template = 
         ";!@Install@!UTF-8!\n"+
         "Title=\"Software Installation\"\n"+
-        "BeginPrompt=\"Do you want to install this software?\"\n"+
         "ExecuteFile=\"%%INSTALL%% \"\n"+
         "ExecuteParameters=\"UPDATESERVERURL=%%UPDATE_SERVER%%\"\n"+
         ";!@InstallEnd@!\n";
