@@ -72,8 +72,10 @@ public class Workflow {
     private List<Step> steps;
 
     private String loginStepString;
-    
+
     private Subscription subscription;
+
+    private boolean useThreadedRefreshHandler;
 
     public Workflow() {
 
@@ -81,6 +83,7 @@ public class Workflow {
 
     public Workflow(List<Step> steps) {
         this.steps = steps;
+        useThreadedRefreshHandler = false;
     }
 
     // Convenience method for setting username and password after the workflow was created
@@ -104,7 +107,9 @@ public class Workflow {
         final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
         // Javascript needs to be disabled for security reasons
         webClient.setJavaScriptEnabled(false);
-        webClient.setRefreshHandler(new ThreadedRefreshHandler());
+        if (useThreadedRefreshHandler) {
+            webClient.setRefreshHandler(new ThreadedRefreshHandler());
+        }
         try {
 
             Step previousStep = null;
@@ -114,13 +119,13 @@ public class Workflow {
                 if (previousStep != null) {
                     currentStep.setInput(previousStep.getOutput());
                 }
-                currentStep.setWorkflow(this);                
-                currentStep.execute(webClient);                
+                currentStep.setWorkflow(this);
+                currentStep.execute(webClient);
                 previousStep = currentStep;
                 if (!currentStep.executedSuccessfully()) {
                     throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
                 }
-                if (!(currentStep instanceof LogoutStep)){
+                if (!(currentStep instanceof LogoutStep)) {
                     result = currentStep.getOutput();
                 }
             }
@@ -140,15 +145,28 @@ public class Workflow {
         this.steps = steps;
     }
 
-    
     public Subscription getSubscription() {
         return subscription;
     }
 
-    
     public void setSubscription(Subscription subscription) {
         this.subscription = subscription;
     }
 
-    
+    public String getLoginStepString() {
+        return loginStepString;
+    }
+
+    public void setLoginStepString(String loginStepString) {
+        this.loginStepString = loginStepString;
+    }
+
+    public boolean isUseThreadedRefreshHandler() {
+        return useThreadedRefreshHandler;
+    }
+
+    public void setUseThreadedRefreshHandler(boolean useThreadedRefreshHandler) {
+        this.useThreadedRefreshHandler = useThreadedRefreshHandler;
+    }
+
 }

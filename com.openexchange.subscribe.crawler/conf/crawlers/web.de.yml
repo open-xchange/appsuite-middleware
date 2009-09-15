@@ -89,4 +89,5 @@ workflowString: |
             regex: "(>)([a-zA-Zäöü]*)(<\\/td>)"
             type: 1
             typeOfInfo: country_business
+  useThreadedRefreshHandler: true
   

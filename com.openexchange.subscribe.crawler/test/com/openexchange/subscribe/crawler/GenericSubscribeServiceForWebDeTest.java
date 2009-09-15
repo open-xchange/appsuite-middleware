@@ -113,10 +113,11 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
             sequence));
 
         Workflow workflow = new Workflow(steps);
+        workflow.setUseThreadedRefreshHandler(true);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
-        // uncomment this if the if the crawler description was updated to get the new config-files
+        //uncomment this if the if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
     }
 
