@@ -49,10 +49,12 @@
 
 package com.openexchange.push.malpoll;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 
 /**
@@ -93,6 +95,32 @@ public final class MALPollPushListenerRegistry {
             i.remove();
         }
         map.clear();
+    }
+
+    /**
+     * Closes all listeners contained in this registry.
+     */
+    public void closeAll() {
+        for (final Iterator<MALPollPushListener> i = map.values().iterator(); i.hasNext();) {
+            i.next().close();
+        }
+    }
+
+    /**
+     * Opens all listeners contained in this registry.
+     */
+    public void openAll() {
+        for (final Iterator<MALPollPushListener> i = map.values().iterator(); i.hasNext();) {
+            final MALPollPushListener l = i.next();
+            try {
+                l.open();
+            } catch (final PushException e) {
+                org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRegistry.class).error(
+                    MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
+                    e);
+                i.remove();
+            }
+        }
     }
 
     /**

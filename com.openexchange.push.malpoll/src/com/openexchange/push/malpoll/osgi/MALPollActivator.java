@@ -102,6 +102,7 @@ public final class MALPollActivator extends DeferredActivator {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
+        getServiceRegistry().addService(clazz, getService(clazz));
         if (TimerService.class == clazz) {
             MALPollPushListenerRegistry.getInstance().openAll();
             // Start global if configured
@@ -109,7 +110,6 @@ public final class MALPollActivator extends DeferredActivator {
                 startScheduledTask(getService(TimerService.class), period);
             }
         }
-        getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
