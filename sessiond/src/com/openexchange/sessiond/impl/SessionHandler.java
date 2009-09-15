@@ -226,11 +226,10 @@ public final class SessionHandler {
         if (null == sessionControl) {
             LOG.debug("Cannot find session id to remove session <" + sessionid + '>');
             return false;
-        } else {
-            postSessionRemoval(sessionControl.getSession());
-            LOG.info("Session closed. ID: " + sessionid);
-            return true;
         }
+        postSessionRemoval(sessionControl.getSession());
+        LOG.info("Session closed. ID: " + sessionid);
+        return true;
     }
 
     /**
