@@ -122,10 +122,11 @@ public final class SessionHandler {
 
             final TimerService timer = SessiondServiceRegistry.getServiceRegistry().getService(TimerService.class);
             if (timer != null) {
-                sessiondTimer = timer.scheduleWithFixedDelay(
-                    new SessiondTimer(),
-                    config.getSessionContainerTimeout(),
-                    config.getSessionContainerTimeout());
+                sessiondTimer =
+                    timer.scheduleWithFixedDelay(
+                        new SessiondTimer(),
+                        config.getSessionContainerTimeout(),
+                        config.getSessionContainerTimeout());
             }
         }
     }
@@ -184,20 +185,14 @@ public final class SessionHandler {
         final String secret = sessionIdGenerator.createSecretId(loginName, String.valueOf(System.currentTimeMillis()));
         final String randomToken = sessionIdGenerator.createRandomId();
 
-        final Session session = new SessionImpl(
-            userId,
-            loginName,
-            password,
-            context.getContextId(),
-            sessionId,
-            secret,
-            randomToken,
-            clientHost,
-            login);
+        final Session session =
+            new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, secret, randomToken, clientHost, login);
 
         LOG.info("Session created. ID: " + sessionId + ", Context: " + context.getContextId() + ", User: " + userId);
 
         sessionData.addSession(session, config.getLifeTime(), noLimit);
+
+        postSessionCreation(session);
 
         return sessionId;
     }
@@ -372,6 +367,19 @@ public final class SessionHandler {
 
     public static int getNumberOfActiveSessions() {
         return sessionData.countSessions();
+    }
+
+    private static void postSessionCreation(final Session session) {
+        final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final Dictionary<Object, Object> dic = new Hashtable<Object, Object>();
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Posted event for added session");
+            }
+        }
     }
 
     private static void postSessionRemoval(final Session session) {

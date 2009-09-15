@@ -68,21 +68,26 @@ public final class SessiondEventConstants {
     }
 
     /**
-     * The topic on single session removal
+     * The topic on single session removal.
      */
     public static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
 
     /**
-     * The topic on session container removal
+     * The topic on session container removal.
      */
     public static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
+
+    /**
+     * The topic on single session creation.
+     */
+    public static final String TOPIC_ADD_SESSION = "com/openexchange/sessiond/add/session";
 
     /**
      * An array of {@link String string} including all known topics.
      * <p>
      * Needed on event handler registration to a bundle context.
      */
-    static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER };
+    static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_ADD_SESSION };
 
     /**
      * Gets an array of {@link String string} including all known topics.
@@ -98,16 +103,16 @@ public final class SessiondEventConstants {
     }
 
     /**
-     * The property for a single session kept in event's properties
+     * The property for a single session kept in event's properties.
      * <p>
-     * Target object is an instance of <tt>com.openexchange.session.Session</tt>
+     * Target object is an instance of <tt>com.openexchange.session.Session</tt>.
      */
     public static final String PROP_SESSION = "com.openexchange.sessiond.session";
 
     /**
      * The property for a session container kept in event's properties.
      * <p>
-     * Target object is an instance of <tt>java.util.Map&lt;String, Session&gt;</tt>
+     * Target object is an instance of <tt>java.util.Map&lt;String, Session&gt;</tt>.
      */
     public static final String PROP_CONTAINER = "com.openexchange.sessiond.container";
 
