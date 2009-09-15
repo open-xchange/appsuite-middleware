@@ -48,35 +48,35 @@
  */
 package com.openexchange.exceptions.console;
 
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import com.openexchange.exceptions.ComponentRegistry;
-import com.openexchange.exceptions.Exceptions;
-import com.openexchange.exceptions.StringComponent;
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.Component;
-
-import java.util.List;
-import java.util.Set;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.FileWriter;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Set;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import com.openexchange.exceptions.ComponentRegistry;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.exceptions.StringComponent;
+import com.openexchange.groupware.Component;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Commands implements CommandProvider {
 
-    private ComponentRegistry components;
+    private final ComponentRegistry components;
 
-    public Commands(ComponentRegistry components) {
+    public Commands(final ComponentRegistry components) {
         this.components = components;
     }
 
-    public Object _listComponents(CommandInterpreter intp) {
-        for(Component component : components.getComponents()) {
-            StringBuilder line = new StringBuilder();
+    public Object _listComponents(final CommandInterpreter intp) {
+        for(final Component component : components.getComponents()) {
+            final StringBuilder line = new StringBuilder();
             line.append(component).append(" registered by ").append(components.getExceptionsForComponent(component).getApplicationId());
             line.append("\n");
             intp.print(line);
@@ -84,11 +84,11 @@ public class Commands implements CommandProvider {
         return null;
     }
 
-    public Object _listApplications(CommandInterpreter intp) {
-        for(String applicationId : components.getApplicationIds()) {
-            StringBuilder line = new StringBuilder();
+    public Object _listApplications(final CommandInterpreter intp) {
+        for(final String applicationId : components.getApplicationIds()) {
+            final StringBuilder line = new StringBuilder();
             line.append(applicationId).append(": [");
-            for(Exceptions exceptions : components.getExceptionsForApplication(applicationId)) {
+            for(final Exceptions exceptions : components.getExceptionsForApplication(applicationId)) {
                 line.append(exceptions.getComponent()).append(", ");
             }
             line.setLength(line.length()-2);
@@ -99,87 +99,93 @@ public class Commands implements CommandProvider {
         return null;
     }
 
-    public Object _listErrorMessages(CommandInterpreter intp) {
-        String componentOrApplicationId = intp.nextArgument();
+    public Object _listErrorMessages(final CommandInterpreter intp) {
+        final String componentOrApplicationId = intp.nextArgument();
         if (componentOrApplicationId == null) {
             listAllErrors(intp);
             return null;
         }
-        Exceptions exceptions = components.getExceptionsForComponent(new StringComponent(componentOrApplicationId));
+        final Exceptions exceptions = components.getExceptionsForComponent(new StringComponent(componentOrApplicationId));
         if (exceptions != null) {
             listErrorMessages(exceptions, intp);
             return null;
         }
 
-        List<Exceptions<?>> exceptionList = components.getExceptionsForApplication(componentOrApplicationId);
+        final List<Exceptions<?>> exceptionList = components.getExceptionsForApplication(componentOrApplicationId);
         if(null == exceptionList || exceptionList.isEmpty()) {
             intp.print("Could not find error messages for component or applicationId: "+componentOrApplicationId);
             return null;
         }
 
-        for(Exceptions e : exceptionList) {
+        for(final Exceptions e : exceptionList) {
             listErrorMessages(e, intp);
         }
         return null;
     }
 
-    private void listAllErrors(CommandInterpreter intp) {
-        for(Component component : components.getComponents()) {
-            Exceptions exceptions = components.getExceptionsForComponent(component);
+    private void listAllErrors(final CommandInterpreter intp) {
+        for(final Component component : components.getComponents()) {
+            final Exceptions exceptions = components.getExceptionsForComponent(component);
             listErrorMessages(exceptions, intp);
         }
     }
 
-    private void listErrorMessages(Exceptions exceptions, CommandInterpreter intp) {
+    private void listErrorMessages(final Exceptions exceptions, final CommandInterpreter intp) {
         intp.print(exceptions.getApplicationId()+" "+exceptions.getComponent()+" : \n\t");
-        for (ErrorMessage error : (Set<ErrorMessage>)exceptions.getMessages()) {
-            StringBuilder line = new StringBuilder("\t");
+        for (final ErrorMessage error : (Set<ErrorMessage>)exceptions.getMessages()) {
+            final StringBuilder line = new StringBuilder("\t");
             appendError(line, error);
             line.append("\n\t");
             intp.print(line);
         }
     }
 
-    private void appendError(StringBuilder line, ErrorMessage error) {
+    private void appendError(final StringBuilder line, final ErrorMessage error) {
         line.append(error.getComponent()).append("-").append(error.getDetailNumber()).append(" ").append(error.getMessage()).append(" -- ").append(error.getHelp());
     }
 
-    public Object _dumpErrorsToCSV(CommandInterpreter intp) {
-        String filename = intp.nextArgument();
+    public Object _dumpErrorsToCSV(final CommandInterpreter intp) {
+        final String filename = intp.nextArgument();
         if (filename == null) {
             intp.print("Please provide a filename to dump the codes into");
             return null;
         }
-        File file = new File(filename);
-        if(file.exists()) { file.delete(); }
+        final File file = new File(filename);
+        if (file.exists() && !file.delete()) {
+            // File deletion failed
+            intp.printStackTrace(new Throwable(MessageFormat.format("File \"{0}\" could not be deleted.", file.getPath())));
+            return null;
+        }
         try {
             file.createNewFile();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             intp.printStackTrace(e);
             return null;
         }
         PrintWriter out = null;
         try {
             out = new PrintWriter(new FileWriter(file));
-            for(Component component : components.getComponents()) {
-                Exceptions exceptions = components.getExceptionsForComponent(component);
+            for(final Component component : components.getComponents()) {
+                final Exceptions exceptions = components.getExceptionsForComponent(component);
                 intp.print("Dumping component "+exceptions.getComponent()+" to "+file+"\n");
                 exportErrorMessages(exceptions, out);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             intp.printStackTrace(e);
         } finally {
-            out.close();
+            if (null != out) {
+                out.close();
+            }
         }
 
         return null;
     }
 
-    private void exportErrorMessages(Exceptions exceptions, PrintWriter out) {
-        Component component = exceptions.getComponent();
-        String componentString = component.getAbbreviation();
-        String applicationId = exceptions.getApplicationId();
-        for (ErrorMessage error : (Set<ErrorMessage>)exceptions.getMessages()) {
+    private void exportErrorMessages(final Exceptions exceptions, final PrintWriter out) {
+        final Component component = exceptions.getComponent();
+        final String componentString = component.getAbbreviation();
+        final String applicationId = exceptions.getApplicationId();
+        for (final ErrorMessage error : (Set<ErrorMessage>)exceptions.getMessages()) {
             out.print(quote(componentString));
             out.print(';');
             out.print(quote(applicationId));
@@ -208,29 +214,29 @@ public class Commands implements CommandProvider {
 		return '"'+s.replaceAll("\\\"", "\\\"")+'"';
 	}
 
-    public Object _showMessage(CommandInterpreter intp) {
-        String component = intp.nextArgument();
+    public Object _showMessage(final CommandInterpreter intp) {
+        final String component = intp.nextArgument();
         if (component == null) {
             intp.print("Please provide a component in the query.");
             return null;
         }
-        String detailNumberS = intp.nextArgument();
+        final String detailNumberS = intp.nextArgument();
         if (detailNumberS == null) {
             intp.print("Please provide a detailNumber in the query.");
             return null;
         }
-        int detailNumber = Integer.valueOf(detailNumberS);
-        Exceptions exceptions = components.getExceptionsForComponent(new StringComponent(component));
+        final int detailNumber = Integer.valueOf(detailNumberS);
+        final Exceptions exceptions = components.getExceptionsForComponent(new StringComponent(component));
         if(exceptions == null) {
             intp.print("Could not find registration for component "+component);
             return null;
         }
-        ErrorMessage errorMessage = exceptions.findMessage(detailNumber);
+        final ErrorMessage errorMessage = exceptions.findMessage(detailNumber);
         if(errorMessage == null) {
             intp.print("Could not find errorMessage "+component+"-"+detailNumber);
             return null;
         }
-        StringBuilder line = new StringBuilder();
+        final StringBuilder line = new StringBuilder();
         appendError(line, errorMessage);
         intp.print(line);
         return null;
@@ -238,7 +244,7 @@ public class Commands implements CommandProvider {
 
 
     public String getHelp() {
-        StringBuilder help = new StringBuilder();
+        final StringBuilder help = new StringBuilder();
         help.append("--- Open-Xchange Component Registy ---\n\t");
         help.append("listComponents - Lists all components registered in the registry\n\t");
         help.append("listApplications - Lists all applicationIds registered in the registry\n\t");
