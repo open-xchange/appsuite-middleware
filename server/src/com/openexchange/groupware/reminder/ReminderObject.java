@@ -83,29 +83,6 @@ public class ReminderObject implements Cloneable {
         super();
     }
 
-    /**
-     * Copy constructor.
-     * @param copy reminder to copy values from.
-     */
-    private ReminderObject(final ReminderObject copy) {
-        super();
-        // Deep copy mutable objects.
-        if (null != copy.lastModified) {
-            this.lastModified = new Date(copy.lastModified.getTime());
-        }
-        userId = copy.userId;
-        if (null != copy.date) {
-            this.date = new Date(copy.date.getTime());
-        }
-        objectId = copy.objectId;
-        targetId = copy.targetId;
-        module = copy.module;
-        description = copy.description;
-        folder = copy.folder;
-        isRecurrenceAppointment = copy.isRecurrenceAppointment;
-        recurrencePosition = copy.recurrencePosition;
-    }
-
     public void setUser(final int userId) {
         this.userId = userId;
     }
@@ -204,7 +181,14 @@ public class ReminderObject implements Cloneable {
 
     @Override
     public ReminderObject clone() {
-        return new ReminderObject(this);
+        try {
+            final ReminderObject clone = (ReminderObject) super.clone();
+            clone.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
+            clone.date = date == null ? null : new Date(date.getTime());
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("CloneNotSupportedException although Cloneable.");
+        }
     }
 
     static {
