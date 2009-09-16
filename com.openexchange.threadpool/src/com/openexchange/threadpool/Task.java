@@ -50,6 +50,7 @@
 package com.openexchange.threadpool;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * {@link Task} - A task being submitted to thread pool.
@@ -69,7 +70,7 @@ public interface Task<V> extends Callable<V> {
 
     /**
      * Invoked prior to executing this task in the given thread. This method is invoked by pooled thread <tt>t</tt> that will execute this
-     * task, and may be used to re-initialize ThreadLocals, or to perform logging.
+     * task, and may be used to re-initialize {@link ThreadLocal}s, or to perform logging.
      * <p>
      * Implementations may leave this method empty if nothing should be performed.
      * 
@@ -83,21 +84,27 @@ public interface Task<V> extends Callable<V> {
      * <p>
      * Implementations may leave this method empty if nothing should be performed.
      * 
-     * @param t The exception that caused termination, or null if execution completed normally
+     * @param t The exception that caused termination, or <code>null</code> if execution completed normally
      */
     void afterExecute(Throwable t);
 
     /**
      * Computes a result, or throws an exception if unable to do so.
      * <p>
-     * Implementation may return <code>null</code> to follow design of <code>Runnable</code> interface:
-     * 
-     * <pre>
-     * Object call() throws Exception {
-     *     r.run();
-     *     return null;
-     * }
-     * </pre>
+     * Use one of the <tt>com.openexchange.threadpool.ThreadPools.task()</tt> methods to create an appropriate {@link Task} from a
+     * {@link Runnable} or {@link Callable} instance.
+     * <p>
+     * <code>&nbsp;&nbsp;&nbsp;&nbsp;final Task&lt;MyResult&gt; task = ThreadPools.task(myRunnable, myResult);</code>
+     * <p>
+     * Some useful memory rules:
+     * <ul>
+     * <li>Never maintain a huge state in {@link Task}. The state variables will not be explicitly <tt>GC</tt>'ed as long as a reference to
+     * the returned {@link Future} is held.</li>
+     * <li>If you need to have a lot of state in {@link Task}, ensure that you clean them up at the end of the call method by setting them
+     * to <code>null</code></li>
+     * <li>Never hang on to the returned {@link Future} indiscriminately. This will prevent the {@link Task} and its return value from being
+     * <tt>GC</tt>'ed.</li>
+     * </ul>
      * 
      * @return The computed result or <code>null</code>
      * @throws Exception If unable to compute a result
