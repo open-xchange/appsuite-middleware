@@ -58,13 +58,13 @@ package com.openexchange.outlook.updater;
  */
 public class SevenZipConfigGenerator {
     private static final String template = 
-        ";!@Install@!UTF-8!\n"+
-        "Title=\"Software Installation\"\n"+
-        "ExecuteFile=\"%%INSTALL%% \"\n"+
-        "ExecuteParameters=\"UPDATESERVERURL=%%UPDATE_SERVER%%\"\n"+
-        ";!@InstallEnd@!\n";
+        ";!@Install@!UTF-8!\r\n"+
+        "Title=\"Open-Xchange Updater Installation\"\r\n"+
+        "ExecuteFile=\"%%INSTALL%%\"\r\n"+
+        "ExecuteParameters=\"UPDATESERVERURL=%%UPDATE_SERVER%% ALLOWURLCHANGE=%%ALLOW_CHANGE%%\"\r\n"+
+        ";!@InstallEnd@!\r\n";
     
     public String getConfiguration(String updateserver, String execFilename) {
-        return template.replaceAll("%%UPDATE_SERVER%%", updateserver).replaceAll("%%INSTALL%%", execFilename);
+        return template.replaceAll("%%UPDATE_SERVER%%", updateserver).replaceAll("%%INSTALL%%", execFilename).replaceAll("%%ALLOW_CHANGE%%", "1");
     }
 }
