@@ -145,10 +145,11 @@ public interface ThreadPoolService {
      * <p>
      * When awaiting completion of given tasks, programmer should obey the following pattern:
      * 
+     * 
      * <pre>
      * try {
      *     for (int i = tasks.size(); i &gt; 0; i--) {
-     *         // Awaits until next task has completed; otherwise poll() method needs to be used to define a timeout
+     *         // Waits until next task has completed; otherwise poll() method needs to be used to define a timeout
      *         final Future&lt;V&gt; f = completionFuture.take();
      *         /* Do something &#42;/
      *     }
@@ -160,17 +161,7 @@ public interface ThreadPoolService {
      *     // Can only occur if task was canceled
      *     /* Do something &#42;/
      * } catch (ExecutionException e) {
-     *     final Throwable t = e.getCause();
-     *     if (t instanceof ExpectedException) {
-     *         // An expected exception type
-     *         throw (ExpectedException) t;
-     *     } else if (t instanceof RuntimeException) {
-     *         throw (RuntimeException) t;
-     *     } else if (t instanceof Error) {
-     *         throw (Error) t;
-     *     } else {
-     *         throw new IllegalStateException(&quot;Not unchecked&quot;, t);
-     *     }
+     *      throw ThreadPools.launderThrowable(e, ExpectedException.class);
      * }
      * </pre>
      * 
