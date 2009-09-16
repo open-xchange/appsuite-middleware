@@ -239,12 +239,12 @@ public final class MALPollActivator extends DeferredActivator {
 
     private void startScheduledTask(final TimerService timerService, final long periodMillis, final boolean parallel) {
         /*
-         * Create either a thread-pool starter or a caller-run starter
+         * Create either an executor starter or a caller-run starter
          */
         final Starter starter;
         if (parallel) {
             /*
-             * A thread-pool-starter
+             * An executor-starter
              */
             starter = new Starter() {
 
