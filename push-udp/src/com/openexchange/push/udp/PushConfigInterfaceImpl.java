@@ -51,6 +51,7 @@ package com.openexchange.push.udp;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -65,7 +66,7 @@ import com.openexchange.config.ConfigurationService;
 
 public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements PushConfig {
 
-    private boolean isPushEnabled;
+    private boolean isPushEnabled = false;
 
     private Set<RemoteHostObject> remoteHost = new HashSet<RemoteHostObject>();
 
@@ -75,13 +76,13 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 
     private int registerPort = 44335;
 
-    private boolean isRegisterDistributionEnabled;
+    private boolean isRegisterDistributionEnabled = false;
 
-    private boolean isEventDistributionEnabled;
+    private boolean isEventDistributionEnabled = false;
 
     private InetAddress senderAddress;
 
-    private boolean multicastEnabled;
+    private boolean multicastEnabled = false;
 
     private InetAddress multicastAddress;
 
@@ -116,7 +117,7 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
         String[] remoteAddressAndPort = null;
         remoteAddressAndPort = parseProperty(conf, "com.openexchange.push.udp.remoteHost", remoteAddressAndPort);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHost=" + remoteAddressAndPort);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHost=" + Arrays.toString(remoteAddressAndPort));
         }
 
         if (remoteAddressAndPort != null) {
