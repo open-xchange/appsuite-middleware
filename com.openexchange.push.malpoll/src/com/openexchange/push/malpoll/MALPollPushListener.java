@@ -78,33 +78,6 @@ import com.openexchange.timer.TimerService;
  */
 public final class MALPollPushListener implements PushListener {
 
-    private static final class MALPollRunnable implements Runnable {
-
-        private final MALPollPushListener listener;
-
-        private final org.apache.commons.logging.Log log;
-
-        MALPollRunnable(final MALPollPushListener listenerInstance, final org.apache.commons.logging.Log log) {
-            super();
-            this.listener = listenerInstance;
-            this.log = log;
-        }
-
-        public void run() {
-            try {
-                if (listener.isIgnoreOnGlobal()) {
-                    try {
-                        listener.checkNewMail();
-                    } catch (final PushException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
-            } catch (final Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-    }
-
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MALPollPushListener.class);
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
@@ -196,7 +169,7 @@ public final class MALPollPushListener implements PushListener {
             } catch (final ServiceException e) {
                 throw new PushException(e);
             }
-            timerTask = timerService.scheduleWithFixedDelay(new MALPollRunnable(this, LOG), 1000, periodMillis);
+            timerTask = timerService.scheduleWithFixedDelay(new MALPollPushListenerRunnable(this, LOG), 1000, periodMillis);
         }
     }
 

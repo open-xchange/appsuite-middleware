@@ -52,6 +52,7 @@ package com.openexchange.push.malpoll.osgi;
 import static com.openexchange.push.malpoll.services.MALPollServiceRegistry.getServiceRegistry;
 import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.concurrent.Executor;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
@@ -60,6 +61,7 @@ import com.openexchange.push.PushException;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.malpoll.MALPollPushListener;
 import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
+import com.openexchange.push.malpoll.MALPollPushListenerRunnable;
 import com.openexchange.push.malpoll.MALPollPushManagerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -85,6 +87,8 @@ public final class MALPollActivator extends DeferredActivator {
 
     private boolean global;
 
+    private boolean concurrentGlobal;
+
     /**
      * Initializes a new {@link MALPollActivator}.
      */
@@ -107,7 +111,7 @@ public final class MALPollActivator extends DeferredActivator {
             MALPollPushListenerRegistry.getInstance().openAll();
             // Start global if configured
             if (global) {
-                startScheduledTask(getService(TimerService.class), period);
+                startScheduledTask(getService(TimerService.class), period, concurrentGlobal);
             }
         }
     }
@@ -173,6 +177,13 @@ public final class MALPollActivator extends DeferredActivator {
                     global = Boolean.parseBoolean(tmp.trim());
                 }
             }
+            concurrentGlobal = true;
+            {
+                final String tmp = configurationService.getProperty("com.openexchange.push.malpoll.concurrentglobal");
+                if (null != tmp) {
+                    concurrentGlobal = Boolean.parseBoolean(tmp.trim());
+                }
+            }
             /*
              * Start-up
              */
@@ -180,7 +191,7 @@ public final class MALPollActivator extends DeferredActivator {
             MALPollPushListener.setPeriodMillis(period);
             MALPollPushManagerService.setStartTimerTaskPerListener(!global);
             if (global) {
-                startScheduledTask(getService(TimerService.class), period);
+                startScheduledTask(getService(TimerService.class), period, concurrentGlobal);
             }
             /*
              * Register push manager
@@ -226,7 +237,45 @@ public final class MALPollActivator extends DeferredActivator {
         }
     }
 
-    private void startScheduledTask(final TimerService timerService, final long periodMillis) {
+    private void startScheduledTask(final TimerService timerService, final long periodMillis, final boolean parallel) {
+        /*
+         * Create either a thread-pool starter or a caller-run starter
+         */
+        final Starter starter;
+        if (parallel) {
+            /*
+             * A thread-pool-starter
+             */
+            starter = new Starter() {
+
+                private final Executor executor = timerService.getExecutor();
+
+                private final org.apache.commons.logging.Log log = LOG;
+
+                public void start(final MALPollPushListener l) {
+                    executor.execute(new MALPollPushListenerRunnable(l, log));
+                }
+            };
+        } else {
+            /*
+             * A caller-runs-starter
+             */
+            starter = new Starter() {
+
+                private final org.apache.commons.logging.Log log = LOG;
+
+                public void start(final MALPollPushListener l) {
+                    try {
+                        l.checkNewMail();
+                    } catch (final PushException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            };
+        }
+        /*
+         * Create global runnable
+         */
         final Runnable r = new Runnable() {
 
             private final org.apache.commons.logging.Log log = LOG;
@@ -236,11 +285,7 @@ public final class MALPollActivator extends DeferredActivator {
                     for (final Iterator<MALPollPushListener> pushListeners = MALPollPushListenerRegistry.getInstance().getPushListeners(); pushListeners.hasNext();) {
                         final MALPollPushListener l = pushListeners.next();
                         if (!l.isIgnoreOnGlobal()) {
-                            try {
-                                l.checkNewMail();
-                            } catch (final PushException e) {
-                                log.error(e.getMessage(), e);
-                            }
+                            starter.start(l);
                         }
                     }
                     if (log.isDebugEnabled()) {
@@ -250,6 +295,7 @@ public final class MALPollActivator extends DeferredActivator {
                     log.error(e.getMessage(), e);
                 }
             }
+
         };
         scheduledTimerTask = timerService.scheduleWithFixedDelay(r, 1000, periodMillis);
     }
@@ -262,6 +308,14 @@ public final class MALPollActivator extends DeferredActivator {
                 timerService.purge();
             }
         }
+    }
+
+    /**
+     * Simple helper interface to decouple listener handling from global {@link Runnable}.
+     */
+    private static interface Starter {
+
+        void start(MALPollPushListener l);
     }
 
 }
