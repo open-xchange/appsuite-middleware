@@ -80,7 +80,7 @@ public interface Task<V> extends Callable<V> {
 
     /**
      * Invoked upon completion of execution of this task. This method is invoked by the thread that executed the task. If non-null, the
-     * Throwable is the uncaught exception that caused execution to terminate abruptly.
+     * {@link Throwable} is the uncaught exception that caused execution to terminate abruptly.
      * <p>
      * Implementations may leave this method empty if nothing should be performed.
      * 
