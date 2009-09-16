@@ -80,6 +80,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.converters.UnifiedINBOXFolderConverter;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
@@ -295,16 +296,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             Thread.currentThread().interrupt();
             throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            if (MailException.class.isAssignableFrom(t.getClass())) {
-                throw (MailException) t;
-            } else if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
-            } else {
-                throw new IllegalStateException("Not unchecked", t);
-            }
+            throw ThreadPools.launderThrowable(e, MailException.class);
         }
     }
 
@@ -378,16 +370,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             Thread.currentThread().interrupt();
             throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            if (MailException.class.isAssignableFrom(t.getClass())) {
-                throw (MailException) t;
-            } else if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
-            } else {
-                throw new IllegalStateException("Not unchecked", t);
-            }
+            throw ThreadPools.launderThrowable(e, MailException.class);
         }
     }
 
@@ -468,16 +451,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             Thread.currentThread().interrupt();
             throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            if (MailException.class.isAssignableFrom(t.getClass())) {
-                throw (MailException) t;
-            } else if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
-            } else {
-                throw new IllegalStateException("Not unchecked", t);
-            }
+            throw ThreadPools.launderThrowable(e, MailException.class);
         }
     }
 

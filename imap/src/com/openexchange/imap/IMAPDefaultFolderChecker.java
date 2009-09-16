@@ -90,6 +90,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -372,16 +373,7 @@ public final class IMAPDefaultFolderChecker {
                         // Keep interrupted status
                         throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
                     } catch (final ExecutionException e) {
-                        final Throwable t = e.getCause();
-                        if (MailException.class.isAssignableFrom(t.getClass())) {
-                            throw (MailException) t;
-                        } else if (t instanceof RuntimeException) {
-                            throw (RuntimeException) t;
-                        } else if (t instanceof Error) {
-                            throw (Error) t;
-                        } else {
-                            throw new IllegalStateException("Not unchecked", t);
-                        }
+                        throw ThreadPools.launderThrowable(e, MailException.class);
                     }
                     if (DEBUG) {
                         LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(

@@ -124,6 +124,7 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -762,16 +763,7 @@ public class Folder extends SessionServlet {
                                     Thread.currentThread().interrupt();
                                     throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
                                 } catch (final ExecutionException e) {
-                                    final Throwable t = e.getCause();
-                                    if (MailException.class.isAssignableFrom(t.getClass())) {
-                                        LOG.error(t.getMessage(), t);
-                                    } else if (t instanceof RuntimeException) {
-                                        throw (RuntimeException) t;
-                                    } else if (t instanceof Error) {
-                                        throw (Error) t;
-                                    } else {
-                                        throw new IllegalStateException("Not unchecked", t);
-                                    }
+                                    throw ThreadPools.launderThrowable(e, MailException.class);
                                 }
                                 /*
                                  * Iterate sorted arrays
@@ -1523,16 +1515,7 @@ public class Folder extends SessionServlet {
                         Thread.currentThread().interrupt();
                         throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
                     } catch (final ExecutionException e) {
-                        final Throwable t = e.getCause();
-                        if (MailException.class.isAssignableFrom(t.getClass())) {
-                            throw (MailException) t;
-                        } else if (t instanceof RuntimeException) {
-                            throw (RuntimeException) t;
-                        } else if (t instanceof Error) {
-                            throw (Error) t;
-                        } else {
-                            throw new IllegalStateException("Not unchecked", t);
-                        }
+                        throw ThreadPools.launderThrowable(e, MailException.class);
                     }
                     // Write arrays
                     for (int i = 0; i < arrays.length; i++) {

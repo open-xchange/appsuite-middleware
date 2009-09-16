@@ -62,6 +62,7 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
@@ -293,20 +294,7 @@ public final class UnifiedINBOXMessageCopier {
             Thread.currentThread().interrupt();
             throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
         } catch (final ExecutionException e) {
-            launderThrowable(e);
-        }
-    }
-
-    private static void launderThrowable(final ExecutionException e) throws MailException {
-        final Throwable t = e.getCause();
-        if (MailException.class.isAssignableFrom(t.getClass())) {
-            throw (MailException) t;
-        } else if (t instanceof RuntimeException) {
-            throw (RuntimeException) t;
-        } else if (t instanceof Error) {
-            throw (Error) t;
-        } else {
-            throw new IllegalStateException("Not unchecked", t);
+            throw ThreadPools.launderThrowable(e, MailException.class);
         }
     }
 
