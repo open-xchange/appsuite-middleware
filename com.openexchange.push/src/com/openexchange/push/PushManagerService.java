@@ -65,7 +65,7 @@ public interface PushManagerService {
      * 
      * @param session The session
      * @return A newly started listener or <code>null</code> if a listener could not be started
-     * @throws PushException If listener cannot be started
+     * @throws PushException If listener cannot be started due to an error
      */
     PushListener startListener(Session session) throws PushException;
 
