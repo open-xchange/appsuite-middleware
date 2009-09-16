@@ -69,22 +69,22 @@ public final class PushEventConstants {
     public static final String TOPIC = "com/openexchange/push";
 
     /**
-     * The context property of a push event.
+     * The context ID property of a push event. Property value is of type <code>java.lang.Integer</code>.
      */
     public static final String PROPERTY_CONTEXT = "com.openexchange.push.context";
 
     /**
-     * The user property of a push event.
+     * The user ID property of a push event. Property value is of type <code>java.lang.Integer</code>.
      */
     public static final String PROPERTY_USER = "com.openexchange.push.user";
 
     /**
-     * The folder property of a push event.
+     * The folder fullname property of a push event. Property value is of type <code>java.lang.String</code>.
      */
     public static final String PROPERTY_FOLDER = "com.openexchange.push.folder";
 
     /**
-     * The session property of a push event.
+     * The session property of a push event. Property value is of type <code>com.openexchange.session.Session</code>.
      */
     public static final String PROPERTY_SESSION = "com.openexchange.push.session";
 
