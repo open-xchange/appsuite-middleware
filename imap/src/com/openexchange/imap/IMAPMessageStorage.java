@@ -128,6 +128,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Serial version UID
      */
@@ -172,9 +174,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private MailAccount getMailAccount() throws MailException {
         if (mailAccount == null) {
             try {
-                final MailAccountStorageService storageService = IMAPServiceRegistry.getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
                 mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (final ServiceException e) {
                 throw new MailException(e);
@@ -276,7 +276,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         } catch (final StoreClosedException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final MessagingException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
             }
             fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, true);
@@ -289,19 +289,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         final long start = System.currentTimeMillis();
         final Message[] submessages;
         if (ignoreBodystructure) {
-            submessages = new FetchIMAPCommand(
-                imapFolder,
-                isRev1,
-                subarr,
-                FetchIMAPCommand.getSafeFetchProfile(fetchProfile),
-                false,
-                true,
-                body).setDetermineAttachmentyHeader(true).doCommand();
+            submessages =
+                new FetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentyHeader(
+                    true).doCommand();
         } else {
             submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
         }
         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(
                 (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
         }
@@ -438,10 +433,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     msgs = new Message[retvalLength];
                     System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
                 }
-                mails = convert2Mails(
-                    msgs,
-                    usedFields.toArray(),
-                    usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
+                mails =
+                    convert2Mails(msgs, usedFields.toArray(), usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     setAccountInfo(mails);
                 }
@@ -454,18 +447,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 final long start = System.currentTimeMillis();
                 if (filter == null) {
-                    msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                    msgs =
+                        new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
                 } else {
-                    msgs = new FetchIMAPCommand(
-                        imapFolder,
-                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                        filter,
-                        fetchProfile,
-                        false,
-                        false,
-                        body).doCommand();
+                    msgs =
+                        new FetchIMAPCommand(
+                            imapFolder,
+                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                            filter,
+                            fetchProfile,
+                            false,
+                            false,
+                            body).doCommand();
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
@@ -583,14 +578,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-            Message[] msgs = new FetchIMAPCommand(
-                imapFolder,
-                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                seqnums,
-                fetchProfile,
-                false,
-                true,
-                body).doCommand();
+            Message[] msgs =
+                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqnums, fetchProfile, false, true, body).doCommand();
             /*
              * Apply thread level
              */
@@ -743,7 +732,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             // Nothing to do on empty ID array
             return;
         }
-        final StringBuilder debug = LOG.isDebugEnabled() ? new StringBuilder(128) : null;
+        final StringBuilder debug = DEBUG ? new StringBuilder(128) : null;
         final long[] remain;
         final int blockSize = getIMAPProperties().getBlockSize();
         if (blockSize > 0 && msgUIDs.length > blockSize) {
@@ -778,7 +767,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             try {
                 final long start = System.currentTimeMillis();
                 new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     sb.setLength(0);
                     LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
                         trashFullname).append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
@@ -805,7 +794,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
          */
         final long start = System.currentTimeMillis();
         new FlagsIMAPCommand(imapFolder, uids, FLAGS_DELETED, true, true, false).doCommand();
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             sb.setLength(0);
             LOG.debug(sb.append(uids.length).append(" messages marked as deleted (through system flag \\DELETED) in ").append(
                 (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
@@ -934,7 +923,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             final long[] result = new long[mailIds.length];
             final int blockSize = getIMAPProperties().getBlockSize();
             final StringBuilder debug;
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 debug = new StringBuilder(128);
             } else {
                 debug = null;
@@ -980,7 +969,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     if (destFolder.getMessageCount() > 0) {
                         final long start = System.currentTimeMillis();
                         new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder(128).append(
                                 "A copy/move to default drafts folder => All messages' \\Draft flag in ").append(destFullname).append(
                                 " set in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
@@ -997,7 +986,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 try {
                     final long start = System.currentTimeMillis();
                     new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder(128).append("A copy/move from default drafts folder => All messages' \\Draft flag in ").append(
                             destFullname).append(" unset in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
                     }
@@ -1017,7 +1006,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullname, final long[] tmp, final StringBuilder sb) throws MessagingException, MailException, IMAPException {
         long start = System.currentTimeMillis();
         long[] uids = new CopyIMAPCommand(imapFolder, tmp, destFullname, false, fast).doCommand();
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             sb.setLength(0);
             LOG.debug(sb.append(tmp.length).append(" messages copied in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
         }
@@ -1030,7 +1019,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         if (move) {
             start = System.currentTimeMillis();
             new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 sb.setLength(0);
                 LOG.debug(sb.append(tmp.length).append(" messages marked as expunged (through system flag \\DELETED) in ").append(
                     (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
@@ -1201,7 +1190,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             notifyIMAPFolderModification(destFullname);
             return retval;
         } catch (final MessagingException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final Exception next = e.getNextException();
                 if (next instanceof CommandFailedException) {
                     final StringBuilder sb = new StringBuilder(8192);
@@ -1290,7 +1279,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     }
                     affectedFlags.add(MailMessage.USER_FORWARDED);
                     applyFlags = true;
-                } else if (LOG.isDebugEnabled()) {
+                } else if (DEBUG) {
                     LOG.debug(new StringBuilder().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
                         " does not support user flags. Skipping forwarded flag."));
                 }
@@ -1308,7 +1297,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     }
                     affectedFlags.add(MailMessage.USER_READ_ACK);
                     applyFlags = true;
-                } else if (LOG.isDebugEnabled()) {
+                } else if (DEBUG) {
                     LOG.debug(new StringBuilder().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
                         " does not support user flags. Skipping read-ack flag."));
                 }
@@ -1316,7 +1305,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             if (applyFlags) {
                 final long start = System.currentTimeMillis();
                 new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(" messages in ").append(
                         (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
                 }
@@ -1349,7 +1338,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 /*
                  * User flags are disabled
                  */
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("User flags are disabled or not supported. Update of color flag ignored.");
                 }
                 return;
@@ -1380,14 +1369,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             long start = System.currentTimeMillis();
             IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder(128).append("All color flags cleared from ").append(msgUIDs.length).append(" messages in ").append(
                     (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
             }
             start = System.currentTimeMillis();
             IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(" messages in ").append(
                     (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
             }
@@ -1523,7 +1512,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             final long start = System.currentTimeMillis();
             retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order));
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (").append(lowCostItems).append(
                     ")<<< took ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
             }
@@ -1574,14 +1563,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return command.deleteCharAt(command.length() - 1).toString();
     }
 
-    private static final EnumSet<MailField> LOW_COST = EnumSet.of(
-        MailField.ID,
-        MailField.FOLDER_ID,
-        MailField.RECEIVED_DATE,
-        MailField.FLAGS,
-        MailField.COLOR_LABEL,
-        MailField.SIZE,
-        MailField.CONTENT_TYPE);
+    private static final EnumSet<MailField> LOW_COST =
+        EnumSet.of(
+            MailField.ID,
+            MailField.FOLDER_ID,
+            MailField.RECEIVED_DATE,
+            MailField.FLAGS,
+            MailField.COLOR_LABEL,
+            MailField.SIZE,
+            MailField.CONTENT_TYPE);
 
     private static boolean onlyLowCostFields(final MailFields fields) {
         final Set<MailField> set = fields.toSet();

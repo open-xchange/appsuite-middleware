@@ -67,10 +67,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -121,6 +121,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private boolean has_next;
     private static final Log LOG = LogFactory.getLog(CalendarOperation.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ResultSet co_rs;
     private PreparedStatement prep;
@@ -167,7 +168,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setGlobalFolderID(setInt(i++, load_resultset));
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
                 if (check_permissions && !recColl.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
-                    if (LOG.isDebugEnabled() && action_folder != inFolder) {
+                    if (DEBUG && action_folder != inFolder) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(action_folder),":",inFolder }));
                     }
                     throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
@@ -188,12 +189,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setParticipants(cimp.getParticipants(cdao, readcon).getList());
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(inFolder),":",Integer.valueOf(action) }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_2));
                     } else if (action_folder != inFolder && check_special_action == action) {
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(inFolder),":",Integer.valueOf(action) }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_3));
@@ -201,7 +202,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
                     if (!recColl.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
-                        if (LOG.isDebugEnabled() && inFolder != action_folder) {
+                        if (DEBUG && inFolder != action_folder) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(action_folder),":",Integer.valueOf(inFolder) }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
@@ -588,17 +589,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return new Date(until + mod);
     }
 
-    private static final void calculateAndSetRealRecurringStartAndEndDate(CalendarDataObject cdao, CalendarDataObject edao) {
+    private static final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
         long startDate = edao.getRecurringStart();
         if (startDate == 0) {
             startDate = edao.getStartDate().getTime();
         }
-        TimeZone tz = Tools.getTimeZone(cdao.getTimezone());
-        int startDateZoneOffset = tz.getOffset(startDate);
+        final TimeZone tz = Tools.getTimeZone(cdao.getTimezone());
+        final int startDateZoneOffset = tz.getOffset(startDate);
         final long endDate = edao.getUntil().getTime();
         long startTime = cdao.getStartDate().getTime();
         long endTime = (cdao.getEndDate().getTime());
-        int startTimeZoneOffset = tz.getOffset(startTime);
+        final int startTimeZoneOffset = tz.getOffset(startTime);
         startTime = startTime % Constants.MILLI_DAY;
         endTime = endTime % Constants.MILLI_DAY  + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
         // FIXME daylight saving time offset
@@ -774,7 +775,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setActionFolder(check_folder_id);
 
                 if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         final StringBuilder colss = new StringBuilder(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
                             String fn = recColl.getFieldName(cols[a]);
@@ -1166,7 +1167,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
 
-    private boolean isUntilBeforeStart(Date until, Date start) {
+    private boolean isUntilBeforeStart(final Date until, final Date start) {
         return start != null && recColl.normalizeLong(until.getTime()) < recColl.normalizeLong(start.getTime());
     }
 
@@ -1265,7 +1266,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return recColl.RECURRING_NO_ACTION;
     }
 
-    private void calculateEndDateForNewType(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
+    private void calculateEndDateForNewType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         Date occurrenceDate;
         if (cdao.getOccurrence() <= 0) {
             occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAXTC);

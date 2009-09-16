@@ -93,6 +93,8 @@ public final class OXFolderIteratorSQL {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderIteratorSQL.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String OXFOLDER_PERMISSIONS = "oxfolder_permissions";
 
     private static final String OXFOLDER_TREE = "oxfolder_tree";
@@ -495,7 +497,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -583,7 +585,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -674,7 +676,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -742,7 +744,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -801,7 +803,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -910,7 +912,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -1215,7 +1217,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -1277,7 +1279,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -1350,7 +1352,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
@@ -1412,7 +1414,7 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final String sql = stmt.toString();
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }

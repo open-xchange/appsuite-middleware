@@ -133,6 +133,8 @@ public class I18nActivator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(I18nActivator.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Reads in all I18n services configured through property <code>"i18n.language.path"</code>, registers them, and returns corresponding
      * service registrations for future unregistration.
@@ -208,7 +210,7 @@ public class I18nActivator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
 
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("I18n Starting");
         }
         componentRegistration = new ComponentRegistration(context, "I18N", "com.openexchange.i18n", I18NErrorMessages.FACTORY);
@@ -231,13 +233,13 @@ public class I18nActivator implements BundleActivator {
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
 
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("I18n Started");
         }
     }
 
     public void stop(final BundleContext context) throws Exception {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("Stopping I18n");
         }
 
@@ -263,7 +265,7 @@ public class I18nActivator implements BundleActivator {
             LOG.error("I18nActivator: stop: ", e);
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("I18n stopped");
         }
     }

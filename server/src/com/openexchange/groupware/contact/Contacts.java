@@ -141,6 +141,8 @@ public final class Contacts {
 
     private static final Log LOG = LogFactory.getLog(Contacts.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     public static mapper[] mapping;
 
     /**
@@ -251,7 +253,7 @@ public final class Contacts {
         final int origWidth = bi.getWidth();
         int origType = bi.getType();
 
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(mime).append(" / type=").append(origType).append(
                 " / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
             LOG.debug(logi.toString());
@@ -279,7 +281,7 @@ public final class Contacts {
                     sWd = scaledWidth;
                     sHd = scaledWidth;
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
                         origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
                         ratio).toString());
@@ -300,7 +302,7 @@ public final class Contacts {
                 sWd = Math.round(widthFloat);
                 sHd = Math.round(heighFloat);
 
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
                         origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
                         ratio).toString());
@@ -321,7 +323,7 @@ public final class Contacts {
 
                 sWd = Math.round(widthFloat);
                 sHd = Math.round(heighFloat);
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
                         origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
                         ratio).toString());
@@ -551,7 +553,7 @@ public final class Contacts {
             final Date ddd = new Date(lmd);
             co.setLastModified(ddd);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder(64).append("INFO: YOU WANT TO INSERT THIS: cid=").append(so.getContextId()).append(" oid=").append(
                     co.getObjectID()).append(" -> ").append(ps.toString()).toString());
             }
@@ -888,7 +890,7 @@ public final class Contacts {
             final java.util.Date server_date = original.getLastModified();
 
             try {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(
                         "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
                 }
@@ -1037,7 +1039,7 @@ public final class Contacts {
 
             writecon.setAutoCommit(false);
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder(
                     "INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + ps.toString()));
             }
@@ -1250,7 +1252,7 @@ public final class Contacts {
         exceptionId = { 25, 26 },
         msg = { "Contact %1$d not found in context %2$d.", "Unable to load contact %1$d in context %2$d." }
     )
-    private static Contact fillContactObject(ContactSql contactSQL, int objectId, int user, int[] group, Context ctx, UserConfiguration uc, Connection con) throws OXException {
+    private static Contact fillContactObject(final ContactSql contactSQL, final int objectId, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection con) throws OXException {
         final Contact co = new Contact();
         Statement stmt = null;
         ResultSet rs = null;
@@ -1451,7 +1453,7 @@ public final class Contacts {
                     ps.setString(7, dleo.getEmailaddress());
                     ps.setInt(8, cid);
 
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder("WRITE DLIST ").append(ps.toString()));
                     }
 
@@ -1693,7 +1695,7 @@ public final class Contacts {
                         ps.setString(8, dleo.getEmailaddress());
                         ps.setInt(12, cid);
 
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder("UPDATE DLIST ").append(ps.toString()));
                         }
 
@@ -1731,7 +1733,7 @@ public final class Contacts {
             cs = new ContactMySql(null);
             ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
             ps.setInt(1, id);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
             }
             ps.execute();
@@ -1766,7 +1768,7 @@ public final class Contacts {
                             ps.setInt(3, dleo.getEmailfield());
                         }
                         ps.setInt(4, cid);
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
                         }
                         ps.execute();
@@ -1879,7 +1881,7 @@ public final class Contacts {
                     ps.setString(3, leo.getContactDisplayname());
                     ps.setString(4, leo.getLinkDisplayname());
                     ps.setInt(5, cid);
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder("INSERT LINKAGE ").append(ps.toString()));
                     }
                     ps.execute();
@@ -1982,7 +1984,7 @@ public final class Contacts {
                         ps.setInt(1, id);
                         ps.setInt(2, leo.getLinkID());
                         ps.setInt(3, cid);
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(ps.toString()));
                         }
                         ps.execute();
@@ -2095,7 +2097,7 @@ public final class Contacts {
             ps.setBytes(2, img);
             ps.setString(3, mime);
             ps.setInt(4, cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder("INSERT IMAGE ").append(ps.toString()));
             }
             ps.execute();
@@ -2134,7 +2136,7 @@ public final class Contacts {
             ps.setInt(4, cid);
             ps.setInt(5, contact_id);
             ps.setInt(6, cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder("UPDATE IMAGE ").append(ps.toString()));
             }
             ps.execute();
@@ -2580,7 +2582,7 @@ public final class Contacts {
                 ec.delete(co);
             }
 
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
             }
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));

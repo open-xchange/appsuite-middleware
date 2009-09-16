@@ -113,6 +113,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String STR_INBOX = "INBOX";
 
     private static final String STR_MSEC = "msec";
@@ -478,7 +480,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                          */
                         throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
                     }
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug("MYRIGHTS command failed on namespace folder", e);
                     }
                 }
@@ -758,7 +760,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                              */
                             throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, newParent);
                         }
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug("MYRIGHTS command failed on namespace folder", e);
                         }
                     }
@@ -1127,7 +1129,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                 }
                 final StringBuilder debug;
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     debug = new StringBuilder(128);
                 } else {
                     debug = null;
@@ -1146,7 +1148,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             try {
                                 final long startCopy = System.currentTimeMillis();
                                 new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
-                                if (LOG.isDebugEnabled()) {
+                                if (DEBUG) {
                                     debug.setLength(0);
                                     LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
                                         trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
@@ -1178,7 +1180,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         final long startExpunge = System.currentTimeMillis();
                         try {
                             IMAPCommandsCollection.fastExpunge(f);
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 debug.setLength(0);
                                 LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append("\" in ").append(
                                     (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
@@ -1187,7 +1189,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             /*
                              * Not possible to retry since connection is broken
                              */
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 debug.setLength(0);
                                 LOG.debug(debug.append("EXPUNGE command timed out in ").append((System.currentTimeMillis() - startExpunge)).append(
                                     STR_MSEC).toString());
@@ -1203,7 +1205,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             /*
                              * Not possible to retry since connection is broken
                              */
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 debug.setLength(0);
                                 LOG.debug(debug.append("EXPUNGE command timed out in ").append((System.currentTimeMillis() - startExpunge)).append(
                                     STR_MSEC).toString());
@@ -1232,7 +1234,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     try {
                         final long startCopy = System.currentTimeMillis();
                         new CopyIMAPCommand(f, trashFullname).doCommand();
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             debug.setLength(0);
                             LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
                                 trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
@@ -1260,7 +1262,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 final long start = System.currentTimeMillis();
                 IMAPCommandsCollection.fastExpunge(f);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     debug.setLength(0);
                     LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
                         System.currentTimeMillis() - startClear).append(STR_MSEC));
@@ -1473,7 +1475,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         try {
             return imapFolder.getACL();
         } catch (final MessagingException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(e.getMessage(), e);
             }
             return null;
@@ -1622,7 +1624,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                      */
                     throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, moveFullname);
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("MYRIGHTS command failed on namespace folder", e);
                 }
             }
@@ -1726,7 +1728,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             } catch (final Entity2ACLException e) {
                 if (Entity2ACLException.Code.UNKNOWN_USER.getNumber() == e.getDetailNumber()) {
                     // Obviously the user is not known, skip
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder().append("User ").append(aclPermission.getEntity()).append(
                             " is not known on IMAP server \"").append(imapConfig.getImapServerAddress()).append('"').toString());
                     }

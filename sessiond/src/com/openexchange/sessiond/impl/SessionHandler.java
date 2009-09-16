@@ -94,6 +94,8 @@ public final class SessionHandler {
 
     private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static ScheduledTimerTask sessiondTimer;
 
     /**
@@ -204,7 +206,7 @@ public final class SessionHandler {
      * @return <code>true</code> if a refreshing last-accessed time stamp was successful; otherwise <code>false</code>
      */
     protected static boolean refreshSession(final String sessionid) {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(new StringBuilder("refreshSession <").append(sessionid).append('>').toString());
         }
         return sessionData.getSession(sessionid) != null;
@@ -235,7 +237,7 @@ public final class SessionHandler {
      * @throws SessiondException If changing the password fails
      */
     protected static void changeSessionPassword(final String sessionid, final String newPassword) throws SessiondException {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(new StringBuilder("changeSessionPassword <").append(sessionid).append('>').toString());
         }
         final SessionControl sessionControl = sessionData.getSession(sessionid);
@@ -261,7 +263,7 @@ public final class SessionHandler {
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(final String sessionid) {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(new StringBuilder("getSession <").append(sessionid).append('>').toString());
         }
         final SessionControl sessionControl = sessionData.getSession(sessionid);
@@ -300,7 +302,7 @@ public final class SessionHandler {
      * @return A wrapping instance of {@link SessionControl} or <code>null</code>
      */
     public static SessionControl getCachedSession(final String secret, final String localIP) {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(new StringBuilder("getCachedSession <").append(secret).append('>').toString());
         }
         try {
@@ -332,14 +334,14 @@ public final class SessionHandler {
      * @return All available instances of {@link SessionControl}
      */
     public static List<SessionControl> getSessions() {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("getSessions");
         }
         return sessionData.getSessions();
     }
 
     protected static void cleanUp() {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("session cleanup");
         }
         final List<SessionControl> sessionControls = sessionData.rotate();
@@ -376,7 +378,7 @@ public final class SessionHandler {
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
             eventAdmin.postEvent(event);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Posted event for added session");
             }
         }
@@ -389,7 +391,7 @@ public final class SessionHandler {
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
             eventAdmin.postEvent(event);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Posted event for removed session");
             }
         }
@@ -407,7 +409,7 @@ public final class SessionHandler {
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
             final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
             eventAdmin.postEvent(event);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Posted event for removed session container");
             }
         }

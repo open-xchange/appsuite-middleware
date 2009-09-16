@@ -87,6 +87,8 @@ public class PushOutputQueue implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(PushOutputQueue.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static PushConfig pushConfigInterface;
 
     private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
@@ -102,7 +104,7 @@ public class PushOutputQueue implements Runnable {
      * @throws EventException If an event exception occurs
      */
     public static void add(final PushObject pushObject) throws EventException {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("add PushObject: " + pushObject);
         }
 
@@ -144,7 +146,7 @@ public class PushOutputQueue implements Runnable {
      * @throws EventException If an event exception occurs
      */
     public static void add(final RegisterObject registerObject, final boolean noDelay) throws EventException {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("add RegisterObject: " + registerObject);
         }
 
@@ -353,7 +355,7 @@ public class PushOutputQueue implements Runnable {
         final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
 
         if (abstractPushObject instanceof PushObject) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Send Push Object");
             }
 
@@ -362,7 +364,7 @@ public class PushOutputQueue implements Runnable {
 
             createAndDeliverPushPackage(pushObject);
         } else if (abstractPushObject instanceof RegisterObject) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Send Register Object");
             }
 
@@ -420,7 +422,7 @@ public class PushOutputQueue implements Runnable {
 
     public void run() {
         while (isRunning) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("get push objects from queue: " + queue.size());
             }
 

@@ -178,6 +178,8 @@ public final class CalendarCollection implements CalendarCollectionService {
     
     
     private static final Log LOG = LogFactory.getLog(CalendarCollection.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
     
     public CalendarCollection() {
         super();
@@ -287,34 +289,34 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (daily), set interval to 1, the given interval was: "+cdao.getInterval());
                 }
                 cdao.setInterval(1);
             }
         } else if (cdao.getRecurrenceType() == CalendarDataObject.WEEKLY) {
             if (cdao.getInterval() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: "+cdao.getInterval());
                 }
                 cdao.setInterval(1);
             }
             if (cdao.getDays() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
                 }
                 cdao.setDays(CalendarDataObject.MONDAY);
             }
         } else if (cdao.getRecurrenceType() == CalendarDataObject.MONTHLY) {
             if (cdao.getInterval() < 1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (montly), set interval to 1, the given interval was: "+cdao.getInterval());
                 }
                 cdao.setInterval(1);
             }
             if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
                 }
                 cdao.setDays(CalendarDataObject.MONDAY);
@@ -322,14 +324,14 @@ public final class CalendarCollection implements CalendarCollectionService {
             }
         } else if (cdao.getRecurrenceType() == CalendarDataObject.YEARLY) {
             if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (monthy), set month to 1, the given interval was: "+cdao.getMonth());
                 }
                 cdao.setMonth(Calendar.JANUARY);
             }
             if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
                 }
                 cdao.setDays(CalendarDataObject.MONDAY);
@@ -2087,7 +2089,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#debugRecurringResult(com.openexchange.calendar.RecurringResult)
      */
     public void debugRecurringResult(final RecurringResultInterface rr) {
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(Integer.valueOf(rr.getPosition()));
             LOG.debug(" : ");
             LOG.debug(StringCollection.date2String(new Date(rr.getStart())));

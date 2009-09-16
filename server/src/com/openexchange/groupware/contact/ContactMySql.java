@@ -95,6 +95,8 @@ public class ContactMySql implements ContactSql {
 
     private static final Log LOG = LogFactory.getLog(ContactMySql.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private String select = "SELECT co.intfield01" + ",co.cid," + "co.timestampfield01," + "co.field03," + "co.field04," + "co.field06," + "co.field07," + "co.field09," + "co.field10," + "co.intfield03," + "co.field79 FROM prg_contacts AS co ";
 
     private String[] where;
@@ -223,7 +225,7 @@ public class ContactMySql implements ContactSql {
         }
         injectors.clear();
 
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             final String sql = ps.toString();
             LOG.debug(new StringBuilder().append("\nContactSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
         }
@@ -897,7 +899,7 @@ public class ContactMySql implements ContactSql {
         for (int a = 0; a < cols.length; a++) {
             final mapper m = Contacts.mapping[cols[a]];
             if (m == null) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("UNKNOWN FIELD -> " + cols[a]);
                 }
             } else {
@@ -1125,21 +1127,21 @@ public class ContactMySql implements ContactSql {
     public void iFdeleteContact(final int id, final int cid, final Statement del) throws SQLException {
         final StringBuilder tmp = new StringBuilder(256);
         tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());
 
         tmp.setLength(0);
         tmp.append("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(id).append(" AND  cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());
 
         tmp.setLength(0);
         tmp.append("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());
@@ -1147,7 +1149,7 @@ public class ContactMySql implements ContactSql {
         tmp.setLength(0);
         tmp.append("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(" WHERE cid = ").append(cid).append(
             " AND intfield01 = ").append(id);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());
@@ -1157,13 +1159,13 @@ public class ContactMySql implements ContactSql {
         final StringBuilder tmp = new StringBuilder(256);
         if (deleteit) {
             tmp.append("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
         } else {
             tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
@@ -1171,14 +1173,14 @@ public class ContactMySql implements ContactSql {
             tmp.setLength(0);
             tmp.append("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(oid).append(" AND  cid = ").append(
                 cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE FROM prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
@@ -1188,14 +1190,14 @@ public class ContactMySql implements ContactSql {
     public void iFbackupContact(final Statement stmt, final int cid, final int oid, final int uid) throws SQLException {
         final StringBuilder tmp = new StringBuilder(256);
         tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         stmt.execute(tmp.toString());
 
         tmp.setLength(0);
         tmp.append("INSERT INTO del_contacts SELECT * FROM prg_contacts WHERE intfield01 = ").append(oid).append(" AND  cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         stmt.execute(tmp.toString());
@@ -1203,7 +1205,7 @@ public class ContactMySql implements ContactSql {
         tmp.setLength(0);
         tmp.append("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(", changed_from = ").append(uid).append(
             " WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         stmt.execute(tmp.toString());
@@ -1216,7 +1218,7 @@ public class ContactMySql implements ContactSql {
 
     public void iFtrashDistributionList(final boolean delete, final int id, final int cid, final Statement smt) throws SQLException {
         if (delete) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid));
             }
             smt.execute(new StringBuilder("DELETE from prg_dlist where intfield01 = ").append(id).append(" AND cid = ").append(cid).toString());
@@ -1224,21 +1226,21 @@ public class ContactMySql implements ContactSql {
             final StringBuilder sb = new StringBuilder(256);
 
             sb.append("DELETE FROM del_dlist WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(sb.toString());
             }
             smt.execute(sb.toString());
 
             sb.setLength(0);
             sb.append("INSERT INTO del_dlist SELECT * FROM prg_dlist WHERE intfield01 = ").append(id).append(" AND  cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(sb.toString());
             }
             smt.execute(sb.toString());
 
             sb.setLength(0);
             sb.append("DELETE FROM prg_dlist WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(sb.toString());
             }
             smt.execute(sb.toString());
@@ -1248,7 +1250,7 @@ public class ContactMySql implements ContactSql {
     public void iFtrashLinks(final boolean delete, final Statement smt, final int id, final int cid) throws SQLException {
         final StringBuilder tmp = new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = ").append(id).append(
             " OR intfield02 = ").append(id).append(") AND cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         smt.execute(tmp.toString());
@@ -1258,7 +1260,7 @@ public class ContactMySql implements ContactSql {
         final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(
             ", created_from = ").append(ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(
             ", fid = ").append(admin_fid).append(" WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         smt.execute(tmp.toString());
@@ -1268,7 +1270,7 @@ public class ContactMySql implements ContactSql {
         if (delete) {
             final StringBuilder tmp = new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(id).append(
                 " AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             smt.execute(tmp.toString());
@@ -1276,7 +1278,7 @@ public class ContactMySql implements ContactSql {
             final StringBuilder tmp = new StringBuilder(256);
 
             tmp.append("DELETE from del_contacts_image where intfield01 = ").append(id).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             smt.execute(tmp.toString());
@@ -1284,14 +1286,14 @@ public class ContactMySql implements ContactSql {
             tmp.setLength(0);
             tmp.append("INSERT INTO del_contacts_image SELECT * FROM prg_contacts_image WHERE intfield01 = ").append(id).append(
                 " AND  cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             smt.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(id).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             smt.execute(tmp.toString());
@@ -1304,7 +1306,7 @@ public class ContactMySql implements ContactSql {
 
         if (delete) {
             tmp.append("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
@@ -1312,21 +1314,21 @@ public class ContactMySql implements ContactSql {
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(" OR intfield02 = ").append(oid).append(
                 ") AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             // FIXME quick fix. deleteRow doesn't work because del.execute
@@ -1355,7 +1357,7 @@ public class ContactMySql implements ContactSql {
             tmp.append("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
                 ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE intfield01 = ").append(
                 oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
             del.execute(tmp.toString());
@@ -1367,7 +1369,7 @@ public class ContactMySql implements ContactSql {
         final StringBuilder tmp = new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ctx.getMailadmin()).append(
             ", created_from = ").append(ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(
             " WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());
@@ -1376,7 +1378,7 @@ public class ContactMySql implements ContactSql {
     public void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(
             cid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());
@@ -1385,7 +1387,7 @@ public class ContactMySql implements ContactSql {
     public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE intfield01 = ").append(uid).append(" and cid = ").append(
             cid);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug(tmp.toString());
         }
         del.execute(tmp.toString());

@@ -104,6 +104,8 @@ public final class IMAPDefaultFolderChecker {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPDefaultFolderChecker.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final int FOLDER_TYPE = (IMAPFolder.HOLDS_MESSAGES | IMAPFolder.HOLDS_FOLDERS);
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
@@ -214,7 +216,7 @@ public final class IMAPDefaultFolderChecker {
                     return;
                 }
                 try {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         final StringBuilder sb = new StringBuilder(2048);
                         sb.append("\n\nDefault folder check for account ").append(accountId).append(" (");
                         sb.append(imapConfig.getServer()).append(")\n");
@@ -319,7 +321,7 @@ public final class IMAPDefaultFolderChecker {
                                         sep,
                                         type,
                                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1);
-                                } else if (LOG.isDebugEnabled()) {
+                                } else if (DEBUG) {
                                     LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
                                 }
                             } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
@@ -333,7 +335,7 @@ public final class IMAPDefaultFolderChecker {
                                         sep,
                                         type,
                                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1);
-                                } else if (LOG.isDebugEnabled()) {
+                                } else if (DEBUG) {
                                     LOG.debug("Skipping check for " + defaultFolderNames[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
                                 }
                             } else {
@@ -381,7 +383,7 @@ public final class IMAPDefaultFolderChecker {
                             throw new IllegalStateException("Not unchecked", t);
                         }
                     }
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
                             System.currentTimeMillis() - start).append("msec").toString());
                     }
@@ -643,7 +645,7 @@ public final class IMAPDefaultFolderChecker {
                 }
             }
         }
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
             LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked for IMAP account ").append(
                 accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());

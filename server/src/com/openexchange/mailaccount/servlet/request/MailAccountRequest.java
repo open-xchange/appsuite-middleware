@@ -101,6 +101,8 @@ public final class MailAccountRequest {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountRequest.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private final ServerSession session;
 
     private Date timestamp;
@@ -340,7 +342,7 @@ public final class MailAccountRequest {
                 mailAccess.getMailConfig());
             return root;
         } catch (final AbstractOXException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Composing mail account's folder tree failed.", e);
             }
             // TODO: How to indicate error if folder tree requested?
@@ -396,7 +398,7 @@ public final class MailAccountRequest {
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
             }
             return null;
@@ -448,7 +450,7 @@ public final class MailAccountRequest {
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
             }
             return false;
@@ -488,7 +490,7 @@ public final class MailAccountRequest {
             mailTransport.ping();
             close = true;
         } catch (final AbstractOXException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Validating transport account failed.", e);
             }
             validated = false;

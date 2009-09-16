@@ -110,6 +110,8 @@ public final class MIMEMessageConverter {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEMessageConverter.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
         MailField.BODY,
         MailField.FULL,
@@ -734,7 +736,7 @@ public final class MIMEMessageConverter {
             final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(field);
             if (filler == null) {
                 if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug("Ignoring mail field " + field);
                     }
                     fillers[i] = null;
@@ -1052,7 +1054,7 @@ public final class MIMEMessageConverter {
                         }
                     };
                 } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug("Ignoring mail field " + field);
                     }
                     fillers[i] = null;
@@ -1541,7 +1543,7 @@ public final class MIMEMessageConverter {
                 }
             }
         } catch (final MessagingException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             }
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
@@ -1559,7 +1561,7 @@ public final class MIMEMessageConverter {
                 headers = new HeaderCollection(0);
             }
         } catch (final IllegalArgumentException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             }
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
@@ -1769,7 +1771,7 @@ public final class MIMEMessageConverter {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug(
                     new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
                         "\". Using plain addresses' string representation instead.").toString(),
@@ -1809,7 +1811,7 @@ public final class MIMEMessageConverter {
             try {
                 priority = Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("Assuming priority NORMAL due to strange X-Priority header: " + priorityStr);
                 }
                 priority = MailMessage.PRIORITY_NORMAL;

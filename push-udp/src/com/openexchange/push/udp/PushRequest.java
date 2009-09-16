@@ -79,6 +79,8 @@ public class PushRequest {
 
     private static final Log LOG = LogFactory.getLog(PushRequest.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final Pattern PATTERN_SPLIT = Pattern.compile("\1");
 
     /**
@@ -126,7 +128,7 @@ public class PushRequest {
 
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, false);
 
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("register package: user id=" + userId + ",host address=" + hostAddress + ",port=" + port);
                 }
 
@@ -146,7 +148,7 @@ public class PushRequest {
 
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, true);
 
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("register sync package: " + registerObj);
                 }
 
@@ -166,7 +168,7 @@ public class PushRequest {
 
                 final PushObject pushObject = new PushObject(folderId, module, contextId, users, true, timestamp);
 
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("push sync package: " + pushObject);
                 }
 
@@ -188,7 +190,7 @@ public class PushRequest {
                 remoteHostObject.setHost(hostAddress);
                 remoteHostObject.setPort(port);
 
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug("remost host register request: " + remoteHostObject);
                 }
 
@@ -220,7 +222,7 @@ public class PushRequest {
         System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
         final String data = new String(b);
 
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("push request data: " + data);
         }
 

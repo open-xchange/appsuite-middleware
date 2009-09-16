@@ -72,6 +72,8 @@ public final class ImageRegistry {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static ImageRegistry INSTANCE;
 
     /**
@@ -206,14 +208,14 @@ public final class ImageRegistry {
         ImageData imageData;
         final String id = imageArguments.getID();
         if (check && (imageData = m.get(id)) != null) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Image data fetched from registry for UID: " + id);
             }
             return imageData.touch();
         }
         imageData = new ImageData(imageSource, imageArguments, timeToLive);
         m.put(id, imageData);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("Image data put into registry with UID: " + id);
         }
         return imageData;
@@ -257,14 +259,14 @@ public final class ImageRegistry {
         ImageData imageData;
         final String id = imageArguments.getID();
         if (check && (imageData = m.get(id)) != null) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("Image data fetched from registry for UID: " + id);
             }
             return imageData.touch();
         }
         imageData = new ImageData(imageSource, imageArguments, timeToLive);
         m.put(id, imageData);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             LOG.debug("Image data put into registry with UID: " + id);
         }
         return imageData;

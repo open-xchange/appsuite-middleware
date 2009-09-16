@@ -86,6 +86,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ForwardRequest.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String methods[] = {
         "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK",
         "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE",
@@ -447,7 +449,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                         version = Integer.parseInt(versionStr);
                     } catch (final NumberFormatException e) {
                         version = 0;
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
                         }
                     }
@@ -512,7 +514,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         if ((headerValue.length() > 0) && cookieList.isEmpty()) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
         }
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG) {
             final StringBuilder sb = new StringBuilder(256).append("Parsed Cookies:\n");
             for (final Cookie cookie : cookieList) {
                 sb.append('\'').append(cookie.getName()).append("'='").append(cookie.getValue()).append("'\n");
@@ -638,7 +640,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             /*
                              * Different JVM route detected -> Discard
                              */
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Ignoring JSESSIONID: ").append(id));
                             }
                             break NextCookie;
@@ -651,7 +653,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                              * Invalid cookie
                              */
                             jsessionids.remove(id);
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             resp.removeCookie(current);
@@ -667,7 +669,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             /*
                              * But this host defines a JVM route
                              */
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             break NextCookie;
@@ -680,7 +682,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                              * Invalid cookie
                              */
                             jsessionids.remove(id);
-                            if (LOG.isDebugEnabled()) {
+                            if (DEBUG) {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             resp.removeCookie(current);
