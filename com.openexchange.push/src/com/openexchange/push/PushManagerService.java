@@ -74,7 +74,7 @@ public interface PushManagerService {
      * 
      * @param session The session
      * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
-     * @throws PushException If listener cannot be stopped
+     * @throws PushException If listener cannot be stopped due to an error
      */
     boolean stopListener(Session session) throws PushException;
 
