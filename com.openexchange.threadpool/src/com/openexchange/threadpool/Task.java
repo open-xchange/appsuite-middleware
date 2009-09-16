@@ -60,7 +60,7 @@ import java.util.concurrent.Future;
 public interface Task<V> extends Callable<V> {
 
     /**
-     * Sets an appropriate name for executing thread.
+     * Sets an appropriate name for executing thread using given {@link ThreadRenamer} instance.
      * <p>
      * Implementations may leave this method empty if given thread needs not to be renamed.
      * 
