@@ -50,6 +50,7 @@
 package com.openexchange.threadpool;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * {@link ThreadPools} - Utility methods for {@link ThreadPoolService} and {@link Task}.
@@ -63,6 +64,45 @@ public final class ThreadPools {
      */
     private ThreadPools() {
         super();
+    }
+
+    /**
+     * Handles given {@link Throwable} in a safe way.
+     * <p>
+     * This method is helpful when dealing with {@link ExecutionException}:
+     * 
+     * <pre>
+     * public void myMethod throws MyException {
+     *  ...
+     *  final Future&lt;MyResult&gt; future = threadPoolService.submit(task);
+     *  try {
+     *      return future.get();
+     *  } catch (final ExecutionException e) {
+     *      throw launderThrowable(e.getCause(), MyException.class);
+     *  }
+     *  ...
+     * }
+     * </pre>
+     * 
+     * @param e The execution exception thrown by an asynchronous computation
+     * @param expectedExceptionType The expected exception type or <code>null</code> if nothing is expected
+     * @return The laundered exception
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     */
+    public static <E extends Exception> E launderThrowable(final ExecutionException e, final Class<E> expectedExceptionType) {
+        final Throwable t = e.getCause();
+        if (null != expectedExceptionType && expectedExceptionType.isInstance(t)) {
+            return expectedExceptionType.cast(t);
+        }
+        if (t instanceof RuntimeException) {
+            throw (RuntimeException) t;
+        } else if (t instanceof Error) {
+            throw (Error) t;
+        } else {
+            throw new IllegalStateException("Not unchecked", t);
+        }
     }
 
     /**
