@@ -840,9 +840,18 @@ public final class Contacts {
                     // CONTACT cid="+ctx.getContextId()+" fid"+fid);
                 }
 
+                if (!oclPerm.canCreateObjects()) {
+                    throw EXCEPTIONS.createOXPermissionException(
+                        15,
+                        Integer.valueOf(folder_whereto),
+                        Integer.valueOf(ctx.getContextId()),
+                        Integer.valueOf(user));
+                }
+                /*-
+                 * 
                 if (!op.canWriteAllObjects()) {
                     if (op.canWriteOwnObjects()) {
-                        can_edit_only_own = true;
+                        can_edit_only_own = true;f
                     } else {
                         throw EXCEPTIONS.createOXPermissionException(
                             15,
@@ -853,6 +862,7 @@ public final class Contacts {
                         // CONTACT cid="+ctx.getContextId()+" fid="+fid);
                     }
                 }
+                 */
             }
 
             /*
