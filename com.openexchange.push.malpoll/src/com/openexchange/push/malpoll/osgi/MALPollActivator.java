@@ -251,6 +251,9 @@ public final class MALPollActivator extends DeferredActivator {
                 private final Executor executor = timerService.getExecutor();
 
                 public void start(final MALPollPushListener l) {
+                    /*
+                     * Delegate execution to Executor instance
+                     */
                     executor.execute(new MALPollPushListenerRunnable(l));
                 }
             };
@@ -263,6 +266,9 @@ public final class MALPollActivator extends DeferredActivator {
                 private final org.apache.commons.logging.Log log = LOG;
 
                 public void start(final MALPollPushListener l) {
+                    /*
+                     * Execute in current thread
+                     */
                     try {
                         l.checkNewMail();
                     } catch (final PushException e) {
