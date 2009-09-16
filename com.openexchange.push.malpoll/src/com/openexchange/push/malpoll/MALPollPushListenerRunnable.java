@@ -8,21 +8,21 @@ import com.openexchange.push.PushException;
  */
 public final class MALPollPushListenerRunnable implements Runnable {
 
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRunnable.class);
+
     private final MALPollPushListener listener;
 
-    private final org.apache.commons.logging.Log log;
-
-    public MALPollPushListenerRunnable(final MALPollPushListener listener, final org.apache.commons.logging.Log log) {
+    public MALPollPushListenerRunnable(final MALPollPushListener listener) {
         super();
         this.listener = listener;
-        this.log = log;
     }
 
     public void run() {
         try {
             listener.checkNewMail();
         } catch (final PushException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

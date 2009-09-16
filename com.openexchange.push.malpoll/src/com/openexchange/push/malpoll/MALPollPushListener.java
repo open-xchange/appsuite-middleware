@@ -169,7 +169,7 @@ public final class MALPollPushListener implements PushListener {
             } catch (final ServiceException e) {
                 throw new PushException(e);
             }
-            timerTask = timerService.scheduleWithFixedDelay(new MALPollPushListenerRunnable(this, LOG), 1000, periodMillis);
+            timerTask = timerService.scheduleWithFixedDelay(new MALPollPushListenerRunnable(this), 1000, periodMillis);
         }
     }
 

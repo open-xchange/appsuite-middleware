@@ -250,10 +250,8 @@ public final class MALPollActivator extends DeferredActivator {
 
                 private final Executor executor = timerService.getExecutor();
 
-                private final org.apache.commons.logging.Log log = LOG;
-
                 public void start(final MALPollPushListener l) {
-                    executor.execute(new MALPollPushListenerRunnable(l, log));
+                    executor.execute(new MALPollPushListenerRunnable(l));
                 }
             };
         } else {
