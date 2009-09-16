@@ -107,6 +107,11 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final Log LOG = LogFactory.getLog(SessionServlet.class);
 
     /**
+     * Whether logger has debug level enabled for this class.
+     */
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /**
      * Factory for creating exceptions.
      */
     private static final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
@@ -126,7 +131,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(final ServletConfig config) throws ServletException {
         super.init(config);
         checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
     }
@@ -158,7 +163,9 @@ public abstract class SessionServlet extends AJAXServlet {
             rememberSession(req, new ServerSessionAdapter(session, ctx));
             super.service(req, resp);
         } catch (final SessiondException e) {
-            LOG.debug(e.getMessage(), e);
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -171,7 +178,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 sendError(resp);
             }
         } catch (final ContextException e) {
-            LOG.debug(e.getMessage(), e);
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -186,7 +195,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private void checkIP(Session session, String actual) throws SessiondException {
+    private void checkIP(final Session session, final String actual) throws SessiondException {
         checkIP(checkIP, session, actual);
     }
 
@@ -204,13 +213,22 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = 5,
         msg = "Wrong client IP address."
     )
-    public static void checkIP(boolean checkIP, Session session, String actual) throws SessiondException {
+    public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             if (checkIP) {
                 LOG.info("Request with session " + session.getSessionID() + " denied. IP changed to " + actual + " but login came from " + session.getLocalIp());
                 throw EXCEPTION.create(5);
             }
-            LOG.debug("Session " + session.getSessionID() + " requests now from " + actual + " but login came from " + session.getLocalIp());
+            if (DEBUG) {
+                final StringBuilder sb = new StringBuilder(64);
+                sb.append("Session ");
+                sb.append(session.getSessionID());
+                sb.append(" requests now from ");
+                sb.append(actual);
+                sb.append(" but login came from ");
+                sb.append(session.getLocalIp());
+                LOG.debug(sb.toString());
+            }
         }
     }
 
@@ -228,7 +246,7 @@ public abstract class SessionServlet extends AJAXServlet {
     private static String getCookieId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final StringBuilder debug = new StringBuilder();
                 debug.append("Parameter session not found: ");
                 final Enumeration<?> enm = req.getParameterNames();
@@ -298,7 +316,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 return getLocalSession(sessionId, sessiondService);
             }
         } catch (final SessiondException e) {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("No appropriate local session found");
             }
             /*
@@ -324,7 +342,7 @@ public abstract class SessionServlet extends AJAXServlet {
          * A cache miss: throw error
          */
         final Cookie[] cookies = req.getCookies();
-        if (LOG.isDebugEnabled() && cookies != null) {
+        if (DEBUG && cookies != null) {
             final StringBuilder debug = new StringBuilder(256);
             debug.append("No cookie for ID: ");
             debug.append(cookieId);
