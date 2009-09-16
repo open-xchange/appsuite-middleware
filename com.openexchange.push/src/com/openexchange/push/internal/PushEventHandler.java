@@ -61,13 +61,15 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.event.SessiondEventConstants;
 
 /**
- * {@link PushEventHandler} - TODO Short description of this class' purpose.
+ * {@link PushEventHandler} - The {@link EventHandler event handler} for mail push bundle to track newly created and removed sessions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushEventHandler implements EventHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PushEventHandler.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link PushEventHandler}.
@@ -90,7 +92,7 @@ public final class PushEventHandler implements EventHandler {
                      * Stop listener for session
                      */
                     final boolean stopped = pushManager.stopListener(session);
-                    if (stopped && LOG.isDebugEnabled()) {
+                    if (DEBUG && stopped) {
                         LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
                             " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
                             '"').toString());
@@ -111,7 +113,7 @@ public final class PushEventHandler implements EventHandler {
                     final Collection<Session> sessions = sessionContainer.values();
                     for (final Session session : sessions) {
                         final boolean stopped = pushManager.stopListener(session);
-                        if (stopped && LOG.isDebugEnabled()) {
+                        if (DEBUG && stopped) {
                             LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
                                 " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
                                 '"').toString());
@@ -129,7 +131,7 @@ public final class PushEventHandler implements EventHandler {
                      * Initialize a new push listener for session
                      */
                     final PushListener pl = pushManager.startListener(session);
-                    if (LOG.isDebugEnabled() && null != pl) {
+                    if (DEBUG && null != pl) {
                         LOG.debug(new StringBuilder(64).append("Started push listener for user ").append(session.getUserId()).append(
                             " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
                             '"').toString());
