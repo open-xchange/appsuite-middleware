@@ -101,6 +101,8 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXMessageStorage.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Serial version UID
      */
@@ -281,7 +283,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     final GetMessagesResult result = completionService.take().get();
                     insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullname);
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("Retrieving ").append(mailIds.length).append(" messages from folder \"").append(
                         fullname).append("\" took ").append(completionService.getDuration()).append("msec."));
                 }
@@ -441,7 +443,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("Searching messages from folder \"").append(fullname).append("\" took ").append(
                         completionService.getDuration()).append("msec."));
                 }
@@ -556,7 +558,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(64).append("Retrieving unread messages from folder \"").append(fullname).append("\" took ").append(
                         completionService.getDuration()).append("msec."));
                 }
@@ -648,7 +650,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             try {
                 // Invoke all and wait for being executed
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     final long start = System.currentTimeMillis();
                     executor.invokeAll(collection);
                     final long dur = System.currentTimeMillis() - start;
@@ -752,7 +754,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             try {
                 // Invoke all and wait for being executed
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     final long start = System.currentTimeMillis();
                     executor.invokeAll(collection);
                     final long dur = System.currentTimeMillis() - start;
@@ -832,7 +834,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             try {
                 // Invoke all and wait for being executed
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     final long start = System.currentTimeMillis();
                     executor.invokeAll(collection);
                     final long dur = System.currentTimeMillis() - start;

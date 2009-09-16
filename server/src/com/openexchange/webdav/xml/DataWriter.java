@@ -71,6 +71,8 @@ public class DataWriter {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DataWriter.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     public static final int ACTION_MODIFIED = 1;
 
     public static final int ACTION_DELETE = 2;
@@ -201,7 +203,7 @@ public class DataWriter {
             /*
              * null is not a legal XML value, transform to an empty string
              */
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 LOG.debug("null is not a legal XML value");
             }
             return "";
@@ -229,13 +231,13 @@ public class DataWriter {
                         ch = 0x10000 + (ch - 0xD800) * 0x400 + (low - 0xDC00);
                         if (Verifier.isXMLCharacter(ch)) {
                             retvalBuilder.append((char) ch);
-                        } else if (LOG.isDebugEnabled()) {
+                        } else if (DEBUG) {
                             LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
                         }
-                    } else if (LOG.isDebugEnabled()) {
+                    } else if (DEBUG) {
                         LOG.debug("illegal surrogate pair");
                     }
-                } else if (LOG.isDebugEnabled()) {
+                } else if (DEBUG) {
                     LOG.debug("truncated surrogate pair");
                 }
             } else {
@@ -244,7 +246,7 @@ public class DataWriter {
                  */
                 if (Verifier.isXMLCharacter(ch)) {
                     retvalBuilder.append((char) ch);
-                } else if (LOG.isDebugEnabled()) {
+                } else if (DEBUG) {
                     LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
                 }
             }
