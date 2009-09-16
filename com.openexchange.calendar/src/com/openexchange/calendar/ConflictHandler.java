@@ -282,7 +282,10 @@ public class ConflictHandler {
         if (create) {
             return true;
         }
-        if (cdao.getRecurrenceID() == conflictDao.getObjectID() || conflictDao.getRecurrenceID() == cdao.getObjectID()) {
+        if (cdao.containsRecurrenceID() && cdao.getRecurrenceID() == conflictDao.getObjectID()) {
+            return false;
+        }
+        if (conflictDao.containsRecurrenceID() && conflictDao.getRecurrenceID() == cdao.getObjectID()) {
             return false;
         }
         if (cdao.getObjectID() != conflictDao.getObjectID()) {
