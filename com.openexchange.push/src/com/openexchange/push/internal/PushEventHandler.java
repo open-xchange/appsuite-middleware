@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.event.SessiondEventConstants;
@@ -88,7 +89,12 @@ public final class PushEventHandler implements EventHandler {
                     /*
                      * Stop listener for session
                      */
-                    pushManager.stopListener(session);
+                    final boolean stopped = pushManager.stopListener(session);
+                    if (stopped && LOG.isDebugEnabled()) {
+                        LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
+                            " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
+                            '"').toString());
+                    }
                 }
 
             } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
@@ -104,7 +110,12 @@ public final class PushEventHandler implements EventHandler {
                      */
                     final Collection<Session> sessions = sessionContainer.values();
                     for (final Session session : sessions) {
-                        pushManager.stopListener(session);
+                        final boolean stopped = pushManager.stopListener(session);
+                        if (stopped && LOG.isDebugEnabled()) {
+                            LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
+                                " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
+                                '"').toString());
+                        }
                     }
                 }
             } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
@@ -117,7 +128,12 @@ public final class PushEventHandler implements EventHandler {
                     /*
                      * Initialize a new push listener for session
                      */
-                    pushManager.startListener(session);
+                    final PushListener pl = pushManager.startListener(session);
+                    if (LOG.isDebugEnabled() && null != pl) {
+                        LOG.debug(new StringBuilder(64).append("Started push listener for user ").append(session.getUserId()).append(
+                            " in context ").append(session.getContextId()).append(" by push manager \"").append(pushManager.toString()).append(
+                            '"').toString());
+                    }
                 }
             }
         } catch (final Exception e) {

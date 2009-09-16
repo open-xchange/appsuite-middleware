@@ -140,12 +140,15 @@ public final class MALPollPushListenerRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
      */
-    public void removePushListener(final int contextId, final int userId) {
+    public boolean removePushListener(final int contextId, final int userId) {
         final MALPollPushListener listener = map.remove(SimpleKey.valueOf(contextId, userId));
         if (null != listener) {
             listener.close();
+            return true;
         }
+        return false;
     }
 
     /**

@@ -148,6 +148,10 @@ public final class MALPollPushListener implements PushListener {
 
     private final Session session;
 
+    private final int userId;
+
+    private final int contextId;
+
     private final boolean ignoreOnGlobal;
 
     private ScheduledTimerTask timerTask;
@@ -164,12 +168,14 @@ public final class MALPollPushListener implements PushListener {
         super();
         this.session = session;
         this.ignoreOnGlobal = ignoreOnGlobal;
+        this.userId = session.getUserId();
+        this.contextId = session.getContextId();
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(128).append("session-ID=").append(session.getSessionID());
-        sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
+        sb.append(", user=").append(userId).append(", context=").append(contextId);
         sb.append(", startTimerTask=").append(!ignoreOnGlobal);
         return sb.toString();
     }
@@ -263,13 +269,8 @@ public final class MALPollPushListener implements PushListener {
         try {
             final String fullname = folder;
             final Set<String> uidSet = new HashSet<String>(mailAccess.getFolderStorage().getFolder(fullname).getMessageCount());
-            final MailMessage[] messages = mailAccess.getMessageStorage().searchMessages(
-                fullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                null,
-                FIELDS);
+            final MailMessage[] messages =
+                mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
             for (final MailMessage mailMessage : messages) {
                 uidSet.add(mailMessage.getMailId());
             }
@@ -290,8 +291,8 @@ public final class MALPollPushListener implements PushListener {
          * Create event's properties
          */
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
-        properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
+        properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+        properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
         properties.put(PushEventConstants.PROPERTY_SESSION, session);
         properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
         /*
@@ -302,6 +303,10 @@ public final class MALPollPushListener implements PushListener {
          * Finally post it
          */
         eventAdmin.postEvent(event);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(userId).append(
+                " in context ").append(contextId).toString());
+        }
     }
 
     /**

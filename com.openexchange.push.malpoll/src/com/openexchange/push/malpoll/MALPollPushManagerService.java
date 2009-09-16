@@ -72,11 +72,14 @@ public final class MALPollPushManagerService implements PushManagerService {
         MALPollPushManagerService.startTimerTaskPerListener = startTimerTaskPerListener;
     }
 
+    private final String name;
+
     /**
      * Initializes a new {@link MALPollPushManagerService}.
      */
     public MALPollPushManagerService() {
         super();
+        name = "MAL Poll Push Manager";
     }
 
     public PushListener startListener(final Session session) throws PushException {
@@ -88,8 +91,13 @@ public final class MALPollPushManagerService implements PushManagerService {
         return null;
     }
 
-    public void stopListener(final Session session) {
-        MALPollPushListenerRegistry.getInstance().removePushListener(session.getContextId(), session.getUserId());
+    public boolean stopListener(final Session session) {
+        return MALPollPushListenerRegistry.getInstance().removePushListener(session.getContextId(), session.getUserId());
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
 }
