@@ -1,3 +1,9 @@
+open-xchange-monitoring (6.12.0.0-5) unstable; urgency=low
+
+  * Public PTF 2009-09-18
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 18 Sep 2009 00:50:44 +0200
+
 open-xchange-monitoring (6.12.0.0-4) unstable; urgency=low
 
   * first build for 6.12 Rev3
