@@ -108,14 +108,27 @@ public class AJPv13TaskWatcher {
         }
     }
 
+    /**
+     * Adds given task to this watcher.
+     * 
+     * @param task The AJP task to add
+     */
     public void addTask(final AJPv13Task task) {
         tasks.putIfAbsent(task.getNum(), task);
     }
 
+    /**
+     * Removes given task from this watcher
+     * 
+     * @param task The AJP task to remove
+     */
     public void removeTask(final AJPv13Task task) {
         tasks.remove(task.getNum());
     }
 
+    /**
+     * Stops this watcher (and cancels all tracked AJP tasks).
+     */
     public void stop() {
         for (final Iterator<AJPv13Task> i = tasks.values().iterator(); i.hasNext();) {
             i.next().cancel();
