@@ -51,6 +51,7 @@ package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -114,7 +115,9 @@ public class AJPv13TaskWatcher {
      * @param task The AJP task to add
      */
     public void addTask(final AJPv13Task task) {
-        tasks.putIfAbsent(task.getNum(), task);
+        if (null != tasks.putIfAbsent(task.getNum(), task)) {
+            LOG.error(MessageFormat.format("AJP with number {0} task could not be added to watcher!", task.getNum()));
+        }
     }
 
     /**
