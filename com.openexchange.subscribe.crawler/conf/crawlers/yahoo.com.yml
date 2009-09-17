@@ -1,0 +1,32 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+displayName: yahoo.com
+id: com.openexchange.subscribe.crawler.yahoocom
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
+      actionOfLoginForm: "https://login.yahoo.com/config/login?"
+      baseUrl: ""
+      linkAvailableAfterLogin: "(.*address.*)"
+      nameOfPasswordField: passwd
+      nameOfUserField: login
+      numberOfForm: 1
+      pageTitleAfterLogin: "(.*address.*)"
+      password: ""
+      url: "http://address.yahoo.com/index.php"
+      username: ""
+    - !com.openexchange.subscribe.crawler.PageByUrlStep
+      url: "http://address.yahoo.com/"
+    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
+      url: ".*contact_list.*"
+    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
+      url: ".*import_export.*"
+    - !com.openexchange.subscribe.crawler.PageByNamedHtmlElementStep
+      buttonName: "submit[action_export_vcard]"
+      formNumber: 3
+    - !com.openexchange.subscribe.crawler.ContactObjectsByVcardFileStep
+      unwantedLines: 
+        - "BDAY[^\\n]*"
+        - "REV[^\\n]*"
+  useThreadedRefreshHandler: true
+  

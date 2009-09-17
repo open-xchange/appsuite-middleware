@@ -49,42 +49,58 @@
 
 package com.openexchange.subscribe.crawler;
 
-public class AbstractStep {
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import org.ho.yaml.Yaml;
 
-    protected String description;
+/**
+ * {@link GenericSubscribeServiceForYahooComTest}
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ */
+public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServiceTestHelpers {
 
-    protected Exception exception;
+    public void testGenericSubscribeServiceForYahooCom() {
+        // insert valid credentials here
+        String username = "";
+        String password = "";
 
-    protected boolean executedSuccessfully;
-    
-    protected Workflow workflow;
+        // create a CrawlerDescription
+        CrawlerDescription crawler = new CrawlerDescription();
+        crawler.setDisplayName("yahoo.com");
+        crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
+        List<Step> steps = new LinkedList<Step>();
 
-    static final String HTML_PAGE = "HtmlPage";
-    
-    static final String PAGE = "Page";
+        steps.add(new LoginPageByFormActionStep(
+            "Log in",
+            "http://address.yahoo.com/index.php",
+            "",
+            "",
+            "https://login.yahoo.com/config/login?",
+            "login",
+            "passwd",
+            "(.*address.*)",
+            1,
+            ""));
+        steps.add(new PageByUrlStep("We are not automatically redirected so we have to click a link", "http://address.yahoo.com/"));
+        steps.add(new PageByLinkRegexStep("Click on Classic Contacts", ".*contact_list.*"));
+        steps.add(new PageByLinkRegexStep("Click on Import/Export", ".*import_export.*"));
+        steps.add(new PageByNamedHtmlElementStep(
+            "Click the \"Export Now\"-Button (underneath \"vCard Single File\")",
+            3,
+            "submit[action_export_vcard]"));
+        List<String> list = new ArrayList<String>();
+        list.add("BDAY[^\\n]*");
+        list.add("REV[^\\n]*");
+        steps.add(new ContactObjectsByVcardFileStep("Work through the vcard-file", list));
 
-    static final String LIST_OF_HTML_PAGES = "List of HtmlPages";
+        Workflow workflow = new Workflow(steps);
+        workflow.setUseThreadedRefreshHandler(true);
+        crawler.setWorkflowString(Yaml.dump(workflow));
 
-    static final String TEXT_PAGE = "TextPage";
-
-    static final String LIST_OF_TEXT_PAGES = "List of TextPages";
-
-    static final String URL_STRING = "URL String";
-
-    static final String LIST_OF_CONTACT_OBJECTS = "List of ContactObjects";
-
-    static final String LIST_OF_HTML_ANCHORS = "List of HtmlAnchors";
-
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        // uncomment this if the if the crawler description was updated to get the new config-files
+        // dumpThis(crawler, crawler.getDisplayName());
     }
-
-    public Exception getException() {
-        return this.exception;
-    }
-    
-    public void setWorkflow (Workflow workflow){
-        this.workflow = workflow;
-    }
-
 }

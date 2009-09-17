@@ -50,65 +50,61 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.osgi.Activator;
+
 
 /**
- * This Step gets a page reachable via Link in the current context (WebClient)
- * 
+ * {@link PageByNamedHtmlElementStep}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, HtmlPage> {
+public class PageByNamedHtmlElementStep extends AbstractStep implements Step<Page,HtmlPage>{
+    
+    protected String buttonName;
+    
+    protected int formNumber;
 
-    protected String linkRegex;
-
-    protected HtmlPage currentPage;
+    protected Page currentPage;
 
     protected HtmlPage inputPage;
 
     private Exception exception;
 
-    protected boolean executedSuccessfully;
+    
+    private static final Log LOG = LogFactory.getLog(PageByNamedHtmlElementStep.class);
 
-    public PageByLinkRegexStep() {
-
+    
+    public PageByNamedHtmlElementStep(){
+        
     }
-
-    public PageByLinkRegexStep(String description, String linkRegex) {
+    
+    public PageByNamedHtmlElementStep(String description, int formNumber, String buttonName){
         this.description = description;
-        this.linkRegex = linkRegex;
+        this.formNumber = formNumber;
+        this.buttonName = buttonName;
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
-        try {
-            for (HtmlAnchor link : inputPage.getAnchors()) {
-                if (link.getHrefAttribute().matches(linkRegex)) {
-                    currentPage = link.click();                 
-                    break;
-                }
+        List<HtmlElement> list = inputPage.getHtmlElementsByName(buttonName);
+        for (HtmlElement el : list){
+            System.out.println("***** " + el);
+            try {
+                currentPage = el.click();
+            } catch (IOException e) {
+                LOG.error(e);
             }
-                       
-            executedSuccessfully = true;
-        } catch (FailingHttpStatusCodeException e) {
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (MalformedURLException e) {
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (IOException e) {
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
-    }
-
-    public boolean executedSuccessfully() {
-        return this.executedSuccessfully;
-    }
-
-    public Exception getException() {
-        return this.exception;
+        executedSuccessfully = true;
     }
 
     public String inputType() {
@@ -116,10 +112,10 @@ public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, 
     }
 
     public String outputType() {
-        return HTML_PAGE;
+        return PAGE;
     }
 
-    public HtmlPage getOutput() {
+    public Page getOutput() {
         return currentPage;
     }
 
@@ -127,32 +123,25 @@ public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, 
         inputPage = input;
     }
 
-    public String getUrl() {
-        return linkRegex;
+    
+    public String getButtonName() {
+        return buttonName;
     }
 
-    public void setUrl(String url) {
-        this.linkRegex = url;
+    
+    public void setButtonName(String buttonName) {
+        this.buttonName = buttonName;
     }
 
-    public HtmlPage getCurrentPage() {
-        return currentPage;
+    
+    public int getFormNumber() {
+        return formNumber;
     }
 
-    public void setCurrentPage(HtmlPage currentPage) {
-        this.currentPage = currentPage;
+    
+    public void setFormNumber(int formNumber) {
+        this.formNumber = formNumber;
     }
-
-    public boolean isExecutedSuccessfully() {
-        return executedSuccessfully;
-    }
-
-    public void setExecutedSuccessfully(boolean executedSuccessfully) {
-        this.executedSuccessfully = executedSuccessfully;
-    }
-
-    public void setException(Exception exception) {
-        this.exception = exception;
-    }
-
+    
+    
 }
