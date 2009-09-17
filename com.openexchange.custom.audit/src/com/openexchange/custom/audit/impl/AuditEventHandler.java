@@ -50,6 +50,8 @@
 package com.openexchange.custom.audit.impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.logging.Handler;
@@ -70,8 +72,12 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -87,6 +93,8 @@ public class AuditEventHandler implements EventHandler {
 	private static final Logger LOG = Logger.getLogger(AuditEventHandler.class.getName());
 
 	private static final AuditEventHandler instance = new AuditEventHandler();
+	
+	private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
     public static AuditEventHandler getInstance() {
         return instance;
@@ -119,6 +127,9 @@ public class AuditEventHandler implements EventHandler {
 					} catch (IOException e) {
 						LOG.log(Level.SEVERE, e.getMessage(), e);
 					}
+					LOG.info("Using own Logging instance.");
+				} else {
+					LOG.info("Using global Logging instance.");
 				}
 			}
 		} catch (ServiceException e) {
@@ -128,31 +139,106 @@ public class AuditEventHandler implements EventHandler {
 	
 	public void handleEvent(final Event event) {
 		try {
+			StringBuffer log = new StringBuffer();
+			
 			final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+			final Context context = ContextStorage.getInstance().getContext(commonEvent.getContextId());
 			
 	        ModuleSwitch: switch (commonEvent.getModule()) {
 	        default: break ModuleSwitch;
 	        case Types.APPOINTMENT:	        	
 	        	Appointment appointment = (Appointment)commonEvent.getActionObj();
+	        	
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
-					LOG.info("Title222: " + appointment.getTitle());
-					LOG.info("Folder id: " + appointment.getParentFolderID());
-					LOG.info("Foldername: " + getPathToRoot(appointment.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()));					
+					log.append("EVENT TYPE: INSERT; ");
+				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
+					log.append("EVENT TYPE: UPDATE; ");
+				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
+					log.append("EVENT TYPE: DELETE; ");
 				}
+				
+				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
+				log.append("OBJECT TYPE: APPOINTMENT; ");
+				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
+				log.append("OBJECT ID: " + appointment.getObjectID() + "; ");
+				log.append("CREATED BY: " + UserStorage.getInstance().getUser(appointment.getCreatedBy(), context).getDisplayName() + "; ");
+				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(appointment.getModifiedBy(), context).getDisplayName() + "; ");
+				log.append("TITLE: " + appointment.getTitle() + "; ");
+				log.append("START DATE: " + appointment.getStartDate() + "; ");
+				log.append("END DATE: " + appointment.getEndDate() + "; ");
+				log.append("FOLDER: " + getPathToRoot(appointment.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
+
 	        	break ModuleSwitch;
 	        case Types.CONTACT:
 	        	Contact contact = (Contact)commonEvent.getActionObj();
-	        	LOG.info(contact.getGivenName() + ", " + contact.getSurName());
+	        	
+				if (commonEvent.getAction() == CommonEvent.INSERT) {
+					log.append("EVENT TYPE: INSERT; ");
+				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
+					log.append("EVENT TYPE: UPDATE; ");
+				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
+					log.append("EVENT TYPE: DELETE; ");
+				}
+				
+				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
+				log.append("OBJECT TYPE: CONTACT; ");
+				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
+				log.append("OBJECT ID: " + contact.getObjectID() + "; ");
+				log.append("CREATED BY: " + UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName() + "; ");
+				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName() + "; ");
+				log.append("CONTACT FULLNAME: " + contact.getDisplayName() + ";");
+				log.append("FOLDER: " + getPathToRoot(contact.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
+				
 	        	break ModuleSwitch;
 	        case Types.TASK:
 	        	Task task = (Task)commonEvent.getActionObj();
-	        	LOG.info(task.getTitle());
+	        	
+				if (commonEvent.getAction() == CommonEvent.INSERT) {
+					log.append("EVENT TYPE: INSERT; ");
+				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
+					log.append("EVENT TYPE: UPDATE; ");
+				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
+					log.append("EVENT TYPE: DELETE; ");
+				}
+				
+				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
+				log.append("OBJECT TYPE: TASK; ");
+				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
+				log.append("OBJECT ID: " + task.getObjectID() + "; ");
+				log.append("CREATED BY: " + UserStorage.getInstance().getUser(task.getCreatedBy(), context).getDisplayName() + "; ");
+				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName() + "; ");
+				log.append("TITLE: " + task.getTitle() + "; ");
+				log.append("FOLDER: " + getPathToRoot(task.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
+				
 	        	break ModuleSwitch;
 	        case Types.INFOSTORE:
 	        	DocumentMetadata document = (DocumentMetadata)commonEvent.getActionObj();
-	        	LOG.info(document.getTitle());
+	        	
+				if (commonEvent.getAction() == CommonEvent.INSERT) {
+					log.append("EVENT TYPE: INSERT; ");
+				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
+					log.append("EVENT TYPE: UPDATE; ");
+				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
+					log.append("EVENT TYPE: DELETE; ");
+				}
+				
+				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
+				log.append("OBJECT TYPE: INFOSTORE; ");
+				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
+				log.append("OBJECT ID: " + document.getId() + "; ");
+				log.append("CREATED BY: " + UserStorage.getInstance().getUser(document.getCreatedBy(), context).getDisplayName() + "; ");
+				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(document.getModifiedBy(), context).getDisplayName() + "; ");
+				log.append("TITLE: " + document.getTitle() + "; ");
+				log.append("TITLE: " + document.getFileName() + "; ");
+				log.append("FOLDER: " + getPathToRoot((int)document.getFolderId(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
+				
 	        	break ModuleSwitch;
 	        }
+			
+			if (LOG.isLoggable(Level.INFO)) {
+				LOG.log(Level.INFO, log.toString());
+			}
+			
 		} catch (final Exception e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
 		}	
