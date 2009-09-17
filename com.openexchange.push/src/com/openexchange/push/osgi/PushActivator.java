@@ -63,7 +63,10 @@ import com.openexchange.push.PushManagerService;
 import com.openexchange.push.exception.PushExceptionFactory;
 import com.openexchange.push.internal.PushEventHandler;
 import com.openexchange.push.internal.PushManagerRegistry;
+import com.openexchange.push.internal.ServiceRegistry;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.sessiond.event.SessiondEventConstants;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link PushActivator} - The activator for push bundle.
@@ -77,6 +80,8 @@ public final class PushActivator implements BundleActivator {
     private ServiceTracker serviceTracker;
 
     private ComponentRegistration componentRegistration;
+
+    private ServiceTracker tpServiceTracker;
 
     /**
      * Initializes a new {@link PushActivator}.
@@ -102,6 +107,15 @@ public final class PushActivator implements BundleActivator {
             PushManagerRegistry.init();
             serviceTracker = new ServiceTracker(context, PushManagerService.class.getName(), new PushManagerServiceTracker(context));
             serviceTracker.open();
+            /*
+             * Thread pool service tracker
+             */
+            tpServiceTracker =
+                new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ThreadPoolService.class));
+            tpServiceTracker.open();
             /*
              * Register event handler to detect removed sessions
              */
@@ -130,6 +144,10 @@ public final class PushActivator implements BundleActivator {
             /*
              * Drop service tracker
              */
+            if (null != tpServiceTracker) {
+                tpServiceTracker.close();
+                tpServiceTracker = null;
+            }
             if (null != serviceTracker) {
                 serviceTracker.close();
                 serviceTracker = null;
