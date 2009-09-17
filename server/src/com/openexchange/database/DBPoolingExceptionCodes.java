@@ -136,7 +136,11 @@ public enum DBPoolingExceptionCodes implements OXErrorMessage {
     /**
      * Cannot resolve server id for server %1$s.
      */
-    NOT_RESOLVED_SERVER(NOT_RESOLVED_SERVER_MSG, Category.SETUP_ERROR, 19);
+    NOT_RESOLVED_SERVER(NOT_RESOLVED_SERVER_MSG, Category.SETUP_ERROR, 19),
+    /**
+     * Nothing known about pool %1$d.
+     */
+    UNKNOWN_POOL(UNKNOWN_POOL_MSG, Category.CODE_ERROR, 20);
 
     /**
      * Message of the exception.

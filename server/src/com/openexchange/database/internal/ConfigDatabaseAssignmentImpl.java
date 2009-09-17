@@ -49,21 +49,20 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.monitoring.MonitorMBean;
-
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link ConfigDatabaseAssignmentImpl}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+final class ConfigDatabaseAssignmentImpl implements ConfigDatabaseAssignmentService {
 
-    /**
-     * Domain for the beans.
-     */
-    String DOMAIN = "com.openexchange.pooling";
+    private static final Assignment CONFIG_DB = new Assignment(0, 0, Constants.CONFIGDB_READ_ID, Constants.CONFIGDB_WRITE_ID, null);
 
-    /**
-     * @return the number of threads waiting for a connection.
-     */
-    int getNumWaiting();
+    ConfigDatabaseAssignmentImpl() {
+        super();
+    }
+
+    public Assignment getConfigDBAssignment() {
+        return CONFIG_DB;
+    }
 }

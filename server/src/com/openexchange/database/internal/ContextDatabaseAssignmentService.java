@@ -49,21 +49,35 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.monitoring.MonitorMBean;
+import com.openexchange.database.DBPoolingException;
+
 
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link ContextDatabaseAssignmentService}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+interface ContextDatabaseAssignmentService {
 
     /**
-     * Domain for the beans.
+     * Gets a database assignment for a context. If the cache is enabled this
+     * method looks into the cache for the assignment and loads it from the
+     * database if cache is disabled or the cache doesn't contain the entry.
+     * 
+     * @param contextId unique identifier of the context.
+     * @return the assignment.
+     * @throws DBPoolingException if getting the assignment fails.
      */
-    String DOMAIN = "com.openexchange.pooling";
+    Assignment getAssignment(int contextId) throws DBPoolingException;
 
     /**
-     * @return the number of threads waiting for a connection.
+     * Invalidates an assignment for a context in the cache.
+     * 
+     * @param contextId
+     *            unique identifier of the context.
+     * @throws DBPoolingException
+     *             if getting the server identifier fails.
      */
-    int getNumWaiting();
+    void removeAssignments(int contextId) throws DBPoolingException;
+
 }

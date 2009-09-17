@@ -113,6 +113,10 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // %1$s is replaced with the defined server name.
     public static final String NOT_RESOLVED_SERVER_MSG = "Cannot resolve server id for server %1$s.";
 
+    // This error message is only for administrators to show that some coding problem exists.
+    // %1$d is replaced with a unique identifier of a database connection pool.
+    public static final String UNKNOWN_POOL_MSG = "Nothing known about pool %1$d.";
+
     /**
      * Prevent instantiation.
      */

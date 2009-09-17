@@ -49,8 +49,6 @@
 
 package com.openexchange.database.osgi;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -61,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.Initialization;
-import com.openexchange.timer.TimerService;
 
 /**
  * Injects the {@link ConfigurationService} and publishes the DatabaseService.
@@ -74,50 +71,27 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
 
     private BundleContext context;
 
-    private ConfigurationService configurationService;
-
-    private TimerService timerService;
-
     private ServiceRegistration serviceRegistration;
 
-    private final Lock lock = new ReentrantLock();
-
-    /**
-     * Initializes a new {@link DatabaseServiceRegisterer}.
-     */
     public DatabaseServiceRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object addingService(ServiceReference reference) {
-        final Object obj = context.getService(reference);
-        final boolean needsRegistration;
-        lock.lock();
+        if (Initialization.getInstance().isStarted()) {
+            // No reconfiguration;
+            return null;
+        }
+        ConfigurationService configuration = (ConfigurationService) context.getService(reference);
         try {
-            if (obj instanceof ConfigurationService) {
-                configurationService = (ConfigurationService) obj;
-            }
-            if (obj instanceof TimerService) {
-                timerService = (TimerService) obj;
-            }
-            needsRegistration = null != configurationService && null != timerService && !Initialization.getInstance().isStarted() && serviceRegistration == null;
-        } finally {
-            lock.unlock();
-        }
-        if (needsRegistration) {
+            DatabaseService service = Initialization.getInstance().start(configuration);
             LOG.info("Publishing DatabaseService.");
-            try {
-                DatabaseService service = Initialization.getInstance().start(configurationService, timerService);
-                serviceRegistration = context.registerService(DatabaseService.class.getName(), service, null);
-            } catch (DBPoolingException e) {
-                LOG.error("Publishing the DatabaseService failed.", e);
-            }
+            serviceRegistration = context.registerService(DatabaseService.class.getName(), service, null);
+        } catch (DBPoolingException e) {
+            LOG.error("Publishing the DatabaseService failed.", e);
         }
-        return obj;
+        return configuration;
     }
 
     /**
@@ -131,27 +105,11 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     public void removedService(ServiceReference reference, Object service) {
-        ServiceRegistration unregister = null;
-        lock.lock();
-        try {
-            if (service instanceof ConfigurationService) {
-                configurationService = null;
-            }
-            if (service instanceof TimerService) {
-                timerService = null;
-            }
-            if (Initialization.getInstance().isStarted() && timerService == null && serviceRegistration != null) {
-                unregister = serviceRegistration;
-                serviceRegistration = null;
-            }
-        } finally {
-            lock.unlock();
-        }
-        if (null != unregister) {
+        if (null != serviceRegistration) {
             LOG.info("Unpublishing DatabaseService.");
-            unregister.unregister();
+            serviceRegistration.unregister();
             Initialization.getInstance().stop();
+            context.ungetService(reference);
         }
-        context.ungetService(reference);
     }
 }

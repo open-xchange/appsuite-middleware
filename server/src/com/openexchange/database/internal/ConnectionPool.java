@@ -136,7 +136,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
     public int getNumberOfDBConnections() {
         return getPoolSize();
     }
-    
+
     /**
      * Sets a new check time used for activating connections. If check time is
      * exhausted since last use of the connection a select statement is sent to

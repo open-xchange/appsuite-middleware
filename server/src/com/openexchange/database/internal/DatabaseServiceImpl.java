@@ -72,28 +72,32 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private static final Log LOG = LogFactory.getLog(DatabaseServiceImpl.class);
 
-    private boolean forceWriteOnly;
+    private final boolean forceWriteOnly;
 
-    private Pools pools;
+    private final Pools pools;
 
-    private AssignmentStorage assignmentStorage;
+    private final ConfigDatabaseService configDatabaseService;
 
-    private ConfigDatabaseService configDatabaseService;
+    private final ContextDatabaseAssignmentService assignmentService;
 
     /**
      * Default constructor.
      */
-    public DatabaseServiceImpl() {
+    public DatabaseServiceImpl(boolean forceWriteOnly, Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService) {
         super();
+        this.forceWriteOnly = forceWriteOnly;
+        this.pools = pools;
+        this.configDatabaseService = configDatabaseService;
+        this.assignmentService = assignmentService;
     }
 
     public int resolvePool(int contextId, boolean write) throws DBPoolingException {
-        Assignment assign = assignmentStorage.getAssignment(contextId);
+        Assignment assign = assignmentService.getAssignment(contextId);
         return write || forceWriteOnly ? assign.getWritePoolId() : assign.getReadPoolId();
     }
 
     public String getSchema(int contextId) throws DBPoolingException {
-        return assignmentStorage.getAssignment(contextId).getSchema();
+        return assignmentService.getAssignment(contextId).getSchema();
     }
 
     /**
@@ -130,7 +134,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     private Connection get(int contextId, boolean write, boolean noTimeout) throws DBPoolingException {
-        final Assignment assign = assignmentStorage.getAssignment(contextId);
+        final Assignment assign = assignmentService.getAssignment(contextId);
         final int poolId;
         if (write || forceWriteOnly) {
             poolId = assign.getWritePoolId();
@@ -227,7 +231,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     public void invalidate(int contextId) throws DBPoolingException {
-        assignmentStorage.removeAssignments(contextId);
+        assignmentService.removeAssignments(contextId);
     }
 
     /**
@@ -269,22 +273,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return connections;
     }
 
-    public void setPools(Pools pools) {
-        this.pools = pools;
-    }
-
-    public void setAssignmentStorage(AssignmentStorage assignementStorage) {
-        this.assignmentStorage = assignementStorage;
-    }
-
-    public void setForceWrite(boolean forceWriteOnly) {
-        this.forceWriteOnly = forceWriteOnly;
-    }
-
-    void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
-        this.configDatabaseService = configDatabaseService;
-    }
-
     // Delegate config database service methods.
 
     public Connection getReadOnly() throws DBPoolingException {
@@ -301,6 +289,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     public void backWritable(Connection con) {
         configDatabaseService.backWritable(con);
+    }
+
+    public int[] listContexts(int poolId) throws DBPoolingException {
+        return configDatabaseService.listContexts(poolId);
     }
 
     // Implemented database service methods.

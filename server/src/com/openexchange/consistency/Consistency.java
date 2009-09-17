@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
 
 import java.io.ByteArrayInputStream;
@@ -73,6 +74,7 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.server.ServiceException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -201,42 +203,42 @@ public abstract class Consistency implements ConsistencyMBean {
         if (LOG.isInfoEnabled()) {
             LOG.info(text);
         }
-	}
+    }
 
-	private void erroroutput(final Exception e) {
-	    LOG.error(e.getMessage(), e);
-	}
+    private void erroroutput(final Exception e) {
+        LOG.error(e.getMessage(), e);
+    }
 
-	private void outputSet(final SortedSet<String> set) {
-	    final Iterator<String> itstr = set.iterator();
-	    final StringBuilder sb = new StringBuilder();
+    private void outputSet(final SortedSet<String> set) {
+        final Iterator<String> itstr = set.iterator();
+        final StringBuilder sb = new StringBuilder();
         while (itstr.hasNext()) {
-	        sb.append(itstr.next()).append("\n");
-	    }
+            sb.append(itstr.next()).append("\n");
+        }
         output(sb.toString());
     }
 
     /**
-	 * Makes the difference set between two set, the first one is changed
-	 *
-	 */
-	private boolean diffset(final SortedSet<String> first,
-			final SortedSet<String> second, final String name, final String name2) {
-		boolean retval = false;
-		first.removeAll(second);
-		if (!first.isEmpty()) {
-		    output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
-		    outputSet(first);
-		    retval = true;
-		}
-		return retval;
-	}
+     * Makes the difference set between two set, the first one is changed
+     *
+     */
+    private boolean diffset(final SortedSet<String> first,
+            final SortedSet<String> second, final String name, final String name2) {
+        boolean retval = false;
+        first.removeAll(second);
+        if (!first.isEmpty()) {
+            output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
+            outputSet(first);
+            retval = true;
+        }
+        return retval;
+    }
 
-	private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver fileSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws AbstractOXException {
+    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver fileSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws AbstractOXException {
 
         // We believe in the worst case, so lets check the storage first, so
-		// that the state file is recreated
-		LOG.info("Checking context "+ctx.getContextId()+". Using solvers db: "+dbSolver.description()+" attachments: "+attachmentSolver.description()+" files: "+fileSolver.description());
+        // that the state file is recreated
+        LOG.info("Checking context "+ctx.getContextId()+". Using solvers db: "+dbSolver.description()+" attachments: "+attachmentSolver.description()+" files: "+fileSolver.description());
         stor.recreateStateFile();
 
         LOG.info("Listing all files in filestore");
@@ -244,50 +246,50 @@ public abstract class Consistency implements ConsistencyMBean {
         LOG.info("Found "+filestoreset.size()+" files in the filestore for this context");
         LOG.info("Loading all attachments");
         final SortedSet<String> attachmentset =
-			attach.getAttachmentFileStoreLocationsperContext(ctx);
+            attach.getAttachmentFileStoreLocationsperContext(ctx);
         LOG.info("Found "+attachmentset.size()+" attachments");
         SortedSet<String> dbfileset;
-		try {
+        try {
             LOG.info("Loading all infostore filestore locations");
             dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
             LOG.info("Found "+dbfileset.size()+" infostore filepaths");
             final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
-			joineddbfileset.addAll(attachmentset);
+            joineddbfileset.addAll(attachmentset);
 
             LOG.info("Found "+joineddbfileset.size()+" filestore ids in total. There are "+filestoreset.size()+" files in the filespool. A difference of "+Math.abs(joineddbfileset.size()-filestoreset.size()));
 
 
             // Build the difference set of the database set, so that the final
-			// dbfileset contains all the members that aren't in the filestoreset
-			if (diffset(dbfileset, filestoreset, "database list",
-					"filestore list")) {
-				// implement the solver for dbfiles here
-				dbSolver.solve(ctx,dbfileset);
-        	}
+            // dbfileset contains all the members that aren't in the filestoreset
+            if (diffset(dbfileset, filestoreset, "database list",
+                    "filestore list")) {
+                // implement the solver for dbfiles here
+                dbSolver.solve(ctx,dbfileset);
+            }
 
 
-			// Build the difference set of the attachment database set, so that the
-			// final attachmentset contains all the members that aren't in the
-			// filestoreset
-			if (diffset(attachmentset, filestoreset,
-					"database list of attachment files", "filestore list")) {
-				//implement the solver for deleted dbfiles here
-				attachmentSolver.solve(ctx, attachmentset);
-        	}
+            // Build the difference set of the attachment database set, so that the
+            // final attachmentset contains all the members that aren't in the
+            // filestoreset
+            if (diffset(attachmentset, filestoreset,
+                    "database list of attachment files", "filestore list")) {
+                //implement the solver for deleted dbfiles here
+                attachmentSolver.solve(ctx, attachmentset);
+            }
 
-			// Build the difference set of the filestore set, so that the final
-			// filestoreset contains all the members that aren't in the dbfileset or
-			// the dbdelfileset
-			if (diffset(filestoreset, joineddbfileset, "filestore list",
-					"one of the databases")) {
-				//implement the solver for the filestore here
-				fileSolver.solve(ctx, filestoreset);
-        	}
+            // Build the difference set of the filestore set, so that the final
+            // filestoreset contains all the members that aren't in the dbfileset or
+            // the dbdelfileset
+            if (diffset(filestoreset, joineddbfileset, "filestore list",
+                    "one of the databases")) {
+                //implement the solver for the filestore here
+                fileSolver.solve(ctx, filestoreset);
+            }
 
-		} catch (final OXException e) {
-			erroroutput(e);
-		}
-	}
+        } catch (final OXException e) {
+            erroroutput(e);
+        }
+    }
 
     private void recalculateUsage(final FileStorage storage) {
         try {
@@ -305,10 +307,10 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract AttachmentBase getAttachments();
     protected abstract FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException;
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws ContextException;
-    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws ContextException, DBPoolingException;
+    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws ContextException, DBPoolingException, ServiceException;
     protected abstract List<Context> getAllContexts() throws ContextException;
     protected abstract User getAdmin(Context ctx) throws LdapException;
-        
+
 
 
     private static final class ResolverPolicy {
@@ -409,7 +411,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class CreateDummyFile {
 
         private final FileStorage storage;
-        
+
         public CreateDummyFile(final FileStorage storage) {
             this.storage = storage;
         }
@@ -440,9 +442,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
         public void solve(final Context ctx, final Set<String> problems) throws OXException {
             /*
-		    * Here we operate in two stages. First we create a dummy entry in the
-		    * filestore. Second we update the Entries in the database
-		    */
+            * Here we operate in two stages. First we create a dummy entry in the
+            * filestore. Second we update the Entries in the database
+            */
             for (final String old_identifier : problems) {
                 try {
                     final String identifier = createDummyFile();
@@ -565,8 +567,8 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 }
                 /* Afterwards we recreate the state file because it could happen that
-			 * that now new free file slots are available.
-			 */
+             * that now new free file slots are available.
+             */
                 storage.recreateStateFile();
             } catch (final FileStorageException e) {
                 LOG1.error("", e);
@@ -630,7 +632,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static class DeleteAttachment implements ProblemSolver {
 
         private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(DeleteAttachment.class);
-        
+
         private final AttachmentBase attachments;
         public DeleteAttachment(final AttachmentBase attachments) {
             this.attachments = attachments;

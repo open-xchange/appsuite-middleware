@@ -49,21 +49,22 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.monitoring.MonitorMBean;
+import com.openexchange.database.DBPoolingException;
 
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Interface for creating database connection pools.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+public interface PoolLifeCycle {
 
     /**
-     * Domain for the beans.
+     * Creates a connection pool for the given pool identifier.
+     * @param poolId the pool identifier.
+     * @return the connection pool or <code>null</code> if the current {@link PoolLifeCycle} is not responsive for the given pool identifier.
+     * @throws DBPoolingException if creating the connection pool has some serious problems.
      */
-    String DOMAIN = "com.openexchange.pooling";
+    ConnectionPool create(int poolId) throws DBPoolingException;
 
-    /**
-     * @return the number of threads waiting for a connection.
-     */
-    int getNumWaiting();
+    boolean destroy(int poolId);
 }

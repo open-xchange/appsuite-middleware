@@ -52,8 +52,6 @@ package com.openexchange.database.osgi;
 import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -80,9 +78,9 @@ public class Activator implements BundleActivator {
             EnumComponent.DB_POOLING,
             "com.openexchange.database",
             DBPoolingExceptionFactory.getInstance());
-        Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        trackers.push(new ServiceTracker(context, filter, new DatabaseServiceRegisterer(context)));
+        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new DatabaseServiceRegisterer(context)));
         trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context)));
+        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
         trackers.push(new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context)));
         for (ServiceTracker tracker : trackers) {
             tracker.open();

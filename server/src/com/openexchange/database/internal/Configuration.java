@@ -50,6 +50,8 @@
 package com.openexchange.database.internal;
 
 import java.util.Properties;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -61,6 +63,8 @@ import com.openexchange.database.DBPoolingException;
  */
 public final class Configuration {
 
+    private static final Log LOG = LogFactory.getLog(Configuration.class);
+
     private static final String CONFIG_FILENAME = "configdb.properties";
 
     private Properties props;
@@ -69,30 +73,29 @@ public final class Configuration {
 
     private Properties writeProps = new Properties();
 
-    /**
-     * Default constructor.
-     */
-    public Configuration() {
+    private final ConnectionPool.Config poolConfig = ConnectionPool.DEFAULT_CONFIG;
+
+    Configuration() {
         super();
     }
 
-    public boolean isWriteDefined() {
+    boolean isWriteDefined() {
         return Boolean.parseBoolean(getProperty(Property.SEPERATE_WRITE, "false"));
     }
 
-    public String getReadUrl() {
+    String getReadUrl() {
         return getProperty(Property.READ_URL);
     }
 
-    public Properties getReadProps() {
+    Properties getReadProps() {
         return readProps;
     }
 
-    public String getWriteUrl() {
+    String getWriteUrl() {
         return getProperty(Property.WRITE_URL);
     }
 
-    public Properties getWriteProps() {
+    Properties getWriteProps() {
         return writeProps;
     }
 
@@ -104,7 +107,7 @@ public final class Configuration {
         T convert(String toConvert);
     }
 
-    private <T> T getUniversal(final Property property, final T def, final Convert<T> converter) {
+    private <T> T getUniversal(Property property, T def, Convert<T> converter) {
         final T retval;
         if (props != null && props.containsKey(property.propertyName)) {
             retval = converter.convert(props.getProperty(property.propertyName));
@@ -114,33 +117,33 @@ public final class Configuration {
         return retval;
     }
 
-    public String getProperty(final Property property, final String def) {
+    String getProperty(Property property, String def) {
         return getUniversal(property, def, new Convert<String>() {
-            public String convert(final String toConvert) {
+            public String convert(String toConvert) {
                 return toConvert;
             }
         });
     }
 
-    public int getInt(final Property property, final int def) {
+    int getInt(Property property, int def) {
         return getUniversal(property, Integer.valueOf(def), new Convert<Integer>() {
-            public Integer convert(final String toConvert) {
+            public Integer convert(String toConvert) {
                 return Integer.valueOf(toConvert);
             }
         }).intValue();
     }
 
-    public long getLong(final Property property, final long def) {
+    long getLong(Property property, long def) {
         return getUniversal(property, Long.valueOf(def), new Convert<Long>() {
-            public Long convert(final String toConvert) {
+            public Long convert(String toConvert) {
                 return Long.valueOf(toConvert);
             }
         }).longValue();
     }
 
-    public boolean getBoolean(final Property property, final boolean def) {
+    boolean getBoolean(Property property, boolean def) {
         return getUniversal(property, Boolean.valueOf(def), new Convert<Boolean>() {
-            public Boolean convert(final String toConvert) {
+            public Boolean convert(String toConvert) {
                 return Boolean.valueOf(toConvert);
             }
         }).booleanValue();
@@ -159,6 +162,7 @@ public final class Configuration {
         }
         separateReadWrite();
         loadDrivers();
+        initPoolConfig();
     }
 
     private void separateReadWrite() {
@@ -188,7 +192,7 @@ public final class Configuration {
         }
         try {
             Class.forName(readDriverClass);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, readDriverClass);
         }
         if (!isWriteDefined()) {
@@ -200,7 +204,7 @@ public final class Configuration {
         }
         try {
             Class.forName(writeDriverClass);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, writeDriverClass);
         }
     }
@@ -212,6 +216,31 @@ public final class Configuration {
         props = null;
         readProps.clear();
         writeProps.clear();
+    }
+
+    /**
+     * Reads the pooling configuration from the configdb.properties file.
+     */
+    private void initPoolConfig() {
+        poolConfig.minIdle = getInt(Property.MIN_IDLE, poolConfig.minIdle);
+        poolConfig.maxIdle = getInt(Property.MAX_IDLE, poolConfig.maxIdle);
+        poolConfig.maxIdleTime = getLong(Property.MAX_IDLE_TIME, poolConfig.maxIdleTime);
+        poolConfig.maxActive = getInt(Property.MAX_ACTIVE, poolConfig.maxActive);
+        poolConfig.maxWait = getLong(Property.MAX_WAIT, poolConfig.maxWait);
+        poolConfig.maxLifeTime = getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime);
+        poolConfig.exhaustedAction = ConnectionPool.ExhaustedActions.valueOf(getProperty(
+            Property.EXHAUSTED_ACTION,
+            poolConfig.exhaustedAction.name()));
+        poolConfig.testOnActivate = getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate);
+        poolConfig.testOnDeactivate = getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate);
+        poolConfig.testOnIdle = getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle);
+        poolConfig.testThreads = getBoolean(Property.TEST_THREADS, poolConfig.testThreads);
+        poolConfig.forceWriteOnly = getBoolean(Property.WRITE_ONLY, false);
+        LOG.info(poolConfig.toString());
+    }
+
+    ConnectionPool.Config getPoolConfig() {
+        return poolConfig;
     }
 
     /**
@@ -302,7 +331,7 @@ public final class Configuration {
          * @param propertyName Name of the property in the server.properties
          * file.
          */
-        private Property(final String propertyName) {
+        private Property(String propertyName) {
             this.propertyName = propertyName;
         }
     }

@@ -58,8 +58,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 
 /**
  * Implementation of the object pool.
@@ -418,10 +416,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      */
     public void destroy() {
         running = false;
-        if (!cleaner.cancel()) {
-            PoolingException e = new PoolingException("Can not stop pool cleaner.");
-            LOG.error(e.getMessage(), e);
-        }
     }
 
     /**
@@ -527,25 +521,21 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return retval / useTimes.length;
     }
 
-    private ScheduledTimerTask cleaner;
-
-    public void registerCleaner(TimerService timerService, long interval) {
-        cleaner = timerService.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                try {
-                    Thread thread = Thread.currentThread();
-                    String origName = thread.getName();
-                    thread.setName("PoolCleaner");
-                    ReentrantLockPool.this.run();
-                    thread.setName(origName);
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
-                }
+    private final Runnable cleaner = new Runnable() {
+        public void run() {
+            try {
+                Thread thread = Thread.currentThread();
+                String origName = thread.getName();
+                thread.setName("PoolCleaner");
+                ReentrantLockPool.this.run();
+                thread.setName(origName);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
             }
-        }, interval, interval);
-    }
+        }
+    };
 
-    public ScheduledTimerTask getCleanerTask() {
+    public Runnable getCleanerTask() {
         return cleaner;
     }
 

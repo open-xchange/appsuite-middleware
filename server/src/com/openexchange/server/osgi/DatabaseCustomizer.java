@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link DatabaseCustomizer}
@@ -75,6 +76,7 @@ public class DatabaseCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(ServiceReference reference) {
         DatabaseService service = (DatabaseService) context.getService(reference);
+        ServerServiceRegistry.getInstance().addService(DatabaseService.class, service);
         Database.setDatabaseService(service);
         return service;
     }
@@ -85,6 +87,7 @@ public class DatabaseCustomizer implements ServiceTrackerCustomizer {
 
     public void removedService(ServiceReference reference, Object service) {
         Database.setDatabaseService(null);
+        ServerServiceRegistry.getInstance().removeService(DatabaseService.class);
         context.ungetService(reference);
     }
 }

@@ -50,8 +50,14 @@
 package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -68,33 +74,21 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static final Log LOG = LogFactory.getLog(ConfigDatabaseServiceImpl.class);
 
-    private Pools pools;
+    private final boolean forceWriteOnly;
 
-    private AssignmentStorage assignmentStorage;
+    private final Pools pools;
 
-    private boolean forceWriteOnly;
+    private final ConfigDatabaseAssignmentService assignmentService;
 
-    /**
-     * Initializes a new {@link ConfigDatabaseServiceImpl}.
-     */
-    public ConfigDatabaseServiceImpl() {
+    ConfigDatabaseServiceImpl(boolean forceWriteOnly, ConfigDatabaseAssignmentService assignmentService, Pools pools) {
         super();
-    }
-
-    public void setPools(Pools pools) {
+        this.forceWriteOnly = forceWriteOnly;
+        this.assignmentService = assignmentService;
         this.pools = pools;
     }
 
-    public void setAssignmentStorage(AssignmentStorage assignementStorage) {
-        this.assignmentStorage = assignementStorage;
-    }
-
-    public void setForceWrite(final boolean forceWriteOnly) {
-        this.forceWriteOnly = forceWriteOnly;
-    }
-
-    private Connection get(final boolean write) throws DBPoolingException {
-        final Assignment assign = assignmentStorage.getConfigDBAssignment();
+    private Connection get(boolean write) throws DBPoolingException {
+        final Assignment assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
             poolId = assign.getWritePoolId();
@@ -108,14 +102,8 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         }
     }
 
-    /**
-     * Returns a connection to the config database to the pool.
-     * @param write <code>true</code> if you obtained a writable connection.
-     * @param con Connection to return.
-     */
-    private void back(final boolean write, final Connection con) {
-        // TODO remove null check to produce more error messages
-        final Assignment assign = assignmentStorage.getConfigDBAssignment();
+    private void back(boolean write, Connection con) {
+        final Assignment assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
             poolId = assign.getWritePoolId();
@@ -125,7 +113,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         back(poolId, con, false);
     }
 
-    private void back(final int poolId, final Connection con, final boolean noTimeout) {
+    private void back(int poolId, Connection con, boolean noTimeout) {
         try {
             final ConnectionPool pool = pools.getPool(poolId);
             if (noTimeout) {
@@ -133,10 +121,10 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             } else {
                 pool.back(con);
             }
-        } catch (final PoolingException e) {
-            final DBPoolingException exc = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
-            LOG.error(exc.getMessage(), exc);
-        } catch (final DBPoolingException e) {
+        } catch (PoolingException e) {
+            final DBPoolingException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+            LOG.error(e1.getMessage(), e1);
+        } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -157,4 +145,30 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         back(true, con);
     }
 
+    public int[] listContexts(int poolId) throws DBPoolingException {
+        List<Integer> tmp = new ArrayList<Integer>();
+        Connection con = getReadOnly();
+        final String getcid = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(getcid);
+            stmt.setInt(1, poolId);
+            stmt.setInt(2, poolId);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                tmp.add(I(result.getInt(1)));
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            backReadOnly(con);
+        }
+        int[] retval = new int[tmp.size()];
+        for (int i = 0; i < tmp.size(); i++) {
+            retval[i] = tmp.get(i).intValue();
+        }
+        return retval;
+    }
 }

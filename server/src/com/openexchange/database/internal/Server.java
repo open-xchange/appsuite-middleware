@@ -70,9 +70,6 @@ import com.openexchange.database.DBPoolingExceptionCodes;
  */
 public final class Server {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(Server.class);
 
     private static final String PROPERTY_NAME = "SERVER_NAME";
@@ -92,7 +89,7 @@ public final class Server {
         super();
     }
 
-    public static void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
+    static void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
         Server.configDatabaseService = configDatabaseService;
     }
 

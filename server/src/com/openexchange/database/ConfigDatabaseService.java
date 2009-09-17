@@ -84,4 +84,6 @@ public interface ConfigDatabaseService {
      */
     void backWritable(Connection con);
 
+    int[] listContexts(int poolId) throws DBPoolingException;
+
 }

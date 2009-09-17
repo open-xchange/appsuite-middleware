@@ -54,9 +54,8 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link Initialization}
@@ -69,15 +68,17 @@ public final class Initialization {
 
     private static final Initialization SINGLETON = new Initialization();
 
-    private ManagementService managementService;
-
     private CacheService cacheService;
 
-    private Configuration configuration;
+    private final Management management = new Management();
+
+    private final Timer timer = new Timer();
+
+    private final Configuration configuration = new Configuration();
 
     private Pools pools;
 
-    private AssignmentStorage assignmentStorage;
+    private ContextDatabaseAssignmentImpl contextAssignment;
 
     private ConfigDatabaseServiceImpl configDatabaseService;
 
@@ -95,30 +96,33 @@ public final class Initialization {
     }
 
     public boolean isStarted() {
-        return null != configuration;
+        return null != pools;
     }
 
-    public DatabaseService start(ConfigurationService configurationService, TimerService timerService) throws DBPoolingException {
-        configuration = new Configuration();
+    public DatabaseService start(ConfigurationService configurationService) throws DBPoolingException {
+        if (null != pools) {
+            throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
+        }
+        // Parse configuration
         configuration.readConfiguration(configurationService);
+        // Set timer interval
+        timer.configure(configuration);
         // Setting up database connection pools.
-        pools = new Pools(timerService);
-        pools.start(configuration);
-        if (null != managementService) {
-            pools.setManagementService(managementService);
-        }
-        // Setting up assignment storage.
-        assignmentStorage = new AssignmentStorage();
+        pools = new Pools(timer);
+        // Add life cycle for configuration database
+        ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
+        pools.addLifeCycle(configDBLifeCycle);
+        // Configuration database connection pool service.
+        configDatabaseService = new ConfigDatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, new ConfigDatabaseAssignmentImpl(), pools);
+
+        // Context database assignments.
+        contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
         if (null != cacheService) {
-            assignmentStorage.setCacheService(cacheService);
+            contextAssignment.setCacheService(cacheService);
         }
-        // Initialize service for connections to config database.
-        configDatabaseService = new ConfigDatabaseServiceImpl();
-        configDatabaseService.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
-        configDatabaseService.setPools(pools);
-        pools.setConnectionDataStorage(new ConnectionDataStorage(configDatabaseService));
-        configDatabaseService.setAssignmentStorage(assignmentStorage);
-        assignmentStorage.setConfigDatabaseService(configDatabaseService);
+        // Context pool life cycle.
+        ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
+        pools.addLifeCycle(contextDBLifeCycle);
 
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
@@ -128,58 +132,39 @@ public final class Initialization {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
 
-        databaseService = new DatabaseServiceImpl();
-        databaseService.setConfigDatabaseService(configDatabaseService);
-        databaseService.setPools(pools);
-        databaseService.setAssignmentStorage(assignmentStorage);
-        databaseService.setForceWrite(ConnectionPool.DEFAULT_CONFIG.forceWriteOnly); // FIXME: This is most certainly not correct.
+        databaseService = new DatabaseServiceImpl(configuration.getPoolConfig().forceWriteOnly, pools, configDatabaseService, contextAssignment);
         return databaseService;
     }
 
     public void stop() {
-        databaseService.setAssignmentStorage(null);
-        databaseService.setPools(null);
-        databaseService.setConfigDatabaseService(null);
         databaseService = null;
-        assignmentStorage.setConfigDatabaseService(null);
-        configDatabaseService.setAssignmentStorage(null);
-        pools.setConnectionDataStorage(null);
-        configDatabaseService.setPools(null);
+        contextAssignment.removeCacheService();
+        contextAssignment = null;
         configDatabaseService = null;
-        assignmentStorage.removeCacheService();
-        assignmentStorage = null;
-        pools.removeManagementService();
-        pools.stop();
+        pools.stop(timer);
         pools = null;
         configuration.clear();
-        configuration = null;
-    }
-
-    public void setManagementService(ManagementService service) {
-        this.managementService = service;
-        if (null != pools) {
-            pools.setManagementService(service);
-        }
-    }
-
-    public void removeManagementService() {
-        this.managementService = null;
-        if (null != pools) {
-            pools.removeManagementService();
-        }
     }
 
     public void setCacheService(CacheService service) {
         this.cacheService = service;
-        if (null != pools) {
-            assignmentStorage.setCacheService(service);
+        if (null != contextAssignment) {
+            contextAssignment.setCacheService(service);
         }
     }
 
     public void removeCacheService() {
         this.cacheService = null;
-        if (null != pools) {
-            assignmentStorage.removeCacheService();
+        if (null != contextAssignment) {
+            contextAssignment.removeCacheService();
         }
+    }
+
+    public Management getManagement() {
+        return management;
+    }
+
+    public Timer getTimer() {
+        return timer;
     }
 }

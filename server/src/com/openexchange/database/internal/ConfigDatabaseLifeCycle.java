@@ -49,21 +49,42 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.monitoring.MonitorMBean;
+import com.openexchange.database.DBPoolingException;
 
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Creates the pools for the configuration database connections.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
-    /**
-     * Domain for the beans.
-     */
-    String DOMAIN = "com.openexchange.pooling";
+    private final ConnectionPool configDBWrite;
 
-    /**
-     * @return the number of threads waiting for a connection.
-     */
-    int getNumWaiting();
+    private final ConnectionPool configDBRead;
+
+    ConfigDatabaseLifeCycle(Configuration configuration, Management management, Timer timer) {
+        super();
+        configDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
+        timer.addTask(configDBWrite.getCleanerTask());
+        management.addPool(Constants.CONFIGDB_WRITE_ID, configDBWrite);
+        configDBRead = new ConnectionPool(configuration.getReadUrl(), configuration.getReadProps(), configuration.getPoolConfig());
+        timer.addTask(configDBRead.getCleanerTask());
+        management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
+    }
+
+    public ConnectionPool create(int poolId) throws DBPoolingException {
+        switch (poolId) {
+        case Constants.CONFIGDB_WRITE_ID:
+            return configDBWrite;
+        case Constants.CONFIGDB_READ_ID:
+            return configDBRead;
+        default:
+            return null;
+        }
+    }
+
+    public boolean destroy(int poolId) {
+        // Pools to configuration database will not be destroyed.
+        return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;
+    }
 }

@@ -49,21 +49,18 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.monitoring.MonitorMBean;
-
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Contains some constants.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+public final class Constants {
 
-    /**
-     * Domain for the beans.
-     */
-    String DOMAIN = "com.openexchange.pooling";
+    public static final int CONFIGDB_READ_ID = -1;
 
-    /**
-     * @return the number of threads waiting for a connection.
-     */
-    int getNumWaiting();
+    public static final int CONFIGDB_WRITE_ID = -2;
+
+    private Constants() {
+        super();
+    }
 }

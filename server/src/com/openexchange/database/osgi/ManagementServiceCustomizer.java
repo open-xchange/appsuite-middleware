@@ -79,7 +79,7 @@ public final class ManagementServiceCustomizer implements ServiceTrackerCustomiz
     public Object addingService(ServiceReference reference) {
         ManagementService service = (ManagementService) context.getService(reference);
         LOG.info("Injecting ManagementService into database bundle.");
-        Initialization.getInstance().setManagementService(service);
+        Initialization.getInstance().getManagement().setManagementService(service);
         return service;
     }
 
@@ -89,7 +89,7 @@ public final class ManagementServiceCustomizer implements ServiceTrackerCustomiz
 
     public void removedService(ServiceReference reference, Object service) {
         LOG.info("Removing ManagementService from database bundle.");
-        Initialization.getInstance().removeManagementService();
+        Initialization.getInstance().getManagement().removeManagementService();
         context.ungetService(reference);
     }
 }

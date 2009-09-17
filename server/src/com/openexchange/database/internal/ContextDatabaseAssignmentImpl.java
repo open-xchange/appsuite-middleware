@@ -56,8 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -78,20 +76,13 @@ import com.openexchange.database.DBPoolingException;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AssignmentStorage {
+public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssignmentService {
 
-    private static final AssignmentStorage singleton = new AssignmentStorage();
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(AssignmentStorage.class);
-
-    private static final Assignment configDB = new Assignment(0, 0, Pools.CONFIGDB_READ_ID, Pools.CONFIGDB_WRITE_ID, null);
+    private static final Log LOG = LogFactory.getLog(ContextDatabaseAssignmentImpl.class);
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
 
-    private ConfigDatabaseService configDatabaseService;
+    private final ConfigDatabaseService configDatabaseService;
 
     private static final String CACHE_NAME = "OXDBPoolCache";
 
@@ -107,29 +98,12 @@ public final class AssignmentStorage {
     /**
      * Default constructor.
      */
-    public AssignmentStorage() {
+    public ContextDatabaseAssignmentImpl(ConfigDatabaseService configDatabaseService) {
         super();
+        this.configDatabaseService = configDatabaseService;
     }
 
-    /**
-     * TODO remove that method.
-     */
-    public static AssignmentStorage getInstance() {
-        return singleton;
-    }
-
-    /**
-     * Gets a database assignment for a context. If the cache is enabled this
-     * method looks into the cache for the assignment and loads it from the
-     * database if cache is disabled or the cache doesn't contain the entry.
-     * 
-     * @param contextId
-     *            unique identifier of the context.
-     * @return the assignment.
-     * @throws DBPoolingException
-     *             if getting the assignment fails.
-     */
-    public Assignment getAssignment(final int contextId) throws DBPoolingException {
+    public Assignment getAssignment(int contextId) throws DBPoolingException {
         Assignment retval;
         if (null == cache) {
             retval = loadAssignment(contextId);
@@ -153,7 +127,7 @@ public final class AssignmentStorage {
         return retval;
     }
 
-    private Assignment loadAssignment(final int contextId) throws DBPoolingException {
+    private Assignment loadAssignment(int contextId) throws DBPoolingException {
         Assignment retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;
@@ -170,7 +144,7 @@ public final class AssignmentStorage {
             } else {
                 throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -179,39 +153,7 @@ public final class AssignmentStorage {
         return retval;
     }
 
-    public List<Integer> listContexts(final int poolid) throws DBPoolingException {
-        final List<Integer> retval = new ArrayList<Integer>();
-        final Connection con = configDatabaseService.getReadOnly();
-        // TODO optimize this bad query
-        final String getcid = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(getcid);
-            stmt.setInt(1, poolid);
-            stmt.setInt(2, poolid);
-            result = stmt.executeQuery();
-            while (result.next()) {
-                retval.add(Integer.valueOf(result.getInt(1)));
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-            configDatabaseService.backReadOnly(con);
-        }
-        return retval;
-    }
-
-    /**
-     * Invalidates an assignment for a context in the cache.
-     * 
-     * @param contextId
-     *            unique identifier of the context.
-     * @throws DBPoolingException
-     *             if getting the server identifier fails.
-     */
-    public void removeAssignments(final int contextId) throws DBPoolingException {
+    public void removeAssignments(int contextId) throws DBPoolingException {
         if (null != cache) {
             try {
                 cache.remove(cache.newCacheKey(contextId, Server.getServerId()));
@@ -219,14 +161,6 @@ public final class AssignmentStorage {
                 LOG.error(e.getMessage(), e);
             }
         }
-    }
-
-    public Assignment getConfigDBAssignment() {
-        return configDB;
-    }
-
-    public void setConfigDatabaseService(ConfigDatabaseService configDatabaseService) {
-        this.configDatabaseService = configDatabaseService;
     }
 
     void setCacheService(final CacheService service) {

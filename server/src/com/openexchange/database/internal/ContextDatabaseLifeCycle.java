@@ -51,41 +51,107 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 
 /**
- * Reads a database connection from the config DB.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Handles the life cycle of database connection pools for contexts databases.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConnectionDataStorage {
+public class ContextDatabaseLifeCycle implements PoolLifeCycle {
+
+    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
 
     private static final String SELECT = "SELECT url,driver,login,password,hardlimit,max,initial FROM db_pool WHERE db_pool_id=?";
 
+    private final Management management;
+
+    private final Timer timer;
+
     private final ConfigDatabaseService configDatabaseService;
 
-    /**
-     * Default constructor.
-     */
-    public ConnectionDataStorage(ConfigDatabaseService configDatabaseService) {
+    private final ConnectionPool.Config defaultPoolConfig;
+
+    private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
+
+    public ContextDatabaseLifeCycle(Configuration configuration, Management management, Timer timer, ConfigDatabaseService configDatabaseService) {
         super();
+        this.management = management;
+        this.timer = timer;
         this.configDatabaseService = configDatabaseService;
+        this.defaultPoolConfig = configuration.getPoolConfig();
     }
 
-    public ConnectionData loadPoolData(final int poolId)
-        throws DBPoolingException {
+    public ConnectionPool create(int poolId) throws DBPoolingException {
+        ConnectionData data = loadPoolData(poolId);
+        try {
+            Class.forName(data.driverClass);
+        } catch (ClassNotFoundException e) {
+            throw DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
+        }
+        ConnectionPool retval = new ConnectionPool(data.url, data.props, getConfig(data));
+        pools.put(I(poolId), retval);
+        timer.addTask(retval.getCleanerTask());
+        management.addPool(poolId, retval);
+        return retval;
+    }
+
+    public boolean destroy(int poolId) {
+        ConnectionPool toDestroy = pools.remove(I(poolId));
+        if (null == toDestroy) {
+            return false;
+        }
+        management.removePool(poolId);
+        timer.removeTask(toDestroy.getCleanerTask());
+        toDestroy.destroy();
+        return true;
+    }
+
+    private ConnectionPool.Config getConfig(final ConnectionData data) {
+        final ConnectionPool.Config retval = defaultPoolConfig.clone();
+        retval.maxActive = data.max;
+        retval.minIdle = data.min;
+        if (data.block) {
+            retval.exhaustedAction = ConnectionPool.ExhaustedActions.BLOCK;
+        } else {
+            retval.exhaustedAction = ConnectionPool.ExhaustedActions.GROW;
+        }
+        return retval;
+    }
+
+    private static void parseUrlToProperties(final ConnectionData retval) throws DBPoolingException {
+        final int paramStart = retval.url.indexOf('?');
+        if (-1 != paramStart) {
+            final Matcher matcher = pattern.matcher(retval.url);
+            retval.url = retval.url.substring(0, paramStart);
+            while (matcher.find()) {
+                final String name = matcher.group(1);
+                final String value = matcher.group(2);
+                if (name != null && name.length() > 0 && value != null && value.length() > 0) {
+                    try {
+                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
+                    } catch (final UnsupportedEncodingException e) {
+                        throw DBPoolingExceptionCodes.PARAMETER_PROBLEM.create(e, value);
+                    }
+                }
+            }
+        }
+    }
+
+    ConnectionData loadPoolData(int poolId) throws DBPoolingException {
         ConnectionData retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;
@@ -116,26 +182,5 @@ public class ConnectionDataStorage {
         }
         parseUrlToProperties(retval);
         return retval;
-    }
-
-    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
-
-    private static void parseUrlToProperties(final ConnectionData retval) throws DBPoolingException {
-        final int paramStart = retval.url.indexOf('?');
-        if (-1 != paramStart) {
-            final Matcher matcher = pattern.matcher(retval.url);
-            retval.url = retval.url.substring(0, paramStart);
-            while (matcher.find()) {
-                final String name = matcher.group(1);
-                final String value = matcher.group(2);
-                if (name != null && name.length() > 0 && value != null && value.length() > 0) {
-                    try {
-                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
-                    } catch (final UnsupportedEncodingException e) {
-                        throw DBPoolingExceptionCodes.PARAMETER_PROBLEM.create(e, value);
-                    }
-                }
-            }
-        }
     }
 }

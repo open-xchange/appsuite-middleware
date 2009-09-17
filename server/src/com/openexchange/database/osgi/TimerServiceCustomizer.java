@@ -47,23 +47,46 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.database.osgi;
 
-import com.openexchange.monitoring.MonitorMBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.internal.Initialization;
+import com.openexchange.timer.TimerService;
 
 /**
- * Interface for monitoring object pools.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link TimerServiceCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConnectionPoolMBean extends MonitorMBean {
+public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
 
-    /**
-     * Domain for the beans.
-     */
-    String DOMAIN = "com.openexchange.pooling";
+    private static final Log LOG = LogFactory.getLog(ManagementServiceCustomizer.class);
 
-    /**
-     * @return the number of threads waiting for a connection.
-     */
-    int getNumWaiting();
+    private final BundleContext context;
+
+    public TimerServiceCustomizer(BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    public Object addingService(ServiceReference reference) {
+        TimerService timer = (TimerService) context.getService(reference);
+        LOG.info("Injecting TimerService into database bundle.");
+        Initialization.getInstance().getTimer().setTimerService(timer);
+        return timer;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        LOG.info("Removing TimerService from database bundle.");
+        Initialization.getInstance().getTimer().removeTimerService();
+        context.ungetService(reference);
+    }
 }
