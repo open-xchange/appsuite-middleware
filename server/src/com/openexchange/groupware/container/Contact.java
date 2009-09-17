@@ -57,13 +57,14 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * ContactObject
+ * {@link Contact} - Represents a contact.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
-
 public class Contact extends CommonObject implements Serializable{
+
+    private static final long serialVersionUID = -1556083622176209459L;
 
     public static final int DISPLAY_NAME = 500;
 
@@ -1701,7 +1702,7 @@ public class Contact extends CommonObject implements Serializable{
         setMarkAsDistributionlist(true);
     }
     
-    public void setUseCount(int useCount) {
+    public void setUseCount(final int useCount) {
         this.useCount = useCount;
         b_useCount = true;
     }
@@ -2653,13 +2654,13 @@ public class Contact extends CommonObject implements Serializable{
 
     @Override
     public Set<Integer> findDifferingFields(final DataObject dataObject) {
-        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
 
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
             return differingFields;
         }
 
-        Contact other = (Contact) dataObject;
+        final Contact other = (Contact) dataObject;
 
         if ((!containsURL() && other.containsURL()) || (containsURL() && other.containsURL() && getURL() != other.getURL() && (getURL() == null || !getURL().equals(
             other.getURL())))) {
@@ -3164,12 +3165,12 @@ public class Contact extends CommonObject implements Serializable{
         return differingFields;
     }
 
-    private boolean isDifferent(byte[] a, byte[] b) {
+    private boolean isDifferent(final byte[] a, final byte[] b) {
         return !Arrays.equals(a, b);
     }
 
     @Override
-    public void set(int field, Object value) {
+    public void set(final int field, final Object value) {
         switch (field) {
         case POSTAL_CODE_HOME:
             setPostalCodeHome((String) value);
@@ -3490,7 +3491,7 @@ public class Contact extends CommonObject implements Serializable{
     }
 
     @Override
-    public Object get(int field) {
+    public Object get(final int field) {
         switch (field) {
         case POSTAL_CODE_HOME:
             return getPostalCodeHome();
@@ -3707,7 +3708,7 @@ public class Contact extends CommonObject implements Serializable{
     }
 
     @Override
-    public boolean contains(int field) {
+    public boolean contains(final int field) {
         switch (field) {
         case POSTAL_CODE_HOME:
             return containsPostalCodeHome();
@@ -3922,7 +3923,7 @@ public class Contact extends CommonObject implements Serializable{
     }
 
     @Override
-    public void remove(int field) {
+    public void remove(final int field) {
         switch (field) {
         case POSTAL_CODE_HOME:
             removePostalCodeHome();
@@ -4238,8 +4239,9 @@ public class Contact extends CommonObject implements Serializable{
 
         }
     }
+    @Override
     public String toString(){
-        StringBuilder name = new StringBuilder();
+        final StringBuilder name = new StringBuilder();
         if(containsTitle()){
             name.append(getTitle());
             name.append(" ");
