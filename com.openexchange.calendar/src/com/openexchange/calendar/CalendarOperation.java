@@ -1595,6 +1595,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setTimezone(rs.wasNull() ? null : tz);
                 }
             });
+            put(Integer.valueOf(Appointment.RECURRENCE_START), new FieldFiller() {
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
+                        throws SQLException {
+                    final long recurring_start = rs.getLong(columnCount);
+                    cdao.setRecurringStart(recurring_start);
+                }
+            });
+
         }
     };
 }

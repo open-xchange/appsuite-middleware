@@ -313,6 +313,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_USER = "user";
 
+    public static final String PARAMETER_TEMPLATE = "template";
     /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
@@ -352,6 +353,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * Error message if writing the response fails.
      */
     protected static final String RESPONSE_ERROR = "Error while writing response object.";
+    
 
     /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise apache things in a

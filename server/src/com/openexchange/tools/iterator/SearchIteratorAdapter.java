@@ -246,4 +246,12 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             }
         };
     }
+    
+    public static <T> List<T> toList(final SearchIterator<T> iterator) throws SearchIteratorException, OXException {
+        List<T> list = new ArrayList<T>();
+        while(iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
+    }
 }
