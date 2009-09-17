@@ -436,7 +436,8 @@ public final class Init {
         registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
         final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
         final TimerService timerService = (TimerService) services.get(TimerService.class);
-        DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, timerService);
+        com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
+        DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
         Database.setDatabaseService(dbService);
     }
 
