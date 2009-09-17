@@ -49,6 +49,8 @@
 
 package com.openexchange.publish.microformats.tools;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
 
@@ -72,6 +74,16 @@ public class ContactTemplateUtils {
         } else {
             return "/publications/contactPictures/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get("siteName")+"/"+contactObject.getObjectID()+"/image";
         }
+    }
+    
+    public List<Contact> onlyPublic(List<Contact> contacts) {
+        List<Contact> filtered = new ArrayList<Contact>(contacts.size());
+        for (Contact contact : contacts) {
+            if(!contact.getPrivateFlag()) {
+                filtered.add(contact);
+            }
+        }
+        return filtered;
     }
 
 }

@@ -173,6 +173,7 @@
 </head>
 
 <body>
+	<#assign contacts = utils.onlyPublic(contacts)>
 	<#if (contacts?size == 0)>
 		<div class="message">Folder is empty</div>
 	</#if>
