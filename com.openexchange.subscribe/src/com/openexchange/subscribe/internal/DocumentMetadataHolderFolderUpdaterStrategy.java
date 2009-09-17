@@ -52,6 +52,7 @@ package com.openexchange.subscribe.internal;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -66,7 +67,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.subscribe.Subscription;
@@ -176,6 +176,9 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         try {
             URL url = new URL(newElement.dataLink);
             final URLConnection urlCon = url.openConnection();
+            if(HttpURLConnection.class.isInstance(urlCon)) {
+                ((HttpURLConnection) urlCon).setChunkedStreamingMode(1024);
+            }
             urlCon.setConnectTimeout(2500);
             urlCon.setReadTimeout(2500);
             urlCon.connect();
