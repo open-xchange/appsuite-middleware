@@ -1,3 +1,7 @@
+* 2009-09-17 - francisco.laguna@open-xchange.com
+
+ - Bugfix #14504: Show only public contacts in publications
+
 * 2009-09-15 - martin.herfurth@open-xchange.com
 
  - Bugfix #12050: Series conflicts with own exceptions.
