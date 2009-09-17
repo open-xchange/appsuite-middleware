@@ -93,19 +93,17 @@ public class AJPv13TaskWatcher {
     public AJPv13TaskWatcher(final ThreadPoolService threadPoolService) {
         super();
         tasks = new ConcurrentHashMap<Long, AJPv13Task>();
-        if (AJPv13Config.getAJPWatcherEnabled()) {
-            /*
-             * Start task if enabled
-             */
-            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-            if (null != timer) {
-                task =
-                    timer.scheduleWithFixedDelay(
-                        new Task(tasks.values(), threadPoolService, LOG),
-                        1000,
-                        AJPv13Config.getAJPWatcherFrequency(),
-                        TimeUnit.MILLISECONDS);
-            }
+        /*
+         * Start keep-alive task
+         */
+        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+        if (null != timer) {
+            task =
+                timer.scheduleWithFixedDelay(
+                    new Task(tasks.values(), threadPoolService, LOG),
+                    1000,
+                    AJPv13Config.getAJPWatcherFrequency(),
+                    TimeUnit.MILLISECONDS);
         }
     }
 
@@ -172,7 +170,7 @@ public class AJPv13TaskWatcher {
 
         public void run() {
             try {
-                final boolean enabled = AJPv13Config.getAJPWatcherPermission();
+                final boolean enabled = AJPv13Config.getAJPWatcherEnabled() && AJPv13Config.getAJPWatcherPermission();
                 final AtomicInteger countWaiting;
                 final AtomicInteger countProcessing;
                 final AtomicInteger countExceeded;
