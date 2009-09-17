@@ -156,7 +156,7 @@ msgid ""
 msgstr ""
 "---------- Ursprüngliche Nachricht ----------\n"
 "Von: #FROM#\n"
-"An: #TO#CC_LINE#\n"
+"An: #TO##CC_LINE#\n"
 "Datum: #DATE# um #TIME#\n"
 "Betreff: #SUBJECT#"
 
