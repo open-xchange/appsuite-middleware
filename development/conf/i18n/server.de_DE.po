@@ -1,14 +1,14 @@
-# translation of server.de_DE.po to deutsch
+# translation of server-de_DE.po to deutsch
 # Antje Faber, 2007.
 # Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
 # translation of server.new.de_DE.po to
 # translation of server.de_DE.po to
 msgid ""
 msgstr ""
-"Project-Id-Version: server.de_DE\n"
+"Project-Id-Version: server-de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2009-06-25 11:02+0200\n"
+"PO-Revision-Date: 2009-09-04 15:31+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -156,7 +156,7 @@ msgid ""
 msgstr ""
 "---------- Ursprüngliche Nachricht ----------\n"
 "Von: #FROM#\n"
-"An: #TO#CC_LINE#\n"
+"An: #TO##CC_LINE#\n"
 "Datum: #DATE# um #TIME#\n"
 "Betreff: #SUBJECT#"
 
@@ -176,6 +176,28 @@ msgstr "Die für diese E-Mail verfügbaren Anhänge sind über diese Links verf�
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:100
 msgid "The links will be deleted by #DATE#"
 msgstr "Die Links werden bis #DATE# gelöscht"
+
+#: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/MicroformatStrings.java:59
+msgid ""
+"Privacy:\n"
+"The data and any references contained in this webpage are shared with you "
+"under the assumption that the owner of the data was entitled to make them "
+"available to you. Neither Open-Xchange, nor any of its subsidiaries or "
+"affiliates shall be liable for its publication or re-publication.\n"
+"Any unauthorized use or dissemination of this data is prohibited. If you "
+"intend to store, process, or pass on this data, please make sure that you "
+"have the right to do so.\n"
+"If you are one of the people listed or responsible for a resource listed on "
+"this page and you don't agree with the publication, please send an email "
+"containing the URL (the link) to this webpage to %s and the publisher of the "
+"data:\n"
+"Data published by %s on %s\n"
+msgstr ""
+"Datenschutzhinweis:\n"
+"Alle Daten und Verweise, die Sie auf dieser Webseite sehen, wurden unter der Annahme veröffentlicht, dass der Inhaber der Daten zur Weitergabe der Daten berechtigt war. Open-Xchange und seine verbundenen Unternehmen sind nicht verantwortlich für die Weitergabe der Daten. Jede unberechtigte Verwendung oder Weitergabe dieser Daten ist verboten.\n"
+"Wenn Sie beabsichtigen, diese Daten zu speichern, zu verarbeiten oder weiterzugeben, stellen Sie bitte sicher, dass Sie dazu die entsprechenden Rechte haben, insbesondere die Zustimmung der betroffenen Personen.\n"
+"Wenn Sie feststellen, dass Ihre personenbezogenen Daten ohne Ihr Einverständnis oder andere Daten fälschlicherweise hier veröffentlicht wurden, senden Sie bitte eine Mail mit der URL/Adresse dieser Seite %s an den Herausgeber der Daten:\n"
+"Daten veröffentlicht von %s am %s\n"
 
 #: tmp/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:59
 msgid ""
