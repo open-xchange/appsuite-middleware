@@ -49,8 +49,8 @@
 
 package com.openexchange.server.osgiservice;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 
