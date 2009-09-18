@@ -177,8 +177,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * @param filterSet The filter set containing classes unsupported search terms
      * @return A new search term with the unsupported search terms removed
      */
-    @SuppressWarnings(UNCHECKED)
-    public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+    public SearchTerm<?> filter(final @SuppressWarnings(UNCHECKED) Set<Class<? extends SearchTerm>> filterSet) {
         if (filterSet.contains(getClass())) {
             return BooleanTerm.FALSE;
         }
@@ -233,7 +232,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * If specified pattern only consists of wildcard characters, an empty string is returned.
      * 
      * @param pattern The pattern possibly containing wildcard characters
-     * @return
+     * @return The largest non-wildcard part
      */
     protected static final String getNonWildcardPart(final String pattern) {
         final String[] parts = PAT_SPLIT.split(pattern);
@@ -262,8 +261,8 @@ public abstract class SearchTerm<T> implements Serializable {
      * <p>
      * Any wildcard characters are replaced with appropriate regex characters.
      * 
-     * @param pattern
-     * @return
+     * @param pattern The wildcard pattern
+     * @return The corresponding regular expression
      */
     protected static Pattern toRegex(final String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
@@ -289,7 +288,7 @@ public abstract class SearchTerm<T> implements Serializable {
                 /*
                  * Escape special regular expression characters
                  */
-                s.append("\\");
+                s.append('\\');
                 s.append(c);
             } else {
                 s.append(c);

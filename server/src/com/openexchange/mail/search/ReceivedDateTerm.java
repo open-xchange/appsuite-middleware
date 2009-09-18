@@ -110,11 +110,12 @@ public final class ReceivedDateTerm extends SearchTerm<long[]> {
             return false;
         }
         final long[] dat = getPattern();
-        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+        final int comparisonType = (int) dat[0];
+        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
             return dat[1] == receivedDate.getTime();
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
             return dat[1] > receivedDate.getTime();
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
             return dat[1] < receivedDate.getTime();
         } else {
             return dat[1] == receivedDate.getTime();
@@ -133,11 +134,12 @@ public final class ReceivedDateTerm extends SearchTerm<long[]> {
             return false;
         }
         final long[] dat = getPattern();
-        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+        final int comparisonType = (int) dat[0];
+        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
             return dat[1] == receivedDate.getTime();
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
             return dat[1] > receivedDate.getTime();
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
             return dat[1] < receivedDate.getTime();
         } else {
             return dat[1] == receivedDate.getTime();
@@ -148,11 +150,12 @@ public final class ReceivedDateTerm extends SearchTerm<long[]> {
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
         final long[] dat = getPattern();
         final int ct;
-        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+        final int comparisonType = (int) dat[0];
+        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
             ct = ComparisonTerm.EQ;
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
             ct = ComparisonTerm.LT;
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
             ct = ComparisonTerm.GT;
         } else {
             ct = ComparisonTerm.EQ;
