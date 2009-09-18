@@ -74,7 +74,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
 /**
- * {@link AllAction} - Maps the action to a <tt>all</tt> action.
+ * {@link AllAction} - Maps the action to an <tt>all</tt> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,6 +82,9 @@ public final class AllAction extends AbstractUserAction {
 
     private static final User[] EMPTY_USERS = new User[0];
 
+    /**
+     * The <tt>all</tt> action string.
+     */
     public static final String ACTION = AJAXServlet.ACTION_ALL;
 
     /**

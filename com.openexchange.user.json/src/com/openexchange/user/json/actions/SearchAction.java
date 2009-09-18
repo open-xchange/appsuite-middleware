@@ -86,6 +86,9 @@ public final class SearchAction extends AbstractUserAction {
 
     private static final Contact[] EMPTY_CONTACTS = new Contact[0];
 
+    /**
+     * The <tt>search</tt> action string.
+     */
     public static final String ACTION = AJAXServlet.ACTION_SEARCH;
 
     /**

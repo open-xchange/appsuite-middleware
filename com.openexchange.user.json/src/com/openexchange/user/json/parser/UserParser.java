@@ -50,7 +50,10 @@
 package com.openexchange.user.json.parser;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +63,7 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -79,14 +83,38 @@ public final class UserParser {
     }
 
     /**
-     * Parses a user from given JSON object.
+     * Parses a user data from given JSON object.
      * 
      * @param userJSONObject The JSON object containing user data
-     * @param timeZone The time zone of requesting session's user
+     * @param userId The user ID
      * @return The parsed user
-     * @throws AjaxException If parsing user fails
+     * @throws AjaxException If parsing user data fails
      */
-    public static Contact parseFolder(final JSONObject userJSONObject, final TimeZone timeZone) throws AjaxException {
+    public static User parseUserData(final JSONObject userJSONObject, final int userId) throws AjaxException {
+        try {
+            final ParsedUser user = new ParsedUser();
+            if (userJSONObject.has(UserField.LOCALE.getName())) {
+                user.setLocale(parseLocaleString(userJSONObject.getString(UserField.LOCALE.getName())));
+            }
+            if (userJSONObject.has(UserField.TIME_ZONE.getName())) {
+                user.setTimeZone(userJSONObject.getString(UserField.TIME_ZONE.getName()));
+            }
+            user.setId(userId);
+            return user;
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
+        }
+    }
+
+    /**
+     * Parses a user contact from given JSON object.
+     * 
+     * @param userJSONObject The JSON object containing user contact data
+     * @param timeZone The time zone of requesting session's user
+     * @return The parsed user contact
+     * @throws AjaxException If parsing user contact fails
+     */
+    public static Contact parseUserContact(final JSONObject userJSONObject, final TimeZone timeZone) throws AjaxException {
         try {
             final Contact contact = new Contact();
             for (int i = 0; i < mapping.length; i++) {
@@ -100,11 +128,11 @@ public final class UserParser {
             if (userJSONObject.has(UserField.LINKS.getName())) {
                 parseLinks(contact, userJSONObject);
             }
-            
+
             if (userJSONObject.has(UserField.CATEGORIES.getName())) {
                 contact.setCategories(parseString(userJSONObject, UserField.CATEGORIES.getName()));
             }
-            
+
             if (userJSONObject.has(UserField.COLOR_LABEL.getName())) {
                 contact.setLabel(parseInt(userJSONObject, UserField.COLOR_LABEL.getName()));
             }
@@ -112,15 +140,15 @@ public final class UserParser {
             if (userJSONObject.has(UserField.PRIVATE_FLAG.getName())) {
                 contact.setPrivateFlag(parseBoolean(userJSONObject, UserField.PRIVATE_FLAG.getName()));
             }
-            
+
             if (userJSONObject.has(UserField.NUMBER_OF_ATTACHMENTS.getName())) {
                 contact.setNumberOfAttachments(parseInt(userJSONObject, UserField.NUMBER_OF_ATTACHMENTS.getName()));
             }
-            
+
             if (userJSONObject.has(UserField.FOLDER_ID.getName())) {
                 contact.setParentFolderID(parseInt(userJSONObject, UserField.FOLDER_ID.getName()));
             }
-            
+
             if (userJSONObject.has(UserField.ID.getName())) {
                 contact.setObjectID(parseInt(userJSONObject, UserField.ID.getName()));
             }
@@ -192,6 +220,26 @@ public final class UserParser {
     /*-
      * #################################### MAPPERS ####################################
      */
+
+    private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
+
+    /**
+     * Parses given locale string into an instance of {@link Locale}
+     * 
+     * @param localeStr The locale string to parse
+     * @return The parsed instance of {@link Locale}
+     * @throws AjaxException If locale string is invalid
+     */
+    private static Locale parseLocaleString(final String localeStr) throws AjaxException {
+        final Matcher match = identifierPattern.matcher(localeStr);
+        Locale retval = null;
+        if (match.matches()) {
+            final String country = match.group(2);
+            final String variant = match.group(3);
+            retval = new Locale(match.group(1), country == null ? "" : country, variant == null ? "" : variant);
+        }
+        return retval;
+    }
 
     private static interface JSONAttributeMapper {
 
@@ -1123,7 +1171,7 @@ public final class UserParser {
         }
 
         final int offset = timeZone.getOffset(d.getTime());
-        d.setTime(d.getTime()-offset);
+        d.setTime(d.getTime() - offset);
         return d;
     }
 

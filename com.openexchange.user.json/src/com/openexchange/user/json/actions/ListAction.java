@@ -68,12 +68,15 @@ import com.openexchange.user.json.services.ServiceRegistry;
 import com.openexchange.user.json.writer.UserWriter;
 
 /**
- * {@link ListAction} - Maps the action to a list action.
+ * {@link ListAction} - Maps the action to a <tt>list</tt> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListAction extends AbstractUserAction {
 
+    /**
+     * The <tt>list</tt> action string.
+     */
     public static final String ACTION = AJAXServlet.ACTION_LIST;
 
     /**

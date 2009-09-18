@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.actions;
 
+import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -61,25 +62,26 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.Utility;
+import com.openexchange.user.json.parser.UserParser;
 import com.openexchange.user.json.services.ServiceRegistry;
-import com.openexchange.user.json.writer.UserWriter;
 
 /**
- * {@link GetAction} - Maps the action to a <tt>get</tt> action.
+ * {@link UpdateAction} - Maps the action to an <tt>update</tt> action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetAction extends AbstractUserAction {
+public final class UpdateAction extends AbstractUserAction {
 
     /**
-     * The <tt>get</tt> action string.
+     * The <tt>update</tt> action string.
      */
-    public static final String ACTION = AJAXServlet.ACTION_GET;
+    public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
     /**
-     * Initializes a new {@link GetAction}.
+     * Initializes a new {@link UpdateAction}.
      */
-    public GetAction() {
+    public UpdateAction() {
         super();
     }
 
@@ -87,28 +89,37 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Parse parameters
          */
-        final int userId = checkIntParameter("id", request);
+        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
         /*
-         * Obtain user from user service
+         * Get user service to get contact ID
          */
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-        final User user = userService.getUser(userId, session.getContext());
+        final int contactId = userService.getUser(id, session.getContext()).getContactId();
         /*
-         * Obtain user's contact
+         * Parse user contact
+         */
+        final JSONObject jData = (JSONObject) request.getData();
+        final Contact parsedUserContact = UserParser.parseUserContact(jData, Utility.getTimeZone(session.getUser().getTimeZone()));
+        parsedUserContact.setObjectID(contactId);
+        /*
+         * Perform update
          */
         final ContactInterface contactInterface =
             ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
                 Constants.USER_ADDRESS_BOOK_FOLDER_ID,
                 session);
-        final Contact userContact = contactInterface.getUserById(userId);
+        contactInterface.updateContactObject(parsedUserContact, Constants.USER_ADDRESS_BOOK_FOLDER_ID, clientLastModified);
         /*
-         * Write user as JSON object
+         * Update user, too
          */
-        final JSONObject jsonObject = UserWriter.writeSingle2Object(null, user, userContact);
+        final User parsedUser = UserParser.parseUserData(jData, id);
+        userService.updateUser(parsedUser, session.getContext());
         /*
-         * Return appropriate result
+         * Get last-modified from server
          */
-        return new AJAXRequestResult(jsonObject);
+        final Date lastModified = contactInterface.getUserById(id).getLastModified();
+        return new AJAXRequestResult(new JSONObject(), lastModified);
     }
 
 }

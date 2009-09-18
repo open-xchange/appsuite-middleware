@@ -69,6 +69,48 @@ public abstract class AbstractUserAction implements AJAXActionService {
     }
 
     /**
+     * Parses specified parameter into an <code>Long</code>.
+     * 
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed <code>Long</code> value or <code>null</code> if not present
+     * @throws AjaxException If parameter is invalid in given request
+     */
+    protected static Long parseLongParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+        String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return null;
+        }
+        tmp = tmp.trim();
+        try {
+            return Long.valueOf(tmp);
+        } catch (final NumberFormatException e) {
+            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+        }
+    }
+
+    /**
+     * Parses specified parameter into an <code>long</code>.
+     * 
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed <code>long</code> value
+     * @throws AjaxException If parameter is invalid in given request
+     */
+    protected static long checkLongParameter(final String parameterName, final AJAXRequestData request) throws AjaxException {
+        String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
+        }
+        tmp = tmp.trim();
+        try {
+            return Long.parseLong(tmp);
+        } catch (final NumberFormatException e) {
+            throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+        }
+    }
+
+    /**
      * Parses specified parameter into an <code>int</code>.
      * 
      * @param parameterName The parameter name

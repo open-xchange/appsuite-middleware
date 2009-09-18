@@ -47,74 +47,144 @@
  *
  */
 
-package com.openexchange.user.json.actions;
+package com.openexchange.user.json.parser;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.tools.servlet.AjaxException;
+import java.util.Set;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link UserActionFactory} - Factory for user component.
+ * {@link ParsedUser} - A parsed user.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserActionFactory implements AJAXActionServiceFactory {
+public final class ParsedUser implements User {
+
+    private static final long serialVersionUID = 3853026806561002845L;
+
+    private int id;
+
+    private Locale locale;
+
+    private String timeZone;
 
     /**
-     * The singleton instance.
+     * Initializes a new {@link ParsedUser}.
      */
-    private static final UserActionFactory SINGLETON = new UserActionFactory();
-
-    /**
-     * Gets the {@link UserActionFactory} instance.
-     * 
-     * @return The {@link UserActionFactory} instance.
-     */
-    public static final UserActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    /*-
-     * Member section
-     */
-
-    /**
-     * The map to store actions.
-     */
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link UserActionFactory}.
-     */
-    private UserActionFactory() {
+    public ParsedUser() {
         super();
-        actions = initActions();
     }
 
-    public AJAXActionService createActionService(final String action) throws AjaxException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw new AjaxException(AjaxException.Code.UnknownAction, action);
-        }
-        return retval;
+    public String[] getAliases() {
+        return null;
+    }
+
+    public Map<String, Set<String>> getAttributes() {
+        return null;
+    }
+
+    public int getContactId() {
+        return -1;
+    }
+
+    public String getDisplayName() {
+        return null;
+    }
+
+    public String getGivenName() {
+        return null;
+    }
+
+    public int[] getGroups() {
+        return null;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getImapLogin() {
+        return null;
+    }
+
+    public String getImapServer() {
+        return null;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public String getLoginInfo() {
+        return null;
+    }
+
+    public String getMail() {
+        return null;
+    }
+
+    public String getMailDomain() {
+        return null;
+    }
+
+    public String getPasswordMech() {
+        return null;
+    }
+
+    public String getPreferredLanguage() {
+        return null == locale ? null : locale.toString();
+    }
+
+    public int getShadowLastChange() {
+        return 0;
+    }
+
+    public String getSmtpServer() {
+        return null;
+    }
+
+    public String getSurname() {
+        return null;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public String getUserPassword() {
+        return null;
+    }
+
+    public boolean isMailEnabled() {
+        return true;
     }
 
     /**
-     * Initializes the unmodifiable map to store actions.
+     * Sets the id
      * 
-     * @return The unmodifiable map with actions stored
+     * @param id The id to set
      */
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(SearchAction.ACTION, new SearchAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        return Collections.unmodifiableMap(tmp);
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    /**
+     * Sets the locale
+     * 
+     * @param locale The locale to set
+     */
+    public void setLocale(final Locale locale) {
+        this.locale = locale;
+    }
+
+    /**
+     * Sets the time zone
+     * 
+     * @param timeZone The time zone to set
+     */
+    public void setTimeZone(final String timeZone) {
+        this.timeZone = timeZone;
     }
 
 }
