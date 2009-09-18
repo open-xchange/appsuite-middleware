@@ -451,9 +451,20 @@ public class OXContextMySQLStorageCommon {
                 stmt = con.prepareStatement("INSERT INTO `" + tableName + "` VALUES (?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, startValue);
-                stmt.executeUpdate();
+                stmt.execute();
                 stmt.close();
             }
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    final void initReplicationMonitor(Connection con, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?,0)");
+            stmt.setInt(1, contextId);
+            stmt.execute();
         } finally {
             closeSQLStuff(stmt);
         }
