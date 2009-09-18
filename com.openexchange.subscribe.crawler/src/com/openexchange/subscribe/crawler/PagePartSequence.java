@@ -55,8 +55,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This describes a sequence of ->PageParts to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode. To
- * identify a particular bit of information two factors are used: - Its place in the sequence (e.g. in the page«s sourcecode the last name
+ * This describes a sequence of ->PageParts to unequivocally identify information (e.g. a contact\u00b4s name) in a webpages sourcecode. To
+ * identify a particular bit of information two factors are used: - Its place in the sequence (e.g. in the page\u00b4s sourcecode the last name
  * is listed after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts: - Fillers, only used to
  * make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a three-capture-group
  * regex (immediately before, relevant part, immediately after)

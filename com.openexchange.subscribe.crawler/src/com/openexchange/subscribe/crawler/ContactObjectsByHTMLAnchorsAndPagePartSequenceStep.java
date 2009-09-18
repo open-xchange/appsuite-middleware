@@ -103,7 +103,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                 pageParts.setPage(pageString);
                 final HashMap<String, String> map = pageParts.retrieveInformation();
 
-                // set the contact«s information
+                // set the contact\u00b4s information
                 if (map.containsKey("first_name")) {
                     contact.setGivenName(map.get("first_name"));
                 }

@@ -159,7 +159,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
                 if (user.getBirthday() != null) {
                     Calendar calendar = Calendar.getInstance();
                     String birthdayString = user.getBirthday().getValue();
-                    Pattern pattern = Pattern.compile("([a-zA-ZŠšŸ]*)([\\s])([0-9]{1,2})([,]{0,1}[\\s]{0,1})([0-9]{0,4})");
+                    Pattern pattern = Pattern.compile("([a-zA-Z\u00e4\u00f6\u00fc]*)([\\s])([0-9]{1,2})([,]{0,1}[\\s]{0,1})([0-9]{0,4})");
                     if (birthdayString != null) {
                         Matcher matcher = pattern.matcher(birthdayString);
                         if (matcher.matches()) {

@@ -50,8 +50,8 @@
 package com.openexchange.subscribe.crawler;
 
 /**
- * This a page part to unequivocally identify information (e.g. a contact«s name) in a webpages sourcecode. To identify a particular bit of
- * information two factors are used: - Its place in a sequence (->PagePartSequence) (e.g. in the page«s sourcecode the last name is listed
+ * This a page part to unequivocally identify information (e.g. a contact\u00b4s name) in a webpages sourcecode. To identify a particular bit of
+ * information two factors are used: - Its place in a sequence (->PagePartSequence) (e.g. in the page\u00b4s sourcecode the last name is listed
  * after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts (identified by their TYPE-Integer):
  * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a
  * three-capture-group regex (immediately before, relevant part, immediately after) and the type of the info (e.g. Contact.LAST_NAME)
