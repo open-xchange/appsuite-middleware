@@ -95,6 +95,9 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
     }
 
     public AJAXActionService createActionService(final String action) throws AjaxException {
+        if (null == action) {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);

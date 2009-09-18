@@ -70,6 +70,13 @@ public final class UserMultipleHandler implements MultipleHandler {
 
     private AJAXRequestResult result;
 
+    /**
+     * Initializes a new {@link UserMultipleHandler}.
+     */
+    public UserMultipleHandler() {
+        super();
+    }
+
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
         actionService = UserActionFactory.getInstance().createActionService(action);
         result = actionService.perform(null, session);
