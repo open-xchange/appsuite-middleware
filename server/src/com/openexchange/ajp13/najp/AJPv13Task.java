@@ -198,6 +198,7 @@ public final class AJPv13Task implements Task<Object> {
         }
         if (control != null) {
             control.cancel(false);
+            control = null;
         }
     }
 
@@ -552,6 +553,10 @@ public final class AJPv13Task implements Task<Object> {
                     s.close();
                 }
                 client = null;
+            }
+            if (control != null) {
+                // control.cancel(false);
+                control = null;
             }
         } catch (final Exception e) {
             if (LOG.isWarnEnabled()) {
