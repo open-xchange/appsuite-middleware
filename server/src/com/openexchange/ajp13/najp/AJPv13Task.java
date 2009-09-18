@@ -173,9 +173,9 @@ public final class AJPv13Task implements Task<Object> {
     }
 
     /**
-     * Gets the (temporary) unique task number.
+     * Gets the sequential task number.
      * 
-     * @return The (temporary) unique task number
+     * @return The sequential task number
      */
     public Long getNum() {
         return num;
@@ -190,7 +190,7 @@ public final class AJPv13Task implements Task<Object> {
                 client.close();
             } catch (final IOException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe)", e);
+                    LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
                 }
             } finally {
                 client = null;
@@ -198,6 +198,7 @@ public final class AJPv13Task implements Task<Object> {
         }
         if (control != null) {
             control.cancel(false);
+            control = null;
         }
     }
 

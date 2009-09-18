@@ -114,7 +114,7 @@ public class AJPv13TaskWatcher {
      */
     public void addTask(final AJPv13Task task) {
         if (null != tasks.putIfAbsent(task.getNum(), task)) {
-            LOG.error(MessageFormat.format("AJP with number {0} task could not be added to watcher!", task.getNum()));
+            LOG.error(MessageFormat.format("AJP task with number {0} task could not be added to watcher!", task.getNum()));
         }
     }
 
