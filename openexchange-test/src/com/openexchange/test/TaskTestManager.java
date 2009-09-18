@@ -297,9 +297,9 @@ public class TaskTestManager {
         case Task.TARGET_COSTS:
             retval = Float.valueOf(((Long) value).floatValue());
             break;
-        case Task.PERCENT_COMPLETED:
-            retval = Integer.valueOf(((Long) value).intValue());
-            break;
+//        case Task.PERCENT_COMPLETED:
+//            retval = Integer.valueOf(((Long) value).intValue());
+//            break;
         case Task.BILLING_INFORMATION:
             retval = String.valueOf(((Integer) value).intValue());
             break;
