@@ -69,9 +69,9 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
     private static final UserActionFactory SINGLETON = new UserActionFactory();
 
     /**
-     * Gets the {@link UserActionFactory} instance.
+     * Gets the {@link UserActionFactory factory} instance.
      * 
-     * @return The {@link UserActionFactory} instance.
+     * @return The {@link UserActionFactory factory} instance.
      */
     public static final UserActionFactory getInstance() {
         return SINGLETON;
