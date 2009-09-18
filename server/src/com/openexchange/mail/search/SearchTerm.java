@@ -261,8 +261,8 @@ public abstract class SearchTerm<T> implements Serializable {
      * <p>
      * Any wildcard characters are replaced with appropriate regex characters.
      * 
-     * @param pattern
-     * @return
+     * @param pattern The wildcard pattern
+     * @return The corresponding regular expression
      */
     protected static Pattern toRegex(final String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
