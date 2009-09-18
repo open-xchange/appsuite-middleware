@@ -232,7 +232,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * If specified pattern only consists of wildcard characters, an empty string is returned.
      * 
      * @param pattern The pattern possibly containing wildcard characters
-     * @return The largest non-wildcard part
+     * @return
      */
     protected static final String getNonWildcardPart(final String pattern) {
         final String[] parts = PAT_SPLIT.split(pattern);
@@ -261,8 +261,8 @@ public abstract class SearchTerm<T> implements Serializable {
      * <p>
      * Any wildcard characters are replaced with appropriate regex characters.
      * 
-     * @param pattern The wildcard pattern
-     * @return The corresponding regular expression
+     * @param pattern
+     * @return
      */
     protected static Pattern toRegex(final String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
