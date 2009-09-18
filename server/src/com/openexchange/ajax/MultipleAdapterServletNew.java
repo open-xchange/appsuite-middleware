@@ -155,6 +155,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         }
         if (preferStream) {
+            /*
+             * Pass request's stream
+             */
             retval.setUploadStream(req.getInputStream());
         } else {
             /*
