@@ -193,6 +193,9 @@ public class AJPv13Exception extends AbstractOXException {
         }
     }
 
+    /**
+     * The empty arguments array.
+     */
     protected static final Object[] EMPTY_ARGS = new Object[0];
 
     /**
@@ -241,7 +244,12 @@ public class AJPv13Exception extends AbstractOXException {
      * @param cause The throwable to wrap
      */
     public AJPv13Exception(final Throwable cause) {
-        super(EnumComponent.AJP, AJPCode.INTERNAL_EXCEPTION.getCategory(), AJPCode.INTERNAL_EXCEPTION.getDetailNumber(), cause.getMessage(), cause);
+        super(
+            EnumComponent.AJP,
+            AJPCode.INTERNAL_EXCEPTION.getCategory(),
+            AJPCode.INTERNAL_EXCEPTION.getDetailNumber(),
+            cause.getMessage(),
+            cause);
         setMessageArgs(EMPTY_ARGS);
         keepAlive = false;
     }
