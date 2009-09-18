@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.MultipleAdapter;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.actions.UserActionFactory;
 
 /**
  * {@link UserMultipleHandlerFactory} - The multiple handler factory for user component.
@@ -69,7 +70,7 @@ public final class UserMultipleHandlerFactory implements MultipleHandlerFactoryS
     }
 
     public MultipleHandler createMultipleHandler() {
-        return new MultipleAdapter(null);
+        return new MultipleAdapter(UserActionFactory.getInstance());
     }
 
     public String getSupportedModule() {

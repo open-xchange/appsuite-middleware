@@ -51,6 +51,7 @@ package com.openexchange.folder.json.multiple;
 
 import com.openexchange.ajax.requesthandler.MultipleAdapter;
 import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 
@@ -66,7 +67,7 @@ public final class FolderMultipleHandlerFactory implements MultipleHandlerFactor
     }
 
     public MultipleHandler createMultipleHandler() {
-        return new MultipleAdapter(null);
+        return new MultipleAdapter(FolderActionFactory.getInstance());
     }
 
     public String getSupportedModule() {
