@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletInputStream;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
@@ -135,6 +136,11 @@ public class AJAXRequestData {
      */
     public void setData(final Object data) {
         this.data = data;
+    }
+
+    public void setUploadStream(ServletInputStream inputStream) {
+        // FIXME Only added to resolve compile issues during the weekend.
+        throw new UnsupportedOperationException();
     }
 
 }
