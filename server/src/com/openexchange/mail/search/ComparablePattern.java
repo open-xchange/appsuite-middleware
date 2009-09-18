@@ -49,29 +49,25 @@
 
 package com.openexchange.mail.search;
 
+
 /**
- * {@link ComparisonType}
- * 
+ * {@link ComparablePattern}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ComparisonType {
-
-    LESS_THAN(javax.mail.search.ComparisonTerm.LT),
-    EQUALS(javax.mail.search.ComparisonTerm.EQ),
-    GREATER_THAN(javax.mail.search.ComparisonTerm.GT);
-
-    private final int ct;
-
-    private ComparisonType(final int ct) {
-        this.ct = ct;
-    }
+public interface ComparablePattern<P> {
 
     /**
-     * Gets the <i><a href="http://java.sun.com/products/javamail/">JavaMail</a></i> constant for this comparison type.
+     * Gets the comparison type.
      * 
-     * @return The <i>JavaMail</i> constant for this comparison type
+     * @return The comparison type
      */
-    public int getType() {
-        return ct;
-    }
+    ComparisonType getComparisonType();
+    
+    /**
+     * Gets the pattern.
+     * 
+     * @return The pattern
+     */
+    P getPattern();
 }

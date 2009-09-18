@@ -111,7 +111,8 @@ public abstract class SearchTerm<T> implements Serializable {
     public abstract boolean matches(final MailMessage mailMessage) throws MailException;
 
     /**
-     * Generates the corresponding instance of {@link javax.mail.search.SearchTerm} from this search term
+     * Generates the corresponding <i><a href="http://java.sun.com/products/javamail/">JavaMail</a></i> instance of
+     * {@link javax.mail.search.SearchTerm} from this search term
      * 
      * @return The corresponding instance of {@link javax.mail.search.SearchTerm}
      */

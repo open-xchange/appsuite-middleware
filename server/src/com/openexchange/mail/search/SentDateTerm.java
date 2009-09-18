@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Date;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.search.ComparisonTerm;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -64,38 +63,35 @@ import com.openexchange.mail.mime.MIMEMailException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SentDateTerm extends SearchTerm<long[]> {
+public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.Date>> {
 
     private static final long serialVersionUID = -1602773060126517090L;
 
-    private final java.util.Date sentDate;
-
-    private final ComparisonType comparisonType;
+    private final ComparablePattern<java.util.Date> pattern;
 
     /**
      * Initializes a new {@link SentDateTerm}
      */
     public SentDateTerm(final ComparisonType comparisonType, final java.util.Date sentDate) {
         super();
-        this.comparisonType = comparisonType;
-        this.sentDate = sentDate;
+        pattern = new ComparablePattern<java.util.Date>() {
+
+            public ComparisonType getComparisonType() {
+                return comparisonType;
+            }
+
+            public Date getPattern() {
+                return sentDate;
+            }
+        };
     }
 
     /**
      * @return The sent date to match
      */
     @Override
-    public long[] getPattern() {
-        switch (comparisonType) {
-        case LESS_THAN:
-            return new long[] { ComparisonType.LESS_THAN.getType(), sentDate.getTime() };
-        case EQUALS:
-            return new long[] { ComparisonType.EQUALS.getType(), sentDate.getTime() };
-        case GREATER_THAN:
-            return new long[] { ComparisonType.GREATER_THAN.getType(), sentDate.getTime() };
-        default:
-            return null;
-        }
+    public ComparablePattern<java.util.Date> getPattern() {
+        return pattern;
     }
 
     @Override
@@ -109,16 +105,16 @@ public final class SentDateTerm extends SearchTerm<long[]> {
         if (null == sentDate) {
             return false;
         }
-        final long[] dat = getPattern();
-        final int comparisonType = (int) dat[0];
-        if (com.openexchange.mail.search.ComparisonType.EQUALS.getType() == comparisonType) {
-            return dat[1] == sentDate.getTime();
-        } else if (com.openexchange.mail.search.ComparisonType.LESS_THAN.getType() == comparisonType) {
-            return dat[1] > sentDate.getTime();
-        } else if (com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType() == comparisonType) {
-            return dat[1] < sentDate.getTime();
+        final ComparablePattern<java.util.Date> pattern = getPattern();
+        final ComparisonType comparisonType = pattern.getComparisonType();
+        if (ComparisonType.EQUALS == comparisonType) {
+            return pattern.getPattern().getTime() == sentDate.getTime();
+        } else if (ComparisonType.LESS_THAN == comparisonType) {
+            return pattern.getPattern().getTime() > sentDate.getTime();
+        } else if (ComparisonType.GREATER_THAN == comparisonType) {
+            return pattern.getPattern().getTime() < sentDate.getTime();
         } else {
-            return dat[1] == sentDate.getTime();
+            return pattern.getPattern().getTime() == sentDate.getTime();
         }
     }
 
@@ -133,34 +129,23 @@ public final class SentDateTerm extends SearchTerm<long[]> {
         if (null == sentDate) {
             return false;
         }
-        final long[] dat = getPattern();
-        final int comparisonType = (int) dat[0];
-        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-            return dat[1] == sentDate.getTime();
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-            return dat[1] > sentDate.getTime();
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-            return dat[1] < sentDate.getTime();
+        final ComparablePattern<java.util.Date> pattern = getPattern();
+        final ComparisonType comparisonType = pattern.getComparisonType();
+        if (ComparisonType.EQUALS == comparisonType) {
+            return pattern.getPattern().getTime() == sentDate.getTime();
+        } else if (ComparisonType.LESS_THAN == comparisonType) {
+            return pattern.getPattern().getTime() > sentDate.getTime();
+        } else if (ComparisonType.GREATER_THAN == comparisonType) {
+            return pattern.getPattern().getTime() < sentDate.getTime();
         } else {
-            return dat[1] == sentDate.getTime();
+            return pattern.getPattern().getTime() == sentDate.getTime();
         }
     }
 
     @Override
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        final long[] dat = getPattern();
-        final int ct;
-        final int comparisonType = (int) dat[0];
-        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-            ct = ComparisonTerm.EQ;
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-            ct = ComparisonTerm.LT;
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-            ct = ComparisonTerm.GT;
-        } else {
-            ct = ComparisonTerm.EQ;
-        }
-        return new javax.mail.search.SentDateTerm(ct, new Date(dat[1]));
+        final ComparablePattern<java.util.Date> pattern = getPattern();
+        return new javax.mail.search.SentDateTerm(pattern.getComparisonType().getType(), pattern.getPattern());
     }
 
     @Override

@@ -52,7 +52,6 @@ package com.openexchange.mail.search;
 import java.util.Collection;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.search.ComparisonTerm;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -63,38 +62,34 @@ import com.openexchange.mail.mime.MIMEMailException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SizeTerm extends SearchTerm<int[]> {
+public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
 
     private static final long serialVersionUID = 6011159685554702125L;
 
-    private final int size;
-
-    private final ComparisonType comparisonType;
+    private final ComparablePattern<Integer> pattern;
 
     /**
      * Initializes a new {@link SizeTerm}
      */
     public SizeTerm(final ComparisonType comparisonType, final int size) {
         super();
-        this.comparisonType = comparisonType;
-        this.size = size;
+        pattern = new ComparablePattern<Integer>() {
+
+            private final Integer i = Integer.valueOf(size);
+
+            public ComparisonType getComparisonType() {
+                return comparisonType;
+            }
+
+            public Integer getPattern() {
+                return i;
+            }
+        };
     }
 
-    /**
-     * @return The size of bytes to match
-     */
     @Override
-    public int[] getPattern() {
-        switch (comparisonType) {
-        case LESS_THAN:
-            return new int[] { ComparisonType.LESS_THAN.getType(), size };
-        case EQUALS:
-            return new int[] { ComparisonType.EQUALS.getType(), size };
-        case GREATER_THAN:
-            return new int[] { ComparisonType.GREATER_THAN.getType(), size };
-        default:
-            return null;
-        }
+    public ComparablePattern<Integer> getPattern() {
+        return pattern;
     }
 
     @Override
@@ -110,50 +105,39 @@ public final class SizeTerm extends SearchTerm<int[]> {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
-        final int[] dat = getPattern();
-        final int comparisonType = dat[0];
-        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-            return size == dat[1];
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-            return size < dat[1];
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-            return size > dat[1];
+        final ComparablePattern<Integer> pattern = getPattern();
+        final ComparisonType comparisonType = pattern.getComparisonType();
+        if (ComparisonType.EQUALS == comparisonType) {
+            return size == pattern.getPattern().intValue();
+        } else if (ComparisonType.LESS_THAN == comparisonType) {
+            return size < pattern.getPattern().intValue();
+        } else if (ComparisonType.GREATER_THAN == comparisonType) {
+            return size > pattern.getPattern().intValue();
         } else {
-            return size == dat[1];
+            return size == pattern.getPattern().intValue();
         }
     }
 
     @Override
     public boolean matches(final MailMessage mailMessage) {
         final long size = mailMessage.getSize();
-        final int[] dat = getPattern();
-        final int comparisonType = dat[0];
-        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-            return size == dat[1];
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-            return size < dat[1];
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-            return size > dat[1];
+        final ComparablePattern<Integer> pattern = getPattern();
+        final ComparisonType comparisonType = pattern.getComparisonType();
+        if (ComparisonType.EQUALS == comparisonType) {
+            return size == pattern.getPattern().intValue();
+        } else if (ComparisonType.LESS_THAN == comparisonType) {
+            return size < pattern.getPattern().intValue();
+        } else if (ComparisonType.GREATER_THAN == comparisonType) {
+            return size > pattern.getPattern().intValue();
         } else {
-            return size == dat[1];
+            return size == pattern.getPattern().intValue();
         }
     }
 
     @Override
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        final int[] dat = getPattern();
-        final int ct;
-        final int comparisonType = dat[0];
-        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
-            ct = ComparisonTerm.EQ;
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
-            ct = ComparisonTerm.LT;
-        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
-            ct = ComparisonTerm.GT;
-        } else {
-            ct = ComparisonTerm.EQ;
-        }
-        return new javax.mail.search.SizeTerm(ct, dat[1]);
+        final ComparablePattern<Integer> pattern = getPattern();
+        return new javax.mail.search.SizeTerm(pattern.getComparisonType().getType(), pattern.getPattern().intValue());
     }
 
     @Override
