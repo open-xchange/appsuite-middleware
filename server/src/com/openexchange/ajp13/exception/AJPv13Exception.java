@@ -230,7 +230,7 @@ public class AJPv13Exception extends AbstractOXException {
      * @param messageArgs The error message arguments
      */
     public AJPv13Exception(final AJPCode code, final boolean keepAlive, final Exception cause, final Object... messageArgs) {
-        super(EnumComponent.AJP, code.category, code.detailNumber, code.message, cause);
+        super(EnumComponent.AJP, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(messageArgs);
         this.keepAlive = keepAlive;
     }
@@ -241,7 +241,7 @@ public class AJPv13Exception extends AbstractOXException {
      * @param cause The throwable to wrap
      */
     public AJPv13Exception(final Throwable cause) {
-        super(EnumComponent.AJP, AJPCode.INTERNAL_EXCEPTION.category, AJPCode.INTERNAL_EXCEPTION.detailNumber, cause.getMessage(), cause);
+        super(EnumComponent.AJP, AJPCode.INTERNAL_EXCEPTION.getCategory(), AJPCode.INTERNAL_EXCEPTION.getDetailNumber(), cause.getMessage(), cause);
         setMessageArgs(EMPTY_ARGS);
         keepAlive = false;
     }
