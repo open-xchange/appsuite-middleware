@@ -111,11 +111,12 @@ public final class SizeTerm extends SearchTerm<int[]> {
             throw MIMEMailException.handleMessagingException(e);
         }
         final int[] dat = getPattern();
-        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+        final int comparisonType = dat[0];
+        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
             return size == dat[1];
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
             return size < dat[1];
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
             return size > dat[1];
         } else {
             return size == dat[1];
@@ -126,11 +127,12 @@ public final class SizeTerm extends SearchTerm<int[]> {
     public boolean matches(final MailMessage mailMessage) {
         final long size = mailMessage.getSize();
         final int[] dat = getPattern();
-        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+        final int comparisonType = dat[0];
+        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
             return size == dat[1];
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
             return size < dat[1];
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
             return size > dat[1];
         } else {
             return size == dat[1];
@@ -141,11 +143,12 @@ public final class SizeTerm extends SearchTerm<int[]> {
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
         final int[] dat = getPattern();
         final int ct;
-        if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+        final int comparisonType = dat[0];
+        if (comparisonType == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
             ct = ComparisonTerm.EQ;
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
             ct = ComparisonTerm.LT;
-        } else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+        } else if (comparisonType == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
             ct = ComparisonTerm.GT;
         } else {
             ct = ComparisonTerm.EQ;

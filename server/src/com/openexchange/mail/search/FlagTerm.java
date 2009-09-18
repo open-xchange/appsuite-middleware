@@ -98,8 +98,10 @@ public final class FlagTerm extends SearchTerm<Integer> {
 
     @Override
     public boolean matches(final MailMessage mailMessage) {
-        final int result = (mailMessage.getFlags() & flags);
-        return set ? (result == flags) : (result == 0);
+        if (set) {
+            return ((mailMessage.getFlags() & flags) == flags);
+        }
+        return ((mailMessage.getFlags() & flags) == 0);
     }
 
     @Override
