@@ -100,9 +100,12 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         } catch (final PoolingException e) {
             throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
         }
+        // TODO Enable the following if the configuration database gets a table replicationMonitor.
+        // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write || forceWriteOnly);
+        
     }
 
-    private void back(boolean write, Connection con) {
+    private void back(Connection con, boolean write) {
         final Assignment assign = assignmentService.getConfigDBAssignment();
         final int poolId;
         if (write || forceWriteOnly) {
@@ -110,23 +113,26 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         } else {
             poolId = assign.getReadPoolId();
         }
-        back(poolId, con, false);
-    }
-
-    private void back(int poolId, Connection con, boolean noTimeout) {
+        final ConnectionPool pool;
         try {
-            final ConnectionPool pool = pools.getPool(poolId);
-            if (noTimeout) {
-                pool.backWithoutTimeout(con);
-            } else {
-                pool.back(con);
-            }
+            pool = pools.getPool(poolId);
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        }
+        try {
+            pool.back(con);
         } catch (PoolingException e) {
             final DBPoolingException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
             LOG.error(e1.getMessage(), e1);
-        } catch (DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
         }
+        // TODO enable the following if the configuration database gets a table replicationMonitor.
+        // try {
+        //     con.close();
+        // } catch (SQLException e) {
+        //     DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        //     LOG.error(e1.getMessage(), e1);
+        // }
     }
 
     public Connection getReadOnly() throws DBPoolingException {
@@ -138,11 +144,11 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     public void backReadOnly(Connection con) {
-        back(false, con);
+        back(con, false);
     }
 
     public void backWritable(Connection con) {
-        back(true, con);
+        back(con, true);
     }
 
     public int[] listContexts(int poolId) throws DBPoolingException {

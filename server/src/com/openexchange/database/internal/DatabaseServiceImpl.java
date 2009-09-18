@@ -91,186 +91,22 @@ public final class DatabaseServiceImpl implements DatabaseService {
         this.assignmentService = assignmentService;
     }
 
-    public int resolvePool(int contextId, boolean write) throws DBPoolingException {
-        Assignment assign = assignmentService.getAssignment(contextId);
-        return write || forceWriteOnly ? assign.getWritePoolId() : assign.getReadPoolId();
-    }
-
-    public String getSchema(int contextId) throws DBPoolingException {
-        return assignmentService.getAssignment(contextId).getSchema();
-    }
-
-    /**
-     * Returns a connection to the database of the specified context.
-     * @param ctx Context.
-     * @param write <code>true</code> if you need a writable connection.
-     * @return a connection to the database of the specified context.
-     * @throws DBPoolingException if no connection can be obtained.
-     */
-    public Connection get(Context ctx, boolean write) throws DBPoolingException {
-        return get(ctx.getContextId(), write);
-    }
-
-    /**
-     * Returns a connection to the database of the context with the specified identifier.
-     * @param contextId identifier of the context.
-     * @param write <code>true</code> if you need a writable connection.
-     * @return a connection to the database of the context.
-     * @throws DBPoolingException if no connection can be obtained.
-     */
-    public Connection get(int contextId, boolean write) throws DBPoolingException {
-        return get(contextId, write, false);
-    }
-
-    /**
-     * This method must only be used for update tasks to get a connection to the database of the context with the specified identifier.
-     * @param contextId identifier of the context.
-     * @param write <code>true</code> if you need a writable connection.
-     * @return a connection to the database of the context.
-     * @throws DBPoolingException if no connection can be obtained.
-     */
-    public Connection getNoTimeout(int contextId, boolean write) throws DBPoolingException {
-        return get(contextId, write, true);
-    }
-
     private Connection get(int contextId, boolean write, boolean noTimeout) throws DBPoolingException {
         final Assignment assign = assignmentService.getAssignment(contextId);
-        final int poolId;
-        if (write || forceWriteOnly) {
-            poolId = assign.getWritePoolId();
-        } else {
-            poolId = assign.getReadPoolId();
-        }
-        return get(poolId, assign.getSchema(), noTimeout);
+        return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
     }
 
-    private Connection get(int poolId, String schema, boolean noTimeout) throws DBPoolingException {
-        final Connection con;
+    private void back(Connection con) {
         try {
-            final ConnectionPool pool = pools.getPool(poolId);
-            if (noTimeout) {
-                con = pool.getWithoutTimeout();
-            } else {
-                con = pool.get();
-            }
-        } catch (final PoolingException e) {
-            throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
-        }
-        try {
-            final String oldSchema = con.getCatalog();
-            if (!oldSchema.equals(schema)) {
-                con.setCatalog(schema);
-            }
-        } catch (final SQLException e) {
-            try {
-                pools.getPool(poolId).back(con);
-            } catch (final PoolingException e1) {
-                LOG.error(e1.getMessage(), e1);
-            }
-            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
-        }
-        return con;
-    }
-
-    /**
-     * Returns a connection to the database of the specified context to the pool.
-     * @param ctx Context.
-     * @param write <code>true</code> if you obtained a writable connection.
-     * @param con Connection to return.
-     */
-    public void back(Context ctx, boolean write, Connection con) {
-        back(ctx.getContextId(), write, con);
-    }
-
-    /**
-     * Returns a connection to the database of the context with the specified identifier to the pool.
-     * @param contextId identifier of the context.
-     * @param write <code>true</code> if you obtained a writable connection.
-     * @param con Connection to return.
-     */
-    public void back(int contextId, boolean write, Connection con) {
-        back(contextId, write, con, false);
-    }
-
-    /**
-     * This method must only be used by database update tasks that return a connection to the database of the context with the specified
-     * identifier to the pool.
-     * @param contextId identifier of the context.
-     * @param write <code>true</code> if you obtained a writable connection.
-     * @param con Connection to return.
-     */
-    public void backNoTimeout(int contextId, boolean write, Connection con) {
-        back(contextId, write, con, true);
-    }
-
-    private void back(int contextId, boolean write, Connection con, boolean noTimeout) {
-        final int poolId;
-        try {
-            poolId = resolvePool(contextId, write);
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            return;
-        }
-        back(poolId, con, noTimeout);
-    }
-
-    private void back(int poolId, Connection con, boolean noTimeout) {
-        try {
-            final ConnectionPool pool = pools.getPool(poolId);
-            if (noTimeout) {
-                pool.backWithoutTimeout(con);
-            } else {
-                pool.back(con);
-            }
-        } catch (final PoolingException e) {
-            final DBPoolingException exc = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
-            LOG.error(exc.getMessage(), exc);
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
+            con.close();
+        } catch (SQLException e) {
+            DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            LOG.error(e1.getMessage(), e1);
         }
     }
 
     public void invalidate(int contextId) throws DBPoolingException {
         assignmentService.removeAssignments(contextId);
-    }
-
-    /**
-     * Sets a new check time for all database connetion pools. If the check time
-     * is exhausted since the last use of the connection a select statement is
-     * sent to the database to verify that the connection still works.
-     * @param checkTime new check time.
-     */
-    public void setCheckTime(long checkTime) {
-        for (final ConnectionPool pool : pools.getPools()) {
-            pool.setCheckTime(checkTime);
-        }
-    }
-
-    public int getNumConnections(Context ctx, boolean write) {
-        return getNumConnections(ctx.getContextId(), write);
-    }
-
-    public int getNumConnections(int contextId, boolean write) {
-        int retval = -1;
-        try {
-            final int poolId = resolvePool(contextId, write);
-            final ConnectionPool pool = pools.getPool(poolId);
-            retval = pool.getNumActive() + pool.getNumIdle();
-        } catch (DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return retval;
-    }
-
-    /**
-     * @return the total number of database connections.
-     */
-    public int getNumConnections() {
-        int connections = 0;
-        for (final ConnectionPool pool : pools.getPools()) {
-            connections += pool.getPoolSize();
-        }
-        return connections;
     }
 
     // Delegate config database service methods.
@@ -298,63 +134,91 @@ public final class DatabaseServiceImpl implements DatabaseService {
     // Implemented database service methods.
 
     public Connection getReadOnly(Context ctx) throws DBPoolingException {
-        return get(ctx.getContextId(), false);
+        return get(ctx.getContextId(), false, false);
     }
 
     public Connection getReadOnly(int contextId) throws DBPoolingException {
-        return get(contextId, false);
+        return get(contextId, false, false);
     }
 
     public Connection getWritable(Context ctx) throws DBPoolingException {
-        return get(ctx.getContextId(), true);
+        return get(ctx.getContextId(), true, false);
     }
 
     public Connection getWritable(int contextId) throws DBPoolingException {
-        return get(contextId, true);
+        return get(contextId, true, false);
     }
 
     public Connection getForUpdateTask(int contextId) throws DBPoolingException {
-        return getNoTimeout(contextId, true);
+        return get(contextId, true, true);
     }
 
     public Connection get(int poolId, String schema) throws DBPoolingException {
-        return get(poolId, schema, false);
+        final Connection con;
+        try {
+            con = pools.getPool(poolId).get();
+        } catch (PoolingException e) {
+            throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
+        }
+        try {
+            String oldSchema = con.getCatalog();
+            if (!oldSchema.equals(schema)) {
+                con.setCatalog(schema);
+            }
+        } catch (SQLException e) {
+            try {
+                pools.getPool(poolId).back(con);
+            } catch (PoolingException e1) {
+                LOG.error(e1.getMessage(), e1);
+            }
+            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
+        }
+        return con;
     }
 
     public void backReadOnly(Context ctx, Connection con) {
-        back(ctx.getContextId(), false, con);
+        back(con);
     }
 
     public void backReadOnly(int contextId, Connection con) {
-        back(contextId, false, con);
+        back(con);
     }
 
     public void backWritable(Context ctx, Connection con) {
-        back(ctx.getContextId(), true, con);
+        back(con);
     }
 
     public void backWritable(int contextId, Connection con) {
-        back(contextId, true, con);
+        back(con);
     }
 
     public void backForUpdateTask(int contextId, Connection con) {
-        backNoTimeout(contextId, true, con);
+        back(con);
     }
 
     public void back(int poolId, Connection con) {
-        back(poolId, con, false);
+        try {
+            pools.getPool(poolId).back(con);
+        } catch (PoolingException e) {
+            final DBPoolingException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, I(poolId));
+            LOG.error(e2.getMessage(), e2);
+        } catch (DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public int getWritablePool(int contextId) throws DBPoolingException {
-        return resolvePool(contextId, true);
+        Assignment assign = assignmentService.getAssignment(contextId);
+        return assign.getWritePoolId();
     }
 
     public String getSchemaName(int contextId) throws DBPoolingException {
-        return getSchema(contextId);
+        return assignmentService.getAssignment(contextId).getSchema();
     }
 
     public int[] getContextsInSameSchema(int contextId) throws DBPoolingException {
-        ConfigDBStorage configDBStorage = new ConfigDBStorage(this);
-        return configDBStorage.getContextsFromSchema(getSchema(contextId), resolvePool(contextId, true));
+        Assignment assign = assignmentService.getAssignment(contextId);
+        ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
+        return configDBStorage.getContextsFromSchema(assign.getSchema(), assign.getWritePoolId());
     }
 }

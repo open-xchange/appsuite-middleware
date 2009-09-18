@@ -71,8 +71,7 @@ import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 
 /**
- * Reads assignments from the database, maybe stores them in a cache for faster
- * access and contains the static assignment for the config DB.
+ * Reads assignments from the database, maybe stores them in a cache for faster access.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */

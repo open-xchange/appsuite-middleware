@@ -117,6 +117,11 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // %1$d is replaced with a unique identifier of a database connection pool.
     public static final String UNKNOWN_POOL_MSG = "Nothing known about pool %1$d.";
 
+    // This is a technical exception message for administrators. For monitoring the replication a replicationMonitor table with a
+    // transaction counter is used. If this transaction counter is missing this exception gets thrown.
+    // %1$d is replaced with the context identifier that is stored in the schema.
+    public static final String TRANSACTION_MISSING_MSG = "Transaction counter is missing for context %1$d.";
+
     /**
      * Prevent instantiation.
      */

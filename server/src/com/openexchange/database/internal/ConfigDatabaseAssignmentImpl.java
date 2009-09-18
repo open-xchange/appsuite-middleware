@@ -50,19 +50,19 @@
 package com.openexchange.database.internal;
 
 /**
- * {@link ConfigDatabaseAssignmentImpl}
- *
+ * Reads assignments from the database, maybe stores them in a cache for faster access.
+ * TODO Broadcast transaction counter through cache.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class ConfigDatabaseAssignmentImpl implements ConfigDatabaseAssignmentService {
 
-    private static final Assignment CONFIG_DB = new Assignment(0, 0, Constants.CONFIGDB_READ_ID, Constants.CONFIGDB_WRITE_ID, null);
+    private final Assignment configDB = new Assignment(0, 0, Constants.CONFIGDB_READ_ID, Constants.CONFIGDB_WRITE_ID, null);
 
     ConfigDatabaseAssignmentImpl() {
         super();
     }
 
     public Assignment getConfigDBAssignment() {
-        return CONFIG_DB;
+        return configDB;
     }
 }

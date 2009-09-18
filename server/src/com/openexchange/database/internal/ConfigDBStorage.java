@@ -125,48 +125,4 @@ public class ConfigDBStorage {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
-
-    /**
-     * Determines one context ID in given schema or <code>-1</code> if no
-     * context could be found
-     * 
-     * @param schema -
-     *            the schema
-     * @param writePoolId -
-     *            corresponding write pool ID (master database)
-     * @return the id of the first retrieved context or <code>-1</code> if no
-     *         context could be found
-     * @throws DBPoolingException
-     */
-    public final int getOneContextFromSchema(final String schema, final int writePoolId)
-            throws DBPoolingException {
-        try {
-            Connection con = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                /*
-                 * Get write pool
-                 */
-                con = configDatabaseService.getReadOnly();
-                stmt = con.prepareStatement(SQL_SELECT_CONTEXTS);
-                stmt.setInt(1, Server.getServerId());
-                stmt.setInt(2, writePoolId);
-                stmt.setString(3, schema);
-                rs = stmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-                return -1;
-            } finally {
-                closeSQLStuff(rs, stmt);
-                if (con != null) {
-                    configDatabaseService.backReadOnly(con);
-                }
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
 }

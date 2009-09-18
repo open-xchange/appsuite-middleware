@@ -82,7 +82,7 @@ public enum DBPoolingExceptionCodes implements OXErrorMessage {
      */
     NULL_CONNECTION(NULL_CONNECTION_MSG, Category.CODE_ERROR, 5),
     /**
-     * Problem with executing SQL: %s
+     * Problem with executing SQL: %1$s
      */
     SQL_ERROR(SQL_ERROR_MSG, Category.CODE_ERROR, 6),
     /**
@@ -140,7 +140,11 @@ public enum DBPoolingExceptionCodes implements OXErrorMessage {
     /**
      * Nothing known about pool %1$d.
      */
-    UNKNOWN_POOL(UNKNOWN_POOL_MSG, Category.CODE_ERROR, 20);
+    UNKNOWN_POOL(UNKNOWN_POOL_MSG, Category.CODE_ERROR, 20),
+    /**
+     * Transaction counter is missing for context %1$d.
+     */
+    TRANSACTION_MISSING(TRANSACTION_MISSING_MSG, Category.SETUP_ERROR, 21);
 
     /**
      * Message of the exception.

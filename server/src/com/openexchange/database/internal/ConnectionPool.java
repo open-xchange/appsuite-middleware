@@ -138,16 +138,6 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
     }
 
     /**
-     * Sets a new check time used for activating connections. If check time is
-     * exhausted since last use of the connection a select statement is sent to
-     * the database to check if the connection still works.
-     * @param checkTime new check time.
-     */
-    public void setCheckTime(final long checkTime) {
-        lifecycle.checkTime = checkTime;
-    }
-
-    /**
      * Life cycle for database connections.
      */
     private static class ConnectionLifecycle implements PoolableLifecycle<Connection> {

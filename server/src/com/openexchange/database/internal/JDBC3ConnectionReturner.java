@@ -1,0 +1,231 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.database.internal;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.util.Map;
+
+/**
+ * {@link JDBC3ConnectionReturner}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class JDBC3ConnectionReturner implements Connection {
+
+    private final Pools pools;
+
+    private final Assignment assign;
+
+    protected final Connection delegate;
+
+    private final boolean noTimeout;
+
+    private final boolean write;
+
+    public JDBC3ConnectionReturner(Pools pools, Assignment assign, Connection delegate, boolean noTimeout, boolean write) {
+        super();
+        this.pools = pools;
+        this.assign = assign;
+        this.delegate = delegate;
+        this.noTimeout = noTimeout;
+        this.write = write;
+    }
+
+    public void clearWarnings() throws SQLException {
+        delegate.clearWarnings();
+    }
+
+    public void close() throws SQLException {
+        ReplicationMonitor.backAndIncrementTransaction(pools, assign, delegate, noTimeout, write);
+    }
+
+    public void commit() throws SQLException {
+        delegate.commit();
+    }
+
+    public Statement createStatement() throws SQLException {
+        return delegate.createStatement();
+    }
+
+    public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+        return delegate.createStatement(resultSetType, resultSetConcurrency);
+    }
+
+    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        return delegate.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
+    public boolean getAutoCommit() throws SQLException {
+        return delegate.getAutoCommit();
+    }
+
+    public String getCatalog() throws SQLException {
+        return delegate.getCatalog();
+    }
+
+    public int getHoldability() throws SQLException {
+        return delegate.getHoldability();
+    }
+
+    public DatabaseMetaData getMetaData() throws SQLException {
+        return delegate.getMetaData();
+    }
+
+    public int getTransactionIsolation() throws SQLException {
+        return delegate.getTransactionIsolation();
+    }
+
+    public Map<String, Class<?>> getTypeMap() throws SQLException {
+        return delegate.getTypeMap();
+    }
+
+    public SQLWarning getWarnings() throws SQLException {
+        return delegate.getWarnings();
+    }
+
+    public boolean isClosed() throws SQLException {
+        return delegate.isClosed();
+    }
+
+    public boolean isReadOnly() throws SQLException {
+        return delegate.isReadOnly();
+    }
+
+    public String nativeSQL(String sql) throws SQLException {
+        return delegate.nativeSQL(sql);
+    }
+
+    public CallableStatement prepareCall(String sql) throws SQLException {
+        return delegate.prepareCall(sql);
+    }
+
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        return delegate.prepareCall(sql, resultSetType, resultSetConcurrency);
+    }
+
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        return delegate.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
+        return delegate.prepareStatement(sql);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+        return delegate.prepareStatement(sql, autoGeneratedKeys);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        return delegate.prepareStatement(sql, resultSetType, resultSetConcurrency);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        return delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
+    public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
+        return delegate.prepareStatement(sql, columnIndexes);
+    }
+
+    public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
+        return delegate.prepareStatement(sql, columnNames);
+    }
+
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        delegate.releaseSavepoint(savepoint);
+    }
+
+    public void rollback() throws SQLException {
+        delegate.rollback();
+    }
+
+    public void rollback(Savepoint savepoint) throws SQLException {
+        delegate.rollback(savepoint);
+    }
+
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+        delegate.setAutoCommit(autoCommit);
+    }
+
+    public void setCatalog(String catalog) throws SQLException {
+        delegate.setCatalog(catalog);
+    }
+
+    public void setHoldability(int holdability) throws SQLException {
+        delegate.setHoldability(holdability);
+    }
+
+    public void setReadOnly(boolean readOnly) throws SQLException {
+        delegate.setReadOnly(readOnly);
+    }
+
+    public Savepoint setSavepoint() throws SQLException {
+        return delegate.setSavepoint();
+    }
+
+    public Savepoint setSavepoint(String name) throws SQLException {
+        return delegate.setSavepoint(name);
+    }
+
+    public void setTransactionIsolation(int level) throws SQLException {
+        delegate.setTransactionIsolation(level);
+    }
+
+    public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+        delegate.setTypeMap(map);
+    }
+}

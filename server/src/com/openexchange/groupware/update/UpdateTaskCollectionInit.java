@@ -328,6 +328,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 62
             // Runs the task AlterUidCollation again. The schema creating scripts did not contain the fix for v6.10.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation2());
+            // Version 6.12 starts here.
             // Version 70
             // New config parameters to set the default confirmation status of newly created appointments
             // for participants in private an public folders
@@ -341,7 +342,10 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 76
             // Drops incorrect admin permission on top level infostore folder
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RemoveAdminPermissionOnInfostoreTask());
-
+            // Version 6.14 starts here.
+            // Version 90
+            // Creates the table replicationMonitor for monitoring if slaves are completely replicated.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateReplicationTableTask());
 
             // TODO: Enable virtual folder tree update task when needed
             // Version XY

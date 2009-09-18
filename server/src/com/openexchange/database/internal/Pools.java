@@ -98,6 +98,9 @@ final class Pools implements Runnable {
         return retval.toArray(new ConnectionPool[retval.size()]);
     }
 
+    /**
+     * @throws DBPoolingException if creating the pool fails.
+     */
     ConnectionPool getPool(int poolId) throws DBPoolingException {
         ConnectionPool retval;
         poolsLock.lock();

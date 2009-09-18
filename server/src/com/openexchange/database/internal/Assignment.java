@@ -57,16 +57,21 @@ import java.io.Serializable;
  */
 public class Assignment implements Serializable {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = -3426601066426517436L;
 
     private final int contextId;
+
     private final int serverId;
-    private final int readPoolId;
+
     private final int writePoolId;
+
+    private final int readPoolId;
+
     private final String schema;
+
+    private boolean transactionInitialized = false;
+
+    private long transaction;
 
     /**
      * Default constructor.
@@ -85,23 +90,36 @@ public class Assignment implements Serializable {
         this.schema = schema;
     }
 
-    public int getContextId() {
+    int getContextId() {
         return contextId;
     }
 
-    public int getServerId() {
+    int getServerId() {
         return serverId;
     }
 
-    public int getReadPoolId() {
+    int getReadPoolId() {
         return readPoolId;
     }
 
-    public int getWritePoolId() {
+    int getWritePoolId() {
         return writePoolId;
     }
 
-    public String getSchema() {
+    String getSchema() {
         return schema;
+    }
+
+    boolean isTransactionInitialized() {
+        return transactionInitialized;
+    }
+
+    long getTransaction() {
+        return transaction;
+    }
+
+    void setTransaction(long transaction) {
+        this.transaction = transaction;
+        transactionInitialized = true;
     }
 }
