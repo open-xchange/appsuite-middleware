@@ -6,7 +6,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/facebook-java-api-1.8-final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/facebook-java-api-1.8-final.jar" sourcepath="source/facebook-java-api-1.8-final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit-2.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit-core-js-2.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jaxb-api-2.1.jar"/>
