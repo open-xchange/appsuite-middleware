@@ -86,8 +86,17 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     private final AJAXActionServiceFactory factory;
 
+    /**
+     * Initializes a new {@link MultipleAdapterServletNew}.
+     * 
+     * @param factory The factory to map incoming request to an appropriate {@link AJAXActionService}
+     * @throws NullPointerException If factory is <code>null</code>
+     */
     protected MultipleAdapterServletNew(final AJAXActionServiceFactory factory) {
         super();
+        if (null == factory) {
+            throw new NullPointerException("Factory is null.");
+        }
         this.factory = factory;
     }
 
