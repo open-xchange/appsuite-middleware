@@ -1052,7 +1052,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException {
     	Connection configCon = null;
         Connection oxCon = null;
-        final int context_id = ctx.getId().intValue();
+        final int contextId = ctx.getId().intValue();
         try {
             if (admin_user != null) {
                 OXUser.checkAndSetLanguage(admin_user);
@@ -1113,47 +1113,45 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 this.oxcontextcommon.fillLogin2ContextTable(ctx, configCon);
                 configCon.commit();
 
-                oxCon = cache.getConnectionForContext(context_id);
+                oxCon = cache.getConnectionForContext(contextId);
                 oxCon.setAutoCommit(false);
 
-                this.oxcontextcommon.initSequenceTables(context_id, oxCon); // perhaps
-                // the
-                // seqs must be
-                // deleted on
-                // exception
+                this.oxcontextcommon.initSequenceTables(contextId, oxCon);
+                this.oxcontextcommon.initReplicationMonitor(oxCon, contextId);
+                // perhaps the seqs must be deleted on exception
                 oxCon.commit();
 
                 if (newSchemaCreated) {
-                    this.oxcontextcommon.initVersionTable(context_id, oxCon);
+                    this.oxcontextcommon.initVersionTable(contextId, oxCon);
                     oxCon.commit();
                 }
 
                 // must be fetched before any other actions, else all statements
                 // are commited on this con
-                final int group_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
+                final int group_id = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
                 oxCon.commit();
 
-                final int internal_user_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
+                final int internal_user_id_for_admin = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
                 oxCon.commit();
 
-                final int contact_id_for_admin = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, oxCon);
+                final int contact_id_for_admin = IDGenerator.getId(contextId, com.openexchange.groupware.Types.CONTACT, oxCon);
                 oxCon.commit();
 
                 int uid_number = -1;
                 if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
-                    uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, oxCon);
+                    uid_number = IDGenerator.getId(contextId, com.openexchange.groupware.Types.UID_NUMBER, oxCon);
                     oxCon.commit();
                 }
 
                 int gid_number = -1;
                 if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-                    gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, oxCon);
+                    gid_number = IDGenerator.getId(contextId, com.openexchange.groupware.Types.GID_NUMBER, oxCon);
                     oxCon.commit();
                 }
 
                 // create group users for context
                 String groupName = translateGroupName(admin_user);
-                this.oxcontextcommon.createStandardGroupForContext(context_id, oxCon, groupName, group_id, gid_number);
+                this.oxcontextcommon.createStandardGroupForContext(contextId, oxCon, groupName, group_id, gid_number);
 
                 this.oxcontextcommon.createAdminForContext(ctx, admin_user, oxCon, internal_user_id_for_admin, contact_id_for_admin, uid_number, access);
                 // create system folder for context
@@ -1177,43 +1175,43 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                oxa.addContextSystemFolders(context_id, display, admin_user.getLanguage(), oxCon);
+                oxa.addContextSystemFolders(contextId, display, admin_user.getLanguage(), oxCon);
 
                 oxCon.commit();
 
                 // context created
-                LOG.info("Context " + context_id + " created!");
+                LOG.info("Context " + contextId + " created!");
             } // end if admin_user
             // TODO: cutmasta call setters and fill all required fields
             ctx.setEnabled(Boolean.TRUE);
             return ctx;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final OXException oxae) {
             LOG.error("Error", oxae);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw new StorageException(oxae.toString());
         } catch (final StorageException ste) {
             LOG.error("Storage Error", ste);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw ste;
         } catch (final SQLException ecop) {
             LOG.error("SQL Error", ecop);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw new StorageException(ecop);            
         } catch (final OXContextException e) {
             LOG.error("Context Error", e);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw new StorageException(e);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw new StorageException(e);
         } catch (final Exception ecp) {
             LOG.error("Internal Error", ecp);
-            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, context_id);
+            this.oxcontextcommon.handleCreateContextRollback(configCon, oxCon, contextId);
             throw new StorageException("Internal server error occured");
         } finally {
             try {
@@ -1226,7 +1224,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             try {
                 if (oxCon != null) {
-                    cache.pushConnectionForContext(context_id, oxCon);
+                    cache.pushConnectionForContext(contextId, oxCon);
                 }
             } catch (final PoolException ecp) {
                 LOG.error("Error pushing ox write connection to pool!", ecp);
