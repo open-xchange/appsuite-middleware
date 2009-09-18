@@ -459,7 +459,7 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    final void initReplicationMonitor(Connection con, int contextId) throws SQLException {
+    public final void initReplicationMonitor(Connection con, int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?,0)");
