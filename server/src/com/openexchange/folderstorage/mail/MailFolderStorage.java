@@ -138,7 +138,10 @@ public final class MailFolderStorage implements FolderStorage {
             } catch (final MailException e) {
                 throw new FolderException(e);
             }
-            accesses.putIfAbsent(key, ma);
+            final MailAccess<?, ?> prev = accesses.putIfAbsent(key, ma);
+            if (null != prev) {
+                ma = prev;
+            }
         }
         return ma;
     }
