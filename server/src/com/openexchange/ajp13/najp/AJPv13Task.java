@@ -173,9 +173,9 @@ public final class AJPv13Task implements Task<Object> {
     }
 
     /**
-     * Gets the (temporary) unique task number.
+     * Gets the sequential task number.
      * 
-     * @return The (temporary) unique task number
+     * @return The sequential task number
      */
     public Long getNum() {
         return num;
