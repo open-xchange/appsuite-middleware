@@ -158,7 +158,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             retval.setUploadStream(req.getInputStream());
         } else {
             /*
-             * Add body
+             * Guess an appropriate body object
              */
             final String body = AJAXServlet.getBody(req);
             if (startsWith('{', body, true)) {
