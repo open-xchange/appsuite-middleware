@@ -210,7 +210,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * Checks whether the specified string only consists of ASCII 7 bit characters.
      * 
      * @param s The string to check
-     * @return <code>true</code> if less than 128; otherwise <code>false</code>
+     * @return <code>true</code> if string only consists of ASCII 7 bit characters; otherwise <code>false</code>
      */
     protected static final boolean isAscii(final String s) {
         final char[] chars = s.toCharArray();
@@ -232,7 +232,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * If specified pattern only consists of wildcard characters, an empty string is returned.
      * 
      * @param pattern The pattern possibly containing wildcard characters
-     * @return
+     * @return The largest non-wildcard part
      */
     protected static final String getNonWildcardPart(final String pattern) {
         final String[] parts = PAT_SPLIT.split(pattern);
