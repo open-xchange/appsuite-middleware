@@ -50,7 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -140,8 +140,8 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
          * Pass all parameters to AJAX request object
          */
         {
-            @SuppressWarnings("unchecked") final Map<String, String[]> parameters = req.getParameterMap();
-            for (final Entry<String, String[]> entry : parameters.entrySet()) {
+            @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
+            for (final Entry<String, String[]> entry : entrySet) {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
             }
         }
