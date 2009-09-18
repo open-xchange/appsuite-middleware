@@ -8,4 +8,4 @@ Standards-Version: 3.6.1
 Package: open-xchange-user-json
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@)
-Description: The Open-Xchange MAL Poll Bundle
+Description: The Open-Xchange user JSON interface bundle
