@@ -30,6 +30,7 @@
 	<property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar" />
 
+    <property name="jsonjar" value="json.jar"/>
     <property name="commonjar" value="common.jar"/>
 
     <!-- Classpath -->
@@ -41,6 +42,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
     <!-- Compile -->
