@@ -58,7 +58,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link AJPv13Exception} - Thrown to indicate an AJP error
+ * {@link AJPv13Exception} - Indicates an AJP error.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
