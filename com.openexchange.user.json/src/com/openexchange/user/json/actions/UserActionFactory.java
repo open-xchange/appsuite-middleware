@@ -106,7 +106,7 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
     }
 
     /**
-     * Initializes the unmodifiable map to store actions.
+     * Initializes the unmodifiable map to stored actions.
      * 
      * @return The unmodifiable map with actions stored
      */
