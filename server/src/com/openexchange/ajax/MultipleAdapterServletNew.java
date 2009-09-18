@@ -111,8 +111,8 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      * 
      * @param req The HTTP request to handle
      * @param resp The HTTP response to write to
-     * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream}; otherwise
-     *            <code>false</code> to generate an appropriate {@link Object} from request's body
+     * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
+     *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
     protected void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
