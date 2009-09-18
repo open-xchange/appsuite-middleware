@@ -97,7 +97,6 @@ public class PageByNamedHtmlElementStep extends AbstractStep implements Step<Pag
     public void execute(WebClient webClient) throws SubscriptionException {
         List<HtmlElement> list = inputPage.getHtmlElementsByName(buttonName);
         for (HtmlElement el : list){
-            System.out.println("***** " + el);
             try {
                 currentPage = el.click();
             } catch (IOException e) {
