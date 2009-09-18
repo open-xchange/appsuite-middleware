@@ -37,6 +37,7 @@
         <pathelement location="${bundlesdir}/${osgijar}"/>
     	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
+    	<pathelement location="${bundlesdir}/${servletjar}" />
         <pathelement location="${bundlesdir}/${globaljar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
