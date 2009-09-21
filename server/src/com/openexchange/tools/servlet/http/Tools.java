@@ -69,11 +69,6 @@ import com.openexchange.ajp13.AJPv13RequestHandler;
 public final class Tools {
 
     /**
-     * Pattern for the HTTP header date format.
-     */
-    private static final String DATE_PATTERN = "EEE',' dd MMMM yyyy HH:mm:ss z";
-
-    /**
      * DateFormat for HTTP header.
      */
     private static final DateFormat HEADER_DATEFORMAT;
@@ -122,7 +117,7 @@ public final class Tools {
 
     /**
      * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
-     * a download
+     * a download.
      * 
      * @param resp the servlet response.
      * @see #removeCachingHeader(HttpServletResponse)
@@ -136,7 +131,7 @@ public final class Tools {
 
     /**
      * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
-     * do not allow this header
+     * do not allow this header.
      * 
      * @param resp the servlet response.
      */
@@ -147,7 +142,7 @@ public final class Tools {
     }
 
     /**
-     * Formats a date for http headers.
+     * Formats a date for HTTP headers.
      * 
      * @param date date to format.
      * @return the string with the formated date.
@@ -159,11 +154,11 @@ public final class Tools {
     }
 
     /**
-     * Parses a date from a http date header
+     * Parses a date from a HTTP date header.
      * 
-     * @param str - the http date header value
+     * @param str The HTTP date header value
      * @return parsed <code>java.util.Date</code> object
-     * @throws ParseException
+     * @throws ParseException If the date header value cannot be parsed
      */
     public static Date parseHeaderDate(final String str) throws ParseException {
         synchronized (HEADER_DATEFORMAT) {
@@ -229,8 +224,8 @@ public final class Tools {
     /**
      * Deletes all OX specific cookies.
      * 
-     * @param req http servlet request.
-     * @param resp http servlet response.
+     * @param req The HTTP servlet request.
+     * @param resp The HTTP servlet response.
      */
     public static void deleteCookies(final HttpServletRequest req, final HttpServletResponse resp) {
         deleteCookies(req, resp, OX_COOKIE_MATCHER);
@@ -239,8 +234,8 @@ public final class Tools {
     /**
      * Deletes all cookies which satisfy specified matcher.
      * 
-     * @param req http servlet request.
-     * @param resp http servlet response.
+     * @param req The HTTP servlet request.
+     * @param resp The HTTP servlet response.
      * @param matcher The cookie name matcher determining which cookie shall be deleted
      */
     public static void deleteCookies(final HttpServletRequest req, final HttpServletResponse resp, final CookieNameMatcher matcher) {
@@ -259,7 +254,10 @@ public final class Tools {
     }
 
     static {
-        HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale.ENGLISH);
+        /*
+         * Pattern for the HTTP header date format.
+         */
+        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
         HEADER_DATEFORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
         EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
     }
