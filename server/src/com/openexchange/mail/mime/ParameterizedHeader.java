@@ -52,7 +52,6 @@ package com.openexchange.mail.mime;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 
 /**
  * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
@@ -179,14 +178,13 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         return parameterList.getParameterNames();
     }
 
-    private static final Pattern PATTERN_CORRECT = Pattern.compile("\\s*=\\s*");
+    //private static final Pattern PATTERN_CORRECT = Pattern.compile("\\s*=\\s*");
 
     /**
      * Prepares parameterized header's string representation:
      * <ol>
      * <li>Unfolds the header's string representation</li>
      * <li>Trims starting/ending whitespace characters</li>
-     * <li>Replaces all " = " with "="</li>
      * <li>Removes ending ";" character</li>
      * </ol>
      * 
@@ -197,7 +195,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         if (paramHdrArg == null) {
             return paramHdrArg;
         }
-        String paramHdr = PATTERN_CORRECT.matcher(unfold(paramHdrArg.trim())).replaceAll("=");
+        // String paramHdr = PATTERN_CORRECT.matcher(unfold(paramHdrArg.trim())).replaceAll("=");
+        String paramHdr = unfold(paramHdrArg.trim());
         if (paramHdr.length() > 0) {
             final int lastPos = paramHdr.length() - 1;
             if (paramHdr.charAt(lastPos) == ';') {

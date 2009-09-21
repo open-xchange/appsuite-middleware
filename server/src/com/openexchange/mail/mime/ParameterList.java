@@ -94,9 +94,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         final String paramNameRegex = "([\\p{ASCII}&&[^=\"\\s;]]+)";
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
         final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")"; // Grab '\"' char sequence or any non-quote character
-        PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?:=(" + tokenRegex + '|' + quotedStringRegex + "))?");
+        PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
 
-        PATTERN_PARAM_CORRECT = Pattern.compile(paramNameRegex + "=([^\"][^; \t]*[ \t][^;]*)($|;)");
+        PATTERN_PARAM_CORRECT = Pattern.compile(paramNameRegex + "( *= *)([^\" ][^; \t]*[ \t][^;]*)($|;)");
     }
 
     private static final String CHARSET_UTF_8 = "utf-8";
@@ -128,7 +128,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @return The corrected parameter list's string representation.
      */
     private static String correctParamList(final String parameterList) {
-        return PATTERN_PARAM_CORRECT.matcher(parameterList).replaceAll("$1=\"$2\"$3");
+        return PATTERN_PARAM_CORRECT.matcher(parameterList).replaceAll("$1$2\"$3\"$4");
     }
 
     public int compareTo(final ParameterList other) {
