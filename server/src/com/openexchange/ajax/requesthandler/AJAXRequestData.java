@@ -115,10 +115,11 @@ public class AJAXRequestData {
      * 
      * @param name The parameter name
      * @return The value mapped to given parameter name or <code>null</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
      */
     public String getParameter(final String name) {
         if (null == name) {
-            return null;
+            throw new NullPointerException("name is null");
         }
         return params.get(name);
     }

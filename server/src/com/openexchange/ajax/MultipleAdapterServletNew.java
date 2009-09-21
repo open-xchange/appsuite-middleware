@@ -203,7 +203,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             return false;
         }
         final int len = toCheck.length();
-        if (len < 0) {
+        if (len <= 0) {
             return false;
         }
         if (!ignoreHeadingWhitespaces) {
