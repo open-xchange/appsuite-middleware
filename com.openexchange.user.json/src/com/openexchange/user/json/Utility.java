@@ -134,14 +134,13 @@ public final class Utility {
      * @return The fields with required field (possibly appended)
      */
     public static int[] checkForRequiredField(final int[] fields, final int requiredField) {
-        boolean found = false;
-        for (int i = 0; !found && i < fields.length; i++) {
+        for (int i = 0; i < fields.length; i++) {
             if (requiredField == fields[i]) {
-                found = true;
+                /*
+                 * Found
+                 */
+                return fields;
             }
-        }
-        if (found) {
-            return fields;
         }
         /*
          * Append required field
