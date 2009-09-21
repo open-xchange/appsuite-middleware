@@ -1222,15 +1222,13 @@ public final class Contacts {
         final Context ctx = ContextStorage.getStorageContext(session);
         final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
-        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
-        final Contact co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
-
+        final Contact co;
         try {
+            final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+            co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
+        } finally {
             DBPool.closeReaderSilent(ctx, readCon);
-        } catch (final Exception ex) {
-            LOG.error("Unable to close READ Connection", ex);
         }
-
         return co;
     }
 
