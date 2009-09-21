@@ -186,7 +186,7 @@ public final class InfostorePerformer implements SessionHolder {
         
         infoFactory.setLockNullLockManager(new EntityLockManagerImpl("lock_null_lock"));
         infoFactory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
-        infoFactory.setProvider(new AlwaysWriteConnectionProvider(new DBPoolProvider()));
+        infoFactory.setProvider(new DBPoolProvider());
         final PathResolverImpl resolver = new PathResolverImpl(infoFactory.getDatabase());
         resolver.setAliases(aliases);
         infoFactory.setResolver(resolver);
