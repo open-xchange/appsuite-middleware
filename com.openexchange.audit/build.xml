@@ -1,4 +1,4 @@
-<project name="com.openexchange.custom.audit" default="default" basedir=".">
+<project name="com.openexchange.audit" default="default" basedir=".">
 
 	<!-- Customizable values -->
 	<property name="destdir" value="" />
