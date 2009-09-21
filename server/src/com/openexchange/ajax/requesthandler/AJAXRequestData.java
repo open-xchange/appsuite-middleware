@@ -97,10 +97,11 @@ public class AJAXRequestData {
      * 
      * @param name The parameter name
      * @param value The parameter value
+     * @throws NullPointerException If name is <code>null</code>
      */
     public void putParameter(final String name, final String value) {
         if (null == name) {
-            return;
+            throw new NullPointerException("name is null");
         }
         if (null == value) {
             params.remove(name);
