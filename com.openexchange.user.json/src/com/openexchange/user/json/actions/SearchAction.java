@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.actions;
 
+import static com.openexchange.user.json.Utility.checkForRequiredField;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -154,12 +155,14 @@ public final class SearchAction extends AbstractUserAction {
                 // Get contact iterator with dummy search fields
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", columns);
+                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
+                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", checkedCols);
             } else {
                 // Sort field is a contact field: pass as it is
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-                it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDirection, columns);
+                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
+                it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDirection, checkedCols);
             }
             /*
              * Collect contacts from iterator

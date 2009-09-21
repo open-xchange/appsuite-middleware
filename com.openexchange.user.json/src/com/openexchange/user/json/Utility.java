@@ -126,4 +126,30 @@ public final class Utility {
         return (date + timeZone.getOffset(date));
     }
 
+    /**
+     * Checks if specified required field is contained in given fields and appends it if necessary.
+     * 
+     * @param fields The fields to check
+     * @param requiredField The required field
+     * @return The fields with required field (possibly appended)
+     */
+    public static int[] checkForRequiredField(final int[] fields, final int requiredField) {
+        boolean found = false;
+        for (int i = 0; !found && i < fields.length; i++) {
+            if (requiredField == fields[i]) {
+                found = true;
+            }
+        }
+        if (found) {
+            return fields;
+        }
+        /*
+         * Append required field
+         */
+        final int[] checkedCols = new int[fields.length + 1];
+        System.arraycopy(fields, 0, checkedCols, 0, fields.length);
+        checkedCols[fields.length] = requiredField;
+        return checkedCols;
+    }
+
 }

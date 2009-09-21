@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.actions;
 
+import static com.openexchange.user.json.Utility.checkForRequiredField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -129,7 +130,7 @@ public final class AllAction extends AbstractUserAction {
                 /*
                  * Ensure UserField.INTERNAL_USERID is requested to properly load corresponding users
                  */
-                final int[] checkedCols = checkForInternalUserId(columns);
+                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
                 if (null == orderField) {
                     /*
                      * Order by contact field
@@ -244,23 +245,6 @@ public final class AllAction extends AbstractUserAction {
         } catch (final OXException e) {
             throw new AjaxException(e);
         }
-    }
-
-    private static int[] checkForInternalUserId(final int[] columns) {
-        boolean found = false;
-        final int internalUserField = UserField.INTERNAL_USERID.getColumn();
-        for (int i = 0; !found && i < columns.length; i++) {
-            if (internalUserField == columns[i]) {
-                found = true;
-            }
-        }
-        if (found) {
-            return columns;
-        }
-        final int[] checkedCols = new int[columns.length + 1];
-        System.arraycopy(columns, 0, checkedCols, 0, columns.length);
-        checkedCols[columns.length] = internalUserField;
-        return checkedCols;
     }
 
 }
