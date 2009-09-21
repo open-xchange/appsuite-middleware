@@ -50,6 +50,7 @@
 package com.openexchange.outlook.updater;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.session.ServerSession;
@@ -73,6 +74,16 @@ public class ParameterCollector {
     
     public Map<String, String> getParameters() {
         return parameterMap;
+    }
+    
+    public Map<String, String> getParametersWithKeyword() {
+        Map<String, String> retval = new HashMap<String, String>();
+        
+        for (String keyword : parameterMap.keySet()) {
+            retval.put(keyword, keyword + "=" + parameterMap.get(keyword));
+        }
+        
+        return retval;
     }
     
     private void collect() {

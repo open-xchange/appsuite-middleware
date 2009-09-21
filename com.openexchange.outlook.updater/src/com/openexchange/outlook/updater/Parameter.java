@@ -60,20 +60,18 @@ import com.openexchange.tools.session.ServerSession;
  */
 public enum Parameter {
 
-    CREATE_IMAP_ACCOUNT("OXCreateIMAPAccount"),
-    ACCOUNT_NAME("OXAccountname"),
-    DISPLAY_NAME("OXDisplayname"),
-    EMAIL_ADDRESS("OXEmailAddress"),
-    IMAP_PORT("OXIMAPPort"),
-    IMAP_SERVER("OXIMAPServer"),
+    ACCOUNT_NAME("OXACCOUNTNAME"),
+    DISPLAY_NAME("OXDISPLAYNAME"),
+    EMAIL_ADDRESS("OXEMAILADDRESS"),
+    IMAP_PORT("OXIMAPPORT"),
+    IMAP_SERVER("OXIMAPSERVER"),
     IMAP_SSL("OXIMAPSSL"),
-    IMAP_USER_NAME("OXIMAPUsername"),
-    PROFILE_NAME("OXProfilename"),
-    SERVER_TIMEOUT("OXServertimeout"),
+    IMAP_USER_NAME("OXIMAPUSERNAME"),
+    SERVER_TIMEOUT("OXSERVERTIMEOUT"),
     SMTP_AUTH("OXSMTPAuth"),
-    SMTP_AUTH_METHOD("OXSMTPAuthMethod"),
-    SMTP_PORT("OXSMTPPort"),
-    SMTP_SERVER("OXSMTPServer"),
+    SMTP_AUTH_METHOD("OXSMTPAUTHMETHOD"),
+    SMTP_PORT("OXSMTPPORT"),
+    SMTP_SERVER("OXSMTPSERVER"),
     SMTP_SSL("OXSMTPSSL");
 
     private String keyword;
@@ -98,46 +96,50 @@ public enum Parameter {
         MailAccountSMTPProperties props = new MailAccountSMTPProperties(account);
         
         switch (this) {
-        case CREATE_IMAP_ACCOUNT:
-            return Boolean.toString(true); //TODO:
         case ACCOUNT_NAME:
-            return account.getName();
+            return quote(account.getName());
         case DISPLAY_NAME:
-            return session.getUser().getDisplayName();
+            return quote(session.getUser().getDisplayName());
         case EMAIL_ADDRESS:
-            return account.getPrimaryAddress();
+            return quote(account.getPrimaryAddress());
         case IMAP_PORT:
-            return Integer.toString(account.getMailPort());
+            return quote(Integer.toString(account.getMailPort()));
         case IMAP_SERVER:
-            return account.getTransportServer();
+            return quote(account.getTransportServer());
         case IMAP_SSL:
-            return Boolean.toString(account.isMailSecure());
+            return b2i(account.isMailSecure());
         case IMAP_USER_NAME:
-            return account.getLogin();
-        case PROFILE_NAME:
-            account.getName();
+            return quote(account.getLogin());
         case SERVER_TIMEOUT:
-            return Integer.toString(props.getSmtpTimeout());
+            return quote(Integer.toString(props.getSmtpTimeout()));
         case SMTP_AUTH:
-            return Boolean.toString(props.isSmtpAuth());
+            return b2i(props.isSmtpAuth());
         case SMTP_AUTH_METHOD:
-            return Integer.toString(AuthMethod.SMTP.getValue()); //TODO:
+            return quote(Integer.toString(AuthMethod.SMTP.getValue()));
         case SMTP_PORT:
-            return Integer.toString(account.getTransportPort());
+            return quote(Integer.toString(account.getTransportPort()));
         case SMTP_SERVER:
-            return account.getTransportServer();
+            return quote(account.getTransportServer());
         case SMTP_SSL:
-            return Boolean.toString(account.isTransportSecure());
+            return b2i(account.isTransportSecure());
 
         default:
             throw new IllegalArgumentException(this.name());
         }
     }
     
+    private String quote(String value) {
+        return "\"" + value + "\"";
+    }
+    
+    private String b2i(boolean value) {
+        return quote(value ? "1" : "0");
+    }
+    
     private enum AuthMethod {
-        POP3(1),
-        SMTP(2),
-        POP_BEFORE_SMTP(3);
+        POP3(0),
+        SMTP(1),
+        POP_BEFORE_SMTP(1);
         
         private int value;
 

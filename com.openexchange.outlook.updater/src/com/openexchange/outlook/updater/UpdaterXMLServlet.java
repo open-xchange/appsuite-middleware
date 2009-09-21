@@ -73,7 +73,7 @@ public class UpdaterXMLServlet extends OXServlet {
 
     private static final Log LOG = LogFactory.getLog(UpdaterXMLServlet.class);
 
-    private static final String TEMPLATE_NAME = "";
+    private static final String TEMPLATE_NAME = "templates/updater.tmpl";
     
     private static TemplateService templateService;
     
@@ -95,7 +95,7 @@ public class UpdaterXMLServlet extends OXServlet {
             getServerSession(req);
             OXTemplate template = templateService.loadTemplate(TEMPLATE_NAME);
             ParameterCollector collector = new ParameterCollector(session, mailAccountStorageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
-            template.process(collector.getParameters(), resp.getWriter());
+            template.process(collector.getParametersWithKeyword(), resp.getWriter());
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
