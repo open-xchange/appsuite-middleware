@@ -52,7 +52,6 @@ package com.openexchange.groupware.ldap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.group.GroupStorage;
 import com.openexchange.i18n.LocaleTools;
 
@@ -504,16 +503,20 @@ public class UserImpl implements User, Cloneable {
     }
 
     /**
-     * @return the aliases
+     * Gets this user's aliases.
+     * 
+     * @return The aliases
      */
     public String[] getAliases() {
         return aliases;
     }
 
     /**
-     * @param aliases the aliases to set
+     * Sets this user's aliases.
+     * 
+     * @param aliases The aliases to set
      */
-    void setAliases(final String[] aliases) {
+    public void setAliases(final String[] aliases) {
         this.aliases = aliases;
     }
 
@@ -522,9 +525,11 @@ public class UserImpl implements User, Cloneable {
     }
 
     /**
+     * Sets the user attributes as an unmodifiable map. 
+     * 
      * @param attributes The attributes to set as an unmodifiable map
      */
-    void setAttributes(final Map<String, Set<String>> attributes) {
+    public void setAttributes(final Map<String, Set<String>> attributes) {
         this.attributes = attributes;
     }
 
