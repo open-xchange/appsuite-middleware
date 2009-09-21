@@ -74,6 +74,10 @@ public class ServletRegistration extends DeferredRegistryRegistration<HttpServic
     public ServletRegistration(BundleContext context, HttpServlet item, String alias) {
         super(context, HttpService.class, item);
         this.alias = alias;
+        if(alias == null) {
+            throw new IllegalArgumentException("The alias must not be null");
+        }
+        open();
     }
 
     @Override

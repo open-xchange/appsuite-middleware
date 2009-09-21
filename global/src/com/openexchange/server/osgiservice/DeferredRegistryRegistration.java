@@ -49,8 +49,8 @@
 
 package com.openexchange.server.osgiservice;
 
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 
@@ -67,7 +67,6 @@ public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
     public DeferredRegistryRegistration(BundleContext context, Class<R> registryClass, P item) {
         super(context, registryClass.getName(), null);
         this.item = item;
-        open();
     }
     
     public abstract void register(R registry, P item);
