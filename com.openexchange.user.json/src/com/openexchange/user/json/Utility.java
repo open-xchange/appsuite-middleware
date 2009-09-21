@@ -64,6 +64,9 @@ import java.util.concurrent.FutureTask;
  */
 public final class Utility {
 
+    /**
+     * Initializes a new {@link Utility}.
+     */
     private Utility() {
         super();
     }
