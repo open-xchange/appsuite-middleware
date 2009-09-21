@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.ServletInputStream;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
@@ -68,6 +68,8 @@ public class AJAXRequestData {
     private final Map<String, String> params;
 
     private Object data;
+
+    private InputStream uploadStream;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -123,7 +125,7 @@ public class AJAXRequestData {
     /**
      * Gets the data object.
      * 
-     * @return The data object
+     * @return The data object or <code>null</code> if not available
      */
     public Object getData() {
         return data;
@@ -138,9 +140,22 @@ public class AJAXRequestData {
         this.data = data;
     }
 
-    public void setUploadStream(ServletInputStream inputStream) {
-        // FIXME Only added to resolve compile issues during the weekend.
-        throw new UnsupportedOperationException();
+    /**
+     * Gets the upload stream. Retrieves the body of the request as binary data as an {@link InputStream}.
+     * 
+     * @return The upload stream or <code>null</code> if not available
+     */
+    public InputStream getUploadStream() {
+        return uploadStream;
+    }
+
+    /**
+     * Sets the upload stream
+     * 
+     * @param uploadStream The upload stream to set
+     */
+    public void setUploadStream(final InputStream uploadStream) {
+        this.uploadStream = uploadStream;
     }
 
 }
