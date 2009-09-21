@@ -40,11 +40,10 @@ package com.openexchange.ajax.config;
 import static com.openexchange.ajax.config.ConfigTools.getUserId;
 import static com.openexchange.ajax.config.ConfigTools.readSetting;
 import static com.openexchange.ajax.config.ConfigTools.storeSetting;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.groupware.settings.tree.SpellCheck;
 import com.openexchange.groupware.settings.tree.TimeZone;
 
 /**
@@ -93,6 +92,23 @@ public class ConfigMenuTest extends AbstractAJAXTest {
                 getSessionId(), TimeZone.NAME));
         storeSetting(getWebConversation(), getHostName(), getSessionId(),
             TimeZone.NAME, timeZone);
+    }
+
+    /**
+     * Tests if the spell check of a user can be changed.
+     * @throws Throwable if an error occurs.
+     */
+    public void testSpellCheck() throws Throwable {
+        final String spellCheck = readSetting(getWebConversation(), getHostName(),
+            getSessionId(), SpellCheck.NAME);
+        final String testSpellCheck = "true";
+        storeSetting(getWebConversation(), getHostName(), getSessionId(),
+            SpellCheck.NAME, testSpellCheck);
+        assertEquals("Written spellcheck isn't returned from server.",
+            testSpellCheck, readSetting(getWebConversation(), getHostName(),
+                getSessionId(), SpellCheck.NAME));
+        storeSetting(getWebConversation(), getHostName(), getSessionId(),
+            SpellCheck.NAME, spellCheck);
     }
 
     /**
