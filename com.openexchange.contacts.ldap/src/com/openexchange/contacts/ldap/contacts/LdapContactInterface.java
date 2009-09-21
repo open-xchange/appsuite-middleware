@@ -206,9 +206,10 @@ public class LdapContactInterface implements ContactInterface {
                 case '\\':
                     sb.append("\\5c");
                     break;
-                case '*':
-                    sb.append("\\2a");
-                    break;
+// We always treat "*" as wildcard
+//                case '*':
+//                    sb.append("\\2a");
+//                    break;
                 case '(':
                     sb.append("\\28");
                     break;
@@ -217,6 +218,9 @@ public class LdapContactInterface implements ContactInterface {
                     break;
                 case '\u0000': 
                     sb.append("\\00"); 
+                    break;
+                case '?':
+                    sb.append('*');
                     break;
                 default:
                     sb.append(curChar);
@@ -264,10 +268,14 @@ public class LdapContactInterface implements ContactInterface {
             String userfilter = null;
             String distrifilter = null;
             if (both || ContactTypes.users.equals(contacttype)) {
-                userfilter = "(" + folderprop.getMappings().getSurname() + "=" + escapeLDAPSearchFilter(searchobject.getPattern()) + "*)";
+                final StringBuilder sb = new StringBuilder();
+                addFilterFor(mappings.getSurname(), searchobject.getPattern(), sb);
+                userfilter = sb.toString();
             }
             if (both || ContactTypes.distributionlists.equals(contacttype)) {
-                distrifilter = "(" + folderprop.getMappings().getDistributionlistname() + "=" + escapeLDAPSearchFilter(searchobject.getPattern()) + "*)";
+                final StringBuilder sb = new StringBuilder();
+                addFilterFor(mappings.getDistributionlistname(), searchobject.getPattern(), sb);
+                distrifilter = sb.toString();
             }
             arrayList = getLDAPContacts(folderId, columns, userfilter, distrifilter, null, false);
         } else {
@@ -359,16 +367,6 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private void removeOlder(final Date since, final List<Contact> list) {
-        for (int i = 0; i < list.size(); i++) {
-            final Contact obj = list.get(i);
-            final Date lastModified = obj.getLastModified();
-            if (null != lastModified && lastModified.before(since)) {
-                list.remove(i--);
-            }
-        }
-    }
-
     public int getNumberOfContacts(final int folderId) throws OXException {
         LOG.info("Called getNumberOfContacts");
         return 0;
@@ -425,11 +423,17 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
-        sb.append("(");
-        sb.append(fieldname);
-        sb.append("=*");
-        sb.append(escapeLDAPSearchFilter(searchString));
-        sb.append("*)");
+        if ("*".equals(searchString)) {
+            sb.append("(");
+            sb.append(fieldname);
+            sb.append("=*)");
+        } else {
+            sb.append("(");
+            sb.append(fieldname);
+            sb.append("=");
+            sb.append(escapeLDAPSearchFilter(searchString));
+            sb.append("*)");
+        }
     }
 
     private List<String> getAttributes(final Set<Integer> columns, boolean distributionlist) {
@@ -1051,6 +1055,17 @@ public class LdapContactInterface implements ContactInterface {
             return String.valueOf(uid);
         }
     }
+
+    private void removeOlder(final Date since, final List<Contact> list) {
+        for (int i = 0; i < list.size(); i++) {
+            final Contact obj = list.get(i);
+            final Date lastModified = obj.getLastModified();
+            if (null != lastModified && lastModified.before(since)) {
+                list.remove(i--);
+            }
+        }
+    }
+
 
     private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapContext context, final int pagesize, String defaultNamingContext) throws NamingException, LdapException, IOException {
         final SearchControls searchControls;
