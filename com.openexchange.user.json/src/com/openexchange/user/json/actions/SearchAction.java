@@ -178,7 +178,7 @@ public final class SearchAction extends AbstractUserAction {
                 try {
                     it.close();
                 } catch (final Exception e) {
-                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllAction.class);
+                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SearchAction.class);
                     LOG.error(e.getMessage(), e);
                 }
             }
