@@ -29,6 +29,8 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractWriteTask.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     /**
      * The character indicating a header record.
      */
@@ -196,7 +198,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         // Write CSV line to file
         final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
         try {
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG_ENABLED) {
                 LOG.debug(new StringBuilder("Writing CSV line: ").append(csvLine).toString());
             }
             fos.write(csvLine.getBytes("US-ASCII"));
