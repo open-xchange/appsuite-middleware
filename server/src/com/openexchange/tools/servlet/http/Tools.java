@@ -157,7 +157,7 @@ public final class Tools {
      * Parses a date from a HTTP date header.
      * 
      * @param str The HTTP date header value
-     * @return parsed <code>java.util.Date</code> object
+     * @return The parsed <code>java.util.Date</code> object
      * @throws ParseException If the date header value cannot be parsed
      */
     public static Date parseHeaderDate(final String str) throws ParseException {
