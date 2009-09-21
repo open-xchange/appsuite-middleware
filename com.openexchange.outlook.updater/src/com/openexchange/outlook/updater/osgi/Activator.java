@@ -15,7 +15,7 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator extends DeferredActivator {
-    private static final Class[] NEEDED_SERVICES = {ConfigurationService.class, HttpService.class, TemplateService.class, MailAccountStorageService.class};
+    private static final Class[] NEEDED_SERVICES = {ConfigurationService.class, TemplateService.class, MailAccountStorageService.class};
     private static final String PATH_PROP = "com.openexchange.outlook.updater.path";
     private static final String ALIAS = "/ajax/updater/installer/*";
     private static final String UPDATER_XML_ALIAS = "/ajax/updater/update.xml";

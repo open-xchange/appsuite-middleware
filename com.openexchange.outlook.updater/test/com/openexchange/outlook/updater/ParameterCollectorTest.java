@@ -49,58 +49,44 @@
 
 package com.openexchange.outlook.updater;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.MockUser;
+import com.openexchange.mailaccount.SimMailAccount;
+import com.openexchange.tools.session.SimServerSession;
+import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class ParameterCollector {
-    
-    private ServerSession session;
-    
-    private Map<String, String> parameterMap;
+public class ParameterCollectorTest extends TestCase {
 
-    private MailAccount mailAccount;
+    private ParameterCollector collector;
 
-    public ParameterCollector(ServerSession session, MailAccount mailAccount) {
-        this.session = session;
-        this.mailAccount = mailAccount;
-        this.parameterMap = new HashMap<String, String>();
-        collect();
-    }
-    
-    public Map<String, String> getParameters() {
-        return parameterMap;
-    }
-    
-    public Map<String, String> getParametersWithKeyword() {
-        Map<String, String> retval = new HashMap<String, String>();
+    public void setUp() throws Exception {
+        super.setUp();
         
-        for (String keyword : parameterMap.keySet()) {
-            String value = parameterMap.get(keyword);
-            if (value == null || value.trim().equals("") || value.trim().equals("\"\"")) {
-                retval.put(keyword, "");
-            } else {
-                retval.put(keyword, keyword + "=" + value);
-            }
-        }
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put("com.openexchange.smtp.smtpTimeout", "30000");
+        MockUser user = new MockUser();
+        user.setDisplayName("Display Name");
+        SimServerSession session = new SimServerSession(new SimContext(1), user, null);
+        SimMailAccount mailAccount = new SimMailAccount();
+        mailAccount.setProperties(properties);
+        collector = new ParameterCollector(session, mailAccount);
+    }
+    
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+    
+    public void testParameterCollector() {
+        Map<String, String> parametersWithKeyword = collector.getParametersWithKeyword();
         
-        return retval;
+        assertTrue("Missing parameter: OXSERVERTIMEOUT", parametersWithKeyword.containsKey("OXSERVERTIMEOUT"));
+        assertEquals("OXSERVERTIMEOUT=\"30000\"", parametersWithKeyword.get("OXSERVERTIMEOUT"));        
+        assertTrue("Missing parameter: OXDISPLAYNAME", parametersWithKeyword.containsKey("OXDISPLAYNAME"));
+        assertEquals("OXDISPLAYNAME=\"Display Name\"", parametersWithKeyword.get("OXDISPLAYNAME"));
     }
-    
-    private void collect() {
-        EnumSet<Parameter> parameters = EnumSet.allOf(Parameter.class);
-        for (Parameter parameter : parameters) {
-            collect(parameter);
-        }
-    }
-    
-    private void collect(Parameter parameter) {
-        parameterMap.put(parameter.getKeyword(), parameter.getValue(session, mailAccount));
-    }
-
 }

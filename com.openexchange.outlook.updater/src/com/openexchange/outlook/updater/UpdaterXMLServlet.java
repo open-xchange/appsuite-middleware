@@ -73,7 +73,7 @@ public class UpdaterXMLServlet extends OXServlet {
 
     private static final Log LOG = LogFactory.getLog(UpdaterXMLServlet.class);
 
-    private static final String TEMPLATE_NAME = "templates/updater.tmpl";
+    private static final String TEMPLATE_NAME = "updater.tmpl";
     
     private static TemplateService templateService;
     
