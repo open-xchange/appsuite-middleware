@@ -69,7 +69,7 @@ import com.openexchange.database.DBPoolingException;
  * This class stores all connection pools. It also removes pools that are empty.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-final class Pools implements Runnable {
+public final class Pools implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(Pools.class);
 

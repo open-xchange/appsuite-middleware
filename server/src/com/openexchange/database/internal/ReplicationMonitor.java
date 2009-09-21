@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.wrapping.JDBC3ConnectionReturner;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -68,7 +69,7 @@ import com.openexchange.pooling.PoolingException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class ReplicationMonitor {
+public final class ReplicationMonitor {
 
     private static final Log LOG = LogFactory.getLog(ReplicationMonitor.class);
 
@@ -171,7 +172,7 @@ final class ReplicationMonitor {
         return retval;
     }
 
-    static void backAndIncrementTransaction(Pools pools, Assignment assign, Connection con, boolean noTimeout, boolean write) {
+    public static void backAndIncrementTransaction(Pools pools, Assignment assign, Connection con, boolean noTimeout, boolean write) {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
