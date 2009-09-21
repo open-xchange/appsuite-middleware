@@ -52,15 +52,12 @@ package com.openexchange.groupware.settings.impl;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -71,6 +68,7 @@ import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This class implements the storage for settings using a relational database.
@@ -140,9 +138,16 @@ public class RdbSettingStorage extends SettingStorage {
         this.session = session;
         this.ctxId = ctxId;
         this.userId = userId;
-        ctx = Tools.getContext(ctxId);
-        user = Tools.getUser(ctx, userId);
-        userConfig = Tools.getUserConfiguration(ctx, userId);
+        if (session instanceof ServerSession) {
+            final ServerSession serverSession = (ServerSession) session;
+            ctx = serverSession.getContext();
+            user = serverSession.getUser();
+            userConfig = serverSession.getUserConfiguration();
+        } else {
+            ctx = Tools.getContext(ctxId);
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+        }
     }
 
     RdbSettingStorage(final Session session, final Context ctx, final User user,

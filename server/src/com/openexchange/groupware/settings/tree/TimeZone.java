@@ -98,8 +98,8 @@ public final class TimeZone implements PreferencesItemService {
                 return true;
             }
             @Override
-            protected void setValue(final UserImpl user, final String value) {
-                user.setTimeZone(value);
+            protected void setValue(final UserImpl newUser, final String value, final User originalUser) {
+                newUser.setTimeZone(value);
             }
         };
     }

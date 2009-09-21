@@ -62,6 +62,13 @@ import com.openexchange.groupware.settings.SettingException;
  * This class contains the shared functions for all user settings.
  */
 public abstract class AbstractUserFuncs implements IValueHandler {
+    
+    /**
+     * Initializes a new {@link AbstractUserFuncs}.
+     */
+    protected AbstractUserFuncs() {
+        super();
+    }
 
     /**
      * {@inheritDoc}
@@ -70,7 +77,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
         final Setting setting) throws SettingException {
         try {
             final UserImpl newUser = new UserImpl(user);
-            setValue(newUser, setting.getSingleValue().toString());
+            setValue(newUser, setting.getSingleValue().toString(), user);
             UserStorage.getInstance().updateUser(newUser, ctx);
         } catch (final LdapException e) {
             throw new SettingException(e);
@@ -85,10 +92,14 @@ public abstract class AbstractUserFuncs implements IValueHandler {
     }
 
     /**
-     * @param user in this user object the value should be set.
-     * @param value the value to set.
-     * @throws SettingException if writing of the value fails.
+     * Sets the value in passed <tt>newUser</tt>.
+     * 
+     * @param newUser In this user object the value should be set.
+     * @param value The value to set.
+     * @param originalUser The original user fetched from storage
+     * @throws SettingException If writing of the value fails.
      */
-    protected abstract void setValue(UserImpl user, String value)
+    protected abstract void setValue(UserImpl newUser, String value, User originalUser)
         throws SettingException;
+
 }

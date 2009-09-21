@@ -49,6 +49,11 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -61,17 +66,21 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * Configuration tree entry for the language of the user.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link SpellCheck} - Configuration tree entry for the spell check function of the user.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Language implements PreferencesItemService {
+public final class SpellCheck implements PreferencesItemService {
 
-    public static final String NAME = "language";
+    /**
+     * The spell check name.
+     */
+    public static final String NAME = "spellcheck";
 
     /**
      * Default constructor.
      */
-    public Language() {
+    public SpellCheck() {
         super();
     }
 
@@ -86,22 +95,36 @@ public final class Language implements PreferencesItemService {
      * {@inheritDoc}
      */
     public IValueHandler getSharedValue() {
-        return  new AbstractUserFuncs() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
+        return new AbstractUserFuncs() {
+
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                setting.setSingleValue(user.getPreferredLanguage());
+
+                final Set<String> set = user.getAttributes().get(NAME);
+                if (null != set && !set.isEmpty()) {
+                    setting.setSingleValue(Boolean.valueOf(set.iterator().next()));
+                } else {
+                    setting.setSingleValue(Boolean.FALSE);
+                }
             }
+
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
+
             public boolean isWritable() {
                 return true;
             }
+
             @Override
             protected void setValue(final UserImpl newUser, final String value, final User originalUser) {
-                newUser.setPreferredLanguage(value);
+                final Map<String, Set<String>> clonedAttrs = new HashMap<String, Set<String>>(originalUser.getAttributes());
+                final Set<String> spellCheck = new HashSet<String>(1);
+                spellCheck.add(value);
+                clonedAttrs.put(NAME, Collections.unmodifiableSet(spellCheck));
+                newUser.setAttributes(Collections.unmodifiableMap(clonedAttrs));
             }
         };
     }
+
 }

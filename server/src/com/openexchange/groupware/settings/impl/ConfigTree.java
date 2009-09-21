@@ -300,6 +300,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.participants.ShowDialog.class,
             com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
             com.openexchange.groupware.settings.tree.ReloadTimes.class,
+            com.openexchange.groupware.settings.tree.SpellCheck.class,
             com.openexchange.groupware.settings.tree.ServerVersion.class,
             com.openexchange.groupware.settings.tree.TaskNotification.class,
             com.openexchange.groupware.settings.tree.TimeZone.class
