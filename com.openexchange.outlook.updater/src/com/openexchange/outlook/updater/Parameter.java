@@ -72,7 +72,8 @@ public enum Parameter {
     SMTP_AUTH_METHOD("OXSMTPAUTHMETHOD"),
     SMTP_PORT("OXSMTPPORT"),
     SMTP_SERVER("OXSMTPSERVER"),
-    SMTP_SSL("OXSMTPSSL");
+    SMTP_SSL("OXSMTPSSL"),
+    URL("OXURL");
 
     private String keyword;
     
@@ -92,7 +93,7 @@ public enum Parameter {
         return keyword;
     }
     
-    public String getValue(ServerSession session, MailAccount account) {
+    public String getValue(String serverURL, ServerSession session, MailAccount account) {
         MailAccountSMTPProperties props = new MailAccountSMTPProperties(account);
         
         switch (this) {
@@ -122,6 +123,8 @@ public enum Parameter {
             return quote(account.getTransportServer());
         case SMTP_SSL:
             return b2i(account.isTransportSecure());
+        case URL:
+            return quote(serverURL);
 
         default:
             throw new IllegalArgumentException(this.name());

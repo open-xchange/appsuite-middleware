@@ -94,13 +94,17 @@ public class UpdaterXMLServlet extends OXServlet {
         try {
             getServerSession(req);
             OXTemplate template = templateService.loadTemplate(TEMPLATE_NAME);
-            ParameterCollector collector = new ParameterCollector(session, mailAccountStorageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+            ParameterCollector collector = new ParameterCollector(getServerUrl(req), session, mailAccountStorageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
             template.process(collector.getParametersWithKeyword(), resp.getWriter());
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             resp.setContentType("text/html");
         }
+    }
+
+    private String getServerUrl(HttpServletRequest req) {
+        return "https://" + req.getServerName();
     }
 
     private void getServerSession(HttpServletRequest req) throws ContextException {

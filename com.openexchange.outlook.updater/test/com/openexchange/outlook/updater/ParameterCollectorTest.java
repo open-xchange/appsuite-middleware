@@ -74,7 +74,7 @@ public class ParameterCollectorTest extends TestCase {
         SimServerSession session = new SimServerSession(new SimContext(1), user, null);
         SimMailAccount mailAccount = new SimMailAccount();
         mailAccount.setProperties(properties);
-        collector = new ParameterCollector(session, mailAccount);
+        collector = new ParameterCollector("http://localhost", session, mailAccount);
     }
     
     public void tearDown() throws Exception {

@@ -66,7 +66,10 @@ public class ParameterCollector {
 
     private MailAccount mailAccount;
 
-    public ParameterCollector(ServerSession session, MailAccount mailAccount) {
+    private String serverUrl;
+
+    public ParameterCollector(String serverUrl, ServerSession session, MailAccount mailAccount) {
+        this.serverUrl = serverUrl;
         this.session = session;
         this.mailAccount = mailAccount;
         this.parameterMap = new HashMap<String, String>();
@@ -100,7 +103,7 @@ public class ParameterCollector {
     }
     
     private void collect(Parameter parameter) {
-        parameterMap.put(parameter.getKeyword(), parameter.getValue(session, mailAccount));
+        parameterMap.put(parameter.getKeyword(), parameter.getValue(serverUrl, session, mailAccount));
     }
 
 }
