@@ -60,6 +60,8 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
 
     private volatile Runnable runnable;
 
+    private final Object lock;
+
     private final AtomicInteger running;
 
     private final AtomicInteger writeCounter;
@@ -80,17 +82,28 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
      */
     public NonBlockingBlocker(final Runnable runnable) {
         super();
+        lock = new Object();
         writeCounter = new AtomicInteger();
         running = new AtomicInteger();
         this.runnable = runnable;
     }
 
     public void block() {
-        synchronized (this) {
+        synchronized (lock) {
             final Thread cur = Thread.currentThread();
             if (cur == owner) {
                 // This thread already blocks
                 return;
+            }
+            while (null != owner) {
+                // Another thread already blocks, wait for being unblocked
+                try {
+                    lock.wait();
+                } catch (final InterruptedException e) {
+                    cur.interrupt();
+                    throw new IllegalMonitorStateException("Thread " + cur.getName() + " was interrupted.");
+                }
+
             }
             // Check if another thread still holds the block
             int state = writeCounter.get();
@@ -112,10 +125,15 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
     }
 
     public void unblock() {
-        if (owner != null && Thread.currentThread() != owner) {
-            throw new IllegalMonitorStateException("Thread " + Thread.currentThread().getName() + " does not own this blocker");
+        synchronized (lock) {
+            if (null == owner || Thread.currentThread() != owner) {
+                throw new IllegalMonitorStateException("Thread " + Thread.currentThread().getName() + " does not own this blocker");
+            }
+            // Set unblocked
+            writeCounter.getAndIncrement();
+            owner = null;
+            lock.notifyAll();
         }
-        writeCounter.getAndIncrement();
     }
 
     public void acquire() {
