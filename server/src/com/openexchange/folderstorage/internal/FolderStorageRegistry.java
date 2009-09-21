@@ -87,7 +87,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     private final ConcurrentMap<String, List<FolderStorage>> registry;
 
-    private final List<FolderStorage> genStorages;
+    private volatile List<FolderStorage> genStorages;
 
     /**
      * Initializes a new {@link FolderStorageRegistry}.
@@ -126,8 +126,15 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         }
         // Register by tree identifier
         if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
-            genStorages.add(folderStorage);
-            Collections.sort(genStorages, FolderStorageComparator.getInstance());
+            final List<FolderStorage> tmp = new ArrayList<FolderStorage>(genStorages);
+            tmp.add(folderStorage);
+            Collections.sort(tmp, FolderStorageComparator.getInstance());
+            /*-
+             * Fake an atomic clear&addAll operation by reassigning volatile variable:
+             * 1. genStorages.clear();
+             * 2. genStorages.addAll(tmp);
+             */
+            genStorages = new CopyOnWriteArrayList<FolderStorage>(tmp);
         } else {
             List<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
@@ -143,11 +150,12 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
-        if (!genStorages.isEmpty()) {
+        final List<FolderStorage> genericStorages = genStorages;
+        if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+            for (final Iterator<FolderStorage> iterator = genericStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 final FolderType folderType = folderStorage.getFolderType();
                 if (folderType.servesTreeId(treeId) && folderType.servesFolderId(folderId)) {
@@ -171,11 +179,12 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
-        if (!genStorages.isEmpty()) {
+        final List<FolderStorage> genericStorages = genStorages;
+        if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+            for (final Iterator<FolderStorage> iterator = genericStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 final FolderType folderType = folderStorage.getFolderType();
                 if (folderType.servesTreeId(treeId) && folderType.servesParentId(parentId)) {
@@ -200,11 +209,12 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
-        if (!genStorages.isEmpty()) {
+        final List<FolderStorage> genericStorages = genStorages;
+        if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+            for (final Iterator<FolderStorage> iterator = genericStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 final FolderType folderType = folderStorage.getFolderType();
                 if (folderType.servesTreeId(treeId)) {
@@ -223,11 +233,12 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     }
 
     public FolderStorage[] getTreeFolderStorages(final String treeId) {
-        if (!genStorages.isEmpty()) {
+        final List<FolderStorage> genericStorages = genStorages;
+        if (!genericStorages.isEmpty()) {
             /*
              * Check general storages first
              */
-            for (final Iterator<FolderStorage> iterator = genStorages.iterator(); iterator.hasNext();) {
+            for (final Iterator<FolderStorage> iterator = genericStorages.iterator(); iterator.hasNext();) {
                 final FolderStorage folderStorage = iterator.next();
                 if (!StoragePriority.HIGHEST.equals(folderStorage.getStoragePriority()) && folderStorage.getFolderType().servesTreeId(
                     treeId)) {
@@ -258,7 +269,6 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
     public void removeFolderStorage(final String treeId, final FolderStorage folderStorage) {
         if (FolderStorage.ALL_TREE_ID.equals(treeId)) {
             genStorages.remove(folderStorage);
-            Collections.sort(genStorages, FolderStorageComparator.getInstance());
         } else {
             final List<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {

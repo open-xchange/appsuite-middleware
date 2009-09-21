@@ -1,6 +1,7 @@
 * 2009-09-21 - thorben.betten@open-xchange.com
 
  - Bugfix #14539: Fixed parsing of content type header
+ - Bugfix #14494: Don't use CopyOnWriteArrayList in Collections.sort() routine
 
 * 2009-09-17 - francisco.laguna@open-xchange.com
 
