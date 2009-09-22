@@ -93,7 +93,9 @@ public final class MIMEStorageUtility {
         CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.SIZE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_X_PRIORITY);
         // Cache fields
-        CACHE_FIELDS = fetchProfile2MailListFields(CACHE_FETCH_PROFILE);
+        final Collection<MailField> fields = fetchProfile2MailListFields(CACHE_FETCH_PROFILE);
+        fields.add(MailField.ACCOUNT_NAME);
+        CACHE_FIELDS = fields;
         CACHE_FIELDS_ARR = CACHE_FIELDS.toArray(new MailField[CACHE_FIELDS.size()]);
     }
 
