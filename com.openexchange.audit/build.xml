@@ -77,7 +77,7 @@
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
-    <target name="installConfig">
+    <target name="installConfig" depends="patchConfig">
         <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
@@ -101,6 +101,15 @@
     <target name="install" depends="installJar,installConfig"/>
 
     <target name="default" depends="install"/>
+
+    <target name="patchConfig" depends="prepare">
+        <property name="patch.conf.dir" value="${tmp.dir}/${conf.dir}"/>
+        <mkdir dir="${patch.conf.dir}"/>
+        <copy todir="${patch.conf.dir}" overwrite="true">
+            <fileset dir="${conf.dir}"/>
+        </copy>
+        <!-- TODO patch config file -->
+    </target>
 
     <!-- Dist -->
     <target name="dist" depends="clean">
