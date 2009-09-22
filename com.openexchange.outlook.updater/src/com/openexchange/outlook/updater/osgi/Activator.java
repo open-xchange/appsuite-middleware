@@ -5,6 +5,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyEvent;
+import com.openexchange.config.PropertyListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.outlook.updater.ResourceLoader;
 import com.openexchange.outlook.updater.UpdaterInstallerAssembler;
@@ -17,11 +19,13 @@ import com.openexchange.tools.service.ServletRegistration;
 public class Activator extends DeferredActivator {
     private static final Class[] NEEDED_SERVICES = {ConfigurationService.class, TemplateService.class, MailAccountStorageService.class};
     private static final String PATH_PROP = "com.openexchange.outlook.updater.path";
-    private static final String ALIAS = "/ajax/updater/installer/*";
+    private static final String ALIAS = "/ajax/updater/installer/default";
     private static final String UPDATER_XML_ALIAS = "/ajax/updater/update.xml";
+    private static final String STANDARD_NAME_PROP = "com.openexchange.outlook.updater.baseName";
     
     private ServletRegistration registration, xmlRegistration;
     private ResourceLoader loader;
+    private ConfigurationService config;
 
     
 	@Override
@@ -42,9 +46,10 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigurationService config = getService(ConfigurationService.class);
+        config = getService(ConfigurationService.class);
         if(config != null) {
             configureLoader(config);
+            configureName(config);
             register();
         }
     }
@@ -81,7 +86,7 @@ public class Activator extends DeferredActivator {
         registration.remove();
         registration = null;
         xmlRegistration.remove();
-        xmlRegistration = null;
+        xmlRegistration = null;  
     }
     
     private void configureLoader(ConfigurationService config) {
@@ -97,6 +102,16 @@ public class Activator extends DeferredActivator {
         BundleResourceLoader bundleLoader = new BundleResourceLoader(context.getBundle());
         
         loader = new CompositeResourceLoader(bundleLoader, fileSystemResourceLoader);
+    }
+    
+    private void configureName(ConfigurationService config) {
+        UpdaterInstallerServlet.setStandardName(config.getProperty(STANDARD_NAME_PROP, new PropertyListener() {
+
+            public void onPropertyChange(PropertyEvent event) {
+                UpdaterInstallerServlet.setStandardName(event.getValue());
+            }
+            
+        }));
     }
 
 }

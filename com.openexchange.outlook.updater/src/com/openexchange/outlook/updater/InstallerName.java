@@ -49,53 +49,35 @@
 
 package com.openexchange.outlook.updater;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-
 
 /**
- * {@link UpdaterInstallerAssembler}
+ * {@link InstallerName}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UpdaterInstallerAssembler {
-    
-    
-    private static final String AUTO_EXTRACTER = "7zS.sfx";
-    
-    
-    private SevenZipConfigGenerator configGenerator = new SevenZipConfigGenerator();
-    private ResourceLoader loader;
-    
-    public UpdaterInstallerAssembler(ResourceLoader loader) {
-        this.loader = loader;
-    }
-    
-    public InputStream buildInstaller(String updateURL, InstallerName name, String locale) throws IOException {
-        String configurationString = configGenerator.getConfiguration(updateURL, name.getExecutableName());
-        ByteArrayInputStream config = new ByteArrayInputStream(configurationString.getBytes("UTF-8"));
+public class InstallerName {
+    private String baseName;
 
-        InputStream sevenZip = tryLoading(name, locale, "en_US", "en");
-        
-        
-        return new CompositeInputStream(loader.get(AUTO_EXTRACTER), config, sevenZip);
+    public InstallerName(String name) {
+        this.baseName = name;
+    }
+    
+    public String get7ZipName(String locale) {
+        return baseName+"."+locale+".7z";
+    }
+    
+    public String getDownloadName() {
+        return baseNameWithoutExtension()+"-install.exe";
+    }
+    
+
+    public String getExecutableName() {
+        return baseName;
+    }
+    
+    private String baseNameWithoutExtension() {
+        return baseName.substring(0, baseName.lastIndexOf('.'));
     }
 
-    private InputStream tryLoading(InstallerName name, String...locales) throws IOException {
-        for(String locale : locales) {
-            try {
-                InputStream is = loader.get(name.get7ZipName(locale));
-                if(is != null) {
-                    return is;
-                }
-            } catch (FileNotFoundException x) {
-                // Ignore
-            }
-        }
-        throw new FileNotFoundException("Could not find 7z for "+name+" in the locales: "+Arrays.asList(locales).toString());
-    }
 }

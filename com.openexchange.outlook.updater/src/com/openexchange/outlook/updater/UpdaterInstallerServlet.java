@@ -74,8 +74,14 @@ public class UpdaterInstallerServlet extends PermissionServlet {
     private static UpdaterInstallerAssembler ASSEMBLER = null;
     private static String ALIAS;
     
+    private static String standardName;
+    
     public static void setAssembler(UpdaterInstallerAssembler service) {
         ASSEMBLER = service;
+    }
+    
+    public static void setStandardName(String name) {
+        standardName = name;
     }
     
     @Override
@@ -84,22 +90,26 @@ public class UpdaterInstallerServlet extends PermissionServlet {
     }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String name = getFilePath(req);
-        String installerName = name.substring(0, name.lastIndexOf('.')) + "-install.exe";
+        InstallerName name = getFilePath(req);
+        
+        String protocol = "http";
+        if(req.getProtocol() == null || req.getProtocol().contains("HTTPS")) {
+           protocol = "https";
+        }
         
         StringBuilder builder = new StringBuilder();
-        builder.append("https://").append(req.getServerName()).append("/ajax/updater/outlook_oxtender.xml");
+        builder.append(protocol).append("://").append(req.getServerName()).append("/ajax/updater/update.xml");
         
         resp.setContentType("application/octet-stream");
         Tools.removeCachingHeader(resp);
         resp.setHeader("Content-Disposition", "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(
-            installerName,
+            name.getDownloadName(),
             "UTF-8",
             req.getHeader("User-Agent").contains("MSIE"))) + "\"");
         
         InputStream is = null;
         try {
-            is = new BufferedInputStream(ASSEMBLER.buildInstaller(builder.toString(), name));
+            is = new BufferedInputStream(ASSEMBLER.buildInstaller(builder.toString(), name, getSessionObject(req).getUser().getLocale().toString()));
         } catch (FileNotFoundException x) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             resp.getWriter().println("Could not find the file you requested: "+name);
@@ -116,9 +126,8 @@ public class UpdaterInstallerServlet extends PermissionServlet {
         is.close();
     }
 
-    private String getFilePath(HttpServletRequest req) {
-        String path = req.getPathInfo().substring(ALIAS.length()-1);
-        return path;
+    private InstallerName getFilePath(HttpServletRequest req) {
+        return new InstallerName(standardName);
     }
     
     
