@@ -73,18 +73,6 @@
 		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" 
 			message="${bundlesdir}/${bundle.name}@start${line.separator}" />
     </target>
-
-	<target name="installConfig">
-        <mkdir dir="${conf.install.copy.dir}"/>
-        <copy todir="${conf.install.copy.dir}" overwrite="true">
-            <fileset dir="${patch.conf.dir}">
-            	<include name="**" />
-                <exclude name="*.in"/>
-                <exclude name="CVS"/>
-                <exclude name="osgi/**"/>
-            </fileset>
-        </copy>
-	</target>
 	
 	<target name="installJar" depends="jar,installInclude">
 		<mkdir dir="${destdir}/${bundlesdir}" />
@@ -95,7 +83,7 @@
 		</copy>
 	</target>
 	
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install" depends="installJar"/>
 
     <target name="default" depends="install"/>
 	
