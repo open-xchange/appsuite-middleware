@@ -38,6 +38,8 @@ workflowString: |
             type: 1
             typeOfInfo: display_name
           - !com.openexchange.subscribe.crawler.PagePart
+            regex: E\-Mail\-Adressen
+          - !com.openexchange.subscribe.crawler.PagePart
             regex: "(<b>Privat</b></td><td class=\"b\" width=\"277\"><a href=[^>]*>)([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)(<)"
             type: 1
             typeOfInfo: email2
@@ -46,17 +48,21 @@ workflowString: |
             type: 1
             typeOfInfo: email1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"277\">)([0-9\\s\\+\\-]*)(<)"
+            regex: Telefonnummern
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"277\">)([0-9\\s\\+\\-\\/]*)(<)"
             type: 1
             typeOfInfo: telephone_home1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(<b>Mobil<\\/b><\\/td><td class=\"b\" width=\"277\">[^>]*>)([0-9\\s\\+\\-]*)(<)"
+            regex: "(<b>Mobil<\\/b><\\/td><td class=\"b\" width=\"277\">[^>]*>)([0-9\\s\\+\\-\\/]*)(<)"
             type: 1
             typeOfInfo: cellular_telephone1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(<b>Büro<\\/b><\\/td><td class=\"b\" width=\"277\">)([0-9\\s\\+\\-]*)(<)"
+            regex: "(<b>Büro<\\/b><\\/td><td class=\"b\" width=\"277\">)([0-9\\s\\+\\-\\/]*)(<)"
             type: 1
             typeOfInfo: telephone_business1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: Adressen
           - !com.openexchange.subscribe.crawler.PagePart
             regex: "(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)"
             type: 1

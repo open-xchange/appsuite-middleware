@@ -92,11 +92,14 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         steps.add(new AnchorsByLinkRegexStep("Get each contact.", "", "adr_show.*"));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(width=\"282\"><b>)"+VALID_NAME+"(<)", "display_name"));
+        pageParts.add(new PagePart("E\\-Mail\\-Adressen"));
         pageParts.add(new PagePart("(<b>Privat</b></td><td class=\"b\" width=\"277\"><a href=[^>]*>)"+VALID_EMAIL_REGEX+"(<)", "email2"));
         pageParts.add(new PagePart("(<b>BŸro</b></td><td class=\"b\" width=\"277\"><a href=[^>]*>)"+VALID_EMAIL_REGEX+"(<)", "email1"));
+        pageParts.add(new PagePart("Telefonnummern"));
         pageParts.add(new PagePart("(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_home1"));
         pageParts.add(new PagePart("(<b>Mobil<\\/b><\\/td><td class=\"b\" width=\"277\">[^>]*>)"+VALID_PHONE_REGEX+"(<)", "cellular_telephone1"));
         pageParts.add(new PagePart("(<b>BŸro<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_business1"));
+        pageParts.add(new PagePart("Adressen"));
         pageParts.add(new PagePart("(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)", "street_home"));
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
         pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_home"));
@@ -118,7 +121,7 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+        //dumpThis(crawler, crawler.getDisplayName());
     }
 
 }
