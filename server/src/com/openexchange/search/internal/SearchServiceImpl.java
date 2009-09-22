@@ -193,7 +193,7 @@ public final class SearchServiceImpl implements SearchService {
             }
             return matches;
         }
-        if (CompositeOperation.NON.equals(operation)) {
+        if (CompositeOperation.NOT.equals(operation)) {
             final SearchTerm<?>[] searchTerms = ((CompositeSearchTerm) searchTerm).getOperands();
             if (searchTerms.length == 0) {
                 return true;

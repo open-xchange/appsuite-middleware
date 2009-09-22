@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.search.internal.terms.AndTerm;
-import com.openexchange.search.internal.terms.NonTerm;
+import com.openexchange.search.internal.terms.NotTerm;
 import com.openexchange.search.internal.terms.OrTerm;
 
 /**
@@ -99,14 +99,14 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
             }
         }),
         /**
-         * The <i><code>NON</code></i> composite type.
+         * The <i><code>NOT</code></i> composite type.
          */
-        NON("non", 1, new InstanceCreator() {
+        NOT("not", 1, new InstanceCreator() {
 
             private static final long serialVersionUID = 5131782739497011902L;
 
             public CompositeSearchTerm newInstance() {
-                return new NonTerm();
+                return new NotTerm();
             }
         });
 
