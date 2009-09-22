@@ -63,7 +63,8 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link SearchTermMapper} - TODO Short description of this class' purpose.
+ * {@link SearchTermMapper} - Maps a given instance of {@link com.openexchange.search.SearchTerm} to an appropriate instance of
+ * {@link com.openexchange.mail.search.SearchTerm}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
