@@ -50,7 +50,9 @@ package com.openexchange.test.fixtures;
 
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
+import com.openexchange.test.fixtures.transformators.FileToByteArrayTransformator;
 import com.openexchange.test.fixtures.transformators.DistributionListTransformator;
+import com.openexchange.test.fixtures.transformators.DocumentsTransformator;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -83,6 +85,7 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
             this.entries = entries;
             addTransformator(new DistributionListTransformator(fixtureLoader), "distribution_list");
             addTransformator(new BooleanTransformator(), "private_flag");
+            addTransformator(new FileToByteArrayTransformator(fixtureLoader), "image1");
         }
 
         public Fixture<Contact> getEntry(final String entryName) throws FixtureException {
