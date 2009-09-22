@@ -70,7 +70,7 @@ public final class HttpServiceImpl implements HttpService {
     private static final HttpContext standardContext = new HttpContextImpl();
 
     /**
-	 * 
+	 * Default constructor.
 	 */
     public HttpServiceImpl() {
         super();
