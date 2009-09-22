@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.calendar.printing.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.ajax,
+ com.openexchange.api,
  com.openexchange.api2,
  com.openexchange.config,
  com.openexchange.groupware,
@@ -14,6 +15,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.java,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.templating,

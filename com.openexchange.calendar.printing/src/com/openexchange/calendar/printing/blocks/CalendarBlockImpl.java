@@ -47,73 +47,33 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.calendar.printing.blocks;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.calendar.printing.CalendarPrintingServlet;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.groupware.container.Appointment;
+
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public class CalendarBlockImpl implements CalendarBlock {
 
-    private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    private HTTPServletRegistration registration;
+    private List<Appointment> appointments = new LinkedList<Appointment>();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return services;
+    public void addAppointment(Appointment appointment) {
+        appointments.add(appointment);
     }
 
-    @Override
-    protected void handleAvailability(Class<?> clazz) {
-        register();
+    public void setAppointment(List<Appointment> appointments) {
+        this.appointments = appointments;
     }
 
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        unregister();
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        register();
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
+    public List<Appointment> getAppointments() {
+        return appointments;
     }
 
-    private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
-            return;
-        }
-        
-        CalendarPrintingServlet.setTemplateService(templates);
-        CalendarPrintingServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CalendarPrintingServlet.setCalendarTools(collectionService);
-        
-        registration = new HTTPServletRegistration(context, ALIAS, new CalendarPrintingServlet());
-        
-    }
-
-    private void unregister() {
-        if(registration != null) {
-            registration.unregister();
-            registration = null;
-        }
+    public boolean isEmpty() {
+        return appointments.size() == 0;
     }
 
 }

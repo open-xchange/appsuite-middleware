@@ -47,73 +47,37 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.calendar.printing.blocks;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.calendar.printing.CalendarPrintingServlet;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.calendar.printing.CalendarPrintingType;
+import com.openexchange.groupware.container.Appointment;
+
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public class CalendarBlockFactory {
 
-    private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    private HTTPServletRegistration registration;
+    private CalendarPrintingType type;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return services;
+    private List<CalendarPartitioningStrategy> strategies;
+
+    public void setTypeToProduce(CalendarPrintingType type) {
+        this.type = type;
     }
 
-    @Override
-    protected void handleAvailability(Class<?> clazz) {
-        register();
+    public void addStrategy(CalendarPartitioningStrategy strategy) {
+        if (strategies == null)
+            strategies = new LinkedList<CalendarPartitioningStrategy>();
+        strategies.add(strategy);
     }
 
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        unregister();
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        register();
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
-    }
-
-    private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
-            return;
+    public List<CalendarBlock> partition(List<Appointment> appointments) {
+        for (CalendarPartitioningStrategy strategy : strategies) {
+            if (strategy.isPackaging(type))
+                return strategy.partition(appointments);
         }
-        
-        CalendarPrintingServlet.setTemplateService(templates);
-        CalendarPrintingServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CalendarPrintingServlet.setCalendarTools(collectionService);
-        
-        registration = new HTTPServletRegistration(context, ALIAS, new CalendarPrintingServlet());
-        
+        return null;
     }
-
-    private void unregister() {
-        if(registration != null) {
-            registration.unregister();
-            registration = null;
-        }
-    }
-
 }

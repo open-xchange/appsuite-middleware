@@ -50,9 +50,8 @@
 package com.openexchange.calendar.printing;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
@@ -62,12 +61,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.java.Strings;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -77,10 +75,26 @@ import com.openexchange.tools.session.ServerSession;
  * {@link CalendarPrintingServlet}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CalendarPrintingServlet extends PermissionServlet {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5186422014968264569L;
+
     private static TemplateService templates = null;
+
+    private static final Log LOG = LogFactory.getLog(CalendarPrintingServlet.class);
+
+    private static final String APPOINTMENTS = "appointments";
+
+    private static final String VIEW_START = "start";
+
+    private static final String VIEW_END = "end";
+
+    private static final String DEBUG = "debuggingItems";
 
     public static void setTemplateService(TemplateService service) {
         templates = service;
@@ -97,9 +111,6 @@ public class CalendarPrintingServlet extends PermissionServlet {
     public static void setCalendarTools(CalendarCollectionService service) {
         calendarTools = service;
     }
-    
-    private static final Log LOG = LogFactory.getLog(CalendarPrintingServlet.class);
-    private static final String APPOINTMENTS = "appointments";
 
     @Override
     protected boolean hasModulePermission(ServerSession session) {
@@ -108,33 +119,54 @@ public class CalendarPrintingServlet extends PermissionServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<String> debuggingItems = new LinkedList<String>();
+        CalendarPrintingTool tool = new CalendarPrintingTool();
+        
         resp.setContentType("text/html");
-        String start = req.getParameter(PARAMETER_START);
-        String end = req.getParameter(PARAMETER_END);
-        String folder = req.getParameter(PARAMETER_FOLDERID);
-        String templateName = req.getParameter(PARAMETER_TEMPLATE);
+
         ServerSession session = getSessionObject(req);
         try {
-            OXTemplate template = templates.loadTemplate(templateName);
-            
+            CalendarPrintingParameters params = new CalendarPrintingParameters(req);
+            if (params.isMissingFields()) {
+                throw new ServletException("Missing one or more parameters: " + Strings.join(params.getMissingFields(), ","));
+            }
+
+            if(tool.isBlockTemplate(params))
+                tool.calculateNewStartAndEnd(params);
+            OXTemplate template = templates.loadTemplate(params.getTemplate());
+
             AppointmentSQLInterface appointmentSql = appointmentSqlFactory.createAppointmentSql(session);
-            SearchIterator<Appointment> iterator = appointmentSql.getAppointmentsBetweenInFolder(Integer.valueOf(folder), new int[]{Appointment.TITLE}, new Date(Long.valueOf(start)), new Date(Long.valueOf(end)), -1, null);
-            List<Appointment> appointments = SearchIteratorAdapter.toList(iterator);
-            
+            SearchIterator<Appointment> iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
+                Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, params.getStart(), params.getEnd(), -1, null);
+
+            List<Appointment> expandedAppointments = tool.expandAppointements(
+                SearchIteratorAdapter.toList(iterator),
+                params.getStart(),
+                params.getEnd(),
+                appointmentSql,
+                calendarTools);
+
+            tool.sort(expandedAppointments);
+
             Map<String, Object> variables = new HashMap<String, Object>();
-            variables.put(APPOINTMENTS, appointments);
-            
+            variables.put(APPOINTMENTS, expandedAppointments);
+            variables.put(VIEW_START, params.getStart());
+            variables.put(VIEW_END, params.getEnd());
+            variables.put(DEBUG, debuggingItems);
+
             template.process(variables, resp.getWriter());
-            
-            
         } catch (Throwable t) {
             writeException(resp, t);
-        } 
-    }
-        
-    private void writeException(HttpServletResponse resp, Throwable t) {
-        LOG.error(t.getMessage(), t);
-        //TODO Write HTML page as response
+        }
     }
 
+
+
+    /**
+     * Write an exception message as HTML to the response
+     */
+    private void writeException(HttpServletResponse resp, Throwable t) {
+        LOG.error(t.getMessage(), t);
+        // TODO Write HTML page as response
+    }
 }

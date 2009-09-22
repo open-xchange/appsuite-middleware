@@ -47,73 +47,32 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.calendar.printing;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.calendar.printing.CalendarPrintingServlet;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import junit.framework.TestCase;
+
+
 /**
+ * {@link CalendarPrintingToolTest}
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public class CalendarPrintingToolTest extends TestCase{
 
-    private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    private HTTPServletRegistration registration;
+    private CalendarPrintingTool testSubject;
+
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return services;
+    protected void setUp() throws Exception {
+        testSubject = new CalendarPrintingTool();
+        super.setUp();
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
-        register();
-    }
-
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        unregister();
+    protected void tearDown() throws Exception {
+        // TODO Auto-generated method stub
+        super.tearDown();
     }
     
-    @Override
-    protected void startBundle() throws Exception {
-        register();
-    }
     
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
-    }
-
-    private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
-            return;
-        }
-        
-        CalendarPrintingServlet.setTemplateService(templates);
-        CalendarPrintingServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CalendarPrintingServlet.setCalendarTools(collectionService);
-        
-        registration = new HTTPServletRegistration(context, ALIAS, new CalendarPrintingServlet());
-        
-    }
-
-    private void unregister() {
-        if(registration != null) {
-            registration.unregister();
-            registration = null;
-        }
-    }
-
 }

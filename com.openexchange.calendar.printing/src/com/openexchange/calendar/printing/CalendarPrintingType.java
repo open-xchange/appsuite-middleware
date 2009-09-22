@@ -47,73 +47,46 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.calendar.printing;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.calendar.printing.CalendarPrintingServlet;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public enum CalendarPrintingType {
+    DAYVIEW("DayView", 0),
+    WORKWEEKVIEW("WorkWeekView", 1),
+    WEEKVIEW("WeekView", 2),
+    MONTHLYVIEW("MonthlyView", 3),
+    YEARLYVIEW("YearlyView", 4);
 
-    private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    private HTTPServletRegistration registration;
+    private String name;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return services;
+    private int number;
+
+    CalendarPrintingType(String name, int number) {
+        this.name = name;
+        this.number = number;
     }
 
-    @Override
-    protected void handleAvailability(Class<?> clazz) {
-        register();
-    }
-
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        unregister();
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        register();
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
-    }
-
-    private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
-            return;
+    /**
+     * Gets an enum instance via its number. Null if not found.
+     */
+    public static CalendarPrintingType getByNumber(int number) {
+        for (CalendarPrintingType type : values()) {
+            if (type.number == number)
+                return type;
         }
-        
-        CalendarPrintingServlet.setTemplateService(templates);
-        CalendarPrintingServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CalendarPrintingServlet.setCalendarTools(collectionService);
-        
-        registration = new HTTPServletRegistration(context, ALIAS, new CalendarPrintingServlet());
-        
+        return null;
     }
 
-    private void unregister() {
-        if(registration != null) {
-            registration.unregister();
-            registration = null;
+    /**
+     * Gets an enum instance via its name. Case-agnostic. Null if not found.
+     */
+    public static CalendarPrintingType getByName(String name) {
+        for (CalendarPrintingType type : values()) {
+            if (name.equalsIgnoreCase(type.name))
+                return type;
         }
+        return null;
     }
-
 }

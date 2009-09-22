@@ -47,73 +47,103 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.calendar.printing;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.calendar.printing.CalendarPrintingServlet;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.AJAXServlet;
+
+
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public class CalendarPrintingParameters {
+    private Date start;
+    private Date end;
+    private String template;
+    private int folder;
+    private List<String> missingFields;
 
-    private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    private HTTPServletRegistration registration;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return services;
-    }
-
-    @Override
-    protected void handleAvailability(Class<?> clazz) {
-        register();
-    }
-
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        unregister();
+    public CalendarPrintingParameters(){
+        
     }
     
-    @Override
-    protected void startBundle() throws Exception {
-        register();
+    public CalendarPrintingParameters(HttpServletRequest req){
+        this();
+        parseRequest(req);
     }
     
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
+    public Date getStart() {
+        return start;
+    }
+    
+    public void setStart(Date start) {
+        this.start = start;
     }
 
-    private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
-            return;
-        }
-        
-        CalendarPrintingServlet.setTemplateService(templates);
-        CalendarPrintingServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CalendarPrintingServlet.setCalendarTools(collectionService);
-        
-        registration = new HTTPServletRegistration(context, ALIAS, new CalendarPrintingServlet());
-        
+    
+    public Date getEnd() {
+        return end;
     }
 
-    private void unregister() {
-        if(registration != null) {
-            registration.unregister();
-            registration = null;
-        }
+    
+    public void setEnd(Date end) {
+        this.end = end;
     }
 
+    
+    public String getTemplate() {
+        return template;
+    }
+
+    
+    public void setTemplate(String template) {
+        this.template = template;
+    }
+
+    
+    public int getFolder() {
+        return folder;
+    }
+
+    
+    public void setFolder(int folder) {
+        this.folder = folder;
+    }
+    
+    public List<String> getMissingFields(){
+        return this.missingFields;
+    }
+    
+    public boolean isMissingFields(){
+        return missingFields != null;
+    }
+
+    
+    public void parseRequest(HttpServletRequest req){
+        LinkedList<String> missingFields = new LinkedList<String>();
+        
+        String start = req.getParameter(AJAXServlet.PARAMETER_START);
+        if (start == null)
+            missingFields.add(AJAXServlet.PARAMETER_START);
+        else
+            this.start = new Date(Long.valueOf(start).longValue());
+        
+        String end = req.getParameter(AJAXServlet.PARAMETER_END);
+        if(end == null)
+            missingFields.add(AJAXServlet.PARAMETER_END);
+        else
+            this.end = new Date(Long.valueOf(end).longValue());
+        
+        String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        this.folder = Integer.valueOf(folder).intValue();
+        
+        String templateName = req.getParameter(AJAXServlet.PARAMETER_TEMPLATE);
+        if(template == null)
+            missingFields.add(AJAXServlet.PARAMETER_TEMPLATE);
+        else
+            this.template = templateName;
+    }
 }
