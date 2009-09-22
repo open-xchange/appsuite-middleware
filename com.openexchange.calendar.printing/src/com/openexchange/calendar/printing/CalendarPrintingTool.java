@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -80,7 +82,10 @@ public class CalendarPrintingTool {
      * and end date.
      */
     public boolean isBlockTemplate(CalendarPrintingParameters params) {
-        return true;
+        String basic = "/[^/]+$";
+        Matcher m1 = Pattern.compile(CalendarPrintingType.WORKWEEKVIEW.getName()  + basic).matcher(params.getTemplate());
+        Matcher m2 = Pattern.compile(CalendarPrintingType.WORKWEEKVIEW.getNumber()  + basic).matcher(params.getTemplate());
+        return  m1.find() || m2.find();
     }
 
     /**

@@ -59,20 +59,55 @@ import junit.framework.TestCase;
  */
 public class CalendarPrintingToolTest extends TestCase{
 
-    private CalendarPrintingTool testSubject;
+    private CalendarPrintingTool tool;
 
-
+    private CalendarPrintingType[] nonBlockTypes = new CalendarPrintingType[]{CalendarPrintingType.DAYVIEW, CalendarPrintingType.WEEKVIEW, CalendarPrintingType.MONTHLYVIEW, CalendarPrintingType.YEARLYVIEW};
+    
     @Override
     protected void setUp() throws Exception {
-        testSubject = new CalendarPrintingTool();
+        tool = new CalendarPrintingTool();
         super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        // TODO Auto-generated method stub
         super.tearDown();
     }
     
+    public void testShouldRecognizeLegitimateTemplateTypes(){
+        for(CalendarPrintingType type :nonBlockTypes){
+            checkBlockTemplate(false, type.getName() + "/someTemplate");
+            checkBlockTemplate(false, type.getNumber() + "/someTemplate");
+        }
+
+        CalendarPrintingType type = CalendarPrintingType.WORKWEEKVIEW;
+        checkBlockTemplate(true, type.getName() + "/someTemplate");
+        checkBlockTemplate(true, type.getNumber() + "/someTemplate");
+    }
+    
+    public void testShouldNotBeConfusedByMisleadingTemplateNames(){
+        CalendarPrintingType evil = CalendarPrintingType.WORKWEEKVIEW;
+        for(CalendarPrintingType type :nonBlockTypes){
+            checkBlockTemplate(false, type.getName() + "/" + evil.getName() + "someTemplate");
+            checkBlockTemplate(false, type.getName() + "/" + "someTemplate" + evil.getName());
+            checkBlockTemplate(false, evil.getName() + "/" + type.getName() + "/" + "someTemplate");
+            checkBlockTemplate(false, type.getNumber() + "/" + evil.getNumber() + "someTemplate");
+            checkBlockTemplate(false, type.getNumber() + "/" + "someTemplate" + evil.getNumber());
+            checkBlockTemplate(false,  evil.getNumber() + "/" + type.getNumber() + "/" + "someTemplate");
+
+            checkBlockTemplate(true, type.getName() + "/" + evil.getName() + "/" +"someTemplate");
+            checkBlockTemplate(true, evil.getName() + "/" + "someTemplate" + type.getName());
+            checkBlockTemplate(true, type.getName() + "/" + evil.getName() + "/" + "someTemplate");
+            checkBlockTemplate(true, evil.getNumber() + "/" + type.getNumber() + "someTemplate");
+            checkBlockTemplate(true, evil.getNumber() + "/" + "someTemplate" + type.getNumber());
+            checkBlockTemplate(true, type.getNumber() + "/" + evil.getNumber() + "/" + "someTemplate");
+        }
+    }
+    
+    private void checkBlockTemplate(boolean expected, String templateName){
+        CalendarPrintingParameters params = new CalendarPrintingParameters();
+        params.setTemplate(templateName);
+        assertEquals("Checking template '" + templateName + "'", expected, tool.isBlockTemplate(params));
+    }
     
 }
