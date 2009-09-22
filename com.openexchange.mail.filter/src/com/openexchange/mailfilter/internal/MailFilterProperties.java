@@ -66,7 +66,8 @@ public class MailFilterProperties {
         SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name),
         SIEVE_SERVER("SIEVE_SERVER", "localhost"),
         SIEVE_PORT("SIEVE_PORT", "2000"),
-        SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange");
+        SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange"),
+        SIEVE_AUTH_ENC("SIEVE_AUTH_ENC", "UTF-8");
         
         public final String property;
         

@@ -76,12 +76,29 @@ import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsExcept
  */
 public class SieveHandler {
 
+    /**
+     * The logger.
+     */
+    private static Log log = LogFactory.getLog(SieveHandler.class);
+
+    /**
+     * The constant for CRLF (carriage-return line-feed).
+     */
     private final static String CRLF = "\r\n";
 
+    /**
+     * The SIEVE OK.
+     */
     private final static String SIEVE_OK = "OK";
 
+    /**
+     * The SIEVE NO.
+     */
     private final static String SIEVE_NO = "NO";
 
+    /**
+     * The SIEVE AUTHENTICATE.
+     */
     private final static String SIEVE_AUTH = "AUTHENTICATE ";
 
     private final static String SIEVE_AUTH_FAILD = "NO \"Authentication Error\"";
@@ -110,15 +127,17 @@ public class SieveHandler {
 
     private boolean AUTH = false;
 
-    private String sieve_user = null;
+    private final String sieve_user;
 
-    private String sieve_auth = null;
+    private final String sieve_auth;
 
-    private String sieve_auth_passwd = null;
+    private final String sieve_auth_enc;
 
-    private String sieve_host = "127.0.0.1";
+    private final String sieve_auth_passwd;
 
-    private int sieve_host_port = 2000;
+    private final String sieve_host;
+
+    private final int sieve_host_port;
 
     private Capabilities capa = null;
 
@@ -127,8 +146,6 @@ public class SieveHandler {
     private BufferedReader bis_sieve = null;
 
     private BufferedOutputStream bos_sieve = null;
-
-    private static Log log = LogFactory.getLog(SieveHandler.class);
 
     private long mStart;
 
@@ -144,20 +161,22 @@ public class SieveHandler {
      * @param host
      * @param port
      */
-    public SieveHandler(final String userName, final String passwd, final String host, final int port) {
+    public SieveHandler(final String userName, final String passwd, final String host, final int port, final String authEnc) {
         sieve_user = userName;
         sieve_auth = userName;
+        sieve_auth_enc = authEnc;
         sieve_auth_passwd = passwd;
-        sieve_host = host;
-        sieve_host_port = port;
+        sieve_host = host; // "127.0.0.1"
+        sieve_host_port = port; // 2000
     }
 
-    public SieveHandler(final String userName, final String authUserName, final String authUserPasswd, final String host, final int port) {
+    public SieveHandler(final String userName, final String authUserName, final String authUserPasswd, final String host, final int port, final String authEnc) {
         sieve_user = userName;
         sieve_auth = authUserName;
+        sieve_auth_enc = authEnc;
         sieve_auth_passwd = authUserPasswd;
-        sieve_host = host;
-        sieve_host_port = port;
+        sieve_host = host; // "127.0.0.1"
+        sieve_host_port = port; // 2000
 
     }
 
@@ -554,7 +573,7 @@ public class SieveHandler {
         final String to64 = commandBuilder.append(sieve_user).append('\0').append(sieve_auth).append('\0').append(sieve_auth_passwd).toString();
         commandBuilder.setLength(0);
 
-        final String user_auth_pass_64 = commandBuilder.append(convertStringToBase64(to64)).append(CRLF).toString();
+        final String user_auth_pass_64 = commandBuilder.append(convertStringToBase64(to64, sieve_auth_enc)).append(CRLF).toString();
         commandBuilder.setLength(0);
 
         final String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"PLAIN\" ").toString();
@@ -607,7 +626,7 @@ public class SieveHandler {
             }
         }
 
-        final String user64 = commandBuilder.append(convertStringToBase64(sieve_auth)).append(CRLF).toString();
+        final String user64 = commandBuilder.append(convertStringToBase64(sieve_auth, sieve_auth_enc)).append(CRLF).toString();
         commandBuilder.setLength(0);
 
         final String user_size = commandBuilder.append('{').append((user64.length() - 2)).append("+}").append(CRLF).toString();
@@ -629,7 +648,7 @@ public class SieveHandler {
             }
         }
 
-        final String pass64 = commandBuilder.append(convertStringToBase64(sieve_auth_passwd)).append(CRLF).toString();
+        final String pass64 = commandBuilder.append(convertStringToBase64(sieve_auth_passwd, sieve_auth_enc)).append(CRLF).toString();
         commandBuilder.setLength(0);
 
         final String pass_size = commandBuilder.append('{').append((pass64.length() - 2)).append("+}").append(CRLF).toString();
@@ -760,12 +779,15 @@ public class SieveHandler {
     }
 
     /**
-     * @param toConvert
-     * @return Base64String
-     * @throws UnsupportedEncodingException
+     * COnverts given string to Base64 using given charset encoding.
+     * 
+     * @param toConvert The string to convert to Base64
+     * @param charset The charset encoding to use when retrieving bytes from passed string
+     * @return The Base64 string
+     * @throws UnsupportedEncodingException If charset encoding is unknown
      */
-    private String convertStringToBase64(final String toConvert) throws UnsupportedEncodingException {
-        final String converted = com.openexchange.tools.encoding.Base64.encode(toConvert.getBytes("UTF-8"));
+    private static String convertStringToBase64(final String toConvert, final String charset) throws UnsupportedEncodingException {
+        final String converted = com.openexchange.tools.encoding.Base64.encode(toConvert.getBytes(charset));
         return converted.replaceAll("(\\r)?\\n", "");
     }
 
