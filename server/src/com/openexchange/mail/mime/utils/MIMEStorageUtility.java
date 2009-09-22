@@ -110,12 +110,10 @@ public final class MIMEStorageUtility {
             return null;
         }
         final FetchProfile clone = new FetchProfile();
-        final Item[] items = toClone.getItems();
-        for (final Item item : items) {
+        for (final Item item : toClone.getItems()) {
             clone.add(item);
         }
-        final String[] headerNames = toClone.getHeaderNames();
-        for (final String headerName : headerNames) {
+        for (final String headerName : toClone.getHeaderNames()) {
             clone.add(headerName);
         }
         return clone;
