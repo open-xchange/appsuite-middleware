@@ -159,16 +159,20 @@ public final class AllFetch {
         }
     };
 
-    private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
+    /**
+     * The map of {@link FetchItemHandler}s.
+     */
+    static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
-        MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
-        MAP.put(UID.class, UID_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
-        MAP.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        MAP.put(BODYSTRUCTURE.class, BODYSTRUCTURE_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        final Map<Class<? extends Item>, FetchItemHandler> m = new HashMap<Class<? extends Item>, FetchItemHandler>(6);
+        m.put(UID.class, UID_ITEM_HANDLER);
+        m.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        m.put(FLAGS.class, FLAGS_ITEM_HANDLER);
+        m.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
+        m.put(BODYSTRUCTURE.class, BODYSTRUCTURE_ITEM_HANDLER);
+        m.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        MAP = Collections.unmodifiableMap(m);
     }
 
     /*-
@@ -310,11 +314,8 @@ public final class AllFetch {
              */
             return new MailMessage[0];
         }
+        final org.apache.commons.logging.Log logger = LOG;
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            private final org.apache.commons.logging.Log logger = LOG;
-
-            private final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 /*-
@@ -342,7 +343,7 @@ public final class AllFetch {
                             final int itemCount = fr.getItemCount();
                             for (int k = 0; k < itemCount; k++) {
                                 final Item item = fr.getItem(k);
-                                final FetchItemHandler itemHandler = map.get(item.getClass());
+                                final FetchItemHandler itemHandler = MAP.get(item.getClass());
                                 if (null == itemHandler) {
                                     throw new ProtocolException("Unsupported FETCH item: " + item.getClass().getName());
                                 }
