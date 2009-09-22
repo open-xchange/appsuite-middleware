@@ -1,6 +1,7 @@
 * 2009-09-22 - thorben.betten@open-xchange.com
 
  - Bugfix #14525: Added configuration option to define SIEVE auth encoding
+ - Bugfix #14533: Fixed plain-text reply version
 
 * 2009-09-21 - thorben.betten@open-xchange.com
 

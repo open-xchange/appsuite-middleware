@@ -635,7 +635,7 @@ public final class MimeReply {
 
     private static boolean getTextContent(final boolean preferHTML, final MailPart multipartPart, final int count, final ContentType partContentType, final ParameterContainer pc) throws MailException, MessagingException, IOException {
         boolean found = false;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
             if (partContentType.isMimeType(preferHTML ? MIMETypes.MIME_TEXT_HTM_ALL : MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(
