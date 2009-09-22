@@ -1479,7 +1479,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a messaging error occurs
      */
     public static int[] uids2SeqNums(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        if (imapFolder.getMessageCount() == 0 || uids.length == 0) {
             /*
              * Empty folder...
              */
