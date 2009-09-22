@@ -94,7 +94,7 @@ public final class SearchTermMapper {
             }
             ANDTerm andTerm;
             if (1 == length) {
-                andTerm = new ANDTerm(map(searchTerms[0]), BooleanTerm.TRUE);
+                andTerm = new ANDTerm(map(searchTerms[0]), BooleanTerm.TRUE); // Neutral element
             } else {
                 andTerm = new ANDTerm(map(searchTerms[0]), map(searchTerms[1]));
                 for (int i = 2; i < length; i++) {
@@ -111,7 +111,7 @@ public final class SearchTermMapper {
             }
             ORTerm orTerm;
             if (1 == length) {
-                orTerm = new ORTerm(map(searchTerms[0]), BooleanTerm.FALSE);
+                orTerm = new ORTerm(map(searchTerms[0]), BooleanTerm.FALSE); // Neutral element
             } else {
                 orTerm = new ORTerm(map(searchTerms[0]), map(searchTerms[1]));
                 for (int i = 2; i < length; i++) {
