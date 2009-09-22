@@ -3,11 +3,14 @@ package com.openexchange.outlook.updater.osgi;
 import java.io.File;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.outlook.updater.Enabled;
 import com.openexchange.outlook.updater.ResourceLoader;
 import com.openexchange.outlook.updater.UpdaterInstallerAssembler;
 import com.openexchange.outlook.updater.UpdaterInstallerServlet;
@@ -26,6 +29,7 @@ public class Activator extends DeferredActivator {
     private ServletRegistration registration, xmlRegistration;
     private ResourceLoader loader;
     private ConfigurationService config;
+    private ServiceRegistration preferenceRegistration;
 
     
 	@Override
@@ -67,6 +71,8 @@ public class Activator extends DeferredActivator {
             unregister();
             return;
         }
+        preferenceRegistration = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
+        
         UpdaterInstallerAssembler assembler = new UpdaterInstallerAssembler(loader);
         
         UpdaterInstallerServlet.setAssembler(assembler);
@@ -87,6 +93,7 @@ public class Activator extends DeferredActivator {
         registration = null;
         xmlRegistration.remove();
         xmlRegistration = null;  
+        preferenceRegistration.unregister();
     }
     
     private void configureLoader(ConfigurationService config) {
