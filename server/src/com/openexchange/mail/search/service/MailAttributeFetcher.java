@@ -422,7 +422,9 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
             }
             return null;
         }
-        return (T) getter.getObject(candidate);
+        @SuppressWarnings("unchecked")
+        final T retval = (T) getter.getObject(candidate);
+        return retval;
     }
 
     /**
