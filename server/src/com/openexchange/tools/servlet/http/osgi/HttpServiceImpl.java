@@ -59,46 +59,33 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
- * {@link HttpServiceImpl}
+ * {@link HttpServiceImpl} - The HTTP Service allows other bundles in the OSGi environment to dynamically register resources and servlets
+ * into the URI namespace of HTTP Service. A bundle may later unregister its resources or servlets.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpServiceImpl implements HttpService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HttpServiceImpl.class);
-
     private static final HttpContext standardContext = new HttpContextImpl();
 
     /**
-	 * Default constructor.
-	 */
+     * Default constructor.
+     */
     public HttpServiceImpl() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.service.http.HttpService#createDefaultHttpContext()
-     */
     public HttpContext createDefaultHttpContext() {
         return standardContext;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.service.http.HttpService#registerResources(java.lang.String, java.lang.String, org.osgi.service.http.HttpContext)
-     */
     public void registerResources(final String alias, final String name, final HttpContext context) throws NamespaceException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("HttpServiceImpl.registerResources() not implemented");
+        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(HttpServiceImpl.class);
+        if (log.isTraceEnabled()) {
+            log.trace("HttpServiceImpl.registerResources() not implemented");
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String, javax.servlet.Servlet, java.util.Dictionary,
-     * org.osgi.service.http.HttpContext)
-     */
     @SuppressWarnings("unchecked")
     public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams, final HttpContext context) throws ServletException, NamespaceException {
         try {
@@ -110,10 +97,6 @@ public final class HttpServiceImpl implements HttpService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.service.http.HttpService#unregister(java.lang.String)
-     */
     public void unregister(final String alias) {
         HttpServletManager.unregisterServlet(alias);
     }
