@@ -1479,16 +1479,23 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If a messaging error occurs
      */
     public static int[] uids2SeqNums(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0 || uids.length == 0) {
+        if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
+             */
+            return new int[0];
+        }
+        final int length = uids.length;
+        if (length == 0) {
+            /*
+             * Empty array...
              */
             return new int[0];
         }
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
+                final Map<Long, Integer> m = new HashMap<Long, Integer>(length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
@@ -1533,13 +1540,13 @@ public final class IMAPCommandsCollection {
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
-                        ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
+                        ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
-                final int[] retval = new int[m.size()];
+                final int[] retval = new int[length];
                 for (int i = 0; i < retval.length; i++) {
-                    final Long key = Long.valueOf(uids[i]);
-                    retval[i] = m.containsKey(key) ? m.get(key).intValue() : -1;
+                    final Integer seqNum = m.get(Long.valueOf(uids[i]));
+                    retval[i] = null == seqNum ? -1 : seqNum.intValue();
                 }
                 return retval;
             }
