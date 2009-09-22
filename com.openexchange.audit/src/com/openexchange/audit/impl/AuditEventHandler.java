@@ -183,8 +183,12 @@ public class AuditEventHandler implements EventHandler {
 				log.append("OBJECT TYPE: CONTACT; ");
 				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
 				log.append("OBJECT ID: " + contact.getObjectID() + "; ");
+				/*
+				 * Temporary removed due to obvious Bug in Contact interface.
+				 * The Interface will always return 0 for creator and modifier.
 				log.append("CREATED BY: " + UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName() + "; ");
 				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName() + "; ");
+				*/
 				log.append("CONTACT FULLNAME: " + contact.getDisplayName() + ";");
 				log.append("FOLDER: " + getPathToRoot(contact.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
 				
