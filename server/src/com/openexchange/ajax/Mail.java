@@ -60,6 +60,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -80,6 +81,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
@@ -92,6 +94,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.parser.InfostoreParser;
+import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
@@ -2152,19 +2155,98 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (sort != null && order == null) {
                 throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_ORDER);
             }
+            final JSONValue searchValue;
+            if (startsWith('[', body, true)) {
+                searchValue = new JSONArray(body);
+            } else if (startsWith('{', body, true)) {
+                searchValue = new JSONObject(body);
+            } else {
+                throw new JSONException(MessageFormat.format("Request body is not a JSON value: {0}", body));
+            }
             /*
-             * Parse body into a JSON array
+             * Perform search dependent on passed JSON value
              */
-            final JSONArray ja = new JSONArray(body);
-            final int length = ja.length();
-            if (length > 0) {
-                final int[] searchCols = new int[length];
-                final String[] searchPats = new String[length];
-                for (int i = 0; i < length; i++) {
-                    final JSONObject tmp = ja.getJSONObject(i);
-                    searchCols[i] = tmp.getInt(PARAMETER_COL);
-                    searchPats[i] = tmp.getString(PARAMETER_SEARCHPATTERN);
+            if (searchValue.isArray()) {
+                /*
+                 * Parse body into a JSON array
+                 */
+                final JSONArray ja = (JSONArray) searchValue;
+                final int length = ja.length();
+                if (length > 0) {
+                    final int[] searchCols = new int[length];
+                    final String[] searchPats = new String[length];
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject tmp = ja.getJSONObject(i);
+                        searchCols[i] = tmp.getInt(PARAMETER_COL);
+                        searchPats[i] = tmp.getString(PARAMETER_SEARCHPATTERN);
+                    }
+                    /*
+                     * Search mails
+                     */
+                    MailServletInterface mailInterface = mailInterfaceArg;
+                    boolean closeMailInterface = false;
+                    try {
+                        if (mailInterface == null) {
+                            mailInterface = MailServletInterface.getInstance(session);
+                            closeMailInterface = true;
+                        }
+                        /*
+                         * Pre-Select field writers
+                         */
+                        final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                        final int userId = session.getUserId();
+                        final int contextId = session.getContextId();
+                        int orderDir = OrderDirection.ASC.getOrder();
+                        if (order != null) {
+                            if (order.equalsIgnoreCase(STR_ASC)) {
+                                orderDir = OrderDirection.ASC.getOrder();
+                            } else if (order.equalsIgnoreCase(STR_DESC)) {
+                                orderDir = OrderDirection.DESC.getOrder();
+                            } else {
+                                throw new MailException(MailException.Code.INVALID_INT_VALUE, PARAMETER_ORDER);
+                            }
+                        }
+                        if ((STR_THREAD.equalsIgnoreCase(sort))) {
+                            it =
+                                mailInterface.getThreadedMessages(
+                                    folderId,
+                                    null,
+                                    MailSortField.RECEIVED_DATE.getField(),
+                                    orderDir,
+                                    searchCols,
+                                    searchPats,
+                                    true,
+                                    columns);
+                            final int size = it.size();
+                            for (int i = 0; i < size; i++) {
+                                final MailMessage mail = it.next();
+                                final JSONArray arr = new JSONArray();
+                                for (final MailFieldWriter writer : writers) {
+                                    writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                }
+                                jsonWriter.value(arr);
+                            }
+                        } else {
+                            final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
+                            final int size = it.size();
+                            for (int i = 0; i < size; i++) {
+                                final MailMessage mail = it.next();
+                                final JSONArray arr = new JSONArray();
+                                for (final MailFieldWriter writer : writers) {
+                                    writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                }
+                                jsonWriter.value(arr);
+                            }
+                        }
+                    } finally {
+                        if (closeMailInterface && mailInterface != null) {
+                            mailInterface.close(true);
+                        }
+                    }
                 }
+            } else {
+                final JSONObject searchObject = ((JSONObject) searchValue).getJSONObject(PARAMETER_FILTER);
                 /*
                  * Search mails
                  */
@@ -2191,38 +2273,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                             throw new MailException(MailException.Code.INVALID_INT_VALUE, PARAMETER_ORDER);
                         }
                     }
-                    if ((STR_THREAD.equalsIgnoreCase(sort))) {
-                        it =
-                            mailInterface.getThreadedMessages(
-                                folderId,
-                                null,
-                                MailSortField.RECEIVED_DATE.getField(),
-                                orderDir,
-                                searchCols,
-                                searchPats,
-                                true,
-                                columns);
-                        final int size = it.size();
-                        for (int i = 0; i < size; i++) {
-                            final MailMessage mail = it.next();
-                            final JSONArray arr = new JSONArray();
-                            for (final MailFieldWriter writer : writers) {
-                                writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
-                            }
-                            jsonWriter.value(arr);
+                    final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchObject), true, columns);
+                    final int size = it.size();
+                    for (int i = 0; i < size; i++) {
+                        final MailMessage mail = it.next();
+                        final JSONArray arr = new JSONArray();
+                        for (final MailFieldWriter writer : writers) {
+                            writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                         }
-                    } else {
-                        final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                        it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
-                        final int size = it.size();
-                        for (int i = 0; i < size; i++) {
-                            final MailMessage mail = it.next();
-                            final JSONArray arr = new JSONArray();
-                            for (final MailFieldWriter writer : writers) {
-                                writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
-                            }
-                            jsonWriter.value(arr);
-                        }
+                        jsonWriter.value(arr);
                     }
                 } finally {
                     if (closeMailInterface && mailInterface != null) {
@@ -3719,6 +3779,27 @@ public class Mail extends PermissionServlet implements UploadListener {
             return false;
         }
 
+    }
+
+    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+        if (!ignoreHeadingWhitespaces) {
+            return startingChar == toCheck.charAt(0);
+        }
+        int i = 0;
+        while (i < len && Character.isWhitespace(toCheck.charAt(i))) {
+            i++;
+        }
+        if (i >= len) {
+            return false;
+        }
+        return startingChar == toCheck.charAt(i);
     }
 
 }
