@@ -64,16 +64,17 @@ public enum CalendarPrintingType {
     private int number;
 
     CalendarPrintingType(String name, int number) {
-        this.name = name;
-        this.number = number;
+        this.setName(name);
+        this.setNumber(number);
     }
+
 
     /**
      * Gets an enum instance via its number. Null if not found.
      */
     public static CalendarPrintingType getByNumber(int number) {
         for (CalendarPrintingType type : values()) {
-            if (type.number == number)
+            if (type.getNumber() == number)
                 return type;
         }
         return null;
@@ -84,9 +85,29 @@ public enum CalendarPrintingType {
      */
     public static CalendarPrintingType getByName(String name) {
         for (CalendarPrintingType type : values()) {
-            if (name.equalsIgnoreCase(type.name))
+            if (name.equalsIgnoreCase(type.getName()))
                 return type;
         }
         return null;
+    }
+
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+
+    public int getNumber() {
+        return number;
     }
 }
