@@ -312,6 +312,10 @@ public final class AllFetch {
         }
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
+            private final org.apache.commons.logging.Log logger = LOG;
+
+            private final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
+
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 /*-
                  * Arguments:  sequence set
@@ -330,7 +334,7 @@ public final class AllFetch {
                 final List<MailMessage> l = new ArrayList<MailMessage>(len);
                 if (response.isOK()) {
                     final String fullname = imapFolder.getFullName();
-                    final String internaldate = "INTERNALDATE";
+                    // final String internaldate = "INTERNALDATE";
                     for (int j = 0; j < len; j++) {
                         if ("FETCH".equals(((IMAPResponse) r[j]).getKey())) {
                             final FetchResponse fr = (FetchResponse) r[j];
@@ -338,14 +342,14 @@ public final class AllFetch {
                             final int itemCount = fr.getItemCount();
                             for (int k = 0; k < itemCount; k++) {
                                 final Item item = fr.getItem(k);
-                                final FetchItemHandler itemHandler = MAP.get(item.getClass());
+                                final FetchItemHandler itemHandler = map.get(item.getClass());
                                 if (null == itemHandler) {
                                     throw new ProtocolException("Unsupported FETCH item: " + item.getClass().getName());
                                 }
                                 try {
-                                    itemHandler.handleItem(item, m, LOG);
+                                    itemHandler.handleItem(item, m, logger);
                                 } catch (final MailException e) {
-                                    LOG.error(e.getMessage(), e);
+                                    logger.error(e.getMessage(), e);
                                 }
                             }
                             l.add(m);
