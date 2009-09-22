@@ -417,9 +417,9 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
     private static final TaskAttributeFetcher instance = new TaskAttributeFetcher();
 
     /**
-     * Gets the contact attribute fetcher instance.
+     * Gets the task attribute fetcher instance.
      * 
-     * @return The contact attribute fetcher instance.
+     * @return The task attribute fetcher instance.
      */
     public static TaskAttributeFetcher getInstance() {
         return instance;
