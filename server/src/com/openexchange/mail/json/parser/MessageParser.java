@@ -116,6 +116,7 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link MessageParser} - Parses instances of {@link JSONObject} to instances of {@link MailMessage}.
@@ -322,7 +323,7 @@ public final class MessageParser {
         parse(
             jsonObj,
             transportMail,
-            TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()),
+            TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()),
             provider,
             session,
             accountId,
@@ -341,7 +342,7 @@ public final class MessageParser {
      */
     public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session, final int accountId) throws MailException {
         try {
-            parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(
+            parse(jsonObj, mail, TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), session, accountId);
         } catch (final ContextException e) {

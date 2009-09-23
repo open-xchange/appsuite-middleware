@@ -50,14 +50,11 @@
 package com.openexchange.ajax.request;
 
 import java.util.Date;
-import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.container.Response;
@@ -83,6 +80,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -261,7 +259,7 @@ public class AttachmentRequest extends CommonRequest {
 			
 			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(attachment.getCreationDate().getTime());
-			aWriter.write(attachment, TimeZone.getTimeZone(user.getTimeZone()));
+			aWriter.write(attachment, TimeZoneUtils.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
 			
 			ATTACHMENT_BASE.commit();
@@ -300,7 +298,7 @@ public class AttachmentRequest extends CommonRequest {
 			
 			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(delta.sequenceNumber());
-			aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, TimeZone.getTimeZone(user.getTimeZone()));
+			aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, TimeZoneUtils.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
 			//w.flush();
 			ATTACHMENT_BASE.commit();
@@ -349,7 +347,7 @@ public class AttachmentRequest extends CommonRequest {
 			iter = result.results();
 			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(result.sequenceNumber());
-			aWriter.writeAttachments(iter,fields,TimeZone.getTimeZone(user.getTimeZone()));
+			aWriter.writeAttachments(iter,fields,TimeZoneUtils.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
 			//w.flush();
 			ATTACHMENT_BASE.commit();
@@ -423,7 +421,7 @@ public class AttachmentRequest extends CommonRequest {
 			
 			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(result.sequenceNumber());
-			aWriter.writeAttachments(iter,fields,TimeZone.getTimeZone(user.getTimeZone()));
+			aWriter.writeAttachments(iter,fields,TimeZoneUtils.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
 			//w.flush();
 			

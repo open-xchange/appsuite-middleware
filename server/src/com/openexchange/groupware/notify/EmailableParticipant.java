@@ -51,7 +51,6 @@ package com.openexchange.groupware.notify;
 
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.container.CalendarObject;
 
 /**

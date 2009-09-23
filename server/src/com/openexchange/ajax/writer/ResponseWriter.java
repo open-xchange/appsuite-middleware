@@ -58,18 +58,15 @@ import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
 import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
 import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
 import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;

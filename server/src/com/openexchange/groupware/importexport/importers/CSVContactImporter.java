@@ -90,6 +90,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -313,7 +314,7 @@ public class CSVContactImporter extends AbstractImporter {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
         
-        final TimeZone utc = TimeZone.getTimeZone("UTC");
+        final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
         final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
         

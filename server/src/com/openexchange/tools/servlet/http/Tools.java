@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -258,7 +258,7 @@ public final class Tools {
          * Pattern for the HTTP header date format.
          */
         HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        HEADER_DATEFORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
         EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
     }
 

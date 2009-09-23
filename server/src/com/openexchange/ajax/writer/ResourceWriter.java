@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.resource.Resource;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ResourceWriter} - Writer for resources.
@@ -73,7 +72,7 @@ public class ResourceWriter extends DataWriter {
      */
     public ResourceWriter() {
         super(null, null);
-        utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
+        utc = getTimeZone("utc");
     }
 
     /**

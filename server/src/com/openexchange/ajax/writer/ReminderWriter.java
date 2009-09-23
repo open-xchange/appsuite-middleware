@@ -51,10 +51,8 @@ package com.openexchange.ajax.writer;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;

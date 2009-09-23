@@ -50,6 +50,7 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.Collections.newHashMap;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -158,7 +159,7 @@ public class AppointmentRequest {
         final String sTimeZone = user.getTimeZone();
         appointmentFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
 
-        timeZone = TimeZone.getTimeZone(sTimeZone);
+        timeZone = getTimeZone(sTimeZone);
         if (LOG.isDebugEnabled()) {
             LOG.debug("use timezone string: " + sTimeZone);
             LOG.debug("use user timezone: " + timeZone);

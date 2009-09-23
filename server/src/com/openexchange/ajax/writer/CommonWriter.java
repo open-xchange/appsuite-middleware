@@ -50,11 +50,9 @@
 package com.openexchange.ajax.writer;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.groupware.container.CommonObject;
 

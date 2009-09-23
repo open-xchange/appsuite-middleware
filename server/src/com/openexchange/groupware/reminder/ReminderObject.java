@@ -51,7 +51,7 @@ package com.openexchange.groupware.reminder;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.TimeZone;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * Data object for a reminder.
@@ -193,6 +193,6 @@ public class ReminderObject implements Cloneable {
 
     static {
         format = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        format.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
     }
 }

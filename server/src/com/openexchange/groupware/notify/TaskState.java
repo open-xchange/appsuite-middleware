@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;

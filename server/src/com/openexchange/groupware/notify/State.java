@@ -51,7 +51,6 @@ package com.openexchange.groupware.notify;
 
 import java.text.DateFormat;
 import java.util.Locale;
-
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.i18n.tools.RenderMap;

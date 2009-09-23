@@ -52,7 +52,6 @@ package com.openexchange.groupware.importexport.importers;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;

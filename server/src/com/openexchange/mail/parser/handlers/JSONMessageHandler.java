@@ -104,6 +104,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link JSONMessageHandler}
@@ -268,7 +269,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private TimeZone getTimeZone() {
         if (timeZone == null) {
-            timeZone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
         }
         return timeZone;
     }

@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.util.Date;
-
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;

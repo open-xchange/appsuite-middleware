@@ -94,6 +94,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -236,7 +237,7 @@ public class ICalImporter extends AbstractImporter {
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
         final Context ctx = session.getContext();
-        final TimeZone defaultTz = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        final TimeZone defaultTz = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
 
         final List<ConversionError> errors = new ArrayList<ConversionError>();
         final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();

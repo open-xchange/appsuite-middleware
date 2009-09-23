@@ -55,13 +55,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Enumeration;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;

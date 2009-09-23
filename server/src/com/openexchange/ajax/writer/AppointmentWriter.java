@@ -54,18 +54,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link AppointmentWriter} - Writer for appointments
@@ -89,7 +88,7 @@ public class AppointmentWriter extends CalendarWriter {
      */
     public AppointmentWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = TimeZone.getTimeZone("utc");
+        utc = TimeZoneUtils.getTimeZone("utc");
     }
     
     public CalendarCollectionService getCalendarCollectionService(){

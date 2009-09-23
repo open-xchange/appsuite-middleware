@@ -52,7 +52,6 @@
 package com.openexchange.groupware.reminder;
 
 import java.sql.Connection;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 

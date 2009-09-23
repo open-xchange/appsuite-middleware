@@ -52,13 +52,14 @@ package com.openexchange.tools.versit.values;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * @author Viktor Pracht
  */
 public class DateTimeValue {
 
-    public static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+    public static final TimeZone GMT = TimeZoneUtils.getTimeZone("GMT");
 
     public Calendar calendar = new GregorianCalendar();
 

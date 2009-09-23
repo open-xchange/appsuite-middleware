@@ -105,6 +105,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -461,13 +462,13 @@ public class OXContainerConverter {
         } catch (final ContextException e) {
             throw new ConverterException(e);
         }
-        timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
     }
 
     public OXContainerConverter(final Session session, final Context ctx) {
         super();
         this.ctx = ctx;
-        timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
     }
 
     public OXContainerConverter(final Context ctx, final TimeZone tz) {
@@ -1033,7 +1034,7 @@ public class OXContainerConverter {
     /**
      * fills and array with null up to a specified amount
      * */
-    private void fillArrayUpTo(ArrayList<?> a, int limit) {
+    private void fillArrayUpTo(ArrayList<?> a, final int limit) {
         if(a == null){
             a = new ArrayList<Object>();
         }
@@ -1050,10 +1051,10 @@ public class OXContainerConverter {
      * @param url The URI parameter's value
      * @throws ConverterException If converting image's data fails
      */
-    public static void loadImageFromURL(Contact contact, String url) throws ConverterException {
+    public static void loadImageFromURL(final Contact contact, final String url) throws ConverterException {
         try {
             loadImageFromURL(contact, new URL(url));
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw new ConverterException("Image URL is not wellformed.", e);
         }
     }
@@ -1066,33 +1067,33 @@ public class OXContainerConverter {
      * @param url The image URL
      * @throws ConverterException If converting image's data fails
      */
-    private static void loadImageFromURL(Contact contact, URL url) throws ConverterException {
+    private static void loadImageFromURL(final Contact contact, final URL url) throws ConverterException {
         String mimeType = null;
         byte[] bytes = null;
         try {
-            URLConnection urlCon = url.openConnection();
+            final URLConnection urlCon = url.openConnection();
             urlCon.setConnectTimeout(2500);
             urlCon.setReadTimeout(2500);
             urlCon.connect();
             mimeType = urlCon.getContentType();
-            InputStream in = urlCon.getInputStream();
+            final InputStream in = urlCon.getInputStream();
             try {
-                ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(in.available());
+                final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(in.available());
                 IOUtils.transfer(in, buffer);
                 bytes = buffer.toByteArray();
                 // In case the configuration file was not read (yet) the default value is given here
-                long maxSize = ContactConfig.getInstance().getMaxImageSize();
+                final long maxSize = ContactConfig.getInstance().getMaxImageSize();
                 if (maxSize > 0 && bytes.length > maxSize) {
-                    ConverterException e = new ConverterException("Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
+                    final ConverterException e = new ConverterException("Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
                     LOG.warn(e.getMessage(), e);
                     bytes = null;
                 }
             } finally {
                 closeStreamStuff(in);
             }
-        } catch (SocketTimeoutException e) {
+        } catch (final SocketTimeoutException e) {
             throw new ConverterException("Timeout reading \"" + url.toString() + "\"", e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ConverterException("IO problem while reading \"" + url.toString() + "\"", e);
         }
         if (bytes != null) {
@@ -1148,8 +1149,9 @@ public class OXContainerConverter {
             if (property == null) {
                 return false;
             }
-            if( property.getValue() instanceof String) //hack to solve different behaviour of our VCard 2.1 parser
+            if( property.getValue() instanceof String) {
                 return StringProperty(containerObj, object, VersitName, setStringMethod);
+            }
             
             final List<String> args = (List<String>) property.getValue();
             setStringMethod.invoke(containerObj, Strings.join(args, ", "));
@@ -1646,7 +1648,7 @@ public class OXContainerConverter {
         if (app.getRecurrenceType() != CalendarObject.NONE) {
             RecurringResultsInterface result;
             try {
-                CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+                final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 result = calColl.calculateFirstRecurring(app);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);

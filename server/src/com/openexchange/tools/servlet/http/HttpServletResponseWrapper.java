@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.DateFormatSymbols;
@@ -62,7 +63,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -171,7 +171,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         shortMonths[Calendar.DECEMBER] = "Dec";
         dfs.setShortMonths(shortMonths);
         HEADER_DATE_FORMAT.setDateFormatSymbols(dfs);
-        HEADER_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+        HEADER_DATE_FORMAT.setTimeZone(getTimeZone("GMT"));
     }
 
     private final Set<Cookie> cookies;

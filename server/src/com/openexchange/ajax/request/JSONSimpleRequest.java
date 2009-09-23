@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.ResponseFields;
 
 public class JSONSimpleRequest implements SimpleRequest {

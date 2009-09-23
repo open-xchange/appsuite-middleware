@@ -80,6 +80,7 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -98,7 +99,7 @@ public class freebusy extends HttpServlet {
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 
-    private static final TimeZone utc = TimeZone.getTimeZone("UTC");
+    private static final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
 
     private static final DateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 

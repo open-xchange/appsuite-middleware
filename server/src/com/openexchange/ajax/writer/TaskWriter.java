@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class TaskWriter extends CalendarWriter {
      */
     public TaskWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = TimeZone.getTimeZone("utc");
+        utc = getTimeZone("utc");
     }
 
     public void writeArray(final Task taskObject, final int cols[], final JSONArray jsonArray) throws JSONException {

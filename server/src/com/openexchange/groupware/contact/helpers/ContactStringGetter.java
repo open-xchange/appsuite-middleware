@@ -51,8 +51,8 @@ package com.openexchange.groupware.contact.helpers;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * Makes strings out of given objects
@@ -65,7 +65,7 @@ public class ContactStringGetter implements ContactSwitcher {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	static {
-	    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+	    DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
 	}
 	
 	/**

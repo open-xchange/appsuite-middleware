@@ -86,6 +86,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -140,7 +141,7 @@ public class TaskRequest {
 
         final String sTimeZone = session.getUser().getTimeZone();
 
-        timeZone = TimeZone.getTimeZone(sTimeZone);
+        timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
         if (LOG.isDebugEnabled()) {
             LOG.debug("use timezone string: " + sTimeZone);
             LOG.debug("use user timezone: " + timeZone);

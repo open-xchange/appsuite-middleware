@@ -127,6 +127,7 @@ import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -1099,7 +1100,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         for (final User user : memberObjects) {
 
                             final int[] groups = user.getGroups();
-                            final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+                            final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
                             if (user.getMail() != null) {
                                 p = new EmailableParticipant(
@@ -1252,7 +1253,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     for (final User user : memberObjects) {
                         // final String lang = user.getPreferredLanguage();
                         final int[] groups = user.getGroups();
-                        final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+                        final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
                         if (user.getMail() != null) {
                             p = new EmailableParticipant(
@@ -1323,7 +1324,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     for (final User user : memberObjects) {
                         // final String lang = user.getPreferredLanguage();
                         final int[] groups = user.getGroups();
-                        final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
+                        final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
                         if (user.getMail() != null) {
                             p = new EmailableParticipant(

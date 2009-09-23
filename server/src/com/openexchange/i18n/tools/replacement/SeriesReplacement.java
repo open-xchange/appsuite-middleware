@@ -53,12 +53,12 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link SeriesReplacement} - The replacement for series information
@@ -297,7 +297,7 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
         final DateFormat retval = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat.getDateInstance(
             DateFormat.DEFAULT,
             locale);
-        retval.setTimeZone(TimeZone.getTimeZone("UTC"));
+        retval.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
         return retval;
     }
 

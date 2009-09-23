@@ -52,8 +52,8 @@ package com.openexchange.tools.versit.old;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 import com.openexchange.tools.versit.values.DateTimeValue;
@@ -119,7 +119,7 @@ public class OldDateTimePropertyDefinition extends OldShortPropertyDefinition {
                 date.isFloating = true;
             }
         }
-        date.calendar.setTimeZone(TimeZone.getTimeZone(tz.toString()));
+        date.calendar.setTimeZone(TimeZoneUtils.getTimeZone(tz.toString()));
     }
 
     private void skipColon(final StringScanner s) throws IOException {

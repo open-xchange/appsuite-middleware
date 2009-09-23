@@ -50,7 +50,6 @@
 package com.openexchange.groupware.settings.tree;
 
 import java.util.TimeZone;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -60,6 +59,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * Adds a configuration setting tree entry for the current time of the server. 
@@ -100,7 +100,7 @@ public final class CurrentTime implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                final TimeZone zone = TimeZone.getTimeZone(user.getTimeZone());
+                final TimeZone zone = TimeZoneUtils.getTimeZone(user.getTimeZone());
                 long time = System.currentTimeMillis();
                 time  += zone.getOffset(time);
                 setting.setSingleValue(Long.valueOf(time));

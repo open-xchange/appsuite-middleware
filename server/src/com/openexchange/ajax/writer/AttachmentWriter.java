@@ -53,10 +53,8 @@ package com.openexchange.ajax.writer;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONWriter;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;

@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -94,6 +93,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -485,7 +485,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
-            iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(iter, cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -515,7 +515,7 @@ public class InfostoreRequest extends CommonRequest {
         try {
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(dm.getSequenceNumber());
-            iWriter.write(dm, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.write(dm, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             iWriter.endTimedResult();
         } catch (final JSONException e) {
             LOG.error("", e);
@@ -608,7 +608,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
-            iWriter.writeMetadata(iter, cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(iter, cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -638,7 +638,7 @@ public class InfostoreRequest extends CommonRequest {
             iter = result.results();
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
-            iWriter.writeMetadata(skipVersion0(iter), cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(skipVersion0(iter), cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -757,7 +757,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(delta.sequenceNumber());
-            iWriter.writeDelta(iter, iter2, cols, ignoreDelete, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.writeDelta(iter, iter2, cols, ignoreDelete, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -1224,7 +1224,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(System.currentTimeMillis());
-            iWriter.writeMetadata(results, cols, TimeZone.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(results, cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
             iWriter.endTimedResult();
 
             searchEngine.commit();

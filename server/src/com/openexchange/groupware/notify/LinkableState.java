@@ -51,7 +51,6 @@ package com.openexchange.groupware.notify;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;

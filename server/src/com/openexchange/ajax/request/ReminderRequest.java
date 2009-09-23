@@ -84,6 +84,7 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -156,7 +157,7 @@ public final class ReminderRequest {
     private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
         final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
-        final TimeZone tz = TimeZone.getTimeZone(userObj.getTimeZone());
+        final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
         final JSONArray jsonArray = new JSONArray();
         try {
             final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
@@ -211,7 +212,7 @@ public final class ReminderRequest {
             it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
 
             while (it.hasNext()) {
-                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(userObj.getTimeZone()));
+                final ReminderWriter reminderWriter = new ReminderWriter(TimeZoneUtils.getTimeZone(userObj.getTimeZone()));
                 final ReminderObject reminderObj = (ReminderObject) it.next();
 
                 if (reminderObj.isRecurrenceAppointment()) {
@@ -248,7 +249,7 @@ public final class ReminderRequest {
 
     private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
-        final TimeZone tz = TimeZone.getTimeZone(userObj.getTimeZone());
+        final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
         final ReminderWriter reminderWriter = new ReminderWriter(tz);
         try {
             final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());

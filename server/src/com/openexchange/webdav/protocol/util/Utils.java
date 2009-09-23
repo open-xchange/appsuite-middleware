@@ -53,9 +53,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.tools.TimeZoneUtils;
 
 public class Utils {
 	
@@ -77,7 +76,7 @@ public class Utils {
     
     private static final SimpleDateFormat output_format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
     static {
-        output_format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        output_format.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
     }
     
 	public static Date convert(final String s) {

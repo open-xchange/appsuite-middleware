@@ -52,7 +52,7 @@ package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Calendar;
-import java.util.TimeZone;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -102,7 +102,7 @@ public class DateTimeValueDefinition extends ValueDefinition {
         }
         final String tz_str = tzid.getValue(0).getText();
         if (tz_str.charAt(0) == '/') {
-            date.calendar.setTimeZone(TimeZone.getTimeZone(tz_str.substring(1)));
+            date.calendar.setTimeZone(TimeZoneUtils.getTimeZone(tz_str.substring(1)));
         } else {
             date.needsVTIMEZONE = true;
         }

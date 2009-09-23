@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -97,6 +96,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -186,7 +186,7 @@ public final class MIMEMessageUtility {
 
                 public MailDateFormat call() throws Exception {
                     final MailDateFormat mdf = new MailDateFormat();
-                    mdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
+                    mdf.setTimeZone(TimeZoneUtils.getTimeZone(timeZoneId));
                     return mdf;
                 }
             });

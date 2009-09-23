@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.image.ImageService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link ContactWriter} - The writer for contacts
@@ -83,7 +84,7 @@ public class ContactWriter extends CommonWriter {
      */
     public ContactWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = TimeZone.getTimeZone("utc");
+        utc = TimeZoneUtils.getTimeZone("utc");
     }
 
     public void writeArray(final Contact contactobject, final int cols[], final JSONArray jsonArray) throws JSONException {

@@ -98,6 +98,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -132,7 +133,7 @@ public class ContactRequest {
 
         final String sTimeZone = session.getUser().getTimeZone();
 
-        timeZone = TimeZone.getTimeZone(sTimeZone);
+        timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
         if (LOG.isDebugEnabled()) {
             LOG.debug("use timezone string: " + sTimeZone);
             LOG.debug("use user timezone: " + timeZone);
