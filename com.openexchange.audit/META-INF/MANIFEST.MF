@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Audit Bundle
+Bundle-Name: Open-Xchange Audit Bundle
 Bundle-SymbolicName: com.openexchange.audit
 Bundle-Version: 6.12.0.0
 Bundle-Activator: com.openexchange.audit.osgi.AuditActivator
