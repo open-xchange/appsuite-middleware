@@ -69,6 +69,7 @@ import com.openexchange.audit.logging.AuditFileHandler;
 import com.openexchange.audit.logging.AuditFilter;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -169,7 +170,12 @@ public class AuditEventHandler implements EventHandler {
 
 	        	break ModuleSwitch;
 	        case Types.CONTACT:
-	        	Contact contact = (Contact)commonEvent.getActionObj();
+	        	/*
+	        	 * Temporary loading full contact object due to bug #
+	        	 * Replace by:
+	        	 * Contact contact = (Contact)commonEvent.getActionObj();
+	        	 */
+	        	Contact contact = Contacts.getContactById(((Contact)commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
 	        	
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
@@ -234,7 +240,7 @@ public class AuditEventHandler implements EventHandler {
 	        	break ModuleSwitch;
 	        }
 			
-			if (LOG.isLoggable(Level.INFO)) {
+			if (LOG.isLoggable(Level.INFO) &&  log.toString().trim().length() > 0) {
 				LOG.log(Level.INFO, log.toString());
 			}
 			
