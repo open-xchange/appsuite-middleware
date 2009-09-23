@@ -2,8 +2,12 @@ package com.openexchange.contacts.ldap.ldap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -11,6 +15,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.Control;
+import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
@@ -22,6 +27,7 @@ import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
+import com.openexchange.contacts.ldap.property.FolderProperties.SearchScope;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
@@ -41,7 +47,6 @@ public class LdapJNDIImpl implements LdapInterface {
          * For serialization
          */
         private static final long serialVersionUID = -3548239536056697658L;
-    
         public byte[] getEncodedValue() {
             return new byte[] {};
         }
@@ -62,12 +67,14 @@ public class LdapJNDIImpl implements LdapInterface {
     private final LdapContext context;
     
     private final boolean deleted;
+
+    private static Map<String, String> MAPPINGTABLE_USERNAME_LDAPBIND = new ConcurrentHashMap<String, String>();
     
     public LdapJNDIImpl(final String login, final String password, final FolderProperties folderprop, final boolean deleted, final boolean distributionlist, final SortInfo sortField) throws LdapException {
         this.folderprop = folderprop;
         this.deleted = deleted;
         try {
-            this.context = LdapUtility.createContext(login, password, folderprop);
+            this.context = createContext(login, password);
         } catch (final NamingException e1) {
             LOG.error(e1.getMessage(), e1);
             throw new LdapException(Code.INITIAL_LDAP_ERROR, e1.getMessage());
@@ -164,7 +171,7 @@ public class LdapJNDIImpl implements LdapInterface {
 
     private SearchControls getSearchControl(final Set<Integer> columns) {
         final SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScope()));
+        searchControls.setSearchScope(getSearchControl(folderprop.getSearchScope()));
         searchControls.setCountLimit(0);
         final List<String> array = getAttributes(columns, false);
         searchControls.setReturningAttributes(array.toArray(new String[array.size()]));
@@ -173,7 +180,7 @@ public class LdapJNDIImpl implements LdapInterface {
 
     private SearchControls getSearchControlDistri(final Set<Integer> columns, boolean deleted) {
         final SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(LdapUtility.getSearchControl(folderprop.getSearchScopeDistributionlist()));
+        searchControls.setSearchScope(getSearchControl(folderprop.getSearchScopeDistributionlist()));
         searchControls.setCountLimit(0);
         final List<String> array = getAttributes(columns, true);
         if (!deleted) {
@@ -449,6 +456,123 @@ public class LdapJNDIImpl implements LdapInterface {
             LOG.error(e.getMessage(), e);
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());
         }
+    }
+
+    public LdapContext createContext(final String username, final String password) throws NamingException, LdapException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Creating new connection.");
+        }
+        final long start = System.currentTimeMillis();
+        final Hashtable<String, String> env = getBasicLDAPProperties();
+        switch (folderprop.getAuthtype()) {
+        case AdminDN:
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, folderprop.getAdminDN());
+            env.put(Context.SECURITY_CREDENTIALS, folderprop.getAdminBindPW());
+            break;
+        case user:
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, getUserBindDN(username));
+            env.put(Context.SECURITY_CREDENTIALS, password);
+            break;
+        case anonymous:
+            break;
+        default:
+            break;
+        }
+        final LdapContext retval = new InitialLdapContext(env, null);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Context creation time: " + (System.currentTimeMillis() - start) + " ms");
+        }
+        return retval;
+    }
+
+    public static int getSearchControl(final SearchScope searchScope) {
+        switch (searchScope) {
+        case one:
+            return SearchControls.ONELEVEL_SCOPE;
+        case base:
+            return SearchControls.OBJECT_SCOPE;
+        case sub:
+            return SearchControls.SUBTREE_SCOPE;
+        default:
+            return -1;
+        }
+    }
+
+    private Hashtable<String, String> getBasicLDAPProperties() {
+        final Hashtable<String, String> env = new Hashtable<String, String>(4, 1f);
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        // Enable connection pooling
+        env.put("com.sun.jndi.ldap.connect.pool", "true");
+        String uri = folderprop.getUri();
+        if (uri.startsWith("ldap://") || uri.startsWith("ldaps://")) {
+            if (uri.endsWith("/")) {
+                uri = uri.substring(0, uri.length() - 1);
+            }
+            env.put(Context.PROVIDER_URL, uri + "/");
+        } else {
+            env.put(Context.PROVIDER_URL, "ldap://" + uri + ":389/");
+        }
+        if (uri.startsWith("ldaps://")) {
+            env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+        }
+        switch (folderprop.getReferrals()) {
+        case follow:
+            env.put(Context.REFERRAL, "follow");
+            break;
+        case ignore:
+            env.put(Context.REFERRAL, "ignore");
+            break;
+        case standard:
+        default:
+            break;
+        }
+        return env;
+    }
+
+    private String getUserBindDN(final String username) throws NamingException, LdapException {
+        final String userbinddn = MAPPINGTABLE_USERNAME_LDAPBIND.get(username);
+        if (null != userbinddn) {
+            return userbinddn;
+        } else {
+            final Hashtable<String, String> basicFolderProperties = getBasicLDAPProperties();
+            switch (folderprop.getUserAuthType()) {
+            case AdminDN:
+                basicFolderProperties.put(Context.SECURITY_AUTHENTICATION, "simple");
+                basicFolderProperties.put(Context.SECURITY_PRINCIPAL, folderprop.getUserAdminDN());
+                basicFolderProperties.put(Context.SECURITY_CREDENTIALS, folderprop.getUserAdminBindPW());
+                break;
+            case anonymous:
+                basicFolderProperties.put(Context.SECURITY_AUTHENTICATION, "none");
+                break;
+            }
+            final LdapContext retval = new InitialLdapContext(basicFolderProperties, null);
+            try {
+                final SearchControls searchControls = new SearchControls();
+                searchControls.setSearchScope(getSearchControl(folderprop.getUserSearchScope()));
+                searchControls.setCountLimit(0);
+                searchControls.setReturningAttributes(new String[]{"dn"});
+                final NamingEnumeration<SearchResult> search = retval.search(folderprop.getUserSearchBaseDN(), setUpFilter(username), searchControls);
+                if (search.hasMore()) {
+                    final SearchResult next = search.next();
+                    if (search.hasMore()) {
+                        throw new LdapException(Code.TOO_MANY_USER_RESULTS);
+                    }
+                    final String userdn = next.getNameInNamespace();
+                    MAPPINGTABLE_USERNAME_LDAPBIND.put(username, userdn);
+                    return userdn;
+                } else {
+                    throw new LdapException(Code.NO_USER_RESULTS, username);
+                }
+            } finally {
+                retval.close();
+            }
+        }
+    }
+
+    private String setUpFilter(final String username) {
+        return "(&" + folderprop.getUserSearchFilter() + "(" + folderprop.getUserSearchAttribute() + "=" + username + "))";
     }
 
 }
