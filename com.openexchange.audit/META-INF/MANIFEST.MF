@@ -46,4 +46,5 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.http,
  org.osgi.util.tracker
 Bundle-ClassPath: .
+Require-Bundle: com.openexchange.server
 
