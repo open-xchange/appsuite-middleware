@@ -52,6 +52,7 @@ package com.openexchange.push.malpoll;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.push.PushException;
@@ -66,6 +67,8 @@ public final class MALPollPushListenerRegistry {
 
     private static final MALPollPushListenerRegistry instance = new MALPollPushListenerRegistry();
 
+    private static final Object PRESENT = new Object();
+
     /**
      * Gets the registry instance.
      * 
@@ -77,12 +80,15 @@ public final class MALPollPushListenerRegistry {
 
     private final ConcurrentMap<SimpleKey, MALPollPushListener> map;
 
+    private final ConcurrentMap<SimpleKey, Map<String, Object>> sessionIds;
+
     /**
      * Initializes a new {@link MALPollPushListenerRegistry}.
      */
     private MALPollPushListenerRegistry() {
         super();
         map = new ConcurrentHashMap<SimpleKey, MALPollPushListener>();
+        sessionIds = new ConcurrentHashMap<SimpleKey, Map<String, Object>>();
     }
 
     /**
@@ -95,6 +101,7 @@ public final class MALPollPushListenerRegistry {
             i.remove();
         }
         map.clear();
+        sessionIds.clear();
     }
 
     /**
@@ -128,11 +135,29 @@ public final class MALPollPushListenerRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param sessionId The session ID
      * @param pushListener The push listener to add
      * @return <code>true</code> if push listener service could be successfully added; otherwise <code>false</code>
      */
-    public boolean addPushListener(final int contextId, final int userId, final MALPollPushListener pushListener) {
-        return (null == map.putIfAbsent(SimpleKey.valueOf(contextId, userId), pushListener));
+    public boolean addPushListener(final int contextId, final int userId, final String sessionId, final MALPollPushListener pushListener) {
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        /*
+         * Add listener
+         */
+        final boolean added = (null == map.putIfAbsent(key, pushListener));
+        /*
+         * Remember corresponding session ID
+         */
+        Map<String, Object> map = sessionIds.get(key);
+        if (null == map) {
+            final Map<String, Object> newMap = new ConcurrentHashMap<String, Object>();
+            map = sessionIds.putIfAbsent(key, newMap);
+            if (null == map) {
+                map = newMap;
+            }
+        }
+        map.put(sessionId, PRESENT);
+        return added;
     }
 
     /**
@@ -140,10 +165,30 @@ public final class MALPollPushListenerRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param sessionId The session ID
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
      */
-    public boolean removePushListener(final int contextId, final int userId) {
-        final MALPollPushListener listener = map.remove(SimpleKey.valueOf(contextId, userId));
+    public boolean removePushListener(final int contextId, final int userId, final String sessionId) {
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        final Map<String, Object> set = sessionIds.get(key);
+        if (null != set) {
+            set.remove(sessionId);
+            /*
+             * Check if last user-associated session was removed
+             */
+            if (set.isEmpty()) {
+                return removeListener(key);
+            }
+            return false;
+        }
+        /*
+         * ???? Cannot occur
+         */
+        return removeListener(key);
+    }
+
+    private boolean removeListener(final SimpleKey key) {
+        final MALPollPushListener listener = map.remove(key);
         if (null != listener) {
             listener.close();
             return true;

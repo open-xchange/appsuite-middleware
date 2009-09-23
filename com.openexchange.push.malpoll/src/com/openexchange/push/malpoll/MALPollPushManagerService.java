@@ -84,7 +84,11 @@ public final class MALPollPushManagerService implements PushManagerService {
 
     public PushListener startListener(final Session session) throws PushException {
         final MALPollPushListener pushListener = MALPollPushListener.newInstance(session, startTimerTaskPerListener);
-        if (MALPollPushListenerRegistry.getInstance().addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
+        if (MALPollPushListenerRegistry.getInstance().addPushListener(
+            session.getContextId(),
+            session.getUserId(),
+            session.getSessionID(),
+            pushListener)) {
             pushListener.open();
             return pushListener;
         }
@@ -92,7 +96,10 @@ public final class MALPollPushManagerService implements PushManagerService {
     }
 
     public boolean stopListener(final Session session) {
-        return MALPollPushListenerRegistry.getInstance().removePushListener(session.getContextId(), session.getUserId());
+        return MALPollPushListenerRegistry.getInstance().removePushListener(
+            session.getContextId(),
+            session.getUserId(),
+            session.getSessionID());
     }
 
     @Override
