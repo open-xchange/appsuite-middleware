@@ -163,8 +163,10 @@ public class AttachmentRequest extends CommonRequest {
 				}
 				
 				final String delete = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
+
+				final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
 				
-				updates(folderId,attachedId,moduleId,timestamp, "deleted".equals(delete), columns, sort, order);
+				updates(folderId,attachedId,moduleId,timestamp, "deleted".equals(delete), columns, sort, order, timeZoneId);
 				return true;
 			} else if (AJAXServlet.ACTION_ALL.equals(action)) {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
@@ -280,7 +282,7 @@ public class AttachmentRequest extends CommonRequest {
 	}
 	
 	
-	private void updates(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order) {
+	private void updates(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final String timeZoneId) {
 		
 		SearchIterator iter = null;
 		SearchIterator iter2 = null;
@@ -298,7 +300,7 @@ public class AttachmentRequest extends CommonRequest {
 			
 			final AttachmentWriter aWriter = new AttachmentWriter(w);
 			aWriter.timedResult(delta.sequenceNumber());
-			aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+			aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, null == timeZoneId ? TimeZoneUtils.getTimeZone(user.getTimeZone()) : TimeZoneUtils.getTimeZone(timeZoneId));
 			aWriter.endTimedResult();
 			//w.flush();
 			ATTACHMENT_BASE.commit();

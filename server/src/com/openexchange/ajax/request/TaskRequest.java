@@ -51,6 +51,7 @@ package com.openexchange.ajax.request;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -229,6 +230,11 @@ public class TaskRequest {
         timestamp = new Date(requestedTimestamp.getTime());
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         if (ignore == null) {
             ignore = "deleted";
@@ -317,6 +323,12 @@ public class TaskRequest {
             objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
         }
 
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
+
         final int[] internalColumns = new int[columnsToLoad.length+1];
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
@@ -356,6 +368,11 @@ public class TaskRequest {
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
         final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
         final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
@@ -403,6 +420,11 @@ public class TaskRequest {
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         timestamp = new Date(0);
 
@@ -427,7 +449,7 @@ public class TaskRequest {
 
         final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
 
-        int taskId = (taskObj.containsObjectID()) ? taskObj.getObjectID() : DataParser.checkInt(jsonObj, "id");
+        final int taskId = (taskObj.containsObjectID()) ? taskObj.getObjectID() : DataParser.checkInt(jsonObj, "id");
 
         timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
 
@@ -439,6 +461,11 @@ public class TaskRequest {
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         timestamp = new Date(0);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         Date lastModified = null;
 
@@ -539,9 +566,9 @@ public class TaskRequest {
         return jsonResponseObject;
     }
 
-    private int[] removeVirtualColumns(int[] columns) {
+    private int[] removeVirtualColumns(final int[] columns) {
         final List<Integer> tmp = new ArrayList<Integer>(columns.length);
-        for (int col : columns) {
+        for (final int col : columns) {
             if (col != Task.LAST_MODIFIED_UTC) {
                 tmp.add(I(col));
             }

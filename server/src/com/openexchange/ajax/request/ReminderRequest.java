@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
@@ -104,7 +105,7 @@ public final class ReminderRequest {
 
     private Date timestamp;
 
-    private AppointmentSqlFactoryService appointmentFactory;
+    private final AppointmentSqlFactoryService appointmentFactory;
 
     private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
 
@@ -203,6 +204,11 @@ public final class ReminderRequest {
 
     private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
         timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? getTimeZone(userObj.getTimeZone()) : getTimeZone(timeZoneId);
+        }
 
         final JSONArray jsonResponseArray = new JSONArray();
         SearchIterator<?> it = null;
@@ -212,7 +218,7 @@ public final class ReminderRequest {
             it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
 
             while (it.hasNext()) {
-                final ReminderWriter reminderWriter = new ReminderWriter(TimeZoneUtils.getTimeZone(userObj.getTimeZone()));
+                final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
                 final ReminderObject reminderObj = (ReminderObject) it.next();
 
                 if (reminderObj.isRecurrenceAppointment()) {
@@ -250,7 +256,13 @@ public final class ReminderRequest {
     private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
-        final ReminderWriter reminderWriter = new ReminderWriter(tz);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? tz : getTimeZone(timeZoneId);
+        }
+        
+        final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         try {
             final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
             final JSONArray jsonResponseArray = new JSONArray();
@@ -312,7 +324,7 @@ public final class ReminderRequest {
      */
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
         final AppointmentSQLInterface calendarSql = appointmentFactory.createAppointmentSql(sessionObj);
-        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
@@ -344,7 +356,7 @@ public final class ReminderRequest {
 
     private static final ReminderObject getNextRecurringReminder(final Session sessionObj, final TimeZone tz, final ReminderObject reminder) throws OXException {
         final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
-        CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());

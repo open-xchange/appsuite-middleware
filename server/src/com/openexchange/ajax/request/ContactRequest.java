@@ -50,6 +50,7 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
@@ -222,6 +223,11 @@ public class ContactRequest {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         timestamp = new Date(requestedTimestamp.getTime());
@@ -330,6 +336,11 @@ public class ContactRequest {
                 }
                 oldfolderId = objectIdAndFolderId[0][1];
             }
+            final TimeZone timeZone;
+            {
+                final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+                timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+            }
 
             final int[] internalColumns = checkLastModified(columnsToLoad);
 
@@ -406,6 +417,11 @@ public class ContactRequest {
         for (int a = 0; a < userIdArray.length; a++) {
             userIdArray[a] = jData.getInt(a);
         }
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Context ctx = session.getContext();
 
@@ -438,6 +454,11 @@ public class ContactRequest {
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
         final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
         final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
@@ -498,6 +519,11 @@ public class ContactRequest {
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             inFolder,
@@ -518,6 +544,11 @@ public class ContactRequest {
 
     public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Context ctx = session.getContext();
 
@@ -541,6 +572,11 @@ public class ContactRequest {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtual(columns);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         timestamp = new Date(0);
 
@@ -595,8 +631,8 @@ public class ContactRequest {
 
         final int[] internalColumns = checkLastModified(columnsToLoad);
 
-        ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-        SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
+        final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
+        final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDir, internalColumns);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {

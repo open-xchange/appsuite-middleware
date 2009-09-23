@@ -208,6 +208,11 @@ public class AppointmentRequest {
 
     public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, AjaxException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final CalendarDataObject appointmentObj = new CalendarDataObject();
         appointmentObj.setContext(ctx);
@@ -247,6 +252,11 @@ public class AppointmentRequest {
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final CalendarDataObject appointmentObj = new CalendarDataObject();
         appointmentObj.setContext(ctx);
@@ -284,6 +294,11 @@ public class AppointmentRequest {
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         timestamp = new Date(requestedTimestamp.getTime());
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
         final Date startUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_START);
         final Date endUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
         final Date start = startUTC == null ? null : applyTimeZone2Date(startUTC.getTime());
@@ -490,6 +505,11 @@ public class AppointmentRequest {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 
@@ -673,6 +693,12 @@ public class AppointmentRequest {
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
         final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
+
         boolean showAppointmentInAllFolders = false;
 
         if (folderId == 0) {
@@ -806,6 +832,11 @@ public class AppointmentRequest {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int recurrencePosition = DataParser.parseInt(jsonObj, CalendarFields.RECURRENCE_POSITION);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
@@ -907,6 +938,12 @@ public class AppointmentRequest {
         if (jsonObj.has("limit")) {
             limit = DataParser.checkInt(jsonObj, "limit");
             hasLimit = true;
+        }
+
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
         }
 
         final Date start = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
@@ -1085,6 +1122,12 @@ public class AppointmentRequest {
     public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXConflictException, OXException, OXJSONException, AjaxException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+        
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
         final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
@@ -1197,8 +1240,15 @@ public class AppointmentRequest {
     public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
         final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int type = DataParser.checkInt(jsonObj, "type");
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
+        
         final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
         final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
+        
 
         timestamp = new Date(0);
 
@@ -1234,6 +1284,11 @@ public class AppointmentRequest {
         final boolean ignoreConflicts = DataParser.checkBoolean(jsonObj, AppointmentFields.IGNORE_CONFLICTS);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
+        }
 
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
 

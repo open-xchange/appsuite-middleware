@@ -162,7 +162,9 @@ public class InfostoreRequest extends CommonRequest {
                     version = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_VERSION));
                 }
 
-                get(id, version);
+                final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+
+                get(id, version, timeZoneId);
 
                 return true;
             } else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
@@ -199,7 +201,9 @@ public class InfostoreRequest extends CommonRequest {
                     return true;
                 }
 
-                list(ids, cols);
+                final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+
+                list(ids, cols, timeZoneId);
 
                 return true;
             } else if (action.equals(AJAXServlet.ACTION_DELETE)) {
@@ -401,6 +405,8 @@ public class InfostoreRequest extends CommonRequest {
                 return;
             }
             final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             
             final String stringLeftHandLimit = req.getParameter(AJAXServlet.LEFT_HAND_LIMIT);
             final String stringRightHandLimit = req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT);
@@ -420,13 +426,14 @@ public class InfostoreRequest extends CommonRequest {
                 rightHandLimit = Integer.parseInt(AJAXServlet.RIGHT_HAND_LIMIT);
             }
             
-            all(folderId, cols, sortedBy, dir, leftHandLimit, rightHandLimit);
+            all(folderId, cols, sortedBy, dir, timeZoneId, leftHandLimit, rightHandLimit);
         } else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
             if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
                 return;
             }
             final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
-            versions(id, cols, sortedBy, dir);
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            versions(id, cols, sortedBy, dir, timeZoneId);
         } else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
             if (!checkRequired(req, action, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_TIMESTAMP)) {
                 return;
@@ -434,7 +441,8 @@ public class InfostoreRequest extends CommonRequest {
             final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
             final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
             final String delete = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
-            updates(folderId, cols, sortedBy, dir, timestamp, delete != null && delete.equals("deleted"));
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            updates(folderId, cols, sortedBy, dir, timestamp, delete != null && delete.equals("deleted"), timeZoneId);
 
         } else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
             final JSONObject queryObject = (JSONObject) req.getBody();
@@ -467,13 +475,15 @@ public class InfostoreRequest extends CommonRequest {
                 }
             }
 
-            search(query, cols, folderId, sortedBy, dir, start, end);
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+
+            search(query, cols, folderId, sortedBy, dir, start, end, timeZoneId);
         }
     }
 
     // Actions
 
-    protected void list(final int[] ids, final Metadata[] cols) throws SearchIteratorException {
+    protected void list(final int[] ids, final Metadata[] cols, final String timeZoneId) throws SearchIteratorException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
@@ -485,7 +495,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
-            iWriter.writeMetadata(iter, cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(iter, cols, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -498,7 +508,7 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected void get(final int id, final int version) {
+    protected void get(final int id, final int version, final String timeZoneId) {
         final InfostoreFacade infostore = getInfostore();
         DocumentMetadata dm = null;
         try {
@@ -515,7 +525,7 @@ public class InfostoreRequest extends CommonRequest {
         try {
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(dm.getSequenceNumber());
-            iWriter.write(dm, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            iWriter.write(dm, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
             iWriter.endTimedResult();
         } catch (final JSONException e) {
             LOG.error("", e);
@@ -582,7 +592,7 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final int leftHandLimit, final int rightHandLimit)
+    protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final String timeZoneId, final int leftHandLimit, final int rightHandLimit)
             throws SearchIteratorException {
         /**
          * System.out.println("ALL: "+System.currentTimeMillis());
@@ -608,7 +618,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
-            iWriter.writeMetadata(iter, cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(iter, cols, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -621,12 +631,12 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir)
+    protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir, final String timeZoneId)
             throws SearchIteratorException {
         final InfostoreFacade infostore = getInfostore();
         TimedResult<DocumentMetadata> result = null;
         SearchIterator<DocumentMetadata> iter = null;
-        Metadata[] loadCols = addIfNeeded(cols, Metadata.VERSION_LITERAL);
+        final Metadata[] loadCols = addIfNeeded(cols, Metadata.VERSION_LITERAL);
         try {
 
             if (sortedBy == null) {
@@ -638,7 +648,7 @@ public class InfostoreRequest extends CommonRequest {
             iter = result.results();
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(result.sequenceNumber());
-            iWriter.writeMetadata(skipVersion0(iter), cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(skipVersion0(iter), cols, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -651,9 +661,9 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    private Metadata[] addIfNeeded(Metadata[] cols, Metadata column) {
-        List<Metadata> newCols = new ArrayList<Metadata>(cols.length+1);
-        for (Metadata metadata : cols) {
+    private Metadata[] addIfNeeded(final Metadata[] cols, final Metadata column) {
+        final List<Metadata> newCols = new ArrayList<Metadata>(cols.length+1);
+        for (final Metadata metadata : cols) {
             if(metadata == column) {
                 return cols;
             }
@@ -670,7 +680,7 @@ public class InfostoreRequest extends CommonRequest {
             private SearchIteratorException se;
             private OXException oxe;
 
-            public void addWarning(AbstractOXException warning) {
+            public void addWarning(final AbstractOXException warning) {
                 iter.addWarning(warning);
             }
 
@@ -685,9 +695,9 @@ public class InfostoreRequest extends CommonRequest {
             public boolean hasNext() {
                 try {
                     scrollToNext();
-                } catch (SearchIteratorException e) {
+                } catch (final SearchIteratorException e) {
                     se = e;
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     oxe = e;
                 }
                 return next != null;
@@ -711,7 +721,7 @@ public class InfostoreRequest extends CommonRequest {
                 if(next == null) {
                     scrollToNext();
                 }
-                DocumentMetadata nextResult = next;
+                final DocumentMetadata nextResult = next;
                 next = null;
                 return nextResult;
             }
@@ -735,7 +745,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir,
-            final long timestamp, final boolean ignoreDelete) throws SearchIteratorException {
+            final long timestamp, final boolean ignoreDelete, final String timeZoneId) throws SearchIteratorException {
         final InfostoreFacade infostore = getInfostore(folderId);
         Delta<DocumentMetadata> delta = null;
 
@@ -757,7 +767,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(delta.sequenceNumber());
-            iWriter.writeDelta(iter, iter2, cols, ignoreDelete, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            iWriter.writeDelta(iter, iter2, cols, ignoreDelete, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
             iWriter.endTimedResult();
 
         } catch (final Throwable t) {
@@ -1213,7 +1223,7 @@ public class InfostoreRequest extends CommonRequest {
     }
 
     protected void search(final String query, final Metadata[] cols, final int folderId, final Metadata sortedBy,
-            final int dir, final int start, final int end) {
+            final int dir, final int start, final int end, final String timeZoneId) {
         final SearchEngine searchEngine = getSearchEngine();
 
         try {
@@ -1224,7 +1234,7 @@ public class InfostoreRequest extends CommonRequest {
 
             final InfostoreWriter iWriter = new InfostoreWriter(w);
             iWriter.timedResult(System.currentTimeMillis());
-            iWriter.writeMetadata(results, cols, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            iWriter.writeMetadata(results, cols, TimeZoneUtils.getTimeZone(null == timeZoneId ? user.getTimeZone() : timeZoneId));
             iWriter.endTimedResult();
 
             searchEngine.commit();
