@@ -83,6 +83,36 @@ public final class Collections {
     }
 
     /**
+     * Strips the <tt>remove()</tt> functionality from an existing iterator.
+     * <p>
+     * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
+     * method is called.
+     * 
+     * @param iterator The iterator to turn into an unmodifiable iterator.
+     * @return An iterator with no remove functionality.
+     */
+    public static <T> Iterator<T> unmodifiableIterator(final Iterator<T> iterator) {
+        if (iterator == null) {
+            throw new NullPointerException();
+        }
+
+        return new Iterator<T>() {
+
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            public T next() {
+                return iterator.next();
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    /**
      * Creates a new {@link HashMap} instance.
      * <p>
      * Convenience method to substitute<br>
