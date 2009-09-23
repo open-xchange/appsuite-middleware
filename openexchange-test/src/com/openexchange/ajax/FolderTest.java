@@ -403,6 +403,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean updateFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
+        return updateFolder(conversation, protocol, hostname, sessionId, entityArg, secondEntityArg, folderId, timestamp, 0);
+    }
+    
+    public static boolean updateFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp, final int permissions) throws JSONException, MalformedURLException, IOException, SAXException {
         final String entity = entityArg.indexOf('@') == -1 ? entityArg : entityArg.substring(0, entityArg.indexOf('@'));
         final String secondEntity;
         if (secondEntityArg == null) {
@@ -416,13 +420,15 @@ public class FolderTest extends AbstractAJAXTest {
         JSONObject jsonPermission = new JSONObject();
         jsonPermission.put("entity", entity);
         jsonPermission.put("group", false);
-        jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
+        jsonPermission.put("bits", (0 == permissions) ? createPermissionBits(8, 8, 8, 8, true) : permissions);
         perms.put(jsonPermission);
-        jsonPermission = new JSONObject();
-        jsonPermission.put("entity", secondEntity);
-        jsonPermission.put("group", false);
-        jsonPermission.put("bits", createPermissionBits(4, 0, 0, 0, false));
-        perms.put(jsonPermission);
+        if (null != secondEntity) {
+            jsonPermission = new JSONObject();
+            jsonPermission.put("entity", secondEntity);
+            jsonPermission.put("group", false);
+            jsonPermission.put("bits", createPermissionBits(4, 0, 0, 0, false));
+            perms.put(jsonPermission);
+        }
         jsonFolder.put("permissions", perms);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
