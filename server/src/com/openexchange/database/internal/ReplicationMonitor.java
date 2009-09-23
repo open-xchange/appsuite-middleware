@@ -78,11 +78,11 @@ public final class ReplicationMonitor {
     }
 
     interface FetchAndSchema {
-        Connection get(Pools pools, Assignment assign, boolean write) throws PoolingException, DBPoolingException;
+        Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, DBPoolingException;
     }
 
     static final FetchAndSchema TIMEOUT = new FetchAndSchema() {
-        public Connection get(Pools pools, Assignment assign, boolean write) throws PoolingException, DBPoolingException {
+        public Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, DBPoolingException {
             final int poolId;
             if (write) {
                 poolId = assign.getWritePoolId();
@@ -104,12 +104,12 @@ public final class ReplicationMonitor {
                 }
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
-            return new JDBC3ConnectionReturner(pools, assign, retval, false, write);
+            return new JDBC3ConnectionReturner(pools, assign, retval, false, write, usedAsRead);
         }
     };
 
     static final FetchAndSchema NOTIMEOUT = new FetchAndSchema() {
-        public Connection get(Pools pools, Assignment assign, boolean write) throws PoolingException, DBPoolingException {
+        public Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, DBPoolingException {
             final int poolId;
             if (write) {
                 poolId = assign.getWritePoolId();
@@ -127,7 +127,7 @@ public final class ReplicationMonitor {
                 pool.backWithoutTimeout(retval);
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
-            return new JDBC3ConnectionReturner(pools, assign, retval, true, write);
+            return new JDBC3ConnectionReturner(pools, assign, retval, true, write, usedAsRead);
         }
     };
 
@@ -138,25 +138,26 @@ public final class ReplicationMonitor {
     static Connection checkActualAndFallback(Pools pools, Assignment assign, FetchAndSchema fetch, boolean write) throws DBPoolingException {
         Connection retval;
         try {
-            retval = fetch.get(pools, assign, write);
+            retval = fetch.get(pools, assign, write, !write);
         } catch (PoolingException e) {
             DBPoolingException e1 = DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
+            // Immediately fail if connection to master is wanted or no fallback is there.
             if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
                 throw e1;
             }
             // Try fallback to master.
             LOG.warn(e1.getMessage(), e1);
             try {
-                return fetch.get(pools, assign, write);
+                return fetch.get(pools, assign, true, true);
             } catch (PoolingException e2) {
                 throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e2);
             }
         }
-        if (assign.isTransactionInitialized() && readTransaction(retval, assign.getContextId()) < assign.getTransaction()) { // TODO handle overflow
+        if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), readTransaction(retval, assign.getContextId()))) {
             LOG.warn("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
             Connection toReturn = retval;
             try {
-                retval = fetch.get(pools, assign, true);
+                retval = fetch.get(pools, assign, true, true);
                 try {
                     toReturn.close();
                 } catch (SQLException e) {
@@ -172,11 +173,16 @@ public final class ReplicationMonitor {
         return retval;
     }
 
-    public static void backAndIncrementTransaction(Pools pools, Assignment assign, Connection con, boolean noTimeout, boolean write) {
+    private static boolean isUpToDate(long masterTransaction, long slaveTransaction) {
+        // TODO handle overflow
+        return slaveTransaction >= masterTransaction;
+    }
+
+    public static void backAndIncrementTransaction(Pools pools, Assignment assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
-            if (poolId != assign.getReadPoolId()) {
+            if (poolId != assign.getReadPoolId() && !usedAsRead) {
                 ReplicationMonitor.increaseTransactionCounter(assign, con);
             }
         } else {

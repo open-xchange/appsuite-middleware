@@ -79,13 +79,16 @@ public class JDBC3ConnectionReturner implements Connection {
 
     private final boolean write;
 
-    public JDBC3ConnectionReturner(Pools pools, Assignment assign, Connection delegate, boolean noTimeout, boolean write) {
+    private final boolean usedAsRead;
+
+    public JDBC3ConnectionReturner(Pools pools, Assignment assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super();
         this.pools = pools;
         this.assign = assign;
         this.delegate = delegate;
         this.noTimeout = noTimeout;
         this.write = write;
+        this.usedAsRead = usedAsRead;
     }
 
     public void clearWarnings() throws SQLException {
@@ -93,7 +96,7 @@ public class JDBC3ConnectionReturner implements Connection {
     }
 
     public void close() throws SQLException {
-        ReplicationMonitor.backAndIncrementTransaction(pools, assign, delegate, noTimeout, write);
+        ReplicationMonitor.backAndIncrementTransaction(pools, assign, delegate, noTimeout, write, usedAsRead);
     }
 
     public void commit() throws SQLException {
