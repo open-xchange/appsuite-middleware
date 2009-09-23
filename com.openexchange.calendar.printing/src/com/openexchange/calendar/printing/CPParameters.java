@@ -55,93 +55,90 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.AJAXServlet;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CPParameters {
+
     private Date start;
+
     private Date end;
+
     private String template;
+
     private int folder;
+
     private List<String> missingFields;
 
-    public CPParameters(){
-        
+    public CPParameters() {
+
     }
-    
-    public CPParameters(HttpServletRequest req){
+
+    public CPParameters(HttpServletRequest req) {
         this();
         parseRequest(req);
     }
-    
+
     public Date getStart() {
         return start;
     }
-    
+
     public void setStart(Date start) {
         this.start = start;
     }
 
-    
     public Date getEnd() {
         return end;
     }
 
-    
     public void setEnd(Date end) {
         this.end = end;
     }
 
-    
     public String getTemplate() {
         return template;
     }
 
-    
     public void setTemplate(String template) {
         this.template = template;
     }
 
-    
     public int getFolder() {
         return folder;
     }
 
-    
     public void setFolder(int folder) {
         this.folder = folder;
     }
-    
-    public List<String> getMissingFields(){
+
+    public List<String> getMissingFields() {
         return this.missingFields;
     }
-    
-    public boolean isMissingFields(){
+
+    public boolean isMissingFields() {
         return missingFields != null;
     }
 
-    
-    public void parseRequest(HttpServletRequest req){
+    public void parseRequest(HttpServletRequest req) {
         LinkedList<String> missingFields = new LinkedList<String>();
-        
+
         String start = req.getParameter(AJAXServlet.PARAMETER_START);
         if (start == null)
             missingFields.add(AJAXServlet.PARAMETER_START);
         else
             this.start = new Date(Long.valueOf(start).longValue());
-        
+
         String end = req.getParameter(AJAXServlet.PARAMETER_END);
-        if(end == null)
+        if (end == null)
             missingFields.add(AJAXServlet.PARAMETER_END);
         else
             this.end = new Date(Long.valueOf(end).longValue());
-        
+
         String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         this.folder = Integer.valueOf(folder).intValue();
-        
+
         String templateName = req.getParameter(AJAXServlet.PARAMETER_TEMPLATE);
-        if(template == null)
+        if (templateName == null)
             missingFields.add(AJAXServlet.PARAMETER_TEMPLATE);
         else
             this.template = templateName;
@@ -151,6 +148,5 @@ public class CPParameters {
     public String toString() {
         return CPParameters.class.getName() + ": Start = " + start + ", end = " + end + ", folder = " + folder + ", template = " + template + ", missing fields : " + isMissingFields();
     }
-    
-    
+
 }
