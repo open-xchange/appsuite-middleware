@@ -544,7 +544,7 @@ public final class CacheFolderStorage implements FolderStorage {
         final boolean ignoreDelete = index == 0;
         if (null == session) {
             folders =
-                new Updates(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdates(
+                new Updates(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry).doUpdates(
                     treeId,
                     timeStamp,
                     ignoreDelete,
@@ -552,7 +552,7 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             try {
                 folders =
-                    new Updates(new ServerSessionAdapter(session), registry).doUpdates(treeId, timeStamp, ignoreDelete, includeContentTypes)[index];
+                    new Updates(new ServerSessionAdapter(session), storageParameters.getDecorator(), registry).doUpdates(treeId, timeStamp, ignoreDelete, includeContentTypes)[index];
             } catch (final ContextException e) {
                 throw new FolderException(e);
             }

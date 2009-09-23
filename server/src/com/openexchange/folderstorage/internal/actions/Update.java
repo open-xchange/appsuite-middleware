@@ -386,9 +386,9 @@ public final class Update extends AbstractAction {
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
         final com.openexchange.folderstorage.internal.actions.List listAction;
         if (null == session) {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(user, context);
+            listAction = new com.openexchange.folderstorage.internal.actions.List(user, context, null);
         } else {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(session);
+            listAction = new com.openexchange.folderstorage.internal.actions.List(session, null);
         }
         listAction.setStorageParameters(storageParameters);
         final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);
@@ -403,9 +403,9 @@ public final class Update extends AbstractAction {
     private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
         final com.openexchange.folderstorage.internal.actions.List listAction;
         if (null == session) {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(user, context);
+            listAction = new com.openexchange.folderstorage.internal.actions.List(user, context, null);
         } else {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(session);
+            listAction = new com.openexchange.folderstorage.internal.actions.List(session, null);
         }
         listAction.setStorageParameters(storageParameters);
         final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);

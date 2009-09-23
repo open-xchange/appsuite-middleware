@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -76,9 +77,10 @@ public final class Path extends AbstractUserizedFolderAction {
      * Initializes a new {@link Path} from given session.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      */
-    public Path(final ServerSession session) {
-        super(session);
+    public Path(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
@@ -86,19 +88,21 @@ public final class Path extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      */
-    public Path(final User user, final Context context) {
-        super(user, context);
+    public Path(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
      * Initializes a new {@link Path}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Path(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public Path(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -106,10 +110,11 @@ public final class Path extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decoratorde
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Path(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public Path(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
     private static interface PermissionProvider {

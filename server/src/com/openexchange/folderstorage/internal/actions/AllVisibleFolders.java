@@ -55,6 +55,7 @@ import java.util.Collection;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderFilter;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -75,9 +76,10 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
      * Initializes a new {@link AllVisibleFolders}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      */
-    public AllVisibleFolders(final ServerSession session) {
-        super(session);
+    public AllVisibleFolders(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
@@ -85,19 +87,21 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context final
+     * @param decorator The optional folder service decorator
      */
-    public AllVisibleFolders(final User user, final Context context) {
-        super(user, context);
+    public AllVisibleFolders(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
      * Initializes a new {@link AllVisibleFolders}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AllVisibleFolders(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public AllVisibleFolders(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -105,10 +109,11 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AllVisibleFolders(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public AllVisibleFolders(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -130,7 +135,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
         openedStorages.add(rootStorage);
         try {
             final java.util.List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
-            final List listAction = null == session ? new List(user, context) : new List(session);
+            final List listAction = null == session ? new List(user, context, getDecorator()) : new List(session, getDecorator());
 
             fillSubfolders(treeId, FolderStorage.ROOT_ID, filter, visibleFolders, listAction, openedStorages);
 

@@ -50,10 +50,12 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.Date;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.Folder;
@@ -113,6 +115,21 @@ public final class UpdateAction extends AbstractFolderAction {
         final JSONObject folderObject = (JSONObject) request.getData();
         final Folder folder = FolderParser.parseFolder(folderObject);
         folder.setID(id);
+        try {
+            if (folderObject.hasAndNotNull(FolderField.SUBSCRIBED.getName()) && 0 == folderObject.getInt(FolderField.SUBSCRIBED.getName())) {
+                /*
+                 * TODO: Remove this ugly hack to fix broken UI behavior which send "subscribed":0 for db folders
+                 */
+                try {
+                    Integer.parseInt(id);
+                    folder.setSubscribed(true);
+                } catch (final NumberFormatException e) {
+                    // Ignore
+                }
+            }
+        } catch (final JSONException e) {
+            // Ignore
+        }
         folder.setTreeID(treeId);
         /*
          * Create
@@ -122,7 +139,7 @@ public final class UpdateAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
-        final Date lastModifiedUTC = folderService.getFolder(treeId, id, session).getLastModifiedUTC();
+        final Date lastModifiedUTC = folderService.getFolder(treeId, id, session, null).getLastModifiedUTC();
         return new AJAXRequestResult(id, lastModifiedUTC);
     }
 

@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.groupware.contexts.Context;
@@ -68,6 +69,8 @@ import com.openexchange.tools.session.ServerSession;
 public final class StorageParametersImpl implements StorageParameters {
 
     private final ServerSession session;
+
+    private FolderServiceDecorator decorator;
 
     private final User user;
 
@@ -163,6 +166,14 @@ public final class StorageParametersImpl implements StorageParameters {
 
     public void setTimeStamp(final Date timeStamp) {
         this.timeStamp = null == timeStamp ? null : new Date(timeStamp.getTime());
+    }
+
+    public FolderServiceDecorator getDecorator() {
+        return decorator;
+    }
+
+    public void setDecorator(final FolderServiceDecorator decorator) {
+        this.decorator = decorator;
     }
 
 }

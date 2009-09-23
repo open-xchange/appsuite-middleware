@@ -153,7 +153,7 @@ public final class Subscribe extends AbstractAction {
                 /*
                  * Check for equally named folder
                  */
-                final UserizedFolder[] subfolders = (session == null ? new List(user, context) : new List(session)).doList(
+                final UserizedFolder[] subfolders = (session == null ? new List(user, context, null) : new List(session, null)).doList(
                     targetTreeId,
                     targetParentId,
                     true,

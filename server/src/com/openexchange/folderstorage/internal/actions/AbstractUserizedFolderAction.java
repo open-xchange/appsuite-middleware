@@ -52,9 +52,11 @@ package com.openexchange.folderstorage.internal.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -77,15 +79,22 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractUserizedFolderAction extends AbstractAction {
 
+    private final FolderServiceDecorator decorator;
+
     private TimeZone timeZone;
 
+    private Locale locale;
+
     /**
      * Initializes a new {@link AbstractUserizedFolderAction}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      */
-    public AbstractUserizedFolderAction(final ServerSession session) {
+    public AbstractUserizedFolderAction(final ServerSession session, final FolderServiceDecorator decorator) {
         super(session);
+        this.decorator = decorator;
+        storageParameters.setDecorator(decorator);
     }
 
     /**
@@ -93,19 +102,25 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      */
-    public AbstractUserizedFolderAction(final User user, final Context context) {
+    public AbstractUserizedFolderAction(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context);
+        this.decorator = decorator;
+        storageParameters.setDecorator(decorator);
     }
 
     /**
      * Initializes a new {@link AbstractUserizedFolderAction}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AbstractUserizedFolderAction(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AbstractUserizedFolderAction(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, folderStorageDiscoverer);
+        this.decorator = decorator;
+        storageParameters.setDecorator(decorator);
     }
 
     /**
@@ -113,22 +128,54 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AbstractUserizedFolderAction(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AbstractUserizedFolderAction(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
+        this.decorator = decorator;
+        storageParameters.setDecorator(decorator);
+    }
+
+    /**
+     * Gets the optional folder service decorator.
+     * 
+     * @return The folder service decorator or <code>null</code>
+     */
+    protected FolderServiceDecorator getDecorator() {
+        return decorator;
     }
 
     /**
      * Gets the time zone.
+     * <p>
+     * If a {@link FolderServiceDecorator decorator} was set and its {@link FolderServiceDecorator#getTimeZone() getTimeZone()} method
+     * returns a non-<code>null</code> value, then decorator's time zone is returned; otherwise user's time zone is returned.
      * 
      * @return The time zone
      */
     protected TimeZone getTimeZone() {
         if (null == timeZone) {
-            timeZone = Tools.getTimeZone(getUser().getTimeZone());
+            final TimeZone tz = null == decorator ? null : decorator.getTimeZone();
+            timeZone = tz == null ? Tools.getTimeZone(getUser().getTimeZone()) : tz;
         }
         return timeZone;
+    }
+
+    /**
+     * Gets the locale.
+     * <p>
+     * If a {@link FolderServiceDecorator decorator} was set and its {@link FolderServiceDecorator#getLocale() getLocale()} method returns a
+     * non-<code>null</code> value, then decorator's locale is returned; otherwise user's locale is returned.
+     * 
+     * @return The locale
+     */
+    protected Locale getLocale() {
+        if (null == locale) {
+            final Locale l = null == decorator ? null : decorator.getLocale();
+            locale = l == null ? getUser().getLocale() : l;
+        }
+        return locale;
     }
 
     /**
@@ -147,7 +194,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      */
     protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
-        userizedFolder.setLocale(getUser().getLocale());
+        userizedFolder.setLocale(getLocale());
         // Permissions
         userizedFolder.setOwnPermission(ownPermission);
         CalculatePermission.calculateUserPermissions(userizedFolder, getContext());

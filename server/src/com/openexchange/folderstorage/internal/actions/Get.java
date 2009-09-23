@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -75,9 +76,10 @@ public final class Get extends AbstractUserizedFolderAction {
      * Initializes a new {@link Get}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      */
-    public Get(final ServerSession session) {
-        super(session);
+    public Get(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
@@ -85,19 +87,21 @@ public final class Get extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      */
-    public Get(final User user, final Context context) {
-        super(user, context);
+    public Get(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
      * Initializes a new {@link Get}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Get(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public Get(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -105,10 +109,11 @@ public final class Get extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Get(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public Get(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
     public UserizedFolder doGet(final String treeId, final String folderId) throws FolderException {

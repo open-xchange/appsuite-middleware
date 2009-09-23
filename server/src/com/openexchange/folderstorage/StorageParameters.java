@@ -83,6 +83,20 @@ public interface StorageParameters {
     Session getSession();
 
     /**
+     * Gets the optional decorator.
+     * 
+     * @return The decorator or <code>null</code>
+     */
+    FolderServiceDecorator getDecorator();
+
+    /**
+     * Sets the decorator.
+     * 
+     * @param decorator The decorator
+     */
+    void setDecorator(FolderServiceDecorator decorator);
+
+    /**
      * Gets a <b>copy</b> of the requestor's last-modified time stamp.
      * 
      * @return A <b>copy</b> of the requestor's last-modified time stamp or <code>null</code>

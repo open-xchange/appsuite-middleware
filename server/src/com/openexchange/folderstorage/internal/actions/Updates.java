@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -93,9 +94,10 @@ public final class Updates extends AbstractUserizedFolderAction {
      * Initializes a new {@link Updates}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      */
-    public Updates(final ServerSession session) {
-        super(session);
+    public Updates(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
@@ -103,19 +105,21 @@ public final class Updates extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      */
-    public Updates(final User user, final Context context) {
-        super(user, context);
+    public Updates(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
      * Initializes a new {@link Updates}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Updates(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public Updates(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -123,10 +127,11 @@ public final class Updates extends AbstractUserizedFolderAction {
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Updates(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public Updates(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
     /**
