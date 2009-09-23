@@ -270,7 +270,7 @@ category={
 			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
 			
 			final int folderId = Integer.parseInt(folder);
-            //final TimeZone timeZone = TimeZone.getTimeZone(sessObj.getUserObject().getTimeZone());
+            //final TimeZone timeZone = TimeZoneUtils.getTimeZone(sessObj.getUserObject().getTimeZone());
 			//final String mail = sessObj.getUserObject().getMail();
 			
 			//final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
