@@ -101,10 +101,11 @@ public final class GetAction extends AbstractUserAction {
                 Constants.USER_ADDRESS_BOOK_FOLDER_ID,
                 session);
         final Contact userContact = contactInterface.getUserById(userId);
+        final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         /*
          * Write user as JSON object
          */
-        final JSONObject jsonObject = UserWriter.writeSingle2Object(null, user, userContact);
+        final JSONObject jsonObject = UserWriter.writeSingle2Object(null, user, userContact, timeZoneId);
         /*
          * Return appropriate result
          */

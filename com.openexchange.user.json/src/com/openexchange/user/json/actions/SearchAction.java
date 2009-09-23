@@ -107,6 +107,7 @@ public final class SearchAction extends AbstractUserAction {
             final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
             final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
             final String orderDirection = request.getParameter(AJAXServlet.PARAMETER_ORDER);
+            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             final JSONObject jData = (JSONObject) request.getData();
             /*
              * Contact search object
@@ -206,7 +207,7 @@ public final class SearchAction extends AbstractUserAction {
             /*
              * Write users as JSON arrays to JSON array
              */
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts);
+            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts, timeZoneId);
             /*
              * Return appropriate result
              */

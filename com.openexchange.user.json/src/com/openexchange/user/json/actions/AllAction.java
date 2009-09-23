@@ -106,6 +106,8 @@ public final class AllAction extends AbstractUserAction {
 
             final int leftHandLimit = parseIntParameter(AJAXServlet.LEFT_HAND_LIMIT, request);
             final int rightHandLimit = parseIntParameter(AJAXServlet.RIGHT_HAND_LIMIT, request);
+
+            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             /*
              * Get services
              */
@@ -237,7 +239,7 @@ public final class AllAction extends AbstractUserAction {
             /*
              * Write users as JSON arrays to JSON array
              */
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts);
+            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts, timeZoneId);
             /*
              * Return appropriate result
              */

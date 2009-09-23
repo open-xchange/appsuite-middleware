@@ -1040,20 +1040,52 @@ public final class UserWriter {
         }
     }
 
+    private static UserFieldWriter getUserFieldWriter(final int field, final String timeZoneId) {
+        if (null == timeZoneId) {
+            return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
+        }
+        /*
+         * Check for time zone sensitive fields
+         */
+        if (UserField.CREATION_DATE.getColumn() == field) {
+            return new UserFieldWriter() {
+
+                public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
+                    final Date d = contact.getCreationDate();
+                    jsonPutter.put(UserField.CREATION_DATE.getName(), null == d ? JSONObject.NULL : Long.valueOf(Utility.addTimeZoneOffset(d.getTime(), timeZoneId)));
+                }
+            };
+        }
+        if (UserField.LAST_MODIFIED.getColumn() == field) {
+            return new UserFieldWriter() {
+
+                public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
+                    final Date d = contact.getCreationDate();
+                    jsonPutter.put(UserField.LAST_MODIFIED.getName(), null == d ? JSONObject.NULL : Long.valueOf(Utility.addTimeZoneOffset(d.getTime(), timeZoneId)));
+                }
+            };
+        }
+        /*
+         * Return static instance
+         */
+        return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
+    }
+
     /**
      * Writes requested fields of given user into a JSON array.
      * 
      * @param fields The fields to write or <code>null</code> to write all
      * @param user The user
      * @param contact The user's contact
+     * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying requested fields of given user
      * @throws AjaxException If writing JSON array fails
      */
-    public static JSONArray writeSingle2Array(final int[] fields, final User user, final Contact contact) throws AjaxException {
+    public static JSONArray writeSingle2Array(final int[] fields, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
         for (int i = 0; i < ufws.length; i++) {
-            UserFieldWriter ufw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
@@ -1080,14 +1112,15 @@ public final class UserWriter {
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param users The users
      * @param contacts The users' contacts
+     * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying JSON arrays of given users
      * @throws AjaxException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final User[] users, final Contact[] contacts) throws AjaxException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
         for (int i = 0; i < ufws.length; i++) {
-            UserFieldWriter ufw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
@@ -1119,14 +1152,15 @@ public final class UserWriter {
      * @param fields The fields to write or <code>null</code> to write all
      * @param user The user
      * @param contact The user's contact
+     * @param timeZoneId The optional time zone ID
      * @return The JSON object carrying requested fields of given user
      * @throws AjaxException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final User user, final Contact contact) throws AjaxException {
+    public static JSONObject writeSingle2Object(final int[] fields, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
         for (int i = 0; i < ufws.length; i++) {
-            UserFieldWriter ufw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
@@ -1153,14 +1187,15 @@ public final class UserWriter {
      * @param fields The fields to write to each JSON object or <code>null</code> to write all
      * @param users The users
      * @param contacts The users' contacts
+     * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying JSON objects of given folders
      * @throws AjaxException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Object(final int[] fields, final User[] users, final Contact[] contacts) throws AjaxException {
+    public static JSONArray writeMultiple2Object(final int[] fields, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
         for (int i = 0; i < ufws.length; i++) {
-            UserFieldWriter ufw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());

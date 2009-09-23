@@ -104,6 +104,7 @@ public final class ListAction extends AbstractUserAction {
                 }
             }
             final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             /*
              * Get services
              */
@@ -135,7 +136,7 @@ public final class ListAction extends AbstractUserAction {
             /*
              * Write users as JSON arrays to JSON array
              */
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts);
+            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts, timeZoneId);
             /*
              * Return appropriate result
              */
