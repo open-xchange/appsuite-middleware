@@ -1237,6 +1237,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         final Contact co = new Contact();
 
         try {
+            co.setParentFolderID(rs.getInt(1));
             co.setContextId(rs.getInt(2));
             co.setCreatedBy(rs.getInt(3));
 
@@ -1264,7 +1265,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
 
             if (!co.containsInternalUserId()){
-                co.setParentFolderID(rs.getInt(1));
                 if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(),userId,memberInGroups,session,readCon, ctx)){
                     throw EXCEPTIONS.createOXConflictException(50,Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
                 }
