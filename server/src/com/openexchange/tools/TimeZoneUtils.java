@@ -86,7 +86,7 @@ public final class TimeZoneUtils {
             final FutureTask<TimeZone> ft = new FutureTask<TimeZone>(new Callable<TimeZone>() {
 
                 public TimeZone call() throws Exception {
-                    return TimeZoneUtils.getTimeZone(ID);
+                    return TimeZone.getTimeZone(ID);
                 }
             });
             f = ZONE_CACHE.putIfAbsent(ID, ft);
