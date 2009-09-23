@@ -66,6 +66,8 @@ public class AbstractStep {
     static final String LIST_OF_HTML_PAGES = "List of HtmlPages";
 
     static final String TEXT_PAGE = "TextPage";
+    
+    static final String UNEXPECTED_PAGE = "UnexpectedPage";
 
     static final String LIST_OF_TEXT_PAGES = "List of TextPages";
 
@@ -87,4 +89,13 @@ public class AbstractStep {
         this.workflow = workflow;
     }
 
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    
 }

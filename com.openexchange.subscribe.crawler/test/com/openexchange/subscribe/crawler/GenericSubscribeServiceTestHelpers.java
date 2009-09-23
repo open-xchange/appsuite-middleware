@@ -75,6 +75,10 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     }
 
     protected void findOutIfThereAreContactsForThisConfiguration(String username, String password, CrawlerDescription crawler) {
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, false);
+    }
+    
+    protected void findOutIfThereAreContactsForThisConfiguration(String username, String password, CrawlerDescription crawler, boolean verbose) {
         Calendar rightNow = Calendar.getInstance();
         long before = rightNow.getTime().getTime();
         // create a GenericSubscribeService that uses this CrawlerDescription
@@ -91,28 +95,29 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             e.printStackTrace();
         }
         assertTrue("There are no contacts for crawler : " + crawler.getDisplayName(), contacts.length != 0);
-        System.out.println("Crawler is : " + crawler.getDisplayName());
-        for (Contact contact : contacts) {
-            System.out.println("contact retrieved is : " + contact.getDisplayName());
-            System.out.println("contacts first name : " + contact.getGivenName());
-            System.out.println("contacts last name : " + contact.getSurName());
-            System.out.println("contacts title : " + contact.getTitle());
-            System.out.println("contacts email address : " + contact.getEmail1());
-            System.out.println("contacts mobile phone number : " + contact.getCellularTelephone1());
-            System.out.println("contacts work phone number : " + contact.getTelephoneBusiness1());
-            System.out.println("contacts home phone number : " + contact.getTelephoneHome1());
-            System.out.println("contacts birthday : " + contact.getBirthday());
-            System.out.println("contacts picture type : " + contact.getImageContentType());
-            System.out.println("contacts street of work : " + contact.getStreetBusiness());
-            System.out.println("contacts postal code of work : " + contact.getPostalCodeBusiness());
-            System.out.println("contacts city of work : " + contact.getCityBusiness());
-            System.out.println("contacts country of work : " + contact.getCountryBusiness());
-            System.out.println("contacts street of private address : " + contact.getStreetHome());
-            System.out.println("contacts postal code of private address : " + contact.getPostalCodeHome());
-            System.out.println("contacts city of private address : " + contact.getCityHome());
-            System.out.println("contacts country of private address : " + contact.getCountryHome());
-
-            System.out.println("----------");
+        if (verbose){
+            for (Contact contact : contacts) {
+                System.out.println("contact retrieved is : " + contact.getDisplayName());
+                System.out.println("contacts first name : " + contact.getGivenName());
+                System.out.println("contacts last name : " + contact.getSurName());
+                System.out.println("contacts title : " + contact.getTitle());
+                System.out.println("contacts email address : " + contact.getEmail1());
+                System.out.println("contacts mobile phone number : " + contact.getCellularTelephone1());
+                System.out.println("contacts work phone number : " + contact.getTelephoneBusiness1());
+                System.out.println("contacts home phone number : " + contact.getTelephoneHome1());
+                System.out.println("contacts birthday : " + contact.getBirthday());
+                System.out.println("contacts picture type : " + contact.getImageContentType());
+                System.out.println("contacts street of work : " + contact.getStreetBusiness());
+                System.out.println("contacts postal code of work : " + contact.getPostalCodeBusiness());
+                System.out.println("contacts city of work : " + contact.getCityBusiness());
+                System.out.println("contacts country of work : " + contact.getCountryBusiness());
+                System.out.println("contacts street of private address : " + contact.getStreetHome());
+                System.out.println("contacts postal code of private address : " + contact.getPostalCodeHome());
+                System.out.println("contacts city of private address : " + contact.getCityHome());
+                System.out.println("contacts country of private address : " + contact.getCountryHome());
+    
+                System.out.println("----------");
+            }
         }
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
         rightNow = Calendar.getInstance();

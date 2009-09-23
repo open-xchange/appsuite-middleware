@@ -98,132 +98,12 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         for (final HtmlAnchor anchor : anchors) {
             try {
                 final HtmlPage page = anchor.click();
-                final Contact contact = new Contact();
+                Contact contact = new Contact();
                 String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
                 pageParts.setPage(pageString);
                 final HashMap<String, String> map = pageParts.retrieveInformation();
 
-                // set the contact\u00b4s information
-                if (map.containsKey("first_name")) {
-                    contact.setGivenName(map.get("first_name"));
-                }
-                if (map.containsKey("last_name")) {
-                    contact.setSurName(map.get("last_name"));
-                }
-                if (map.containsKey("first_name") & map.containsKey("last_name")) {
-                    contact.setDisplayName(map.get("first_name") + " " + map.get("last_name"));
-                }
-                if (map.containsKey("display_name")) {
-                    contact.setDisplayName(map.get("display_name"));
-                }
-                if (map.containsKey("middle_name")) {
-                    contact.setMiddleName(map.get("middle_name"));
-                }
-                if (map.containsKey("title")) {
-                    contact.setTitle(map.get("title"));
-                }
-                if (map.containsKey("street_home")) {
-                    contact.setStreetHome(map.get("street_home"));
-                }
-                if (map.containsKey("postal_code_home")) {
-                    contact.setPostalCodeHome(map.get("postal_code_home"));
-                }
-                if (map.containsKey("city_home")) {
-                    contact.setCityHome(map.get("city_home"));
-                }
-                if (map.containsKey("state_home")) {
-                    contact.setStateHome(map.get("state_home"));
-                }
-                if (map.containsKey("country_home")) {
-                    contact.setCountryHome(map.get("country_home"));
-                }
-                if (map.containsKey("street_business")) {
-                    contact.setStreetBusiness(map.get("street_business"));
-                }
-                if (map.containsKey("postal_code_business")) {
-                    contact.setPostalCodeBusiness(map.get("postal_code_business"));
-                }
-                if (map.containsKey("city_business")) {
-                    contact.setCityBusiness(map.get("city_business"));
-                }
-                if (map.containsKey("state_business")) {
-                    contact.setStateBusiness(map.get("state_business"));
-                }
-                if (map.containsKey("country_business")) {
-                    contact.setCountryBusiness(map.get("country_business"));
-                }
-                if (map.containsKey("email1")) {
-                    contact.setEmail1(map.get("email1"));
-                }
-                if (map.containsKey("email2")) {
-                    contact.setEmail2(map.get("email2"));
-                }
-                if (map.containsKey("email3")) {
-                    contact.setEmail3(map.get("email3"));
-                }
-                if (map.containsKey("telephone_home1")) {
-                    contact.setTelephoneHome1(map.get("telephone_home1"));
-                }
-                if (map.containsKey("telephone_business1")) {
-                    contact.setTelephoneBusiness1(map.get("telephone_business1"));
-                }
-                if (map.containsKey("cellular_telephone1")) {
-                    contact.setCellularTelephone1(map.get("cellular_telephone1"));
-                }
-                if (map.containsKey("cellular_telephone2")) {
-                    contact.setCellularTelephone2(map.get("cellular_telephone2"));
-                }
-                if (map.containsKey("fax_home")) {
-                    contact.setFaxHome(map.get("fax_home"));
-                }
-                if (map.containsKey("fax_business")) {
-                    contact.setFaxBusiness(map.get("fax_business"));
-                }
-                if (map.containsKey("company")) {
-                    contact.setCompany(map.get("company"));
-                }
-                if (map.containsKey("position")) {
-                    contact.setPosition(map.get("position"));
-                }
-                if (map.containsKey("employee_type")) {
-                    contact.setEmployeeType(map.get("employee_type"));
-                }
-                if (map.containsKey("department")) {
-                    contact.setDepartment(map.get("department"));
-                }
-                if (map.containsKey("note")) {
-                    contact.setNote(map.get("note"));
-                }
-                if (map.containsKey("profession")) {
-                    contact.setProfession(map.get("profession"));
-                }
-                if (map.containsKey("url")) {
-                    contact.setURL(map.get("url"));
-                }
-                if (map.containsKey("instant_messenger1")) {
-                    contact.setInstantMessenger1(map.get("instant_messenger1"));
-                }
-                if (map.containsKey("instant_messenger2")) {
-                    contact.setInstantMessenger2(map.get("instant_messenger2"));
-                }
-                //handle birthdays
-                Calendar cal = null;
-                if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
-                    cal = Calendar.getInstance();
-                    int date = Integer.valueOf(map.get("birthday_day"));
-                    int month = Integer.valueOf(map.get("birthday_month"));
-                    int year = 2009;
-                    if (map.containsKey("birthday_year")) {
-                        year = Integer.valueOf(map.get("birthday_year"));
-                    }
-                    cal.set(year, month, date);
-                    contact.setBirthday(cal.getTime());
-                }
-
-                // add the image from a url to the contact
-                if (map.containsKey("image")) {
-                    OXContainerConverter.loadImageFromURL(contact, map.get("image"));
-                }
+                contact = Mappings.translateMapToContact(map);
 
                 SANITIZER.sanitize(contact);
                 contactObjects.add(contact);
@@ -249,6 +129,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         }
 
     }
+
 
     public String inputType() {
         return LIST_OF_HTML_ANCHORS;

@@ -235,9 +235,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SubscriptionException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        } 
         executedSuccessfully = true;
         contactObjectsArray = new Contact[contactObjects.size()];
         for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
