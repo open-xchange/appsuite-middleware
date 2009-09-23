@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -310,6 +310,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Sep 07 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
 * Thu Sep 03 2009 - marcus.klein@open-xchange.com
  - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
  - Bugfix #14432: Added ActiveSync and USM to access combination all.
