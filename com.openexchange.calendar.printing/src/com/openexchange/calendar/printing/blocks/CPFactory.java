@@ -73,7 +73,7 @@ public class CPFactory {
         strategies.add(strategy);
     }
 
-    public List<CPBlock> partition(List<Appointment> appointments) {
+    public List<CPData> partition(List<Appointment> appointments) {
         for (CPPartitioningStrategy strategy : strategies) {
             if (strategy.isPackaging(type))
                 return strategy.partition(appointments);

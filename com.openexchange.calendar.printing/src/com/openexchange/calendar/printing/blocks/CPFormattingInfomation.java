@@ -49,18 +49,37 @@
 
 package com.openexchange.calendar.printing.blocks;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.container.Appointment;
-
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public interface CPBlock {
-    public List<Appointment> getAppointments();
-    
-    public boolean isEmpty();
-    
-    public Map<String,String> getMetaData();
+public class CPFormattingInfomation {
+
+    private int position;
+
+    private int type;
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public CPFormattingInfomation() {
+        super();
+    }
+
+    public CPFormattingInfomation(int position, int type) {
+        this.position = position;
+        this.type = type;
+    }
 }

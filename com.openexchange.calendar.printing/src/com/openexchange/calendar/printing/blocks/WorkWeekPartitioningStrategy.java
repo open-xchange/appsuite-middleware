@@ -66,7 +66,7 @@ public class WorkWeekPartitioningStrategy implements CPPartitioningStrategy {
 
     private Appointment lastAppointment;
 
-    private CPBlockImpl lastWeek;
+    private CPData lastWeek;
 
     public void setCalendar(Calendar calendar) {
         this.calendar = calendar;
@@ -80,17 +80,17 @@ public class WorkWeekPartitioningStrategy implements CPPartitioningStrategy {
         return type == CPType.WORKWEEKVIEW;
     }
 
-    public List<CPBlock> partition(List<Appointment> appointments) {
+    public List<CPData> partition(List<Appointment> appointments) {
         CPTool tools = new CPTool();
         tools.sort(appointments);
 
-        LinkedList<CPBlock> blocks = new LinkedList<CPBlock>();
-        CPBlockImpl latestBlock = new CPBlockImpl();
+        LinkedList<CPData> blocks = new LinkedList<CPData>();
+        CPData latestBlock = new CPData();
         for (Appointment appointment : appointments) {
             if (isSignalForNewWeek(appointment)) {
                 blocks.add(latestBlock);
                 lastWeek = latestBlock;
-                latestBlock = new CPBlockImpl();
+                latestBlock = new CPData();
             }
             if (isWorkWeekAppointment(appointment)) {
                 if (isInTwoWeeks(appointment))
@@ -107,7 +107,7 @@ public class WorkWeekPartitioningStrategy implements CPPartitioningStrategy {
     /**
      * Takes care of adding the last block to the long chain of blocks, adds a first block in case the first appointment spans two weeks
      */
-    private void finalizeBlockStructure(LinkedList<CPBlock> blocks, CPBlock block) {
+    private void finalizeBlockStructure(LinkedList<CPData> blocks, CPData block) {
         if (lastWeek != null && !lastWeek.isEmpty() && !blocks.contains(lastWeek)) // in case the first appointment spreads two weeks
             blocks.addFirst(lastWeek);
         blocks.add(block);
@@ -115,7 +115,7 @@ public class WorkWeekPartitioningStrategy implements CPPartitioningStrategy {
 
     private void addToLastWeek(Appointment appointment) {
         if (lastWeek == null)
-            lastWeek = new CPBlockImpl();
+            lastWeek = new CPData();
         lastWeek.addAppointment(appointment);
     }
 

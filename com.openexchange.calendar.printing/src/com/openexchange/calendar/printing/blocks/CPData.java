@@ -58,12 +58,14 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CPBlockImpl implements CPBlock {
+public class CPData {
 
     private List<Appointment> appointments = new LinkedList<Appointment>();
 
-    private Map<String,String> metaData = new HashMap<String,String>();
-    
+    private Map<String, String> metaData = new HashMap<String, String>();
+
+    private List<CPFormattingInfomation> formattingInformation;
+
     public void addAppointment(Appointment appointment) {
         appointments.add(appointment);
     }
@@ -80,12 +82,26 @@ public class CPBlockImpl implements CPBlock {
         return appointments.size() == 0;
     }
 
-    public void setMetaData(Map<String,String> metaData) {
+    public void setMetaData(Map<String, String> metaData) {
         this.metaData = metaData;
     }
 
-    public Map<String,String> getMetaData() {
+    public Map<String, String> getMetaData() {
         return metaData;
+    }
+
+    public void setFormattingInformation(List<CPFormattingInfomation> info) {
+        this.formattingInformation = info;
+    }
+
+    public void addFormattingInformation(CPFormattingInfomation info) {
+        if (formattingInformation == null)
+            formattingInformation = new LinkedList<CPFormattingInfomation>();
+        formattingInformation.add(info);
+    }
+
+    public List<CPFormattingInfomation> getFormattingInformation() {
+        return this.formattingInformation;
     }
 
 }

@@ -61,5 +61,5 @@ public interface CPPartitioningStrategy {
     
     public boolean isPackaging(CPType type);
     
-    public List<CPBlock> partition(List<Appointment> appointments);
+    public List<CPData> partition(List<Appointment> appointments);
 }
