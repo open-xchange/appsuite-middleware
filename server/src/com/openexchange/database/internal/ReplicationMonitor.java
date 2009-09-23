@@ -73,6 +73,12 @@ public final class ReplicationMonitor {
 
     private static final Log LOG = LogFactory.getLog(ReplicationMonitor.class);
 
+    private static long masterConnectionsFetched;
+
+    private static long slaveConnectionsFetched;
+
+    private static long masterInsteadOfSlaveFetched;
+
     private ReplicationMonitor() {
         super();
     }
@@ -139,6 +145,7 @@ public final class ReplicationMonitor {
         Connection retval;
         try {
             retval = fetch.get(pools, assign, write, !write);
+            incrementFetched(assign, write);
         } catch (PoolingException e) {
             DBPoolingException e1 = DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
             // Immediately fail if connection to master is wanted or no fallback is there.
@@ -148,7 +155,8 @@ public final class ReplicationMonitor {
             // Try fallback to master.
             LOG.warn(e1.getMessage(), e1);
             try {
-                return fetch.get(pools, assign, true, true);
+                retval = fetch.get(pools, assign, true, true);
+                incrementInstead();
             } catch (PoolingException e2) {
                 throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e2);
             }
@@ -158,6 +166,7 @@ public final class ReplicationMonitor {
             Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
+                incrementInstead();
                 try {
                     toReturn.close();
                 } catch (SQLException e) {
@@ -254,5 +263,29 @@ public final class ReplicationMonitor {
             autocommit(con);
             closeSQLStuff(result, stmt);
         }
+    }
+
+    public static void incrementFetched(Assignment assign, boolean write) {
+        if (assign.getWritePoolId() == assign.getReadPoolId() || write) {
+            masterConnectionsFetched++;
+        } else {
+            slaveConnectionsFetched++;
+        }
+    }
+
+    private static void incrementInstead() {
+        masterInsteadOfSlaveFetched++;
+    }
+
+    public static long getMasterConnectionsFetched() {
+        return masterConnectionsFetched;
+    }
+
+    public static long getSlaveConnectionsFetched() {
+        return slaveConnectionsFetched;
+    }
+
+    public static long getMasterInsteadOfSlave() {
+        return masterInsteadOfSlaveFetched;
     }
 }

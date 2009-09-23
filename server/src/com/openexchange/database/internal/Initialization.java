@@ -109,6 +109,7 @@ public final class Initialization {
         timer.configure(configuration);
         // Setting up database connection pools.
         pools = new Pools(timer);
+        management.addOverview(new Overview(pools));
         // Add life cycle for configuration database
         ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);

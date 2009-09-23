@@ -72,6 +72,8 @@ public final class Management {
 
     private ManagementService managementService;
 
+    private Overview overview;
+
     Management() {
         super();
     }
@@ -94,7 +96,7 @@ public final class Management {
     private void registerMBean(final String name, final ConnectionPool pool) {
         try {
             if (null != managementService) {
-                final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
+                ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
                 managementService.registerMBean(objName, pool);
             }
         } catch (final MalformedObjectNameException e) {
@@ -109,6 +111,15 @@ public final class Management {
     public void registerMBeans() {
         for (final Map.Entry<Integer, ConnectionPool> entry : pools.entrySet()) {
             registerMBean(createMBeanName(entry.getKey().intValue()), entry.getValue());
+        }
+        try {
+            managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
+        } catch (ManagementException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NullPointerException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -134,6 +145,15 @@ public final class Management {
     public void unregisterMBeans() {
         for (final Map.Entry<Integer, ConnectionPool> entry : pools.entrySet()) {
             unregisterMBean(Management.createMBeanName(entry.getKey().intValue()));
+        }
+        try {
+            managementService.unregisterMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"));
+        } catch (MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (ManagementException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NullPointerException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -164,5 +184,9 @@ public final class Management {
         if (null != managementService) {
             unregisterMBean(createMBeanName(poolId));
         }
+    }
+
+    public void addOverview(Overview overview) {
+        this.overview = overview;
     }
 }

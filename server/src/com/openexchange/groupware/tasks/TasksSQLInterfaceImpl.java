@@ -290,8 +290,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }
-        final UpdateData update = new UpdateData(ctx, user, userConfig,
-            folder, task, lastRead);
+        final UpdateData update = new UpdateData(ctx, user, userConfig, folder, task, lastRead);
         try {
             update.prepare();
             // TODO join doUpdate(), updateReminder() and makeNextRecurrence() in one transaction.

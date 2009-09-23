@@ -96,7 +96,9 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             poolId = assign.getReadPoolId();
         }
         try {
-            return pools.getPool(poolId).get();
+            Connection retval = pools.getPool(poolId).get();
+            ReplicationMonitor.incrementFetched(assign, write);
+            return retval;
         } catch (final PoolingException e) {
             throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
         }
