@@ -272,8 +272,3 @@ BEGIN
 END //
 DELIMITER ;
 
-CREATE TABLE replicationMonitor (
-    cid INT4 UNSIGNED NOT NULL,
-    transaction INT8 NOT NULL,
-    PRIMARY KEY (cid)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
