@@ -47,36 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.user.newactions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * {@link AbstractMailRequest}
- *
+ * {@link GetRequest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class GetRequest extends AbstractUserRequest<GetResponse> {
 
     /**
-     * URL of the mail AJAX interface.
+     * Unique identifier of the user.
      */
-    public static final String MAIL_URL = "/ajax/mail";
+    private final int userId;
 
     /**
      * Default constructor.
+     * 
+     * @param userId The unique identifier of the user.
+     * @param timeZone The time zone
      */
-    protected AbstractMailRequest() {
+    public GetRequest(final int userId) {
         super();
+        this.userId = userId;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return MAIL_URL;
+    public Object getBody() throws JSONException {
+        return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public GetParser getParser() {
+        return new GetParser(true);
+    }
 }

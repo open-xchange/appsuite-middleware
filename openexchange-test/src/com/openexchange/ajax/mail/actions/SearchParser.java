@@ -49,34 +49,26 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAllParser;
 
 /**
- * {@link AbstractMailRequest}
+ * {@link SearchParser}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
-
-    /**
-     * URL of the mail AJAX interface.
-     */
-    public static final String MAIL_URL = "/ajax/mail";
+public class SearchParser extends AbstractAllParser<SearchResponse> {
 
     /**
      * Default constructor.
      */
-    protected AbstractMailRequest() {
-        super();
+    public SearchParser(final boolean failOnError, final int[] columns) {
+        super(failOnError,columns);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return MAIL_URL;
+    @Override
+    protected SearchResponse instanciateResponse(final Response response) {
+        return new SearchResponse(response);
     }
 
 }

@@ -47,36 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.user.newactions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AbstractMailRequest}
+ * {@link GetResponse}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class GetResponse extends AbstractAJAXResponse {
 
     /**
-     * URL of the mail AJAX interface.
+     * @param response
      */
-    public static final String MAIL_URL = "/ajax/mail";
-
-    /**
-     * Default constructor.
-     */
-    protected AbstractMailRequest() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return MAIL_URL;
+    public GetResponse(final Response response) {
+        super(response);
     }
 
 }

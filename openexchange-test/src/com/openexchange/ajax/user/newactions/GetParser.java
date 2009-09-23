@@ -47,36 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.user.newactions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-/**
- * {@link AbstractMailRequest}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
- */
-public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
-
-    /**
-     * URL of the mail AJAX interface.
-     */
-    public static final String MAIL_URL = "/ajax/mail";
+public class GetParser extends AbstractAJAXParser<GetResponse> {
 
     /**
      * Default constructor.
      */
-    protected AbstractMailRequest() {
-        super();
+    public GetParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return MAIL_URL;
+    @Override
+    protected GetResponse createResponse(final Response response) throws JSONException {
+        return new GetResponse(response);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GetResponse parse(final String body) throws JSONException {
+        final GetResponse retval = super.parse(body);
+        return retval;
+    }
 }
