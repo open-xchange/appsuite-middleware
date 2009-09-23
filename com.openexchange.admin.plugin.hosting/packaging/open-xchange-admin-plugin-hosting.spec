@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,10 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Sep 11 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14489: Removed own implemenetation of the administration JMX interface and using now management bundle.
+* Mon Sep 07 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
 * Fri Sep 04 2009 - marcus.klein@open-xchange.com
  - Bugfix #14449: Fixed wrong variable reference introduced by fixing bug 12168.
  - Bugfix #14451: Fixed adding another login mapping introduced by fixing bug 12168.
