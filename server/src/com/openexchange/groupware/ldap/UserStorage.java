@@ -50,10 +50,8 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -196,6 +194,13 @@ public abstract class UserStorage {
 
     /**
      * This method updates some values of a user.
+     * <p>
+     * Currently supported values for update:
+     * <ul>
+     * <li>Time zone</li>
+     * <li>Language</li>
+     * <li>Attributes (if present, not <code>null</code>)</li>
+     * </ul>
      * @param user user object with the updated values.
      * @param context The context.
      * @throws LdapException  if an error occurs.
@@ -260,7 +265,7 @@ public abstract class UserStorage {
      */
     public abstract void invalidateUser(final Context ctx, final int userId) throws UserException;
 
-    public final void invalidateUser(Context ctx, int[] userIds) throws UserException {
+    public final void invalidateUser(final Context ctx, final int[] userIds) throws UserException {
         for (final int member : userIds) {
             invalidateUser(ctx, member);
         }
