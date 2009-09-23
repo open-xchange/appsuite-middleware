@@ -98,7 +98,7 @@ public class ConfigMenuTest extends AbstractAJAXTest {
      * Tests if the spell check of a user can be changed.
      * @throws Throwable if an error occurs.
      */
-    public void testSpellCheck() throws Throwable {
+    public void _testSpellCheck() throws Throwable {
         final String spellCheck = readSetting(getWebConversation(), getHostName(),
             getSessionId(), SpellCheck.NAME);
         final String testSpellCheck = "true";
