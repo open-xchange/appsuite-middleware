@@ -1821,34 +1821,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private int getContactIdByUserId(final int ctx, final int user_id, final Connection write_con) throws StorageException {
+    private int getContactIdByUserId(int ctxId, int userId, Connection con) throws StorageException {
         int retval = -1;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
-            stmt = write_con.prepareStatement("SELECT intfield01 FROM prg_contacts WHERE userid = ? AND  cid = ?");
-
-            stmt.setInt(1, user_id);
-            stmt.setInt(2, ctx);
+            stmt = con.prepareStatement("SELECT intfield01 FROM prg_contacts WHERE cid=? AND userid=?");
+            stmt.setInt(1, ctxId);
+            stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            while (rs.next()) {
-                retval = rs.getInt("intfield01");
+            if (rs.next()) {
+                retval = rs.getInt(1);
             }
             rs.close();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement on ox write connection!", e);
-            }
+            com.openexchange.tools.sql.DBUtils.closeSQLStuff(stmt);
         }
-
         return retval;
     }
 
