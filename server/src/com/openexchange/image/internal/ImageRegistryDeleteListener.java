@@ -50,6 +50,8 @@
 package com.openexchange.image.internal;
 
 import java.sql.Connection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -65,45 +67,43 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ImageRegistryDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ImageRegistryDeleteListener implements DeleteListener {
 
-	/**
-	 * Initializes a new {@link ImageRegistryDeleteListener}
-	 */
-	public ImageRegistryDeleteListener() {
-		super();
-	}
+    private static final Log LOG = LogFactory.getLog(ImageRegistryDeleteListener.class);
 
-	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
-			/*
-			 * Remove user image from registry
-			 */
-			final Session session = deleteEvent.getSession();
-			final Contact contact;
-			try {
-				final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(session);
-				contact = contactSql.getUserById(deleteEvent.getId(), writeCon);
-			} catch (final ContextException e) {
-				throw new DeleteFailedException(e);
-			} catch (final OXException e) {
-				throw new DeleteFailedException(e);
-			}
-			final String id;
-			{
-				final String[] reqArgs = new ContactImageDataSource().getRequiredArguments();
-				final DataArguments args = new DataArguments(2);
-				args.put(reqArgs[0], String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-				args.put(reqArgs[1], String.valueOf(contact.getObjectID()));
-				id = args.getID();
-			}
-			ImageRegistry.getInstance().removeImageData(session.getContextId(), id);
-		}
-	}
+    public ImageRegistryDeleteListener() {
+        super();
+    }
 
+    /**
+     * Remove user image from registry.
+     */
+    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+        if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
+            final Session session = deleteEvent.getSession();
+            final Contact contact;
+            try {
+                final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(session);
+                contact = contactSql.getUserById(deleteEvent.getId(), writeCon);
+            } catch (ContextException e) {
+                // Ignore removing image if user contact can not be loaded. Then already a lot is broken.
+                LOG.warn(e.getMessage(), e);
+                return;
+            } catch (OXException e) {
+                throw new DeleteFailedException(e);
+            }
+            final String id;
+            {
+                final String[] reqArgs = new ContactImageDataSource().getRequiredArguments();
+                final DataArguments args = new DataArguments(2);
+                args.put(reqArgs[0], String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+                args.put(reqArgs[1], String.valueOf(contact.getObjectID()));
+                id = args.getID();
+            }
+            ImageRegistry.getInstance().removeImageData(session.getContextId(), id);
+        }
+    }
 }

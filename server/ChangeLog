@@ -1,3 +1,7 @@
+* 2009-09-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #14453: Ignoring not loadable user contact in ImageRegistryDeleteListener and continue deleting that user.
+
 * 2009-09-22 - thorben.betten@open-xchange.com
 
  - Bugfix #14525: Added configuration option to define SIEVE auth encoding
