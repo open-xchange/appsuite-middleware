@@ -178,7 +178,7 @@ public abstract class OXServlet extends WebDavServlet {
                 LOG.trace("Authorization header found.");
             }
             final String[] userpass = OXServlet.decodeAuthorization(auth);
-            final String login = userpass[0].toLowerCase();
+            final String login = userpass[0];
             final String pass = userpass[1];
             if (!checkLogin(login, pass, req.getRemoteAddr())) {
                 addUnauthorizedHeader(resp);

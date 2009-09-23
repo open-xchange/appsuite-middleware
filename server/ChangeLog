@@ -1,6 +1,7 @@
 * 2009-09-22 - marcus.klein@open-xchange.com
 
  - Bugfix #14453: Ignoring not loadable user contact in ImageRegistryDeleteListener and continue deleting that user.
+ - Bugfix #14561: Not converting login information to lower case in WebDAV interface login method.
 
 * 2009-09-22 - thorben.betten@open-xchange.com
 
