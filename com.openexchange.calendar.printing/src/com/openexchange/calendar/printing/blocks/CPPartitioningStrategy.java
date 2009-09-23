@@ -47,67 +47,19 @@
  *
  */
 
-package com.openexchange.calendar.printing;
+package com.openexchange.calendar.printing.blocks;
+
+import java.util.List;
+import com.openexchange.calendar.printing.CPType;
+import com.openexchange.groupware.container.Appointment;
+
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public enum CalendarPrintingType {
-    DAYVIEW("DayView", 0),
-    WORKWEEKVIEW("WorkWeekView", 1),
-    WEEKVIEW("WeekView", 2),
-    MONTHLYVIEW("MonthlyView", 3),
-    YEARLYVIEW("YearlyView", 4);
-
-    private String name;
-
-    private int number;
-
-    CalendarPrintingType(String name, int number) {
-        this.setName(name);
-        this.setNumber(number);
-    }
-
-
-    /**
-     * Gets an enum instance via its number. Null if not found.
-     */
-    public static CalendarPrintingType getByNumber(int number) {
-        for (CalendarPrintingType type : values()) {
-            if (type.getNumber() == number)
-                return type;
-        }
-        return null;
-    }
-
-    /**
-     * Gets an enum instance via its name. Case-agnostic. Null if not found.
-     */
-    public static CalendarPrintingType getByName(String name) {
-        for (CalendarPrintingType type : values()) {
-            if (name.equalsIgnoreCase(type.getName()))
-                return type;
-        }
-        return null;
-    }
-
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-
-    public int getNumber() {
-        return number;
-    }
+public interface CPPartitioningStrategy {
+    
+    public boolean isPackaging(CPType type);
+    
+    public List<CPBlock> partition(List<Appointment> appointments);
 }

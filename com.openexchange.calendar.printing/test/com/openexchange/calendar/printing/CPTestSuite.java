@@ -47,19 +47,26 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.calendar.printing;
 
-import java.util.List;
-import com.openexchange.calendar.printing.CalendarPrintingType;
-import com.openexchange.groupware.container.Appointment;
-
+import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public interface CalendarPartitioningStrategy {
-    
-    public boolean isPackaging(CalendarPrintingType type);
-    
-    public List<CalendarBlock> partition(List<Appointment> appointments);
+public class CPTestSuite extends TestSuite {
+
+    private CPTestSuite() {
+        super();
+    }
+
+    public static Test suite() {
+        final TestSuite suite = new TestSuite();
+        suite.addTestSuite(CPToolTest.class);
+        suite.addTestSuite(WorkWeekPartitioningTest.class);
+        suite.addTestSuite(CPTypeTest.class);
+        return suite;
+    }
 }

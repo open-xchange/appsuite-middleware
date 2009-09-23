@@ -47,25 +47,20 @@
  *
  */
 
-package com.openexchange.calendar.printing;
+package com.openexchange.calendar.printing.blocks;
 
-import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.groupware.container.Appointment;
+
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarPrintingTestSuite extends TestSuite {
-
-    private CalendarPrintingTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(CalendarPrintingToolTest.class);
-        suite.addTestSuite(WorkWeekPartitioningTest.class);
-        return suite;
-    }
+public interface CPBlock {
+    public List<Appointment> getAppointments();
+    
+    public boolean isEmpty();
+    
+    public Map<String,String> getMetaData();
 }

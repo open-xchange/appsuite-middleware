@@ -137,7 +137,7 @@ public class WorkWeekPartitioningTest extends TestCase {
         app2.setStartDate(dates[2]);
         app2.setEndDate(dates[3]);
         
-        List<CalendarBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{app1,app2}));
+        List<CPBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{app1,app2}));
         assertEquals("Two consecutive days, Wednesday and Thursday, should need only one partition", 1, partitions.size());
         assertEquals("Partition should contain two appointments", 2, partitions.get(0).getAppointments().size());
     }
@@ -149,7 +149,7 @@ public class WorkWeekPartitioningTest extends TestCase {
         weekendAppointment.setStartDate(dates[0]);
         weekendAppointment.setEndDate(dates[1]);
         
-        List<CalendarBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{weekendAppointment}));
+        List<CPBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{weekendAppointment}));
         assertEquals("Should have one partition only", 1, partitions.size());
         assertEquals("Partition should be empty", 0, partitions.get(0).getAppointments().size());
     }
@@ -167,7 +167,7 @@ public class WorkWeekPartitioningTest extends TestCase {
         app2.setStartDate(dates[0]);
         app2.setEndDate(dates[1]);
         
-        List<CalendarBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{app1, app2}));
+        List<CPBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{app1, app2}));
         assertEquals("Should have two partitions", 2, partitions.size());
         assertEquals("First partition should contain one appointment", 1, partitions.get(0).getAppointments().size());
         assertEquals("Second partition should contain one appointment", 1, partitions.get(1).getAppointments().size());
@@ -179,7 +179,7 @@ public class WorkWeekPartitioningTest extends TestCase {
         longAppointment.setStartDate(THURSDAY().getTime());
         longAppointment.setEndDate(WEDNESDAY_NEXT_WEEK().getTime());
         
-        List<CalendarBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{longAppointment}));
+        List<CPBlock> partitions = strategy.partition(Arrays.asList(new Appointment[]{longAppointment}));
         assertEquals("Should have two partitions", 2, partitions.size());
         assertEquals("First partition should contain one appointment", 1, partitions.get(0).getAppointments().size());
         assertEquals("Second partition should contain one appointment", 1, partitions.get(1).getAppointments().size());

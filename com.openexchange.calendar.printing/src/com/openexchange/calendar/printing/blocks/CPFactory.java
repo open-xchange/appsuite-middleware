@@ -51,29 +51,33 @@ package com.openexchange.calendar.printing.blocks;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.calendar.printing.CPType;
 import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarBlockImpl implements CalendarBlock {
+public class CPFactory {
 
-    private List<Appointment> appointments = new LinkedList<Appointment>();
+    private CPType type;
 
-    public void addAppointment(Appointment appointment) {
-        appointments.add(appointment);
+    private List<CPPartitioningStrategy> strategies;
+
+    public void setTypeToProduce(CPType type) {
+        this.type = type;
     }
 
-    public void setAppointment(List<Appointment> appointments) {
-        this.appointments = appointments;
+    public void addStrategy(CPPartitioningStrategy strategy) {
+        if (strategies == null)
+            strategies = new LinkedList<CPPartitioningStrategy>();
+        strategies.add(strategy);
     }
 
-    public List<Appointment> getAppointments() {
-        return appointments;
+    public List<CPBlock> partition(List<Appointment> appointments) {
+        for (CPPartitioningStrategy strategy : strategies) {
+            if (strategy.isPackaging(type))
+                return strategy.partition(appointments);
+        }
+        return null;
     }
-
-    public boolean isEmpty() {
-        return appointments.size() == 0;
-    }
-
 }

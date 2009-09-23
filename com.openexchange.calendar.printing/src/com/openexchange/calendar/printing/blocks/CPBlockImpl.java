@@ -49,15 +49,43 @@
 
 package com.openexchange.calendar.printing.blocks;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.container.Appointment;
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public interface CalendarBlock {
-    public List<Appointment> getAppointments();
+public class CPBlockImpl implements CPBlock {
+
+    private List<Appointment> appointments = new LinkedList<Appointment>();
+
+    private Map<String,String> metaData = new HashMap<String,String>();
     
-    public boolean isEmpty();
+    public void addAppointment(Appointment appointment) {
+        appointments.add(appointment);
+    }
+
+    public void setAppointment(List<Appointment> appointments) {
+        this.appointments = appointments;
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
+
+    public boolean isEmpty() {
+        return appointments.size() == 0;
+    }
+
+    public void setMetaData(Map<String,String> metaData) {
+        this.metaData = metaData;
+    }
+
+    public Map<String,String> getMetaData() {
+        return metaData;
+    }
+
 }

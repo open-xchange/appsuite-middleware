@@ -59,18 +59,18 @@ import com.openexchange.ajax.AJAXServlet;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarPrintingParameters {
+public class CPParameters {
     private Date start;
     private Date end;
     private String template;
     private int folder;
     private List<String> missingFields;
 
-    public CalendarPrintingParameters(){
+    public CPParameters(){
         
     }
     
-    public CalendarPrintingParameters(HttpServletRequest req){
+    public CPParameters(HttpServletRequest req){
         this();
         parseRequest(req);
     }
@@ -146,4 +146,11 @@ public class CalendarPrintingParameters {
         else
             this.template = templateName;
     }
+
+    @Override
+    public String toString() {
+        return CPParameters.class.getName() + ": Start = " + start + ", end = " + end + ", folder = " + folder + ", template = " + template + ", missing fields : " + isMissingFields();
+    }
+    
+    
 }

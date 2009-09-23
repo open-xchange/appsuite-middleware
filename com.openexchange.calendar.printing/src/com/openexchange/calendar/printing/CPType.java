@@ -47,73 +47,82 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.calendar.printing;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.calendar.printing.CPServlet;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public enum CPType {
+    DAYVIEW("DayView", 0),
+    WORKWEEKVIEW("WorkWeekView", 1),
+    WEEKVIEW("WeekView", 2),
+    MONTHLYVIEW("MonthlyView", 3),
+    YEARLYVIEW("YearlyView", 4);
 
-    private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    private HTTPServletRegistration registration;
+    private String name;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return services;
+    private int number;
+
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    protected void handleAvailability(Class<?> clazz) {
-        register();
+    public String getName() {
+        return name;
     }
 
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        unregister();
-    }
-    
-    @Override
-    protected void startBundle() throws Exception {
-        register();
-    }
-    
-    @Override
-    protected void stopBundle() throws Exception {
-        unregister();
+    public void setNumber(int number) {
+        this.number = number;
     }
 
-    private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
-            unregister();
-            return;
+    public int getNumber() {
+        return number;
+    }
+
+    CPType(String name, int number) {
+        this.setName(name);
+        this.setNumber(number);
+    }
+
+    /**
+     * Gets an enum instance via its number. Null if not found.
+     */
+    public static CPType getByNumber(int number) {
+        for (CPType type : values()) {
+            if (type.getNumber() == number)
+                return type;
         }
-        
-        CPServlet.setTemplateService(templates);
-        CPServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CPServlet.setCalendarTools(collectionService);
-        
-        registration = new HTTPServletRegistration(context, ALIAS, new CPServlet());
-        
+        return null;
     }
 
-    private void unregister() {
-        if(registration != null) {
-            registration.unregister();
-            registration = null;
+    /**
+     * Gets an enum instance via its name. Case-agnostic. Null if not found.
+     */
+    public static CPType getByName(String name) {
+        for (CPType type : values()) {
+            if (name.equalsIgnoreCase(type.getName()))
+                return type;
         }
+        return null;
     }
 
+    public static CPType getByTemplateName(String string) {
+        Matcher matcher = Pattern.compile("([^/]+)/[^/]+$").matcher(string);
+        if(! matcher.find())
+            return null;
+        CPType find;
+
+        String identifier = matcher.group(1);
+        find = getByName(identifier);
+        try {
+        if(find == null)
+            find = getByNumber(Integer.valueOf(identifier).intValue());
+        } catch(NumberFormatException e){
+            return null;
+        }
+        return find;
+    }
 }

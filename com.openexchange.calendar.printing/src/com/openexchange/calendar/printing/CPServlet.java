@@ -61,6 +61,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.calendar.printing.blocks.CPBlock;
+import com.openexchange.calendar.printing.blocks.CPFactory;
+import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -72,12 +75,12 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CalendarPrintingServlet}
+ * {@link CPServlet}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarPrintingServlet extends PermissionServlet {
+public class CPServlet extends PermissionServlet {
 
     /**
      * 
@@ -86,9 +89,9 @@ public class CalendarPrintingServlet extends PermissionServlet {
 
     private static TemplateService templates = null;
 
-    private static final Log LOG = LogFactory.getLog(CalendarPrintingServlet.class);
+    private static final Log LOG = LogFactory.getLog(CPServlet.class);
 
-    private static final String APPOINTMENTS = "appointments";
+    private static final String APPOINTMENTBLOCKS = "appointmentblocks";
 
     private static final String VIEW_START = "start";
 
@@ -120,15 +123,19 @@ public class CalendarPrintingServlet extends PermissionServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> debuggingItems = new LinkedList<String>();
-        CalendarPrintingTool tool = new CalendarPrintingTool();
+        CPTool tool = new CPTool();
         
         resp.setContentType("text/html");
 
         ServerSession session = getSessionObject(req);
         try {
-            CalendarPrintingParameters params = new CalendarPrintingParameters(req);
+            CPParameters params = new CPParameters(req);
             if (params.isMissingFields()) {
                 throw new ServletException("Missing one or more parameters: " + Strings.join(params.getMissingFields(), ","));
+            }
+            System.out.println("DEBUG: " + params);
+            if(CPType.getByTemplateName(params.getTemplate()) == null){
+                throw new ServletException("Cannot find template " + params.getTemplate());
             }
 
             if(tool.isBlockTemplate(params))
@@ -147,9 +154,14 @@ public class CalendarPrintingServlet extends PermissionServlet {
                 calendarTools);
 
             tool.sort(expandedAppointments);
+            
+            CPFactory factory = new CPFactory();
+            factory.addStrategy(new WorkWeekPartitioningStrategy());
+            factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
+            List<CPBlock> blocks = factory.partition(expandedAppointments);
 
             Map<String, Object> variables = new HashMap<String, Object>();
-            variables.put(APPOINTMENTS, expandedAppointments);
+            variables.put(APPOINTMENTBLOCKS, blocks);
             variables.put(VIEW_START, params.getStart());
             variables.put(VIEW_END, params.getEnd());
             variables.put(DEBUG, debuggingItems);

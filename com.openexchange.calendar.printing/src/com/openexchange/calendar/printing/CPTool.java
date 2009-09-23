@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -67,24 +68,44 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarPrintingTool {
-
+public class CPTool {
+    
+    private Calendar calendar;
+    
     /**
-     * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
+     * Based on the selected template, this method determines new start and end dates 
+     * to present exactly the block that the template needs.
      */
-    public void calculateNewStartAndEnd(CalendarPrintingParameters params) {
-        // TODO Auto-generated method stub
-
+    public void calculateNewStartAndEnd(CPParameters params) {
+        if(! isBlockTemplate(params))
+            return;
+        //TODO this calls for a strategy pattern later on when there is more than one
+        
+        Calendar cal = getCalendar();
+        cal.setTime(params.getStart());
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        params.setStart( cal.getTime() );
+        
+        cal.setTime(params.getEnd());
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        params.setEnd( cal.getTime() );
+        
     }
 
     /**
      * Checks whether the template given is one that prints a specific timeframe as a block, which might be different from the given start
      * and end date.
      */
-    public boolean isBlockTemplate(CalendarPrintingParameters params) {
+    public boolean isBlockTemplate(CPParameters params) {
         String basic = "/[^/]+$";
-        Matcher m1 = Pattern.compile(CalendarPrintingType.WORKWEEKVIEW.getName()  + basic).matcher(params.getTemplate());
-        Matcher m2 = Pattern.compile(CalendarPrintingType.WORKWEEKVIEW.getNumber()  + basic).matcher(params.getTemplate());
+        Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName()  + basic).matcher(params.getTemplate());
+        Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber()  + basic).matcher(params.getTemplate());
         return  m1.find() || m2.find();
     }
 
@@ -127,6 +148,14 @@ public class CalendarPrintingTool {
             all.add(temp);
         }
         return all;
+    }
+
+    public void setCalendar(Calendar calendar) {
+        this.calendar = calendar;
+    }
+
+    public Calendar getCalendar() {
+        return calendar;
     }
 
 }

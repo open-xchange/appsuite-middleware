@@ -53,19 +53,19 @@ import junit.framework.TestCase;
 
 
 /**
- * {@link CalendarPrintingToolTest}
+ * {@link CPToolTest}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarPrintingToolTest extends TestCase{
+public class CPToolTest extends TestCase{
 
-    private CalendarPrintingTool tool;
+    private CPTool tool;
 
-    private CalendarPrintingType[] nonBlockTypes = new CalendarPrintingType[]{CalendarPrintingType.DAYVIEW, CalendarPrintingType.WEEKVIEW, CalendarPrintingType.MONTHLYVIEW, CalendarPrintingType.YEARLYVIEW};
+    private CPType[] nonBlockTypes = new CPType[]{CPType.DAYVIEW, CPType.WEEKVIEW, CPType.MONTHLYVIEW, CPType.YEARLYVIEW};
     
     @Override
     protected void setUp() throws Exception {
-        tool = new CalendarPrintingTool();
+        tool = new CPTool();
         super.setUp();
     }
 
@@ -75,19 +75,19 @@ public class CalendarPrintingToolTest extends TestCase{
     }
     
     public void testShouldRecognizeLegitimateTemplateTypes(){
-        for(CalendarPrintingType type :nonBlockTypes){
+        for(CPType type :nonBlockTypes){
             checkBlockTemplate(false, type.getName() + "/someTemplate");
             checkBlockTemplate(false, type.getNumber() + "/someTemplate");
         }
 
-        CalendarPrintingType type = CalendarPrintingType.WORKWEEKVIEW;
+        CPType type = CPType.WORKWEEKVIEW;
         checkBlockTemplate(true, type.getName() + "/someTemplate");
         checkBlockTemplate(true, type.getNumber() + "/someTemplate");
     }
     
     public void testShouldNotBeConfusedByMisleadingTemplateNames(){
-        CalendarPrintingType evil = CalendarPrintingType.WORKWEEKVIEW;
-        for(CalendarPrintingType type :nonBlockTypes){
+        CPType evil = CPType.WORKWEEKVIEW;
+        for(CPType type :nonBlockTypes){
             checkBlockTemplate(false, type.getName() + "/" + evil.getName() + "someTemplate");
             checkBlockTemplate(false, type.getName() + "/" + "someTemplate" + evil.getName());
             checkBlockTemplate(false, evil.getName() + "/" + type.getName() + "/" + "someTemplate");
@@ -105,7 +105,7 @@ public class CalendarPrintingToolTest extends TestCase{
     }
     
     private void checkBlockTemplate(boolean expected, String templateName){
-        CalendarPrintingParameters params = new CalendarPrintingParameters();
+        CPParameters params = new CPParameters();
         params.setTemplate(templateName);
         assertEquals("Checking template '" + templateName + "'", expected, tool.isBlockTemplate(params));
     }

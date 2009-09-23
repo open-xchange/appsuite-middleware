@@ -47,37 +47,40 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.calendar.printing;
 
-import java.util.LinkedList;
-import java.util.List;
-import com.openexchange.calendar.printing.CalendarPrintingType;
-import com.openexchange.groupware.container.Appointment;
+import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CalendarBlockFactory {
-
-    private CalendarPrintingType type;
-
-    private List<CalendarPartitioningStrategy> strategies;
-
-    public void setTypeToProduce(CalendarPrintingType type) {
-        this.type = type;
+public class CPTypeTest extends TestCase {
+    
+    private void checkType(String template, CPType expected) {
+        assertEquals(
+            "The template string '" + template + "' should lead to a template of type " + expected,
+            expected,
+            CPType.getByTemplateName(template));
     }
 
-    public void addStrategy(CalendarPartitioningStrategy strategy) {
-        if (strategies == null)
-            strategies = new LinkedList<CalendarPartitioningStrategy>();
-        strategies.add(strategy);
-    }
+    public void testShouldFindCorrectTypeByTemplateName() {
+        CPType evil = CPType.WORKWEEKVIEW;
+        for (CPType type : CPType.values()) {
+            checkType(type.getName() + "/" + evil.getName() + "someTemplate", type);
+            checkType(type.getName() + "/" + "someTemplate" + evil.getName(), type);
+            checkType(evil.getName() + "/" + type.getName() + "/" + "someTemplate", type);
+            checkType(type.getName() + "/" + evil.getName() + "/" + "someTemplate", evil);
 
-    public List<CalendarBlock> partition(List<Appointment> appointments) {
-        for (CalendarPartitioningStrategy strategy : strategies) {
-            if (strategy.isPackaging(type))
-                return strategy.partition(appointments);
+            checkType(type.getNumber() + "/" + evil.getNumber() + "someTemplate", type);
+            checkType(type.getNumber() + "/" + "someTemplate" + evil.getNumber(), type);
+            checkType(evil.getNumber() + "/" + type.getNumber() + "/" + "someTemplate", type);
+            checkType(type.getNumber() + "/" + evil.getNumber() + "/" + "someTemplate", evil);
         }
-        return null;
+    }
+
+    public void testShouldReturnNullOnFailure() {
+        checkType("", null);
+        checkType("666/template.tmpl", null);
+        checkType("/1/666/template.tmpl", null);
     }
 }
