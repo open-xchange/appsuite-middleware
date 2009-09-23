@@ -47,57 +47,43 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.database.internal;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.internal.CreateReplicationTable;
-import com.openexchange.database.internal.DBPoolingExceptionFactory;
-import com.openexchange.exceptions.osgi.ComponentRegistration;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.management.ManagementService;
-import com.openexchange.timer.TimerService;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * Activator for the database bundle.
+ * Creates the table replicationMonitor.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class CreateReplicationTable extends AbstractCreateTableImpl {
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-
-    private ComponentRegistration dbpoolingComponent;
-
-    private ServiceRegistration createTableRegistration;
-
-    public void start(BundleContext context) throws Exception {
-        dbpoolingComponent = new ComponentRegistration(
-            context,
-            EnumComponent.DB_POOLING,
-            "com.openexchange.database",
-            DBPoolingExceptionFactory.getInstance());
-        createTableRegistration = context.registerService(CreateTableService.class.getName(), new CreateReplicationTable(), null);
-        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new DatabaseServiceRegisterer(context)));
-        trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceCustomizer(context)));
-        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceCustomizer(context)));
-        trackers.push(new ServiceTracker(context, CacheService.class.getName(), new CacheServiceCustomizer(context)));
-        for (ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
+    public CreateReplicationTable() {
+        super();
     }
 
-    public void stop(BundleContext context) throws Exception {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-        createTableRegistration.unregister();
-        dbpoolingComponent.unregister();
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
+
+    public String[] tablesToCreate() {
+        return tables;
+    }
+
+    @Override
+    public String[] getCreateStatements() {
+        return creates;
+    }
+
+    private static final String[] tables = {
+        "replicationMonitor"
+    };
+
+    private static final String[] creates = {
+        "CREATE TABLE replicationMonitor (" +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "transaction INT8 NOT NULL," +
+            "PRIMARY KEY (cid)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+    };
 }

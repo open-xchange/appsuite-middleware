@@ -82,4 +82,6 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
 
     public abstract String[] getCreateStatements();
 
+    protected static final String[] NO_TABLES = new String[0];
+
 }
