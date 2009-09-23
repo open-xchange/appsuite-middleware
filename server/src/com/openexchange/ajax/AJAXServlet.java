@@ -291,6 +291,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_TIMESTAMP = "timestamp";
 
+    public static final String PARAMETER_TIMEZONE= "timezone";
+
     public static final String PARAMETER_VERSION = "version";
 
     public static final String UPLOAD_FORMFIELD_MAIL = "json_0";
