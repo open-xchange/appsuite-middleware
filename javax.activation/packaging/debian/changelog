@@ -1,3 +1,9 @@
+open-xchange-activation (1.1.1-9) unstable; urgency=low
+
+  * First build for 6.13 Rev1
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Wed, 23 Sep 2009 14:58:48 +0200
+
 open-xchange-activation (1.1.1-8) unstable; urgency=low
 
   * first build for 6.11 Rev7

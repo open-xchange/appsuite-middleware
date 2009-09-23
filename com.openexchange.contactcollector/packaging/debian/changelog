@@ -1,3 +1,9 @@
+open-xchange-contactcollector (6.13.0.0-1) unstable; urgency=low
+
+  * First build for 6.13 Rev1
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Wed, 23 Sep 2009 15:00:14 +0200
+
 open-xchange-contactcollector (6.13.0.0-0) unstable; urgency=low
 
   * 6.13 unstable cycle

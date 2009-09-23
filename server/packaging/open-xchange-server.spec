@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,25 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Sep 22 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14525: Added configuration option to define SIEVE auth encoding
+ - Bugfix #14533: Fixed plain-text reply version
+ - Bugfix #14544: Setting right array size when resolving UIDs to sequence numbers
+* Mon Sep 21 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14539: Fixed parsing of content type header
+ - Bugfix #14494: Don't use CopyOnWriteArrayList in Collections.sort() routine
+* Thu Sep 17 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14504: Show only public contacts in publications
+ - Bugfix #14506: Use transfer encoding "chunked" for infostore subscriptions
+* Tue Sep 15 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #12050: Series conflicts with own exceptions.
+* Fri Sep 11 2009 - thorben.betten@open-xchange.com
+ - Bugfix 14489: Auto-Detecting charset of a RFC 2047 "encoded-word" if unknown
+* Thu Sep 10 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14467: Fixed reply of multipart/related message without HTML content
+ - Bugfix #14466: Fixed HttpSessionWrapper.invalidate() method
+* Wed Sep 09 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14454: Escaped dash character in email regex for crawling contact from Google.
 * Fri Sep 04 2009 - marcus.klein@open-xchange.com
  - Bugfix #14450: Storing sent null value for task attributes target duration, actual duration, target costs and actual costs as null and
    not as zero.
@@ -629,7 +648,11 @@ fi
  - Bugfix #14010: Added timeout to IMAP default folder check routine
 * Fri Jun 26 2009 - thorben.betten@open-xchange.com
  - Bugfix #13975: Replaced folder name with folder ID in error message FLD-0003
- - Bugfix #14001: Proper multipart/* Fri Jun 26 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14001: Proper multipart/* parsing if message contains empty text content
+ - Bugfix #14000: Maintaining file extension when composing new file name on duplicate infostore file
+ - Bugfix #14005: Dealing with corrupt image path on reply/forward
+ - Bugfix #13971: Suppressing error logs on disabled mail account for admin
+* Fri Jun 26 2009 - martin.herfurth@open-xchange.com
  - Bugfix #13931: Make special sorting case insensitive.
 * Fri Jun 26 2009 - choeger@open-xchange.com
  - Bugfix #13997: IBM and SUN xerces packages contain package description for SUN Java
@@ -2692,7 +2715,14 @@ fi
    on the first level. 
 ########### LOOK MA! NO HANDS! CONFIGCHANGE CONFIGCHANGE#############
 in the servletmapping.properties we have a new entry:
-infostore* Fri Aug 03 2007 - thorben.betten@open-xchange.com
+infostore*:com.openexchange.webdav.Infostore
+in the apache configuration:
+JkMount /infostore ajp13
+JkMount /infostore/ ajp13
+JkMount /infostore/* ajp13
+#####################################################################
+ - Fixed Bug #8676: Return correct lockdiscovery property on LOCK for LockNull resources.
+* Fri Aug 03 2007 - thorben.betten@open-xchange.com
  - Fixed forwarding of messages with inline images
  - Fastened message cache
  - Fixed: Invalidation of user configuration now affects session, too
@@ -3101,7 +3131,10 @@ JkOptions +ForwardURICompatUnparsed
     CONFIG CHANGE: new file participant.properties and new path to this file in
     system.properties.
 * Wed Jun 20 2007 - thorben.betten@open-xchange.com
- - Bugfix #7679: Extended to allow special value "* Wed Jun 20 2007 - martin.kauss@open-xchange.com
+ - Bugfix #7679: Extended to allow special value "*" that will initialize
+   the affected server sockets (AJP & JMX) with bind address left to null,
+   thus it binds to all interfaces.
+* Wed Jun 20 2007 - martin.kauss@open-xchange.com
  - Fixed bug #7883. The reminder was set for all participants even if only
    one participant has set the reminder. This has been fixed.
  - Fixed an issue that while creating an recurring exception for whole day
