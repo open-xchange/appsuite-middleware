@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.contacts.ldap.ldap;
+package com.openexchange.contacts.ldap.contacts;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.contacts.ldap.contacts.LdapContactInterface;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
