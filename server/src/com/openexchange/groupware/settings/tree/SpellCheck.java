@@ -66,7 +66,10 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * {@link SpellCheck} - Configuration tree entry for the spell check function of the user.
+ * {@link SpellCheck} - Configuration tree entry for the spell check functionality of the user.
+ * <p>
+ * <b>Note</b>: This item is currently disabled in <code>com.openexchange.groupware.settings.impl.ConfigTree</code> class.<br>
+ * By now a global option to enable/disable spell check functionality is sufficient.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -97,8 +100,8 @@ public final class SpellCheck implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
 
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user,
+                final UserConfiguration userConfig, final Setting setting) throws SettingException {
 
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null != set && !set.isEmpty()) {
