@@ -55,7 +55,7 @@ import com.openexchange.contacts.ldap.exceptions.LdapException;
 
 
 /**
- * This interface describes how values can be get from an ldap object
+ * This interface describes how values can be fetched from an ldap object
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
