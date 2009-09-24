@@ -297,7 +297,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                         value = getProperty(entry.getKey());
                     } else {
                         value = getProperty(entry.getKey(), listener);
-                    } // FIXME: this could have been overriden by some property
+                    } // FIXME: this could have been overridden by some property
                     // external to the requested folder.
                     retval.put(entry.getKey(), value);
                 }
