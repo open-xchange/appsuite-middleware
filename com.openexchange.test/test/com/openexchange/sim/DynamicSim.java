@@ -89,6 +89,14 @@ public class DynamicSim implements InvocationHandler{
         return (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[]{klass}, this);
     }
     
+    public static <T> T compose(Class<T> klass, DynamicSim...sims) {
+        return compose(klass, new Class[0], sims);
+    }
+    
+    public static<T> T compose(Class<T> klass, List<DynamicSim> dynamicSims) {
+        return compose(klass, new Class[0], dynamicSims);
+    }
+
     public static <T> T compose(Class<T> klass, Class[] additionalClasses, DynamicSim...sims) {
         SequenceInvocationHandler sequenceInvocationHandler = new SequenceInvocationHandler(sims);
         Class[] classes = new Class[additionalClasses.length+1];
