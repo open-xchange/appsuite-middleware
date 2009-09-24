@@ -114,6 +114,7 @@ import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
+import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -532,6 +533,11 @@ public final class ServerActivator extends DeferredActivator {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
             props.put(STR_IDENTIFIER, "com.openexchange.ical");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new ICalJSONDataHandler(), props));
         }
         {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
