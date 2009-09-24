@@ -49,10 +49,8 @@
 
 package com.openexchange.calendar.printing.blocks;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPTool;
 import com.openexchange.calendar.printing.CPType;
 import com.openexchange.groupware.container.Appointment;
@@ -60,112 +58,69 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class WorkWeekPartitioningStrategy implements CPPartitioningStrategy {
+public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy implements CPPartitioningStrategy {
 
-    private Calendar calendar = Calendar.getInstance();
+    public static final int DAYBREAK = 0;
 
-    private Appointment lastAppointment;
+    public static final int WEEKBREAK = 1;
 
-    private CPData lastWeek;
-
-    public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
-    }
-
-    public Calendar getCalendar() {
-        return calendar;
-    }
+    private CPAppointment lastAppointment;
 
     public boolean isPackaging(CPType type) {
         return type == CPType.WORKWEEKVIEW;
     }
 
-    public List<CPData> partition(List<Appointment> appointments) {
+    public CPPartition partition(List<CPAppointment> appointments) {
         CPTool tools = new CPTool();
         tools.sort(appointments);
 
-        LinkedList<CPData> blocks = new LinkedList<CPData>();
-        CPData latestBlock = new CPData();
-        for (Appointment appointment : appointments) {
-            if (isSignalForNewWeek(appointment)) {
-                blocks.add(latestBlock);
-                lastWeek = latestBlock;
-                latestBlock = new CPData();
-            }
-            if (isWorkWeekAppointment(appointment)) {
-                if (isInTwoWeeks(appointment))
-                    addToLastWeek(appointment);
-                latestBlock.addAppointment(appointment);
-            }
+        CPPartition blocks = new CPPartition();
+
+        for (int i = 0, length = appointments.size(); i < length; i++) {
+            CPAppointment appointment = appointments.get(i);
+            if (i > 0)
+                lastAppointment = appointments.get(i - 1);
+
+            if (isWorkWeekAppointment(appointment))
+                blocks.addAppointment(appointment);
+
+            if (isSignalForNewDay(appointment))
+                blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK));
+
+            if (isSignalForNewWeek(appointment))
+                blocks.addFormattingInformation(new CPFormattingInfomation(i, WEEKBREAK));
+
+            if (isWorkWeekAppointment(appointment))
+                if (isOnTwoDays(appointment) || isInTwoWeeks(appointment))
+                    blocks.addAppointment(appointment); // store again for use in second block
         }
-
-        finalizeBlockStructure(blocks, latestBlock);
-
         return blocks;
     }
 
-    /**
-     * Takes care of adding the last block to the long chain of blocks, adds a first block in case the first appointment spans two weeks
-     */
-    private void finalizeBlockStructure(LinkedList<CPData> blocks, CPData block) {
-        if (lastWeek != null && !lastWeek.isEmpty() && !blocks.contains(lastWeek)) // in case the first appointment spreads two weeks
-            blocks.addFirst(lastWeek);
-        blocks.add(block);
+    private boolean isOnTwoDays(CPAppointment appointment) {
+        return isOnDifferentDays(appointment.getStart(), appointment.getEnd());
     }
 
-    private void addToLastWeek(Appointment appointment) {
-        if (lastWeek == null)
-            lastWeek = new CPData();
-        lastWeek.addAppointment(appointment);
+    private boolean isInTwoWeeks(CPAppointment appointment) {
+        return isInDifferentWeeks(appointment.getStart(), appointment.getEnd());
     }
 
-    private boolean isInTwoWeeks(Appointment appointment) {
-        return isInSameWeek(appointment.getStartDate(), appointment.getEndDate());
-    }
-
-    private boolean isSignalForNewWeek(Appointment appointment) {
-        if (lastAppointment == null) {
-            lastAppointment = appointment;
+    private boolean isSignalForNewDay(CPAppointment appointment) {
+        if (lastAppointment == null)
             return false;
-        }
-        boolean result = isInSameWeek(lastAppointment.getStartDate(), appointment.getStartDate()) || isInSameWeek(
-            lastAppointment.getEndDate(),
-            appointment.getEndDate());
 
-        lastAppointment = appointment;
-        return result;
+        return isOnDifferentDays(lastAppointment.getStart(), appointment.getStart()) || isOnDifferentDays(
+            lastAppointment.getEnd(),
+            appointment.getEnd());
     }
 
-    private boolean isInSameWeek(Date first, Date second) {
-        calendar = getCalendar();
+    private boolean isSignalForNewWeek(CPAppointment appointment) {
+        if (lastAppointment == null)
+            return false;
 
-        calendar.setTime(first);
-        int week1 = calendar.get(Calendar.WEEK_OF_YEAR);
-        int year1 = calendar.get(Calendar.YEAR);
-        calendar.setTime(second);
-        int week2 = calendar.get(Calendar.WEEK_OF_YEAR);
-        int year2 = calendar.get(Calendar.YEAR);
-
-        return week1 != week2 || year1 != year2;
-    }
-
-    /**
-     * @return true if start or end date are in work week, false otherwise (also if not set at all)
-     */
-    public boolean isWorkWeekAppointment(Appointment appointment) {
-        if (appointment.containsStartDate() && isInWorkWeek(appointment.getStartDate()))
-            return true;
-        if (appointment.containsStartDate() && isInWorkWeek(appointment.getStartDate()))
-            return true;
-        return false;
-    }
-
-    public boolean isInWorkWeek(Date date) {
-        // TODO: Scope of work week might need to be configurable in the future.
-        Calendar calendar = getCalendar();
-        calendar.setTime(date);
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
-        return !(day == Calendar.SATURDAY || day == Calendar.SUNDAY);
+        return isInDifferentWeeks(lastAppointment.getStart(), appointment.getStart()) || isInDifferentWeeks(
+            lastAppointment.getEnd(),
+            appointment.getEnd());
     }
 
 }

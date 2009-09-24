@@ -69,33 +69,32 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CPTool {
-    
+
     private Calendar calendar;
-    
+
     /**
-     * Based on the selected template, this method determines new start and end dates 
-     * to present exactly the block that the template needs.
+     * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
      */
     public void calculateNewStartAndEnd(CPParameters params) {
-        if(! isBlockTemplate(params))
+        if (!isBlockTemplate(params))
             return;
-        //TODO this calls for a strategy pattern later on when there is more than one
-        
+        // TODO this calls for a strategy pattern later on when there is more than one
+
         Calendar cal = getCalendar();
         cal.setTime(params.getStart());
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        params.setStart( cal.getTime() );
-        
+        params.setStart(cal.getTime());
+
         cal.setTime(params.getEnd());
         cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.MILLISECOND, 999);
-        params.setEnd( cal.getTime() );
-        
+        params.setEnd(cal.getTime());
+
     }
 
     /**
@@ -104,47 +103,93 @@ public class CPTool {
      */
     public boolean isBlockTemplate(CPParameters params) {
         String basic = "/[^/]+$";
-        Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName()  + basic).matcher(params.getTemplate());
-        Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber()  + basic).matcher(params.getTemplate());
-        return  m1.find() || m2.find();
+        Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName() + basic).matcher(params.getTemplate());
+        Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber() + basic).matcher(params.getTemplate());
+        return m1.find() || m2.find();
     }
 
     /**
      * Sort a list of appointments by start date.
      */
-    public void sort(List<Appointment> appointments) {
+    public void sort(List<CPAppointment> appointments) {
         Collections.sort(appointments, new StartDateComparator());
     }
 
     /**
      * Expands all appointments in a list using their recurrence information for a certain given timeframe
      */
-    public List<Appointment> expandAppointements(List<Appointment> compressedAppointments, Date start, Date end, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) throws OXObjectNotFoundException, OXException, SQLException {
-        List<Appointment> expandedAppointments = new LinkedList<Appointment>();
+    public List<CPAppointment> expandAppointements(List<Appointment> compressedAppointments, Date start, Date end, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) throws OXObjectNotFoundException, OXException, SQLException {
+        List<CPAppointment> expandedAppointments = new LinkedList<CPAppointment>();
         for (Appointment appointment : compressedAppointments) {
             Appointment temp = appointmentSql.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
-            expandedAppointments.addAll(expandRecurrence(temp, start, end, calendarTools));
+            List<Appointment> split = splitIntoSingleDays(temp);
+            for (Appointment temp2 : split)
+                expandedAppointments.addAll(expandRecurrence(temp2, start, end, calendarTools));
         }
         return expandedAppointments;
+    }
+
+    public List<Appointment> splitIntoSingleDays(Appointment appointment) {
+        List<Appointment> appointments = new LinkedList<Appointment>();        
+        final long duration = (appointment.getEndDate().getTime() - appointment.getStartDate().getTime()) / 1000 / 60 / 60 / 24;       
+        
+        if(duration == 0){
+            appointments.add(appointment);
+            return appointments; 
+        }
+        
+        Calendar newStartCal = Calendar.getInstance();
+        newStartCal.setTime(appointment.getStartDate());
+        newStartCal.set(Calendar.HOUR_OF_DAY, 0);
+        newStartCal.set(Calendar.MINUTE, 0);
+        newStartCal.set(Calendar.SECOND, 0);
+        newStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar newEndCal = Calendar.getInstance();
+        newEndCal.setTime(appointment.getStartDate());
+        newEndCal.set(Calendar.HOUR_OF_DAY, 23);
+        newEndCal.set(Calendar.MINUTE, 59);
+        newEndCal.set(Calendar.SECOND, 59);
+        newEndCal.set(Calendar.MILLISECOND, 999);
+
+        Appointment first = (Appointment) appointment.clone();
+        first.setEndDate(newEndCal.getTime());
+        appointments.add(first);
+
+        for (int i = 1; i < duration; i++) {
+            Appointment middle = (Appointment) appointment.clone();
+            newStartCal.add(Calendar.DAY_OF_YEAR, 1);
+            newEndCal.add(Calendar.DAY_OF_YEAR, 1);
+            middle.setStartDate(newStartCal.getTime());
+            middle.setEndDate(newEndCal.getTime());
+            appointments.add(middle);
+        }
+
+        Appointment last = (Appointment) appointment.clone();
+        newStartCal.add(Calendar.DAY_OF_YEAR, 1);
+        last.setStartDate(newStartCal.getTime());
+        appointments.add(last);
+
+        return appointments;
     }
 
     /**
      * Takes an appointment and interprets its recurrence information to find all occurrences between start and end date.
      */
-    public List<Appointment> expandRecurrence(Appointment appointment, Date start, Date end, CalendarCollectionService calendarTools) throws OXException {
+    public List<CPAppointment> expandRecurrence(Appointment appointment, Date start, Date end, CalendarCollectionService calendarTools) throws OXException {
         RecurringResultsInterface recurrences = calendarTools.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
-        List<Appointment> all = new LinkedList<Appointment>();
+        List<CPAppointment> all = new LinkedList<CPAppointment>();
         if (recurrences == null) {
-            all.add(appointment);
+            all.add(new CPAppointment(appointment));
             return all;
         }
 
         for (int i = 0, length = recurrences.size(); i < length; i++) {
-            Appointment temp = new Appointment();
+            CPAppointment temp = new CPAppointment();
             temp.setTitle(appointment.getTitle());
             RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
-            temp.setStartDate(new Date(recurringResult.getStart()));
-            temp.setEndDate(new Date(recurringResult.getEnd()));
+            temp.setStart(new Date(recurringResult.getStart()));
+            temp.setEnd(new Date(recurringResult.getEnd()));
             all.add(temp);
         }
         return all;

@@ -49,17 +49,58 @@
 
 package com.openexchange.calendar.printing.blocks;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.calendar.printing.CPAppointment;
-import com.openexchange.calendar.printing.CPType;
-
+import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public interface CPPartitioningStrategy {
-    
-    public boolean isPackaging(CPType type);
-    
-    public CPPartition partition(List<CPAppointment> appointments);
+public class CPPartition {
+
+    private List<CPAppointment> appointments = new LinkedList<CPAppointment>();
+
+    private Map<String, String> metaData = new HashMap<String, String>();
+
+    private List<CPFormattingInfomation> formattingInformation = new LinkedList<CPFormattingInfomation>();;
+
+    public void addAppointment(CPAppointment appointment) {
+        appointments.add(appointment);
+    }
+
+    public void setAppointment(List<CPAppointment> appointments) {
+        this.appointments = appointments;
+    }
+
+    public List<CPAppointment> getAppointments() {
+        return appointments;
+    }
+
+    public boolean isEmpty() {
+        return appointments.size() == 0;
+    }
+
+    public void setMetaData(Map<String, String> metaData) {
+        this.metaData = metaData;
+    }
+
+    public Map<String, String> getMetaData() {
+        return metaData;
+    }
+
+    public void setFormattingInformation(List<CPFormattingInfomation> info) {
+        this.formattingInformation = info;
+    }
+
+    public void addFormattingInformation(CPFormattingInfomation info) {
+        formattingInformation.add(info);
+    }
+
+    public List<CPFormattingInfomation> getFormattingInformation() {
+        return this.formattingInformation;
+    }
+
 }

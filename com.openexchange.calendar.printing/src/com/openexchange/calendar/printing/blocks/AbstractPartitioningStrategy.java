@@ -49,59 +49,74 @@
 
 package com.openexchange.calendar.printing.blocks;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.groupware.container.Appointment;
+import java.util.Calendar;
+import java.util.Date;
+import com.openexchange.calendar.printing.CPAppointment;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link AbstractPartitioningStrategy}
+ *
+ * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
-public class CPData {
-
-    private List<Appointment> appointments = new LinkedList<Appointment>();
-
-    private Map<String, String> metaData = new HashMap<String, String>();
-
-    private List<CPFormattingInfomation> formattingInformation;
-
-    public void addAppointment(Appointment appointment) {
-        appointments.add(appointment);
+public class AbstractPartitioningStrategy {
+    
+    private Calendar calendar = Calendar.getInstance();
+    
+    public void setCalendar(Calendar calendar) {
+        this.calendar = calendar;
     }
 
-    public void setAppointment(List<Appointment> appointments) {
-        this.appointments = appointments;
+    public Calendar getCalendar() {
+        return calendar;
+    }
+    
+    public AbstractPartitioningStrategy() {
+        super();
     }
 
-    public List<Appointment> getAppointments() {
-        return appointments;
+    public boolean isOnDifferentDays(Date first, Date second) {
+        calendar = getCalendar();
+    
+        calendar.setTime(first);
+        int day1 = calendar.get(Calendar.DAY_OF_YEAR);
+        int year1 = calendar.get(Calendar.YEAR);
+        calendar.setTime(second);
+        int day2 = calendar.get(Calendar.DAY_OF_YEAR);
+        int year2 = calendar.get(Calendar.YEAR);
+    
+        return day1 != day2 || year1 != year2;
     }
 
-    public boolean isEmpty() {
-        return appointments.size() == 0;
+    public boolean isInDifferentWeeks(Date first, Date second) {
+        calendar = getCalendar();
+    
+        calendar.setTime(first);
+        int week1 = calendar.get(Calendar.WEEK_OF_YEAR);
+        int year1 = calendar.get(Calendar.YEAR);
+        calendar.setTime(second);
+        int week2 = calendar.get(Calendar.WEEK_OF_YEAR);
+        int year2 = calendar.get(Calendar.YEAR);
+    
+        return week1 != week2 || year1 != year2;
     }
 
-    public void setMetaData(Map<String, String> metaData) {
-        this.metaData = metaData;
+    /**
+     * @return true if start or end date are in work week, false otherwise (also if not set at all)
+     */
+    public boolean isWorkWeekAppointment(CPAppointment appointment) {
+        if (appointment.getStart() != null && isInWorkWeek(appointment.getStart()))
+            return true;
+        if (appointment.getStart() != null && isInWorkWeek(appointment.getStart()))
+            return true;
+        return false;
     }
 
-    public Map<String, String> getMetaData() {
-        return metaData;
-    }
-
-    public void setFormattingInformation(List<CPFormattingInfomation> info) {
-        this.formattingInformation = info;
-    }
-
-    public void addFormattingInformation(CPFormattingInfomation info) {
-        if (formattingInformation == null)
-            formattingInformation = new LinkedList<CPFormattingInfomation>();
-        formattingInformation.add(info);
-    }
-
-    public List<CPFormattingInfomation> getFormattingInformation() {
-        return this.formattingInformation;
+    public boolean isInWorkWeek(Date date) {
+        // TODO: Scope of work week might need to be configurable in the future.
+        Calendar calendar = getCalendar();
+        calendar.setTime(date);
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+        return !(day == Calendar.SATURDAY || day == Calendar.SUNDAY);
     }
 
 }

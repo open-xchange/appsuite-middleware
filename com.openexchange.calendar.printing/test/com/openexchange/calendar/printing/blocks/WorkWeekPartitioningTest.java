@@ -50,16 +50,15 @@
 package com.openexchange.calendar.printing.blocks;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import com.openexchange.groupware.container.Appointment;
-import junit.framework.TestCase;
+import com.openexchange.calendar.printing.AbstractDateTest;
+import com.openexchange.calendar.printing.CPAppointment;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class WorkWeekPartitioningTest extends TestCase {
+public class WorkWeekPartitioningTest extends 
+AbstractDateTest {
     private WorkWeekPartitioningStrategy strategy;
     
     @Override
@@ -73,119 +72,58 @@ public class WorkWeekPartitioningTest extends TestCase {
         super.tearDown();
     }
     
-    /**
-     * Gets you four dates, starting one day and two hours before the given calendar point
-     * @param cal
-     * @return
-     */
-    private Date[] getFourDates(Calendar cal) {
-        Date date11 = cal.getTime();
-        cal.add(Calendar.HOUR_OF_DAY, -1);
-        Date date10 = cal.getTime();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        Date date01 = cal.getTime();
-        cal.add(Calendar.HOUR_OF_DAY, -1);
-        Date date00 = cal.getTime();
-        
-        cal.add(Calendar.DAY_OF_YEAR, 1);
-        cal.add(Calendar.HOUR_OF_DAY, 2);
-        return new Date[]{date00,date01,date10,date11};
-    }
-
-    /**
-     * @return 8.1.2009 was a thursday
-     */
-    protected Calendar THURSDAY(){
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_YEAR, 8);
-        cal.set(Calendar.YEAR, 2009);
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        return cal;
-    }
-
-    /**
-     * @return 11.1.2009 was a sunday
-     */
-    protected Calendar SUNDAY(){
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_YEAR, 11);
-        cal.set(Calendar.YEAR, 2009);
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        return cal;
-    }
-    
-    /**
-     * @return 14.1.2009 was a wednesday
-     */
-    protected Calendar WEDNESDAY_NEXT_WEEK(){
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_YEAR, 14);
-        cal.set(Calendar.YEAR, 2009);
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        return cal;
-    }
-
     public void testShouldPartitionConsecutiveDatesInOneWeekIntoOneBlock() {        
         Date[] dates = getFourDates(THURSDAY());
 
-        Appointment app1 = new Appointment();
-        Appointment app2 = new Appointment();
+        CPAppointment app1 = new CPAppointment();
+        CPAppointment app2 = new CPAppointment();
         app1.setTitle("First appointment");
         app2.setTitle("Second appointment");
-        app1.setStartDate(dates[0]);
-        app1.setEndDate(dates[1]);
-        app2.setStartDate(dates[2]);
-        app2.setEndDate(dates[3]);
+        app1.setStart(dates[0]);
+        app1.setEnd(dates[1]);
+        app2.setStart(dates[2]);
+        app2.setEnd(dates[3]);
         
-        List<CPData> partitions = strategy.partition(Arrays.asList(new Appointment[]{app1,app2}));
-        assertEquals("Two consecutive days, Wednesday and Thursday, should need only one partition", 1, partitions.size());
-        assertEquals("Partition should contain two appointments", 2, partitions.get(0).getAppointments().size());
+        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1,app2}));
+        assertEquals("Two consecutive days, Wednesday and Thursday, should need only one partition", 1, partitions.getFormattingInformation().size());
+        assertEquals("Partition should contain two appointments", 2, partitions.getAppointments().size());
     }
 
     public void testShouldNotShowWeekendAppointmentsAtAll(){
         Date[] dates = getFourDates(SUNDAY());
-        Appointment weekendAppointment = new Appointment();
+        CPAppointment weekendAppointment = new CPAppointment();
         weekendAppointment.setTitle("First appointment");
-        weekendAppointment.setStartDate(dates[0]);
-        weekendAppointment.setEndDate(dates[1]);
+        weekendAppointment.setStart(dates[0]);
+        weekendAppointment.setEnd(dates[1]);
         
-        List<CPData> partitions = strategy.partition(Arrays.asList(new Appointment[]{weekendAppointment}));
-        assertEquals("Should have one partition only", 1, partitions.size());
-        assertEquals("Partition should be empty", 0, partitions.get(0).getAppointments().size());
+        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{weekendAppointment}));
+        assertEquals("Should have no formatting info", 0, partitions.getFormattingInformation().size());
+        assertEquals("Partition should be empty", 0, partitions.getAppointments().size());
     }
     
     public void testShouldPartitionTwoDatesInTwoWeeksIntoTwoBlocks() {
         Date[] dates = getFourDates(THURSDAY());
-        Appointment app1 = new Appointment();
+        CPAppointment app1 = new CPAppointment();
         app1.setTitle("First appointment");
-        app1.setStartDate(dates[0]);
-        app1.setEndDate(dates[1]);
+        app1.setStart(dates[0]);
+        app1.setEnd(dates[1]);
         
         dates = getFourDates(WEDNESDAY_NEXT_WEEK());
-        Appointment app2 = new Appointment();
+        CPAppointment app2 = new CPAppointment();
         app2.setTitle("Second appointment");
-        app2.setStartDate(dates[0]);
-        app2.setEndDate(dates[1]);
+        app2.setStart(dates[0]);
+        app2.setEnd(dates[1]);
         
-        List<CPData> partitions = strategy.partition(Arrays.asList(new Appointment[]{app1, app2}));
-        assertEquals("Should have two partitions", 2, partitions.size());
-        assertEquals("First partition should contain one appointment", 1, partitions.get(0).getAppointments().size());
-        assertEquals("Second partition should contain one appointment", 1, partitions.get(1).getAppointments().size());
-    }
-    
-    public void testShouldSpreadTwoWeekAppointmentOverTwoBlocks(){
-        Appointment longAppointment = new Appointment();
-        longAppointment.setTitle("Long appointment");
-        longAppointment.setStartDate(THURSDAY().getTime());
-        longAppointment.setEndDate(WEDNESDAY_NEXT_WEEK().getTime());
-        
-        List<CPData> partitions = strategy.partition(Arrays.asList(new Appointment[]{longAppointment}));
-        assertEquals("Should have two partitions", 2, partitions.size());
-        assertEquals("First partition should contain one appointment", 1, partitions.get(0).getAppointments().size());
-        assertEquals("Second partition should contain one appointment", 1, partitions.get(1).getAppointments().size());
-    }
-    
-    public void testShouldStoreStartAndEnddateAndWeekInMetadata(){
-        
+        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1, app2}));
+        assertEquals("Should contain two elements", 2, partitions.getAppointments().size());
+        boolean daybreakFound = false, weekbreakFound = false;
+        for(CPFormattingInfomation info: partitions.getFormattingInformation()){
+            if(info.getPosition() == 1 && info.getType() == WorkWeekPartitioningStrategy.DAYBREAK)
+                daybreakFound = true;
+            if(info.getPosition() == 1 && info.getType() == WorkWeekPartitioningStrategy.WEEKBREAK)
+                weekbreakFound = true;
+        }
+        assertTrue("Should contain a day break after the first element", daybreakFound);
+        assertTrue("Should contain a week break after the first element", weekbreakFound);
     }
 }

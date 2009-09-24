@@ -50,16 +50,15 @@
 package com.openexchange.calendar.printing;
 
 import java.util.Comparator;
-import com.openexchange.groupware.container.CalendarObject;
 
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class StartDateComparator implements Comparator<CalendarObject> {
+public class StartDateComparator implements Comparator<CPAppointment> {
 
-    public int compare(CalendarObject o1, CalendarObject o2) {
-        return o1.getStartDate().compareTo(o2.getStartDate());
+    public int compare(CPAppointment o1, CPAppointment o2) {
+        return o1.getStart().compareTo(o2.getStart());
     }
 
 }

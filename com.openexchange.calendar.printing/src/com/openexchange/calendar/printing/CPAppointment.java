@@ -47,19 +47,72 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.calendar.printing;
 
-import java.util.List;
-import com.openexchange.calendar.printing.CPAppointment;
-import com.openexchange.calendar.printing.CPType;
-
+import java.util.Date;
+import com.openexchange.groupware.container.Appointment;
 
 /**
+ * The view of an appointment. A stupid version without any recurrence pattern, day spanning and so on.
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public interface CPPartitioningStrategy {
-    
-    public boolean isPackaging(CPType type);
-    
-    public CPPartition partition(List<CPAppointment> appointments);
+public class CPAppointment {
+
+    private String title, description, location;
+
+    private Date start, end;
+
+    public CPAppointment() {
+        super();
+    }
+
+    public CPAppointment(Appointment mother) {
+        this();
+        setTitle(mother.getTitle());
+        setDescription(mother.getNote());
+        setLocation(mother.getLocation());
+        setStart(mother.getStartDate());
+        setEnd(mother.getEndDate());
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Date getStart() {
+        return start;
+    }
+
+    public Date getEnd() {
+        return end;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setStart(Date start) {
+        this.start = start;
+    }
+
+    public void setEnd(Date end) {
+        this.end = end;
+    }
 }

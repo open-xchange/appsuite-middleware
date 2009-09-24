@@ -47,19 +47,88 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.calendar.printing;
 
-import java.util.List;
-import com.openexchange.calendar.printing.CPAppointment;
-import com.openexchange.calendar.printing.CPType;
-
+import java.util.Calendar;
+import java.util.Date;
+import junit.framework.TestCase;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link AbstractDateTest}
+ *
+ * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
-public interface CPPartitioningStrategy {
+public abstract class AbstractDateTest extends TestCase {
+
+    /**
+     * Initializes a new {@link AbstractDateTest}.
+     */
+    public AbstractDateTest() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link AbstractDateTest}.
+     * @param name
+     */
+    public AbstractDateTest(String name) {
+        super(name);
+    }
+
+    /**
+     * Gets you four dates, starting one day and two hours before the given calendar point
+     * @param cal
+     * @return
+     */
+    protected Date[] getFourDates(Calendar cal) {
+        Date date11 = cal.getTime();
+        cal.add(Calendar.HOUR_OF_DAY, -1);
+        Date date10 = cal.getTime();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        Date date01 = cal.getTime();
+        cal.add(Calendar.HOUR_OF_DAY, -1);
+        Date date00 = cal.getTime();
+        
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        cal.add(Calendar.HOUR_OF_DAY, 2);
+        return new Date[]{date00,date01,date10,date11};
+    }
+
+    /**
+     * @return 8.1.2009 was a thursday
+     */
+    protected Calendar THURSDAY() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_YEAR, 8);
+        cal.set(Calendar.YEAR, 2009);
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        return cal;
+    }
+
+    /**
+     * @return 11.1.2009 was a sunday
+     */
+    protected Calendar SUNDAY() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_YEAR, 11);
+        cal.set(Calendar.YEAR, 2009);
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        return cal;
+    }
+
+    /**
+     * @return 14.1.2009 was a wednesday
+     */
+    protected Calendar WEDNESDAY_NEXT_WEEK() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_YEAR, 14);
+        cal.set(Calendar.YEAR, 2009);
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        return cal;
+    }
     
-    public boolean isPackaging(CPType type);
-    
-    public CPPartition partition(List<CPAppointment> appointments);
+    protected Calendar getCalendar(){
+        return Calendar.getInstance();
+    }
+
 }

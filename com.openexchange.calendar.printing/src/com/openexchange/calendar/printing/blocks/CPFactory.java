@@ -51,8 +51,8 @@ package com.openexchange.calendar.printing.blocks;
 
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPType;
-import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -73,7 +73,7 @@ public class CPFactory {
         strategies.add(strategy);
     }
 
-    public List<CPData> partition(List<Appointment> appointments) {
+    public CPPartition partition(List<CPAppointment> appointments) {
         for (CPPartitioningStrategy strategy : strategies) {
             if (strategy.isPackaging(type))
                 return strategy.partition(appointments);

@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.calendar.printing.blocks.CPData;
+import com.openexchange.calendar.printing.blocks.CPPartition;
 import com.openexchange.calendar.printing.blocks.CPFactory;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -146,7 +146,7 @@ public class CPServlet extends PermissionServlet {
             SearchIterator<Appointment> iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
                 Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, params.getStart(), params.getEnd(), -1, null);
 
-            List<Appointment> expandedAppointments = tool.expandAppointements(
+            List<CPAppointment> expandedAppointments = tool.expandAppointements(
                 SearchIteratorAdapter.toList(iterator),
                 params.getStart(),
                 params.getEnd(),
@@ -158,7 +158,7 @@ public class CPServlet extends PermissionServlet {
             CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
-            List<CPData> blocks = factory.partition(expandedAppointments);
+            CPPartition blocks = factory.partition(expandedAppointments);
 
             Map<String, Object> variables = new HashMap<String, Object>();
             variables.put(APPOINTMENTBLOCKS, blocks);
