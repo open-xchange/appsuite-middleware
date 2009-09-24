@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.request.AppointmentRequest;
@@ -81,6 +80,8 @@ public class AllRequest extends CommonAllRequest {
 
     private final boolean recurrenceMaster;
 
+    private String timeZoneId;
+
     public AllRequest(final int folderId, final int[] columns, final Date start,
         final Date end, final TimeZone tz) {
         this(folderId, columns, start, end, tz, true);
@@ -97,6 +98,24 @@ public class AllRequest extends CommonAllRequest {
         this.start = addTimeZone2Date(start, tz);
         this.end = addTimeZone2Date(end, tz);
         this.recurrenceMaster = recurrenceMaster;
+    }
+
+    /**
+     * Gets the time zone of the response.
+     *
+     * @return The time zone ID
+     */
+    public String getTimeZoneId() {
+        return timeZoneId;
+    }
+    
+    /**
+     * Sets the time zone of the response.
+     *
+     * @param timeZoneId The time zone ID to set
+     */
+    public void setTimeZoneId(final String timeZoneId) {
+        this.timeZoneId = timeZoneId;
     }
 
     private static int[] addGUIColumns(final int[] columns) {
@@ -132,12 +151,22 @@ public class AllRequest extends CommonAllRequest {
     @Override
     public Parameter[] getParameters() {
         final Parameter[] params = super.getParameters();
-        final Parameter[] retval = new Parameter[params.length + 3];
+        if (null == timeZoneId) {
+            final Parameter[] retval = new Parameter[params.length + 3];
+            System.arraycopy(params, 0, retval, 0, params.length);
+            retval[retval.length - 3] = new Parameter(AJAXServlet.PARAMETER_START, start);
+            retval[retval.length - 2] = new Parameter(AJAXServlet.PARAMETER_END, end);
+            retval[retval.length - 1] = new Parameter(AppointmentRequest.RECURRENCE_MASTER,
+                recurrenceMaster);
+            return retval;
+        }
+        final Parameter[] retval = new Parameter[params.length + 4];
         System.arraycopy(params, 0, retval, 0, params.length);
-        retval[retval.length - 3] = new Parameter(AJAXServlet.PARAMETER_START, start);
-        retval[retval.length - 2] = new Parameter(AJAXServlet.PARAMETER_END, end);
-        retval[retval.length - 1] = new Parameter(AppointmentRequest.RECURRENCE_MASTER,
+        retval[retval.length - 4] = new Parameter(AJAXServlet.PARAMETER_START, start);
+        retval[retval.length - 3] = new Parameter(AJAXServlet.PARAMETER_END, end);
+        retval[retval.length - 2] = new Parameter(AppointmentRequest.RECURRENCE_MASTER,
             recurrenceMaster);
+        retval[retval.length - 1] = new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZoneId);
         return retval;
     }
 

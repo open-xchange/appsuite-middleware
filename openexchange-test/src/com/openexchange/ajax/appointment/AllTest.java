@@ -1,14 +1,19 @@
 package com.openexchange.ajax.appointment;
 
-import java.util.*;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
-
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -16,8 +21,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
-
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.tools.servlet.AjaxException;
 
 public class AllTest extends AppointmentTest {
@@ -35,19 +38,20 @@ public class AllTest extends AppointmentTest {
 		super.setUp();
     }
 
+    @Override
     protected void tearDown() throws Exception {
         clean();
     }
 
     public void testShouldListAppointmentsInPrivateFolder() throws Exception{
-        Appointment appointment = new Appointment();
+        final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
         appointment.setEndDate(D("24/02/1998 14:00"));
         appointment.setTitle("Appointment 1 for All Test");
         appointment.setParentFolderID(appointmentFolderId);
         create( appointment );
 
-        Appointment anotherAppointment = new Appointment();
+        final Appointment anotherAppointment = new Appointment();
         anotherAppointment.setStartDate(D("03/05/1999 10:00"));
         anotherAppointment.setEndDate(D("03/05/1999 10:30"));
         anotherAppointment.setTitle("Appointment 2 for All Test");
@@ -58,53 +62,89 @@ public class AllTest extends AppointmentTest {
         CommonAllResponse allResponse = getClient().execute(all);
 
         // Verify appointments are included in response
-        JSONArray data = (JSONArray) allResponse.getData();
+        final JSONArray data = (JSONArray) allResponse.getData();
         assertInResponse(data, appointment, anotherAppointment);
+
+        all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), utc);
+        final TimeZone respTimeZone = TimeZone.getTimeZone("GMT+08:00");
+        all.setTimeZoneId(respTimeZone.getID());
+        allResponse = getClient().execute(all);
+
+        final JSONArray data2 = (JSONArray) allResponse.getData();
+        for(int i = 0, size = data.length(); i < size; i++) {
+            final JSONArray row = data.getJSONArray(i);
+
+            final int id = row.getInt(0);
+            final int folderId = row.getInt(1);
+            final String title = row.getString(2);
+            final long startDate = row.getLong(3);
+            final long endDate = row.getLong(4);
+
+            final JSONArray row2 = data2.getJSONArray(i);
+            
+            final int id2 = row2.getInt(0);
+            final int folderId2 = row2.getInt(1);
+            final String title2 = row2.getString(2);
+            final long startDate2 = row2.getLong(3);
+            final long endDate2 = row2.getLong(4);
+            
+            assertEquals("Unexpected ID.", id, id2);
+            assertEquals("Unexpected folder ID.", folderId, folderId2);
+            assertEquals("Unexpected title.", title, title2);
+            
+            final long userTZStartOffset = timeZone.getOffset(startDate);
+            final long respTZStartOffset = respTimeZone.getOffset(startDate);
+            assertEquals("Unexpected time zone is response", ((startDate2 - startDate)), (respTZStartOffset - userTZStartOffset));
+            
+            final long userTZEndOffset = timeZone.getOffset(endDate);
+            final long respTZEndOffset = respTimeZone.getOffset(endDate2);
+            assertEquals("Unexpected time zone is response", ((endDate2 - endDate)), (respTZEndOffset - userTZEndOffset));
+        }
     }
 
     public void testShouldOnlyListAppointmentsInSpecifiedTimeRange() throws JSONException, AjaxException, IOException, SAXException {
-        Appointment appointment = new Appointment();
+        final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
         appointment.setEndDate(D("24/02/1998 14:00"));
         appointment.setTitle("Appointment 1 for All Test");
         appointment.setParentFolderID(appointmentFolderId);
         create( appointment );
 
-        Appointment anotherAppointment = new Appointment();
+        final Appointment anotherAppointment = new Appointment();
         anotherAppointment.setStartDate(D("03/05/1999 10:00"));
         anotherAppointment.setEndDate(D("03/05/1999 10:30"));
         anotherAppointment.setTitle("Appointment 2 for All Test");
         anotherAppointment.setParentFolderID(appointmentFolderId);
         create( anotherAppointment );
 
-        AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), utc);
-        CommonAllResponse allResponse = getClient().execute(all);
+        final AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), utc);
+        final CommonAllResponse allResponse = getClient().execute(all);
 
         // Verify appointments are included in response
-        JSONArray data = (JSONArray) allResponse.getData();
+        final JSONArray data = (JSONArray) allResponse.getData();
 
         assertNotInResponse(data, appointment);
         assertInResponse(data, anotherAppointment);
                 
     }
 
-    private void assertInResponse(JSONArray data, Appointment...appointments) throws JSONException {
-        Set<Integer> expectedIds = new HashSet<Integer>();
-        Map<Integer, Appointment> id2appointment = new HashMap<Integer, Appointment>();
-        for(Appointment appointment : appointments) {
+    private void assertInResponse(final JSONArray data, final Appointment...appointments) throws JSONException {
+        final Set<Integer> expectedIds = new HashSet<Integer>();
+        final Map<Integer, Appointment> id2appointment = new HashMap<Integer, Appointment>();
+        for(final Appointment appointment : appointments) {
             expectedIds.add(appointment.getObjectID());
             id2appointment.put(appointment.getObjectID(), appointment);
         }
         for(int i = 0, size = data.length(); i < size; i++) {
-            JSONArray row = data.getJSONArray(i);
+            final JSONArray row = data.getJSONArray(i);
 
-            int id = row.getInt(0);
-            int folderId = row.getInt(1);
-            String title = row.getString(2);
-            long startDate = row.getLong(3);
-            long endDate = row.getLong(4);
+            final int id = row.getInt(0);
+            final int folderId = row.getInt(1);
+            final String title = row.getString(2);
+            final long startDate = row.getLong(3);
+            final long endDate = row.getLong(4);
 
-            Appointment expectedAppointment = id2appointment.get(id);
+            final Appointment expectedAppointment = id2appointment.get(id);
             expectedIds.remove(id);
 
             if(expectedAppointment != null) {
@@ -118,15 +158,15 @@ public class AllTest extends AppointmentTest {
         assertTrue("Missing ids: "+expectedIds, expectedIds.isEmpty());
     }
 
-    private void assertNotInResponse(JSONArray data, Appointment...appointments) throws JSONException {
-        Set<Integer> ids = new HashSet<Integer>();
-        for(Appointment appointment : appointments) {
+    private void assertNotInResponse(final JSONArray data, final Appointment...appointments) throws JSONException {
+        final Set<Integer> ids = new HashSet<Integer>();
+        for(final Appointment appointment : appointments) {
             ids.add(appointment.getObjectID());
         }
         for(int i = 0, size = data.length(); i < size; i++) {
-            JSONArray row = data.getJSONArray(i);
+            final JSONArray row = data.getJSONArray(i);
 
-            int id = row.getInt(0);
+            final int id = row.getInt(0);
 
             assertFalse(ids.contains(id));
         }
@@ -241,8 +281,9 @@ public class AllTest extends AppointmentTest {
             }
         }
         } finally {
-            if(objectId == -1)
+            if(objectId == -1) {
                 return;
+            }
             deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
         }
     }
