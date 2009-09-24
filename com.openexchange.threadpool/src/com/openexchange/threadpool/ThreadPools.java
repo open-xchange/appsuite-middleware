@@ -136,6 +136,21 @@ public final class ThreadPools {
     }
 
     /**
+     * Returns a {@link Task} object that, when called, runs the given task, renames thread's prefix and returns <tt>null</tt>.
+     * 
+     * @param task The task to run
+     * @param prefix The thread's prefix
+     * @return A {@link Task} object
+     * @throws NullPointerException If task is <code>null</code>
+     */
+    public static Task<Object> task(final Runnable task, final String prefix) {
+        if (task == null || prefix == null) {
+            throw new NullPointerException();
+        }
+        return new RenamingTaskAdapter<Object>(new RunnableAdapter<Object>(task, null), prefix);
+    }
+
+    /**
      * Returns a {@link Task} object that, when called, returns the given task's result.
      * 
      * @param task The task to run
@@ -192,6 +207,39 @@ public final class ThreadPools {
 
         public void setThreadName(final ThreadRenamer threadRenamer) {
             // NOP
+        }
+
+        public V call() throws Exception {
+            return callable.call();
+        }
+
+    }
+
+    private static final class RenamingTaskAdapter<V> implements Task<V> {
+
+        private final Callable<V> callable;
+
+        private final String prefix;
+
+        /**
+         * Initializes a new {@link TaskAdapter}.
+         */
+        RenamingTaskAdapter(final Callable<V> callable, final String prefix) {
+            super();
+            this.callable = callable;
+            this.prefix = prefix;
+        }
+
+        public void afterExecute(final Throwable throwable) {
+            // NOP
+        }
+
+        public void beforeExecute(final Thread thread) {
+            // NOP
+        }
+
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            threadRenamer.renamePrefix(prefix);
         }
 
         public V call() throws Exception {
