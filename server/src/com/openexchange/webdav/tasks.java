@@ -73,7 +73,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -92,17 +92,14 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     private static final long serialVersionUID = 1750720959626156342L;
 
-    private static final transient Log LOG = LogFactory.getLog(tasks.class);
+    private static final Log LOG = LogFactory.getLog(tasks.class);
 
-    /**
-     * Initializes a new {@link tasks}.
-     */
     public tasks() {
         super();
     }
 
     @Override
-    protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser, final PendingInvocations<TasksSQLInterface> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
+    protected void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser, PendingInvocations<TasksSQLInterface> pendingInvocations) throws AbstractOXException, XmlPullParserException, IOException {
         final Session session = getSession(req);
         if (isTag(parser, "prop", "DAV:")) {
             /*
@@ -110,15 +107,15 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
              */
             parser.nextTag();
 
-            final Task taskobject = new Task();
+            final Task task = new Task();
 
             final TaskParser taskparser = new TaskParser(session);
-            taskparser.parse(parser, taskobject);
+            taskparser.parse(parser, task);
 
             final int method = taskparser.getMethod();
 
-            final Date lastModified = taskobject.getLastModified();
-            taskobject.removeLastModified();
+            final Date lastModified = task.getLastModified();
+            task.removeLastModified();
 
             final int inFolder = taskparser.getFolder();
 
@@ -127,51 +124,24 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
              */
             switch (method) {
             case DataParser.SAVE:
-                if (taskobject.containsObjectID()) {
-                    if (!taskobject.getAlarmFlag()) {
-                        taskobject.setAlarm(null);
+                if (task.containsObjectID()) {
+                    if (!task.getAlarmFlag()) {
+                        task.setAlarm(null);
                     }
-
-                    pendingInvocations.add(new QueuedTask(
-                        taskobject,
-                        taskparser.getClientID(),
-                        taskparser.getConfirm(),
-                        DataParser.SAVE,
-                        lastModified,
-                        inFolder));
+                    pendingInvocations.add(new QueuedTask(task, taskparser.getClientID(), DataParser.SAVE, lastModified, inFolder));
                 } else {
-                    if (!taskobject.getAlarmFlag()) {
-                        taskobject.removeAlarm();
+                    if (!task.getAlarmFlag()) {
+                        task.removeAlarm();
                     }
-
-                    taskobject.setParentFolderID(inFolder);
-
-                    pendingInvocations.add(new QueuedTask(
-                        taskobject,
-                        taskparser.getClientID(),
-                        taskparser.getConfirm(),
-                        DataParser.SAVE,
-                        lastModified,
-                        inFolder));
+                    task.setParentFolderID(inFolder);
+                    pendingInvocations.add(new QueuedTask(task, taskparser.getClientID(), DataParser.SAVE, lastModified, inFolder));
                 }
                 break;
             case DataParser.DELETE:
-                pendingInvocations.add(new QueuedTask(
-                    taskobject,
-                    taskparser.getClientID(),
-                    taskparser.getConfirm(),
-                    DataParser.DELETE,
-                    lastModified,
-                    inFolder));
+                pendingInvocations.add(new QueuedTask(task, taskparser.getClientID(), DataParser.DELETE, lastModified, inFolder));
                 break;
             case DataParser.CONFIRM:
-                pendingInvocations.add(new QueuedTask(
-                    taskobject,
-                    taskparser.getClientID(),
-                    taskparser.getConfirm(),
-                    DataParser.CONFIRM,
-                    lastModified,
-                    inFolder));
+                pendingInvocations.add(new QueuedTask(task, taskparser.getClientID(), DataParser.CONFIRM, lastModified, inFolder));
                 break;
             default:
                 if (LOG.isDebugEnabled()) {
@@ -185,7 +155,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session, final PendingInvocations<TasksSQLInterface> pendingInvocations) throws IOException {
-        final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface tasksql = new TasksSQLImpl(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedTask qtask = (QueuedTask) pendingInvocations.poll();
             if (null != qtask) {
@@ -226,8 +196,6 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
         private final String clientId;
 
-        private final int confirm;
-
         private final int action;
 
         private final Date lastModified;
@@ -246,11 +214,10 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
          * @param lastModified The last-modified date
          * @param inFolder The task's folder
          */
-        public QueuedTask(final Task task, final String clientId, final int confirm, final int action, final Date lastModified, final int inFolder) {
+        public QueuedTask(Task task, String clientId, int action, Date lastModified, int inFolder) {
             super();
             this.task = task;
             this.clientId = clientId;
-            this.confirm = confirm;
             this.action = action;
             this.lastModified = lastModified;
             this.inFolder = inFolder;
@@ -265,8 +232,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
          * @param user The user ID
          * @throws IOException If writing response fails
          */
-        public void actionPerformed(final TasksSQLInterface tasksSQL, final OutputStream os, final int user) throws IOException {
-
+        public void actionPerformed(TasksSQLInterface tasksSQL, OutputStream os, int user) throws IOException {
             final XMLOutputter xo = new XMLOutputter();
             try {
                 if (action == DataParser.SAVE) {
@@ -292,7 +258,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                     }
                     tasksSQL.deleteTaskObject(task.getObjectID(), inFolder, lastModified);
                 } else if (action == DataParser.CONFIRM) {
-                    tasksSQL.setUserConfirmation(task.getObjectID(), user, confirm, null);
+                    tasksSQL.setUserConfirmation(task.getObjectID(), user, task.getConfirm(), task.getConfirmMessage());
                 } else {
                     throw new OXConflictException(new WebdavException(WebdavException.Code.INVALID_ACTION, Integer.valueOf(action)));
                 }
@@ -312,32 +278,30 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
             } catch (final OXConcurrentModificationException exc) {
                 LOG.debug(_parsePropChilds, exc);
                 writeResponse(task, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, clientId, os, xo);
-            } catch (final OXException exc) {
-                if (exc.getCategory() == Category.USER_INPUT) {
-                    LOG.debug(_parsePropChilds, exc);
-                    writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, USER_INPUT_EXCEPTION), clientId, os, xo);
+            } catch (OXException e) {
+                if (e.getCategory() == Category.USER_INPUT) {
+                    LOG.debug(_parsePropChilds, e);
+                    writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(e, USER_INPUT_EXCEPTION), clientId, os, xo);
                 } else {
-                    LOG.error(_parsePropChilds, exc);
+                    LOG.error(_parsePropChilds, e);
                     writeResponse(
                         task,
                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                        getErrorMessage(exc, SERVER_ERROR_EXCEPTION) + exc.toString(),
+                        getErrorMessage(e, SERVER_ERROR_EXCEPTION) + e.toString(),
                         clientId,
                         os,
                         xo);
                 }
-            } catch (final Exception exc) {
-                LOG.error(_parsePropChilds, exc);
+            } catch (Exception e) {
+                LOG.error(_parsePropChilds, e);
                 writeResponse(task, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(
                     SERVER_ERROR_EXCEPTION,
-                    "undefinied error") + exc.toString(), clientId, os, xo);
+                    "undefinied error") + e.toString(), clientId, os, xo);
             }
         }
-        
         public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
             this.lastModifiedCache = lastModifiedCache;
         }
-
     }
 
     @Override

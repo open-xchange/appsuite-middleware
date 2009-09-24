@@ -90,7 +90,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -299,7 +299,7 @@ public class ICalExporter implements Exporter {
                     fieldsToBeExported = _taskFields;
                 }
                 
-                final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
+                final TasksSQLInterface taskSql = new TasksSQLImpl(sessObj);
                 final SearchIterator<Task> searchIterator = taskSql.getModifiedTasksInFolder(Integer.parseInt(folder), fieldsToBeExported, DATE_ZERO);
                 final List<Task> tasks = new LinkedList<Task>();
                 try {
@@ -373,7 +373,7 @@ public class ICalExporter implements Exporter {
                     closeVersitResources(oxContainerConverter, versitWriter);
                 }
             } else if (fo.getModule() == FolderObject.TASK) {
-                final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessObj);
+                final TasksSQLInterface taskSql = new TasksSQLImpl(sessObj);
                 final Task taskObj = taskSql.getTaskById(objectId, Integer.parseInt(folder));
                 try {
                     exportTask(oxContainerConverter, taskDef, versitWriter, taskObj);

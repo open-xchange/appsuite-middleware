@@ -74,13 +74,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  * This class implements the methods needed by the tasks interface of the API version 2.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksSQLInterfaceImpl implements TasksSQLInterface {
+public class TasksSQLImpl implements TasksSQLInterface {
 
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(
-        TasksSQLInterfaceImpl.class);
+        TasksSQLImpl.class);
 
     /**
      * Reference to the context.
@@ -91,7 +91,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      * Default constructor.
      * @param session Session.
      */
-    public TasksSQLInterfaceImpl(final Session session) {
+    public TasksSQLImpl(final Session session) {
         super();
         this.session = session;
     }
@@ -340,11 +340,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Date setUserConfirmation(final int taskId, final int userId,
-        final int confirm, final String message) throws OXException {
+    public Date setUserConfirmation(int taskId, int userId, int confirm, String message) throws OXException {
         final Context ctx;
         try {
             ctx = Tools.getContext(session.getContextId());
@@ -353,13 +349,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         final Date lastModified;
         try {
-            final ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId,
-                confirm, message);
+            ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId, confirm, message);
             confirmT.prepare();
             confirmT.doConfirmation();
             lastModified = confirmT.getLastModified();
             confirmT.sentEvent(session);
-        } catch (final TaskException e) {
+        } catch (TaskException e) {
             throw Tools.convert(e);
         }
         return lastModified;

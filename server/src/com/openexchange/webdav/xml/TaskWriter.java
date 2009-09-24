@@ -88,7 +88,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -165,7 +165,7 @@ public class TaskWriter extends CalendarWriter {
         final Element eProp = new Element("prop", "D", "DAV:");
         final XMLOutputter xo = new XMLOutputter();
         try {
-            final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
+            final TasksSQLInterface tasksql = new TasksSQLImpl(sessionObj);
             final Task taskobject = tasksql.getTaskById(objectId, folderId);
             writeObject(taskobject, false, xo, os);
         } catch (final OXObjectNotFoundException exc) {
@@ -176,7 +176,7 @@ public class TaskWriter extends CalendarWriter {
     }
 
     public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
-        final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
+        final TasksSQLInterface tasksql = new TasksSQLImpl(sessionObj);
         final XMLOutputter xo = new XMLOutputter();
         /*
          * Fist send all 'deletes', than all 'modified'

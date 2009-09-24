@@ -1,3 +1,7 @@
+* 2009-09-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #14558: Implemented setting the confirm message for tasks through WebDAV/XML interface.
+
 * 2009-09-22 - marcus.klein@open-xchange.com
 
  - Bugfix #14453: Ignoring not loadable user contact in ImageRegistryDeleteListener and continue deleting that user.

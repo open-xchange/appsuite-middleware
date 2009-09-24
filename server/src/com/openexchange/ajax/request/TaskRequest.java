@@ -85,7 +85,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -191,7 +191,7 @@ public class TaskRequest {
         final TaskParser taskParser = new TaskParser(timeZone);
         taskParser.parse(task, jsonobject);
 
-        final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.insertTaskObject(task);
         timestamp = task.getLastModified();
 
@@ -215,7 +215,7 @@ public class TaskRequest {
 
         task.setObjectID(id);
 
-        final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();
 
@@ -255,7 +255,7 @@ public class TaskRequest {
             System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
             internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
-            final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
+            final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             final TaskWriter taskWriter = new TaskWriter(timeZone);
 
             it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
@@ -301,7 +301,7 @@ public class TaskRequest {
         final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 
-        final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.deleteTaskObject(id, inFolder, timestamp);
 
         return new JSONArray();
@@ -338,7 +338,7 @@ public class TaskRequest {
         final JSONArray jsonResponseArray = new JSONArray();
 
         try {
-            final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
+            final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             final TaskWriter taskwriter = new TaskWriter(timeZone);
             it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 
@@ -391,7 +391,7 @@ public class TaskRequest {
 
             final TaskWriter taskwriter = new TaskWriter(timeZone);
 
-            final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
+            final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             if (leftHandLimit == 0) {
                 it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, orderDir, internalColumns);
             } else {
@@ -428,7 +428,7 @@ public class TaskRequest {
 
         timestamp = new Date(0);
 
-        final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         final Task task = sqlinterface.getTaskById(id, inFolder);
         final TaskWriter taskWriter = new TaskWriter(timeZone);
 
@@ -447,7 +447,7 @@ public class TaskRequest {
         final TaskParser taskParser = new TaskParser(timeZone);
         taskParser.parse(taskObj, jData);
 
-        final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
 
         final int taskId = (taskObj.containsObjectID()) ? taskObj.getObjectID() : DataParser.checkInt(jsonObj, "id");
 
@@ -524,7 +524,7 @@ public class TaskRequest {
         try {
             final TaskWriter taskWriter = new TaskWriter(timeZone);
 
-            final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(session);
+            final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
 
             while (it.hasNext()) {
@@ -552,7 +552,7 @@ public class TaskRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 
-        final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface taskInterface = new TasksSQLImpl(session);
         final Task taskObj = taskInterface.getTaskById(id, inFolder);
         taskObj.removeObjectID();
         taskObj.setParentFolderID(folderId);

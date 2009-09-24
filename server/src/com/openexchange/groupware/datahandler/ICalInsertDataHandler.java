@@ -86,7 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -229,7 +229,7 @@ public final class ICalInsertDataHandler implements DataHandler {
 
 	private void insertTasks(final Session session, final int taskFolder, final List<Task> tasks,
 			final JSONArray folderAndIdArray) throws OXException, JSONException {
-		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
+		final TasksSQLInterface taskSql = new TasksSQLImpl(session);
 		for (final Task task : tasks) {
 			task.setParentFolderID(taskFolder);
 			taskSql.insertTaskObject(task);

@@ -95,7 +95,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceException;
@@ -258,7 +258,7 @@ public final class ical extends PermissionServlet {
                     }
                 }
             }
-            final TasksSQLInterface taskInterface = new TasksSQLInterfaceImpl(sessionObj);
+            final TasksSQLInterface taskInterface = new TasksSQLImpl(sessionObj);
             SearchIterator<Task> itTask = null;
             try {
                 itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, TASK_FIELDS, new Date(0));

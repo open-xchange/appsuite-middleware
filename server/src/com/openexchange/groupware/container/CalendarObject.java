@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -824,30 +825,30 @@ public abstract class CalendarObject extends CommonObject {
         if ((!containsChangeExceptions() && other.containsChangeExceptions()) || (containsChangeExceptions() && other.containsChangeExceptions() && getChangeException() != other.getChangeException() && (getChangeException() == null || isDifferent(
             getChangeException(),
             other.getChangeException())))) {
-            differingFields.add(CHANGE_EXCEPTIONS);
+            differingFields.add(I(CHANGE_EXCEPTIONS));
         }
 
         if ((!containsDayInMonth() && other.containsDayInMonth()) || (containsDayInMonth() && other.containsDayInMonth() && getDayInMonth() != other.getDayInMonth())) {
-            differingFields.add(DAY_IN_MONTH);
+            differingFields.add(I(DAY_IN_MONTH));
         }
 
         if ((!containsDays() && other.containsDays()) || (containsDays() && other.containsDays() && getDays() != other.getDays())) {
-            differingFields.add(DAYS);
+            differingFields.add(I(DAYS));
         }
 
         if ((!containsDeleteExceptions() && other.containsDeleteExceptions()) || (containsDeleteExceptions() && other.containsDeleteExceptions() && getDeleteException() != other.getDeleteException() && (getDeleteException() == null || isDifferent(
             getDeleteException(),
             other.getDeleteException())))) {
-            differingFields.add(DELETE_EXCEPTIONS);
+            differingFields.add(I(DELETE_EXCEPTIONS));
         }
 
         if ((!containsEndDate() && other.containsEndDate()) || (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || !getEndDate().equals(
             other.getEndDate())))) {
-            differingFields.add(END_DATE);
+            differingFields.add(I(END_DATE));
         }
 
         if ((!containsInterval() && other.containsInterval()) || (containsInterval() && other.containsInterval() && getInterval() != other.getInterval())) {
-            differingFields.add(INTERVAL);
+            differingFields.add(I(INTERVAL));
         }
 
         if ((!containsMonth() && other.containsMonth()) || (containsMonth() && other.containsMonth() && getMonth() != other.getMonth())) {

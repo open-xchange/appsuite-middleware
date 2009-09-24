@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -210,7 +210,7 @@ public final class VersitUtility {
                      * Create interface if not done, yet
                      */
                     if (taskInterface == null) {
-                        taskInterface = new TasksSQLInterfaceImpl(session);
+                        taskInterface = new TasksSQLImpl(session);
                     }
                     taskInterface.insertTaskObject(taskObj);
                     /*

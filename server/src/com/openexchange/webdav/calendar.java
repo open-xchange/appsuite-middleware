@@ -142,7 +142,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 if (appointmentobject.containsObjectID()) {
                     sanitize(appointmentobject);
 
-                    pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                    pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
                             DataParser.SAVE, lastModified, inFolder));
                 } else {
                     if (!appointmentobject.getAlarmFlag()) {
@@ -151,7 +151,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
                     appointmentobject.setParentFolderID(inFolder);
 
-                    pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                    pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
                             DataParser.SAVE, lastModified, inFolder));
                 }
                 break;
@@ -160,11 +160,11 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
                 }
 
-                pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
                         DataParser.DELETE, lastModified, inFolder));
                 break;
             case DataParser.CONFIRM:
-                pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(), ap.getConfirm(),
+                pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
                         DataParser.CONFIRM, lastModified, inFolder));
                 break;
             default:
@@ -246,8 +246,6 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
         private final String clientId;
 
-        private final int confirm;
-
         private final int action;
 
         private final Date lastModified;
@@ -266,12 +264,11 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
          * @param lastModified The last-modified date
          * @param inFolder The appointment's folder
          */
-        public QueuedAppointment(final CalendarDataObject appointmentobject, final String clientId, final int confirm,
+        public QueuedAppointment(final CalendarDataObject appointmentobject, final String clientId,
                 final int action, final Date lastModified, final int inFolder) {
             super();
             this.appointmentobject = appointmentobject;
             this.clientId = clientId;
-            this.confirm = confirm;
             this.action = action;
             this.lastModified = lastModified;
             this.inFolder = inFolder;
@@ -320,7 +317,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     appointmentsSQL.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
                     break;
                 case DataParser.CONFIRM:
-                    appointmentsSQL.setUserConfirmation(appointmentobject.getObjectID(), appointmentobject.getParentFolderID(), user, confirm,
+                    appointmentsSQL.setUserConfirmation(appointmentobject.getObjectID(), appointmentobject.getParentFolderID(), user, appointmentobject.getConfirm(),
                             appointmentobject.getConfirmMessage());
                     break;
                 default:
