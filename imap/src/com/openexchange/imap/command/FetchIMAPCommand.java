@@ -710,7 +710,16 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             msg.setReplyTo(env.replyTo);
             msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, env.inReplyTo);
             msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, env.messageId);
-
+            /*-
+             * Hmm... Why does ENVELOPE omit CR?LFs in subject?!
+             * 
+             * Example:
+             * Subject: =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?=
+             *  =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
+             *  
+             * is transferred as:
+             * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
+             */
             final String subject;
             if (env.subject == null) {
                 subject = "";
