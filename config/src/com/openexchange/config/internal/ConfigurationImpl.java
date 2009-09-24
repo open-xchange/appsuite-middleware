@@ -322,8 +322,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @see com.openexchange.config.Configuration#getProperty(java.lang.String, int)
      */
     public int getIntProperty(final String name, final int defaultValue) {
-        final String prop;
-        if (properties.containsKey(name) && (prop = properties.get(name)) != null) {
+        final String prop = properties.get(name);
+        if (prop != null) {
             try {
                 return Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
