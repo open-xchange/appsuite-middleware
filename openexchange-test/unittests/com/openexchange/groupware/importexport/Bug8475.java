@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 
 public class Bug8475 extends AbstractICalImportTest{
 	
@@ -95,7 +95,7 @@ public class Bug8475 extends AbstractICalImportTest{
 			"END:VCALENDAR";
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 		
-		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
 		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		
 		final Participant[] participants = task.getParticipants();
@@ -127,7 +127,7 @@ public class Bug8475 extends AbstractICalImportTest{
 			"END:VCALENDAR";
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 		
-		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
 		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		
 		final Participant[] participants = task.getParticipants();

@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 
 public class Bug8654 extends AbstractICalImportTest {
 	
@@ -114,7 +114,7 @@ public class Bug8654 extends AbstractICalImportTest {
 
 		final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8654", ctx, false);
 		
-		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+		final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
 		final Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		assertEquals("Teste Task Import von OX" , task.getTitle());
 	}

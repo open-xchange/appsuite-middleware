@@ -148,7 +148,7 @@ public class DowngradeTest extends TestCase {
             new UserParticipant(user.getId()),
             new UserParticipant(secondUser.getId())
         });
-        final TasksSQLInterface taskSQL = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
         try {
             downgradeDelegate();
@@ -168,7 +168,7 @@ public class DowngradeTest extends TestCase {
             new UserParticipant(user.getId()),
             new UserParticipant(secondUser.getId())
         });
-        final TasksSQLInterface taskSQL = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
         try {
             downgradeDelegate();
@@ -188,7 +188,7 @@ public class DowngradeTest extends TestCase {
         final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(),
             ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
-        final TasksSQLInterface taskSQL = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
         downgradeNoTasks();
         assertNoTask(task.getObjectID());
@@ -204,7 +204,7 @@ public class DowngradeTest extends TestCase {
             new UserParticipant(user.getId()),
             new UserParticipant(secondUser.getId())
         });
-        final TasksSQLInterface taskSQL = new TasksSQLInterfaceImpl(session);
+        final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
         taskSQL.insertTaskObject(task);
         try {
             downgradeNoTasks();

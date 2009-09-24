@@ -75,7 +75,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 
@@ -181,7 +181,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "7718", ctx, false);
 
-        final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+        final TasksSQLInterface tasks = new TasksSQLImpl(sessObj);
         final Task task = tasks.getTaskById(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()));
         assertEquals("Summary", summary, task.getTitle());
         assertEquals("Description:", description, task.getNote());
