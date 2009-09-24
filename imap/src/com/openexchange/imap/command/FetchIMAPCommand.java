@@ -721,7 +721,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
              * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
              */
             final String subject;
-            if (env.subject == null) {
+            if (null == env.subject) {
                 subject = "";
             } else {
                 final char[] chars = env.subject.toCharArray();
