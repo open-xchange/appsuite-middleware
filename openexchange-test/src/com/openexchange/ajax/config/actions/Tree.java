@@ -56,6 +56,9 @@ package com.openexchange.ajax.config.actions;
  */
 public enum Tree {
 
+    /** the complete preferences tree */
+    ALL(""),
+
     /** A string containing GUI-specific settings (currently, it is a huge JSON object). */
     GUI("/gui"),
 
