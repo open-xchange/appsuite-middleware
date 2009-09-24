@@ -106,6 +106,46 @@ public class ServerUserSetting {
         }
 
     };
+    
+    private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_ACCESS = new Attribute<Boolean>() {
+
+        public Boolean getAttribute(ResultSet rs) throws SQLException {
+            return Boolean.valueOf(rs.getBoolean(getColumnName()));
+        }
+
+        public String getColumnName() {
+            return "contactCollectOnMailAccess";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Boolean value) throws SQLException {
+            if (value == null) {
+                pstmt.setBoolean(1, true);
+            } else {
+                pstmt.setBoolean(1, value.booleanValue());
+            }
+        }
+        
+    };
+    
+    private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_TRANSPORT = new Attribute<Boolean>() {
+
+        public Boolean getAttribute(ResultSet rs) throws SQLException {
+            return Boolean.valueOf(rs.getBoolean(getColumnName()));
+        }
+
+        public String getColumnName() {
+            return "contactCollectOnMailTransport";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Boolean value) throws SQLException {
+            if (value == null) {
+                pstmt.setBoolean(1, true);
+            } else {
+                pstmt.setBoolean(1, value.booleanValue());
+            }
+        }
+        
+    };
 
     private static final Attribute<Integer> DEFAULT_STATUS_PRIVATE = new Attribute<Integer>() {
 
@@ -274,6 +314,54 @@ public class ServerUserSetting {
      */
     public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
         return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, connection);
+    }
+    
+    /**
+     * Sets the flag for contact collection on incoming mails.
+     * 
+     * @param cid
+     * @param user
+     * @param value
+     * @throws SettingException 
+     */
+    public void setContactCollectOnMailAccess(int cid, int user, boolean value) throws SettingException {
+        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value), connection);
+    }
+    
+    /**
+     * returns the flag for contact collection on incoming mails.
+     * 
+     * @param cid
+     * @param user
+     * @return
+     * @throws SettingException 
+     */
+    public Boolean isContactCollectOnMailAccess(int cid, int user) throws SettingException {
+        return getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, connection);
+    }
+    
+    /**
+     * Sets the flag for contact collection on outgoing mails.
+     * 
+     * @param cid
+     * @param user
+     * @param value
+     * @throws SettingException 
+     */
+    public void setContactCollectOnMailTransport(int cid, int user, boolean value) throws SettingException {
+        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value), connection);
+    }
+    
+    /**
+     * returns the flag for contact collection on outgoing mails.
+     * 
+     * @param cid
+     * @param user
+     * @return
+     * @throws SettingException 
+     */
+    public Boolean isContactCollectOnMailTransport(int cid, int user) throws SettingException {
+        return getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, connection);
     }
 
     /**
