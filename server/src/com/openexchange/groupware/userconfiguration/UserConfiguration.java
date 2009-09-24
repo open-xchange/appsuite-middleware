@@ -55,9 +55,13 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
@@ -752,7 +756,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
      */
     public boolean isMultipleMailAccounts() {
-        // TODO: return getBooleanAttribute("beta", UserStorage.getInstance().getUser(userId, ctx)) && hasPermission(MULTIPLE_MAIL_ACCOUNTS);
+        try {
+            return hasBetaEnabled() && hasPermission(MULTIPLE_MAIL_ACCOUNTS);
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Return flag
+         */
         return hasPermission(MULTIPLE_MAIL_ACCOUNTS);
     }
 
@@ -772,7 +783,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
-        // TODO: return getBooleanAttribute("beta", UserStorage.getInstance().getUser(userId, ctx)) && hasPermission(SUBSCRIPTION);
+        try {
+            return hasBetaEnabled() && hasPermission(SUBSCRIPTION);
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Return flag
+         */
         return hasPermission(SUBSCRIPTION);
     }
 
@@ -792,7 +810,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public boolean isPublication() {
-        // TODO: return getBooleanAttribute("beta", UserStorage.getInstance().getUser(userId, ctx)) && hasPermission(PUBLICATION);
+        try {
+            return hasBetaEnabled() && hasPermission(PUBLICATION);
+        } catch (final LdapException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Return flag
+         */
         return hasPermission(PUBLICATION);
     }
 
@@ -939,21 +964,51 @@ public final class UserConfiguration implements Serializable, Cloneable {
         return new StringBuilder().append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
 
+    private static final String BETA = "beta";
+
+    private static final String PROP_BETA = "com.openexchange.user.beta";
+
+    /**
+     * Checks whether configuration's user has beta features enabled.
+     * 
+     * @return <code>true</code> if configuration's user has beta features enabled; otherwise <code>false</code>
+     * @throws LdapException If user cannot be fetched from storage
+     */
+    private boolean hasBetaEnabled() throws LdapException {
+        return getBooleanAttribute(BETA, UserStorage.getInstance().getUser(userId, ctx), getBooleanProperty(PROP_BETA, true));
+    }
+
+    /**
+     * Gets the specified <code>boolean</code> property from configuration service.
+     * 
+     * @param name The property's name
+     * @param defaultValue The default <code>boolean</code> value to return if property is missing
+     * @return The <code>boolean</code> value
+     */
+    private static boolean getBooleanProperty(final String name, final boolean defaultValue) {
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            return defaultValue;
+        }
+        return service.getBoolProperty(name, defaultValue);
+    }
+
     /**
      * Gets the specified <code>boolean</code> attribute from given user.
      * 
      * @param name The name of the <code>boolean</code> attribute
      * @param user The user
+     * @param defaultValue The default value to return if user has no attribute of specified name
      * @return The value of the <code>boolean</code> attribute
      */
-    private static boolean getBooleanAttribute(final String name, final User user) {
+    private static boolean getBooleanAttribute(final String name, final User user, final boolean defaultValue) {
         final Map<String, Set<String>> attributes = user.getAttributes();
         if (null == attributes) {
-            return false;
+            return defaultValue;
         }
         final Set<String> bset = attributes.get(name);
         if (null == bset || bset.isEmpty()) {
-            return false;
+            return defaultValue;
         }
         return Boolean.parseBoolean(bset.iterator().next());
     }

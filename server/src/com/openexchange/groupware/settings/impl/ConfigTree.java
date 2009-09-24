@@ -203,6 +203,7 @@ public final class ConfigTree {
     private static Class< ? extends PreferencesItemService>[] getClasses() {
         return new Class[] {
             com.openexchange.groupware.settings.tree.AvailableModules.class,
+            com.openexchange.groupware.settings.tree.BetaFeatures.class,
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactID.class,
             com.openexchange.groupware.settings.tree.ContextID.class,
