@@ -81,7 +81,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
             // Run in calling thread
             new Memorizer(addresses, session).run();
         } else {
-            threadPoolService.submit(ThreadPools.task(new Memorizer(addresses, session)), CallerRunsBehavior.getInstance());
+            threadPoolService.submit(ThreadPools.task(new Memorizer(addresses, session), "ContactCollector"), CallerRunsBehavior.getInstance());
         }
     }
 
