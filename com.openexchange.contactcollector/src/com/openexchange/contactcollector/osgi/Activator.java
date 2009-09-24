@@ -61,6 +61,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -69,8 +70,6 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Activator extends DeferredActivator {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
 
     private ServiceRegistration registryCollector;
 
@@ -107,7 +106,6 @@ public class Activator extends DeferredActivator {
         }
 
         collectorInstance = new ContactCollectorServiceImpl();
-        collectorInstance.start();
         registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null);
         registryCollector = context.registerService(ContactCollectorService.class.getName(), collectorInstance, null);
         registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
@@ -120,13 +118,7 @@ public class Activator extends DeferredActivator {
         registryPrefItemFolder.unregister();
         registryCollector.unregister();
         registryFolderCreator.unregister();
-        try {
-            collectorInstance.stop();
-        } catch (final InterruptedException e) {
-            LOG.error("Contact collector shut-down interrupted", e);
-        } finally {
-            collectorInstance = null;
-        }
+        collectorInstance = null;
         /*
          * Clear service registry
          */
@@ -135,7 +127,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class };
+        return new Class<?>[] { ContextService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class, ThreadPoolService.class };
     }
 
     @Override
