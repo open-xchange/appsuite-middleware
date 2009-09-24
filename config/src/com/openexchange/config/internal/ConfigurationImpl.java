@@ -310,8 +310,9 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @see com.openexchange.config.Configuration#getProperty(java.lang.String, boolean)
      */
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
-        if (properties.containsKey(name)) {
-            return Boolean.parseBoolean(properties.get(name));
+        final String prop = properties.get(name);
+        if (null != prop) {
+            return Boolean.parseBoolean(prop.trim());
         }
         return defaultValue;
     }
