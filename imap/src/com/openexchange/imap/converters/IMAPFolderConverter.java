@@ -50,6 +50,7 @@
 package com.openexchange.imap.converters;
 
 import java.net.InetSocketAddress;
+import java.util.Locale;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
@@ -246,9 +247,10 @@ public final class IMAPFolderConverter {
             if ("INBOX".equals(imapFullname)) {
                 mailFolder.setDefaultFolder(true);
             } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
-                final int len = UserSettingMailStorage.getInstance().getUserSettingMail(
-                    session.getUserId(),
-                    ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
+                final int len =
+                    UserSettingMailStorage.getInstance().getUserSettingMail(
+                        session.getUserId(),
+                        ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
                 for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
                     if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
                         mailFolder.setDefaultFolder(true);
@@ -393,7 +395,8 @@ public final class IMAPFolderConverter {
         final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                final String pattern = mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
+                final String pattern =
+                    mailFolder.isRootFolder() ? "%" : new StringBuilder().append(fullname).append(separator).append('%').toString();
                 if (checkSubscribed) {
                     return protocol.lsub("", pattern);
                 }
@@ -469,7 +472,8 @@ public final class IMAPFolderConverter {
              * Check if subfolder creation is allowed
              */
             final ACLPermission ownPermission = new ACLPermission();
-            final int fp = RootSubfolderCache.canCreateSubfolders(rootFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
+            final int fp =
+                RootSubfolderCache.canCreateSubfolders(rootFolder, true, session, imapConfig.getAccountId()).booleanValue() ? OCLPermission.CREATE_SUB_FOLDERS : OCLPermission.READ_FOLDER;
             ownPermission.setEntity(session.getUserId());
             ownPermission.setAllPermission(fp, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
             ownPermission.setFolderAdmin(false);
@@ -536,9 +540,13 @@ public final class IMAPFolderConverter {
             throw MIMEMailException.handleMessagingException(e);
         }
         try {
-            final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new InetSocketAddress(
-                imapConfig.getServer(),
-                imapConfig.getPort()), session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
+            final Entity2ACLArgs args =
+                new Entity2ACLArgsImpl(
+                    imapConfig.getAccountId(),
+                    new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()),
+                    session.getUserId(),
+                    imapFolder.getFullName(),
+                    imapFolder.getSeparator());
             final StringBuilder debugBuilder;
             if (LOG.isDebugEnabled()) {
                 debugBuilder = new StringBuilder(128);
@@ -651,14 +659,12 @@ public final class IMAPFolderConverter {
             try {
                 retval = RightsCache.getCachedRights(folder, true, session, imapConfig.getAccountId());
             } catch (final MessagingException e) {
-                if ((e.getNextException() instanceof com.sun.mail.iap.CommandFailedException) && (e.getNextException().getMessage().indexOf(
-                    "NO Mailbox does not exist") != -1)) {
+                final Exception nextException = e.getNextException();
+                if ((nextException instanceof com.sun.mail.iap.CommandFailedException)) {
                     /*
-                     * This occurs when requesting MYRIGHTS on a shared folder. Just log a warning!
+                     * Handle command failed exception
                      */
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, folder.getFullName()), e);
-                    }
+                    handleCommandFailedException(((com.sun.mail.iap.CommandFailedException) nextException), folder.getFullName());
                 } else {
                     LOG.error(e.getMessage(), e);
                 }
@@ -685,6 +691,20 @@ public final class IMAPFolderConverter {
             }
         }
         return retval;
+    }
+
+    private static void handleCommandFailedException(final com.sun.mail.iap.CommandFailedException e, final String fullname) {
+        final String msg = e.getMessage().toLowerCase(Locale.ENGLISH);
+        if (msg.indexOf("Mailbox doesn't exist") >= 0 || msg.indexOf("Mailbox does not exist") >= 0) {
+            /*
+             * This occurs when requesting MYRIGHTS on a shared or somehow non-existent folder. Just log a warning!
+             */
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullname), e);
+            }
+        } else {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     /**
