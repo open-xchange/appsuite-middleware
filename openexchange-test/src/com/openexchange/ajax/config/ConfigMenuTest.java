@@ -94,10 +94,10 @@ public class ConfigMenuTest extends AbstractAJAXSession {
      * Tests if the timezone of a user can be changed.
      */
     public void testTimeZone() throws Throwable {
-        GetRequest getRequest = new GetRequest(Tree.TimeZone);
+        final GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
-        String timeZone = getResponse.getString();
-        String testTimeZone = "Australia/Hobart";
+        final String timeZone = getResponse.getString();
+        final String testTimeZone = "Australia/Hobart";
         SetRequest setRequest = new SetRequest(Tree.TimeZone, testTimeZone);
         try {
             getClient().execute(setRequest);
@@ -110,11 +110,30 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     }
 
     /**
+     * Tests if the beta feature enablement of a user can be changed.
+     */
+    public void testBeta() throws Throwable {
+        final GetRequest getRequest = new GetRequest(Tree.Beta);
+        GetResponse getResponse = getClient().execute(getRequest);
+        final String beta = getResponse.getString();
+        final String testBeta = "false";
+        SetRequest setRequest = new SetRequest(Tree.Beta, testBeta);
+        try {
+            getClient().execute(setRequest);
+            getResponse = getClient().execute(getRequest);
+            assertEquals("Written timezone isn't returned from server.", testBeta, getResponse.getString());
+        } finally {
+            setRequest = new SetRequest(Tree.Beta, beta);
+            getClient().execute(setRequest);
+        }
+    }
+
+    /**
      * Tests if the unique identifier of the user can be loaded.
      */
     public void testIdentifier() throws Throwable {
-        GetRequest request = new GetRequest(Tree.Identifier);
-        GetResponse response = getClient().execute(request);
+        final GetRequest request = new GetRequest(Tree.Identifier);
+        final GetResponse response = getClient().execute(request);
         final int userId = response.getInteger();
         LOG.trace("UserId: " + userId);
         assertTrue("No valid user identifier", userId > 0);

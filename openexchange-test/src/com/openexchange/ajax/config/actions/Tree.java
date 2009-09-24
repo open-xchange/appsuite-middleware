@@ -255,6 +255,9 @@ public enum Tree {
     /** the configured timezone of the user. */
     TimeZone("/timezone"),
 
+    /** the configured beta feature enablement of the user. */
+    Beta("/beta"),
+
     /** Timeout after that idle uploads are deleted. */
     MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
 
