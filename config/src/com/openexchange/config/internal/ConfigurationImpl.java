@@ -283,14 +283,15 @@ public final class ConfigurationImpl implements ConfigurationService {
         return getPropertiesInFolder(folderName, null);
     }
 
-    public Properties getPropertiesInFolder(String folderName, final PropertyListener listener) {
+    public Properties getPropertiesInFolder(final String folderName, final PropertyListener listener) {
         final Properties retval = new Properties();
         final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
+        String fldName = folderName;
         for (final File dir : dirs) {
-            folderName = dir.getAbsolutePath() + "/" + folderName + "/";
+            fldName = dir.getAbsolutePath() + "/" + fldName + "/";
             while (iter.hasNext()) {
                 final Entry<String, String> entry = iter.next();
-                if (entry.getValue().startsWith(folderName)) {
+                if (entry.getValue().startsWith(fldName)) {
                     final String value;
                     if (null == listener) {
                         value = getProperty(entry.getKey());
