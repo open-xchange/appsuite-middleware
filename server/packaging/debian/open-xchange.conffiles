@@ -28,5 +28,6 @@
 /opt/open-xchange/etc/groupware/TidyConfiguration.properties
 /opt/open-xchange/etc/groupware/TidyMessages.properties
 /opt/open-xchange/etc/groupware/transport.properties
+/opt/open-xchange/etc/groupware/user.properties
 /opt/open-xchange/etc/groupware/whitelist.properties
 /opt/open-xchange/etc/groupware/servletmappings/servletmapping.properties
