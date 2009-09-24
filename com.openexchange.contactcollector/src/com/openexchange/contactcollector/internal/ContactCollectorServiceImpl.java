@@ -54,7 +54,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.session.Session;
@@ -90,7 +89,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
      * Starts this contact collector.
      */
     public void start() {
-        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory("Collector-"));
+        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory());
     }
 
     /**
@@ -110,27 +109,13 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
 
     private static final class CollectorThreadFactory implements ThreadFactory {
 
-        private final AtomicInteger threadNumber;
-
-        private final String namePrefix;
-
-        public CollectorThreadFactory(final String namePrefix) {
+        public CollectorThreadFactory() {
             super();
-            threadNumber = new AtomicInteger(1);
-            this.namePrefix = namePrefix;
         }
 
         public Thread newThread(final Runnable r) {
-            return new Thread(r, getThreadName(
-                threadNumber.getAndIncrement(),
-                new StringBuilder(namePrefix.length() + 5).append(namePrefix)));
+            return new Thread(r, "ContactCollector");
         }
 
-        private static String getThreadName(final int threadNumber, final StringBuilder sb) {
-            for (int i = threadNumber; i < 10000; i *= 10) {
-                sb.append('0');
-            }
-            return sb.append(threadNumber).toString();
-        }
     }
 }
