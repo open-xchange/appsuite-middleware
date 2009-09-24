@@ -61,6 +61,8 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.customizer.folder.FolderGetCustomizer;
+import com.openexchange.ajax.customizer.folder.FolderListCustomizer;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -354,25 +356,27 @@ public final class FolderWriter extends DataWriter {
     /**
      * Writes specified fields from given folder into a JSON object
      * 
+     * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
      * @param locale The user's locale to get appropriate folder name used in display
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
-        writeOXFolderFieldsAsObject(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
+    public void writeOXFolderFieldsAsObject(FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
+        writeOXFolderFieldsAsObject(customizer, fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
     }
 
     /**
      * Writes specified fields from given folder into a JSON object
      * 
+     * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
      * @param name The preferred name or <code>null</code>
      * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
+    public void writeOXFolderFieldsAsObject(FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
         try {
             final int[] fs;
             if (fields == null) {
@@ -387,6 +391,7 @@ public final class FolderWriter extends DataWriter {
                 for (int i = 0; i < fs.length; i++) {
                     writers[i].writeField(jsonwriter, fo, true, name, hasSubfolders);
                 }
+                customizer.appendData(jsonwriter, fo);
             } finally {
                 jsonwriter.endObject();
             }
@@ -402,25 +407,27 @@ public final class FolderWriter extends DataWriter {
     /**
      * Writes specified fields from given folder into a JSON array
      * 
+     * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
      * @param locale The user's locale to get appropriate folder name used in display
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
-        writeOXFolderFieldsAsArray(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
+    public void writeOXFolderFieldsAsArray(FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
+        writeOXFolderFieldsAsArray(customizer, fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
     }
 
     /**
      * Writes specified fields from given folder into a JSON array
      * 
+     * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
      * @param name The preferred name or <code>null</code>
      * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
+    public void writeOXFolderFieldsAsArray(FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
         try {
             final FolderFieldWriter[] writers = getFolderFieldWriter(fields);
             jsonwriter.array();
@@ -428,6 +435,7 @@ public final class FolderWriter extends DataWriter {
                 for (int i = 0; i < fields.length; i++) {
                     writers[i].writeField(jsonwriter, fo, false, name, hasSubfolders);
                 }
+                customizer.appendData(jsonwriter, fo);
             } finally {
                 jsonwriter.endArray();
             }

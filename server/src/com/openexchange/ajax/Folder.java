@@ -79,6 +79,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.customizer.folder.FolderGetCustomizer;
+import com.openexchange.ajax.customizer.folder.FolderGetPathCustomizer;
+import com.openexchange.ajax.customizer.folder.FolderResponseCustomizer;
+import com.openexchange.ajax.customizer.folder.FolderRootCustomizer;
+import com.openexchange.ajax.customizer.folder.FolderSubfoldersCustomizer;
+import com.openexchange.ajax.customizer.folder.FolderUpdatesCustomizer;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
@@ -155,6 +161,12 @@ public class Folder extends SessionServlet {
 
     private static transient final Log LOG = LogFactory.getLog(Folder.class);
 
+    private static FolderResponseCustomizer responseCustomizer = FolderResponseCustomizer.DEFAULT_CUSTOMIZER;
+    
+    public static void setFolderResponseCustomizer(FolderResponseCustomizer customizer) {
+        responseCustomizer = customizer;
+    }
+    
     private static final AbstractOXException getWrappingOXException(final Throwable cause) {
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
@@ -296,6 +308,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
+        FolderRootCustomizer customizer = getResponseCustomizer().getRootCustomizer(session);
         long lastModified = 0;
         /*
          * Start response
@@ -305,8 +318,14 @@ public class Folder extends SessionServlet {
             /*
              * Read in parameters
              */
+            customizer.setParameters(paramContainer);
+            
             final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
+            
+            customizer.setColumns(columns);
+            customizer.setContext(ctx);
+            
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId);
@@ -338,6 +357,7 @@ public class Folder extends SessionServlet {
                             rootFolder.getObjectID(),
                             session.getUser().getLocale()), hasSubfolder);
                     }
+                    customizer.appendData(jsonWriter, rootFolder);
                 } finally {
                     jsonWriter.endArray();
                 }
@@ -359,7 +379,12 @@ public class Folder extends SessionServlet {
         jsonWriter.endArray();
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModified == 0 ? null : new Date(lastModified));
+        customizer.customizeResponse(response);
         return response;
+    }
+
+    private FolderResponseCustomizer getResponseCustomizer() {
+        return responseCustomizer;
     }
 
     /**
@@ -395,6 +420,8 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
+        final FolderSubfoldersCustomizer customizer = getResponseCustomizer().getSubfoldersCustomizer(session);
+        
         Date lastModifiedDate = null;
         /*
          * Start response
@@ -415,10 +442,19 @@ public class Folder extends SessionServlet {
             if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
                 ignoreMailfolder = true;
             }
+            
+            customizer.setColumns(columns);
+            customizer.setContext(ctx);
+            customizer.setIgnore(ignore);
+            customizer.setIgnoreMailFolder(ignoreMailfolder);
+            customizer.setParameters(paramContainer);
+            customizer.setParent(parentIdentifier);
+            
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId);
             int parentId = -1;
             if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
                 // TODO: DELEGATE TO getRootFolder() if parentId is "0"
+                customizer.setParentId(parentId);
                 long lastModified = 0;
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
@@ -442,6 +478,7 @@ public class Folder extends SessionServlet {
                             for (int j = 0; j < writers.length; j++) {
                                 writers[j].writeField(jsonWriter, listFolder, false);
                             }
+                            customizer.appendData(jsonWriter, listFolder);
                         } finally {
                             jsonWriter.endArray();
                         }
@@ -463,6 +500,7 @@ public class Folder extends SessionServlet {
                             for (int j = 0; j < writers.length; j++) {
                                 writers[j].writeField(jsonWriter, listFolder, false);
                             }
+                            customizer.appendData(jsonWriter, listFolder);
                         } finally {
                             jsonWriter.endArray();
                         }
@@ -484,6 +522,7 @@ public class Folder extends SessionServlet {
                             for (int j = 0; j < writers.length; j++) {
                                 writers[j].writeField(jsonWriter, listFolder, false);
                             }
+                            customizer.appendData(jsonWriter, listFolder);
                         } finally {
                             jsonWriter.endArray();
                         }
@@ -505,6 +544,7 @@ public class Folder extends SessionServlet {
                             for (int j = 0; j < writers.length; j++) {
                                 writers[j].writeField(jsonWriter, listFolder, false);
                             }
+                            customizer.appendData(jsonWriter, listFolder);
                         } finally {
                             jsonWriter.endArray();
                         }
@@ -553,6 +593,7 @@ public class Folder extends SessionServlet {
                             for (int j = 0; j < writers.length; j++) {
                                 writers[j].writeField(jsonWriter, fo, false, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
                             }
+                            customizer.appendData(jsonWriter, fo);
                         } finally {
                             jsonWriter.endArray();
                         }
@@ -570,7 +611,7 @@ public class Folder extends SessionServlet {
                                 FolderObject.INFOSTORE,
                                 true,
                                 FolderObject.SYSTEM_TYPE);
-                            folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
+                            folderWriter.writeOXFolderFieldsAsArray(customizer, columns, virtualListFolder, locale);
                         }
                     } finally {
                         if (it != null) {
@@ -622,6 +663,7 @@ public class Folder extends SessionServlet {
                             for (int j = 0; j < writers.length; j++) {
                                 writers[j].writeField(jsonWriter, virtualOwnerFolder, false, null, 1);
                             }
+                            customizer.appendData(jsonWriter, virtualOwnerFolder);
                         } finally {
                             jsonWriter.endArray();
                         }
@@ -784,7 +826,7 @@ public class Folder extends SessionServlet {
                          */
                         try {
                             final FolderObject internalUsers = foldersqlinterface.getFolderById(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-                            folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject.getFolderString(
+                            folderWriter.writeOXFolderFieldsAsArray(customizer, columns, internalUsers, FolderObject.getFolderString(
                                 internalUsers.getObjectID(),
                                 locale), -1);
                         } catch (final OXException e) {
@@ -826,7 +868,7 @@ public class Folder extends SessionServlet {
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
-                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
+                                folderWriter.writeOXFolderFieldsAsArray(customizer, columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
                             if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
@@ -856,7 +898,7 @@ public class Folder extends SessionServlet {
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
-                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
+                                folderWriter.writeOXFolderFieldsAsArray(customizer, columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
                             if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
@@ -886,7 +928,7 @@ public class Folder extends SessionServlet {
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
-                                folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
+                                folderWriter.writeOXFolderFieldsAsArray(customizer, columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
                             if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
@@ -934,6 +976,7 @@ public class Folder extends SessionServlet {
                         for (final FolderFieldWriter ffw : writers) {
                             ffw.writeField(jsonWriter, sharedFolder, false, null, 0);
                         }
+                        customizer.appendData(jsonWriter, sharedFolder);
                     } finally {
                         jsonWriter.endArray();
                     }
@@ -1007,6 +1050,7 @@ public class Folder extends SessionServlet {
         jsonWriter.endArray();
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
+        customizer.customizeResponse(response);
         return response;
     }
 
@@ -1050,6 +1094,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
+        final FolderGetPathCustomizer customizer = getResponseCustomizer().getGetPathCustomizer(session);
         long lastModified = 0;
         /*
          * Start response
@@ -1063,9 +1108,17 @@ public class Folder extends SessionServlet {
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
+            
+            
+            customizer.setContext(ctx);
+            customizer.setParameters(paramContainer);
+            customizer.setColumns(columns);
+            customizer.setFolderIdentifier(folderIdentifier);
+            
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId);
             int folderId = -1;
             if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
+                customizer.setFolderId(folderId);
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 /*
                  * Pre-Select field writers
@@ -1084,6 +1137,7 @@ public class Folder extends SessionServlet {
                         for (final FolderFieldWriter ffw : writers) {
                             ffw.writeField(jsonWriter, fo, false);
                         }
+                        customizer.appendData(jsonWriter, fo);
                     } finally {
                         jsonWriter.endArray();
                     }
@@ -1110,6 +1164,7 @@ public class Folder extends SessionServlet {
                         for (final FolderFieldWriter ffw : writers) {
                             ffw.writeField(jsonWriter, fo, false);
                         }
+                        customizer.appendData(jsonWriter, fo);
                     } finally {
                         jsonWriter.endArray();
                     }
@@ -1181,7 +1236,7 @@ public class Folder extends SessionServlet {
                     } else {
                         privateFolder = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, ctx);
                     }
-                    folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
+                    folderWriter.writeOXFolderFieldsAsArray(customizer, columns, privateFolder, FolderObject.getFolderString(
                         FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
                         session.getUser().getLocale()), -1);
                 } finally {
@@ -1216,6 +1271,7 @@ public class Folder extends SessionServlet {
         jsonWriter.endArray();
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModified == 0 ? null : new Date(lastModified));
+        customizer.customizeResponse(response);
         return response;
     }
 
@@ -1254,6 +1310,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
+        final FolderUpdatesCustomizer customizer = getResponseCustomizer().getUpdatesCustomizer(session);
         Date lastModifiedDate = null;
         /*
          * Start response
@@ -1264,6 +1321,8 @@ public class Folder extends SessionServlet {
             /*
              * Read in parameters
              */
+            customizer.setParameters(paramContainer);
+            
             final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
@@ -1272,6 +1331,14 @@ public class Folder extends SessionServlet {
             final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
             final boolean ignoreDeleted = STRING_DELETED.equalsIgnoreCase(paramContainer.getStringParam(PARAMETER_IGNORE));
             lastModified = Math.max(timestamp.getTime(), lastModified);
+            
+            customizer.setColumns(columns);
+            customizer.setContext(ctx);
+            customizer.setIgnoreDeleted(ignoreDeleted);
+            customizer.setIncludeMailFolders(includeMailFolders);
+            customizer.setLastModified(lastModified);
+            customizer.setTimestamp(timestamp);
+            
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
             final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
             /*
@@ -1359,6 +1426,7 @@ public class Folder extends SessionServlet {
                     for (final FolderFieldWriter ffw : writers) {
                         ffw.writeField(jsonWriter, fo, false);
                     }
+                    customizer.appendData(jsonWriter, fo);
                 } finally {
                     jsonWriter.endArray();
                 }
@@ -1551,6 +1619,7 @@ public class Folder extends SessionServlet {
         jsonWriter.endArray();
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
+        customizer.customizeResponse(response);
         return response;
     }
 
@@ -1579,22 +1648,28 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         OXJSONWriter jsonWriter = null;
+        final FolderGetCustomizer customizer = getResponseCustomizer().getGetCustomizer(session);
         Date lastModifiedDate = null;
         /*
          * Start response
          */
         try {
+            customizer.setParameters(paramContainer);
             final Context ctx = session.getContext();
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
+            customizer.setContext(ctx);
+            customizer.setColumns(columns);
+            customizer.setFolderIdentifier(folderIdentifier);
             int folderId = -1;
             if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
+                customizer.setFolderId(folderId);
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 final FolderObject fo = foldersqlinterface.getFolderById(folderId);
                 lastModifiedDate = fo.getLastModified();
                 jsonWriter = new OXJSONWriter();
-                new FolderWriter(jsonWriter, session, ctx, timeZoneId).writeOXFolderFieldsAsObject(columns, fo, session.getUser().getLocale());
+                new FolderWriter(jsonWriter, session, ctx, timeZoneId).writeOXFolderFieldsAsObject(customizer, columns, fo, session.getUser().getLocale());
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 int userId = -1;
                 try {
@@ -1605,7 +1680,7 @@ public class Folder extends SessionServlet {
                 final User user = UserStorage.getInstance().getUser(userId, ctx);
                 final FolderObject fo = FolderObject.createVirtualSharedFolderObject(userId, user.getDisplayName());
                 jsonWriter = new OXJSONWriter();
-                new FolderWriter(jsonWriter, session, ctx, timeZoneId).writeOXFolderFieldsAsObject(columns, fo, user.getLocale());
+                new FolderWriter(jsonWriter, session, ctx, timeZoneId).writeOXFolderFieldsAsObject(customizer, columns, fo, user.getLocale());
             } else {
                 MailServletInterface mailInterface = null;
                 try {
@@ -1645,6 +1720,7 @@ public class Folder extends SessionServlet {
          */
         response.setData(jsonWriter == null ? JSONObject.NULL : jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
+        customizer.customizeResponse(response);
         return response;
     }
 
