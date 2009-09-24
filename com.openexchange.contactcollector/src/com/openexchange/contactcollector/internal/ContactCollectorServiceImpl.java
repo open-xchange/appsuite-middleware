@@ -50,13 +50,13 @@
 package com.openexchange.contactcollector.internal;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.contactcollector.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link ContactCollectorServiceImpl}
@@ -64,12 +64,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
-
-    /**
-     * The contact collector's executor.<br>
-     * TODO: Replace with global thread pool if supported later on.
-     */
-    private ExecutorService executor;
 
     /**
      * Initializes a new {@link ContactCollectorServiceImpl}.
@@ -80,42 +74,15 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
         /*
-         * Enqueue in executor
+         * Delegate to thread pool if available
          */
-        executor.execute(new Memorizer(addresses, session));
-    }
-
-    /**
-     * Starts this contact collector.
-     */
-    public void start() {
-        executor = Executors.newSingleThreadExecutor(new CollectorThreadFactory());
-    }
-
-    /**
-     * Stops this contact collector.
-     * 
-     * @throws InterruptedException If shut-down is interrupted
-     */
-    public void stop() throws InterruptedException {
-        // Maybe an abrupt shut-down through executor.shutdownNow();?
-        executor.shutdown();
-        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-    }
-
-    /*-
-     * #####################################################################
-     */
-
-    private static final class CollectorThreadFactory implements ThreadFactory {
-
-        public CollectorThreadFactory() {
-            super();
+        final ThreadPoolService threadPoolService = ServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        if (null == threadPoolService) {
+            // Run in calling thread
+            new Memorizer(addresses, session).run();
+        } else {
+            threadPoolService.submit(ThreadPools.task(new Memorizer(addresses, session)), CallerRunsBehavior.getInstance());
         }
-
-        public Thread newThread(final Runnable r) {
-            return new Thread(r, "ContactCollector");
-        }
-
     }
+
 }

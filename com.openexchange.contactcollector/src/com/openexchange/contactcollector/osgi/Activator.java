@@ -115,9 +115,17 @@ public class Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         registryPrefItemEnabled.unregister();
+        registryPrefItemEnabled = null;
+
         registryPrefItemFolder.unregister();
+        registryPrefItemFolder = null;
+
         registryCollector.unregister();
+        registryCollector = null;
+
         registryFolderCreator.unregister();
+        registryFolderCreator = null;
+
         collectorInstance = null;
         /*
          * Clear service registry
@@ -127,7 +135,8 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class, ThreadPoolService.class };
+        return new Class<?>[] {
+            ContextService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class, ThreadPoolService.class };
     }
 
     @Override
