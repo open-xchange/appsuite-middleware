@@ -62,6 +62,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -136,7 +137,8 @@ public class Activator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ContextService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class, ThreadPoolService.class };
+            ContextService.class, UserService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class,
+            ThreadPoolService.class };
     }
 
     @Override
