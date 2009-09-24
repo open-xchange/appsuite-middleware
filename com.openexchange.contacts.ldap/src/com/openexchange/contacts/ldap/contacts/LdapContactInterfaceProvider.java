@@ -49,10 +49,14 @@
 
 package com.openexchange.contacts.ldap.contacts;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.api2.OXException;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
 
 /**
@@ -69,6 +73,15 @@ public final class LdapContactInterfaceProvider implements ContactInterfaceProvi
     private final int folderId;
 
     private final int contextId;
+    
+    public List<Contact> cached_contacts;
+    
+    // Mapping tables - only used if the folder content is the same for all user (admin dn auth)
+    public Map<Integer, String> keytable;
+    
+    public Map<String, Integer> valuetable;
+    
+    public ReentrantReadWriteLock rwlock_cached_contacts = new ReentrantReadWriteLock(true);
 
     /**
      * Initializes a new {@link LdapContactInterfaceProvider}.
@@ -87,7 +100,7 @@ public final class LdapContactInterfaceProvider implements ContactInterfaceProvi
     }
 
     public ContactInterface newContactInterface(final Session session) throws OXException {
-        final LdapContactInterface ldapContactInterface = new LdapContactInterface(contextId, adminId, folderProperties, folderId);
+        final LdapContactInterface ldapContactInterface = new LdapContactInterface(contextId, adminId, folderProperties, folderId, this);
         ldapContactInterface.setSession(session);
         return ldapContactInterface;
     }

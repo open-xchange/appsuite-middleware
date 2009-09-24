@@ -64,6 +64,7 @@ import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link LdapActivator}
@@ -88,7 +89,7 @@ public final class LdapActivator extends DeferredActivator {
     }
 
     private static final Class<?>[] NEEDED_SERVICES = {
-            ConfigurationService.class, ContextService.class };
+            ConfigurationService.class, ContextService.class, TimerService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -68,6 +68,7 @@ import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapInterface;
 import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.ldap.LdapInterface.FillClosure;
+import com.openexchange.contacts.ldap.osgi.ServiceRegistry;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
@@ -83,11 +84,47 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
 public class LdapContactInterface implements ContactInterface {
+
+    private static final int TASK_DELAY = 2000;
+
+    private class ContactLoaderTask implements Runnable {
+        
+        private final LdapContactInterfaceProvider contactIFace;
+        
+        private final Set<Integer> columns;
+        
+        private final int folderId;
+
+        public ContactLoaderTask(final LdapContactInterfaceProvider contactIFace, final int folderId, final Set<Integer> columns) {
+            super();
+            this.contactIFace = contactIFace;
+            this.folderId = folderId;
+            this.columns = columns;
+        }
+
+        public void run() {
+            try {
+                final List<Contact> ldapContacts = getLDAPContacts(folderId, columns, null, null, null, false);
+                this.contactIFace.rwlock_cached_contacts.writeLock().lock();
+                try {
+                    this.contactIFace.cached_contacts = ldapContacts;
+                    System.out.println("Refreshed folder: " + folderid);
+                } finally {
+                    this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
+                }
+            } catch (final LdapException e) {
+                LOG.error(e.getMessage(), e);
+            }
+
+        }
+
+    }
 
     private static final ArrayIterator<Contact> EMPTY_ARRAY_ITERATOR = new ArrayIterator<Contact>(new Contact[0]);
 
@@ -138,13 +175,16 @@ public class LdapContactInterface implements ContactInterface {
     
     private final FolderProperties folderprop;
     
+    private final LdapContactInterfaceProvider contactIFace;
+    
     private Session session;
     
-    public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid) {
+    public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid, final LdapContactInterfaceProvider contactIFace) {
         this.context = context;
         this.admin_id = admin_id;
         this.folderprop = folderprop;
         this.folderid = folderid;
+        this.contactIFace = contactIFace;
     }
     
     
@@ -275,7 +315,38 @@ public class LdapContactInterface implements ContactInterface {
         if (0 != orderBy) {
             columns.addAll(getColumnSet(new int[]{orderBy}));
         }
-        final ArrayList<Contact> arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
+        
+        final List<Contact> arrayList;
+        // If a AdminDN is used, all users see the same contacts, so we can cache them...
+        if (contentTheSameForAll()) {
+            this.contactIFace.rwlock_cached_contacts.writeLock().lock();
+            if (null == this.contactIFace.cached_contacts) {
+                try {
+                    // Fill
+                    arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
+                    this.contactIFace.cached_contacts = Collections.synchronizedList(new ArrayList<Contact>());
+                    this.contactIFace.cached_contacts.addAll(arrayList);
+                } finally {
+                    this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
+                }
+                // Start thread
+                ServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(new ContactLoaderTask(this.contactIFace, folderId, columns), TASK_DELAY, TASK_DELAY);
+            } else {
+                try {
+                    try {
+                        this.contactIFace.rwlock_cached_contacts.readLock().lock();
+                    } finally {
+                        this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
+                    }
+                    arrayList = this.contactIFace.cached_contacts;
+                } finally {
+                    this.contactIFace.rwlock_cached_contacts.readLock().unlock();
+                }
+            }
+        } else {
+            arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
+            
+        }
         
         // Get only the needed parts...
         final List<Contact> subList = getSubList(from, to, arrayList);
@@ -394,6 +465,11 @@ public class LdapContactInterface implements ContactInterface {
         }
     }
 
+    private boolean contentTheSameForAll() {
+        return FolderProperties.AuthType.AdminDN.equals(folderprop.getAuthtype());
+    }
+
+
     private Set<Integer> getColumnSet(final int[] cols) {
         final Set<Integer> columns = new HashSet<Integer>();
         for (final int col : cols) {
@@ -404,12 +480,16 @@ public class LdapContactInterface implements ContactInterface {
 
     @SuppressWarnings("unchecked")
     private Map<Integer, String> getKeyMappingTable() throws LdapException {
-        final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
-        if (null == keys) {
-            throw new LdapException(Code.NO_KEYS_MAPPING_TABLE_FOUND);
+        if (contentTheSameForAll()) {
+            return this.contactIFace.keytable;
+        } else {
+            final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
+            if (null == keys) {
+                throw new LdapException(Code.NO_KEYS_MAPPING_TABLE_FOUND);
+            }
+            final Map<Integer, String> table = (Map<Integer, String>) keys;
+            return table;
         }
-        final Map<Integer, String> table = (Map<Integer, String>) keys;
-        return table;
     }
 
 
@@ -485,7 +565,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private List<Contact> getSubList(int from, int to, final ArrayList<Contact> arrayList) {
+    private List<Contact> getSubList(int from, int to, final List<Contact> arrayList) {
         final int size = arrayList.size();
         if (from <= 0 && to >= size) {
             return arrayList;
@@ -508,6 +588,19 @@ public class LdapContactInterface implements ContactInterface {
                 return ldapUidToOxUid(uid, getValuesMappingTable(), getKeyMappingTable());
             }
 
+            private Integer ldapUidToOxUid(final String uid, final Map<String, Integer> values, final Map<Integer, String> keys) throws LdapException {
+                final Integer number = values.get(uid);
+                if (null != number) {
+                    return number;
+                } else {
+                    // First we add to the keys table than we fetch the values one and add there too
+                    final Integer newvalue = Autoboxing.I(values.size()+1);
+                    values.put(uid, newvalue);
+                    keys.put(newvalue, uid);
+                    return newvalue;
+                }
+            }
+
         };
     }
 
@@ -524,46 +617,53 @@ public class LdapContactInterface implements ContactInterface {
 
     @SuppressWarnings("unchecked")
     private Map<String, Integer> getValuesMappingTable() throws LdapException {
-        final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
-        if (null == values) {
-            throw new LdapException(Code.NO_VALUES_MAPPING_TABLE_FOUND);
+        if (contentTheSameForAll()) {
+            return this.contactIFace.valuetable;
+        } else {
+            final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
+            if (null == values) {
+                throw new LdapException(Code.NO_VALUES_MAPPING_TABLE_FOUND);
+            }
+            final Map<String, Integer> table = (Map<String, Integer>) values;
+            return table;
         }
-        final Map<String, Integer> table = (Map<String, Integer>) values;
-        return table;
-    
     }
 
 
     private void initMappingTable() {
-        // We only add the tables to the session if this is desired through the config file
+        // We only need the mapping tables if this is desire through the config file
         if (folderprop.isMemorymapping()) {
-            final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
-            final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
-            if (null == keys) {
-                // Mapping table for this session was never initialized, so we do it here...
-                this.session.setParameter(MAPPING_TABLE_KEYS, new ConcurrentHashMap<Integer, String>());
-            }
-            if (null == values) {
-                // Mapping table for this session was never initialized, so we do it here...
-                this.session.setParameter(MAPPING_TABLE_VALUES, new ConcurrentHashMap<String, Integer>());
+            if (contentTheSameForAll()) {
+                if (null == this.contactIFace.keytable) {
+                    synchronized (this) {
+                        if (null == this.contactIFace.keytable) {
+                            this.contactIFace.keytable = new ConcurrentHashMap<Integer, String>();
+                        }
+                    }
+                }
+                if (null == this.contactIFace.valuetable) {
+                    synchronized (this) {
+                        if (null == this.contactIFace.valuetable) {
+                            this.contactIFace.valuetable = new ConcurrentHashMap<String, Integer>();
+                        }
+                    }
+                }
+            } else {
+                final Object keys = this.session.getParameter(MAPPING_TABLE_KEYS);
+                final Object values = this.session.getParameter(MAPPING_TABLE_VALUES);
+                if (null == keys) {
+                    // Mapping table for this session was never initialized, so we do it here...
+                    this.session.setParameter(MAPPING_TABLE_KEYS, new ConcurrentHashMap<Integer, String>());
+                }
+                if (null == values) {
+                    // Mapping table for this session was never initialized, so we do it here...
+                    this.session.setParameter(MAPPING_TABLE_VALUES, new ConcurrentHashMap<String, Integer>());
+                }
             }
         }
     }
 
 
-    private Integer ldapUidToOxUid(final String uid, final Map<String, Integer> values, final Map<Integer, String> keys) throws LdapException {
-        final Integer number = values.get(uid);
-        if (null != number) {
-            return number;
-        } else {
-            // First we add to the keys table than we fetch the values one and add there too
-            final Integer newvalue = Autoboxing.I(values.size()+1);
-            values.put(uid, newvalue);
-            keys.put(newvalue, uid);
-            return newvalue;
-        }
-    }
-    
     private String oxUidToLdapUid(final int uid) throws LdapException {
         if (folderprop.isMemorymapping()) {
             final Map<Integer, String> keys = getKeyMappingTable();
