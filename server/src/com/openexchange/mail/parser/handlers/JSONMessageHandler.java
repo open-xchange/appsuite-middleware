@@ -585,13 +585,14 @@ public final class JSONMessageHandler implements MailMessageHandler {
             /*
              * Just usual plain text
              */
-            asPlainText(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode));
+            // asPlainText(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode));
             if (textAppended) {
                 /*
                  * A plain text message body has already been detected; append inline text as an attachment, too
                  */
                 asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
             } else {
+                asPlainText(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode));
                 textAppended = true;
             }
             return true;
