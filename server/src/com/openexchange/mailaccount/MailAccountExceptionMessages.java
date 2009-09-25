@@ -96,7 +96,7 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
      */
     PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_ENCRYPTION_FAILED_MSG, Category.CODE_ERROR, 9),
     /**
-     * Password decryption failed.
+     * Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
      */
     PASSWORD_DECRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_DECRYPTION_FAILED_MSG, Category.CODE_ERROR, 10),
     /**

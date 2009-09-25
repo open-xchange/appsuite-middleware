@@ -88,8 +88,8 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Password encryption failed.
     public static final String PASSWORD_ENCRYPTION_FAILED_MSG = "Password encryption failed.";
 
-    // Password decryption failed.
-    public static final String PASSWORD_DECRYPTION_FAILED_MSG = "Password decryption failed.";
+    // Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
+    public static final String PASSWORD_DECRYPTION_FAILED_MSG = "Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).";
 
     // The Unified INBOX account already exists for user %1$s in context %2$s.
     public static final String DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG = "The Unified INBOX account already exists for user %1$s in context %2$s.";
