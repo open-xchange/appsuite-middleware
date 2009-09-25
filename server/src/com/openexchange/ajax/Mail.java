@@ -113,6 +113,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
@@ -156,6 +157,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1068,7 +1070,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                          */
                         mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                     } else if (wasUnseen) {
-                        triggerContactCollector(session, mail);
+                        /*
+                         * Trigger contact collector
+                         */
+                        try {
+                            if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
+                                session.getContextId(),
+                                session.getUserId()).booleanValue()) {
+                                triggerContactCollector(session, mail);
+                            }
+                        } catch (final SettingException e) {
+                            LOG.warn("Contact collector could not be triggered.", e);
+                        }
                     }
                 } else if (showMessageHeaders) {
                     final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
@@ -3540,7 +3553,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                             /*
                              * Trigger contact collector
                              */
-                            triggerContactCollector(session, composedMails[0]);
+                            try {
+                                if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailTransport(
+                                    session.getContextId(),
+                                    session.getUserId()).booleanValue()) {
+                                    triggerContactCollector(session, composedMails[0]);
+                                }
+                            } catch (final SettingException e) {
+                                LOG.warn("Contact collector could not be triggered.", e);
+                            }
                         }
                     }
                     if (msgIdentifier == null) {
