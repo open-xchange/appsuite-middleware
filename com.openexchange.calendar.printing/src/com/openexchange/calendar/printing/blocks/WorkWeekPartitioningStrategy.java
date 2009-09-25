@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPTool;
 import com.openexchange.calendar.printing.CPType;
-import com.openexchange.groupware.container.Appointment;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
