@@ -50,9 +50,13 @@
 package com.openexchange.contactcollector.internal;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -62,8 +66,11 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * {@link ContactCollectorServiceImpl}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
+
+    private TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>> aliasesMap;
 
     /**
      * Initializes a new {@link ContactCollectorServiceImpl}.
@@ -79,18 +86,31 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         final ThreadPoolService threadPoolService = ServiceRegistry.getInstance().getService(ThreadPoolService.class);
         if (null == threadPoolService) {
             // Run in calling thread
-            new Memorizer(addresses, session).run();
+            new Memorizer(addresses, session, aliasesMap).run();
         } else {
-            threadPoolService.submit(ThreadPools.task(new Memorizer(addresses, session), "ContactCollector"), CallerRunsBehavior.getInstance());
+            threadPoolService.submit(
+                ThreadPools.task(new Memorizer(addresses, session, aliasesMap), "ContactCollector"),
+                CallerRunsBehavior.getInstance());
         }
     }
 
-    public void start() {
-        
+    /**
+     * Starts this contact collector service implementation.
+     * 
+     * @throws ServiceException If a needed service is missing
+     */
+    public void start() throws ServiceException {
+        aliasesMap = new TimeoutConcurrentMap<Integer, Future<Set<InternetAddress>>>(60, true);
     }
 
+    /**
+     * Stops this contact collector service implementation.
+     */
     public void stop() {
-        
+        if (null != aliasesMap) {
+            aliasesMap.dispose();
+            aliasesMap = null;
+        }
     }
-    
+
 }

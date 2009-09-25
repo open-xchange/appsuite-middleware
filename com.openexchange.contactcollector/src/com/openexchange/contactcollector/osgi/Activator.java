@@ -107,9 +107,14 @@ public class Activator extends DeferredActivator {
         }
 
         collectorInstance = new ContactCollectorServiceImpl();
+        collectorInstance.start();
+
         registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null);
+
         registryCollector = context.registerService(ContactCollectorService.class.getName(), collectorInstance, null);
+
         registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
+
         registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
     }
 
@@ -127,6 +132,7 @@ public class Activator extends DeferredActivator {
         registryFolderCreator.unregister();
         registryFolderCreator = null;
 
+        collectorInstance.stop();
         collectorInstance = null;
         /*
          * Clear service registry
