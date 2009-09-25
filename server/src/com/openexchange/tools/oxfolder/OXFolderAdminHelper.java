@@ -121,7 +121,7 @@ public final class OXFolderAdminHelper {
      */
 
     /**
-     * Enabled/Disables specified user's global address book permission.
+     * Enables/Disables specified user's global address book permission.
      * 
      * @param cid The context ID
      * @param userId The user ID
