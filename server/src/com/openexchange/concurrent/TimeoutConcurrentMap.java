@@ -255,6 +255,10 @@ public final class TimeoutConcurrentMap<K, V> {
      * @return The value associated with given key or <code>null</code>
      */
     public V get(final K key) {
+        /*
+         * It is possible that a get() is performed while a running timer attempts to remove this value. In this case the caller receives
+         * associated value although it is actually timed-out. A little misbehavior that is acceptable.
+         */
         final ValueWrapper<V> vw = map.get(key);
         if (null == vw) {
             return null;
