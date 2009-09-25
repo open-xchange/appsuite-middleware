@@ -255,14 +255,11 @@ public final class TimeoutConcurrentMap<K, V> {
      * @return The value associated with given key or <code>null</code>
      */
     public V get(final K key) {
-        // Remove from map to avoid time-out event in the meantime
-        final ValueWrapper<V> vw = map.remove(key);
+        final ValueWrapper<V> vw = map.get(key);
         if (null == vw) {
             return null;
         }
         vw.touch();
-        // Restore to map
-        map.put(key, vw);
         return vw.value;
     }
 
@@ -312,7 +309,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
         public final boolean forceTimeout;
 
-        private long lastAccessed;
+        public volatile long lastAccessed;
 
         public ValueWrapper(final V value, final long ttl, final boolean forceTimeout, final TimeoutListener<V> timeoutListener) {
             super();
@@ -331,10 +328,6 @@ public final class TimeoutConcurrentMap<K, V> {
             lastAccessed = System.currentTimeMillis();
         }
 
-        public long getLastAccessed() {
-            return lastAccessed;
-        }
-
     }
 
     private static final class TimedRunnable<K, V> implements Runnable {
@@ -350,7 +343,7 @@ public final class TimeoutConcurrentMap<K, V> {
             final long now = System.currentTimeMillis();
             for (final Iterator<ValueWrapper<V>> it = tmap.values().iterator(); it.hasNext();) {
                 final ValueWrapper<V> vw = it.next();
-                if ((now - vw.getLastAccessed()) > vw.ttl) {
+                if ((now - vw.lastAccessed) > vw.ttl) {
                     it.remove();
                     if (vw.timeoutListener != null) {
                         vw.timeoutListener.onTimeout(vw.value);
