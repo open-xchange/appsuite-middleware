@@ -85,4 +85,12 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         }
     }
 
+    public void start() {
+        
+    }
+
+    public void stop() {
+        
+    }
+    
 }
