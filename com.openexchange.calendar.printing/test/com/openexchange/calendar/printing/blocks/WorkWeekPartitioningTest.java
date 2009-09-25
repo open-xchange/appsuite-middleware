@@ -79,10 +79,10 @@ AbstractDateTest {
         CPAppointment app2 = new CPAppointment();
         app1.setTitle("First appointment");
         app2.setTitle("Second appointment");
-        app1.setStart(dates[0]);
-        app1.setEnd(dates[1]);
-        app2.setStart(dates[2]);
-        app2.setEnd(dates[3]);
+        app1.setStartDate(dates[0]);
+        app1.setEndDate(dates[1]);
+        app2.setStartDate(dates[2]);
+        app2.setEndDate(dates[3]);
         
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1,app2}));
         assertEquals("Two consecutive days, Wednesday and Thursday, should need only one partition", 1, partitions.getFormattingInformation().size());
@@ -93,8 +93,8 @@ AbstractDateTest {
         Date[] dates = getFourDates(SUNDAY());
         CPAppointment weekendAppointment = new CPAppointment();
         weekendAppointment.setTitle("First appointment");
-        weekendAppointment.setStart(dates[0]);
-        weekendAppointment.setEnd(dates[1]);
+        weekendAppointment.setStartDate(dates[0]);
+        weekendAppointment.setEndDate(dates[1]);
         
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{weekendAppointment}));
         assertEquals("Should have no formatting info", 0, partitions.getFormattingInformation().size());
@@ -105,14 +105,14 @@ AbstractDateTest {
         Date[] dates = getFourDates(THURSDAY());
         CPAppointment app1 = new CPAppointment();
         app1.setTitle("First appointment");
-        app1.setStart(dates[0]);
-        app1.setEnd(dates[1]);
+        app1.setStartDate(dates[0]);
+        app1.setEndDate(dates[1]);
         
         dates = getFourDates(WEDNESDAY_NEXT_WEEK());
         CPAppointment app2 = new CPAppointment();
         app2.setTitle("Second appointment");
-        app2.setStart(dates[0]);
-        app2.setEnd(dates[1]);
+        app2.setStartDate(dates[0]);
+        app2.setEndDate(dates[1]);
         
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1, app2}));
         assertEquals("Should contain two elements", 2, partitions.getAppointments().size());

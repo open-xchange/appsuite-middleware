@@ -61,7 +61,7 @@ public class CPAppointment {
 
     private String title, description, location;
 
-    private Date start, end;
+    private Date startDate, endDate;
 
     public CPAppointment() {
         super();
@@ -72,8 +72,8 @@ public class CPAppointment {
         setTitle(mother.getTitle());
         setDescription(mother.getNote());
         setLocation(mother.getLocation());
-        setStart(mother.getStartDate());
-        setEnd(mother.getEndDate());
+        setStartDate(mother.getStartDate());
+        setEndDate(mother.getEndDate());
     }
 
     public String getTitle() {
@@ -88,12 +88,12 @@ public class CPAppointment {
         return location;
     }
 
-    public Date getStart() {
-        return start;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public Date getEnd() {
-        return end;
+    public Date getEndDate() {
+        return endDate;
     }
 
     public void setTitle(String title) {
@@ -108,11 +108,11 @@ public class CPAppointment {
         this.location = location;
     }
 
-    public void setStart(Date start) {
-        this.start = start;
+    public void setStartDate(Date start) {
+        this.startDate = start;
     }
 
-    public void setEnd(Date end) {
-        this.end = end;
+    public void setEndDate(Date end) {
+        this.endDate = end;
     }
 }

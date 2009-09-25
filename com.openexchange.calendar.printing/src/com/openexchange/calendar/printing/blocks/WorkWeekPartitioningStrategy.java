@@ -97,29 +97,29 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
     }
 
     private boolean isOnTwoDays(CPAppointment appointment) {
-        return isOnDifferentDays(appointment.getStart(), appointment.getEnd());
+        return isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate());
     }
 
     private boolean isInTwoWeeks(CPAppointment appointment) {
-        return isInDifferentWeeks(appointment.getStart(), appointment.getEnd());
+        return isInDifferentWeeks(appointment.getStartDate(), appointment.getEndDate());
     }
 
     private boolean isSignalForNewDay(CPAppointment appointment) {
         if (lastAppointment == null)
             return false;
 
-        return isOnDifferentDays(lastAppointment.getStart(), appointment.getStart()) || isOnDifferentDays(
-            lastAppointment.getEnd(),
-            appointment.getEnd());
+        return isOnDifferentDays(lastAppointment.getStartDate(), appointment.getStartDate()) || isOnDifferentDays(
+            lastAppointment.getEndDate(),
+            appointment.getEndDate());
     }
 
     private boolean isSignalForNewWeek(CPAppointment appointment) {
         if (lastAppointment == null)
             return false;
 
-        return isInDifferentWeeks(lastAppointment.getStart(), appointment.getStart()) || isInDifferentWeeks(
-            lastAppointment.getEnd(),
-            appointment.getEnd());
+        return isInDifferentWeeks(lastAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
+            lastAppointment.getEndDate(),
+            appointment.getEndDate());
     }
 
 }

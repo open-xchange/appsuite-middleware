@@ -104,9 +104,9 @@ public class AbstractPartitioningStrategy {
      * @return true if start or end date are in work week, false otherwise (also if not set at all)
      */
     public boolean isWorkWeekAppointment(CPAppointment appointment) {
-        if (appointment.getStart() != null && isInWorkWeek(appointment.getStart()))
+        if (appointment.getStartDate() != null && isInWorkWeek(appointment.getStartDate()))
             return true;
-        if (appointment.getStart() != null && isInWorkWeek(appointment.getStart()))
+        if (appointment.getStartDate() != null && isInWorkWeek(appointment.getStartDate()))
             return true;
         return false;
     }

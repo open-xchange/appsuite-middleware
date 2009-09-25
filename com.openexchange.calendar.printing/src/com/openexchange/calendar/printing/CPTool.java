@@ -188,8 +188,8 @@ public class CPTool {
             CPAppointment temp = new CPAppointment();
             temp.setTitle(appointment.getTitle());
             RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
-            temp.setStart(new Date(recurringResult.getStart()));
-            temp.setEnd(new Date(recurringResult.getEnd()));
+            temp.setStartDate(new Date(recurringResult.getStart()));
+            temp.setEndDate(new Date(recurringResult.getEnd()));
             all.add(temp);
         }
         return all;
