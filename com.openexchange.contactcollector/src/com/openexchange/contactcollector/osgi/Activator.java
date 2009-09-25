@@ -49,6 +49,8 @@
 
 package com.openexchange.contactcollector.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -56,6 +58,8 @@ import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.preferences.ContactCollectEnabled;
 import com.openexchange.contactcollector.preferences.ContactCollectFolder;
+import com.openexchange.contactcollector.preferences.ContactCollectOnMailAccess;
+import com.openexchange.contactcollector.preferences.ContactCollectOnMailTransport;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -72,13 +76,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class Activator extends DeferredActivator {
 
-    private ServiceRegistration registryCollector;
-
-    private ServiceRegistration registryPrefItemFolder;
-
-    private ServiceRegistration registryPrefItemEnabled;
-
-    private ServiceRegistration registryFolderCreator;
+    private List<ServiceRegistration> serviceRegistrations;
 
     private ContactCollectorServiceImpl collectorInstance;
 
@@ -105,33 +103,38 @@ public class Activator extends DeferredActivator {
                 }
             }
         }
-
+        /*
+         * Initialize service
+         */
         collectorInstance = new ContactCollectorServiceImpl();
         collectorInstance.start();
-
-        registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null);
-
-        registryCollector = context.registerService(ContactCollectorService.class.getName(), collectorInstance, null);
-
-        registryPrefItemFolder = context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null);
-
-        registryPrefItemEnabled = context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null);
+        /*
+         * Register all
+         */
+        serviceRegistrations = new ArrayList<ServiceRegistration>(6);
+        serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null));
+        serviceRegistrations.add(context.registerService(ContactCollectorService.class.getName(), collectorInstance, null));
+        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null));
+        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null));
+        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectOnMailAccess(), null));
+        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectOnMailTransport(), null));
     }
 
     @Override
     public void stopBundle() throws Exception {
-        registryPrefItemEnabled.unregister();
-        registryPrefItemEnabled = null;
-
-        registryPrefItemFolder.unregister();
-        registryPrefItemFolder = null;
-
-        registryCollector.unregister();
-        registryCollector = null;
-
-        registryFolderCreator.unregister();
-        registryFolderCreator = null;
-
+        /*
+         * Unregister all
+         */
+        if (null != serviceRegistrations) {
+            for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
+                serviceRegistration.unregister();
+            }
+            serviceRegistrations.clear();
+            serviceRegistrations = null;
+        }
+        /*
+         * Stop service
+         */
         collectorInstance.stop();
         collectorInstance = null;
         /*
