@@ -92,7 +92,7 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
      */
     NO_DUPLICATE_DEFAULT(MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG, Category.CODE_ERROR, 8),
     /**
-     * Password encryption failed.
+     * Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
      */
     PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_ENCRYPTION_FAILED_MSG, Category.CODE_ERROR, 9),
     /**

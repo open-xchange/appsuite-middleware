@@ -108,7 +108,7 @@ public abstract class TransportConfig extends MailConfig {
         transportConfig.accountId = accountId;
         fillLoginAndPassword(
             transportConfig,
-            session.getPassword(),
+            session,
             UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLoginInfo(),
             mailAccount);
         String serverURL = TransportConfig.getTransportServerURL(mailAccount);

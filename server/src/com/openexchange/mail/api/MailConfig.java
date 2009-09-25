@@ -280,7 +280,7 @@ public abstract class MailConfig {
             throw new MailException(e);
         }
         mailConfig.accountId = accountId;
-        fillLoginAndPassword(mailConfig, session.getPassword(), UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
+        fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
@@ -378,9 +378,8 @@ public abstract class MailConfig {
      * @throws AbstractOXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws AbstractOXException {
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-            MailAccountStorageService.class,
-            true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
             final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
             if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
@@ -487,10 +486,11 @@ public abstract class MailConfig {
      * @param mailAccount The mail account
      * @throws MailConfigException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final String sessionPassword, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws MailConfigException {
         // Assign login
         mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         // Assign password
+        final String sessionPassword = session.getPassword();
         if (mailAccount.isDefaultAccount()) {
             final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
@@ -513,7 +513,12 @@ public abstract class MailConfig {
                 try {
                     mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, sessionPassword);
                 } catch (final GeneralSecurityException e) {
-                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(e, new Object[0]));
+                    throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
+                        e,
+                        mailConfig.login,
+                        mailAccount.getMailServer(),
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId())));
                 }
             }
         }

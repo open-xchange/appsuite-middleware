@@ -1,3 +1,7 @@
+* 2009-09-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #14570: Enhanced error message by necessary information to recognize affected user and account
+
 * 2009-09-23 - marcus.klein@open-xchange.com
 
  - Bugfix #14558: Implemented setting the confirm message for tasks through WebDAV/XML interface.
