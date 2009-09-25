@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing.blocks;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.calendar.printing.AbstractDateTest;
 import com.openexchange.calendar.printing.CPAppointment;
@@ -85,7 +86,7 @@ AbstractDateTest {
         app2.setEndDate(dates[3]);
         
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1,app2}));
-        assertEquals("Two consecutive days, Wednesday and Thursday, should need only one partition", 1, partitions.getFormattingInformation().size());
+        assertEquals("Two consecutive days, Wednesday and Thursday, should need only one partition break and one day info", 2, partitions.getFormattingInformation().size());
         assertEquals("Partition should contain two appointments", 2, partitions.getAppointments().size());
     }
 
@@ -126,4 +127,23 @@ AbstractDateTest {
         assertTrue("Should contain a day break after the first element", daybreakFound);
         assertTrue("Should contain a week break after the first element", weekbreakFound);
     }
+    
+    public void testShouldDetermineMissingDays(){
+        int[] daysInbetween = strategy.getMissingDaysInbetween(THURSDAY().getTime(), SUNDAY().getTime());
+        assertEquals("Should have two days inbetween", 2, daysInbetween.length);
+        assertEquals("First day inbetween would be Friday", Calendar.FRIDAY, daysInbetween[0]);
+        assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, daysInbetween[1]);
+    }
+    
+    public void testShouldDetermineMissingDaysBetweenTwoWeeks(){
+        int[] daysInbetween = strategy.getMissingDaysInbetween(THURSDAY().getTime(), WEDNESDAY_NEXT_WEEK().getTime());
+        assertEquals("Should have two days inbetween", 5, daysInbetween.length);
+        assertEquals("First day inbetween would be Friday", Calendar.FRIDAY, daysInbetween[0]);
+        assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, daysInbetween[1]);
+        assertEquals("Third day inbetween would be Sunday", Calendar.SUNDAY, daysInbetween[2]);
+        assertEquals("Fourth day inbetween would be Monday", Calendar.MONDAY, daysInbetween[3]);
+        assertEquals("Fifth day inbetween would be Tuesday", Calendar.TUESDAY, daysInbetween[4]);
+
+    }
+
 }

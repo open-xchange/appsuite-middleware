@@ -49,6 +49,8 @@
 
 package com.openexchange.calendar.printing.blocks;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPTool;
@@ -62,6 +64,8 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
     public static final int DAYBREAK = 0;
 
     public static final int WEEKBREAK = 1;
+    
+    public static final int DAYNAME = 10;
 
     private CPAppointment lastAppointment;
 
@@ -83,8 +87,16 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
             if (isWorkWeekAppointment(appointment))
                 blocks.addAppointment(appointment);
 
-            if (isSignalForNewDay(appointment))
+            if (isSignalForNewDay(appointment)){
                 blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK));
+                blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYNAME, getDayName(appointment.getStartDate())));
+            }
+            
+            if (i > 0 && isMissingDaysInbetween(lastAppointment.getStartDate(), appointment.getStartDate()) ){
+                for(int day : getMissingDaysInbetween(lastAppointment.getStartDate(), appointment.getStartDate())){
+                    blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYNAME, String.valueOf(day)));
+                }
+            }
 
             if (isSignalForNewWeek(appointment))
                 blocks.addFormattingInformation(new CPFormattingInfomation(i, WEEKBREAK));
@@ -94,6 +106,12 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
                     blocks.addAppointment(appointment); // store again for use in second block
         }
         return blocks;
+    }
+
+    private String getDayName(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return String.valueOf(cal.get(Calendar.DAY_OF_WEEK));
     }
 
     private boolean isOnTwoDays(CPAppointment appointment) {

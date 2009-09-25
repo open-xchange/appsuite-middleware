@@ -91,13 +91,15 @@ public class CPServlet extends PermissionServlet {
 
     private static final Log LOG = LogFactory.getLog(CPServlet.class);
 
-    private static final String APPOINTMENTBLOCKS = "appointmentblocks";
+    private static final String APPOINTMENTS = "appointments";
 
     private static final String VIEW_START = "start";
 
     private static final String VIEW_END = "end";
 
     private static final String DEBUG = "debuggingItems";
+
+    private static final String FORMATTINGINFO = "formattinginfo";
 
     public static void setTemplateService(TemplateService service) {
         templates = service;
@@ -158,10 +160,11 @@ public class CPServlet extends PermissionServlet {
             CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
-            CPPartition blocks = factory.partition(expandedAppointments);
+            CPPartition partitions = factory.partition(expandedAppointments);
 
             Map<String, Object> variables = new HashMap<String, Object>();
-            variables.put(APPOINTMENTBLOCKS, blocks);
+            variables.put(APPOINTMENTS, partitions.getAppointments());
+            variables.put(FORMATTINGINFO, partitions.getFormattingInformation());
             variables.put(VIEW_START, params.getStart());
             variables.put(VIEW_END, params.getEnd());
             variables.put(DEBUG, debuggingItems);
