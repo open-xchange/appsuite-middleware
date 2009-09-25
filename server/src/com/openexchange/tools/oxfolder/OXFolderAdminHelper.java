@@ -65,8 +65,11 @@ import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
+import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -116,6 +119,102 @@ public final class OXFolderAdminHelper {
      * INSERT INTO oxfolder_specialfolders VALUES ('user', 7); INSERT INTO oxfolder_userfolders VALUES ('projects',
      * 'projects/projects_list_all', null, 'folder/item_projects.png');
      */
+
+    /**
+     * Enabled/Disables specified user's global address book permission.
+     * 
+     * @param cid The context ID
+     * @param userId The user ID
+     * @param enable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
+     * @param writeCon A writable connection
+     * @throws OXException If an error occurs
+     */
+    public void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            stmt.setInt(pos++, userId);
+            rs = stmt.executeQuery();
+            final boolean update = rs.next();
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            /*
+             * Insert/Update
+             */
+            if (update) {
+                stmt = writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                pos = 1;
+                if (enable) {
+                    stmt.setInt(pos++, OCLPermission.READ_FOLDER);
+                    stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
+                    stmt.setInt(pos++, OCLPermission.WRITE_OWN_OBJECTS);
+                } else {
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                }
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                stmt.setInt(pos++, userId);
+                stmt.executeUpdate();
+            } else {
+                stmt = writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                pos = 1;
+                stmt.setInt(pos++, cid); // cid
+                stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID); // fuid
+                stmt.setInt(pos++, userId); // permission_id
+                if (enable) {
+                    stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
+                    stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS); // orp
+                    stmt.setInt(pos++, OCLPermission.WRITE_OWN_OBJECTS); // owp
+                } else {
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // fp
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
+                }
+                stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
+                stmt.setInt(pos++, 0); // admin_flag
+                stmt.setInt(pos++, 0); // group_flag
+                stmt.setInt(pos++, 0); // system
+                stmt.executeUpdate();
+            }
+            DBUtils.closeSQLStuff(stmt);
+            stmt = null;
+            /*
+             * Update last-modified of folder
+             */
+            final int admin = getContextAdminID(cid, writeCon);
+            final ContextImpl ctx = new ContextImpl(cid);
+            ctx.setMailadmin(admin);
+            OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
+            /*
+             * Update caches
+             */
+            try {
+                if (FolderCacheManager.isEnabled()) {
+                    FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
+                }
+                if (FolderQueryCacheManager.isInitialized()) {
+                    FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
+                }
+                if (CalendarCache.isInitialized()) {
+                    CalendarCache.getInstance().invalidateGroup(cid);
+                }
+            } catch (final AbstractOXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
 
     private static final String STR_TABLE = "#TABLE#";
 
