@@ -72,6 +72,8 @@ public final class TimeoutConcurrentMap<K, V> {
 
     private final ScheduledTimerTask timeoutTask;
 
+    private final boolean forceTimeout;
+
     private TimeoutListener<V> defaultTimeoutListener;
 
     private volatile boolean disposed;
@@ -83,7 +85,20 @@ public final class TimeoutConcurrentMap<K, V> {
      * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
      */
     public TimeoutConcurrentMap(final int shrinkerIntervalSeconds) throws ServiceException {
+        this(shrinkerIntervalSeconds, false);
+    }
+
+    /**
+     * Initializes a new {@link TimeoutConcurrentMap}.
+     * 
+     * @param shrinkerIntervalSeconds The shrinker interval in seconds
+     * @param forceTimeout <code>true</code> to force initial time-out of contained elements even if they were "touched"; otherwise
+     *            <code>false</code> to keep them alive as long as not timed-out
+     * @throws ServiceException If initialization fails due to missing {@link TimerService timer service}
+     */
+    public TimeoutConcurrentMap(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws ServiceException {
         super();
+        this.forceTimeout = forceTimeout;
         map = new ConcurrentHashMap<K, ValueWrapper<V>>();
         final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
         timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
@@ -180,7 +195,7 @@ public final class TimeoutConcurrentMap<K, V> {
         if (disposed) {
             throw new IllegalStateException("time-out map was disposed.");
         }
-        final ValueWrapper<V> vw = map.put(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, timeoutListener));
+        final ValueWrapper<V> vw = map.put(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, forceTimeout, timeoutListener));
         if (null == vw) {
             return null;
         }
@@ -215,7 +230,8 @@ public final class TimeoutConcurrentMap<K, V> {
         if (disposed) {
             throw new IllegalStateException("time-out map was disposed.");
         }
-        final ValueWrapper<V> vw = map.putIfAbsent(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, timeoutListener));
+        final ValueWrapper<V> vw =
+            map.putIfAbsent(key, new ValueWrapper<V>(value, timeToLiveSeconds * 1000, forceTimeout, timeoutListener));
         if (null == vw) {
             return null;
         }
@@ -294,17 +310,24 @@ public final class TimeoutConcurrentMap<K, V> {
 
         public final TimeoutListener<V> timeoutListener;
 
+        public final boolean forceTimeout;
+
         private long lastAccessed;
 
-        public ValueWrapper(final V value, final long ttl, final TimeoutListener<V> timeoutListener) {
+        public ValueWrapper(final V value, final long ttl, final boolean forceTimeout, final TimeoutListener<V> timeoutListener) {
             super();
             this.value = value;
             this.ttl = ttl;
             lastAccessed = System.currentTimeMillis();
             this.timeoutListener = timeoutListener;
+            this.forceTimeout = forceTimeout;
         }
 
         public void touch() {
+            if (forceTimeout) {
+                // Force time out; don't touch last-accessed time stamp.
+                return;
+            }
             lastAccessed = System.currentTimeMillis();
         }
 
