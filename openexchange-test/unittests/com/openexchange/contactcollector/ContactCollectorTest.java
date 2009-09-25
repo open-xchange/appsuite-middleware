@@ -66,8 +66,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -124,7 +124,7 @@ public class ContactCollectorTest extends TestCase {
 
     public void testNewContact() throws Throwable {
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
-        collector.start();
+        //collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
@@ -135,13 +135,13 @@ public class ContactCollectorTest extends TestCase {
             assertEquals("No object found", 1, contacts.size());
             assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
         } finally {
-            collector.stop();
+            //collector.stop();
         }
     }
 
     public void testExistingContact() throws Throwable {
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
-        collector.start();
+        //collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
@@ -156,7 +156,7 @@ public class ContactCollectorTest extends TestCase {
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
             assertEquals("Count does not match", 3, contacts.get(0).getUseCount());
         } finally {
-            collector.stop();
+            //collector.stop();
         }
     }
 
