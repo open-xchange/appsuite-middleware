@@ -12,6 +12,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.outlook.updater.Enabled;
 import com.openexchange.outlook.updater.ResourceLoader;
+import com.openexchange.outlook.updater.UpdaterFileDeliveryServlet;
 import com.openexchange.outlook.updater.UpdaterInstallerAssembler;
 import com.openexchange.outlook.updater.UpdaterInstallerServlet;
 import com.openexchange.outlook.updater.UpdaterXMLServlet;
@@ -24,12 +25,16 @@ public class Activator extends DeferredActivator {
     private static final String PATH_PROP = "com.openexchange.outlook.updater.path";
     private static final String ALIAS = "/ajax/updater/installer/default";
     private static final String UPDATER_XML_ALIAS = "/ajax/updater/update.xml";
+    private static final String UPDATER_FILES_ALIAS = "/ajax/updater/files/*";
+
+    
     private static final String STANDARD_NAME_PROP = "com.openexchange.outlook.updater.baseName";
     
     private ServletRegistration registration, xmlRegistration;
     private ResourceLoader loader;
     private ConfigurationService config;
     private ServiceRegistration preferenceRegistration;
+    private ServletRegistration filesRegistration;
 
     
 	@Override
@@ -76,13 +81,16 @@ public class Activator extends DeferredActivator {
         UpdaterInstallerAssembler assembler = new UpdaterInstallerAssembler(loader);
         
         UpdaterInstallerServlet.setAssembler(assembler);
-        UpdaterInstallerServlet.setAlias(ALIAS);
+        
+        UpdaterFileDeliveryServlet.setAlias(UPDATER_FILES_ALIAS);
+        UpdaterFileDeliveryServlet.setResourceLoader(loader);
         
         UpdaterXMLServlet.setTemplateService(getService(TemplateService.class));
         UpdaterXMLServlet.setMailAccountStorageService(getService(MailAccountStorageService.class));
         
         registration = new ServletRegistration(context, new UpdaterInstallerServlet(), ALIAS);
         xmlRegistration = new ServletRegistration(context, new UpdaterXMLServlet(), UPDATER_XML_ALIAS);
+        filesRegistration = new ServletRegistration(context, new UpdaterFileDeliveryServlet(), UPDATER_FILES_ALIAS);
     }
     
     public void unregister() {
@@ -93,6 +101,9 @@ public class Activator extends DeferredActivator {
         registration = null;
         xmlRegistration.remove();
         xmlRegistration = null;  
+        filesRegistration.remove();
+        filesRegistration = null;
+        
         preferenceRegistration.unregister();
     }
     

@@ -50,85 +50,99 @@
 package com.openexchange.outlook.updater;
 
 import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.PermissionServlet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.webdav.OXServlet;
 
 
 /**
- * {@link UpdaterInstallerServlet}
+ * {@link UpdaterFileDeliveryServlet}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class UpdaterInstallerServlet extends PermissionServlet {
+public class UpdaterFileDeliveryServlet extends OXServlet {
 
-    private static UpdaterInstallerAssembler ASSEMBLER = null;
+    private static final Log LOG = LogFactory.getLog(UpdaterFileDeliveryServlet.class);
+
+    private static ResourceLoader loader;
     
-    private static String standardName;
-    
-    public static void setAssembler(UpdaterInstallerAssembler service) {
-        ASSEMBLER = service;
+    public static void setResourceLoader(ResourceLoader resourceLoader) {
+        loader = resourceLoader;
     }
     
-    public static void setStandardName(String name) {
-        standardName = name;
+    private static String alias;
+    
+    public static void setAlias(String value) {
+        alias = value;
     }
     
     @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserConfiguration().hasWebDAVXML();
+    protected void decrementRequests() {
+    
     }
+
+    @Override
+    protected void incrementRequests() {
+    
+    }
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        InstallerName name = getFilePath(req);
-        
-        String protocol = "http";
-        if(req.getProtocol() == null || req.getProtocol().contains("HTTPS")) {
-           protocol = "https";
-        }
-        
-        StringBuilder builder = new StringBuilder();
-        builder.append(protocol).append("://").append(req.getServerName()).append("/ajax/updater/update.xml");
-        
-        resp.setContentType("application/octet-stream");
-        Tools.removeCachingHeader(resp);
-        resp.setHeader("Content-Disposition", "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(
-            name.getDownloadName(),
-            "UTF-8",
-            req.getHeader("User-Agent").contains("MSIE"))) + "\"");
-        
-        InputStream is = null;
+        Session session = getSession(req);
+        BufferedInputStream is = null;
         try {
-            is = new BufferedInputStream(ASSEMBLER.buildInstaller(builder.toString(), name, getSessionObject(req).getUser().getLocale().toString()));
-        } catch (FileNotFoundException x) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().println("Could not find the file you requested: "+name);
-            return;
+            ServerSessionAdapter serverSession = new ServerSessionAdapter(session);
+            boolean hasWebDAVXML = serverSession.getUserConfiguration().hasWebDAVXML();
+            if(!hasWebDAVXML) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.setContentType("text/plain");
+                resp.getWriter().println("You do not have access to the Outlook Interface.");
+                return;
+            }
+            
+            resp.setContentType("application/octet-stream");
+            Tools.removeCachingHeader(resp);
+            
+            ServletOutputStream outputStream = resp.getOutputStream();
+            InputStream inputStream = loader.get(getFilePath(req));
+            if(inputStream == null) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            is = new BufferedInputStream(inputStream);
+            
+            byte[] buffer = new byte[1024];
+            int bytesRead = 0;
+            while((bytesRead = is.read(buffer))!=0) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.flush();
+        } catch (Throwable t) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            LOG.error(t.getMessage(), t);
+        } finally {
+            if(is != null) {
+                is.close();
+            }
         }
+    }
     
-        ServletOutputStream out = resp.getOutputStream();
-        
-        int data = -1;
-        
-        while((data = is.read()) != -1) {
-            out.write(data);
-        }
-        is.close();
+    private String getFilePath(HttpServletRequest req) {
+        String path = req.getPathInfo().substring(alias.length()-1);
+        return path;
     }
 
-    private InstallerName getFilePath(HttpServletRequest req) {
-        return new InstallerName(standardName);
-    }
-    
-    
-    
 }
