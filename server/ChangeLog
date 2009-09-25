@@ -1,6 +1,7 @@
 * 2009-09-25 - thorben.betten@open-xchange.com
 
  - Bugfix #14570: Enhanced error message by necessary information to recognize affected user and account
+ - Bugfix #14572: More tolerant parsing of GETSCRIPT response
 
 * 2009-09-23 - marcus.klein@open-xchange.com
 
