@@ -437,7 +437,7 @@ public final class Init {
         final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
         final TimerService timerService = (TimerService) services.get(TimerService.class);
         com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
-        DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
+        final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
         Database.setDatabaseService(dbService);
     }
 
@@ -472,6 +472,8 @@ public final class Init {
         reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
         reg.addService(ContextService.class, services.get(ContextService.class));
         reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
+        reg.addService(UserService.class, services.get(UserService.class));
+        reg.addService(TimerService.class, services.get(TimerService.class));
     }
 
     private static void startAndInjectMailAccountStorageService() throws Exception {
@@ -587,7 +589,7 @@ public final class Init {
 
     public static void stopThreadPoolBundle() throws Exception {
         services.remove(TimerService.class);
-        ThreadPoolServiceImpl threadPool = (ThreadPoolServiceImpl) services.remove(ThreadPoolService.class);
+        final ThreadPoolServiceImpl threadPool = (ThreadPoolServiceImpl) services.remove(ThreadPoolService.class);
         threadPool.shutdownNow();
         threadPool.awaitTermination(10000);
     }
