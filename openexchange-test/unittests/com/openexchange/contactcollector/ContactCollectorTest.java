@@ -124,7 +124,7 @@ public class ContactCollectorTest extends TestCase {
 
     public void testNewContact() throws Throwable {
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
-        //collector.start();
+        collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
@@ -135,13 +135,13 @@ public class ContactCollectorTest extends TestCase {
             assertEquals("No object found", 1, contacts.size());
             assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
         } finally {
-            //collector.stop();
+            collector.stop();
         }
     }
 
     public void testExistingContact() throws Throwable {
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
-        //collector.start();
+        collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
@@ -156,7 +156,7 @@ public class ContactCollectorTest extends TestCase {
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
             assertEquals("Count does not match", 3, contacts.get(0).getUseCount());
         } finally {
-            //collector.stop();
+            collector.stop();
         }
     }
 
