@@ -126,8 +126,8 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
          * Check for reply
          */
         {
-            final MailPath msgref;
-            if (ComposeType.REPLY.equals(type) && ((msgref = mail.getMsgref()) != null)) {
+            final MailPath msgref = mail.getMsgref();
+            if (ComposeType.REPLY.equals(type) && (msgref != null)) {
                 final MailAccess<?, ?> access = MailAccess.getInstance(session, msgref.getAccountId());
                 access.connect();
                 try {
