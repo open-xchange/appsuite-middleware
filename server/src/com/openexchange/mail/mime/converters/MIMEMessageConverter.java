@@ -1157,10 +1157,21 @@ public final class MIMEMessageConverter {
                 }
             }
             {
-                final ContentType ct = mail.getContentType();
-                mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-                    (Multipart) msg.getContent(),
-                    ct.getSubType())));
+                try {
+                    final ContentType ct = mail.getContentType();
+                    mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
+                        (Multipart) msg.getContent(),
+                        ct.getSubType())));
+                } catch (final ClassCastException e) {
+                    // Cast to javax.mail.Multipart failed
+                    LOG.warn(
+                        new StringBuilder(256).append(
+                            "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
+                            e.getMessage()).append(
+                            ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have no (file) attachments.").toString(),
+                        e);
+                    mail.setHasAttachment(false);
+                }
             }
             {
                 final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
