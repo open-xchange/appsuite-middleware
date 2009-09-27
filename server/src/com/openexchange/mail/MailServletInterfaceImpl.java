@@ -276,12 +276,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         /*
                          * Handle spam
                          */
-                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(sourceFullname, msgUIDs, false, session);
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
                     } else {
                         /*
                          * Handle ham.
                          */
-                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(sourceFullname, msgUIDs, false, session);
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
                     }
                 }
             }
@@ -322,13 +322,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     /*
                      * Handle ham.
                      */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(sourceFullname, msgUIDs, false, session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
                 }
                 if (SPAM_SPAM == spamActionDest) {
                     /*
                      * Handle spam
                      */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(sourceFullname, msgUIDs, false, session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
                 }
             }
             // Fetch messages from source folder

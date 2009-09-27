@@ -79,10 +79,11 @@ public interface MailService {
      * </pre>
      * 
      * @param session The session
+     * @param accountId The account ID
      * @return An appropriate instance of {@link MailAccess}
      * @throws MailException If an appropriate instance of {@link MailAccess mail access} cannot be initialized
      */
-    public MailAccess<?, ?> getMailAccess(Session session) throws MailException;
+    public MailAccess<?, ?> getMailAccess(Session session, int accountId) throws MailException;
 
     /**
      * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.
@@ -99,9 +100,10 @@ public interface MailService {
      * </pre>
      * 
      * @param session The session providing needed user data
+     * @param accountId The account ID
      * @return An appropriate instance of {@link MailTransport}
      * @throws MailException If an appropriate instance of {@link MailTransport mail transport} cannot be initialized
      */
-    public MailTransport getMailTransport(Session session) throws MailException;
+    public MailTransport getMailTransport(Session session, int accountId) throws MailException;
 
 }

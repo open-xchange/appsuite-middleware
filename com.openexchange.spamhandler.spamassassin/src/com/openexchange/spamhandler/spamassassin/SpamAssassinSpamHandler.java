@@ -88,7 +88,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         
         private final String[] plainMessages;
 
-        public PlainAndNestedMessages(String[] nestedMessages, String[] plainMessages) {
+        public PlainAndNestedMessages(final String[] nestedMessages, final String[] plainMessages) {
             super();
             this.nestedMessages = nestedMessages;
             this.plainMessages = plainMessages;
@@ -114,7 +114,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         
         private final String username;
         
-        public SpamdSettings(String hostname, int port, String username) {
+        public SpamdSettings(final String hostname, final int port, final String username) {
             this.hostname = hostname;
             this.port = port;
             this.username = username;
@@ -139,13 +139,13 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 
     private static class UnwrapParameter {
 
-        private MailAccess<?, ?> m_mailAccess;
+        private final MailAccess<?, ?> m_mailAccess;
 
-        private boolean m_move;
+        private final boolean m_move;
 
-        private String m_spamFullname;
+        private final String m_spamFullname;
 
-        public UnwrapParameter(String spamFullname, boolean move, MailAccess<?, ?> mailAccess) {
+        public UnwrapParameter(final String spamFullname, final boolean move, final MailAccess<?, ?> mailAccess) {
             m_spamFullname = spamFullname;
             m_move = move;
             m_mailAccess = mailAccess;
@@ -194,12 +194,12 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
         final MailService mailService = ServiceRegistry.getInstance().getService(MailService.class);
         if (null == mailService) {
             throw new SpamhandlerSpamassassinException(Code.MAILSERVICE_MISSING);
         }
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session);
+        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
         mailAccess.connect();
         final PropertyHandler instance2 = PropertyHandler.getInstance();
         final SpamdSettings spamdSettings = getSpamdSettings(session, instance2);
@@ -207,11 +207,15 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleSpam(String fullname, String[] mailIDs, boolean move, Session session) throws MailException {
+    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
         /*
          * Copy to confirmed spam folder
          */
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        final MailService mailService = ServiceRegistry.getInstance().getService(MailService.class);
+        if (null == mailService) {
+            throw new SpamhandlerSpamassassinException(Code.MAILSERVICE_MISSING);
+        }
+        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, accountId);
         mailAccess.connect();
         try {
 
@@ -234,7 +238,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private void copyMessagesToConfirmedHamAndInbox(final UnwrapParameter paramObject, String[] plainIDsArr, final String confirmedHamFullname, SpamdSettings spamdSettings) throws MailException {
+    private void copyMessagesToConfirmedHamAndInbox(final UnwrapParameter paramObject, final String[] plainIDsArr, final String confirmedHamFullname, final SpamdSettings spamdSettings) throws MailException {
         final MailAccess<?, ?> mailAccess = paramObject.getMailAccess();
         final String spamFullname = paramObject.getSpamFullname();
         mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, plainIDsArr, false);
@@ -247,7 +251,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private MailMessage[] getNestedMailsAndHandleOthersAsPlain(final UnwrapParameter paramObject, final String confirmedHamFullname, final String[] nestedMessages, SpamdSettings spamdSettings) throws MailException {
+    private MailMessage[] getNestedMailsAndHandleOthersAsPlain(final UnwrapParameter paramObject, final String confirmedHamFullname, final String[] nestedMessages, final SpamdSettings spamdSettings) throws MailException {
         final int nestedmessagelength = nestedMessages.length;
         final List<MailMessage> nestedMails = new ArrayList<MailMessage>(nestedmessagelength);
         final String[] exc = new String[1];
@@ -283,7 +287,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                 try {
                     provider = spamdservice.getProvider(session);
                     spamdSettings = new SpamdSettings(provider.getHostname(), provider.getPort(), provider.getUsername());
-                } catch (MailException e) {
+                } catch (final MailException e) {
                     throw new SpamhandlerSpamassassinException(Code.ERROR_GETTING_SPAMD_PROVIDER, e, e.getMessage());
                 }
             } else {
@@ -293,7 +297,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         return spamdSettings;
     }
 
-    private String getUsername(Session session) {
+    private String getUsername(final Session session) {
         return session.getLogin();
     }
 
@@ -303,7 +307,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
      * @param spamdsettings the settings how spamd can be reached
      * @throws SpamhandlerSpamassassinException 
      */
-    private void sendToSpamd(final String source, boolean spam, SpamdSettings spamdsettings) throws SpamhandlerSpamassassinException {
+    private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings) throws SpamhandlerSpamassassinException {
         final Spamc spamc = new Spamc();
         spamc.setHost(spamdsettings.getHostname());
         spamc.setPort(spamdsettings.getPort());
@@ -346,7 +350,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         return new PlainAndNestedMessages(extractIDs.toArray(new String[extractIDs.size()]), plainIDs.toArray(new String[plainIDs.size()]));
     }
 
-    private void spamdMessageProcessing(final MailMessage[] mails, final SpamdSettings spamdSettings, boolean spam) throws MailException, SpamhandlerSpamassassinException {
+    private void spamdMessageProcessing(final MailMessage[] mails, final SpamdSettings spamdSettings, final boolean spam) throws MailException, SpamhandlerSpamassassinException {
         for (final MailMessage mail : mails) {
             // ...then get the plaintext of the mail as spamhandler is not able to cope with our mail objects ;-) ...
             final String source = mail.getSource();
@@ -356,7 +360,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private void unwrap(UnwrapParameter parameterObject, final String[] mailIDs, SpamdSettings spamdSettings) throws MailException {
+    private void unwrap(final UnwrapParameter parameterObject, final String[] mailIDs, final SpamdSettings spamdSettings) throws MailException {
         final MailAccess<?, ?> mailAccess = parameterObject.getMailAccess();
         try {
             /*

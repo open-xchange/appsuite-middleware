@@ -152,6 +152,7 @@ public abstract class SpamHandler {
      * <p>
      * This method may be overridden if another spam handling is desired.
      * 
+     * @param accountId The account ID
      * @param fullname The fullname of the folder containing spam messages
      * @param mailIDs The mail IDs
      * @param move If <code>true</code> the mails identified by specified mail IDs are moved to spam folder; otherwise the mails remain in
@@ -159,7 +160,7 @@ public abstract class SpamHandler {
      * @param session The session providing needed user data
      * @throws MailException If handling spam fails
      */
-    public void handleSpam(final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
+    public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws MailException {
         /*
          * Copy to confirmed spam folder
          */
@@ -195,6 +196,7 @@ public abstract class SpamHandler {
      * Dependent on the used spam system, the spam messages cannot be copied/moved as they are, but need to be parsed in the way the spam
      * system wraps spam messages. If spam system does not wrap original messages, then the default spam handler is supposed to be used.
      * 
+     * @param accountId The account ID
      * @param spamFullname The spam folder's fullname
      * @param mailIDs The mail IDs
      * @param move If <code>true</code> the mails identified by specified mail IDs are moved to INBOX folder; otherwise the mails remain in
@@ -202,6 +204,6 @@ public abstract class SpamHandler {
      * @param session The session providing needed user data
      * @throws MailException If handling ham fails
      */
-    public abstract void handleHam(String spamFullname, String[] mailIDs, boolean move, Session session) throws MailException;
+    public abstract void handleHam(int accountId, String spamFullname, String[] mailIDs, boolean move, Session session) throws MailException;
 
 }

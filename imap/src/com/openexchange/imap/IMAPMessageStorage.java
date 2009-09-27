@@ -1680,6 +1680,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  */
                 try {
                     SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleSpam(
+                        accountId,
                         imapFolder.getFullName(),
                         longs2uids(msgUIDs),
                         move,
@@ -1704,7 +1705,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Handle ham.
              */
             try {
-                IMAPProvider.getInstance().getSpamHandler().handleHam(imapFolder.getFullName(), longs2uids(msgUIDs), move, session);
+                IMAPProvider.getInstance().getSpamHandler().handleHam(accountId, imapFolder.getFullName(), longs2uids(msgUIDs), move, session);
                 /*
                  * Close and reopen to force internal message cache update
                  */

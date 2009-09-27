@@ -69,12 +69,12 @@ public final class MailServiceImpl implements MailService {
         super();
     }
 
-    public MailAccess<?, ?> getMailAccess(final Session session) throws MailException {
-        return MailAccess.getInstance(session);
+    public MailAccess<?, ?> getMailAccess(final Session session, final int accountId) throws MailException {
+        return MailAccess.getInstance(session, accountId);
     }
 
-    public MailTransport getMailTransport(final Session session) throws MailException {
-        return MailTransport.getInstance(session);
+    public MailTransport getMailTransport(final Session session, final int accountId) throws MailException {
+        return MailTransport.getInstance(session, accountId);
     }
 
 }
