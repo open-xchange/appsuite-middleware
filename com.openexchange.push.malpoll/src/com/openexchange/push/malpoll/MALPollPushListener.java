@@ -237,7 +237,7 @@ public final class MALPollPushListener implements PushListener {
     }
 
     private Set<String> gatherUIDs(final MailService mailService) throws MailException {
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session);
+        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, 0);
         mailAccess.connect();
         try {
             final String fullname = folder;
