@@ -55,6 +55,7 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -124,15 +125,16 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
         /*
          * Check for reply
          */
-        if (ComposeType.REPLY.equals(type) && (mail.getMsgref() != null)) {
-            final MailAccess<?, ?> access = MailAccess.getInstance(session);
-            access.connect();
-            try {
-                setReplyHeaders(
-                    access.getMessageStorage().getMessage(mail.getMsgref().getFolder(), mail.getMsgref().getMailID(), false),
-                    smtpMessage);
-            } finally {
-                access.close(true);
+        {
+            final MailPath msgref;
+            if (ComposeType.REPLY.equals(type) && ((msgref = mail.getMsgref()) != null)) {
+                final MailAccess<?, ?> access = MailAccess.getInstance(session, msgref.getAccountId());
+                access.connect();
+                try {
+                    setReplyHeaders(access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false), smtpMessage);
+                } finally {
+                    access.close(true);
+                }
             }
         }
         /*
