@@ -274,6 +274,14 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
          */
         if (detectedUsers.size() < users.size()) {
             final int[] permissions2Insert = null == permissions ? getConfiguredPermissions() : permissions;
+            final int adminUserId;
+            try {
+                adminUserId = getContextMailAdmin(writeCon, contextId);
+            } catch (final DBPoolingException e) {
+                throw new UpdateException(e);
+            } catch (final SQLException e) {
+                throw createSQLError(e);
+            }
             PreparedStatement stmt = null;
             try {
                 stmt =
@@ -281,16 +289,17 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
                 int pos;
                 for (final Integer userId : users) {
                     if (!detectedUsers.contains(userId)) {
+                        final int user = userId.intValue();
                         // Insert
                         pos = 1;
                         stmt.setInt(pos++, contextId); // cid
                         stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID); // fuid
-                        stmt.setInt(pos++, userId.intValue()); // permission_id
+                        stmt.setInt(pos++, user); // permission_id
                         stmt.setInt(pos++, permissions2Insert[0]); // fp
                         stmt.setInt(pos++, permissions2Insert[1]); // orp
                         stmt.setInt(pos++, permissions2Insert[2]); // owp
                         stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
-                        stmt.setInt(pos++, 0); // admin_flag
+                        stmt.setInt(pos++, user == adminUserId ? 1 : 0); // admin_flag
                         stmt.setInt(pos++, 0); // group_flag
                         stmt.setInt(pos++, 0); // system
                         stmt.addBatch();
@@ -313,6 +322,24 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
         }
         return new int[] {
             OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS };
+    }
+
+    private static final String SQL_GET_CONTEXT_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
+
+    private static int getContextMailAdmin(final Connection con, final int cid) throws DBPoolingException, SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_GET_CONTEXT_MAILADMIN);
+            stmt.setInt(1, cid);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return -1;
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task GlobalAddressBookPermissionsResolverTask: %1$s." })
