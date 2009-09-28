@@ -97,10 +97,6 @@ import com.openexchange.spamhandler.SpamHandler;
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class MailAccountMigrationTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountMigrationTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailAccountMigrationTask.class);
-
     public MailAccountMigrationTask() {
         super();
     }
@@ -127,6 +123,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
                 sb.append(currentContextId);
                 sb.append(":\n");
                 sb.append(e.getMessage());
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountMigrationTask.class);
                 LOG.error(sb.toString(), e);
             }
         }
@@ -171,6 +168,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
 
     private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws UpdateException {
         final Context ctx = new ContextImpl(contextId);
+        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountMigrationTask.class);
         // First check (and possibly insert) a sequence for specified context
         checkAndInsertMailAccountSequence(ctx);
         // Proceed with user data migration to new mail account tables
@@ -201,7 +199,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
                 final User user = new RdbUserStorage().getUser(userId.intValue(), ctx);
                 final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(userId.intValue(), ctx);
                 try {
-                    handleUser(user, getNameProvderFromUSM(usm), ctx, sb);
+                    handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
                 } catch (final UpdateException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
@@ -213,7 +211,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
         }
     }
 
-    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb) throws UpdateException {
+    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws UpdateException {
         /*
          * Insert
          */
@@ -250,8 +248,9 @@ public final class MailAccountMigrationTask implements UpdateTask {
         return null == string ? "" : string;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountMigrationTask: %1$s." })
     private static UpdateException createSQLError(final SQLException e) {
+        final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailAccountMigrationTask.class);
         return EXCEPTION.create(1, e, e.getMessage());
     }
 
