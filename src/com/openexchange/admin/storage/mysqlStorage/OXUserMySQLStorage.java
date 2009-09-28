@@ -1821,7 +1821,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private int getContactIdByUserId(int ctxId, int userId, Connection con) throws StorageException {
+    private int getContactIdByUserId(final int ctxId, final int userId, final Connection con) throws StorageException {
         int retval = -1;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1834,7 +1834,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 retval = rs.getInt(1);
             }
             rs.close();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
         } finally {
@@ -1848,7 +1848,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final Connection con;
         try {
             con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
@@ -2006,6 +2006,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setSubscription(user.isSubscription());
             acc.setActiveSync(user.hasActiveSync());
             acc.setUSM(user.hasUSM());
+            acc.setGlobalAddressBook(new OXFolderAdminHelper().isGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, read_ox_con));
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2016,6 +2017,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
+        } catch (final OXException e) {
+            log.error("OX Error ", e);
+            throw new StorageException(e.toString(), e);
         } finally {
             try {
                 if (read_ox_con != null) {
@@ -2292,9 +2296,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void myChangeInsertModuleAccess(Context ctx, int user_id, UserModuleAccess access, boolean insert_or_update, Connection read_ox_con, Connection write_ox_con, int[] groups) throws StorageException {
+    private void myChangeInsertModuleAccess(final Context ctx, final int user_id, final UserModuleAccess access, final boolean insert_or_update, final Connection read_ox_con, final Connection write_ox_con, final int[] groups) throws StorageException {
         try {
-            UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, groups, ctx.getId().intValue(), read_ox_con);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, groups, ctx.getId().intValue(), read_ox_con);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
             user.setForum(access.getForum());
@@ -2322,22 +2326,28 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setPublication(access.isPublication());
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
+            // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
+            new OXFolderAdminHelper().setGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBook(), write_ox_con);
+
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             if (!insert_or_update) {
-                com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId().intValue());
-                UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
+                final com.openexchange.groupware.contexts.Context tmp = ContextStorage.getInstance().getContext(ctx.getId().intValue());
+                final UserConfigurationStorage uConfStor = UserConfigurationStorage.getInstance();
                 uConfStor.removeUserConfiguration(user.getUserId(), tmp);
             }
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             log.error("DBPooling Error", e);
             throw new StorageException(e.toString());
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             log.error("Context Error", e);
             throw new StorageException(e.toString());
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
+            log.error("UserConfiguration Error", e);
+            throw new StorageException(e.toString());
+        } catch (final OXException e) {
             log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
         }
