@@ -49,6 +49,10 @@
 
 package com.openexchange.tools.oxfolder;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.api2.OXException;
@@ -60,7 +64,10 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -215,6 +222,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
          */
         value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT", (propertyListener = new PropertyListener() {
 
+            private final org.apache.commons.logging.Log logger = LOG;
+
             public void onPropertyChange(final PropertyEvent event) {
                 if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
                     final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
@@ -234,10 +243,17 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     }
                     enableInternalUsersEdit = false;
                 }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(MessageFormat.format(
+                if (logger.isInfoEnabled()) {
+                    logger.info(MessageFormat.format(
                         "Property ''ENABLE_INTERNAL_USER_EDIT'' change propagated. ENABLE_INTERNAL_USER_EDIT={0}",
                         Boolean.valueOf(enableInternalUsersEdit)));
+                }
+                /*
+                 * Update permissions
+                 */
+                final int contextId = getValidContextId();
+                if (-1 != contextId) {
+                    updateGADWritePermission(contextId);
                 }
                 /*
                  * Clear folder cache to ensure removal of all cached instances of global address book
@@ -246,12 +262,62 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     try {
                         FolderCacheManager.getInstance().clearAll();
                     } catch (final FolderCacheNotEnabledException e) {
-                        LOG.error(e.getMessage(), e);
+                        logger.error(e.getMessage(), e);
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }
+
+            private void updateGADWritePermission(final int contextId) {
+                Connection con = null;
+                try {
+                    con = Database.get(contextId, true);
+                } catch (final DBPoolingException e) {
+                    logger.error(e.getMessage(), e);
+                }
+                if (null != con) {
+                    PreparedStatement ps = null;
+                    try {
+                        ps = con.prepareStatement("UPDATE oxfolder_permissions SET owp = ? WHERE fuid = ?");
+                        ps.setInt(1, enableInternalUsersEdit ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+                        ps.setInt(2, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                        ps.executeUpdate();
+                    } catch (final SQLException e) {
+                        logger.error(e.getMessage(), e);
+                    } finally {
+                        Database.back(contextId, true, con);
+                    }
+                }
+            }
+
+            private int getValidContextId() {
+                Connection configDBCon = null;
+                try {
+                    configDBCon = Database.get(false);
+                } catch (final DBPoolingException e) {
+                    logger.error(e.getMessage(), e);
+                }
+                if (null != configDBCon) {
+                    PreparedStatement ps = null;
+                    ResultSet rs = null;
+                    try {
+                        ps = configDBCon.prepareStatement("SELECT cid FROM login2context");
+                        rs = ps.executeQuery();
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                        }
+                        logger.error("No context found!", new Throwable());
+                        return -1;
+                    } catch (final SQLException e) {
+                        logger.error(e.getMessage(), e);
+                    } finally {
+                        Database.back(false, configDBCon);
+                    }
+                }
+                return -1;
+            }
+
         }));
         if (null == value) {
             LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
