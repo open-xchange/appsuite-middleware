@@ -65,7 +65,7 @@ public class ArrayWrapper implements Array {
 
     private final ResultSetWrapper result;
 
-    public ArrayWrapper(Array delegate, ResultSetWrapper result) {
+    public ArrayWrapper(final Array delegate, final ResultSetWrapper result) {
         super();
         this.delegate = delegate;
         this.result = result;
@@ -75,15 +75,15 @@ public class ArrayWrapper implements Array {
         return delegate.getArray();
     }
 
-    public Object getArray(Map<String, Class<?>> map) throws SQLException {
+    public Object getArray(final Map<String, Class<?>> map) throws SQLException {
         return delegate.getArray(map);
     }
 
-    public Object getArray(long index, int count) throws SQLException {
+    public Object getArray(final long index, final int count) throws SQLException {
         return delegate.getArray(index, count);
     }
 
-    public Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
+    public Object getArray(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
         return delegate.getArray(index, count, map);
     }
 
@@ -99,15 +99,21 @@ public class ArrayWrapper implements Array {
         return new ResultSetWrapper(delegate.getResultSet(), result.getStatement());
     }
 
-    public ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
+    public ResultSet getResultSet(final Map<String, Class<?>> map) throws SQLException {
         return new ResultSetWrapper(delegate.getResultSet(map), result.getStatement());
     }
 
-    public ResultSet getResultSet(long index, int count) throws SQLException {
+    public ResultSet getResultSet(final long index, final int count) throws SQLException {
         return new ResultSetWrapper(delegate.getResultSet(index, count), result.getStatement());
     }
 
-    public ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
+    public ResultSet getResultSet(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
         return new ResultSetWrapper(delegate.getResultSet(index, count, map), result.getStatement());
     }
+
+    @Override
+    public String toString() {
+        return null == delegate ? super.toString() : delegate.toString();
+    }
+
 }

@@ -76,7 +76,13 @@ public class PreparedStatementWrapper extends StatementWrapper implements Prepar
 
     private final PreparedStatement delegate;
 
-    public PreparedStatementWrapper(PreparedStatement delegate, JDBC3ConnectionReturner con) {
+    /**
+     * Initializes a new {@link PreparedStatementWrapper}.
+     * 
+     * @param delegate The delegate statement
+     * @param con The connection returner instance
+     */
+    public PreparedStatementWrapper(final PreparedStatement delegate, final JDBC3ConnectionReturner con) {
         super(delegate, con);
         this.delegate = delegate;
     }
@@ -109,123 +115,129 @@ public class PreparedStatementWrapper extends StatementWrapper implements Prepar
         return delegate.getParameterMetaData();
     }
 
-    public void setArray(int i, Array x) throws SQLException {
+    public void setArray(final int i, final Array x) throws SQLException {
         delegate.setArray(i, x);
     }
 
-    public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
+    public void setAsciiStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
         delegate.setAsciiStream(parameterIndex, x, length);
     }
 
-    public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
+    public void setBigDecimal(final int parameterIndex, final BigDecimal x) throws SQLException {
         delegate.setBigDecimal(parameterIndex, x);
     }
 
-    public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
+    public void setBinaryStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
         delegate.setBinaryStream(parameterIndex, x, length);
     }
 
-    public void setBlob(int i, Blob x) throws SQLException {
+    public void setBlob(final int i, final Blob x) throws SQLException {
         delegate.setBlob(i, x);
     }
 
-    public void setBoolean(int parameterIndex, boolean x) throws SQLException {
+    public void setBoolean(final int parameterIndex, final boolean x) throws SQLException {
         delegate.setBoolean(parameterIndex, x);
     }
 
-    public void setByte(int parameterIndex, byte x) throws SQLException {
+    public void setByte(final int parameterIndex, final byte x) throws SQLException {
         delegate.setByte(parameterIndex, x);
     }
 
-    public void setBytes(int parameterIndex, byte[] x) throws SQLException {
+    public void setBytes(final int parameterIndex, final byte[] x) throws SQLException {
         delegate.setBytes(parameterIndex, x);
     }
 
-    public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
+    public void setCharacterStream(final int parameterIndex, final Reader reader, final int length) throws SQLException {
         delegate.setCharacterStream(parameterIndex, reader, length);
     }
 
-    public void setClob(int i, Clob x) throws SQLException {
+    public void setClob(final int i, final Clob x) throws SQLException {
         delegate.setClob(i, x);
     }
 
-    public void setDate(int parameterIndex, Date x) throws SQLException {
+    public void setDate(final int parameterIndex, final Date x) throws SQLException {
         delegate.setDate(parameterIndex, x);
     }
 
-    public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
+    public void setDate(final int parameterIndex, final Date x, final Calendar cal) throws SQLException {
         delegate.setDate(parameterIndex, x, cal);
     }
 
-    public void setDouble(int parameterIndex, double x) throws SQLException {
+    public void setDouble(final int parameterIndex, final double x) throws SQLException {
         delegate.setDouble(parameterIndex, x);
     }
 
-    public void setFloat(int parameterIndex, float x) throws SQLException {
+    public void setFloat(final int parameterIndex, final float x) throws SQLException {
         delegate.setFloat(parameterIndex, x);
     }
 
-    public void setInt(int parameterIndex, int x) throws SQLException {
+    public void setInt(final int parameterIndex, final int x) throws SQLException {
         delegate.setInt(parameterIndex, x);
     }
 
-    public void setLong(int parameterIndex, long x) throws SQLException {
+    public void setLong(final int parameterIndex, final long x) throws SQLException {
         delegate.setLong(parameterIndex, x);
     }
 
-    public void setNull(int parameterIndex, int sqlType) throws SQLException {
+    public void setNull(final int parameterIndex, final int sqlType) throws SQLException {
         delegate.setNull(parameterIndex, sqlType);
     }
 
-    public void setNull(int paramIndex, int sqlType, String typeName) throws SQLException {
+    public void setNull(final int paramIndex, final int sqlType, final String typeName) throws SQLException {
         delegate.setNull(paramIndex, sqlType, typeName);
     }
 
-    public void setObject(int parameterIndex, Object x) throws SQLException {
+    public void setObject(final int parameterIndex, final Object x) throws SQLException {
         delegate.setObject(parameterIndex, x);
     }
 
-    public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
+    public void setObject(final int parameterIndex, final Object x, final int targetSqlType) throws SQLException {
         delegate.setObject(parameterIndex, x, targetSqlType);
     }
 
-    public void setObject(int parameterIndex, Object x, int targetSqlType, int scale) throws SQLException {
+    public void setObject(final int parameterIndex, final Object x, final int targetSqlType, final int scale) throws SQLException {
         delegate.setObject(parameterIndex, x, targetSqlType, scale);
     }
 
-    public void setRef(int i, Ref x) throws SQLException {
+    public void setRef(final int i, final Ref x) throws SQLException {
         delegate.setRef(i, x);
     }
 
-    public void setShort(int parameterIndex, short x) throws SQLException {
+    public void setShort(final int parameterIndex, final short x) throws SQLException {
         delegate.setShort(parameterIndex, x);
     }
 
-    public void setString(int parameterIndex, String x) throws SQLException {
+    public void setString(final int parameterIndex, final String x) throws SQLException {
         delegate.setString(parameterIndex, x);
     }
 
-    public void setTime(int parameterIndex, Time x) throws SQLException {
+    public void setTime(final int parameterIndex, final Time x) throws SQLException {
         delegate.setTime(parameterIndex, x);
     }
 
-    public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
+    public void setTime(final int parameterIndex, final Time x, final Calendar cal) throws SQLException {
         delegate.setTime(parameterIndex, x, cal);
     }
 
-    public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
+    public void setTimestamp(final int parameterIndex, final Timestamp x) throws SQLException {
         delegate.setTimestamp(parameterIndex, x);
     }
 
-    public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
+    public void setTimestamp(final int parameterIndex, final Timestamp x, final Calendar cal) throws SQLException {
         delegate.setTimestamp(parameterIndex, x, cal);
     }
 
-    public void setURL(int parameterIndex, URL x) throws SQLException {
+    public void setURL(final int parameterIndex, final URL x) throws SQLException {
         delegate.setURL(parameterIndex, x);
     }
 
-    public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+    public void setUnicodeStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
         delegate.setUnicodeStream(parameterIndex, x, length);
     }
+
+    @Override
+    public String toString() {
+        return null == delegate ? super.toString() : delegate.toString();
+    }
+
 }

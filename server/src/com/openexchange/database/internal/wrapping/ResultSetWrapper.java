@@ -78,13 +78,19 @@ public class ResultSetWrapper implements ResultSet {
 
     private final StatementWrapper stmt;
 
-    public ResultSetWrapper(ResultSet delegate, StatementWrapper stmt) {
+    /**
+     * Initializes a new {@link ResultSetWrapper}.
+     * 
+     * @param delegate The delegate result set
+     * @param stmt The statement wrapper
+     */
+    public ResultSetWrapper(final ResultSet delegate, final StatementWrapper stmt) {
         super();
         this.delegate = delegate;
         this.stmt = stmt;
     }
 
-    public boolean absolute(int row) throws SQLException {
+    public boolean absolute(final int row) throws SQLException {
         return delegate.absolute(row);
     }
 
@@ -112,7 +118,7 @@ public class ResultSetWrapper implements ResultSet {
         delegate.deleteRow();
     }
 
-    public int findColumn(String columnName) throws SQLException {
+    public int findColumn(final String columnName) throws SQLException {
         return delegate.findColumn(columnName);
     }
 
@@ -120,91 +126,91 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.first();
     }
 
-    public Array getArray(int i) throws SQLException {
+    public Array getArray(final int i) throws SQLException {
         return new ArrayWrapper(delegate.getArray(i), this);
     }
 
-    public Array getArray(String colName) throws SQLException {
+    public Array getArray(final String colName) throws SQLException {
         return new ArrayWrapper(delegate.getArray(colName), this);
     }
 
-    public InputStream getAsciiStream(int columnIndex) throws SQLException {
+    public InputStream getAsciiStream(final int columnIndex) throws SQLException {
         return delegate.getAsciiStream(columnIndex);
     }
 
-    public InputStream getAsciiStream(String columnName) throws SQLException {
+    public InputStream getAsciiStream(final String columnName) throws SQLException {
         return delegate.getAsciiStream(columnName);
     }
 
-    public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
+    public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
         return delegate.getBigDecimal(columnIndex);
     }
 
-    public BigDecimal getBigDecimal(String columnName) throws SQLException {
+    public BigDecimal getBigDecimal(final String columnName) throws SQLException {
         return delegate.getBigDecimal(columnName);
     }
 
-    public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
+    public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
         return delegate.getBigDecimal(columnIndex, scale);
     }
 
-    public BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
+    public BigDecimal getBigDecimal(final String columnName, final int scale) throws SQLException {
         return delegate.getBigDecimal(columnName, scale);
     }
 
-    public InputStream getBinaryStream(int columnIndex) throws SQLException {
+    public InputStream getBinaryStream(final int columnIndex) throws SQLException {
         return delegate.getBinaryStream(columnIndex);
     }
 
-    public InputStream getBinaryStream(String columnName) throws SQLException {
+    public InputStream getBinaryStream(final String columnName) throws SQLException {
         return delegate.getBinaryStream(columnName);
     }
 
-    public Blob getBlob(int i) throws SQLException {
+    public Blob getBlob(final int i) throws SQLException {
         return delegate.getBlob(i);
     }
 
-    public Blob getBlob(String colName) throws SQLException {
+    public Blob getBlob(final String colName) throws SQLException {
         return delegate.getBlob(colName);
     }
 
-    public boolean getBoolean(int columnIndex) throws SQLException {
+    public boolean getBoolean(final int columnIndex) throws SQLException {
         return delegate.getBoolean(columnIndex);
     }
 
-    public boolean getBoolean(String columnName) throws SQLException {
+    public boolean getBoolean(final String columnName) throws SQLException {
         return delegate.getBoolean(columnName);
     }
 
-    public byte getByte(int columnIndex) throws SQLException {
+    public byte getByte(final int columnIndex) throws SQLException {
         return delegate.getByte(columnIndex);
     }
 
-    public byte getByte(String columnName) throws SQLException {
+    public byte getByte(final String columnName) throws SQLException {
         return delegate.getByte(columnName);
     }
 
-    public byte[] getBytes(int columnIndex) throws SQLException {
+    public byte[] getBytes(final int columnIndex) throws SQLException {
         return delegate.getBytes(columnIndex);
     }
 
-    public byte[] getBytes(String columnName) throws SQLException {
+    public byte[] getBytes(final String columnName) throws SQLException {
         return delegate.getBytes(columnName);
     }
 
-    public Reader getCharacterStream(int columnIndex) throws SQLException {
+    public Reader getCharacterStream(final int columnIndex) throws SQLException {
         return delegate.getCharacterStream(columnIndex);
     }
 
-    public Reader getCharacterStream(String columnName) throws SQLException {
+    public Reader getCharacterStream(final String columnName) throws SQLException {
         return delegate.getCharacterStream(columnName);
     }
 
-    public Clob getClob(int i) throws SQLException {
+    public Clob getClob(final int i) throws SQLException {
         return delegate.getClob(i);
     }
 
-    public Clob getClob(String colName) throws SQLException {
+    public Clob getClob(final String colName) throws SQLException {
         return delegate.getClob(colName);
     }
 
@@ -216,27 +222,27 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.getCursorName();
     }
 
-    public Date getDate(int columnIndex) throws SQLException {
+    public Date getDate(final int columnIndex) throws SQLException {
         return delegate.getDate(columnIndex);
     }
 
-    public Date getDate(String columnName) throws SQLException {
+    public Date getDate(final String columnName) throws SQLException {
         return delegate.getDate(columnName);
     }
 
-    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
+    public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
         return delegate.getDate(columnIndex, cal);
     }
 
-    public Date getDate(String columnName, Calendar cal) throws SQLException {
+    public Date getDate(final String columnName, final Calendar cal) throws SQLException {
         return delegate.getDate(columnName, cal);
     }
 
-    public double getDouble(int columnIndex) throws SQLException {
+    public double getDouble(final int columnIndex) throws SQLException {
         return delegate.getDouble(columnIndex);
     }
 
-    public double getDouble(String columnName) throws SQLException {
+    public double getDouble(final String columnName) throws SQLException {
         return delegate.getDouble(columnName);
     }
 
@@ -248,27 +254,27 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.getFetchSize();
     }
 
-    public float getFloat(int columnIndex) throws SQLException {
+    public float getFloat(final int columnIndex) throws SQLException {
         return delegate.getFloat(columnIndex);
     }
 
-    public float getFloat(String columnName) throws SQLException {
+    public float getFloat(final String columnName) throws SQLException {
         return delegate.getFloat(columnName);
     }
 
-    public int getInt(int columnIndex) throws SQLException {
+    public int getInt(final int columnIndex) throws SQLException {
         return delegate.getInt(columnIndex);
     }
 
-    public int getInt(String columnName) throws SQLException {
+    public int getInt(final String columnName) throws SQLException {
         return delegate.getInt(columnName);
     }
 
-    public long getLong(int columnIndex) throws SQLException {
+    public long getLong(final int columnIndex) throws SQLException {
         return delegate.getLong(columnIndex);
     }
 
-    public long getLong(String columnName) throws SQLException {
+    public long getLong(final String columnName) throws SQLException {
         return delegate.getLong(columnName);
     }
 
@@ -276,27 +282,27 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.getMetaData();
     }
 
-    public Object getObject(int columnIndex) throws SQLException {
+    public Object getObject(final int columnIndex) throws SQLException {
         return delegate.getObject(columnIndex);
     }
 
-    public Object getObject(String columnName) throws SQLException {
+    public Object getObject(final String columnName) throws SQLException {
         return delegate.getObject(columnName);
     }
 
-    public Object getObject(int i, Map<String, Class<?>> map) throws SQLException {
+    public Object getObject(final int i, final Map<String, Class<?>> map) throws SQLException {
         return delegate.getObject(i, map);
     }
 
-    public Object getObject(String colName, Map<String, Class<?>> map) throws SQLException {
+    public Object getObject(final String colName, final Map<String, Class<?>> map) throws SQLException {
         return delegate.getObject(colName, map);
     }
 
-    public Ref getRef(int i) throws SQLException {
+    public Ref getRef(final int i) throws SQLException {
         return delegate.getRef(i);
     }
 
-    public Ref getRef(String colName) throws SQLException {
+    public Ref getRef(final String colName) throws SQLException {
         return delegate.getRef(colName);
     }
 
@@ -304,11 +310,11 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.getRow();
     }
 
-    public short getShort(int columnIndex) throws SQLException {
+    public short getShort(final int columnIndex) throws SQLException {
         return delegate.getShort(columnIndex);
     }
 
-    public short getShort(String columnName) throws SQLException {
+    public short getShort(final String columnName) throws SQLException {
         return delegate.getShort(columnName);
     }
 
@@ -316,43 +322,43 @@ public class ResultSetWrapper implements ResultSet {
         return stmt;
     }
 
-    public String getString(int columnIndex) throws SQLException {
+    public String getString(final int columnIndex) throws SQLException {
         return delegate.getString(columnIndex);
     }
 
-    public String getString(String columnName) throws SQLException {
+    public String getString(final String columnName) throws SQLException {
         return delegate.getString(columnName);
     }
 
-    public Time getTime(int columnIndex) throws SQLException {
+    public Time getTime(final int columnIndex) throws SQLException {
         return delegate.getTime(columnIndex);
     }
 
-    public Time getTime(String columnName) throws SQLException {
+    public Time getTime(final String columnName) throws SQLException {
         return delegate.getTime(columnName);
     }
 
-    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
+    public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
         return delegate.getTime(columnIndex, cal);
     }
 
-    public Time getTime(String columnName, Calendar cal) throws SQLException {
+    public Time getTime(final String columnName, final Calendar cal) throws SQLException {
         return delegate.getTime(columnName, cal);
     }
 
-    public Timestamp getTimestamp(int columnIndex) throws SQLException {
+    public Timestamp getTimestamp(final int columnIndex) throws SQLException {
         return delegate.getTimestamp(columnIndex);
     }
 
-    public Timestamp getTimestamp(String columnName) throws SQLException {
+    public Timestamp getTimestamp(final String columnName) throws SQLException {
         return delegate.getTimestamp(columnName);
     }
 
-    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
+    public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
         return delegate.getTimestamp(columnIndex, cal);
     }
 
-    public Timestamp getTimestamp(String columnName, Calendar cal) throws SQLException {
+    public Timestamp getTimestamp(final String columnName, final Calendar cal) throws SQLException {
         return delegate.getTimestamp(columnName, cal);
     }
 
@@ -360,19 +366,19 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.getType();
     }
 
-    public URL getURL(int columnIndex) throws SQLException {
+    public URL getURL(final int columnIndex) throws SQLException {
         return delegate.getURL(columnIndex);
     }
 
-    public URL getURL(String columnName) throws SQLException {
+    public URL getURL(final String columnName) throws SQLException {
         return delegate.getURL(columnName);
     }
 
-    public InputStream getUnicodeStream(int columnIndex) throws SQLException {
+    public InputStream getUnicodeStream(final int columnIndex) throws SQLException {
         return delegate.getUnicodeStream(columnIndex);
     }
 
-    public InputStream getUnicodeStream(String columnName) throws SQLException {
+    public InputStream getUnicodeStream(final String columnName) throws SQLException {
         return delegate.getUnicodeStream(columnName);
     }
 
@@ -424,7 +430,7 @@ public class ResultSetWrapper implements ResultSet {
         delegate.refreshRow();
     }
 
-    public boolean relative(int rows) throws SQLException {
+    public boolean relative(final int rows) throws SQLException {
         return delegate.relative(rows);
     }
 
@@ -440,163 +446,163 @@ public class ResultSetWrapper implements ResultSet {
         return delegate.rowUpdated();
     }
 
-    public void setFetchDirection(int direction) throws SQLException {
+    public void setFetchDirection(final int direction) throws SQLException {
         delegate.setFetchDirection(direction);
     }
 
-    public void setFetchSize(int rows) throws SQLException {
+    public void setFetchSize(final int rows) throws SQLException {
         delegate.setFetchSize(rows);
     }
 
-    public void updateArray(int columnIndex, Array x) throws SQLException {
+    public void updateArray(final int columnIndex, final Array x) throws SQLException {
         delegate.updateArray(columnIndex, x);
     }
 
-    public void updateArray(String columnName, Array x) throws SQLException {
+    public void updateArray(final String columnName, final Array x) throws SQLException {
         delegate.updateArray(columnName, x);
     }
 
-    public void updateAsciiStream(int columnIndex, InputStream x, int length) throws SQLException {
+    public void updateAsciiStream(final int columnIndex, final InputStream x, final int length) throws SQLException {
         delegate.updateAsciiStream(columnIndex, x, length);
     }
 
-    public void updateAsciiStream(String columnName, InputStream x, int length) throws SQLException {
+    public void updateAsciiStream(final String columnName, final InputStream x, final int length) throws SQLException {
         delegate.updateAsciiStream(columnName, x, length);
     }
 
-    public void updateBigDecimal(int columnIndex, BigDecimal x) throws SQLException {
+    public void updateBigDecimal(final int columnIndex, final BigDecimal x) throws SQLException {
         delegate.updateBigDecimal(columnIndex, x);
     }
 
-    public void updateBigDecimal(String columnName, BigDecimal x) throws SQLException {
+    public void updateBigDecimal(final String columnName, final BigDecimal x) throws SQLException {
         delegate.updateBigDecimal(columnName, x);
     }
 
-    public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
+    public void updateBinaryStream(final int columnIndex, final InputStream x, final int length) throws SQLException {
         delegate.updateBinaryStream(columnIndex, x, length);
     }
 
-    public void updateBinaryStream(String columnName, InputStream x, int length) throws SQLException {
+    public void updateBinaryStream(final String columnName, final InputStream x, final int length) throws SQLException {
         delegate.updateBinaryStream(columnName, x, length);
     }
 
-    public void updateBlob(int columnIndex, Blob x) throws SQLException {
+    public void updateBlob(final int columnIndex, final Blob x) throws SQLException {
         delegate.updateBlob(columnIndex, x);
     }
 
-    public void updateBlob(String columnName, Blob x) throws SQLException {
+    public void updateBlob(final String columnName, final Blob x) throws SQLException {
         delegate.updateBlob(columnName, x);
     }
 
-    public void updateBoolean(int columnIndex, boolean x) throws SQLException {
+    public void updateBoolean(final int columnIndex, final boolean x) throws SQLException {
         delegate.updateBoolean(columnIndex, x);
     }
 
-    public void updateBoolean(String columnName, boolean x) throws SQLException {
+    public void updateBoolean(final String columnName, final boolean x) throws SQLException {
         delegate.updateBoolean(columnName, x);
     }
 
-    public void updateByte(int columnIndex, byte x) throws SQLException {
+    public void updateByte(final int columnIndex, final byte x) throws SQLException {
         delegate.updateByte(columnIndex, x);
     }
 
-    public void updateByte(String columnName, byte x) throws SQLException {
+    public void updateByte(final String columnName, final byte x) throws SQLException {
         delegate.updateByte(columnName, x);
     }
 
-    public void updateBytes(int columnIndex, byte[] x) throws SQLException {
+    public void updateBytes(final int columnIndex, final byte[] x) throws SQLException {
         delegate.updateBytes(columnIndex, x);
     }
 
-    public void updateBytes(String columnName, byte[] x) throws SQLException {
+    public void updateBytes(final String columnName, final byte[] x) throws SQLException {
         delegate.updateBytes(columnName, x);
     }
 
-    public void updateCharacterStream(int columnIndex, Reader x, int length) throws SQLException {
+    public void updateCharacterStream(final int columnIndex, final Reader x, final int length) throws SQLException {
         delegate.updateCharacterStream(columnIndex, x, length);
     }
 
-    public void updateCharacterStream(String columnName, Reader reader, int length) throws SQLException {
+    public void updateCharacterStream(final String columnName, final Reader reader, final int length) throws SQLException {
         delegate.updateCharacterStream(columnName, reader, length);
     }
 
-    public void updateClob(int columnIndex, Clob x) throws SQLException {
+    public void updateClob(final int columnIndex, final Clob x) throws SQLException {
         delegate.updateClob(columnIndex, x);
     }
 
-    public void updateClob(String columnName, Clob x) throws SQLException {
+    public void updateClob(final String columnName, final Clob x) throws SQLException {
         delegate.updateClob(columnName, x);
     }
 
-    public void updateDate(int columnIndex, Date x) throws SQLException {
+    public void updateDate(final int columnIndex, final Date x) throws SQLException {
         delegate.updateDate(columnIndex, x);
     }
 
-    public void updateDate(String columnName, Date x) throws SQLException {
+    public void updateDate(final String columnName, final Date x) throws SQLException {
         delegate.updateDate(columnName, x);
     }
 
-    public void updateDouble(int columnIndex, double x) throws SQLException {
+    public void updateDouble(final int columnIndex, final double x) throws SQLException {
         delegate.updateDouble(columnIndex, x);
     }
 
-    public void updateDouble(String columnName, double x) throws SQLException {
+    public void updateDouble(final String columnName, final double x) throws SQLException {
         delegate.updateDouble(columnName, x);
     }
 
-    public void updateFloat(int columnIndex, float x) throws SQLException {
+    public void updateFloat(final int columnIndex, final float x) throws SQLException {
         delegate.updateFloat(columnIndex, x);
     }
 
-    public void updateFloat(String columnName, float x) throws SQLException {
+    public void updateFloat(final String columnName, final float x) throws SQLException {
         delegate.updateFloat(columnName, x);
     }
 
-    public void updateInt(int columnIndex, int x) throws SQLException {
+    public void updateInt(final int columnIndex, final int x) throws SQLException {
         delegate.updateInt(columnIndex, x);
     }
 
-    public void updateInt(String columnName, int x) throws SQLException {
+    public void updateInt(final String columnName, final int x) throws SQLException {
         delegate.updateInt(columnName, x);
     }
 
-    public void updateLong(int columnIndex, long x) throws SQLException {
+    public void updateLong(final int columnIndex, final long x) throws SQLException {
         delegate.updateLong(columnIndex, x);
     }
 
-    public void updateLong(String columnName, long x) throws SQLException {
+    public void updateLong(final String columnName, final long x) throws SQLException {
         delegate.updateLong(columnName, x);
     }
 
-    public void updateNull(int columnIndex) throws SQLException {
+    public void updateNull(final int columnIndex) throws SQLException {
         delegate.updateNull(columnIndex);
     }
 
-    public void updateNull(String columnName) throws SQLException {
+    public void updateNull(final String columnName) throws SQLException {
         delegate.updateNull(columnName);
     }
 
-    public void updateObject(int columnIndex, Object x) throws SQLException {
+    public void updateObject(final int columnIndex, final Object x) throws SQLException {
         delegate.updateObject(columnIndex, x);
     }
 
-    public void updateObject(String columnName, Object x) throws SQLException {
+    public void updateObject(final String columnName, final Object x) throws SQLException {
         delegate.updateObject(columnName, x);
     }
 
-    public void updateObject(int columnIndex, Object x, int scale) throws SQLException {
+    public void updateObject(final int columnIndex, final Object x, final int scale) throws SQLException {
         delegate.updateObject(columnIndex, x, scale);
     }
 
-    public void updateObject(String columnName, Object x, int scale) throws SQLException {
+    public void updateObject(final String columnName, final Object x, final int scale) throws SQLException {
         delegate.updateObject(columnName, x, scale);
     }
 
-    public void updateRef(int columnIndex, Ref x) throws SQLException {
+    public void updateRef(final int columnIndex, final Ref x) throws SQLException {
         delegate.updateRef(columnIndex, x);
     }
 
-    public void updateRef(String columnName, Ref x) throws SQLException {
+    public void updateRef(final String columnName, final Ref x) throws SQLException {
         delegate.updateRef(columnName, x);
     }
 
@@ -604,39 +610,45 @@ public class ResultSetWrapper implements ResultSet {
         delegate.updateRow();
     }
 
-    public void updateShort(int columnIndex, short x) throws SQLException {
+    public void updateShort(final int columnIndex, final short x) throws SQLException {
         delegate.updateShort(columnIndex, x);
     }
 
-    public void updateShort(String columnName, short x) throws SQLException {
+    public void updateShort(final String columnName, final short x) throws SQLException {
         delegate.updateShort(columnName, x);
     }
 
-    public void updateString(int columnIndex, String x) throws SQLException {
+    public void updateString(final int columnIndex, final String x) throws SQLException {
         delegate.updateString(columnIndex, x);
     }
 
-    public void updateString(String columnName, String x) throws SQLException {
+    public void updateString(final String columnName, final String x) throws SQLException {
         delegate.updateString(columnName, x);
     }
 
-    public void updateTime(int columnIndex, Time x) throws SQLException {
+    public void updateTime(final int columnIndex, final Time x) throws SQLException {
         delegate.updateTime(columnIndex, x);
     }
 
-    public void updateTime(String columnName, Time x) throws SQLException {
+    public void updateTime(final String columnName, final Time x) throws SQLException {
         delegate.updateTime(columnName, x);
     }
 
-    public void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
+    public void updateTimestamp(final int columnIndex, final Timestamp x) throws SQLException {
         delegate.updateTimestamp(columnIndex, x);
     }
 
-    public void updateTimestamp(String columnName, Timestamp x) throws SQLException {
+    public void updateTimestamp(final String columnName, final Timestamp x) throws SQLException {
         delegate.updateTimestamp(columnName, x);
     }
 
     public boolean wasNull() throws SQLException {
         return delegate.wasNull();
     }
+
+    @Override
+    public String toString() {
+        return null == delegate ? super.toString() : delegate.toString();
+    }
+
 }
