@@ -78,6 +78,7 @@ import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link GlobalAddressBookPermissionsResolverTask} - Resolves GAD's group permission to individual user permissions.
@@ -272,7 +273,7 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
          * Any missing permission?
          */
         if (detectedUsers.size() < users.size()) {
-            final int[] permissions2Insert = null == permissions ? getAnyExistingPermission(contextId, writeCon) : permissions;
+            final int[] permissions2Insert = null == permissions ? getConfiguredPermissions() : permissions;
             PreparedStatement stmt = null;
             try {
                 stmt =
@@ -305,37 +306,13 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
         }
     }
 
-    private static int[] getAnyExistingPermission(final int contextId, final Connection con) throws UpdateException {
-        int[] permissions = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT permission_id, fp, orp, owp, odp FROM oxfolder_permissions WHERE cid = ? AND fuid = ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            rs = stmt.executeQuery();
-            pos = 1;
-            if (rs.next()) {
-                permissions = new int[4];
-                permissions[0] = rs.getInt(pos++);
-                permissions[1] = rs.getInt(pos++);
-                permissions[2] = rs.getInt(pos++);
-                permissions[3] = rs.getInt(pos++);
-            }
-        } catch (final SQLException e) {
-            throw createSQLError(e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-        }
-        if (null == permissions) {
-            // Return default permissions if GAD is enabled
+    private static int[] getConfiguredPermissions() {
+        if (OXFolderProperties.isEnableInternalUsersEdit()) {
             return new int[] {
                 OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS };
         }
-        return permissions;
+        return new int[] {
+            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS };
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task GlobalAddressBookPermissionsResolverTask: %1$s." })
