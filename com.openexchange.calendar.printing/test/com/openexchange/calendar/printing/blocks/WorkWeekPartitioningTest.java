@@ -167,12 +167,15 @@ AbstractDateTest {
         
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1, app2}));
         List<Integer> days = new LinkedList<Integer>();
+        int numberOfDays = 0;
         for(CPFormattingInfomation info: partitions.getFormattingInformation()){
             if(info.getType() == 10){
                 days.add (Integer.valueOf (info.getAdditionalInformation() ) );
+                numberOfDays++;
             }
         }
         Collections.sort(days);
+        assertEquals("Should contain day info for every work day", 5, numberOfDays);
         assertTrue("Should contain Monday, even though there is no appointment", days.contains( Integer.valueOf(Calendar.MONDAY) ));
         assertTrue("Should contain Tuesday, even though there is no appointment", days.contains( Integer.valueOf(Calendar.TUESDAY) ));
         assertTrue("Should contain Wednesday, even though there is no appointment", days.contains( Integer.valueOf(Calendar.WEDNESDAY) ));
