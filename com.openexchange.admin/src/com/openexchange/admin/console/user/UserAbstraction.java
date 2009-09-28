@@ -216,6 +216,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
     protected static final String OPT_ACCESS_USM = "access-usm";
+    protected static final String OPT_ACCESS_GAD = "access-global-address-book";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     
     
@@ -284,6 +285,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessSubscription = null;
     protected Option accessActiveSync = null;
     protected Option accessUSM = null;
+    protected Option accessGAD = null;
     
     
     // non-generic extended option
@@ -587,6 +589,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setPublication(accessOption2BooleanCreate(parser,this.accessPublication));
         access.setActiveSync(accessOption2BooleanCreate(parser,this.accessActiveSync));
         access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
+        access.setGlobalAddressBook(accessOption2BooleanCreate(parser, this.accessGAD));
     }
     
     protected final boolean accessOption2BooleanCreate(final AdminParser parser,final Option accessOption){
@@ -718,6 +721,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         	access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
         	changed = true;
         }
+        if((String) parser.getOptionValue(this.accessGAD) != null) {
+            access.setGlobalAddressBook(accessOption2BooleanCreate(parser, this.accessGAD));
+            changed = true;
+        }
         return changed;
     }
     
@@ -801,7 +808,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
-        
+        this.accessGAD = setLongOpt(admp, OPT_ACCESS_GAD, "on/off", "Global Address Book (Default is off)", true, false, true);
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
@@ -966,7 +973,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void parseAndSetUserId(final AdminParser parser, final User usr) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
-            userid = Integer.parseInt(optionValue);
+            userid = Integer.valueOf(optionValue);
             usr.setId(userid);
         }
     }

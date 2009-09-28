@@ -286,6 +286,7 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
+            columnnames.add(UserAbstraction.OPT_ACCESS_GAD);
 
         }
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
@@ -344,6 +345,7 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isPublication()));
             datarow.add(String.valueOf(access.isActiveSync()));
             datarow.add(String.valueOf(access.isUSM()));
+            datarow.add(String.valueOf(access.isGlobalAddressBook()));
             data.add(datarow);
             printExtensionsError(user);
         }
