@@ -308,6 +308,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -328,6 +329,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -348,6 +350,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -368,6 +371,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -388,6 +392,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -408,6 +413,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -420,7 +426,7 @@ public final class OXFolderAdminHelper {
             adminPermission.setEntity(mailAdmin);
             adminPermission.setGroupPermission(false);
             setGADPermissions(adminPermission);
-            adminPermission.setFolderAdmin(false);
+            adminPermission.setFolderAdmin(true);
             createSystemFolder(
                 FolderObject.SYSTEM_LDAP_FOLDER_ID,
                 FolderObject.SYSTEM_LDAP_FOLDER_NAME,
@@ -430,6 +436,7 @@ public final class OXFolderAdminHelper {
                 true,
                 creatingTime,
                 mailAdmin,
+                false,
                 cid,
                 writeCon);
         }
@@ -451,6 +458,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -471,6 +479,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -491,6 +500,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         /*
@@ -511,6 +521,7 @@ public final class OXFolderAdminHelper {
             true,
             creatingTime,
             mailAdmin,
+            true,
             cid,
             writeCon);
         if (LOG.isInfoEnabled()) {
@@ -564,7 +575,7 @@ public final class OXFolderAdminHelper {
 
     private static final String SQL_INSERT_SPECIAL_FOLDER = "INSERT INTO oxfolder_specialfolders " + "(tag, cid, fuid) VALUES (?,?,?)";
 
-    private void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final int cid, final Connection writeCon) throws SQLException {
+    private void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int cid, final Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_FOLDER);
@@ -578,7 +589,7 @@ public final class OXFolderAdminHelper {
             stmt.setInt(8, mailAdminId); // created_from
             stmt.setLong(9, creatingTime); // changing_date
             stmt.setInt(10, mailAdminId); // changed_from
-            stmt.setInt(11, FolderObject.PUBLIC_PERMISSION); // permission_flag
+            stmt.setInt(11, isPublic ? FolderObject.PUBLIC_PERMISSION : FolderObject.CUSTOM_PERMISSION); // permission_flag
             stmt.setInt(12, 1); // subfolder_flag
             stmt.executeUpdate();
             stmt.close();
