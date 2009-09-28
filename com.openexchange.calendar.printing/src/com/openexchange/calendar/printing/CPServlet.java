@@ -135,7 +135,6 @@ public class CPServlet extends PermissionServlet {
             if (params.isMissingFields()) {
                 throw new ServletException("Missing one or more parameters: " + Strings.join(params.getMissingFields(), ","));
             }
-            System.out.println("DEBUG: " + params);
             if(CPType.getByTemplateName(params.getTemplate()) == null){
                 throw new ServletException("Cannot find template " + params.getTemplate());
             }
