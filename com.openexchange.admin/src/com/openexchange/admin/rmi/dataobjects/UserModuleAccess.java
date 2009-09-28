@@ -124,6 +124,8 @@ public class UserModuleAccess implements Serializable {
 
     private boolean USM = true;
 
+    private boolean GlobalAddressBook = true;
+
 
     /**
      * Creates a new instance of UserModuleAccess
@@ -207,6 +209,7 @@ public class UserModuleAccess implements Serializable {
         this.Publication = true;
         this.ActiveSync = true;
         this.USM = true;
+        this.GlobalAddressBook = true;
     }
 
     /**
@@ -240,6 +243,7 @@ public class UserModuleAccess implements Serializable {
         this.Publication = false;
         this.ActiveSync = false;
         this.USM = false;
+        this.GlobalAddressBook = false;
     }
 
     public boolean getEditGroup() {
@@ -548,7 +552,7 @@ public class UserModuleAccess implements Serializable {
         return ActiveSync;
     }
 
-    public void setActiveSync(boolean activeSync) {
+    public void setActiveSync(final boolean activeSync) {
         this.ActiveSync = activeSync;
     }
 
@@ -556,8 +560,16 @@ public class UserModuleAccess implements Serializable {
         return USM;
     }
 
-    public void setUSM(boolean val) {
+    public void setUSM(final boolean val) {
         this.USM = val;
+    }
+
+    public boolean isGlobalAddressBook() {
+        return GlobalAddressBook;
+    }
+
+    public void setGlobalAddressBook(final boolean val) {
+        this.GlobalAddressBook = val;
     }
 
     @Override
