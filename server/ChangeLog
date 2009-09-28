@@ -1,3 +1,7 @@
+* 2009-09-28 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14357: Fixed yearly pattern with workdays.
+
 * 2009-09-27 - thorben.betten@open-xchange.com
 
  - Bugfix #14571: Fixed setting "In-Reply-To" and "References" headers on reply to a message of an external mail account

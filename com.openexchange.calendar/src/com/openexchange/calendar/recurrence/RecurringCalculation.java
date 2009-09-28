@@ -1058,11 +1058,7 @@ public class RecurringCalculation {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
                             calc.set(Calendar.DAY_OF_MONTH, 1);
-                            if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                                calc.add(Calendar.DAY_OF_MONTH, 2 + (day_or_type-1));
-                            } else if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                                calc.add(Calendar.DAY_OF_MONTH, 1 + (day_or_type-1));
-                            }
+                            addWorkdays(calc, day_or_type);
                         } else if (a == CalendarObject.WEEKENDDAY) {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
@@ -1139,6 +1135,25 @@ public class RecurringCalculation {
         
         
         return rs;
+    }
+    
+    /**
+     * Adds the ammount of workdays to the given Calendar, which should be the first of a month.
+     * 
+     * @param cal
+     * @param days
+     */
+    private void addWorkdays(Calendar cal, int days) {
+        while (days > 1 || isWeekend(cal)) {
+            if (!isWeekend(cal)) {
+                days--;
+            }
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+        }
+    }
+
+    private boolean isWeekend(Calendar cal) {
+        return cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY;
     }
     
     private static int getDay(final int cd) throws RecurringException {
