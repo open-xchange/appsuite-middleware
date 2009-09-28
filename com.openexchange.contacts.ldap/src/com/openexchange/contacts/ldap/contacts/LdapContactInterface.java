@@ -91,8 +91,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class LdapContactInterface implements ContactInterface {
 
-    private static final int TASK_DELAY = 2000;
-
     private class ContactLoaderTask implements Runnable {
         
         private final LdapContactInterfaceProvider contactIFace;
@@ -114,7 +112,6 @@ public class LdapContactInterface implements ContactInterface {
                 this.contactIFace.rwlock_cached_contacts.writeLock().lock();
                 try {
                     this.contactIFace.cached_contacts = ldapContacts;
-                    System.out.println("Refreshed folder: " + folderid);
                 } finally {
                     this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
                 }
@@ -330,7 +327,7 @@ public class LdapContactInterface implements ContactInterface {
                     this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
                 }
                 // Start thread
-                ServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(new ContactLoaderTask(this.contactIFace, folderId, columns), TASK_DELAY, TASK_DELAY);
+                ServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(new ContactLoaderTask(this.contactIFace, folderId, columns), folderprop.getRefreshinterval(), folderprop.getRefreshinterval());
             } else {
                 try {
                     try {

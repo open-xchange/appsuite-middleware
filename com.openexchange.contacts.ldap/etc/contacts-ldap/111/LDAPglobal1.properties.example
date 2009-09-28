@@ -114,3 +114,8 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.ADS_deletion_support=false
 # See http://java.sun.com/products/jndi/tutorial/ldap/referral/jndi.html for a
 # detailed description
 com.openexchange.contacts.ldap.context111.LDAPglobal1.referrals=follow
+
+# Specify the refresh interval for the cached contacts. If authtype is 
+# "anonymous" or "AdminDN" the contacts are cached and refreshed in the
+# background in the interval specified here (given in ms)
+com.openexchange.contacts.ldap.context111.LDAPglobal1.refreshinterval=10000

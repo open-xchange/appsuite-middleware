@@ -63,6 +63,8 @@ import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code
 public class FolderProperties {
 
     
+    private static final int DEFAULT_REFRESH_INTERVAL = 10000;
+
     public interface SetterFallbackClosure {
         public void set(String property);
         
@@ -146,7 +148,8 @@ public class FolderProperties {
         baseDN_distributionlist("baseDN_distributionlist"),
         outlook_support("outlook_support"),
         ADS_deletion_support("ADS_deletion_support"),
-        referrals("referrals");
+        referrals("referrals"),
+        refreshinterval("refreshinterval");
         
         private final String name;
         
@@ -218,6 +221,10 @@ public class FolderProperties {
     private boolean ads_deletion_support;
     
     private ReferralTypes referrals;
+    
+    private int refreshinterval;
+    
+    
     
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -425,6 +432,19 @@ public class FolderProperties {
                 return ReferralTypes.valueOf(string);
             }
         });
+        
+        final String refreshintervalstring = checkStringProperty(parameterObject, Parameters.refreshinterval);
+        try {
+            if (null != refreshintervalstring) {
+                retval.setRefreshinterval(Integer.parseInt(refreshintervalstring));
+            } else {
+                retval.setRefreshinterval(DEFAULT_REFRESH_INTERVAL);
+            }
+            logBuilder.append("\trefreshinterval: ").append(retval.getRefreshinterval()).append('\n');
+        } catch (final NumberFormatException e) {
+            throw new LdapConfigurationException(Code.INVALID_REFRESHINTERVAL, refreshintervalstring);
+        }
+
 
         final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
         
@@ -498,6 +518,12 @@ public class FolderProperties {
     public ReferralTypes getReferrals() {
         return referrals;
     }
+
+    public int getRefreshinterval() {
+        return refreshinterval;
+    }
+
+
 
     public int getPagesize() {
         return pagesize;
@@ -651,6 +677,12 @@ public class FolderProperties {
     private void setReferrals(ReferralTypes referrals) {
         this.referrals = referrals;
     }
+
+    private void setRefreshinterval(int refreshinterval) {
+        this.refreshinterval = refreshinterval;
+    }
+
+
 
     private void setSearchfilter(final String searchfilter) {
         this.searchfilter = searchfilter;

@@ -141,6 +141,11 @@ public class PropertyHandler {
         
     }
 
+    /**
+     * @param props
+     * @param propertyname
+     * @return the propertyvalue if the property exists and is != null or null otherwise
+     */
     public static String checkStringProperty(final Properties props, final String propertyname) {
         final String property = props.getProperty(propertyname);
         if (null != property && 0 != property.length()) {

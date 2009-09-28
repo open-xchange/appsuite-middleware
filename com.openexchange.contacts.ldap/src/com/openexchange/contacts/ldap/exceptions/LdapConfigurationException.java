@@ -134,7 +134,12 @@ public class LdapConfigurationException extends OXException {
         /**
          * The given value for referrals "%s" is not a possible one
          */
-        REFERRALS_WRONG("The given value for referrals \"%s\" is not a possible one", Category.SETUP_ERROR, 15);
+        REFERRALS_WRONG("The given value for referrals \"%s\" is not a possible one", Category.SETUP_ERROR, 15),
+        
+        /**
+         * The given value for refreshinterval "%s" is no integer value
+         */
+        INVALID_REFRESHINTERVAL("The given value for refreshinterval \"%s\" is no integer value", Category.SETUP_ERROR, 16);
 
 
         /**
