@@ -64,7 +64,7 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
 
     private final String servletPath;
 
-    private final ListIDs identifier;
+    protected final ListIDs identifier;
 
     private final int[] columns;
 
