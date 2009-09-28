@@ -347,8 +347,11 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Creates the table replicationMonitor for monitoring if slaves are completely replicated.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateReplicationTableTask());
             // Version 92
-            // Config parameter for en-/disabling contact collection on incomming and outgoing mails.
+            // Config parameter for en-/disabling contact collection on incoming and outgoing mails.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ContactCollectOnIncomingAndOutgoingMailUpdateTask());
+            // Version 94
+            // Resolves Global Address Book's group permission to individual user permissions.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.GlobalAddressBookPermissionsResolverTask());
 
             // TODO: Enable virtual folder tree update task when needed
             // Version XY
