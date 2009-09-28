@@ -104,8 +104,8 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
                 timestamp = request.getTimestamp();
                 return retval;
             } catch (final AbstractOXException e) {
-                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class);
-                LOG.error(e.getMessage(), e);
+                final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class);
+                log.error(e.getMessage(), e);
                 throw e;
             }
         }
