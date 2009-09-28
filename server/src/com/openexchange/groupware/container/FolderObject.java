@@ -236,14 +236,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     public static final int SUBSCR_SUBFLDS = 315;
 
-    public static final int[] ALL_COLUMNS = {
-        // From FolderObject itself
-        FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
-        CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
-        // From FolderChildObject
-        FOLDER_ID,
-        // From DataObject
-        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+    public static final int[] ALL_COLUMNS =
+        {
+            // From FolderObject itself
+            FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
+            CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
+            // From FolderChildObject
+            FOLDER_ID,
+            // From DataObject
+            OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     // Modules
     public static final int TASK = 1;
@@ -284,12 +285,14 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     }
 
     // SQL string for standard modules
-    public static final String SQL_IN_STR_STANDARD_MODULES = new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(
-        ',').append(CONTACT).append(',').append(UNBOUND).append(',').append(INFOSTORE).append(')').toString();
+    public static final String SQL_IN_STR_STANDARD_MODULES =
+        new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(
+            ',').append(INFOSTORE).append(')').toString();
 
     // SQL string for standard modules including system module
-    public static final String SQL_IN_STR_STANDARD_MODULES_ALL = new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(
-        ',').append(CONTACT).append(',').append(UNBOUND).append(',').append(SYSTEM_MODULE).append(',').append(INFOSTORE).append(')').toString();
+    public static final String SQL_IN_STR_STANDARD_MODULES_ALL =
+        new StringBuilder().append('(').append(TASK).append(',').append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(
+            ',').append(SYSTEM_MODULE).append(',').append(INFOSTORE).append(')').toString();
 
     // Permissions
     public static final int PRIVATE_PERMISSION = 1;
@@ -798,14 +801,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                  * Search for visible subfolders
                  */
                 final int[] modules = { TASK, CALENDAR, CONTACT };
-                return (iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
-                    userId,
-                    groups,
-                    userConfig.getAccessibleModules(),
-                    FolderObject.PUBLIC,
-                    modules,
-                    SYSTEM_PUBLIC_FOLDER_ID,
-                    ctx)).hasNext();
+                return (iter =
+                    OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
+                        userId,
+                        groups,
+                        userConfig.getAccessibleModules(),
+                        FolderObject.PUBLIC,
+                        modules,
+                        SYSTEM_PUBLIC_FOLDER_ID,
+                        ctx)).hasNext();
             } else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
                 return userConfig.hasInfostore();
                 // return (iter =
@@ -898,7 +902,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             } else if (objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID) {
                 iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CONTACT, userId, groups, userConfig, ctx, null);
             } else if (objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
-                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups, userConfig, ctx, null);
+                iter =
+                    OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups, userConfig, ctx, null);
             } else {
                 iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
             }
@@ -1474,7 +1479,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return loadFolderObjectFromDB(folderId, ctx, readConArg, loadPermissions, loadSubfolderList, TABLE_OT, TABLE_OP);
     }
 
-    private static final String SQL_LOAD_F = "SELECT parent, fname, module, type, creating_date, created_from," + " changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
+    private static final String SQL_LOAD_F =
+        "SELECT parent, fname, module, type, creating_date, created_from," + " changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads specified folder from database.
@@ -1575,7 +1581,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return getFolderPermissions(folderId, ctx, readConArg, TABLE_OP);
     }
 
-    private static final String SQL_LOAD_P = "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
+    private static final String SQL_LOAD_P =
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
@@ -1605,8 +1612,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
-                final OCLPermission[] permissions = new OCLPermission[1];
-                if (rs.next()) {
+                final List<OCLPermission> permissions = new ArrayList<OCLPermission>();
+                while (rs.next()) {
                     final int entity = rs.getInt(1);
                     final OCLPermission p = new OCLPermission();
                     p.setEntity(entity);
@@ -1631,25 +1638,27 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                     p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
                     p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
                     p.setSystem(rs.getInt(8));
-                    permissions[0] = p;
+                    permissions.add(p);
                 }
                 stmt.close();
                 rs = null;
                 stmt = null;
-                return permissions;
+                if (update) {
+                    for (final OCLPermission p : permissions) {
+                        OXFolderSQL.updateSinglePermission(
+                            folderId,
+                            p.getEntity(),
+                            OCLPermission.READ_FOLDER,
+                            OCLPermission.READ_ALL_OBJECTS,
+                            owp,
+                            OCLPermission.NO_PERMISSIONS,
+                            null,
+                            ctx);
+                    }
+                }
+                return permissions.toArray(new OCLPermission[permissions.size()]);
             } finally {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
-                if (update) {
-                    OXFolderSQL.updateSinglePermission(
-                        folderId,
-                        OCLPermission.ALL_GROUPS_AND_USERS,
-                        OCLPermission.READ_FOLDER,
-                        OCLPermission.READ_ALL_OBJECTS,
-                        owp,
-                        OCLPermission.NO_PERMISSIONS,
-                        null,
-                        ctx);
-                }
             }
         }
         try {
