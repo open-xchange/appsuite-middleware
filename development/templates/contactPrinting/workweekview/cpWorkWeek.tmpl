@@ -10,6 +10,42 @@
 	<span class="date">${a_date?string("HH:mm zzz")}</span>
 </#macro>
 
+<#macro insert_breaks formattinginfo appointment_index> 
+	<#list formattinginfo as info>
+		<#if info.position == appointment_index>
+		
+			<#if info.type == 0>
+			</td>
+			<td>
+			</#if>
+			
+			<#if info.type == 1>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</#if>
+		</#if>
+	</#list>
+</#macro>
+
+<#macro insert_day_info info> 
+	<#if info.type == 10>
+		<th>
+		<#if info.additionalInformation == "2">
+			Monday
+		<#elseif info.additionalInformation == "3">
+			Tuesday
+		<#elseif info.additionalInformation == "4">
+			Wednesday
+		<#elseif info.additionalInformation == "5">
+			Thursday
+		<#elseif info.additionalInformation == "6">
+			Friday
+		</#if>
+		</th>
+	</#if>
+</#macro>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -17,6 +53,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
 <head>
 	<title>OX Calendar PrintView</title>
+	<style type="text/css">
+		table, tr {
+			width: 100%;
+		}
+		th {
+			width:20%;
+		}
+	</style>
 </head>
 
 <body>
@@ -25,17 +69,20 @@
 		to <@datetime end />
 	</h1>
 	
-	<ul>
-	<#list appointmentblocks as appointmentblock>
-		<li>
-			<ul>
-				<#list appointmentblock.appointments as appointment>
-					<li><@datetime appointment.startDate /> ${appointment.title}</li>
-				</#list>
-			</ul>
-		</li>
-	</#list>
-	</ul>
+	<table border="1">
+		<tr>
+			<#list formattinginfo as info>
+				<@insert_day_info info />
+			</#list>
+		</tr>
+		<tr>
+		<#list appointments as appointment>
+		
+			<@insert_breaks formattinginfo appointment_index />
+			<@datetime appointment.startDate />${appointment.title}<br />
+		</#list>
+		</tr>
+	</table>
 	
 	<h1>Debugging data:</h1>
 	<ul>
