@@ -98,10 +98,16 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
         }
 
         public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
-            final ContactRequest request = new ContactRequest(session);
-            final JSONValue retval = request.action(action, jsonObject);
-            timestamp = request.getTimestamp();
-            return retval;
+            try {
+                final ContactRequest request = new ContactRequest(session);
+                final JSONValue retval = request.action(action, jsonObject);
+                timestamp = request.getTimestamp();
+                return retval;
+            } catch (final AbstractOXException e) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class);
+                LOG.error(e.getMessage(), e);
+                throw e;
+            }
         }
 
     }
