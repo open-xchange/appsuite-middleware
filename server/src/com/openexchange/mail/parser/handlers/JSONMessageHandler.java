@@ -145,6 +145,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private boolean textAppended;
 
+    private boolean textWasEmpty;
+
     private final boolean[] modified;
 
     /**
@@ -395,10 +397,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * These headers are covered by fields of {@link MailMessage}
      */
-    private static final Set<HeaderName> COVERED_HEADER_NAMES = new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
-        MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC, MessageHeaders.CC,
-        MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT,
-        MessageHeaders.TO }));
+    private static final Set<HeaderName> COVERED_HEADER_NAMES =
+        new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
+            MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE, MessageHeaders.BCC,
+            MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY,
+            MessageHeaders.SUBJECT, MessageHeaders.TO }));
 
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws MailException {
         if (size == 0) {
@@ -585,15 +588,22 @@ public final class JSONMessageHandler implements MailMessageHandler {
             /*
              * Just usual plain text
              */
-            // asPlainText(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode));
             if (textAppended) {
-                /*
-                 * A plain text message body has already been detected; append inline text as an attachment, too
-                 */
-                asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
+                if (textWasEmpty) {
+                    final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                    asPlainText(id, contentType.getBaseType(), content);
+                    textWasEmpty = (null == content || 0 == content.length());
+                } else {
+                    /*
+                     * A plain text message body has already been detected; append inline text as an attachment, too
+                     */
+                    asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
+                }
             } else {
-                asPlainText(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode));
+                final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                asPlainText(id, contentType.getBaseType(), content);
                 textAppended = true;
+                textWasEmpty = (null == content || 0 == content.length());
             }
             return true;
         } catch (final JSONException e) {
@@ -634,8 +644,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
                 contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
             } catch (final Exception e) {
-                final Throwable t = new Throwable(
-                    new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                final Throwable t =
+                    new Throwable(
+                        new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn(t.getMessage(), t);
             }
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType);
@@ -713,9 +724,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 nestedMail = (MailMessage) content;
             } else if (content instanceof InputStream) {
                 try {
-                    nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
-                        MIMEDefaultSession.getDefaultSession(),
-                        (InputStream) content));
+                    nestedMail =
+                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
