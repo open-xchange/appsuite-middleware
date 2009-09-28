@@ -66,11 +66,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactsByCsvFileStep extends AbstractStep implements Step <Contact[], UnexpectedPage> {
-
-    private UnexpectedPage inputPage;
-    
-    private Contact[] contacts;
+public class ContactsByCsvFileStep extends AbstractStep<Contact[], UnexpectedPage>{
     
     private boolean ignoreFirstLine;
     
@@ -90,7 +86,7 @@ public class ContactsByCsvFileStep extends AbstractStep implements Step <Contact
     
     public void execute(WebClient webClient) throws SubscriptionException {
         final Vector<Contact> contactObjects = new Vector<Contact>();
-        String page = inputPage.getWebResponse().getContentAsString();
+        String page = input.getWebResponse().getContentAsString();
         int counter = 0;
         while (page.contains("\n")) {
             int endOfLine = page.indexOf("\n");
@@ -132,32 +128,11 @@ public class ContactsByCsvFileStep extends AbstractStep implements Step <Contact
             
         }
         executedSuccessfully = true;
-        contacts = new Contact[contactObjects.size()];
-        for (int i = 0; i < contacts.length && i < contactObjects.size(); i++) {
-            contacts[i] = contactObjects.get(i);
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
         }
     }
-
-    
-    public String inputType() {
-        return UNEXPECTED_PAGE;
-    }
-
-    
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    
-    public Contact[] getOutput() {
-        return contacts;
-    }
-
-    
-    public void setInput(UnexpectedPage input) {
-        this.inputPage = input;
-    }
-
     
     public boolean getIgnoreFirstLine() {
         return ignoreFirstLine;

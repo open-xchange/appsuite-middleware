@@ -71,11 +71,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>> {
-
-    private List<HtmlAnchor> anchors;
-
-    private Contact[] contactObjectsArray;
+public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], List<HtmlAnchor>> {
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
@@ -98,7 +94,7 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements Ste
         VersitDefinition.Reader versitReader;
         String encoding = "ISO-8859-1";
         // int counter=0;
-        for (HtmlAnchor anchor : anchors) {
+        for (HtmlAnchor anchor : input) {
             try {
                 HtmlPage page = anchor.click();
                 Contact contact = new Contact();
@@ -145,43 +141,11 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep implements Ste
             executedSuccessfully = true;
         }
 
-        contactObjectsArray = new Contact[contactObjects.size()];
-        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
-            contactObjectsArray[i] = contactObjects.get(i);
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
         }
 
-    }
-
-    public String inputType() {
-        return LIST_OF_HTML_ANCHORS;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
-    }
-
-    public void setInput(List<HtmlAnchor> input) {
-        this.anchors = input;
-    }
-
-    public List<HtmlAnchor> getAnchors() {
-        return anchors;
-    }
-
-    public void setAnchors(List<HtmlAnchor> pages) {
-        this.anchors = pages;
-    }
-
-    public Contact[] getContactObjectsArray() {
-        return contactObjectsArray;
-    }
-
-    public void setContactObjectsArray(Contact[] contactObjectsArray) {
-        this.contactObjectsArray = contactObjectsArray;
     }
 
     public String getVcardUrl() {

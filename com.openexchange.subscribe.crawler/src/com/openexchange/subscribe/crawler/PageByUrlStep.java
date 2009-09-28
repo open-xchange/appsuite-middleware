@@ -62,11 +62,9 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object> {
+public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
 
     private String url;
-
-    private HtmlPage currentPage;
 
     private Exception exception;
 
@@ -84,7 +82,7 @@ public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object
     public void execute(WebClient webClient) throws SubscriptionException {
         try {
             HtmlPage pageByUrl = webClient.getPage(this.url);
-            this.currentPage = pageByUrl;
+            output = pageByUrl;
             executedSuccessfully = true;
         } catch (FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
@@ -103,18 +101,6 @@ public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object
         return this.exception;
     }
 
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    public String outputType() {
-        return HTML_PAGE;
-    }
-
-    public HtmlPage getOutput() {
-        return currentPage;
-    }
-
     public void setInput(Object input) {
         // this needs to do nothing
     }
@@ -125,14 +111,6 @@ public class PageByUrlStep extends AbstractStep implements Step<HtmlPage, Object
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public HtmlPage getCurrentPage() {
-        return currentPage;
-    }
-
-    public void setCurrentPage(HtmlPage currentPage) {
-        this.currentPage = currentPage;
     }
 
     public boolean isExecutedSuccessfully() {

@@ -66,14 +66,11 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object>, LoginStep {
+public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
 
     private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 
-    private HtmlPage currentPage;
-
     public LoginPageStep() {
-
     }
 
     public LoginPageStep(String description, String url, String username, String password, String nameOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin, String baseUrl) {
@@ -99,7 +96,7 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
             HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);
             passwordfield.setValueAttribute(this.password);
             final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-            this.currentPage = pageAfterLogin;
+            this.output = pageAfterLogin;
 
             // if this link is not on the page the login did not work
             boolean linkAvailable = false;
@@ -119,26 +116,6 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
         } catch (IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
-    }
-
-    public HtmlPage getCurrentPage() {
-        return currentPage;
-    }
-
-    public String inputType() {
-        return null;
-    }
-
-    public String outputType() {
-        return HTML_PAGE;
-    }
-
-    public HtmlPage getOutput() {
-        return currentPage;
-    }
-
-    public void setInput(Object input) {
-        // this does nothing
     }
 
     public String getUrl() {
@@ -187,10 +164,6 @@ public class LoginPageStep extends AbstractStep implements Step<HtmlPage, Object
 
     public void setNameOfPasswordField(String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
-    }
-
-    public void setCurrentPage(HtmlPage currentPage) {
-        this.currentPage = currentPage;
     }
 
     public String getPageTitleAfterLogin() {

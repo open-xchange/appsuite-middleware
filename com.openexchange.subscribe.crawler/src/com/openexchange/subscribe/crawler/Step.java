@@ -59,7 +59,7 @@ import com.openexchange.subscribe.SubscriptionException;
  * @param <O> The Output accessible if the step executed successfully
  * @param <I> The Input needed for the step to execute
  */
-public interface Step<O, I> extends HasOutput<O>, HasInput<I> {
+public interface Step<O, I>{
 
     boolean executedSuccessfully();
 
@@ -67,10 +67,14 @@ public interface Step<O, I> extends HasOutput<O>, HasInput<I> {
 
     void execute(WebClient webClient) throws SubscriptionException;
 
-    String inputType();
+    Class inputType();
 
-    String outputType();
+    Class outputType();
     
     void setWorkflow(Workflow workflow);
+    
+    public void setInput(I input);
+    
+    public O getOutput();
 
 }

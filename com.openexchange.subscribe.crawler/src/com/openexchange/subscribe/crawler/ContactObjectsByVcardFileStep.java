@@ -72,13 +72,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByVcardFileStep extends AbstractStep implements Step<Contact[], Page> {
-
-    private Contact[] contactObjectsArray = new Contact[0];
+public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page> {
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
-
-    private Page inputPage;
 
     private static final Log LOG = LogFactory.getLog(ContactObjectsByVcardFileStep.class);
 
@@ -97,7 +93,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep implements Step<
         Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
-        String pageString = inputPage.getWebResponse().getContentAsString();
+        String pageString = input.getWebResponse().getContentAsString();
 
         while (pageString.contains("BEGIN:VCARD")) {
             int beginIndex = pageString.indexOf("BEGIN:VCARD");
@@ -126,9 +122,9 @@ public class ContactObjectsByVcardFileStep extends AbstractStep implements Step<
 
         executedSuccessfully = true;
 
-        contactObjectsArray = new Contact[contactObjects.size()];
-        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
-            contactObjectsArray[i] = contactObjects.get(i);
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
         }
 
     }
@@ -138,22 +134,6 @@ public class ContactObjectsByVcardFileStep extends AbstractStep implements Step<
             vcardString = vcardString.replaceAll(regexToReplace, "");
         }
         return vcardString;
-    }
-
-    public String inputType() {
-        return PAGE;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
-    }
-
-    public void setInput(Page input) {
-        inputPage = input;
     }
 
     public List<String> getUnwantedLines() {

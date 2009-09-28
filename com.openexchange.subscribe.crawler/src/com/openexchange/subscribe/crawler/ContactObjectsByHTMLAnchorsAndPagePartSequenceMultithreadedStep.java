@@ -68,16 +68,12 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
- * This step takes HtmlAnchors that each link to a page containing contact information and converts them to ContactObjects for OX
+ * This step takes HtmlAnchors that each link to a page containing contact information and converts them to ContactObjects for OX.
  * TimerService is used to execute multiple of the quite slow http-requests simultaneously.
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>>, NeedsLoginStepString {
-
-    private List<HtmlAnchor> anchors;
-
-    private Contact[] contactObjectsArray;
+public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep extends AbstractStep<Contact[], List<HtmlAnchor>> implements NeedsLoginStepString {
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
@@ -98,7 +94,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
         List<Contact> contacts = new ArrayList<Contact>();
 
         ParallelExecutor parallelExecutor = new ParallelExecutor();
-        List<List<HtmlAnchor>> subsetsOfLinks = parallelExecutor.splitIntoTasks(anchors);
+        List<List<HtmlAnchor>> subsetsOfLinks = parallelExecutor.splitIntoTasks(input);
         List<Callable<ArrayList<Contact>>> callables = new ArrayList<Callable<ArrayList<Contact>>>();
         for (List<HtmlAnchor> subset : subsetsOfLinks) {
             Callable callable = new ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(
@@ -108,45 +104,13 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
             callables.add(callable);
         }
         contacts = parallelExecutor.execute(callables);
-        contactObjectsArray = new Contact[contacts.size()];
-        for (int i = 0; i < contactObjectsArray.length && i < contacts.size(); i++) {
-            contactObjectsArray[i] = contacts.get(i);
+        output = new Contact[contacts.size()];
+        for (int i = 0; i < output.length && i < contacts.size(); i++) {
+            output[i] = contacts.get(i);
         }
 
         this.executedSuccessfully = true;
 
-    }
-
-    public String inputType() {
-        return LIST_OF_HTML_ANCHORS;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
-    }
-
-    public void setInput(final List<HtmlAnchor> input) {
-        anchors = input;
-    }
-
-    public List<HtmlAnchor> getAnchors() {
-        return anchors;
-    }
-
-    public void setAnchors(final List<HtmlAnchor> pages) {
-        anchors = pages;
-    }
-
-    public Contact[] getContactObjectsArray() {
-        return contactObjectsArray;
-    }
-
-    public void setContactObjectsArray(final Contact[] contactObjectsArray) {
-        this.contactObjectsArray = contactObjectsArray;
     }
 
     public static ContactSanitizer getSANITIZER() {

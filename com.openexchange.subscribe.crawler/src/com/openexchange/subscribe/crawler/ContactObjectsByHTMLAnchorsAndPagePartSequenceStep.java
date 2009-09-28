@@ -71,11 +71,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>> {
-
-    private List<HtmlAnchor> anchors;
-
-    private Contact[] contactObjectsArray;
+public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends AbstractStep<Contact[], List<HtmlAnchor>> {
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
@@ -95,7 +91,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     public void execute(final WebClient webClient) {
         final Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-        for (final HtmlAnchor anchor : anchors) {
+        for (final HtmlAnchor anchor : input) {
             try {
                 final HtmlPage page = anchor.click();
                 Contact contact = new Contact();
@@ -123,44 +119,11 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             executedSuccessfully = true;
         }
 
-        contactObjectsArray = new Contact[contactObjects.size()];
-        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
-            contactObjectsArray[i] = contactObjects.get(i);
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
         }
 
-    }
-
-
-    public String inputType() {
-        return LIST_OF_HTML_ANCHORS;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
-    }
-
-    public void setInput(final List<HtmlAnchor> input) {
-        anchors = input;
-    }
-
-    public List<HtmlAnchor> getAnchors() {
-        return anchors;
-    }
-
-    public void setAnchors(final List<HtmlAnchor> pages) {
-        anchors = pages;
-    }
-
-    public Contact[] getContactObjectsArray() {
-        return contactObjectsArray;
-    }
-
-    public void setContactObjectsArray(final Contact[] contactObjectsArray) {
-        this.contactObjectsArray = contactObjectsArray;
     }
 
     public static ContactSanitizer getSANITIZER() {

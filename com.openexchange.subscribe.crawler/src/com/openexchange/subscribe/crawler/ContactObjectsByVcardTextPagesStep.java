@@ -69,11 +69,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements Step<Contact[], List<TextPage>> {
-
-    private List<TextPage> pages;
-
-    private Contact[] contactObjectsArray;
+public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], List<TextPage>>{
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
@@ -85,7 +81,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements 
         Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
-        for (TextPage page : pages) {
+        for (TextPage page : input) {
             byte[] vcard = page.getWebResponse().getContentAsBytes();
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
             VersitDefinition.Reader versitReader;
@@ -106,43 +102,11 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep implements 
             executedSuccessfully = true;
         }
 
-        contactObjectsArray = new Contact[contactObjects.size()];
-        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
-            contactObjectsArray[i] = contactObjects.get(i);
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
         }
 
-    }
-
-    public String inputType() {
-        return LIST_OF_TEXT_PAGES;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
-    }
-
-    public void setInput(List<TextPage> input) {
-        this.pages = input;
-    }
-
-    public List<TextPage> getPages() {
-        return pages;
-    }
-
-    public void setPages(List<TextPage> pages) {
-        this.pages = pages;
-    }
-
-    public Contact[] getContactObjectsArray() {
-        return contactObjectsArray;
-    }
-
-    public void setContactObjectsArray(Contact[] contactObjectsArray) {
-        this.contactObjectsArray = contactObjectsArray;
     }
 
 }

@@ -83,15 +83,15 @@ public class ConditionalPageByLinkRegexStep extends PageByLinkRegexStep {
     public void execute(WebClient webClient) throws SubscriptionException {
         try {
             boolean found = false;
-            for (HtmlAnchor link : inputPage.getAnchors()) {
+            for (HtmlAnchor link : input.getAnchors()) {
                 if (link.getHrefAttribute().matches(linkRegex)) {
-                    currentPage = link.click();
+                    output = link.click();
                     found = true;
                     break;
                 }
-                //if the conditional link is not find pass through the input page
+                //if the conditional link is not found pass through the input page
                 if (!found){
-                    currentPage = inputPage;
+                    output = input;
                 }
             }
                        

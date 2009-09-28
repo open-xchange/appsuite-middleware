@@ -63,13 +63,9 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, HtmlPage> {
+public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
 
     protected String linkRegex;
-
-    protected HtmlPage currentPage;
-
-    protected HtmlPage inputPage;
 
     private Exception exception;
 
@@ -86,9 +82,9 @@ public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, 
 
     public void execute(WebClient webClient) throws SubscriptionException {
         try {
-            for (HtmlAnchor link : inputPage.getAnchors()) {
+            for (HtmlAnchor link : input.getAnchors()) {
                 if (link.getHrefAttribute().matches(linkRegex)) {
-                    currentPage = link.click();                 
+                    output = link.click();                 
                     break;
                 }
             }
@@ -111,36 +107,12 @@ public class PageByLinkRegexStep extends AbstractStep implements Step<HtmlPage, 
         return this.exception;
     }
 
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    public String outputType() {
-        return HTML_PAGE;
-    }
-
-    public HtmlPage getOutput() {
-        return currentPage;
-    }
-
-    public void setInput(HtmlPage input) {
-        inputPage = input;
-    }
-
     public String getUrl() {
         return linkRegex;
     }
 
     public void setUrl(String url) {
         this.linkRegex = url;
-    }
-
-    public HtmlPage getCurrentPage() {
-        return currentPage;
-    }
-
-    public void setCurrentPage(HtmlPage currentPage) {
-        this.currentPage = currentPage;
     }
 
     public boolean isExecutedSuccessfully() {

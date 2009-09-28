@@ -82,14 +82,10 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 // TODO: Expand this to handle single fields (consisting of fieldname and a regex) of a contact by extracting them from a webpage
-public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep implements Step<Contact[], List<HtmlAnchor>> {
+public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<Contact[], List<HtmlAnchor>> {
     
     private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep.class);
     
-    private List<HtmlAnchor> anchors;
-
-    private Contact[] contactObjectsArray;
-
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
     private String vcardUrl, pictureUrl;
@@ -114,9 +110,9 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep i
         executedSuccessfully = true;
 
         synchronized (synchronizedContacts) {
-            contactObjectsArray = new Contact[synchronizedContacts.size()];
-            for (int i = 0; i < contactObjectsArray.length && i < synchronizedContacts.size(); i++) {
-                contactObjectsArray[i] = synchronizedContacts.get(i);
+            output = new Contact[synchronizedContacts.size()];
+            for (int i = 0; i < output.length && i < synchronizedContacts.size(); i++) {
+                output[i] = synchronizedContacts.get(i);
             }
         }
 
@@ -181,37 +177,7 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep i
         }
     }
 
-    public String inputType() {
-        return LIST_OF_HTML_PAGES;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
-    }
-
-    public void setInput(List<HtmlAnchor> input) {
-        this.anchors = input;
-    }
-
-    public List<HtmlAnchor> getAnchors() {
-        return anchors;
-    }
-
-    public void setAnchors(List<HtmlAnchor> pages) {
-        this.anchors = pages;
-    }
-
-    public Contact[] getContactObjectsArray() {
-        return contactObjectsArray;
-    }
-
-    public void setContactObjectsArray(Contact[] contactObjectsArray) {
-        this.contactObjectsArray = contactObjectsArray;
-    }
+    
 
     public class WorkerThread extends Thread {
 

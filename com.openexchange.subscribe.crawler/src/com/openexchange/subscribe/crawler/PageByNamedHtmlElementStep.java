@@ -65,15 +65,11 @@ import com.openexchange.subscribe.SubscriptionException;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class PageByNamedHtmlElementStep extends AbstractStep implements Step<Page,HtmlPage>{
+public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
     
     protected String buttonName;
     
     protected int formNumber;
-
-    protected Page currentPage;
-
-    protected HtmlPage inputPage;
 
     private Exception exception;
 
@@ -92,33 +88,16 @@ public class PageByNamedHtmlElementStep extends AbstractStep implements Step<Pag
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
-        List<HtmlElement> list = inputPage.getHtmlElementsByName(buttonName);
+        List<HtmlElement> list = input.getHtmlElementsByName(buttonName);
         for (HtmlElement el : list){
             try {
-                currentPage = el.click();
+                output = el.click();
             } catch (IOException e) {
                 LOG.error(e);
             }
         }
         executedSuccessfully = true;
     }
-
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    public String outputType() {
-        return PAGE;
-    }
-
-    public Page getOutput() {
-        return currentPage;
-    }
-
-    public void setInput(HtmlPage input) {
-        inputPage = input;
-    }
-
     
     public String getButtonName() {
         return buttonName;

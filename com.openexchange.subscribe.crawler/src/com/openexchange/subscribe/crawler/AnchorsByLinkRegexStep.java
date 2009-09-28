@@ -65,9 +65,7 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<HtmlAnchor>, HtmlPage> {
-
-    private HtmlPage htmlPage;
+public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlPage>{
 
     private String linkRegex;
 
@@ -77,10 +75,8 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
 
     private ArrayList<HtmlPage> subpages;
 
-    private ArrayList<HtmlAnchor> resultpageLinks;
-
     public AnchorsByLinkRegexStep() {
-
+        output = new ArrayList<HtmlAnchor>();
     }
 
     public AnchorsByLinkRegexStep(String description, String subpageLinkRegex, String linkRegex) {
@@ -89,15 +85,15 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
         this.linkRegex = linkRegex;
         this.subpagesHref = new ArrayList<String>();
         this.subpages = new ArrayList<HtmlPage>();
-        this.resultpageLinks = new ArrayList<HtmlAnchor>();
+        output = new ArrayList<HtmlAnchor>();
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
         try {         
             // add the first page as there should always be results there
-            subpages.add(htmlPage);
+            subpages.add(input);
             // search for subpages
-            for (HtmlAnchor link : htmlPage.getAnchors()) {
+            for (HtmlAnchor link : input.getAnchors()) {
                 // get the subpages
                 if (link.getHrefAttribute().matches(subpageLinkRegex)) {
                     if (!subpagesHref.contains(link.getHrefAttribute())) {
@@ -114,8 +110,8 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
             for (HtmlPage subpage : subpages) {
                 for (HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {                    
                     // get the result pages
-                    if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex) && !resultpageLinks.contains(possibleLinkToResultpage)) {
-                        resultpageLinks.add(possibleLinkToResultpage);
+                    if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex) && !output.contains(possibleLinkToResultpage)) {
+                        output.add(possibleLinkToResultpage);
                     }
                 }
             }
@@ -140,30 +136,6 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
         return exception;
     }
 
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    public String outputType() {
-        return LIST_OF_HTML_ANCHORS;
-    }
-
-    public List<HtmlAnchor> getOutput() {
-        return resultpageLinks;
-    }
-
-    public void setInput(HtmlPage input) {
-        this.htmlPage = input;
-    }
-
-    public HtmlPage getHtmlPage() {
-        return htmlPage;
-    }
-
-    public void setHtmlPage(HtmlPage htmlPage) {
-        this.htmlPage = htmlPage;
-    }
-
     public String getSubpageLinkRegex() {
         return subpageLinkRegex;
     }
@@ -186,14 +158,6 @@ public class AnchorsByLinkRegexStep extends AbstractStep implements Step<List<Ht
 
     public void setSubpages(ArrayList<HtmlPage> subpages) {
         this.subpages = subpages;
-    }
-
-    public ArrayList<HtmlAnchor> getResultpageLinks() {
-        return resultpageLinks;
-    }
-
-    public void setResultpageLinks(ArrayList<HtmlAnchor> resultpageLinks) {
-        this.resultpageLinks = resultpageLinks;
     }
 
     public String getLinkRegex() {

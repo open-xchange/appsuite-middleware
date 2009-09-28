@@ -71,11 +71,9 @@ import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Object>, LoginStep {
+public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
 
     private static final Log LOG = LogFactory.getLog(FacebookAPIStep.class);
-    
-    private Contact[] contactObjectsArray;
 
     private static String API_KEY = "d36ebc9e274a89e3bd0c239cea4acb48";
 
@@ -99,7 +97,7 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
-        contactObjectsArray = new Contact[0];
+        output = new Contact[0];
         ArrayList<Contact> contactObjects = new ArrayList<Contact>();
 
         try {
@@ -237,22 +235,10 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
             LOG.error(e.getMessage(), e);
         } 
         executedSuccessfully = true;
-        contactObjectsArray = new Contact[contactObjects.size()];
-        for (int i = 0; i < contactObjectsArray.length && i < contactObjects.size(); i++) {
-            contactObjectsArray[i] = contactObjects.get(i);
+        output = new Contact[contactObjects.size()];
+        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
+            output[i] = contactObjects.get(i);
         }
-    }
-
-    public String inputType() {
-        return null;
-    }
-
-    public String outputType() {
-        return LIST_OF_CONTACT_OBJECTS;
-    }
-
-    public Contact[] getOutput() {
-        return contactObjectsArray;
     }
 
     public void setInput(Object input) {
@@ -315,9 +301,6 @@ public class FacebookAPIStep extends AbstractStep implements Step<Contact[], Obj
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.crawler.LoginStep#getBaseUrl()
-     */
     public String getBaseUrl() {
         return url;
     }

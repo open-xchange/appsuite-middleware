@@ -67,11 +67,7 @@ import com.openexchange.subscribe.SubscriptionException;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class UnexpectedPageByMultiselectStep extends AbstractStep implements Step<UnexpectedPage, HtmlPage>{
-
-    private HtmlPage inputPage;
-    
-    private UnexpectedPage currentPage;
+public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage, HtmlPage> {
     
     private String formName, formAction, selectName, selectValue, buttonName;
     
@@ -96,9 +92,9 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep implements Ste
     public void execute(WebClient webClient) throws SubscriptionException {
         HtmlForm form = null;
         if (!formName.equals("")) {
-            form = inputPage.getFormByName(formName);
+            form = input.getFormByName(formName);
         } else if (!formAction.equals("")){
-            for (HtmlForm tempForm : inputPage.getForms()){
+            for (HtmlForm tempForm : input.getForms()){
                 if (tempForm.getActionAttribute().matches(formAction)){
                     form = tempForm;
                 }
@@ -111,36 +107,15 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep implements Ste
             HtmlSubmitInput button = form.getInputByName(buttonName);
             
             try {
-                currentPage = (UnexpectedPage) button.click();
+                output = (UnexpectedPage) button.click();
             } catch (Exception e) {
                 LOG.error(e);
             }
-            if (currentPage != null) {
+            if (output != null) {
                 executedSuccessfully = true;
             }            
         }
     }
-
-    
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    
-    public String outputType() {
-        return UNEXPECTED_PAGE;        
-    }
-
-    
-    public UnexpectedPage getOutput() {
-        return currentPage;
-    }
-
-    
-    public void setInput(HtmlPage input) {
-        this.inputPage = input;   
-    }
-
     
     public String getFormName() {
         return formName;

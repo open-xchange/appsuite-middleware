@@ -65,18 +65,14 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextPage>, HtmlPage> {
-
-    private HtmlPage htmlPage;
+public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
 
     private String urlBeforeOffset, urlAfterOffset, linkpart;
 
     private int offset;
 
-    private List<TextPage> returnedPages = new ArrayList<TextPage>();
-
     public TextPagesByLinkStep() {
-
+        output = new ArrayList<TextPage>();
     }
 
     public TextPagesByLinkStep(String description, String urlBeforeOffset, int offset, String urlAfterOffset, String linkpart) {
@@ -85,6 +81,7 @@ public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextP
         this.urlAfterOffset = urlAfterOffset;
         this.offset = offset;
         this.linkpart = linkpart;
+        output = new ArrayList<TextPage>();
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
@@ -101,7 +98,7 @@ public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextP
                     if (link.getHrefAttribute().startsWith(linkpart)) {
                         oneSuccess = true;
                         TextPage tempTextPage = link.click();
-                        returnedPages.add(tempTextPage);
+                        output.add(tempTextPage);
                     }
                 }
                 tempOffset += offset;
@@ -124,38 +121,6 @@ public class TextPagesByLinkStep extends AbstractStep implements Step<List<TextP
 
     public Exception getException() {
         return exception;
-    }
-
-    public String inputType() {
-        return HTML_PAGE;
-    }
-
-    public String outputType() {
-        return LIST_OF_TEXT_PAGES;
-    }
-
-    public List<TextPage> getOutput() {
-        return returnedPages;
-    }
-
-    public void setInput(HtmlPage input) {
-        this.htmlPage = input;
-    }
-
-    public HtmlPage getHtmlPage() {
-        return htmlPage;
-    }
-
-    public void setHtmlPage(HtmlPage htmlPage) {
-        this.htmlPage = htmlPage;
-    }
-
-    public List<TextPage> getReturnedPages() {
-        return returnedPages;
-    }
-
-    public void setReturnedPages(List<TextPage> returnedPages) {
-        this.returnedPages = returnedPages;
     }
 
     public String getUrlBeforeOffset() {

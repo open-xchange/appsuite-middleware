@@ -49,7 +49,10 @@
 
 package com.openexchange.subscribe.crawler;
 
-public class AbstractStep {
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.subscribe.SubscriptionException;
+
+public abstract class AbstractStep<O,I> implements Step<O,I>{
 
     protected String description;
 
@@ -58,24 +61,10 @@ public class AbstractStep {
     protected boolean executedSuccessfully;
     
     protected Workflow workflow;
-
-    static final String HTML_PAGE = "HtmlPage";
     
-    static final String PAGE = "Page";
-
-    static final String LIST_OF_HTML_PAGES = "List of HtmlPages";
-
-    static final String TEXT_PAGE = "TextPage";
+    protected O output;
     
-    static final String UNEXPECTED_PAGE = "UnexpectedPage";
-
-    static final String LIST_OF_TEXT_PAGES = "List of TextPages";
-
-    static final String URL_STRING = "URL String";
-
-    static final String LIST_OF_CONTACT_OBJECTS = "List of ContactObjects";
-
-    static final String LIST_OF_HTML_ANCHORS = "List of HtmlAnchors";
+    protected I input;
 
     public boolean executedSuccessfully() {
         return executedSuccessfully;
@@ -97,5 +86,23 @@ public class AbstractStep {
         this.description = description;
     }
 
+    public abstract void execute(WebClient webClient) throws SubscriptionException;
+
+    public Class inputType() {
+        return input.getClass();
+    }
+
+    public Class outputType() {
+        return output.getClass();
+    }
+
+    public O getOutput() {
+        return output;
+    }
+
+    public void setInput(I input) {
+        this.input = input;
+        
+    }
     
 }

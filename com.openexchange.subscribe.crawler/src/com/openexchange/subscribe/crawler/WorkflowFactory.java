@@ -79,7 +79,7 @@ public class WorkflowFactory {
         Workflow workflow = null;
 
         workflow = (Workflow) Yaml.load(string);
-        checkSanity(workflow);
+        //checkSanity(workflow);
 
         return workflow;
     }

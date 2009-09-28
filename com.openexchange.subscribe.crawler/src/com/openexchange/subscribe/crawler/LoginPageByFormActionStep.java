@@ -66,13 +66,11 @@ import com.openexchange.subscribe.SubscriptionException;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LoginPageByFormActionStep extends AbstractStep implements Step<HtmlPage, Object>, LoginStep {
+public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 
     private int numberOfForm;
-
-    private HtmlPage currentPage;
 
     public LoginPageByFormActionStep() {
 
@@ -110,7 +108,7 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
                 HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);
                 passwordfield.setValueAttribute(this.password);
                 final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-                this.currentPage = pageAfterLogin;
+                this.output = pageAfterLogin;
 
                 boolean linkAvailable = false;
                 for (HtmlAnchor link : pageAfterLogin.getAnchors()) {
@@ -130,22 +128,6 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
         } catch (IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
-    }
-
-    public HtmlPage getCurrentPage() {
-        return currentPage;
-    }
-
-    public String inputType() {
-        return null;
-    }
-
-    public String outputType() {
-        return HTML_PAGE;
-    }
-
-    public HtmlPage getOutput() {
-        return currentPage;
     }
 
     public void setInput(Object input) {
@@ -198,10 +180,6 @@ public class LoginPageByFormActionStep extends AbstractStep implements Step<Html
 
     public void setNameOfPasswordField(String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
-    }
-
-    public void setCurrentPage(HtmlPage currentPage) {
-        this.currentPage = currentPage;
     }
 
     public String getPageTitleAfterLogin() {
