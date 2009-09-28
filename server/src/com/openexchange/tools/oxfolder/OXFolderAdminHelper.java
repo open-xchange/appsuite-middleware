@@ -92,6 +92,8 @@ public final class OXFolderAdminHelper {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderAdminHelper.class);
 
+    private static final boolean ADMIN_EDITABLE = false;
+
     public OXFolderAdminHelper() {
         super();
     }
@@ -543,6 +545,9 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
          */
+        /*
+         * Grant full access for 'Shared Address Book' to admin
+         */
         createSingleUserPermission(
             FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
             mailAdmin,
@@ -552,6 +557,35 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        if (ADMIN_EDITABLE) {
+            /*
+             * Grant admin access for public infostore folder to admin
+             */
+            createSingleUserPermission(
+                FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
+                mailAdmin,
+                new int[] {
+                    OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS },
+                true,
+                cid,
+                writeCon);
+            /*
+             * Grant admin access for user infostore folder to admin
+             */
+            createSingleUserPermission(
+                FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+                mailAdmin,
+                new int[] {
+                    OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS },
+                true,
+                cid,
+                writeCon);
+        }
+        /*
+         * Grant full access for project folder to admin
+         */
         createSingleUserPermission(
             FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID,
             mailAdmin,
