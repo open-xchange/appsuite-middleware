@@ -114,13 +114,16 @@ public class AbstractPartitioningStrategy {
     }
 
     public boolean isInWorkWeek(Date date) {
-        // TODO: Scope of work week might need to be configurable in the future.
         Calendar calendar = getCalendar();
         calendar.setTime(date);
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
-        return !(day == Calendar.SATURDAY || day == Calendar.SUNDAY);
+        return isInWorkWeek(calendar.get(Calendar.DAY_OF_WEEK));
     }
 
+    public boolean isInWorkWeek(int calendarDayOfWeek) {
+        // TODO: Scope of work week might need to be configurable in the future.
+        return !(calendarDayOfWeek == Calendar.SATURDAY || calendarDayOfWeek  == Calendar.SUNDAY);
+    }
+    
     protected int[] getMissingDaysInbetween(Date first, Date second) {
         long length = (second.getTime() - first.getTime()) /1000/60/60/24 - 1;
         LinkedList<Integer> days = new LinkedList<Integer>();
@@ -133,9 +136,15 @@ public class AbstractPartitioningStrategy {
         
         return I2i(days);
     }
-
+    
     protected boolean isMissingDaysInbetween(Date first, Date second) {
         return ((second.getTime() - first.getTime()) /1000/60/60/24) > 1;
     }
+
+    protected int getStartingDayOfWorkWeek() {
+        // TODO make less European
+        return Calendar.MONDAY;
+    }
+
 
 }
