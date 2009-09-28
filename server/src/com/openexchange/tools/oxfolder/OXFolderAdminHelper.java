@@ -121,6 +121,36 @@ public final class OXFolderAdminHelper {
      */
 
     /**
+     * Checks whether global address book is enabled for specified user.
+     * 
+     * @param cid The context ID
+     * @param userId The user ID
+     * @param readCon A readable connection
+     * @return <code>true</code> if global address book is enabled; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    public boolean isGlobalAddressBookEnabled(final int cid, final int userId, final Connection readCon) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = readCon.prepareStatement("SELECT fp, orp FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            stmt.setInt(pos++, userId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) >= OCLPermission.READ_FOLDER && rs.getInt(2) >= OCLPermission.READ_ALL_OBJECTS;
+            }
+            return false;
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
      * Enables/Disables specified user's global address book permission.
      * 
      * @param cid The context ID
@@ -133,7 +163,8 @@ public final class OXFolderAdminHelper {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            stmt =
+                writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -146,7 +177,8 @@ public final class OXFolderAdminHelper {
              * Insert/Update
              */
             if (update) {
-                stmt = writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                stmt =
+                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 pos = 1;
                 if (enable) {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER);
@@ -162,7 +194,8 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, userId);
                 stmt.executeUpdate();
             } else {
-                stmt = writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt =
+                    writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, cid); // cid
                 stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID); // fuid
@@ -382,31 +415,24 @@ public final class OXFolderAdminHelper {
          */
         // TODO: Whether to enable/disable internal-user-edit should be set by
         // caller (admin) as a parameter
-        if (OXFolderProperties.isEnableInternalUsersEdit()) {
-            systemPermission.setAllPermission(
-                OCLPermission.READ_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.WRITE_OWN_OBJECTS,
-                OCLPermission.NO_PERMISSIONS);
-        } else {
-            systemPermission.setAllPermission(
-                OCLPermission.READ_FOLDER,
-                OCLPermission.READ_ALL_OBJECTS,
-                OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS);
+        {
+            final OCLPermission adminPermission = new OCLPermission();
+            adminPermission.setEntity(mailAdmin);
+            adminPermission.setGroupPermission(false);
+            setGADPermissions(adminPermission);
+            adminPermission.setFolderAdmin(false);
+            createSystemFolder(
+                FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                FolderObject.SYSTEM_LDAP_FOLDER_NAME,
+                adminPermission,
+                FolderObject.SYSTEM_FOLDER_ID,
+                FolderObject.CONTACT,
+                true,
+                creatingTime,
+                mailAdmin,
+                cid,
+                writeCon);
         }
-        systemPermission.setFolderAdmin(false);
-        createSystemFolder(
-            FolderObject.SYSTEM_LDAP_FOLDER_ID,
-            FolderObject.SYSTEM_LDAP_FOLDER_NAME,
-            systemPermission,
-            FolderObject.SYSTEM_FOLDER_ID,
-            FolderObject.CONTACT,
-            true,
-            creatingTime,
-            mailAdmin,
-            cid,
-            writeCon);
         /*
          * Insert system user folder
          */
@@ -530,9 +556,11 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private final static String SQL_INSERT_SYSTEM_FOLDER = "INSERT INTO oxfolder_tree " + "(fuid, cid, parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+    private final static String SQL_INSERT_SYSTEM_FOLDER =
+        "INSERT INTO oxfolder_tree " + "(fuid, cid, parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String SQL_INSERT_SYSTEM_PERMISSION = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) VALUES (?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_SYSTEM_PERMISSION =
+        "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) VALUES (?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_INSERT_SPECIAL_FOLDER = "INSERT INTO oxfolder_specialfolders " + "(tag, cid, fuid) VALUES (?,?,?)";
 
@@ -601,6 +629,30 @@ public final class OXFolderAdminHelper {
             stmt.setInt(7, allPerms[3]);
             stmt.setInt(8, isFolderAdmin ? 1 : 0);
             stmt.setInt(9, 0);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+                stmt = null;
+            }
+        }
+    }
+
+    private void createSinglePermission(final int fuid, final OCLPermission addMe, final int cid, final Connection writeCon) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, fuid);
+            stmt.setInt(3, addMe.getEntity());
+            stmt.setInt(4, addMe.getFolderPermission());
+            stmt.setInt(5, addMe.getReadPermission());
+            stmt.setInt(6, addMe.getWritePermission());
+            stmt.setInt(7, addMe.getDeletePermission());
+            stmt.setInt(8, addMe.isFolderAdmin() ? 1 : 0);
+            stmt.setInt(9, addMe.isGroupPermission() ? 1 : 0);
             stmt.executeUpdate();
             stmt.close();
             stmt = null;
@@ -716,7 +768,8 @@ public final class OXFolderAdminHelper {
 
     private static final String SQL_UPDATE_FOLDER_TIMESTAMP = "UPDATE #FT# AS ot SET ot.changing_date = ? WHERE ot.cid = ? AND ot.fuid = ?";
 
-    private static final String SQL_SELECT_FOLDER_IN_PERMISSIONS = "SELECT ot.fuid FROM #FT# AS ot JOIN #PT# as op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id = ? GROUP BY ot.fuid";
+    private static final String SQL_SELECT_FOLDER_IN_PERMISSIONS =
+        "SELECT ot.fuid FROM #FT# AS ot JOIN #PT# as op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id = ? GROUP BY ot.fuid";
 
     /**
      * Propagates that a group has been modified throughout affected folders by touching folder's last-modified timestamp.
@@ -735,9 +788,10 @@ public final class OXFolderAdminHelper {
             /*
              * Touch all folder timestamps in whose permissions the group's entity identifier occurs
              */
-            stmt = readCon.prepareStatement(SQL_SELECT_FOLDER_IN_PERMISSIONS.replaceFirst("#FT#", STR_OXFOLDERTREE).replaceFirst(
-                "#PT#",
-                STR_OXFOLDERPERMS));
+            stmt =
+                readCon.prepareStatement(SQL_SELECT_FOLDER_IN_PERMISSIONS.replaceFirst("#FT#", STR_OXFOLDERTREE).replaceFirst(
+                    "#PT#",
+                    STR_OXFOLDERPERMS));
             stmt.setInt(1, cid);
             stmt.setInt(2, cid);
             stmt.setInt(3, group);
@@ -850,7 +904,8 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private static final String SQL_SELECT_DISPLAY_NAME = "SELECT " + Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND " + Contacts.mapping[Contact.INTERNAL_USERID].getDBFieldName() + " = ?";
+    private static final String SQL_SELECT_DISPLAY_NAME =
+        "SELECT " + Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND " + Contacts.mapping[Contact.INTERNAL_USERID].getDBFieldName() + " = ?";
 
     /**
      * Load specified user's display name with given connection (which is possibly in non-auto-commit mode). Thus we obtain most up-to-date
@@ -915,6 +970,17 @@ public final class OXFolderAdminHelper {
                     FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_NAME,
                     Integer.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID),
                     Integer.valueOf(ctx.getContextId()));
+            }
+            /*
+             * Add user to global address book permissions
+             */
+            {
+                final OCLPermission p = new OCLPermission();
+                p.setEntity(userId);
+                p.setGroupPermission(false);
+                setGADPermissions(p);
+                p.setFolderAdmin(false);
+                createSinglePermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, p, cid, writeCon);
             }
             /*
              * Proceed
@@ -1012,6 +1078,27 @@ public final class OXFolderAdminHelper {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+        }
+    }
+
+    /**
+     * Sets the global address book permission dependent on {@link OXFolderProperties#isEnableInternalUsersEdit()} option.
+     * 
+     * @param p The permission instance whose permissions shall be set
+     */
+    private static void setGADPermissions(final OCLPermission p) {
+        if (OXFolderProperties.isEnableInternalUsersEdit()) {
+            p.setAllPermission(
+                OCLPermission.READ_FOLDER,
+                OCLPermission.READ_ALL_OBJECTS,
+                OCLPermission.WRITE_OWN_OBJECTS,
+                OCLPermission.NO_PERMISSIONS);
+        } else {
+            p.setAllPermission(
+                OCLPermission.READ_FOLDER,
+                OCLPermission.READ_ALL_OBJECTS,
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS);
         }
     }
 
