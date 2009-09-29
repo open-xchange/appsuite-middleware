@@ -63,7 +63,15 @@ public enum PushExceptionCodes implements OXErrorMessage {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(PushExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1);
+    UNEXPECTED_ERROR(PushExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    /**
+     * Missing property: %1$s
+     */
+    MISSING_PROPERTY(PushExceptionMessages.MISSING_PROPERTY_MSG, Category.CODE_ERROR, 2),
+    /**
+     * Invalid property value in property "%1$s": %2$s
+     */
+    INVALID_PROPERTY(PushExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3);
 
     private final Category category;
 

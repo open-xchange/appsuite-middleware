@@ -58,10 +58,14 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public final class PushExceptionMessages implements LocalizableStrings {
 
-    /**
-     * An error occurred: %1$s
-     */
+    // An error occurred: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // Missing property: %1$s
+    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
+
+    // Invalid property value in property \"%1$s\": %2$s
+    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
 
     /**
      * Initializes a new {@link PushExceptionMessages}.
