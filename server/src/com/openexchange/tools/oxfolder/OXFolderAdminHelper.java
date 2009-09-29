@@ -163,8 +163,9 @@ public final class OXFolderAdminHelper {
             /*
              * Iterate users
              */
+            final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
             for (final Integer user : users) {
-                setGlobalAddressBookEnabled(cid, user.intValue(), enable, writeCon);
+                setGlobalAddressBookEnabled(cid, user.intValue(), enable, writeCon, admin);
             }
         } finally {
             Database.back(cid, true, writeCon);
@@ -211,6 +212,21 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon) throws OXException {
+        setGlobalAddressBookEnabled(cid, userId, enable, writeCon, null);
+    }
+
+    /**
+     * Enables/Disables specified user's global address book permission.
+     * 
+     * @param cid The context ID
+     * @param userId The user ID
+     * @param enable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
+     * @param writeCon A writable connection
+     * @throws OXException If an error occurs
+     */
+    private void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon, final Integer adminId) throws OXException {
+        final int admin = adminId == null ? getContextAdminID(cid, writeCon) : adminId.intValue();
+        final boolean isAdmin = (admin == userId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -229,7 +245,7 @@ public final class OXFolderAdminHelper {
              */
             if (update) {
                 stmt =
-                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 pos = 1;
                 if (enable) {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER);
@@ -240,6 +256,8 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
                 }
+                stmt.setInt(pos++, isAdmin ? 1 : 0);
+                stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 stmt.setInt(pos++, userId);
@@ -261,7 +279,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
                 }
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
-                stmt.setInt(pos++, 0); // admin_flag
+                stmt.setInt(pos++, isAdmin ? 1 : 0); // admin_flag
                 stmt.setInt(pos++, 0); // group_flag
                 stmt.setInt(pos++, 0); // system
                 stmt.executeUpdate();
@@ -271,7 +289,6 @@ public final class OXFolderAdminHelper {
             /*
              * Update last-modified of folder
              */
-            final int admin = getContextAdminID(cid, writeCon);
             final ContextImpl ctx = new ContextImpl(cid);
             ctx.setMailadmin(admin);
             OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
