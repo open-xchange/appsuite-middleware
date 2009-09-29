@@ -174,6 +174,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_MATTACH = "attachment";
 
+    public static final String ACTION_ZIP_MATTACH = "zip_attachments";
+
     public static final String ACTION_MAIL_RECEIPT_ACK = "receipt_ack";
 
     public static final String ACTION_NEW_MSGS = "newmsgs";

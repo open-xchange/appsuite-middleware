@@ -101,6 +101,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -335,6 +336,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionGetMessage(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_MATTACH)) {
             actionGetAttachment(req, resp);
+        } else if (actionStr.equalsIgnoreCase(ACTION_ZIP_MATTACH)) {
+            actionGetMultipleAttachments(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_NEW_MSGS)) {
             actionGetNew(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_SAVE_VERSIT)) {
@@ -1455,6 +1458,90 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         ResponseWriter.write(response, writer);
+    }
+
+    public void actionGetGetMultipleAttachments() throws MailException {
+        throw new MailException(MailException.Code.UNSUPPORTED_ACTION, ACTION_ZIP_MATTACH, "Multiple servlet");
+    }
+
+    private final void actionGetMultipleAttachments(final HttpServletRequest req, final HttpServletResponse resp) {
+        /*
+         * Some variables
+         */
+        final ServerSession session = getSessionObject(req);
+        boolean outSelected = false;
+        /*
+         * Start response
+         */
+        try {
+            /*
+             * Read in parameters
+             */
+            final String folderPath = checkStringParam(req, PARAMETER_FOLDERID);
+            final String uid = checkStringParam(req, PARAMETER_ID);
+            final String[] sequenceIds = checkStringArrayParam(req, PARAMETER_MAILATTCHMENT);
+            /*
+             * Get attachment
+             */
+            final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            ManagedFile mf = null;
+            try {
+                mf = mailInterface.getMessageAttachments(folderPath, uid, sequenceIds);
+                /*
+                 * Set Content-Type and Content-Disposition header
+                 */
+                final String fileName =
+                    new StringBuilder(32).append(getSimpleName(folderPath)).append('_').append(uid).append(".zip").toString();
+                /*
+                 * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
+                 */
+                final ContentType contentType = new ContentType();
+                contentType.setPrimaryType("application");
+                contentType.setSubType("octet-stream");
+                resp.setContentType(contentType.toString());
+                final String userAgent = req.getHeader(STR_USER_AGENT);
+                final String preparedFileName =
+                    getSaveAsFileName(fileName, isMSIEOnWindows(userAgent == null ? "" : userAgent), "application/zip");
+                resp.setHeader(
+                    "Content-disposition",
+                    new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                /*
+                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
+                 * not allow header "Pragma"
+                 */
+                Tools.removeCachingHeader(resp);
+                final OutputStream out = resp.getOutputStream();
+                outSelected = true;
+                /*
+                 * Write from content's input stream to response output stream
+                 */
+                final InputStream zipInputStream = mf.getInputStream();
+                try {
+                    final byte[] buffer = new byte[0xFFFF];
+                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) != -1;) {
+                        out.write(buffer, 0, len);
+                    }
+                    out.flush();
+                } finally {
+                    zipInputStream.close();
+                }
+            } finally {
+                if (mailInterface != null) {
+                    mailInterface.close(true);
+                }
+                if (null != mf) {
+                    mf.delete();
+                    mf = null;
+                }
+            }
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            callbackError(resp, outSelected, true, e);
+        } catch (final Exception e) {
+            final AbstractOXException exc = getWrappingOXException(e);
+            LOG.error(exc.getMessage(), exc);
+            callbackError(resp, outSelected, true, exc);
+        }
     }
 
     public void actionGetAttachment() throws MailException {
@@ -3382,6 +3469,19 @@ public class Mail extends PermissionServlet implements UploadListener {
         return paramVal;
     }
 
+    private static String[] checkStringArrayParam(final HttpServletRequest req, final String paramName) throws AbstractOXException {
+        final String tmp = req.getParameter(paramName);
+        if (tmp == null || tmp.length() == 0 || STR_NULL.equals(tmp)) {
+            throw new OXMandatoryFieldException(
+                EnumComponent.MAIL,
+                MailException.Code.MISSING_PARAM.getCategory(),
+                MailException.Code.MISSING_PARAM.getNumber(),
+                null,
+                paramName);
+        }
+        return tmp.split(" *, *");
+    }
+
     /*
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
@@ -3821,6 +3921,22 @@ public class Mail extends PermissionServlet implements UploadListener {
             return false;
         }
         return startingChar == toCheck.charAt(i);
+    }
+
+    private static String getSimpleName(final String fullname) {
+        if (null == fullname) {
+            return null;
+        }
+        final int len = fullname.length();
+        int pos = fullname.lastIndexOf('.');
+        if (pos >= 0 && pos < len - 1) {
+            return fullname.substring(pos + 1);
+        }
+        pos = fullname.lastIndexOf('/');
+        if (pos >= 0 && pos < len - 1) {
+            return fullname.substring(pos + 1);
+        }
+        return fullname;
     }
 
 }

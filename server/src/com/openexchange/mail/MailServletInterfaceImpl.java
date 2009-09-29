@@ -52,6 +52,10 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +69,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.cache.OXCachingException;
@@ -73,6 +79,9 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dataretention.DataRetentionException;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -276,12 +285,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         /*
                          * Handle spam
                          */
-                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(
+                            accountId,
+                            sourceFullname,
+                            msgUIDs,
+                            false,
+                            session);
                     } else {
                         /*
                          * Handle ham.
                          */
-                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(
+                            accountId,
+                            sourceFullname,
+                            msgUIDs,
+                            false,
+                            session);
                     }
                 }
             }
@@ -322,13 +341,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     /*
                      * Handle ham.
                      */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(
+                        accountId,
+                        sourceFullname,
+                        msgUIDs,
+                        false,
+                        session);
                 }
                 if (SPAM_SPAM == spamActionDest) {
                     /*
                      * Handle spam
                      */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(
+                        accountId,
+                        sourceFullname,
+                        msgUIDs,
+                        false,
+                        session);
                 }
             }
             // Fetch messages from source folder
@@ -657,6 +686,102 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         return mailAccess.getMessageStorage().getAttachment(fullname, msgUID, attachmentPosition);
+    }
+
+    @Override
+    public ManagedFile getMessageAttachments(final String folder, final String msgUID, final String[] attachmentPositions) throws MailException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        /*
+         * Get parts
+         */
+        final MailPart[] parts = new MailPart[attachmentPositions.length];
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = mailAccess.getMessageStorage().getAttachment(fullname, msgUID, attachmentPositions[i]);
+        }
+        /*
+         * Store them temporary to files
+         */
+        final ManagedFileManagement mfm;
+        try {
+            mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
+        } catch (final ServiceException e) {
+            throw new MailException(e);
+        }
+        final ManagedFile[] files = new ManagedFile[parts.length];
+        try {
+            for (int i = 0; i < files.length; i++) {
+                final MailPart part = parts[i];
+                if (null == part) {
+                    files[i] = null;
+                } else {
+                    files[i] = mfm.createManagedFile(part.getInputStream());
+                }
+            }
+            /*
+             * ZIP them
+             */
+            try {
+                final File tempFile = mfm.newTempFile();
+                final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(tempFile));
+                try {
+                    final byte[] buf = new byte[8192];
+                    for (int i = 0; i < files.length; i++) {
+                        final ManagedFile file = files[i];
+                        if (null != file) {
+                            final FileInputStream in = new FileInputStream(file.getFile());
+                            try {
+                                /*
+                                 * Add ZIP entry to output stream
+                                 */
+                                out.putNextEntry(new ZipEntry(parts[i].getFileName()));
+                                /*
+                                 * Transfer bytes from the file to the ZIP file
+                                 */
+                                int len;
+                                while ((len = in.read(buf)) > 0) {
+                                    out.write(buf, 0, len);
+                                }
+                                /*
+                                 * Complete the entry
+                                 */
+                                out.closeEntry();
+                            } finally {
+                                try {
+                                    in.close();
+                                } catch (final IOException e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    // Complete the ZIP file
+                    try {
+                        out.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+                /*
+                 * Return managed file
+                 */
+                return mfm.createManagedFile(tempFile);
+            } catch (final IOException e) {
+                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+            }
+        } catch (final ManagedFileException e) {
+            throw new MailException(e);
+        } finally {
+            for (int i = 0; i < files.length; i++) {
+                final ManagedFile file = files[i];
+                if (null != file) {
+                    file.delete();
+                }
+            }
+        }
     }
 
     @Override

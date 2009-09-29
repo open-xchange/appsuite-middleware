@@ -50,6 +50,7 @@
 package com.openexchange.mail;
 
 import com.openexchange.api2.MailInterfaceMonitor;
+import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -210,6 +211,17 @@ public abstract class MailServletInterface {
      * @param displayVersion <code>true</code> if returned object is for display purpose; otherwise <code>false</code>
      */
     public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws MailException;
+
+    /**
+     * Returns message's attachments as a ZIP file backed by returned managed file instance.
+     * 
+     * @param folder The folder
+     * @param msgUID The message ID
+     * @param attachmentPositions The attachment positions
+     * @return A ZIP file backed by returned managed file instance
+     * @throws MailException If an error occurs
+     */
+    public abstract ManagedFile getMessageAttachments(String folder, String msgUID, String[] attachmentPositions) throws MailException;
 
     /**
      * Returns a message's inline image located identified with given <code>cid</code> wrapped by an instance of
