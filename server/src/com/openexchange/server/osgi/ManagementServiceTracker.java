@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -62,6 +63,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.report.internal.ReportingInit;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link ManagementServiceTracker}
@@ -71,6 +73,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
     private static final Log LOG = LogFactory.getLog(ManagementServiceTracker.class);
+
+    private ObjectName gadObjectName;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
@@ -91,6 +95,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             /*
              * Add all mbeans since management service is now available
              */
+            gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
             managementService.registerMBean(
                 getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true),
                 AJPv13Monitors.AJP_MONITOR_SERVER_THREADS);
@@ -122,12 +127,16 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.getListenerMonitor().getClass().getName(), true));
             managementService.unregisterMBean(getObjectName(AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.getClass().getName(), true));
+            OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            gadObjectName = null;
         }
     }
+
 }

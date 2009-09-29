@@ -55,6 +55,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -68,6 +71,8 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.management.ManagementException;
+import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -123,10 +128,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             FolderCacheManager.initInstance();
         }
         FolderQueryCacheManager.initInstance();
-        /*
-         * Add listener to important ENABLE_INTERNAL_USER_EDIT
-         */
-
     }
 
     public void stop() throws AbstractOXException {
@@ -387,4 +388,57 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         return instance.enableInternalUsersEdit;
     }
 
+    /*-
+     * ############################# MBEAN STUFF #############################
+     */
+
+    /**
+     * Registers the global address book restorer MBean.
+     * 
+     * @param managementService The management service
+     * @return The object name of registered MBean
+     */
+    public static ObjectName registerRestorerMBean(final ManagementService managementService) {
+        try {
+            final ObjectName objectName = getObjectName(GADRestorerMBeanImpl.class.getName(), GADRestorerMBean.CACHE_DOMAIN);
+            managementService.registerMBean(objectName, new GADRestorerMBeanImpl());
+            return objectName;
+        } catch (final MalformedObjectNameException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final NotCompliantMBeanException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final ManagementException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Unregisters the global address book restorer MBean.
+     * 
+     * @param objectName The object name of registered MBean
+     * @param managementService The management service
+     */
+    public static void unregisterRestorerMBean(final ObjectName objectName, final ManagementService managementService) {
+        if (objectName != null) {
+            try {
+                managementService.unregisterMBean(objectName);
+            } catch (final ManagementException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
+     * 
+     * @param className The class name to use as object name
+     * @param domain The domain name
+     * @return An appropriate instance of {@link ObjectName}
+     * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
+     */
+    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
+        final int pos = className.lastIndexOf('.');
+        return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    }
 }
