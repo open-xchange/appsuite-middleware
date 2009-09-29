@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
