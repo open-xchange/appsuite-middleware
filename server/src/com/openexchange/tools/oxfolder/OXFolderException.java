@@ -324,7 +324,7 @@ public class OXFolderException extends OXException {
         /**
          * A DBPool error occurred in context %1$s
          */
-        DBPOOLING_ERROR("An SQL error occurred in context %1$s", Category.CODE_ERROR, 39),
+        DBPOOLING_ERROR("A DBPool error occurred in context %1$s", Category.CODE_ERROR, 39),
         /**
          * Delivered sequence id %1$s from database is less than allowed min. folder id of %2$s in context %3$s
          */
