@@ -65,6 +65,7 @@ public class SubscriptionSource {
     private DynamicFormDescription formDescription;
     private SubscribeService subscribeService;
     private int folderModule = 0;
+    private int priority = 0;
     
     public String getId() {
         return id;
@@ -112,6 +113,15 @@ public class SubscriptionSource {
     
     public int getFolderModule() {
         return folderModule;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
     @Override

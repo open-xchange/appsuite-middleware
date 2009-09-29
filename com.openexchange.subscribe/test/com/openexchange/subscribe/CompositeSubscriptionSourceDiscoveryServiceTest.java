@@ -52,6 +52,8 @@ package com.openexchange.subscribe;
 import static com.openexchange.subscribe.Asserts.assertDoesNotKnow;
 import static com.openexchange.subscribe.Asserts.assertKnows;
 import static com.openexchange.subscribe.Asserts.assertSources;
+import static com.openexchange.subscribe.Asserts.assertPriority;
+
 import java.util.List;
 import junit.framework.TestCase;
 
@@ -67,6 +69,7 @@ public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
     public void setUp() {
         SimSubscriptionSourceDiscoveryService discoverer1 = new SimSubscriptionSourceDiscoveryService();
         SimSubscriptionSourceDiscoveryService discoverer2 = new SimSubscriptionSourceDiscoveryService();
+        SimSubscriptionSourceDiscoveryService discoverer3 = new SimSubscriptionSourceDiscoveryService();
         
         discoverer1.addSource(source("com.openexchange.example.source1.1"));
         discoverer1.addSource(source("com.openexchange.example.source1.2"));
@@ -75,15 +78,20 @@ public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
         discoverer2.addSource(source("com.openexchange.example.source2.2"));
         discoverer2.addSource(source("com.openexchange.example.source2.3"));
         
+        discoverer3.addSource(sourceWithPriority("com.openexchange.example.source1.1", 2));
+        
         this.compositeDiscoverer = new CompositeSubscriptionSourceDiscoveryService();
         compositeDiscoverer.addSubscriptionSourceDiscoveryService(discoverer1);
         compositeDiscoverer.addSubscriptionSourceDiscoveryService(discoverer2);
+        compositeDiscoverer.addSubscriptionSourceDiscoveryService(discoverer3);
     }
     
+
     public void testCompositeList() {
         List<SubscriptionSource> allSources = compositeDiscoverer.getSources(-1);
         assertNotNull("compositeDiscoverer returned null!", allSources);
         assertSources(allSources, "com.openexchange.example.source1.1", "com.openexchange.example.source1.2", "com.openexchange.example.source2.1", "com.openexchange.example.source2.2", "com.openexchange.example.source2.3");
+        assertPriority(allSources, "com.openexchange.example.source1.1", 2);
     }
     
     public void testCompositeKnowsSource() {
@@ -105,10 +113,14 @@ public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
         
         assertNull("Got com.openexchange.example.source3.1 ?!?", compositeDiscoverer.getSource("com.openexchange.example.source3.1"));
         
+        assertPriority(compositeDiscoverer.getSource("com.openexchange.example.source1.1"),2);
     }
     
-    
-    
+    private SubscriptionSource sourceWithPriority(String string, int i) {
+        SubscriptionSource source = source(string);
+        source.setPriority(i);
+        return source;
+    }
 
     private SubscriptionSource source(String identifier) {
         SubscriptionSource source = new SubscriptionSource();

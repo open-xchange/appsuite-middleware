@@ -65,6 +65,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.SubscriptionSourceCollector;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.parser.ListingParser;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
@@ -91,7 +92,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
     private static final Log LOG = LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class);
     
     private String sourceURL;
-    private Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>();
+    private SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
     private OXMFParserFactoryService parserFactory;
     private OXMFFormParser formParser;
     
@@ -102,47 +103,33 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
     }
     
     public SubscriptionSource getSource(String identifier) {
-        return sources.get(identifier);
+        return sources.getSource(identifier);
     }
 
     public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
-        for(SubscriptionSource source : sources.values()) {
-            if(source.getSubscribeService().knows(context, subscriptionId)) {
-                return source;
-            }
-        }
-        return null;
+        return sources.getSource(context, subscriptionId);
     }
 
     public List<SubscriptionSource> getSources() {
-        return new ArrayList<SubscriptionSource>(sources.values());
+        return sources.getSources();
     }
 
     public List<SubscriptionSource> getSources(int folderModule) {
-        if(-1 == folderModule) {
-            return getSources();
-        }
-        List<SubscriptionSource> matching = new ArrayList<SubscriptionSource>(sources.size());
-        for(SubscriptionSource source : sources.values()) {
-            if(source.getFolderModule() == folderModule) {
-                matching.add(source);
-            }
-        }
-        return matching;
+        return sources.getSources(folderModule);
     }
 
     public boolean knowsSource(String identifier) {
-        return sources.containsKey(identifier);
+        return sources.knowsSource(identifier);
     }
     
     public void refresh() throws SubscriptionException {
         try {
             List<ExternalSubscriptionSource> listing = grabListing();
-            Map<String, SubscriptionSource> sources = new HashMap<String, SubscriptionSource>(listing.size());
+            SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
             for (ExternalSubscriptionSource external : listing) {
                 MicroformatSubscribeService service = grabService(external);
                 if(service != null) {
-                    sources.put(service.getSubscriptionSource().getId(), service.getSubscriptionSource());
+                    sources.addSubscribeService(service);
                 }
             }
             this.sources = sources;

@@ -74,6 +74,7 @@ public class ListingParser {
     private static final String MODULE = "ox_module";
     private static final String DISPLAY_NAME = "ox_displayName";
     private static final String LINK = "ox_link";
+    private static final String PRIORITY = "ox_priority";
     
     
     private OXMFParserFactoryService parserFactory;
@@ -126,6 +127,9 @@ public class ListingParser {
         }
         if(attributes.containsKey(LINK)) {
             source.setExternalAddress(attributes.get(LINK));
+        }
+        if(attributes.containsKey(PRIORITY)) {
+            source.setPriority(Integer.valueOf(attributes.get(PRIORITY)));
         }
     }
 

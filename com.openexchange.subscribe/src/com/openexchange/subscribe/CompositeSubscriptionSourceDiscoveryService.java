@@ -50,8 +50,12 @@
 package com.openexchange.subscribe;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -70,20 +74,42 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
      * @see com.openexchange.subscribe.SubscriptionSourceDiscoveryService#getSource(java.lang.String)
      */
     public SubscriptionSource getSource(String identifier) {
+        SubscriptionSource current = null;
         for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
             if(subDiscoverer.knowsSource(identifier)) {
-                return subDiscoverer.getSource(identifier);
+                SubscriptionSource source = subDiscoverer.getSource(identifier);
+                if(current == null || current.getPriority() < source.getPriority()) {
+                    current = source;
+                }
             }
         }
-        return null;
+        return current;
     }
 
     public List<SubscriptionSource> getSources(int folderModule) {
-        List<SubscriptionSource> allSources = new LinkedList<SubscriptionSource>();
+        Map<String, SubscriptionSource> allSources = new HashMap<String, SubscriptionSource>();
         for(SubscriptionSourceDiscoveryService subDiscoverer : services) {
-            allSources.addAll(subDiscoverer.getSources(folderModule));
+            List<SubscriptionSource> sources = subDiscoverer.getSources(folderModule);
+            for (SubscriptionSource subscriptionSource : sources) {
+                SubscriptionSource previousSource = allSources.get(subscriptionSource.getId());
+                if(previousSource == null || previousSource.getPriority() < subscriptionSource.getPriority()) {
+                    allSources.put(subscriptionSource.getId(), subscriptionSource);
+                }
+            }
         }
-        return allSources;
+        List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(allSources.values());
+        Collections.sort(sources, new Comparator<SubscriptionSource>() {
+
+            public int compare(SubscriptionSource o1, SubscriptionSource o2) {
+                if(o1.getDisplayName() != null && o2.getDisplayName() != null) {
+                    return o1.getDisplayName().compareTo(o2.getDisplayName());
+                } else {
+                    return o1.getDisplayName() == null ? -1 : 1;
+                }
+            }
+            
+        });
+        return sources;
     }
     
     public List<SubscriptionSource> getSources() {

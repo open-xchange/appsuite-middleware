@@ -49,10 +49,15 @@
 
 package com.openexchange.subscribe;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -67,7 +72,8 @@ import com.openexchange.groupware.contexts.Context;
 public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryService {
 
     private Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
-
+    private Map<String, SortedSet<SubscribeService>> shelvedServices = new HashMap<String, SortedSet<SubscribeService>>();
+    
     public SubscriptionSource getSource(String identifier) {
         if(!services.containsKey(identifier)) {
             return null;
@@ -94,13 +100,26 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
     }
 
     public void addSubscribeService(SubscribeService service) {
-        services.put(service.getSubscriptionSource().getId(), service);
+        SubscribeService oldService = services.get(service.getSubscriptionSource().getId());
+        if(oldService != null) {
+            if(oldService.getSubscriptionSource().getPriority() < service.getSubscriptionSource().getPriority()) {
+                shelfService(oldService);
+                services.put(service.getSubscriptionSource().getId(), service);
+            } else {
+                shelfService(service);
+            }
+        } else {
+            services.put(service.getSubscriptionSource().getId(), service);
+        }
+        
     }
 
+    // FIXME: This is not unique anymore
     public void removeSubscribeService(String identifier) {
         services.remove(identifier);        
+        resurrectFromShelf(identifier);
     }
-
+    
     public SubscriptionSource getSource(Context context, int subscriptionId) throws AbstractOXException {
         for(SubscribeService source : services.values()) {
             if(source.knows(context, subscriptionId)) {
@@ -108,6 +127,31 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
             }
         }
         return null;
+    }
+    
+
+    private void shelfService(SubscribeService service) {
+        String identifier = service.getSubscriptionSource().getId();
+        SortedSet<SubscribeService> set = shelvedServices.get(identifier);
+        if(set == null) {
+            set = new TreeSet<SubscribeService>(new Comparator<SubscribeService>(){
+
+                public int compare(SubscribeService o1, SubscribeService o2) {
+                    return o1.getSubscriptionSource().getPriority() - o2.getSubscriptionSource().getPriority();
+                }
+                
+            });
+            shelvedServices.put(identifier, set);
+        }
+        set.add(service);
+    }
+
+    private void resurrectFromShelf(String identifier) {
+        SortedSet<SubscribeService> set = shelvedServices.get(identifier);
+        if(set != null) {
+            services.put(identifier, set.first());
+            set.remove(set.first());
+        }
     }
 
 

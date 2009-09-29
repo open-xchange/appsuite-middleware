@@ -58,7 +58,7 @@ import java.util.Set;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertEquals;
-
+import static junit.framework.Assert.fail;
 
 
 /**
@@ -90,5 +90,19 @@ public class Asserts {
         }
         assertTrue("Expected: "+expectedList+" Got: "+identifier, actual.isEmpty());
         
+    }
+    
+    public static void assertPriority(List<SubscriptionSource> sources, String identifier, int priority) {
+        for (SubscriptionSource subscriptionSource : sources) {
+            if(subscriptionSource.getId().equals(identifier)) {
+                assertEquals(priority, subscriptionSource.getPriority());
+                return;
+            }
+        }
+        fail("Did not found subscription source with identifier "+identifier);
+    }
+    
+    public static void assertPriority(SubscriptionSource source, int priority) {
+        assertEquals(priority, source.getPriority());
     }
 }
