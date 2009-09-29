@@ -85,7 +85,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * RdbFolderSQLInterface
+ * {@link RdbFolderSQLInterface} - The (relational) database implementation of {@link FolderSQLInterface}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
