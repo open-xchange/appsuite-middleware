@@ -118,7 +118,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         }
     }
 
-    private static final Set<Integer> getNonTreeVisibleModules() {
+    private static final Set<Integer> newNonTreeVisibleModules() {
         final Set<Integer> retval = new HashSet<Integer>();
         retval.add(Integer.valueOf(FolderObject.CALENDAR));
         retval.add(Integer.valueOf(FolderObject.TASK));
@@ -496,7 +496,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             ctx)).asQueue();
         final int size = q.size();
         final Iterator<FolderObject> iter = q.iterator();
-        final Set<Integer> stdModules = getNonTreeVisibleModules();
+        final Set<Integer> stdModules = newNonTreeVisibleModules();
         /*
          * Iterate result queue
          */
