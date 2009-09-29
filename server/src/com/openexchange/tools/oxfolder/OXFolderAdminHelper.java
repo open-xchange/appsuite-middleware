@@ -234,6 +234,18 @@ public final class OXFolderAdminHelper {
     private void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
         final int admin = adminId == null ? getContextAdminID(cid, writeCon) : adminId.intValue();
         final boolean isAdmin = (admin == userId);
+        if (isAdmin) {
+            try {
+                /*
+                 * Check if folder has already been created for given context
+                 */
+                if (!checkFolderExistence(cid, FolderObject.SYSTEM_LDAP_FOLDER_ID, writeCon)) {
+                    createGlobalAddressBook(cid, admin, writeCon, System.currentTimeMillis());
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            }
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -502,24 +514,17 @@ public final class OXFolderAdminHelper {
          */
         // TODO: Whether to enable/disable internal-user-edit should be set by
         // caller (admin) as a parameter
-        {
-            final OCLPermission adminPermission = new OCLPermission();
-            adminPermission.setEntity(mailAdmin);
-            adminPermission.setGroupPermission(false);
-            setGADPermissions(adminPermission);
-            adminPermission.setFolderAdmin(true);
-            createSystemFolder(
-                FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                FolderObject.SYSTEM_LDAP_FOLDER_NAME,
-                adminPermission,
-                FolderObject.SYSTEM_FOLDER_ID,
-                FolderObject.CONTACT,
-                true,
-                creatingTime,
-                mailAdmin,
-                false,
-                cid,
-                writeCon);
+        if (checkFolderExistence(cid, FolderObject.SYSTEM_LDAP_FOLDER_ID, writeCon)) {
+            final ContextImpl ctx = new ContextImpl(cid);
+            ctx.setMailadmin(mailAdmin);
+            try {
+                OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, creatingTime, mailAdmin, writeCon, ctx);
+            } catch (final DBPoolingException e) {
+                // Cannot occur
+                LOG.error(e.getMessage(), e);
+            }
+        } else {
+            createGlobalAddressBook(cid, mailAdmin, writeCon, creatingTime);
         }
         /*
          * Insert system user folder
@@ -677,6 +682,56 @@ public final class OXFolderAdminHelper {
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Folder rights for mail admin successfully added for context ").append(cid).toString());
         }
+    }
+
+    /**
+     * Checks existence of given folder in given context.
+     * 
+     * @param cid The context ID
+     * @param folderId The folder ID
+     * @param con A connection
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    private static boolean checkFolderExistence(final int cid, final int folderId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, folderId);
+            return stmt.executeQuery().next();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Creates the global address book folder.
+     * 
+     * @param cid The context ID
+     * @param mailAdmin The ID of context's admin
+     * @param writeCon A writable connection
+     * @param creatingTime The creating time
+     * @throws SQLException If a SQL error occurs
+     */
+    private void createGlobalAddressBook(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+        final OCLPermission adminPermission = new OCLPermission();
+        adminPermission.setEntity(mailAdmin);
+        adminPermission.setGroupPermission(false);
+        setGADPermissions(adminPermission);
+        adminPermission.setFolderAdmin(true);
+        createSystemFolder(
+            FolderObject.SYSTEM_LDAP_FOLDER_ID,
+            FolderObject.SYSTEM_LDAP_FOLDER_NAME,
+            adminPermission,
+            FolderObject.SYSTEM_FOLDER_ID,
+            FolderObject.CONTACT,
+            true,
+            creatingTime,
+            mailAdmin,
+            false,
+            cid,
+            writeCon);
     }
 
     private final static String SQL_INSERT_SYSTEM_FOLDER =
@@ -975,7 +1030,8 @@ public final class OXFolderAdminHelper {
     }
 
     private static void propagateDisplayNameModification(final int userId, final long lastModified, final int contextAdminID, final Connection readCon, final Connection writeCon, final int cid) throws OXException {
-        final Context ctx = new ContextImpl(cid);
+        final ContextImpl ctx = new ContextImpl(cid);
+        ctx.setMailadmin(contextAdminID);
         /*
          * Update shared folder's last modified timestamp
          */
