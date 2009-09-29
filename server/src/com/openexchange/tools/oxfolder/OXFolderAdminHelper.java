@@ -686,6 +686,29 @@ public final class OXFolderAdminHelper {
     }
 
     /**
+     * Checks permission existence in given folder in given context for given user.
+     * 
+     * @param cid The context ID
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param con A connection
+     * @return <code>true</code> if a permission exists; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    private static boolean checkPermissionExistence(final int cid, final int folderId, final int userId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, folderId);
+            stmt.setInt(3, userId);
+            return stmt.executeQuery().next();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
      * Checks existence of given folder in given context.
      * 
      * @param cid The context ID
@@ -823,15 +846,16 @@ public final class OXFolderAdminHelper {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_PERMISSION);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, fuid);
-            stmt.setInt(3, addMe.getEntity());
-            stmt.setInt(4, addMe.getFolderPermission());
-            stmt.setInt(5, addMe.getReadPermission());
-            stmt.setInt(6, addMe.getWritePermission());
-            stmt.setInt(7, addMe.getDeletePermission());
-            stmt.setInt(8, addMe.isFolderAdmin() ? 1 : 0);
-            stmt.setInt(9, addMe.isGroupPermission() ? 1 : 0);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, fuid);
+            stmt.setInt(pos++, addMe.getEntity());
+            stmt.setInt(pos++, addMe.getFolderPermission());
+            stmt.setInt(pos++, addMe.getReadPermission());
+            stmt.setInt(pos++, addMe.getWritePermission());
+            stmt.setInt(pos++, addMe.getDeletePermission());
+            stmt.setInt(pos++, addMe.isFolderAdmin() ? 1 : 0);
+            stmt.setInt(pos++, addMe.isGroupPermission() ? 1 : 0);
             stmt.executeUpdate();
             stmt.close();
             stmt = null;
@@ -1152,15 +1176,16 @@ public final class OXFolderAdminHelper {
                     Integer.valueOf(ctx.getContextId()));
             }
             /*
-             * Add user to global address book permissions
+             * Add user to global address book permissions if not present
              */
-            {
+            final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+            if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
                 final OCLPermission p = new OCLPermission();
                 p.setEntity(userId);
                 p.setGroupPermission(false);
                 setGADPermissions(p);
                 p.setFolderAdmin(false);
-                createSinglePermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, p, cid, writeCon);
+                createSinglePermission(globalAddressBookId, p, cid, writeCon);
             }
             /*
              * Proceed
