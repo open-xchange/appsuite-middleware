@@ -123,6 +123,45 @@ public final class OXFolderAdminHelper {
      */
 
     /**
+     * Restores default permissions on global address book folder in given context.
+     * 
+     * @param cid The context ID
+     * @param enable Whether to enable or disable global address book access for each user
+     * @param writeCon A connection with write capability
+     * @throws OXException If an error occurs
+     */
+    public void restoreDefaultGlobalAddressBookPermissions(final int cid, final boolean enable, final Connection writeCon) throws OXException {
+        final List<Integer> users;
+        /*
+         * Get context's users
+         */
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = writeCon.prepareStatement("SELECT id FROM user WHERE cid = ?");
+                final int pos = 1;
+                stmt.setInt(pos, cid);
+                rs = stmt.executeQuery();
+                users = new ArrayList<Integer>();
+                while (rs.next()) {
+                    users.add(Integer.valueOf(rs.getInt(pos)));
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+        }
+        /*
+         * Iterate users
+         */
+        for (final Integer user : users) {
+            setGlobalAddressBookEnabled(cid, user.intValue(), enable, writeCon);
+        }
+    }
+
+    /**
      * Checks whether global address book is enabled for specified user.
      * 
      * @param cid The context ID
@@ -577,8 +616,7 @@ public final class OXFolderAdminHelper {
                 FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
                 mailAdmin,
                 new int[] {
-                    OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS },
+                    OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS },
                 true,
                 cid,
                 writeCon);
