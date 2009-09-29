@@ -1630,12 +1630,33 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
+    /**
+     * Gets the subfolder IDs of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
     public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg) throws SQLException, DBPoolingException {
         return getSubfolderIds(folderId, ctx, readConArg, TABLE_OT);
     }
 
     private static final String SQL_SEL = "SELECT fuid FROM #TABLE# WHERE cid = ? AND parent = ?";
 
+    /**
+     * Gets the subfolder IDs of specified folder.
+     * 
+     * @param folderId The ID of the folder whose subfolders' IDs shall be returned
+     * @param ctx The context
+     * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
+     * @param table The folder's working or backup table name
+     * @return The subfolder IDs of specified folder
+     * @throws SQLException If a SQL error occurs
+     * @throws DBPoolingException If a pooling error occurs
+     */
     public static final ArrayList<Integer> getSubfolderIds(final int folderId, final Context ctx, final Connection readConArg, final String table) throws SQLException, DBPoolingException {
         Connection readCon = readConArg;
         boolean closeCon = false;
@@ -1660,7 +1681,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         }
     }
 
-    public static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
+    private static final OCLPermission VIRTUAL_FOLDER_PERMISSION = new OCLPermission();
 
     static {
         VIRTUAL_FOLDER_PERMISSION.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
@@ -1673,10 +1694,31 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
             OCLPermission.NO_PERMISSIONS);
     }
 
+    /**
+     * Creates a folder instance representing a virtual folder.
+     * 
+     * @param objectID The virtual object ID
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @return A folder instance representing a virtual folder
+     */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type) {
         return createVirtualFolderObject(objectID, name, module, hasSubfolders, type, null);
     }
 
+    /**
+     * Creates a folder instance representing a virtual folder.
+     * 
+     * @param objectID The virtual object ID
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @param virtualPerm The folder's permission
+     * @return A folder instance representing a virtual folder
+     */
     public static final FolderObject createVirtualFolderObject(final int objectID, final String name, final int module, final boolean hasSubfolders, final int type, final OCLPermission virtualPerm) {
         final OCLPermission p = virtualPerm == null ? VIRTUAL_FOLDER_PERMISSION : virtualPerm;
         final FolderObject virtualFolder = new FolderObject(objectID);
@@ -1689,6 +1731,16 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return virtualFolder;
     }
 
+    /**
+     * Creates a folder instance representing a virtual folder.
+     * 
+     * @param fullName The folder's fullname
+     * @param name The name
+     * @param module The module
+     * @param hasSubfolders Whether the folder is supposed to contain subfolders
+     * @param type The type
+     * @return A folder instance representing a virtual folder
+     */
     public static final FolderObject createVirtualFolderObject(final String fullName, final String name, final int module, final boolean hasSubfolders, final int type) {
         final OCLPermission p = VIRTUAL_FOLDER_PERMISSION;
         final FolderObject virtualFolder = new FolderObject();
@@ -1701,6 +1753,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return virtualFolder;
     }
 
+    /**
+     * Creates a folder instance representing a shared folder.
+     * 
+     * @param createdBy The user ID of shared folder's owner
+     * @param creatorDisplayName The display name of shared folder's owner
+     * @return A folder instance representing a shared folder.
+     */
     public static final FolderObject createVirtualSharedFolderObject(final int createdBy, final String creatorDisplayName) {
         return createVirtualFolderObject(
             new StringBuilder(20).append(SHARED_PREFIX).append(createdBy).toString(),
