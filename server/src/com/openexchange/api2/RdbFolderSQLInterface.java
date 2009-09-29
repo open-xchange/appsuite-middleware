@@ -101,9 +101,6 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             this.queryNum = queryNum;
         }
 
-        public int getQueryNum() {
-            return queryNum;
-        }
     }
 
     private static final int getNonTreeVisibleNum(final int module) {
