@@ -101,10 +101,23 @@ public enum PushExceptionCodes implements OXErrorMessage {
         return null;
     }
 
+    /**
+     * Creates a new push exception of this error type with specified message arguments.
+     * 
+     * @param messageArgs The message arguments
+     * @return A new push exception
+     */
     public PushException create(final Object... messageArgs) {
         return PushExceptionFactory.getInstance().create(this, messageArgs);
     }
 
+    /**
+     * Creates a new push exception of this error type with specified cause and message arguments.
+     * 
+     * @param cause The cause
+     * @param messageArgs The message arguments
+     * @return A new push exception
+     */
     public PushException create(final Throwable cause, final Object... messageArgs) {
         return PushExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
