@@ -67,6 +67,7 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
@@ -127,37 +128,46 @@ public final class OXFolderAdminHelper {
      * 
      * @param cid The context ID
      * @param enable Whether to enable or disable global address book access for each user
-     * @param writeCon A connection with write capability
      * @throws OXException If an error occurs
      */
-    public void restoreDefaultGlobalAddressBookPermissions(final int cid, final boolean enable, final Connection writeCon) throws OXException {
-        final List<Integer> users;
-        /*
-         * Get context's users
-         */
-        {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                stmt = writeCon.prepareStatement("SELECT id FROM user WHERE cid = ?");
-                final int pos = 1;
-                stmt.setInt(pos, cid);
-                rs = stmt.executeQuery();
-                users = new ArrayList<Integer>();
-                while (rs.next()) {
-                    users.add(Integer.valueOf(rs.getInt(pos)));
-                }
-            } catch (final SQLException e) {
-                throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-            }
+    public void restoreDefaultGlobalAddressBookPermissions(final int cid, final boolean enable) throws OXException {
+        final Connection writeCon;
+        try {
+            writeCon = Database.get(cid, true);
+        } catch (final DBPoolingException e) {
+            throw new OXException(e);
         }
-        /*
-         * Iterate users
-         */
-        for (final Integer user : users) {
-            setGlobalAddressBookEnabled(cid, user.intValue(), enable, writeCon);
+        try {
+            final List<Integer> users;
+            /*
+             * Get context's users
+             */
+            {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = writeCon.prepareStatement("SELECT id FROM user WHERE cid = ?");
+                    final int pos = 1;
+                    stmt.setInt(pos, cid);
+                    rs = stmt.executeQuery();
+                    users = new ArrayList<Integer>();
+                    while (rs.next()) {
+                        users.add(Integer.valueOf(rs.getInt(pos)));
+                    }
+                } catch (final SQLException e) {
+                    throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                }
+            }
+            /*
+             * Iterate users
+             */
+            for (final Integer user : users) {
+                setGlobalAddressBookEnabled(cid, user.intValue(), enable, writeCon);
+            }
+        } finally {
+            Database.back(cid, true, writeCon);
         }
     }
 
