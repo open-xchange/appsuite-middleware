@@ -49,8 +49,6 @@
 
 package com.openexchange.calendar.printing.blocks;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -61,7 +59,7 @@ public class CPFormattingInfomation {
 
     private int type;
     
-    private String additionalInformation;
+    private Object additionalInformation;
 
     public int getPosition() {
         return position;
@@ -79,11 +77,11 @@ public class CPFormattingInfomation {
         this.type = type;
     }
     
-    public void setAdditionalInformation(String additionalInformation) {
+    public void setAdditionalInformation(Object additionalInformation) {
         this.additionalInformation = additionalInformation;
     }
     
-    public String getAdditionalInformation() {
+    public Object getAdditionalInformation() {
         return additionalInformation;
     }
 
@@ -97,9 +95,15 @@ public class CPFormattingInfomation {
         this.type = type;
     }
 
-    public CPFormattingInfomation(int position, int type, String additional) {
+    public CPFormattingInfomation(int position, int type, Object additional) {
         this(position,type);
         setAdditionalInformation(additional);
     }
+
+    @Override
+    public String toString() {
+        return getPosition() + "/" + getType() + ": " + getAdditionalInformation(); 
+    }
+    
 
 }

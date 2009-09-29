@@ -115,4 +115,11 @@ public class CPAppointment {
     public void setEndDate(Date end) {
         this.endDate = end;
     }
+
+    @Override
+    public String toString() {
+        return getStartDate() + " - " + getEndDate() +": " + getTitle();
+    }
+    
+    
 }

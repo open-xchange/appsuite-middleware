@@ -75,10 +75,15 @@ public abstract class AbstractDateTest extends TestCase {
         super(name);
     }
 
+    public Date plusOneHour(Date date){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+        return cal.getTime();
+    }
+    
     /**
      * Gets you four dates, starting one day and two hours before the given calendar point
-     * @param cal
-     * @return
      */
     protected Date[] getFourDates(Calendar cal) {
         Date date11 = cal.getTime();
@@ -95,36 +100,47 @@ public abstract class AbstractDateTest extends TestCase {
     }
 
     /**
+     * @return 7.1.2009 was a wednesday
+     */
+    protected Date WEDNESDAY() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_YEAR, 7);
+        cal.set(Calendar.YEAR, 2009);
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        return cal.getTime();
+    }
+        
+    /**
      * @return 8.1.2009 was a thursday
      */
-    protected Calendar THURSDAY() {
+    protected Date THURSDAY() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_YEAR, 8);
         cal.set(Calendar.YEAR, 2009);
         cal.set(Calendar.HOUR_OF_DAY, 12);
-        return cal;
+        return cal.getTime();
     }
 
     /**
      * @return 11.1.2009 was a sunday
      */
-    protected Calendar SUNDAY() {
+    protected Date SUNDAY() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_YEAR, 11);
         cal.set(Calendar.YEAR, 2009);
         cal.set(Calendar.HOUR_OF_DAY, 12);
-        return cal;
+        return cal.getTime();
     }
 
     /**
      * @return 14.1.2009 was a wednesday
      */
-    protected Calendar WEDNESDAY_NEXT_WEEK() {
+    protected Date WEDNESDAY_NEXT_WEEK() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_YEAR, 14);
         cal.set(Calendar.YEAR, 2009);
         cal.set(Calendar.HOUR_OF_DAY, 12);
-        return cal;
+        return cal.getTime();
     }
     
     protected Calendar getCalendar(){

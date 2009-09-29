@@ -87,24 +87,41 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
             if (isWorkWeekAppointment(appointment))
                 blocks.addAppointment(appointment);
             
-            if (isMissingDaysInbetween(lastAppointment, appointment) )
-                for(int day : getMissingDaysInbetween(lastAppointment, appointment))
-                    if(isInWorkWeek(day))
+            if (isMissingDaysInbetween(lastAppointment, appointment) ){
+                for(int day : getMissingDaysInbetween(lastAppointment, appointment)){
+                    if(isInWorkWeek(day)){
+                        blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK));
                         blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYNAME, String.valueOf(day)));
+                    }
+                }
+            }
 
             if (isSignalForNewDay(appointment) && isInWorkWeek(appointment.getStartDate())){
-                blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK));
+                blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK, appointment.getStartDate()));
                 blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYNAME, getDayName(appointment.getStartDate())));
             }
 
             if (isSignalForNewWeek(appointment))
-                blocks.addFormattingInformation(new CPFormattingInfomation(i, WEEKBREAK));
+                blocks.addFormattingInformation(new CPFormattingInfomation(i, WEEKBREAK, Integer.valueOf(getWeekOfYear(appointment.getStartDate()))));
 
             if (isWorkWeekAppointment(appointment))
                 if (isOnTwoDays(appointment) || isInTwoWeeks(appointment))
                     blocks.addAppointment(appointment); // store again for use in second block
         }
         return blocks;
+    }
+
+
+    private Date createDate(Date startFrom, int daysToAdd) {
+        Calendar cal = getCalendar(); 
+        cal.setTime(startFrom);
+        cal.add(Calendar.DAY_OF_YEAR, daysToAdd);
+        return cal.getTime();
+    }
+
+    public int getWeekOfYear(Date date) {
+        getCalendar().setTime(date);
+        return getCalendar().get(Calendar.WEEK_OF_YEAR);
     }
 
     private String getDayName(Date date) {

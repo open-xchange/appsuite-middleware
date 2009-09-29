@@ -56,13 +56,17 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Activator extends DeferredActivator implements BundleActivator {
 
     private static final String ALIAS = "/ajax/printCalendar";
-    private static Class[] services = new Class[]{TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class};
+
+    private static Class[] services = new Class[] {
+        TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
+
     private HTTPServletRegistration registration;
 
     @Override
@@ -75,17 +79,16 @@ public class Activator extends DeferredActivator implements BundleActivator {
         register();
     }
 
-
     @Override
     protected void handleUnavailability(Class<?> clazz) {
         unregister();
     }
-    
+
     @Override
     protected void startBundle() throws Exception {
         register();
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         unregister();
@@ -95,22 +98,22 @@ public class Activator extends DeferredActivator implements BundleActivator {
         TemplateService templates = getService(TemplateService.class);
         AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
         CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-        
-        if(templates == null || appointmentSqlFactory == null || collectionService == null) {
+
+        if (templates == null || appointmentSqlFactory == null || collectionService == null) {
             unregister();
             return;
         }
-        
+
         CPServlet.setTemplateService(templates);
         CPServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
         CPServlet.setCalendarTools(collectionService);
-        
+
         registration = new HTTPServletRegistration(context, ALIAS, new CPServlet());
-        
+
     }
 
     private void unregister() {
-        if(registration != null) {
+        if (registration != null) {
             registration.unregister();
             registration = null;
         }
