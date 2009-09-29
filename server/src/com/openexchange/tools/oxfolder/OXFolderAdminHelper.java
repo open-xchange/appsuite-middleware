@@ -515,11 +515,12 @@ public final class OXFolderAdminHelper {
          */
         // TODO: Whether to enable/disable internal-user-edit should be set by
         // caller (admin) as a parameter
-        if (checkFolderExistence(cid, FolderObject.SYSTEM_LDAP_FOLDER_ID, writeCon)) {
+        final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+        if (checkFolderExistence(cid, globalAddressBookId, writeCon)) {
             final ContextImpl ctx = new ContextImpl(cid);
             ctx.setMailadmin(mailAdmin);
             try {
-                OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, creatingTime, mailAdmin, writeCon, ctx);
+                OXFolderSQL.updateLastModified(globalAddressBookId, creatingTime, mailAdmin, writeCon, ctx);
             } catch (final DBPoolingException e) {
                 // Cannot occur
                 LOG.error(e.getMessage(), e);
