@@ -299,7 +299,7 @@ public final class BrowserDetector {
             browserPlatform = UNIX;
         }
 
-        if (browserPlatform.equals(WINDOWS)) {
+        if (WINDOWS.equals(browserPlatform)) {
             if (browserName.equals(MOZILLA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;
@@ -321,7 +321,7 @@ public final class BrowserDetector {
                     cssOK = true;
                 }
             }
-        } else if (browserPlatform.equals(MACINTOSH)) {
+        } else if (MACINTOSH.equals(browserPlatform)) {
             if (browserName.equals(MOZILLA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;
@@ -339,7 +339,7 @@ public final class BrowserDetector {
                     cssOK = true;
                 }
             }
-        } else if (browserPlatform.equals(UNIX)) {
+        } else if (UNIX.equals(browserPlatform)) {
             if (browserName.equals(MOZILLA)) {
                 if (browserVersion >= 3.0) {
                     javascriptOK = true;
