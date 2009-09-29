@@ -93,7 +93,7 @@ public class GADRestorerCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("restoreGADDefaults", toolkitOptions);
+        helpFormatter.printHelp("restoregaddefaults", toolkitOptions);
     }
 
     /**
