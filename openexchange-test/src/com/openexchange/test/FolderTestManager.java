@@ -50,6 +50,7 @@
 package com.openexchange.test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -428,7 +429,15 @@ public class FolderTestManager extends TestCase {
         }
     }
     
-    public FolderObject generateFolder(String name, int moduleID, int parentID, int userID){
+    /**
+     * Generates a folder with admin permissions for all given userIDs.
+     * @param name Name of the folder
+     * @param moduleID moduleID of the folder (is it task, appointment, contact...?)
+     * @param parentID the parent folder's ID
+     * @param userIDs the IDs of the users that have admin permission on this one
+     * @return a fodler object according to the input parameters
+     */
+    public FolderObject generateFolder(String name, int moduleID, int parentID, int... userIDs){
         //create a folder
         FolderObject folder = new FolderObject();
         folder.setFolderName(name);
@@ -436,16 +445,20 @@ public class FolderTestManager extends TestCase {
         folder.setParentFolderID(parentID);
         folder.setModule(moduleID);
         // create permissions
-        final OCLPermission permissions = new OCLPermission();
-        permissions.setEntity(userID);
-        permissions.setGroupPermission(false);
-        permissions.setFolderAdmin(true);
-        permissions.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
-        folder.setPermissionsAsArray(new OCLPermission[] { permissions});
+        ArrayList<OCLPermission> allPermissions = new ArrayList<OCLPermission>();
+        for(int userID: userIDs){
+            final OCLPermission permissions = new OCLPermission();
+            permissions.setEntity(userID);
+            permissions.setGroupPermission(false);
+            permissions.setFolderAdmin(true);
+            permissions.setAllPermission(
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION);
+            allPermissions.add(permissions);
+        }
+        folder.setPermissions(allPermissions);
         return folder;
     }
 }
