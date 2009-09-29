@@ -118,6 +118,11 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         }
     }
 
+    /**
+     * Creates a new {@link Set set} containing the modules of those folders which might not be visible in hierarchical tree view.
+     * 
+     * @return A new {@link Set set} containing the modules.
+     */
     private static final Set<Integer> newNonTreeVisibleModules() {
         final Set<Integer> retval = new HashSet<Integer>();
         retval.add(Integer.valueOf(FolderObject.CALENDAR));
@@ -127,9 +132,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         return retval;
     }
 
-    private static final int[] VIRTUAL_IDS = {
-        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+    private static final int[] VIRTUAL_IDS =
+        {
+            FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+            FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbFolderSQLInterface.class);
 
@@ -187,9 +193,13 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
     public FolderObject getFolderById(final int id) throws OXException {
         final int pos = Arrays.binarySearch(VIRTUAL_IDS, id);
         if (pos >= 0) {
-            final FolderObject fo = FolderObject.createVirtualFolderObject(id, FolderObject.getFolderString(
-                id,
-                session.getUser().getLocale()), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+            final FolderObject fo =
+                FolderObject.createVirtualFolderObject(
+                    id,
+                    FolderObject.getFolderString(id, session.getUser().getLocale()),
+                    FolderObject.SYSTEM_MODULE,
+                    true,
+                    FolderObject.SYSTEM_TYPE);
             if (3 == pos) {
                 fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
             } else {
@@ -268,9 +278,10 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                         (folderobjectArg.containsObjectID() && folderobjectArg.getObjectID() > 0 ? getFolderName(folderobjectArg) : ""),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                final int[] virtualIDs = new int[] {
-                    FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                    FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+                final int[] virtualIDs =
+                    new int[] {
+                        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
                 if (Arrays.binarySearch(virtualIDs, parentFolderID) > -1) {
                     throw new OXFolderPermissionException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, getUserName(session), getFolderName(
                         parentFolderID,
@@ -329,10 +340,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                         OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION,
                         new Object[0]);
                 }
-                final EffectivePermission effectivePerm = oxfolderAccess.getFolderPermission(
-                    folderobject.getObjectID(),
-                    userId,
-                    userConfiguration);
+                final EffectivePermission effectivePerm =
+                    oxfolderAccess.getFolderPermission(folderobject.getObjectID(), userId, userConfiguration);
                 if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
                     throw new OXFolderException(
                         FolderCode.NO_MODULE_ACCESS,
@@ -391,9 +400,13 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final int folderId = folderobject.getObjectID();
             final int pos = Arrays.binarySearch(VIRTUAL_IDS, folderId);
             if (pos >= 0) {
-                final FolderObject fo = FolderObject.createVirtualFolderObject(folderId, FolderObject.getFolderString(
-                    folderId,
-                    session.getUser().getLocale()), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                final FolderObject fo =
+                    FolderObject.createVirtualFolderObject(
+                        folderId,
+                        FolderObject.getFolderString(folderId, session.getUser().getLocale()),
+                        FolderObject.SYSTEM_MODULE,
+                        true,
+                        FolderObject.SYSTEM_TYPE);
                 if (3 == pos) {
                     fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
                 } else {
@@ -489,11 +502,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             userId = u.getId();
             groups = u.getGroups();
         }
-        final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersNotSeenInTreeView(
-            userId,
-            groups,
-            userConfiguration,
-            ctx)).asQueue();
+        final Queue<FolderObject> q =
+            ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersNotSeenInTreeView(userId, groups, userConfiguration, ctx)).asQueue();
         final int size = q.size();
         final Iterator<FolderObject> iter = q.iterator();
         final Set<Integer> stdModules = newNonTreeVisibleModules();
@@ -770,9 +780,13 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final int objectID = folderobject.getObjectID();
             final int pos = Arrays.binarySearch(VIRTUAL_IDS, objectID);
             if (pos >= 0) {
-                final FolderObject fo = FolderObject.createVirtualFolderObject(objectID, FolderObject.getFolderString(
-                    objectID,
-                    session.getUser().getLocale()), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                final FolderObject fo =
+                    FolderObject.createVirtualFolderObject(
+                        objectID,
+                        FolderObject.getFolderString(objectID, session.getUser().getLocale()),
+                        FolderObject.SYSTEM_MODULE,
+                        true,
+                        FolderObject.SYSTEM_TYPE);
                 if (3 == pos) {
                     fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
                 } else {

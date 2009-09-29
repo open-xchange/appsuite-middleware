@@ -62,6 +62,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
@@ -79,7 +80,6 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -1482,6 +1482,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     private static final String SQL_LOAD_F =
         "SELECT parent, fname, module, type, creating_date, created_from," + " changing_date, changed_from, permission_flag, subfolder_flag, default_flag" + " FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
+    private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
+
     /**
      * Loads specified folder from database.
      * 
@@ -1506,7 +1508,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                     readCon = DBPool.pickup(ctx);
                     closeCon = true;
                 }
-                stmt = readCon.prepareStatement(SQL_LOAD_F.replaceFirst("#TABLE#", table));
+                stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_F).replaceFirst(table));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
@@ -1600,85 +1602,23 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         boolean closeCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        if (folderId == SYSTEM_LDAP_FOLDER_ID && TABLE_OP.equals(table)) {
-            boolean update = false;
-            int owp = OCLPermission.NO_PERMISSIONS;
-            try {
-                if (readCon == null) {
-                    readCon = DBPool.pickup(ctx);
-                    closeCon = true;
-                }
-                stmt = readCon.prepareStatement(SQL_LOAD_P.replaceFirst("#TABLE#", table));
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, folderId);
-                rs = stmt.executeQuery();
-                final List<OCLPermission> permissions = new ArrayList<OCLPermission>();
-                while (rs.next()) {
-                    final int entity = rs.getInt(1);
-                    final OCLPermission p = new OCLPermission();
-                    p.setEntity(entity);
-                    /*
-                     * Get object-write-permission
-                     */
-                    owp = rs.getInt(4);
-                    if (OXFolderProperties.isEnableInternalUsersEdit() && owp < OCLPermission.WRITE_OWN_OBJECTS) {
-                        /*
-                         * Object-write-permission is out of sync with database
-                         */
-                        owp = OCLPermission.WRITE_OWN_OBJECTS;
-                        update = true;
-                    } else if (!OXFolderProperties.isEnableInternalUsersEdit() && owp > OCLPermission.NO_PERMISSIONS) {
-                        /*
-                         * Object-write-permission is out of sync with database
-                         */
-                        owp = OCLPermission.NO_PERMISSIONS;
-                        update = true;
-                    }
-                    p.setAllPermission(rs.getInt(2), rs.getInt(3), owp, rs.getInt(5));
-                    p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
-                    p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
-                    p.setSystem(rs.getInt(8));
-                    permissions.add(p);
-                }
-                stmt.close();
-                rs = null;
-                stmt = null;
-                if (update) {
-                    for (final OCLPermission p : permissions) {
-                        OXFolderSQL.updateSinglePermission(
-                            folderId,
-                            p.getEntity(),
-                            OCLPermission.READ_FOLDER,
-                            OCLPermission.READ_ALL_OBJECTS,
-                            owp,
-                            OCLPermission.NO_PERMISSIONS,
-                            null,
-                            ctx);
-                    }
-                }
-                return permissions.toArray(new OCLPermission[permissions.size()]);
-            } finally {
-                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
-            }
-        }
         try {
             if (readCon == null) {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_LOAD_P.replaceFirst("#TABLE#", table));
+            stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(SQL_LOAD_P).replaceFirst(table));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
             final ArrayList<OCLPermission> permList = new ArrayList<OCLPermission>();
             while (rs.next()) {
-                final int entity = rs.getInt(1);
                 final OCLPermission p = new OCLPermission();
-                p.setEntity(entity);
-                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5));
-                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
-                p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
-                p.setSystem(rs.getInt(8));
+                p.setEntity(rs.getInt(1)); // Entity
+                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp
+                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
+                p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
+                p.setSystem(rs.getInt(8)); // system
                 permList.add(p);
             }
             stmt.close();
