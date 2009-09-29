@@ -66,6 +66,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends ContextAbstraction {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListCore.class);
+
     private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
     
     private interface GetterClosureInterface {
@@ -101,6 +103,7 @@ public abstract class ListCore extends ContextAbstraction {
             }
             ctxs = maincall(parser, pattern, auth);
         } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
             printErrors(null, null, e, parser);
         }
 
@@ -111,9 +114,11 @@ public abstract class ListCore extends ContextAbstraction {
                 sysoutOutput(ctxs, parser);
             }
         } catch (final InvalidDataException e) {
+            LOG.error(e.getMessage(), e);
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
             sysexit(1);
         } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
@@ -131,42 +136,42 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     @Override
-    protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, AdminParser parser) {
+    protected ArrayList<String> getCSVDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
-            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+            public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
                 return commonex.getCSVData(ctx);
             }
         });
     }
 
     @Override
-    protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, AdminParser parser) {
+    protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
-            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+            public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
                 return commonex.getHumanReadableData(ctx);
             }
         });
     }
 
     @Override
-    protected ArrayList<String> getCSVColumnsOfAllExtensions(AdminParser parser) {
+    protected ArrayList<String> getCSVColumnsOfAllExtensions(final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
-            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+            public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesCSV();
             }
         });
     }
 
     @Override
-    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(AdminParser parser) {
+    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final AdminParser parser) {
         return abstractGetter(parser, new GetterClosureInterface() {
-            public ArrayList<String> getData(ContextConsoleListInterface commonex) {
+            public ArrayList<String> getData(final ContextConsoleListInterface commonex) {
                 return commonex.getColumnNamesHumanReadable();
             }
         });
     }
 
-    private ArrayList<String> abstractGetter(AdminParser parser, final GetterClosureInterface iface) {
+    private ArrayList<String> abstractGetter(final AdminParser parser, final GetterClosureInterface iface) {
         final ArrayList<String> retval = new ArrayList<String>();
         if (null == this.listsubclasses) {
             try {
