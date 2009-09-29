@@ -63,8 +63,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ChangeCore extends ContextAbstraction {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ChangeCore.class);
-    
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         
@@ -101,20 +99,17 @@ public abstract class ChangeCore extends ContextAbstraction {
                 parseAndSetExtensions(parser, ctx, auth);
                 
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             maincall(parser, ctx, auth);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
             printErrors(successtext, null, e, parser);
         }
         try {
             displayChangedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

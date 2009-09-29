@@ -65,8 +65,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class CreateCore extends ContextAbstraction {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CreateCore.class);
-
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setContextNameOption(parser, NeededQuadState.notneeded);
@@ -117,20 +115,17 @@ public abstract class CreateCore extends ContextAbstraction {
                 
                 parseAndSetExtensions(parser, ctx, auth);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             ctxid = maincall(parser, ctx, usr, auth).getId();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
         }
 
         try {
             displayCreatedMessage((null != ctxid) ? String.valueOf(ctxid) : null, null, parser);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
