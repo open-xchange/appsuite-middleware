@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-06-29 09:58+0200\n"
+"PO-Revision-Date: 2009-09-29 15:19+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -54,6 +54,13 @@ msgstr "Beim Auflösen von Ordnernamen-Konflikten trat ein SQL-Fehler auf: %s"
 msgid "A SQL error occurred while creating table 'version': %1$s."
 msgstr "SQL-Fehler beim Erstellen der Tabellen-'version': %1$s."
 
+msgid ""
+"A SQL error occurred while performing task "
+"ContactsAddIndex4AutoCompleteSearch: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe ContactsAddIndex4AutoCompleteSearch trat ein SQL-"
+"Fehler auf: %1$s."
+
 msgid "A SQL error occurred while performing task CreateGenconfTablesTask: %1$s."
 msgstr ""
 "Beim Ausführen der Aufgabe CreateGenconfTablesTask trat ein SQL-Fehler auf: %"
@@ -69,9 +76,21 @@ msgstr ""
 "Beim Ausführen der Aufgabe CreateSubscribeTableTask trat ein SQL-Fehler auf: "
 "%1$s."
 
+msgid ""
+"A SQL error occurred while performing task "
+"GlobalAddressBookPermissionsResolverTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe GlobalAddressBookPermissionsResolverTask trat ein SQL-"
+"Fehler auf: %1$s."
+
 msgid "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s."
 msgstr ""
 "Beim Ausführen der Aufgabe MailAccountCreateTablesTask trat ein SQL-Fehler "
+"auf: %1$s."
+
+msgid "A SQL error occurred while performing task MailAccountMigrationTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe MailAccountMigrationTask trat ein SQL-Fehler "
 "auf: %1$s."
 
 msgid ""
@@ -84,10 +103,27 @@ msgstr ""
 msgid "A SQL error occurred while performing task POP3CreateTableTask: %1$s."
 msgstr "Beim Ausführen der Aufgabe POP3CreateTableTask trat ein SQL-Fehler auf: %1$s."
 
+msgid ""
+"A SQL error occurred while performing task "
+"RemoveAdminPermissionOnInfostoreTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe RemoveAdminPermissionOnInfostoreTask trat ein SQL-"
+"Fehler auf: %1$s."
+
 msgid "A SQL error occurred while performing task SpellCheckUserDictTableTask: %1$s."
 msgstr ""
 "Beim Ausführen der Aufgabe SpellCheckUserDictTableTask trat ein SQL-Fehler "
 "auf: %1$s."
+
+msgid "A SQL error occurred while performing task VirtualTreeCreateTableTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe VirtualTreeCreateTableTask trat ein SQL-Fehler "
+"auf: %1$s."
+
+msgid "A SQL error occurred while performing task VirtualTreeMigrationTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe VirtualTreeMigrationTask trat ein SQL-Fehler auf: "
+"%1$s."
 
 msgid "A SQL error occurred while reading schema version information: %1$s."
 msgstr "SQL-Fehler beim Lesen der Schema-Versionsinformationen: %1$s."
@@ -112,8 +148,8 @@ msgid ""
 "A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4"
 "$s). Server response: %5$s"
 msgstr ""
-"Befehl auf Mailserver %1$s mit Login %2$s fehlgeschlagen (Benutzer=%3$s, Kontext=%4"
-"$s). Server-Antwort: %5$s"
+"Befehl auf Mailserver %1$s mit Login %2$s fehlgeschlagen (Benutzer=%3$s, "
+"Kontext=%4$s). Server-Antwort: %5$s"
 
 msgid "A command to mail server failed. Server response: %1$s."
 msgstr "Ein Befehl an den Mailserver ist fehlgeschlagen. Server-Antwort: %1$s."
@@ -311,8 +347,8 @@ msgid ""
 "An error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
 "%4$s). Error message: %5$s"
 msgstr ""
-"Fehler im Protokoll an Mailserver %1$s mit Login %2$s (Benutzer=%3$s, Kontext="
-"%4$s). Fehlermeldung: %5$s"
+"Fehler im Protokoll an Mailserver %1$s mit Login %2$s (Benutzer=%3$s, "
+"Kontext=%4$s). Fehlermeldung: %5$s"
 
 msgid "An error occurred attaching to the given object."
 msgstr "Fehler beim Anhängen an das angegebene Objekt"
@@ -374,6 +410,7 @@ msgstr ""
 "nicht gespeichert werden. 1. Objekt %1$d Ordner %2$d 2. Objekt %3$d Ordner %4"
 "$d Kontext %5$d"
 
+#. An error occurred: %1$s
 msgid "An error occurred: %1$s"
 msgstr "Es trat ein Fehler auf: %1$s"
 
@@ -389,6 +426,9 @@ msgid ""
 msgstr ""
 "Es existiert bereits ein Infostore-Ordner namens %1$s unterhalb des Ordners %"
 "2$s (%3$s) im Kontext %4$s. Bitte wählen Sie einen anderen Anzeigenamen."
+
+msgid "An internal error occurred: %1$s"
+msgstr "Es trat ein interner Fehler auf: %1$s"
 
 msgid "An invalid SQL query was sent to the server."
 msgstr "Server erhielt ungültige SQL-Anfrage"
@@ -427,8 +467,8 @@ msgid ""
 "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Server response: %5$s"
 msgstr ""
-"Fehlerhafter Befehl angezeigt durch Mailserver %1$s mit Login %2$s (Benutzer=%3$s, "
-"Kontext=%4$s). Server-Antwort: %5$s"
+"Fehlerhafter Befehl angezeigt durch Mailserver %1$s mit Login %2$s (Benutzer="
+"%3$s, Kontext=%4$s). Server-Antwort: %5$s"
 
 msgid "Bad value %1$s in parameter %2$s"
 msgstr "Ungültiger Wert %1$s in Parameter %2$s"
@@ -475,6 +515,9 @@ msgstr "Es kann auf einmal nur in einen Ordner importiert werden."
 
 msgid "Can't access DBPool"
 msgstr "Kein Zugriff auf DBPool"
+
+msgid "Can't handle spam because MailService isn't available"
+msgstr "Spam kann nicht verarbeitet werden, da MailService nicht zur Verfügung steht."
 
 msgid "Can't resolve filestore."
 msgstr "Dateispeicher kann nicht aufgelöst werden"
@@ -701,8 +744,8 @@ msgid ""
 "Connection closed to server %1$s with login %2$s (user=%3$s, context=%4$s): %"
 "5$s"
 msgstr ""
-"Verbindung zum Server %1$s geschlossen mit Login %2$s (Benutzer=%3$s, Kontext=%4$s): %"
-"5$s"
+"Verbindung zum Server %1$s geschlossen mit Login %2$s (Benutzer=%3$s, "
+"Kontext=%4$s): %5$s"
 
 msgid "Connection is broken due to a socket exception on remote server: %1$s"
 msgstr ""
@@ -719,8 +762,8 @@ msgstr ""
 msgid "Connection was reset. Please try again."
 msgstr "Verbindung wurde zurückgesetzt. Bitte erneut versuchen."
 
-msgid "Contact not found! Context %1$d"
-msgstr "Kontakt nicht gefunden. Kontext %1$d"
+msgid "Contact %1$d not found in context %2$d."
+msgstr "Kontakt %1$d nicht in Kontext %2$d gefunden."
 
 msgid "Context ID is not a number: %1$s."
 msgstr "Kontext-ID ist keine Zahl: %1$s."
@@ -902,6 +945,13 @@ msgstr ""
 "Es trat ein kritischer Fehler auf. Dieser Ordner enthält einen Kontakt ohne "
 "ID. Kontext %1$d Ordner %2$d"
 
+msgid ""
+"Current version number %1$s is already lower than or equal to desired "
+"version number %2$s."
+msgstr ""
+"Aktuelle Versionsnummer %1$s ist bereits niedriger oder gleich der "
+"gewünschten Versionsnummer %2$s."
+
 msgid "Database cannot be reached."
 msgstr "Zugriff auf Datenbank fehlgeschlagen"
 
@@ -1000,14 +1050,37 @@ msgstr "Enddatum liegt vor Startdatum"
 msgid "Error communicating with mbean in server: %s"
 msgstr "Fehler bei der Kommunikation mit mbean auf Server: %s"
 
+msgid "Error during communication with spamd: \"%s\""
+msgstr "Fehler bei der Kommunikation mit spamd: \"%s\""
+
 msgid "Error in SQL Statement"
 msgstr "Fehler im SQL-Statement"
 
 msgid "Error in SQL Update"
 msgstr "Fehler im SQL-Update"
 
+msgid "Error loading update task \"%1$s\"."
+msgstr "Fehler beim Laden der Update-Aufgabe \"%1$s\"."
+
+msgid "Error while getting spamd provider from service: \"%s\""
+msgstr "Fehler beim Abrufen des spamd-Providers vom Dienst: \"%s\""
+
 msgid "Error while inserting task: %s."
 msgstr "Fehler beim Einfügen der Aufgabe: %s"
+
+msgid ""
+"Error while performing task RemoveAdminPermissionOnInfostoreTask: No context "
+"admin exists for context %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe RemoveAdminPermissionOnInfostoreTask trat ein "
+"Fehler auf: Kein Kontextadmin für Kontext %1$s vorhanden."
+
+msgid ""
+"Error while performing task VirtualTreeMigrationTask: No context admin "
+"exists for context %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe VirtualTreeMigrationTask trat ein Fehler auf: "
+"Kein Kontextadmin für Kontext %1$s vorhanden."
 
 msgid ""
 "Error: Got an UserParticipant object with a private folder id < 1 : "
@@ -1257,6 +1330,9 @@ msgstr ""
 "Datenbank-ID-Duplikat %d gefunden. Einstellungseintrag wird nicht "
 "hinzugefügt."
 
+msgid "Found duplicate path %s."
+msgstr "Pfad-Duplikat %s gefunden."
+
 msgid "Found resource groups with same identifier %1$d."
 msgstr "Ressourcengruppen mit gleicher ID %1$d gefunden"
 
@@ -1319,6 +1395,10 @@ msgstr "Header \"content-type\" zeigt keinen Multipart-Inhalt an"
 msgid "Header %1$s could not be properly parsed"
 msgstr "Header %1$s konnte nicht korrekt analysiert werden."
 
+#, fuzzy
+msgid "Html-2-Text conversion failed: %1$s"
+msgstr "Datenerhaltung fehlgeschlagen: %1$s."
+
 msgid "I/O error while writing to Writer object: %s"
 msgstr "E/A-Fehler beim Schreiben in Writer Objekt: %s"
 
@@ -1360,6 +1440,9 @@ msgstr ""
 "Der Import ist fehlgeschlagen. Einige der eingegebenen Daten übersteigen das "
 "Datenbank-Feldlimit. Bitte kürzen Sie folgende Einträge: %1$s Zeichenlimit: %"
 "2$s Gesendet %3$s"
+
+msgid "In order to accomplish the search, %1$d or more characters are required."
+msgstr "Um die Suche durchzuführen, sind mindestens %1$d Zeichen erforderlich."
 
 msgid "Incomplete recurring information: Missing day in month."
 msgstr "Unvollständige Serieninformationen. Tag des Monats fehlt."
@@ -1423,6 +1506,9 @@ msgstr ""
 
 msgid "Integer value exceeds max allowed value (65535): %1$d"
 msgstr "Ganzzahlenwert übersteigt maximal erlaubten Wert (65535): %1$d"
+
+msgid "Internal error: Wrong arguments are given to the tell command: \"%s\""
+msgstr "Interner Fehler: Dem tell-Befehl wurden falsche Argumente übergeben: \"%s\""
 
 msgid "Invalid Content-Disposition value: %1$s"
 msgstr "Ungültiger Content-Disposition-Wert: %1$s"
@@ -1493,6 +1579,9 @@ msgstr "Ungültiger Multipart-Inhalt. Anzahl der angehängten Inhalte ist 0."
 msgid "Invalid object ID %1$s"
 msgstr "Ungültige Objekt-ID %1$s"
 
+msgid "Invalid parameter \"%1$s\": %2$s"
+msgstr "Ungültiger Parameter \"%1$s\": %2$s"
+
 msgid "Invalid parameter name: %1$s"
 msgstr "Ungültiger Parametername: %1$s"
 
@@ -1538,6 +1627,9 @@ msgstr "Ungültiger Wert %s in Einstellung %s."
 
 msgid "Invalid value in element \"%1$s\": %2$s."
 msgstr "Ungültiger Wert in Element \"%1$s\": %2$s."
+
+msgid "JSON error: %s"
+msgstr "JSON-Fehler: %s"
 
 msgid "Length is not a number: %1$s."
 msgstr "Length ist keine Zahl: %1$s."
@@ -1676,7 +1768,7 @@ msgstr ""
 msgid "Missing affiliation id"
 msgstr "Zugehörigkeits-ID fehlt"
 
-msgid "Missing cache config file at location: %1$s"
+msgid "Missing cache configuration file at location: %1$s"
 msgstr "Fehlende Cache-Konfigurationsdatei unter: %1$s"
 
 msgid "Missing configuration property: %1$s"
@@ -1790,7 +1882,9 @@ msgstr ""
 "verschoben werden."
 
 msgid "Move of a recurring appointment to another folder is not supported."
-msgstr "Ein wiederkehrender Termin kann nicht in einen anderen Ordner verschoben werden."
+msgstr ""
+"Ein wiederkehrender Termin kann nicht in einen anderen Ordner verschoben "
+"werden."
 
 msgid "Moving appointment to a public folder flaged as private is not allowed!"
 msgstr ""
@@ -1833,6 +1927,9 @@ msgstr "Keine Anlage mit der ID %1$s in Nachricht gefunden"
 
 msgid "No attribute name could be found for code: %1$d"
 msgstr "Kein Attributname gefunden für Code: %1$d"
+
+msgid "No cache found for region name: %1$s"
+msgstr "Kein Cache gefunden für Bereichsname: %1$s"
 
 msgid "No changes found. No update requiered. Context %1$d Object %2$d"
 msgstr "Keine Änderungen gefunden. Kein Update erforderlich. Kontext %1$d Objekt %2$d"
@@ -1900,10 +1997,16 @@ msgstr "Keine Verbindung zum Host: Kein Zugriff auf Server (%1$s)"
 msgid "No row found in table update."
 msgstr "Keine Zeile in Tabellen-Update gefunden."
 
+msgid "No send address could be found in user configuration"
+msgstr "In der Benutzerkonfiguration konnte keine Senderadresse gefunden werden."
+
 msgid "No servlet class name found for key \"%s\". Please check servlet mappings."
 msgstr ""
 "Kein Servlet-Klassenname für  den Schlüssel \"%s\" gefunden. Bitte "
 "überprüfen Sie die Servlet-Zuordnungen."
+
+msgid "No storage access because mail connection is not connected"
+msgstr "Kein Speicherzugriff wegen fehlender Mail-Verbindung."
 
 msgid "No subfolder creation underneath shared folder %1$s in context %2$s"
 msgstr ""
@@ -2091,6 +2194,9 @@ msgstr "Push UDP-Ausnahme."
 msgid "Put into cache failed."
 msgstr "Legen in Cache fehlgeschlagen"
 
+msgid "Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s"
+msgstr "Empfangsbestätigung kann nicht gesendet werden: fehlender Header %1$s in der Nachricht %2$s"
+
 msgid "Recurrence position %1$s does not exist"
 msgstr "Wiederkehrende Position %1$s ist nicht vorhanden"
 
@@ -2249,6 +2355,9 @@ msgstr "Die Werte einiger Felder sind zu lang"
 msgid "Spam handler initialization failed: %1$s"
 msgstr "Initialisierung des Spam-Handlers fehlgeschlagen: %1$s"
 
+msgid "Spamd returned wrong exit code \"%s\""
+msgstr ""
+
 msgid "Start date %1$s must be before end date %2$s."
 msgstr "Das Startdatum %1$s muss vor dem Enddatum %2$s liegen."
 
@@ -2271,6 +2380,9 @@ msgid "Table update failed. Schema %1$s could not be unlocked."
 msgstr ""
 "Tabellen-Update fehlgeschlagen. Sperre für Schema %1$s konnte nicht "
 "aufgehoben werden."
+
+msgid "Table update failed. Schema %1$s could not be updated."
+msgstr "Tabellen-Update fehlgeschlagen. Schema %1$s konnte nicht aktualisiert werden."
 
 msgid "Target and source folder cannot be equal in context %1$s"
 msgstr "Ziel- und Quellordner dürfen im Kontext %1$s nicht identisch sein"
@@ -2320,10 +2432,13 @@ msgstr "Der von Ihnen angeforderte Kontakt ist ungültig."
 msgid "The cookie with the session identifier is missing."
 msgstr "Das Cookie mit der Session-ID fehlt."
 
-msgid "The default element attributes could not be assigned"
+msgid "The default element attributes could not be assigned."
 msgstr "Die Standard-Elementattribute konnten nicht zugewiesen werden."
 
 msgid "The default element attributes could not be retrieved"
+msgstr "Die Standard-Elementattribute konnten nicht abgerufen werden"
+
+msgid "The default element attributes could not be retrieved."
 msgstr "Die Standard-Elementattribute konnten nicht abgerufen werden"
 
 msgid "The directory already exists."
@@ -2394,6 +2509,12 @@ msgstr "Der Ordner %s ist nicht vorhanden."
 msgid "The following field(s) are too long to be imported: %s"
 msgstr "Folgende Felder sind zu lang und können nicht importiert werden: %s"
 
+msgid "The given value for mode \"%s\" is not a possible one"
+msgstr "Der angegebene Typ für den Modus \"%s\" wird nicht unterstützt."
+
+msgid "The given value for userSource \"%s\" is not a possible one"
+msgstr "Der für userSource \"%s\" angegebene Wert wird nicht unterstützt."
+
 msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
@@ -2425,6 +2546,9 @@ msgstr ""
 "Das Objekt konnte nicht losgelöst werden, da das Update an einem "
 "zugrundeliegenden Objekt fehlschlug."
 
+#. *
+#. * The object has been changed in the meantime.
+#.
 msgid "The object has been changed in the meantime."
 msgstr "Das Objekt hat sich mittlerweile geändert."
 
@@ -2434,6 +2558,23 @@ msgid ""
 msgstr ""
 "Das von Ihnen angeforderte Objekt konnte nicht gefunden werden. Bitte erneut "
 "versuchen. Kontext %1$d Ordner %2$d Benutzer %3$d Objekt %4$d"
+
+msgid "The parameter \"%s\" is not set in property file"
+msgstr "Der Parameter \"%s\" ist nicht in der Property-Datei festgelegt."
+
+msgid "The parameter \"%s\" must be an integer value but is \"%s\""
+msgstr "Der Parameter \"%s\" muss eine Ganzzahl sein, ist aber \"%s\""
+
+msgid "The parameter \"%s\" must be an long value but is \"%s\""
+msgstr ""
+
+msgid "The parameter \"%s\" must be set in the property file if spamd is true"
+msgstr "Der Parameter \"%s\" muss in der Property-Datei festgelegt sein, wenn spamdb auf true gesetzt ist."
+
+msgid ""
+"The parameter \"userSource\" must be set in the property file if spamd is "
+"true"
+msgstr "Der Parameter \"userSource\" muss in der Property-Datei festgelegt sein, wenn spamdb auf true gesetzt ist."
 
 msgid "The recurrence pattern is too complex. Giving up."
 msgstr "Das Serienmuster ist zu komplex. Der Vorgang wird abgebrochen."
@@ -2481,6 +2622,9 @@ msgstr ""
 
 msgid "The types of specified data source are not supported"
 msgstr "Die angegebenen Datenquellentypen werden nicht unterstützt"
+
+msgid "There are no recipient(s) for the new message."
+msgstr "Für die neue Nachricht sind keine Empfänger eingetragen."
 
 msgid ""
 "There was an issue in authenticating your E-Mail password. This may be "
@@ -2688,11 +2832,11 @@ msgstr ""
 "Verknüpfungen für dieses Objekt können nicht alle geladen werden. Objekt %1"
 "$d Benutzer %2$d Kontext %3$d"
 
+msgid "Unable to load contact %1$d in context %2$d."
+msgstr "Kontakt %1$d in Kontext %2$d konnte nicht geladen werden."
+
 msgid "Unable to load contact image: Context %1$d Contact %2$d"
 msgstr "Kontaktfoto kann nicht geladen werden : Kontext %1$d Kontakt %2$d"
-
-msgid "Unable to load contact: Context %1$d"
-msgstr "Kontakt kann nicht geladen werden: Kontext %1$d"
 
 msgid "Unable to load dristributionlist: Context %1$d Contact %2$d"
 msgstr "Verteilerliste kann nicht geladen werden : Kontext %1$d Kontakt %2$d"
@@ -2823,6 +2967,9 @@ msgstr ""
 "Unerwartetes Paket mit leerem Body von Webserver erhalten. Total-Received: %1"
 "$d | Content-Length: %2$d."
 
+#. *
+#. * Unexpected error: %1$s
+#.
 msgid "Unexpected error: %1$s"
 msgstr "Unerwarteter Fehler: %1$s"
 
@@ -3306,6 +3453,88 @@ msgstr "Datenerhaltung fehlgeschlagen: %1$s."
 msgid "AN I/O error occurred: %1$s."
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
+#. A JSON exception occurred.
+msgid "A JSON exception occurred."
+msgstr "Es trat ein JSON-Fehler auf."
+
+#. An IO Exception occurred
+msgid "An IO Exception occurred"
+msgstr "Es trat eine E/A-Ausnahme auf."
+
+#. Invalid type: %1$s.
+msgid "Invalid type: %1$s."
+msgstr "Ungültiger Typ: %1$s."
+
+#. Different types in array.
+msgid "Different types in array."
+msgstr "Unterschiedliche Typen im Array."
+
+#. Invalid tree structure.
+msgid "Invalid tree structure."
+msgstr "Ungültige Baumstruktur."
+
+#. Missing parameter %s
+msgid "Missing parameter %s"
+msgstr "Fehlender Parameter %s"
+
+#. loadBinaries must be an array of paths
+msgid "loadBinaries must be an array of paths"
+msgstr "loadBinaries muss ein Array von Pfaden sein."
+
+#. The parameters ( %s ) are conflicting. Please supply only one of those.
+msgid "The parameters ( %s ) are conflicting. Please supply only one of those."
+msgstr "Parameter-Konflikt ( %s ). Bitte nur einen angeben."
+
+#. The action %s is not known.
+msgid "The action %s is not known."
+msgstr "Unbekannte Aktion %s."
+
+#. Binaries that are part of trees must be base64 encoded. Only directly accessed binaries can be encoded freely.
+msgid ""
+"Binaries that are part of trees must be base64 encoded. Only directly "
+"accessed binaries can be encoded freely."
+msgstr ""
+"Binaries in Baumstrukturen müssen base64-kodiert sein. Nur bei direktem "
+"Binary-Zugriff kann das Encoding frei gewählt werden."
+
+#. Unknown binaryEncoding %s
+msgid "Unknown binaryEncoding %s."
+msgstr "Unbekanntes binaryEncoding %s."
+
+#. General Exception
+msgid "General Exception"
+msgstr "Allgemeine Ausnahme"
+
+#. SQL Exception
+msgid "An SQL Exception has occurred."
+msgstr "Es trat ein SQL-Fehler auf."
+
+#. Could not create table %s
+msgid "Could not create table %s"
+msgstr "Tabelle %s konnte nicht erstellt werden werden"
+
+#. No such node: %1$s
+msgid "No such node: %1$s"
+msgstr "Kein solcher Node gefunden: %1$s."
+
+msgid ""
+"This EAV implementation does not support floating point numbers. Please use "
+"only integers."
+msgstr ""
+"Diese EAV-Implementation unterstützt keine Fließkommazahlen. Bitte verwenden "
+"Sie nur Ganzzahlen."
+
+msgid "The path %s has already been taken"
+msgstr "Der Pfad %s wird bereits verwendet"
+
+#. Missing property: %1$s
+msgid "Missing property: %1$s"
+msgstr "Fehlende Eigenschaft: %1$s"
+
+#. Invalid property value in property \"%1$s\": %2$s
+msgid "Invalid property value in property \"%1$s\": %2$s"
+msgstr "Ungültiger Eigenschafts-Wert in Eigenschaft \"%1$s\": %2$s"
+
 #. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
 msgid "Account \"%s\" is locked."
@@ -3454,6 +3683,17 @@ msgstr "%1$s ist nicht initialisiert."
 msgid "Cannot resolve server id for server %1$s."
 msgstr "Fehler beim Auflösen der Server-ID für Server %1$s."
 
+#. This error message is only for administrators to show that some coding problem exists.
+#. %1$d is replaced with a unique identifier of a database connection pool.
+msgid "Nothing known about pool %1$d."
+msgstr "Unbekannter Pool %1$d."
+
+#. This is a technical exception message for administrators. For monitoring the replication a replicationMonitor table with a
+#. transaction counter is used. If this transaction counter is missing this exception gets thrown.
+#. %1$d is replaced with the context identifier that is stored in the schema.
+msgid "Transaction counter is missing for context %1$d."
+msgstr "Übertragungszähler für Kontext %1$d ist nicht vorhanden."
+
 #. *
 #. * File not found: %1$s
 #.
@@ -3472,9 +3712,141 @@ msgstr "E/A-Fehler: %1$s"
 msgid "No such managed file associated with ID: %1$s"
 msgstr "Keine verwaltete Datei vorhanden mit ID: %1$s"
 
-#. Unknown operation: %1$s.
-msgid "Unknown operation: %1$s."
-msgstr "Unbekannte Aktion: %1$s."
+#. *
+#. * SQL error: %1$s
+#.
+msgid "SQL error: %1$s"
+msgstr "SQL-Fehler: %1$s"
+
+#. *
+#. * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
+#.
+msgid ""
+"No appropriate folder storage for tree identifier \"%1$s\" and folder "
+"identifier \"%2$s\"."
+msgstr "Kein passender Ordner-Speicher für Baum-ID \"%1$s\" und Ordner-ID \"%2$s\"."
+
+#. *
+#. * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
+#.
+msgid ""
+"No appropriate folder storage for tree identifier \"%1$s\" and content type "
+"\"%2$s\"."
+msgstr "Kein passender Ordner-Speicher für Baum-ID  \"%1$s\" und Inhaltstyp \"%2$s\"."
+
+#. *
+#. * Missing session.
+#.
+msgid "Missing session."
+msgstr "Fehlende Sitzung."
+
+#. *
+#. * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
+#.
+msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
+msgstr "Ordner \"%1$s\" ist im Kontext \"%3$s\" für Benutzer \"%2$s\" nicht sichtbar"
+
+#. *
+#. * JSON error: %1$s
+#.
+msgid "JSON error: %1$s"
+msgstr "JSON-Fehler: %1$s"
+
+#. *
+#. * Missing tree identifier.
+#.
+msgid "Missing tree identifier."
+msgstr "Fehlende ID für Baum."
+
+#. *
+#. * Missing parent folder identifier.
+#.
+msgid "Missing parent folder identifier."
+msgstr "Fehlende ID für übergeordneten Ordner."
+
+#. *
+#. * Missing folder identifier.
+#.
+msgid "Missing folder identifier."
+msgstr "Fehlende Ordner-ID."
+
+#. *
+#. * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
+#.
+msgid ""
+"Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree "
+"\"%3$s\" for user %4$s in context %5$s."
+msgstr ""
+"Übergeordneter Ordner \"%1$s\" erlaubt im Kontext %5$s im Baum \"%3$s\" "
+"keinen Inhaltstyp \"%2$s\" für den Benutzer %4$s."
+
+#. *
+#. * Move operation not permitted.
+#.
+msgid "Move operation not permitted."
+msgstr "Verschiebe-Aktion nicht erlaubt."
+
+#. *
+#. * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
+#.
+msgid ""
+"A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree "
+"\"%3$s\"."
+msgstr ""
+"Eine Verzeichnis namens \"%1$s\" ist bereits im übergeordneten Ordner \"%2$s"
+"\" im Baum \"%3$s\" vorhanden."
+
+#. *
+#. * Subscribe operation not permitted on tree "%1$s".
+#.
+msgid "Subscribe operation not permitted on tree \"%1$s\"."
+msgstr "Abonnier-Vorgang nicht im Baum \"%1$s\" erlaubt."
+
+#. *
+#. * Un-Subscribe operation not permitted on tree "%1$s".
+#.
+msgid "Un-Subscribe operation not permitted on tree \"%1$s\"."
+msgstr "Abbestellen nicht erlaubt im Baum \"%1$s\"."
+
+#. *
+#. * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
+#.
+msgid "Un-Subscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\"."
+msgstr "Abbestellen im Baum \"%2$s\" nicht erlaubt im Ordner \"%1$s\"."
+
+#. *
+#. * Unknown content type: %1$s.
+#.
+msgid "Unknown content type: %1$s."
+msgstr "Unbekannter Inhalts-Typ: %1$s."
+
+#. *
+#. * Missing parameter: %1$s.
+#.
+msgid "Missing parameter: %1$s."
+msgstr "Fehlender Parameter: %1$s"
+
+#. *
+#. * Missing property: %1$s.
+#.
+msgid "Missing property: %1$s."
+msgstr "Fehlende Eigenschaft: %1$s."
+
+#. *
+#. * Unsupported storage type: %1$s.
+#.
+msgid "Unsupported storage type: %1$s."
+msgstr "Nicht unterstützter Speicher-Typ: %1$s."
+
+#. *
+#. * Folder "%1$s" could not be found in tree "%2$s".
+#.
+msgid "Folder \"%1$s\" could not be found in tree \"%2$s\"."
+msgstr "Ordner \"%1$s\" konnte nicht im Baum \"%2$s\" gefunden werden."
+
+#. Unexpected error: %1$s.
+msgid "Unexpected error: %1$s."
+msgstr "Unerwarteter Fehler: %1$s."
 
 #. Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
 msgid "Cannot find mail account with identifier %1$s for user %2$s in context %3$s."
@@ -3518,13 +3890,21 @@ msgstr ""
 msgid "No duplicate default account allowed."
 msgstr "Duplikat des Standard-Accounts nicht zulässig"
 
-#. Password encryption failed.
-msgid "Password encryption failed."
-msgstr "Passwortverschlüsselung fehlgeschlagen"
+#. Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
+msgid ""
+"Password encryption failed for login %1$s on server %2$s (user=%3$s, context="
+"%4$s)."
+msgstr ""
+"Passwortverschlüsselung fehlgeschlagen für Login %1$s auf Server %2$s (Benutzer=%3$s, Kontext="
+"%4$s)."
 
-#. Password decryption failed.
-msgid "Password decryption failed."
-msgstr "Passwortentschlüsselung fehlgeschlagen"
+#. Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
+msgid ""
+"Password decryption failed for login %1$s on server %2$s (user=%3$s, context="
+"%4$s)."
+msgstr ""
+"Passwortentschlüsselung fehlgeschlagen für Login %1$s auf Server %2$s (Benutzer=%3$s, Kontext="
+"%4$s)."
 
 #. The Unified INBOX account already exists for user %1$s in context %2$s.
 msgid "The Unified INBOX account already exists for user %1$s in context %2$s."
@@ -3563,4 +3943,8 @@ msgstr "Ungültiger Suchbegriff im JSON-Objekt."
 #. Missing field "%1$s" in JSON object.
 msgid "Missing field \"%1$s\" in JSON object."
 msgstr "Fehlendes Feld \"%1$s\" in JSON-Objekt."
+
+#. Unknown operation: %1$s.
+msgid "Unknown operation: %1$s."
+msgstr "Unbekannte Aktion: %1$s."
 
