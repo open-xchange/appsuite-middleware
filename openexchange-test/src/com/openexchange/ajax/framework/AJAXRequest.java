@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONException;
 
 /**
@@ -80,6 +79,9 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
             this.name = name;
             this.value = value;
         }
+        public Parameter(final String name, final String[] values) {
+            this(name, convert(values));
+        }
         public Parameter(final String name, final int[] values) {
             this(name, convert(values));
         }
@@ -101,6 +103,15 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         public static String convert(final int[] values) {
             final StringBuilder columnSB = new StringBuilder();
             for (final int i : values) {
+                columnSB.append(i);
+                columnSB.append(',');
+            }
+            columnSB.delete(columnSB.length() - 1, columnSB.length());
+            return columnSB.toString();
+        }
+        public static String convert(final String[] values) {
+            final StringBuilder columnSB = new StringBuilder();
+            for (final String i : values) {
                 columnSB.append(i);
                 columnSB.append(',');
             }
