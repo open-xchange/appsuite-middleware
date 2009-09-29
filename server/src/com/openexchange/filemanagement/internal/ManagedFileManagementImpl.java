@@ -246,6 +246,40 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         files.clear();
     }
 
+    public File newTempFile() throws ManagedFileException {
+        File tmpFile = null;
+        File directory = null;
+        do {
+            directory = tmpDirReference.get();
+            try {
+                if (null == tmpFile) {
+                    tmpFile = File.createTempFile(PREFIX, SUFFIX, directory);
+                    tmpFile.deleteOnExit();
+                } else {
+                    final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
+                    if (!tmpFile.delete()) {
+                        LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
+                    }
+                    tmpFile = tmp;
+                    tmpFile.deleteOnExit();
+                }
+            } catch (final IOException e) {
+                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
+                    LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
+                }
+                throw ManagedFileExceptionFactory.getInstance().create(ManagedFileExceptionErrorMessage.IO_ERROR, e, e.getMessage());
+            }
+        } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
+        return tmpFile;
+    }
+    
+    public ManagedFile createManagedFile(final File temporaryFile) throws ManagedFileException {
+        final ManagedFile mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);
+        mf.setSize(temporaryFile.length());
+        files.put(mf.getID(), mf);
+        return mf;
+    }
+
     public ManagedFile createManagedFile(final byte[] bytes) throws ManagedFileException {
         return createManagedFile0(new UnsynchronizedByteArrayInputStream(bytes), false);
     }

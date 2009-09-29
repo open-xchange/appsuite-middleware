@@ -49,6 +49,7 @@
 
 package com.openexchange.filemanagement;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -62,6 +63,30 @@ public interface ManagedFileManagement {
      * Clears all files kept by this file management.
      */
     public void clear();
+
+    /**
+     * Creates a new temporary file.
+     * <p>
+     * If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and</li>
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.</li>
+     * </ol>
+     * 
+     * @return A new temporary file
+     * @throws ManagedFileException If a temporary filöe could not be created
+     */
+    public File newTempFile() throws ManagedFileException;
+
+    /**
+     * Creates a new managed file from specified temporary file.
+     * 
+     * @param temporaryFile A temporary file (previously obtained from {@link #newTempFile()}
+     * @return A new managed file
+     * @throws ManagedFileException If a new managed file cannot be created from specified temporary file
+     */
+    public ManagedFile createManagedFile(final File temporaryFile) throws ManagedFileException;
 
     /**
      * Creates a new managed file from specified input stream.
