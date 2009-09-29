@@ -85,7 +85,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * OXFolderAdminHelper
+ * {@link OXFolderAdminHelper} - Helper class for admin.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
