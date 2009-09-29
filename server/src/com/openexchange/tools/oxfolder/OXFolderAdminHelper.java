@@ -163,9 +163,16 @@ public final class OXFolderAdminHelper {
             /*
              * Iterate users
              */
-            final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
-            for (final Integer user : users) {
-                setGlobalAddressBookEnabled(cid, user.intValue(), enable, writeCon, admin);
+            if (!users.isEmpty()) {
+                final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
+                final int size = users.size();
+                for (int i = 1; i < size; i++) {
+                    setGlobalAddressBookEnabled(cid, users.get(i).intValue(), enable, writeCon, admin, false);
+                }
+                /*
+                 * Propagate with last update
+                 */
+                setGlobalAddressBookEnabled(cid, users.get(0).intValue(), enable, writeCon, admin, true);
             }
         } finally {
             Database.back(cid, true, writeCon);
@@ -212,7 +219,7 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon) throws OXException {
-        setGlobalAddressBookEnabled(cid, userId, enable, writeCon, null);
+        setGlobalAddressBookEnabled(cid, userId, enable, writeCon, null, true);
     }
 
     /**
@@ -224,7 +231,7 @@ public final class OXFolderAdminHelper {
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
-    private void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon, final Integer adminId) throws OXException {
+    private void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
         final int admin = adminId == null ? getContextAdminID(cid, writeCon) : adminId.intValue();
         final boolean isAdmin = (admin == userId);
         PreparedStatement stmt = null;
@@ -250,7 +257,9 @@ public final class OXFolderAdminHelper {
                 if (enable) {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER);
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
-                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(
+                        pos++,
+                        OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
                 } else {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -272,7 +281,9 @@ public final class OXFolderAdminHelper {
                 if (enable) {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS); // orp
-                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
+                    stmt.setInt(
+                        pos++,
+                        OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
                 } else {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // fp
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
@@ -289,24 +300,26 @@ public final class OXFolderAdminHelper {
             /*
              * Update last-modified of folder
              */
-            final ContextImpl ctx = new ContextImpl(cid);
-            ctx.setMailadmin(admin);
-            OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
-            /*
-             * Update caches
-             */
-            try {
-                if (FolderCacheManager.isEnabled()) {
-                    FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
+            if (propagate) {
+                final ContextImpl ctx = new ContextImpl(cid);
+                ctx.setMailadmin(admin);
+                OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
+                /*
+                 * Update caches
+                 */
+                try {
+                    if (FolderCacheManager.isEnabled()) {
+                        FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
+                    }
+                    if (FolderQueryCacheManager.isInitialized()) {
+                        FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
+                    }
+                    if (CalendarCache.isInitialized()) {
+                        CalendarCache.getInstance().invalidateGroup(cid);
+                    }
+                } catch (final AbstractOXException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-                if (FolderQueryCacheManager.isInitialized()) {
-                    FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
-                }
-                if (CalendarCache.isInitialized()) {
-                    CalendarCache.getInstance().invalidateGroup(cid);
-                }
-            } catch (final AbstractOXException e) {
-                LOG.error(e.getMessage(), e);
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
