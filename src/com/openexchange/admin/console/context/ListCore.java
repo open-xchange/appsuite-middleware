@@ -66,8 +66,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends ContextAbstraction {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListCore.class);
-
     private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
     
     private interface GetterClosureInterface {
@@ -103,7 +101,6 @@ public abstract class ListCore extends ContextAbstraction {
             }
             ctxs = maincall(parser, pattern, auth);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
             printErrors(null, null, e, parser);
         }
 
@@ -114,11 +111,9 @@ public abstract class ListCore extends ContextAbstraction {
                 sysoutOutput(ctxs, parser);
             }
         } catch (final InvalidDataException e) {
-            LOG.error(e.getMessage(), e);
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
             sysexit(1);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
