@@ -400,7 +400,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      */
     public static ObjectName registerRestorerMBean(final ManagementService managementService) {
         try {
-            final ObjectName objectName = getObjectName(GADRestorerMBeanImpl.class.getName(), GADRestorerMBean.CACHE_DOMAIN);
+            final ObjectName objectName = getObjectName(GADRestorerMBeanImpl.class.getName(), GADRestorerMBean.GAD_DOMAIN);
             managementService.registerMBean(objectName, new GADRestorerMBeanImpl());
             return objectName;
         } catch (final MalformedObjectNameException e) {
@@ -437,7 +437,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      * @return An appropriate instance of {@link ObjectName}
      * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
      */
-    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
+    public static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
         final int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
     }

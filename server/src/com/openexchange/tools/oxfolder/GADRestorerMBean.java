@@ -58,7 +58,7 @@ import javax.management.MBeanException;
  */
 public interface GADRestorerMBean {
 
-    public static final String CACHE_DOMAIN = "com.openexchange.globaladdressbook";
+    public static final String GAD_DOMAIN = "com.openexchange.globaladdressbook";
 
     /**
      * Restores default permissions on global address book folder.
