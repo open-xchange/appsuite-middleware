@@ -249,7 +249,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             removeFromFolderCache(fuids, event.getContext());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         }
         /*
          * Strip all user permission from other (public) infostore folders
@@ -320,7 +320,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 ids.add(Integer.valueOf(fuid));
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         }
         /*
          * Update cache
@@ -375,7 +375,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 cSql.deleteAppointmentsInFolder(folderID, event.getWriteCon());
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(event.getContext().getContextId()));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -457,7 +457,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 event.getWriteCon());
             set.addAll(tmp);
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         }
         /*
          * Update cache

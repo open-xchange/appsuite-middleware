@@ -318,9 +318,9 @@ public class OXFolderException extends OXException {
          */
         NO_EFFECTIVE_PERMISSION("Effective permission of folder %1$s could not be determined for user %2$s in context %3$s", Category.CODE_ERROR, 37),
         /**
-         * A SQL error occurred in context %1$s
+         * A SQL error occurred: %1$s
          */
-        SQL_ERROR("An SQL error occurred in context %1$s", Category.CODE_ERROR, 38),
+        SQL_ERROR("A SQL error occurred: %1$s", Category.CODE_ERROR, 38),
         /**
          * A DBPool error occurred in context %1$s
          */

@@ -243,7 +243,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -387,7 +387,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -480,7 +480,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -690,7 +690,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -839,7 +839,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 

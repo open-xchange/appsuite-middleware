@@ -163,7 +163,7 @@ public class Folder extends SessionServlet {
 
     private static FolderResponseCustomizer responseCustomizer = FolderResponseCustomizer.DEFAULT_CUSTOMIZER;
     
-    public static void setFolderResponseCustomizer(FolderResponseCustomizer customizer) {
+    public static void setFolderResponseCustomizer(final FolderResponseCustomizer customizer) {
         responseCustomizer = customizer;
     }
     
@@ -308,7 +308,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
-        FolderRootCustomizer customizer = getResponseCustomizer().getRootCustomizer(session);
+        final FolderRootCustomizer customizer = getResponseCustomizer().getRootCustomizer(session);
         long lastModified = 0;
         /*
          * Start response

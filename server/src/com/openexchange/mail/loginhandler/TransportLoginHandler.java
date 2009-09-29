@@ -126,7 +126,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
                 throw new LoginException(new OXFolderException(
                     OXFolderException.FolderCode.SQL_ERROR,
                     e,
-                    Integer.valueOf(ctx.getContextId())));
+                    e.getMessage()));
             } catch (final OXFolderException e) {
                 throw new LoginException(e);
             } catch (final OXException e) {

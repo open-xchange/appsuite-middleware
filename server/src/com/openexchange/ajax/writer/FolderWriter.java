@@ -362,7 +362,7 @@ public final class FolderWriter extends DataWriter {
      * @param locale The user's locale to get appropriate folder name used in display
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsObject(FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
+    public void writeOXFolderFieldsAsObject(final FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
         writeOXFolderFieldsAsObject(customizer, fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
     }
 
@@ -376,7 +376,7 @@ public final class FolderWriter extends DataWriter {
      * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsObject(FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
+    public void writeOXFolderFieldsAsObject(final FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
         try {
             final int[] fs;
             if (fields == null) {
@@ -398,7 +398,7 @@ public final class FolderWriter extends DataWriter {
         } catch (final JSONException e) {
             throw new OXFolderException(OXFolderException.FolderCode.JSON_ERROR, e, e.getMessage());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         }
@@ -413,7 +413,7 @@ public final class FolderWriter extends DataWriter {
      * @param locale The user's locale to get appropriate folder name used in display
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsArray(FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
+    public void writeOXFolderFieldsAsArray(final FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
         writeOXFolderFieldsAsArray(customizer, fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
     }
 
@@ -427,7 +427,7 @@ public final class FolderWriter extends DataWriter {
      * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsArray(FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
+    public void writeOXFolderFieldsAsArray(final FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
         try {
             final FolderFieldWriter[] writers = getFolderFieldWriter(fields);
             jsonwriter.array();
@@ -442,7 +442,7 @@ public final class FolderWriter extends DataWriter {
         } catch (final JSONException e) {
             throw new OXFolderException(OXFolderException.FolderCode.JSON_ERROR, e, e.getMessage());
         } catch (final SQLException e) {
-            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final AbstractOXException e) {
             throw new OXFolderException(e);
         }
@@ -656,7 +656,7 @@ public final class FolderWriter extends DataWriter {
                             } catch (final DBPoolingException e) {
                                 throw new OXException(e);
                             } catch (final SQLException e) {
-                                throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+                                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
                             }
                             jsonwriter.value(ja);
                         }

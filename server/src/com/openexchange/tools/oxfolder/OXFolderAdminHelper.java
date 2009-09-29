@@ -155,7 +155,7 @@ public final class OXFolderAdminHelper {
                         users.add(Integer.valueOf(rs.getInt(pos)));
                     }
                 } catch (final SQLException e) {
-                    throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+                    throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
                 } finally {
                     DBUtils.closeSQLStuff(rs, stmt);
                 }
@@ -203,7 +203,7 @@ public final class OXFolderAdminHelper {
             }
             return false;
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -322,7 +322,7 @@ public final class OXFolderAdminHelper {
                 }
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw new OXException(e);
         } finally {
@@ -348,7 +348,7 @@ public final class OXFolderAdminHelper {
             final int contextMalAdmin = getContextAdminID(cid, con);
             addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -362,7 +362,7 @@ public final class OXFolderAdminHelper {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
@@ -991,7 +991,7 @@ public final class OXFolderAdminHelper {
                 FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
         }
@@ -1019,7 +1019,7 @@ public final class OXFolderAdminHelper {
                 FolderCacheManager.getInstance().removeFolderObject(defaultInfostoreFolderId, ctx);
             }
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
         } catch (final LdapException e) {
@@ -1045,7 +1045,7 @@ public final class OXFolderAdminHelper {
         try {
             stmt = con.prepareStatement(SQL_SELECT_DISPLAY_NAME);
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
         ResultSet rs = null;
         try {
@@ -1057,7 +1057,7 @@ public final class OXFolderAdminHelper {
             }
             return null;
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -1200,7 +1200,7 @@ public final class OXFolderAdminHelper {
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
         } catch (final SQLException e) {
-            throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
