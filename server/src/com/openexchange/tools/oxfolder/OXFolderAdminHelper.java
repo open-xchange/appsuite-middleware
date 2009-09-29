@@ -234,12 +234,13 @@ public final class OXFolderAdminHelper {
     private void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
         final int admin = adminId == null ? getContextAdminID(cid, writeCon) : adminId.intValue();
         final boolean isAdmin = (admin == userId);
+        final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
         if (isAdmin) {
             try {
                 /*
                  * Check if folder has already been created for given context
                  */
-                if (!checkFolderExistence(cid, FolderObject.SYSTEM_LDAP_FOLDER_ID, writeCon)) {
+                if (!checkFolderExistence(cid, globalAddressBookId, writeCon)) {
                     createGlobalAddressBook(cid, admin, writeCon, System.currentTimeMillis());
                 }
             } catch (final SQLException e) {
@@ -253,7 +254,7 @@ public final class OXFolderAdminHelper {
                 writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            stmt.setInt(pos++, globalAddressBookId);
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             final boolean update = rs.next();
@@ -280,7 +281,7 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
                 stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                stmt.setInt(pos++, globalAddressBookId);
                 stmt.setInt(pos++, userId);
                 stmt.executeUpdate();
             } else {
@@ -288,7 +289,7 @@ public final class OXFolderAdminHelper {
                     writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, cid); // cid
-                stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID); // fuid
+                stmt.setInt(pos++, globalAddressBookId); // fuid
                 stmt.setInt(pos++, userId); // permission_id
                 if (enable) {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
@@ -315,13 +316,13 @@ public final class OXFolderAdminHelper {
             if (propagate) {
                 final ContextImpl ctx = new ContextImpl(cid);
                 ctx.setMailadmin(admin);
-                OXFolderSQL.updateLastModified(FolderObject.SYSTEM_LDAP_FOLDER_ID, System.currentTimeMillis(), admin, writeCon, ctx);
+                OXFolderSQL.updateLastModified(globalAddressBookId, System.currentTimeMillis(), admin, writeCon, ctx);
                 /*
                  * Update caches
                  */
                 try {
                     if (FolderCacheManager.isEnabled()) {
-                        FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx);
+                        FolderCacheManager.getInstance().removeFolderObject(globalAddressBookId, ctx);
                     }
                     if (FolderQueryCacheManager.isInitialized()) {
                         FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
