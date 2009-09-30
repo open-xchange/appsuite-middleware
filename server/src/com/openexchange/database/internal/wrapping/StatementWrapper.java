@@ -228,7 +228,6 @@ public class StatementWrapper implements Statement {
 
     @Override
     public String toString() {
-        return null == delegate ? super.toString() : delegate.toString();
+        return delegate.toString();
     }
-
 }

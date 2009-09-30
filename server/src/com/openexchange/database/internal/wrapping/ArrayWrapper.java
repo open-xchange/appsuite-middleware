@@ -113,7 +113,6 @@ public class ArrayWrapper implements Array {
 
     @Override
     public String toString() {
-        return null == delegate ? super.toString() : delegate.toString();
+        return delegate.toString();
     }
-
 }

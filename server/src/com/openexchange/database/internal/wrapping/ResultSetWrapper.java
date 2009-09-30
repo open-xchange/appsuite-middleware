@@ -648,7 +648,6 @@ public class ResultSetWrapper implements ResultSet {
 
     @Override
     public String toString() {
-        return null == delegate ? super.toString() : delegate.toString();
+        return delegate.toString();
     }
-
 }
