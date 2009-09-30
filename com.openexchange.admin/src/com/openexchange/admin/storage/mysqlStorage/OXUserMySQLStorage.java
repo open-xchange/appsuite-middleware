@@ -2006,7 +2006,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setSubscription(user.isSubscription());
             acc.setActiveSync(user.hasActiveSync());
             acc.setUSM(user.hasUSM());
-            acc.setGlobalAddressBook(new OXFolderAdminHelper().isGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, read_ox_con));
+            final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
+            acc.setGlobalAddressBook(adminHelper.isGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, read_ox_con));
+            acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(ctx.getId().intValue(), user_id, read_ox_con));
+
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2327,7 +2330,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
-            new OXFolderAdminHelper().setGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBook(), write_ox_con);
+            final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
+            adminHelper.setGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBook(), write_ox_con);
+            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), user_id, write_ox_con);
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             if (!insert_or_update) {
