@@ -55,9 +55,9 @@ import com.openexchange.push.PushException;
 import com.openexchange.push.PushExceptionCodes;
 
 /**
- * Factory for creating {@link DataException}.
+ * Factory for creating {@link PushException}.
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushExceptionFactory extends Exceptions<PushException> {
 
