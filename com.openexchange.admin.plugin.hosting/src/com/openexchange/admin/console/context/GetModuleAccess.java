@@ -152,6 +152,8 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_GROUP);
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_RESOURCE);
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PASSWORD);
+        columnnames.add(UserAbstraction.OPT_ACCESS_COLLECT_EMAIL_ADDRESSES);
+        columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
         columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
         columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
         columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
