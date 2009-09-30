@@ -400,8 +400,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      */
     public static ObjectName registerRestorerMBean(final ManagementService managementService) {
         try {
-            final ObjectName objectName = getObjectName(GADRestorerMBeanImpl.class.getName(), GADRestorerMBean.GAD_DOMAIN);
-            managementService.registerMBean(objectName, new GADRestorerMBeanImpl());
+            final ObjectName objectName = getObjectName(GABRestorerMBeanImpl.class.getName(), GABRestorerMBean.GAB_DOMAIN);
+            managementService.registerMBean(objectName, new GABRestorerMBeanImpl());
             return objectName;
         } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);

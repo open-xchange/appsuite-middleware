@@ -74,7 +74,7 @@ import com.openexchange.tools.oxfolder.GADRestorerMBeanImpl;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
- * {@link GABRestorerCLT} - Restores default permissions for global address book (GAD).
+ * {@link GABRestorerCLT} - Restores default permissions for global address book (GAB).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
