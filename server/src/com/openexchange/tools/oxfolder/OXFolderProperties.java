@@ -254,7 +254,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                  */
                 final int contextId = getValidContextId();
                 if (-1 != contextId) {
-                    updateGADWritePermission(contextId);
+                    updateGABWritePermission(contextId);
                 }
                 /*
                  * Clear folder cache to ensure removal of all cached instances of global address book
@@ -270,7 +270,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 }
             }
 
-            private void updateGADWritePermission(final int contextId) {
+            private void updateGABWritePermission(final int contextId) {
                 Connection con = null;
                 try {
                     con = Database.get(contextId, true);

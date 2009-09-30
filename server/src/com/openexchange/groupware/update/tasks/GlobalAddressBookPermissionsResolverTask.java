@@ -81,7 +81,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
- * {@link GlobalAddressBookPermissionsResolverTask} - Resolves GAD's group permission to individual user permissions.
+ * {@link GlobalAddressBookPermissionsResolverTask} - Resolves GAB's group permission to individual user permissions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -181,7 +181,7 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
             throw createSQLError(e);
         }
         try {
-            checkGADPermissions4Users(users, contextId, writeCon);
+            checkGABPermissions4Users(users, contextId, writeCon);
             writeCon.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(writeCon);
@@ -207,7 +207,7 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
         }
     }
 
-    private static void checkGADPermissions4Users(final List<Integer> users, final int contextId, final Connection writeCon) throws UpdateException {
+    private static void checkGABPermissions4Users(final List<Integer> users, final int contextId, final Connection writeCon) throws UpdateException {
         boolean found = false;
         final Set<Integer> detectedUsers = new HashSet<Integer>();
         int[] permissions = null;

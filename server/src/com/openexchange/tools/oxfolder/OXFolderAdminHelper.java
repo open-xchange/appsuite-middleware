@@ -743,7 +743,7 @@ public final class OXFolderAdminHelper {
         final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setEntity(mailAdmin);
         adminPermission.setGroupPermission(false);
-        setGADPermissions(adminPermission);
+        setGABPermissions(adminPermission);
         adminPermission.setFolderAdmin(true);
         createSystemFolder(
             FolderObject.SYSTEM_LDAP_FOLDER_ID,
@@ -1184,7 +1184,7 @@ public final class OXFolderAdminHelper {
                 final OCLPermission p = new OCLPermission();
                 p.setEntity(userId);
                 p.setGroupPermission(false);
-                setGADPermissions(p);
+                setGABPermissions(p);
                 p.setFolderAdmin(false);
                 createSinglePermission(globalAddressBookId, p, cid, writeCon);
             }
@@ -1292,7 +1292,7 @@ public final class OXFolderAdminHelper {
      * 
      * @param p The permission instance whose permissions shall be set
      */
-    private static void setGADPermissions(final OCLPermission p) {
+    private static void setGABPermissions(final OCLPermission p) {
         if (OXFolderProperties.isEnableInternalUsersEdit()) {
             p.setAllPermission(
                 OCLPermission.READ_FOLDER,

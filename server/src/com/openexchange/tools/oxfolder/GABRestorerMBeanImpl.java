@@ -50,23 +50,37 @@
 package com.openexchange.tools.oxfolder;
 
 import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import com.openexchange.api2.OXException;
+
 
 /**
- * {@link GADRestorerMBean} - The MBean restore default permissions on global address book folder.
- * 
+ * {@link GABRestorerMBeanImpl}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface GADRestorerMBean {
-
-    public static final String GAD_DOMAIN = "com.openexchange.globaladdressbook";
+public final class GABRestorerMBeanImpl extends StandardMBean implements GABRestorerMBean {
 
     /**
-     * Restores default permissions on global address book folder.
+     * Initializes a new {@link GABRestorerMBeanImpl}.
      * 
-     * @param cid The context ID
-     * @param enable Whether to enable or disable global address book access for each user
-     * @throws MBeanException If invocation fails
+     * @throws NotCompliantMBeanException
      */
-    public void restoreDefaultPermissions(int cid) throws MBeanException;
+    public GABRestorerMBeanImpl() throws NotCompliantMBeanException {
+        super(GABRestorerMBean.class);
+    }
+
+    public void restoreDefaultPermissions(final int cid) throws MBeanException {
+        try {
+            new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, OXFolderProperties.isEnableInternalUsersEdit());
+        } catch (final OXException e) {
+            final String message = e.getMessage();
+            org.apache.commons.logging.LogFactory.getLog(GABRestorerMBeanImpl.class).error(message, e);
+            final Exception wrapMe = new Exception(message);
+            wrapMe.setStackTrace(e.getStackTrace());
+            throw new MBeanException(wrapMe, message);
+        }
+    }
 
 }
