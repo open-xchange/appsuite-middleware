@@ -60,7 +60,8 @@ import com.openexchange.twitter.TwitterExceptionCodes;
 import com.openexchange.twitter.TwitterService;
 
 /**
- * {@link TwitterServiceImpl} - The twitter service implementation.
+ * {@link TwitterServiceImpl} - The twitter service implementation based on <a
+ * href="http://repo1.maven.org/maven2/net/homeip/yusuke/twitter4j/">twitter4j</a>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
