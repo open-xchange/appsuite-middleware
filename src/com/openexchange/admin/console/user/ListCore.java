@@ -250,7 +250,7 @@ public abstract class ListCore extends UserAbstraction {
         notallowedOrReplace.put("Gui_spam_filter_enabled", "GUI_Spam_filter_capabilities_enabled");
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, notallowedOrReplace);
 
-        final ArrayList<String> columnnames = new ArrayList<String>();
+        final ArrayList<String> columnnames = new ArrayList<String>(32);
         for (final MethodAndNames methodandnames : methArrayList) {
             columnnames.add(methodandnames.getName());
         }
