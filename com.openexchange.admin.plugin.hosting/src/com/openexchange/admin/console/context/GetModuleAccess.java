@@ -123,6 +123,8 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.isSubscription()));
         datarow.add(String.valueOf(access.isActiveSync()));
         datarow.add(String.valueOf(access.isUSM()));
+        datarow.add(String.valueOf(access.isGlobalAddressBook()));
+        datarow.add(String.valueOf(access.isPublicFolderEditable()));
         data.add(datarow);
         doCSVOutput(getAccessColums(),data);        
     }
