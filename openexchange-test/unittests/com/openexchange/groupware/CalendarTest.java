@@ -797,15 +797,15 @@ public class CalendarTest extends TestCase {
             deleteAllAppointments();
                         
             SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0), true);
-            Appointment foundA = null;
             boolean found = false;
             while (si.hasNext()) {
                 final Appointment tdao = si.next();
-                foundA = tdao;
-                found = true;
+                if (tdao != null) {
+                    found = true;
+                }
             }
             si.close();
-            assertFalse("Found unexpected Appointment: " + foundA.getTitle(), found);
+            assertFalse("Found unexpected Appointment.", found);
             
             // Magic test
         
