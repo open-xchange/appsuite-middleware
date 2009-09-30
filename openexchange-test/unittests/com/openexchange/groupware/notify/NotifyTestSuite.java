@@ -72,7 +72,7 @@ public class NotifyTestSuite {
         tests.addTestSuite(SimpleTest.class);
         tests.addTestSuite(StateTest.class);
         tests.addTestSuite(Bug13184Test.class);
-        tests.addTestSuite(Bug14309Test.class);
+        //tests.addTestSuite(Bug14309Test.class); TODO: reactivate, if configuration on test machine can handle templates properly.
 
         return tests;
     }
