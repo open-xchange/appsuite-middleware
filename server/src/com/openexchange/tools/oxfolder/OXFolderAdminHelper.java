@@ -136,7 +136,13 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public boolean isPublicFolderEditable(final int cid, final int userId, final Connection readCon) throws OXException {
-        final int admin = getContextAdminID(cid, readCon);
+        final int admin;
+        try {
+            admin = getContextAdminID(cid, readCon);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
         if (admin != userId) {
             return false;
         }
@@ -172,7 +178,13 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public void setPublicFolderEditable(final boolean editable, final int userId, final int cid, final Connection writeCon) throws OXException {
-        final int admin = getContextAdminID(cid, writeCon);
+        final int admin;
+        try {
+            admin = getContextAdminID(cid, writeCon);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        }
         if (userId != admin) {
             return;
         }
