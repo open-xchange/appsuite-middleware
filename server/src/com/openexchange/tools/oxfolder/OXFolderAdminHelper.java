@@ -81,6 +81,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -122,6 +123,152 @@ public final class OXFolderAdminHelper {
      * INSERT INTO oxfolder_specialfolders VALUES ('user', 7); INSERT INTO oxfolder_userfolders VALUES ('projects',
      * 'projects/projects_list_all', null, 'folder/item_projects.png');
      */
+
+    /**
+     * Checks if context's admin has administer permission on public folder(s).
+     * <p>
+     * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
+     * 
+     * @param cid The context ID
+     * @param userId The ID of the user for whom the setting shall be checked
+     * @param readCon A readable connection
+     * @return <code>true</code> if context's admin has administer permission on public folder(s); otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    public boolean isPublicFolderEditable(final int cid, final int userId, final Connection readCon) throws OXException {
+        final int admin = getContextAdminID(cid, readCon);
+        if (admin != userId) {
+            return false;
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt =
+                readCon.prepareStatement("SELECT admin_flag FROM oxfolder_permissions WHERE cid = ? AND permission_id = ? AND fuid IN " + StringCollection.getSqlInString(new int[] { FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID }));
+            stmt.setInt(1, cid);
+            stmt.setInt(2, admin);
+            rs = stmt.executeQuery();
+            boolean editable = true;
+            while (editable && rs.next()) {
+                editable &= (rs.getInt(1) > 0);
+            }
+            return editable;
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Sets if context's admin has administer permission on public folder(s).
+     * <p>
+     * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
+     * 
+     * @param editable <code>true</code> if context's admin has administer permission on public folder(s); otherwise <code>false</code>
+     * @param userId The ID of the user for whom the option shall be set
+     * @param cid The context ID
+     * @param writeCon A writable connection
+     * @throws OXException If an error occurs
+     */
+    public void setPublicFolderEditable(final boolean editable, final int userId, final int cid, final Connection writeCon) throws OXException {
+        final int admin = getContextAdminID(cid, writeCon);
+        if (userId != admin) {
+            return;
+        }
+        final int publicInfostoreFolderId = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID;
+        final int[] ids = { publicInfostoreFolderId };
+        for (final int id : ids) {
+            if (publicInfostoreFolderId == id) {
+                try {
+                    /*
+                     * Check if folder has already been created for given context
+                     */
+                    if (!checkFolderExistence(cid, id, writeCon)) {
+                        createPublicInfostoreFolder(cid, admin, writeCon, System.currentTimeMillis());
+                    }
+                } catch (final SQLException e) {
+                    throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+                }
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt =
+                        writeCon.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, publicInfostoreFolderId);
+                    stmt.setInt(pos++, admin);
+                    rs = stmt.executeQuery();
+                    final boolean update = rs.next();
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    /*
+                     * Insert/Update
+                     */
+                    if (update) {
+                        stmt =
+                            writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+                        pos = 1;
+                        stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS);
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                        stmt.setInt(pos++, editable ? 1 : 0);
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                        stmt.setInt(pos++, cid);
+                        stmt.setInt(pos++, publicInfostoreFolderId);
+                        stmt.setInt(pos++, admin);
+                        stmt.executeUpdate();
+                    } else {
+                        stmt =
+                            writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        pos = 1;
+                        stmt.setInt(pos++, cid); // cid
+                        stmt.setInt(pos++, publicInfostoreFolderId); // fuid
+                        stmt.setInt(pos++, admin); // permission_id
+                        stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
+                        stmt.setInt(pos++, editable ? 1 : 0); // admin_flag
+                        stmt.setInt(pos++, 0); // group_flag
+                        stmt.setInt(pos++, 0); // system
+                        stmt.executeUpdate();
+                    }
+                    DBUtils.closeSQLStuff(stmt);
+                    stmt = null;
+                    /*
+                     * Update last-modified of folder
+                     */
+                    final ContextImpl ctx = new ContextImpl(cid);
+                    ctx.setMailadmin(admin);
+                    OXFolderSQL.updateLastModified(publicInfostoreFolderId, System.currentTimeMillis(), admin, writeCon, ctx);
+                    /*
+                     * Update caches
+                     */
+                    try {
+                        if (FolderCacheManager.isEnabled()) {
+                            FolderCacheManager.getInstance().removeFolderObject(publicInfostoreFolderId, ctx);
+                        }
+                        if (FolderQueryCacheManager.isInitialized()) {
+                            FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
+                        }
+                        if (CalendarCache.isInitialized()) {
+                            CalendarCache.getInstance().invalidateGroup(cid);
+                        }
+                    } catch (final AbstractOXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                } catch (final SQLException e) {
+                    throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+                } catch (final DBPoolingException e) {
+                    throw new OXException(e);
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                }
+            }
+        }
+    }
 
     /**
      * Restores default permissions on global address book folder in given context.
@@ -594,24 +741,9 @@ public final class OXFolderAdminHelper {
         /*
          * Insert system public infostore folder
          */
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
-        systemPermission.setFolderAdmin(false);
-        createSystemFolder(
-            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
-            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME,
-            systemPermission,
-            FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
-            FolderObject.INFOSTORE,
-            true,
-            creatingTime,
-            mailAdmin,
-            true,
-            cid,
-            writeCon);
+        if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
+            createPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
+        }
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("All System folders successfully created for context ").append(cid).toString());
         }
@@ -684,6 +816,39 @@ public final class OXFolderAdminHelper {
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Folder rights for mail admin successfully added for context ").append(cid).toString());
         }
+    }
+
+    /**
+     * Creates the public infostore folder with default permission for all-groups-and-users entity.
+     * 
+     * @param cid The context ID
+     * @param mailAdmin The context admin
+     * @param writeCon A writable connection
+     * @param creatingTime The creation date
+     * @throws SQLException If a SQL error occurs
+     */
+    private void createPublicInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+        final OCLPermission systemPermission = new OCLPermission();
+        systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        systemPermission.setGroupPermission(true);
+        systemPermission.setAllPermission(
+            OCLPermission.CREATE_SUB_FOLDERS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setFolderAdmin(false);
+        createSystemFolder(
+            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
+            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME,
+            systemPermission,
+            FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
+            FolderObject.INFOSTORE,
+            true,
+            creatingTime,
+            mailAdmin,
+            true,
+            cid,
+            writeCon);
     }
 
     /**
