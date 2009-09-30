@@ -50,7 +50,6 @@ package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.user.UserAbstraction;
@@ -84,7 +83,7 @@ public class GetModuleAccess extends ContextAbstraction {
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
             // Fetch access object
-            UserModuleAccess access = oxres.getModuleAccess(ctx, auth);
+            final UserModuleAccess access = oxres.getModuleAccess(ctx, auth);
             
             // output access object
             doCsvOutput(access);   
@@ -96,7 +95,7 @@ public class GetModuleAccess extends ContextAbstraction {
         }
     }
 
-    private void doCsvOutput(UserModuleAccess access) throws InvalidDataException {
+    private void doCsvOutput(final UserModuleAccess access) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         final ArrayList<String> datarow = new ArrayList<String>();
         datarow.add(String.valueOf(access.getCalendar()));
@@ -155,6 +154,8 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
         columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
         columnnames.add(UserAbstraction.OPT_ACCESS_USM);
+        columnnames.add(UserAbstraction.OPT_ACCESS_GAB);
+        columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
         return columnnames;
     }
 
