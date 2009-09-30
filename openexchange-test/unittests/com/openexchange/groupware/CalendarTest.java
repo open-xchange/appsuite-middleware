@@ -797,13 +797,15 @@ public class CalendarTest extends TestCase {
             deleteAllAppointments();
                         
             SearchIterator<Appointment> si = csql.getModifiedAppointmentsInFolder(public_folder_id, cols, new Date(0), true);
+            Appointment foundA = null;
             boolean found = false;
             while (si.hasNext()) {
                 final Appointment tdao = si.next();
+                foundA = tdao;
                 found = true;
             }
             si.close();
-            assertTrue("Got no results out of the public folder", found == false);
+            assertFalse("Found not expected Appointment: " + foundA.getTitle(), found);
             
             // Magic test
         
