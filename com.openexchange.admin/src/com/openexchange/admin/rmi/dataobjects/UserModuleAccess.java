@@ -126,6 +126,7 @@ public class UserModuleAccess implements Serializable {
 
     private boolean GlobalAddressBook = true;
 
+    private boolean PublicFolderEditable = true;
 
     /**
      * Creates a new instance of UserModuleAccess
@@ -210,6 +211,7 @@ public class UserModuleAccess implements Serializable {
         this.ActiveSync = true;
         this.USM = true;
         this.GlobalAddressBook = true;
+        this.PublicFolderEditable = true;
     }
 
     /**
@@ -244,6 +246,7 @@ public class UserModuleAccess implements Serializable {
         this.ActiveSync = false;
         this.USM = false;
         this.GlobalAddressBook = false;
+        this.PublicFolderEditable = false;
     }
 
     public boolean getEditGroup() {
@@ -570,6 +573,14 @@ public class UserModuleAccess implements Serializable {
 
     public void setGlobalAddressBook(final boolean val) {
         this.GlobalAddressBook = val;
+    }
+
+    public boolean isPublicFolderEditable() {
+        return PublicFolderEditable;
+    }
+
+    public void setPublicFolderEditable(final boolean publicFolderEditable) {
+        PublicFolderEditable = publicFolderEditable;
     }
 
     @Override
