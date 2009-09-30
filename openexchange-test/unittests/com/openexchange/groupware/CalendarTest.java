@@ -805,7 +805,7 @@ public class CalendarTest extends TestCase {
                 found = true;
             }
             si.close();
-            assertFalse("Found not expected Appointment: " + foundA.getTitle(), found);
+            assertFalse("Found unexpected Appointment: " + foundA.getTitle(), found);
             
             // Magic test
         
