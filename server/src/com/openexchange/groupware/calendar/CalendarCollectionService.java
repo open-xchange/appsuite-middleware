@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -141,8 +142,9 @@ public interface CalendarCollectionService {
 
     /**
      * If user or shared folder owner is missing in participants it is added.
+     * @throws OXException 
      */
-    public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p);
+    public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException;
 
     public void removeParticipant(final CalendarDataObject cdao, final int uid) throws OXException;
 

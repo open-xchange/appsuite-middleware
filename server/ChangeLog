@@ -1,3 +1,7 @@
+* 2009-09-30 - martin.herfurth@open-xchange.com
+
+ - Bugfix #13226: Change user will not be added to participant list, if he is already member of a participating group.
+
 * 2009-09-28 - martin.herfurth@open-xchange.com
 
  - Bugfix #14357: Fixed yearly pattern with workdays.

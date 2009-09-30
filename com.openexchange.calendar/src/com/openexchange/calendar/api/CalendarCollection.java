@@ -89,6 +89,8 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -113,6 +115,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.settings.SettingException;
@@ -1956,21 +1959,46 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndFillIfUserIsUser(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.Participant)
      */
-    public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) {
+    public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
-            Arrays.sort(check);
-            if (Arrays.binarySearch(check, p) < 0) {
-                final Participant newp[] = new Participant[check.length+1];
-                System.arraycopy(check, 0, newp, 0, check.length);
-                newp[check.length] = p;
-                cdao.setParticipants(newp);
+            try {
+                if (!containsParicipant(check, p, cdao.getContext())) {
+                    final Participant newp[] = new Participant[check.length+1];
+                    System.arraycopy(check, 0, newp, 0, check.length);
+                    newp[check.length] = p;
+                    cdao.setParticipants(newp);
+                }
+            } catch (LdapException e) {
+                throw new OXException(e);
             }
         } else {
             final Participant newp[] = new Participant[1];
             newp[0] = p;
             cdao.setParticipants(newp);
         }
+    }
+    
+    private boolean containsParicipant(Participant[] participants, Participant p, Context ctx) throws LdapException {
+        for (Participant part : participants) {
+            if (part.getType() == p.getType()) {
+                if (part.getIdentifier() == p.getIdentifier()) {
+                    return true;
+                }
+            } else {
+                if (part.getType() == Participant.GROUP) {
+                    GroupStorage groups = GroupStorage.getInstance();
+                    Group group = groups.getGroup(part.getIdentifier(), ctx);
+                    int[] member = group.getMember();
+                    for (int memberId : member) {
+                        if (memberId == p.getIdentifier()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     /* (non-Javadoc)
