@@ -51,6 +51,7 @@ package com.openexchange.calendar.printing.blocks;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.calendar.printing.AbstractDateTest;
@@ -129,20 +130,29 @@ AbstractDateTest {
     }
     
     public void testShouldDetermineMissingDays(){
-        int[] daysInbetween = strategy.getMissingDaysInbetween(THURSDAY(), SUNDAY());
-        assertEquals("Should have two days inbetween", 2, daysInbetween.length);
-        assertEquals("First day inbetween would be Friday", Calendar.FRIDAY, daysInbetween[0]);
-        assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, daysInbetween[1]);
+        Calendar cal = Calendar.getInstance();
+        List<Date> daysInbetween = strategy.getMissingDaysInbetween(THURSDAY(), SUNDAY());
+        assertEquals("Should have two days inbetween", 2, daysInbetween.size());
+        cal.setTime(daysInbetween.get(0));
+        assertEquals("First day inbetween would be Friday", Calendar.FRIDAY, cal.get(Calendar.DAY_OF_WEEK));
+        cal.setTime(daysInbetween.get(1));
+        assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, cal.get(Calendar.DAY_OF_WEEK));
     }
     
     public void testShouldDetermineMissingDaysBetweenTwoWeeks(){
-        int[] daysInbetween = strategy.getMissingDaysInbetween(THURSDAY(), WEDNESDAY_NEXT_WEEK());
-        assertEquals("Should have two days inbetween", 5, daysInbetween.length);
-        assertEquals("First day inbetween would be Friday", Calendar.FRIDAY, daysInbetween[0]);
-        assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, daysInbetween[1]);
-        assertEquals("Third day inbetween would be Sunday", Calendar.SUNDAY, daysInbetween[2]);
-        assertEquals("Fourth day inbetween would be Monday", Calendar.MONDAY, daysInbetween[3]);
-        assertEquals("Fifth day inbetween would be Tuesday", Calendar.TUESDAY, daysInbetween[4]);
+        Calendar cal = Calendar.getInstance();
+        List<Date> daysInbetween = strategy.getMissingDaysInbetween(THURSDAY(), WEDNESDAY_NEXT_WEEK());
+        assertEquals("Should have two days inbetween", 5, daysInbetween.size());
+        cal.setTime(daysInbetween.get(0));
+        assertEquals("First day inbetween would be Friday", Calendar.FRIDAY, cal.get(Calendar.DAY_OF_WEEK));
+        cal.setTime(daysInbetween.get(1));
+        assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, cal.get(Calendar.DAY_OF_WEEK));
+        cal.setTime(daysInbetween.get(2));
+        assertEquals("Third day inbetween would be Sunday", Calendar.SUNDAY, cal.get(Calendar.DAY_OF_WEEK));
+        cal.setTime(daysInbetween.get(3));
+        assertEquals("Fourth day inbetween would be Monday", Calendar.MONDAY, cal.get(Calendar.DAY_OF_WEEK));
+        cal.setTime(daysInbetween.get(4));
+        assertEquals("Fifth day inbetween would be Tuesday", Calendar.TUESDAY, cal.get(Calendar.DAY_OF_WEEK));
     }
     
     public void testShouldGiveDayInfo(){
@@ -161,7 +171,7 @@ AbstractDateTest {
         int numberOfDays = 0;
         for(CPFormattingInfomation info: partitions.getFormattingInformation()){
             if(info.getType() == 10){
-                days.add (Integer.valueOf ( (String) info.getAdditionalInformation() ) );
+                days.add ( (Integer) info.getAdditionalInformation() );
                 numberOfDays++;
             }
         }
@@ -190,7 +200,7 @@ AbstractDateTest {
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[]{app1, app2}));
         
         boolean foundDayname = false, foundDaybreak = false;
-        String dayname = null;
+        Integer dayname = null;
         int encounters = 0;
         for(CPFormattingInfomation info: partitions.getFormattingInformation()){
             if(info.getType() == 0){
@@ -202,7 +212,7 @@ AbstractDateTest {
                 if(foundDayname)
                     fail("Encountered dayname info twice without daybreak info inbetween");
                 foundDayname = true;
-                dayname = (String) info.getAdditionalInformation();
+                dayname = (Integer) info.getAdditionalInformation();
             }
             if(foundDayname){
                 assertTrue("Did not find daybreak before day #"+dayname, foundDaybreak);
