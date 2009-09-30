@@ -210,11 +210,11 @@ public final class OXFolderAdminHelper {
                         stmt =
                             writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
                         pos = 1;
-                        stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS);
-                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                        stmt.setInt(pos++, editable ? 1 : 0);
-                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                        stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
+                        stmt.setInt(pos++, editable ? 1 : 0); // admin_flag
+                        stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                         stmt.setInt(pos++, cid);
                         stmt.setInt(pos++, publicInfostoreFolderId);
                         stmt.setInt(pos++, admin);
