@@ -130,7 +130,7 @@ public class GetModuleAccess extends ContextAbstraction {
     }
 
     private static ArrayList<String> getAccessColums() {
-        final ArrayList<String> columnnames = new ArrayList<String>();
+        final ArrayList<String> columnnames = new ArrayList<String>(32);
         columnnames.add(UserAbstraction.OPT_ACCESS_CALENDAR);
         columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
         columnnames.add(UserAbstraction.OPT_ACCESS_DELEGATE_TASKS);
