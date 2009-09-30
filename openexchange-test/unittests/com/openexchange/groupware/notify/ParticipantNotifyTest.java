@@ -139,7 +139,7 @@ public class ParticipantNotifyTest extends TestCase {
 	public static final void assertNames(final Iterable<String> names, final String... expected) {
 		final Set<String> expectSet = new HashSet<String>(Arrays.asList(expected));
 		for(final String name : names) {
-			assertTrue(names.toString(), expectSet.remove(name));
+			assertTrue(name + "is not in " + expectSet.toString(), expectSet.remove(name));
 		}
         assertTrue("Didn't find " + expectSet, expectSet.isEmpty());
     }
