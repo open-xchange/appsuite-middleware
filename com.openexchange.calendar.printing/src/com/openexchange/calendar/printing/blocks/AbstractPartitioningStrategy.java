@@ -49,10 +49,10 @@
 
 package com.openexchange.calendar.printing.blocks;
 
-import static com.openexchange.java.Autoboxing.I2i;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
 
 /**
@@ -124,17 +124,18 @@ public class AbstractPartitioningStrategy {
         return !(calendarDayOfWeek == Calendar.SATURDAY || calendarDayOfWeek  == Calendar.SUNDAY);
     }
     
-    protected int[] getMissingDaysInbetween(Date first, Date second) {
+    protected List<Date> getMissingDaysInbetween(Date first, Date second) {
         long length = (second.getTime() - first.getTime()) /1000/60/60/24 - 1;
-        LinkedList<Integer> days = new LinkedList<Integer>();
+        LinkedList<Date> days = new LinkedList<Date>();
         Calendar cal = getCalendar();
         cal.setTime(first);
-        int start = cal.get(Calendar.DAY_OF_WEEK);
+        
         for(int i = 0; i < length; i++){
-            days.add( Integer.valueOf((start+i) % 7 + 1));
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+            days.add( cal.getTime() );
         }
         
-        return I2i(days);
+        return days;
     }
     
     protected boolean isMissingDaysInbetween(Date first, Date second) {
