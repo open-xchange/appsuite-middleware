@@ -28,11 +28,11 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
 
-    <!-- Third party libs 
+    <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
         <include name="${lib.dir}/*.jar"/>
         <exclude name="CVS"/>
-    </fileset> -->
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -40,7 +40,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
-    	<!-- <fileset refid="3rdpartyjars"/> -->
+    	<fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
