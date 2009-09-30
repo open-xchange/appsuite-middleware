@@ -30,5 +30,5 @@ CLASSPATH="-classpath $OXBUNDLES/com.openexchange.global.jar:$OXBUNDLES/com.open
 pushd $OXPREFIX
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.tools.oxfolder.console.GADRestorerCLT $@
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.tools.oxfolder.console.GABRestorerCLT $@
 

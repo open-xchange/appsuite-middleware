@@ -74,11 +74,11 @@ import com.openexchange.tools.oxfolder.GADRestorerMBeanImpl;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
- * {@link GADRestorerCLT} - Restores default permissions for global address book (GAD).
+ * {@link GABRestorerCLT} - Restores default permissions for global address book (GAD).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GADRestorerCLT {
+public class GABRestorerCLT {
 
     private static final Options toolkitOptions;
 
@@ -93,13 +93,13 @@ public class GADRestorerCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("restoregaddefaults", toolkitOptions);
+        helpFormatter.printHelp("restoregabdefaults", toolkitOptions);
     }
 
     /**
-     * Initializes a new {@link GADRestorerCLT}.
+     * Initializes a new {@link GABRestorerCLT}.
      */
-    private GADRestorerCLT() {
+    private GABRestorerCLT() {
         super();
     }
 
@@ -175,7 +175,7 @@ public class GADRestorerCLT {
 
             } catch (final MalformedObjectNameException e) {
                 // Cannot occur
-                org.apache.commons.logging.LogFactory.getLog(GADRestorerCLT.class).error(e.getMessage(), e);
+                org.apache.commons.logging.LogFactory.getLog(GABRestorerCLT.class).error(e.getMessage(), e);
             } finally {
                 jmxConnector.close();
             }
