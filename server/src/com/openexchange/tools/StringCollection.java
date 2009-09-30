@@ -311,13 +311,10 @@ public final class StringCollection {
         }
         final StringBuilder sb = new StringBuilder(arr.length * 5);
         sb.append('(');
-        for (int a = 0; a < arr.length; a++) {
-            if (a > 0) {
-                sb.append(',');
-                sb.append(arr[a]);
-            } else {
-                sb.append(arr[a]);
-            }
+        sb.append(arr[0]);
+        for (int a = 1; a < arr.length; a++) {
+            sb.append(',');
+            sb.append(arr[a]);
         }
         sb.append(')');
         return sb.toString();
