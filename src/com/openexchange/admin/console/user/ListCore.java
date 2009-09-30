@@ -286,7 +286,7 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
             columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
-            columnnames.add(UserAbstraction.OPT_ACCESS_GAD);
+            columnnames.add(UserAbstraction.OPT_ACCESS_GAB);
 
         }
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
