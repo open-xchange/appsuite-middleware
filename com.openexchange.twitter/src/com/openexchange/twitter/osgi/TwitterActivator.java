@@ -53,11 +53,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.twitter.TwitterException;
+import com.openexchange.twitter.TwitterService;
 import com.openexchange.twitter.exception.TwitterExceptionFactory;
+import com.openexchange.twitter.internal.TwitterServiceImpl;
 
 /**
  * {@link TwitterActivator} - The activator for twitter bundle.
@@ -70,6 +73,8 @@ public final class TwitterActivator implements BundleActivator {
 
     private List<ServiceTracker> trackers;
 
+    private List<ServiceRegistration> registrations;
+
     /**
      * Initializes a new {@link TwitterActivator}.
      */
@@ -80,6 +85,9 @@ public final class TwitterActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class);
         try {
+            if (log.isInfoEnabled()) {
+                log.info("starting bundle: com.openexchange.twitter");
+            }
             /*
              * Register component
              */
@@ -98,6 +106,11 @@ public final class TwitterActivator implements BundleActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
+            /*
+             * Register
+             */
+            registrations = new ArrayList<ServiceRegistration>(1);
+            registrations.add(context.registerService(TwitterService.class.getName(), new TwitterServiceImpl(), null));
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.twitter: " + e.getMessage(), e);
             throw e;
@@ -107,6 +120,18 @@ public final class TwitterActivator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
         final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class);
         try {
+            if (log.isInfoEnabled()) {
+                log.info("stopping bundle: com.openexchange.twitter");
+            }
+            /*
+             * Unregister
+             */
+            if (null != registrations) {
+                for (final ServiceRegistration registration : registrations) {
+                    registration.unregister();
+                }
+                registrations = null;
+            }
             /*
              * Close trackers
              */
