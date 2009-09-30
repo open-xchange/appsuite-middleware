@@ -312,9 +312,10 @@ public class MIMEMessageFiller {
          */
         if (mail.containsFrom()) {
             InternetAddress sender = null;
-            if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+            final String sendAddr = usm.getSendAddr();
+            if (sendAddr != null && sendAddr.length() > 0) {
                 try {
-                    sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                    sender = new QuotedInternetAddress(sendAddr, true);
                 } catch (final AddressException e) {
                     LOG.error("Default send address cannot be parsed", e);
                 }
