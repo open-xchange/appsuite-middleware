@@ -139,7 +139,7 @@ public interface TwitterAccess {
     public DirectMessage sendDirectMessage(String id, String text) throws TwitterException;
 
     /**
-     * Updates the user's status. The text will be trimmed if the length of the text is exceeding 160 characters.
+     * Updates the user's status. The text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
      * 
@@ -150,7 +150,7 @@ public interface TwitterAccess {
     public Status updateStatus(String status) throws TwitterException;
 
     /**
-     * Updates the user's status. The text will be trimmed if the length of the text is exceeding 160 characters.
+     * Updates the user's status. The text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
      * 
