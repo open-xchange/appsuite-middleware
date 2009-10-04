@@ -257,7 +257,7 @@ public final class MIMEMessageUtility {
      * @param htmlContent The HTML content
      * @return <code>true</code> if given HTML content contains inlined images; otherwise <code>false</code>
      */
-    public static boolean hasEmbeddedImages(final String htmlContent) {
+    public static boolean hasEmbeddedImages(final CharSequence htmlContent) {
         return PATTERN_EMBD_IMG.matcher(htmlContent).find() || PATTERN_EMBD_IMG_ALT.matcher(htmlContent).find();
     }
 
