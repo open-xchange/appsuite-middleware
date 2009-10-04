@@ -58,7 +58,7 @@ package com.openexchange.twitter;
 public interface TwitterService {
 
     /**
-     * Gets the twitter access instance for the authenticating user
+     * Gets the twitter access instance for the authenticating user.
      * 
      * @param twitterId The twitter id
      * @param password The twitter password
