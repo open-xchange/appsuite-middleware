@@ -267,7 +267,7 @@ public final class MIMEMessageUtility {
      * @param htmlContent The HTML content
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
-    public static List<String> getContentIDs(final String htmlContent) {
+    public static List<String> getContentIDs(final CharSequence htmlContent) {
         final List<String> retval = new ArrayList<String>();
         Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
         while (m.find()) {
