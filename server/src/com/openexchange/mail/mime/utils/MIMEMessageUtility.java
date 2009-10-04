@@ -318,7 +318,7 @@ public final class MIMEMessageUtility {
      * @param session The user session
      * @return <code>true</code> if given HTML content contains references to local image files; otherwise <code>false</code>
      */
-    public static boolean hasReferencedLocalImages(final String htmlContent, final Session session) {
+    public static boolean hasReferencedLocalImages(final CharSequence htmlContent, final Session session) {
         final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
         if (m.find()) {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
