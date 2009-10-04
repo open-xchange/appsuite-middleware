@@ -49,14 +49,7 @@
 
 package com.openexchange.twitter.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import twitter4j.Twitter;
-import com.openexchange.twitter.DirectMessage;
-import com.openexchange.twitter.Paging;
-import com.openexchange.twitter.Status;
-import com.openexchange.twitter.TwitterException;
-import com.openexchange.twitter.TwitterExceptionCodes;
+import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterService;
 
 /**
@@ -74,115 +67,12 @@ public final class TwitterServiceImpl implements TwitterService {
         super();
     }
 
-    public List<DirectMessage> getDirectMessages(final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            final List<twitter4j.DirectMessage> l = twitter.getDirectMessages();
-
-            final List<DirectMessage> ret = new ArrayList<DirectMessage>(l.size());
-            for (final twitter4j.DirectMessage dm : l) {
-                ret.add(new DirectMessageImpl(dm));
-            }
-            return ret;
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+    public TwitterAccess getTwitterAccess(final String twitterId, final String password) {
+        return new TwitterAccessImpl(new twitter4j.Twitter(twitterId, password));
     }
 
-    public List<DirectMessage> getDirectMessages(final Paging paging, final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            final List<twitter4j.DirectMessage> l =
-                twitter.getDirectMessages(new twitter4j.Paging(paging.getPage(), paging.getCount(), paging.getSinceId(), paging.getMaxId()));
-
-            final List<DirectMessage> ret = new ArrayList<DirectMessage>(l.size());
-            for (final twitter4j.DirectMessage dm : l) {
-                ret.add(new DirectMessageImpl(dm));
-            }
-            return ret;
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public List<Status> getFriendsTimeline(final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            final List<twitter4j.Status> l = twitter.getFriendsTimeline();
-
-            final List<Status> ret = new ArrayList<Status>(l.size());
-            for (final twitter4j.Status status : l) {
-                ret.add(new StatusImpl(status));
-            }
-            return ret;
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public List<Status> getFriendsTimeline(final Paging paging, final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            final List<twitter4j.Status> l =
-                twitter.getFriendsTimeline(new twitter4j.Paging(paging.getPage(), paging.getCount(), paging.getSinceId(), paging.getMaxId()));
-
-            final List<Status> ret = new ArrayList<Status>(l.size());
-            for (final twitter4j.Status status : l) {
-                ret.add(new StatusImpl(status));
-            }
-            return ret;
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public List<Status> getHomeTimeline(final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            final List<twitter4j.Status> l = twitter.getHomeTimeline();
-
-            final List<Status> ret = new ArrayList<Status>(l.size());
-            for (final twitter4j.Status status : l) {
-                ret.add(new StatusImpl(status));
-            }
-            return ret;
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public List<Status> getHomeTimeline(final Paging paging, final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            final List<twitter4j.Status> l =
-                twitter.getHomeTimeline(new twitter4j.Paging(paging.getPage(), paging.getCount(), paging.getSinceId(), paging.getMaxId()));
-
-            final List<Status> ret = new ArrayList<Status>(l.size());
-            for (final twitter4j.Status status : l) {
-                ret.add(new StatusImpl(status));
-            }
-            return ret;
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public DirectMessage sendDirectMessage(final String id, final String text, final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            return new DirectMessageImpl(twitter.sendDirectMessage(id, text));
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    public Status updateStatus(final String status, final String twitterId, final String password) throws TwitterException {
-        final Twitter twitter = new Twitter(twitterId, password);
-        try {
-            return new StatusImpl(twitter.updateStatus(status));
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+    public TwitterAccess getUnauthenticatedTwitterAccess() {
+        return new TwitterAccessImpl(new twitter4j.Twitter());
     }
 
 }

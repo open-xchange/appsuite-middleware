@@ -49,7 +49,6 @@
 
 package com.openexchange.twitter;
 
-import java.util.List;
 
 /**
  * {@link TwitterService} - The <a href="http://twitter.com/">twitter</a> service.
@@ -59,109 +58,19 @@ import java.util.List;
 public interface TwitterService {
 
     /**
-     * Gets the 20 most recent statuses posted in the last 24 hours from the authenticating user and that user's friends. It's also possible
-     * to request another user's friends_timeline via the id parameter below.
-     * <p>
-     * This method calls <a href="http://twitter.com/statuses/friends_timeline">http://twitter.com/statuses/friends_timeline</a>
+     * Gets the twitter access instance for the authenticating user
      * 
      * @param twitterId The twitter id
      * @param password The twitter password
-     * @return A list of the friends' time line
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     * @return The authenticated twitter access
      */
-    public List<Status> getFriendsTimeline(String twitterId, String password) throws TwitterException;
+    public TwitterAccess getTwitterAccess(String twitterId, String password);
 
     /**
-     * Returns the 20 most recent statuses posted in the last 24 hours from the specified user id.
-     * <p>
-     * This method calls <a href="http://twitter.com/statuses/friends_timeline">http://twitter.com/statuses/friends_timeline</a>
+     * Gets an unauthenticated twitter access instance.
      * 
-     * @param paging The controls pagination
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return A list of the friends' time line
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     * @return An unauthenticated twitter access
      */
-    public List<Status> getFriendsTimeline(Paging paging, String twitterId, String password) throws TwitterException;
-
-    /**
-     * Returns the 20 most recent statuses, including re-tweets, posted by the authenticating user and that user's friends. This is the
-     * equivalent of /timeline/home on the Web.
-     * <p>
-     * This method calls <a href="http://twitter.com/statuses/home_timeline">http://twitter.com/statuses/home_timeline</a>
-     * 
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return A list of the home time line
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
-     */
-    public List<Status> getHomeTimeline(String twitterId, String password) throws TwitterException;
-
-    /**
-     * Returns the 20 most recent statuses, including re-tweets, posted by the authenticating user and that user's friends. This is the
-     * equivalent of /timeline/home on the Web.
-     * <p>
-     * This method calls <a href="http://twitter.com/statuses/home_timeline">http://twitter.com/statuses/home_timeline</a>
-     * 
-     * @param paging The controls pagination
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return A list of the home time line
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
-     */
-    public List<Status> getHomeTimeline(Paging paging, String twitterId, String password) throws TwitterException;
-
-    /**
-     * Gets a list of the direct messages sent to the authenticating user.
-     * <p>
-     * This method calls <a href="http://twitter.com/direct_messages">http://twitter.com/direct_messages</a>
-     * 
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return A list of direct messages
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
-     */
-    public List<DirectMessage> getDirectMessages(String twitterId, String password) throws TwitterException;
-
-    /**
-     * Gets a list of the direct messages sent to the authenticating user.
-     * <p>
-     * This method calls <a href="http://twitter.com/direct_messages">http://twitter.com/direct_messages</a>
-     * 
-     * @param paging The controls pagination
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return A list of direct messages
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
-     */
-    public List<DirectMessage> getDirectMessages(Paging paging, String twitterId, String password) throws TwitterException;
-
-    /**
-     * Sends a new direct message to the specified user from the authenticating user. Requires both the user and text parameters below. The
-     * text will be trimmed if the length of the text is exceeding 140 characters.
-     * <p>
-     * This method calls <a href="http://twitter.com/direct_messages/new">http://twitter.com/direct_messages/new</a>
-     * 
-     * @param id The ID or screen name of the user to whom send the direct message
-     * @param text The text of the message to send
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return The direct message sent to recipient
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
-     */
-    public DirectMessage sendDirectMessage(String id, String text, String twitterId, String password) throws TwitterException;
-
-    /**
-     * Updates the user's status. The text will be trimmed if the length of the text is exceeding 160 characters.
-     * <p>
-     * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
-     * 
-     * @param status The text of your status update
-     * @param twitterId The twitter id
-     * @param password The twitter password
-     * @return The latest status
-     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
-     */
-    public Status updateStatus(String status, String twitterId, String password) throws TwitterException;
+    public TwitterAccess getUnauthenticatedTwitterAccess();
 
 }
