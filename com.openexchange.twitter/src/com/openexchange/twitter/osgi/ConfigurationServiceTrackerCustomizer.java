@@ -57,7 +57,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.twitter.internal.TwitterConfiguration;
 
 /**
- * {@link ConfigurationServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for {@link ManagementService}.
+ * {@link ConfigurationServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for {@link ConfigurationService}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
