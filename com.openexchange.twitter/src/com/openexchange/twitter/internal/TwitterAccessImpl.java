@@ -190,4 +190,12 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    public Status updateStatus(final String status, final long inReplyToStatusId) throws TwitterException {
+        try {
+            return new StatusImpl(twitter4jTwitter.updateStatus(status, inReplyToStatusId));
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
 }

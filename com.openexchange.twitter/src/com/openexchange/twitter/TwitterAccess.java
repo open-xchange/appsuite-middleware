@@ -149,4 +149,18 @@ public interface TwitterAccess {
      */
     public Status updateStatus(String status) throws TwitterException;
 
+    /**
+     * Updates the user's status. The text will be trimmed if the length of the text is exceeding 160 characters.
+     * <p>
+     * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
+     * 
+     * @param status The text of your status update
+     * @param inReplyToStatusId The ID of an existing status that the status to be posted is in reply to. This implicitly sets the
+     *            in_reply_to_user_id attribute of the resulting status to the user ID of the message being replied to. Invalid/missing
+     *            status IDs will be ignored.
+     * @return The latest status
+     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     */
+    public Status updateStatus(String status, long inReplyToStatusId) throws TwitterException;
+
 }
