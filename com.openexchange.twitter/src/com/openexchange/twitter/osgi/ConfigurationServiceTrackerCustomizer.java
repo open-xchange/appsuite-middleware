@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.twitter.internal.TwitterConfiguration;
 
 /**
  * {@link ConfigurationServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for {@link ManagementService}.
@@ -84,6 +85,10 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
          * Add to registry
          */
         getServiceRegistry().addService(ConfigurationService.class, service);
+        /*
+         * ... and configure
+         */
+        TwitterConfiguration.configure((ConfigurationService) service);
         return service;
     }
 
