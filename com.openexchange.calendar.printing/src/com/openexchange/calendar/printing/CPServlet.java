@@ -62,7 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
-import com.openexchange.calendar.printing.blocks.CPFormattingInfomation;
+import com.openexchange.calendar.printing.blocks.CPFormattingInformation;
 import com.openexchange.calendar.printing.blocks.CPPartition;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -172,7 +172,7 @@ public class CPServlet extends PermissionServlet {
             for(CPAppointment app : partitions.getAppointments()){
                 debuggingItems.add(app.getTitle());
             }
-            for(CPFormattingInfomation info: partitions.getFormattingInformation()){
+            for(CPFormattingInformation info: partitions.getFormattingInformation()){
                 debuggingItems.add(info.toString());
             }
             
