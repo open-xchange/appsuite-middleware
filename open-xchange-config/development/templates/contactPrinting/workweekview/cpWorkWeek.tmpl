@@ -1,131 +1,119 @@
+<#macro timezone a_date>
+                  <span class="date timezone">${a_date?string("zzz")}</span>
+</#macro>
+
 <#macro date a_date>
-						<span class="date">${a_date?string("yyyy-MM-dd")}</span>
+                  <span class="date">${a_date?string("yyyy-MM-dd")}</span>
 </#macro>
 
 <#macro datetime a_date>
-						<span class="date">${a_date?string("yyyy-MM-dd, HH:mm zzz")}</span>
+                  <span class="date time">${a_date?string("yyyy-MM-dd, HH:mm")}</span>
 </#macro>
 
 <#macro time a_date>
-						<span class="date">${a_date?string("HH:mm")}</span>
+                  <span class="time">${a_date?string("HH:mm")}</span>
 </#macro>
 
-<#macro insert_breaks formattinginfo appointment_index> 
-	<#list formattinginfo as info>
-		<#if info.position == appointment_index>
-		
-			<#if info.type == 0>
-				<#if info.position != 0>
-			</td>
-				</#if>
-			<td class="day">
-				<h3 class="dayDate">
-					<@date info.additionalInformation />
-				</h3>
-			</#if>
-			
-			<#if info.type == 1>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="5">
-				<h2 class="weekNumer">
-					Calendar week ${info.additionalInformation}
-				</h2>
-			</td>
-		</tr>
-		<tr>
-			<td class="day">
-			</#if>
-		</#if>
-	</#list>
+<#macro do_breaks formattinginfo appointment_index> 
+   <#list formattinginfo as info>
+
+      <#if info.position == appointment_index && info.type == 0 && info_index != 0>
+         </td>
+      </#if>
+   	  <#if info.position == appointment_index && info.type == 1 && info_index != 0>
+   	  </tr>
+   	  
+   	  </#if>
+      <#if info.position == appointment_index && info.type == 1>
+      <tr>
+         <td colspan="5">
+            <h2 class="weekNumber">
+               Calendar week ${info.additionalInformation}
+            </h2>
+         </td>
+      </tr>
+      <tr>
+      </#if>
+      <#if info.position == appointment_index && info.type == 0>
+         <td class="day">
+            <h3 class="dayDate">
+               <@date info.additionalInformation />
+            </h3>
+      </#if>
+   </#list>
 </#macro>
 
-<#macro insert_day_info info> 
-	<#if info.type == 10>
-		<th>
-		<#if info.additionalInformation == "2">
-			Monday
-		<#elseif info.additionalInformation == "3">
-			Tuesday
-		<#elseif info.additionalInformation == "4">
-			Wednesday
-		<#elseif info.additionalInformation == "5">
-			Thursday
-		<#elseif info.additionalInformation == "6">
-			Friday
-		</#if>
-		</th>
-	</#if>
-</#macro>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
 <head>
-	<title>OX Calendar PrintView</title>
-	<style type="text/css">
-		table, tr {
-			width: 100%;
-		}
-		th {
-			width:20%;
-		}
-		.duration {
-			font-size: 80%;
-			width: 25%;
-		}
-		.title {
-			width: 65%;
-		}
-		.appointment {
-		}
-		td.day {
-			vertical-align: top;
-		}
-	</style>
+   <title>OX Calendar PrintView</title>
+   <style type="text/css">
+      table, tr {
+         width: 100%;
+      }
+      th {
+         width:20%;
+      }
+      .duration {
+         font-size: 80%;
+         width: 25%;
+      }
+      .title {
+         width: 65%;
+      }
+      .appointment {
+      }
+      td h2, td h3 {
+         text-align: centered;
+      }
+      td.day {
+         vertical-align: top;
+      }
+      h1,h2,h3,h4 {
+      	font-size: 1.1em;
+      	text-align: center;
+      }
+   </style>
 </head>
 
 <body>
-	<h1>
-		<@datetime start />
-		- 
-		<@datetime end />
-	</h1>
-	
-	<table border="1">
-		<tr>
-			<#list formattinginfo as info>
-				<@insert_day_info info />
-			</#list>
-		</tr>
-		<tr>
-		<#list appointments as appointment>
-		
-			<@insert_breaks formattinginfo appointment_index />
-			<table class="appointment">
-				<tr>
-					<td class="duration">
-						<@time appointment.startDate />
-						-<br />
-						<@time appointment.endDate />
-					</td>
-					<td class="info">
-						${appointment.title}<br />
-						<@date appointment.startDate />
-					</td>
-				</tr>
-			</table>
-		</#list>
-		</tr>
-	</table>
-	
-	<h1>Debugging data:</h1>
-	<ul>
-	<#list debuggingItems as debugItem>
-		<li>${debugItem}</li>
-	</#list>
-	</ul>
+   <h1>
+      Workweek: 
+      <@date start />
+      - 
+      <@date end />
+      <@timezone start />
+   </h1>
+   
+   <table border="1">
+      <tr>
+         <th>Monday</th>
+         <th>Tuesday</th>
+         <th>Wednesday</th>
+         <th>Thursday</th>
+         <th>Friday</th>
+      </tr>
+      
+      <#list appointments as appointment>
+         <@do_breaks formattinginfo appointment_index />
+            <table class="appointment">
+               <tr>
+                  <td class="duration">
+                     <@time appointment.startDate />
+                     -<br />
+                     <@time appointment.endDate />
+                  </td>
+                  <td class="info">
+                     ${appointment.title}<br />
+                     <@date appointment.startDate />
+                  </td>
+               </tr>
+            </table>
+      </#list>
+      </tr>
+   </table>
 </body>
 </html>
