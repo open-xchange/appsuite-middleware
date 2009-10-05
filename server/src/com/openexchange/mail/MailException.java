@@ -364,7 +364,11 @@ public class MailException extends AbstractOXException {
         /**
          * Mail folder must not be deleted: %1$s.
          */
-        FOLDER_DELETION_DENIED("Mail folder must not be deleted: %1$s.", Category.CODE_ERROR, 69);
+        FOLDER_DELETION_DENIED("Mail folder must not be deleted: %1$s.", Category.CODE_ERROR, 69),
+        /**
+         * No delete access on mail folder: %1$s.
+         */
+        NO_DELETE_ACCESS("No delete access on mail folder: %1$s.", Category.PERMISSION, 70);
 
         private final String message;
 
