@@ -372,7 +372,11 @@ public class MailException extends AbstractOXException {
         /**
          * Mail folder must not be moved: %1$s.
          */
-        FOLDER_MOVE_DENIED("Mail folder must not be moved: %1$s.", Category.CODE_ERROR, 71);
+        FOLDER_MOVE_DENIED("Mail folder must not be moved: %1$s.", Category.CODE_ERROR, 71),
+        /**
+         * Mail folder must not be updated: %1$s.
+         */
+        FOLDER_UPDATE_DENIED("Mail folder must not be updated: %1$s.", Category.CODE_ERROR, 72);
 
         private final String message;
 
