@@ -73,20 +73,12 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
     private static final String COLUMN_TRANSPORT = "contactCollectOnMailTransport";
 
     private static final String COLUMN_ACCESS = "contactCollectOnMailAccess";
+    
+    private static final String COLUMN_DEFINITION_TRANSPORT = COLUMN_TRANSPORT + " BOOL DEFAULT TRUE";
+    
+    private static final String COLUMN_DEFINITION_ACCESS = COLUMN_ACCESS + " BOOL DEFAULT TRUE";
 
-    private static final String ALTER_TRANSPORT = "ALTER TABLE " + TABLE + " ADD " + COLUMN_TRANSPORT + " BOOL DEFAULT TRUE";
-
-    private static final String ALTER_ACCESS = "ALTER TABLE " + TABLE + " ADD " + COLUMN_ACCESS + " BOOL DEFAULT TRUE";
-
-    private static final Map<String, String> STATEMENTS = new HashMap<String, String>() {
-
-        private static final long serialVersionUID = 1L;
-
-        {
-            put(COLUMN_TRANSPORT, ALTER_TRANSPORT);
-            put(COLUMN_ACCESS, ALTER_ACCESS);
-        }
-    };
+    private static final String ALTER_TABLE = "ALTER TABLE " + TABLE + " ADD (";
 
     public int addedWithVersion() {
         return 92;
@@ -100,14 +92,31 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
         Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            for (String column : STATEMENTS.keySet()) {
-                if (columnExists(con, TABLE, column)) {
-                    continue;
-                }
-                PreparedStatement stmt = con.prepareStatement(STATEMENTS.get(column));
-                stmt.execute();
-                stmt.close();
+            
+            StringBuilder sb = new StringBuilder(ALTER_TABLE);
+            
+            if (!columnExists(con, TABLE, COLUMN_TRANSPORT)) {
+                sb.append(COLUMN_DEFINITION_TRANSPORT);
+                sb.append(", ");
             }
+            
+            if (!columnExists(con, TABLE, COLUMN_ACCESS)) {
+                sb.append(COLUMN_DEFINITION_ACCESS);
+                sb.append(", ");
+            }
+            
+            String stmt = sb.toString();
+            
+            if (stmt.equals(ALTER_TABLE)) {
+                return;
+            }
+            
+            stmt = stmt.substring(0, stmt.length() - 2);
+            stmt = stmt + ")";
+            
+            PreparedStatement pstmt = con.prepareStatement(stmt);
+            pstmt.execute();
+            pstmt.close();
             con.commit();
         } catch (SQLException e) {
             rollback(con);
