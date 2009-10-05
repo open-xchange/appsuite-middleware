@@ -360,7 +360,11 @@ public class MailException extends AbstractOXException {
         /**
          * In order to accomplish the search, %1$d or more characters are required.
          */
-        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, 68);
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, 68),
+        /**
+         * Mail folder must not be deleted: %1$s.
+         */
+        FOLDER_DELETION_DENIED("Mail folder must not be deleted: %1$s.", Category.CODE_ERROR, 69);
 
         private final String message;
 
