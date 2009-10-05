@@ -142,10 +142,14 @@ public class AbstractPartitioningStrategy {
         return ((second.getTime() - first.getTime()) /1000/60/60/24) > 1;
     }
 
-    protected int getStartingDayOfWorkWeek() {
+    protected int getFirstDayOfWorkWeek() {
         // TODO make less European
         return Calendar.MONDAY;
     }
 
 
+    protected int getLastDayOfWorkWeek() {
+        // TODO make less European
+        return Calendar.FRIDAY;
+    }
 }
