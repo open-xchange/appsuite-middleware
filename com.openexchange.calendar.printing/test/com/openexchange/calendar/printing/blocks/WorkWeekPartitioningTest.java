@@ -288,12 +288,4 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
     public void testShouldInsertWeekbreakWhenFillingUpMissingDays(){
         
     }
-    
-    public void testShouldFillFromBeginningOfWeek(){
-        
-    }
-    
-    public void testShouldFillUpToEndOfWeek(){
-        
-    }
 }
