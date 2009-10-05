@@ -53,7 +53,7 @@ package com.openexchange.calendar.printing.blocks;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CPFormattingInfomation {
+public class CPFormattingInformation {
 
     private int position;
 
@@ -86,23 +86,61 @@ public class CPFormattingInfomation {
     }
 
     
-    public CPFormattingInfomation() {
+    public CPFormattingInformation() {
         super();
     }
 
-    public CPFormattingInfomation(int position, int type) {
+    public CPFormattingInformation(int position, int type) {
         this.position = position;
         this.type = type;
     }
 
-    public CPFormattingInfomation(int position, int type, Object additional) {
+    public CPFormattingInformation(int position, int type, Object additional) {
         this(position,type);
         setAdditionalInformation(additional);
     }
 
     @Override
     public String toString() {
-        return getPosition() + "/" + getType() + ": " + getAdditionalInformation(); 
+        return getPosition() + "/" + getType(); 
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((additionalInformation == null) ? 0 : additionalInformation.hashCode());
+        result = prime * result + position;
+        result = prime * result + type;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        CPFormattingInformation other = (CPFormattingInformation) obj;
+        if (additionalInformation == null) {
+            if (other.additionalInformation != null) {
+                return false;
+            }
+        } else if (!additionalInformation.equals(other.additionalInformation)) {
+            return false;
+        }
+        if (position != other.position) {
+            return false;
+        }
+        if (type != other.type) {
+            return false;
+        }
+        return true;
     }
     
 
