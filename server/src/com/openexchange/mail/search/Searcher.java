@@ -86,13 +86,31 @@ public final class Searcher {
      * @throws MailException If checking mail messages against search term fails
      */
     public static MailMessage[] matches(final MailMessage[] mailMessages, final SearchTerm<?> searchTerm) throws MailException {
-        final List<MailMessage> matched = new ArrayList<MailMessage>();
+        final List<MailMessage> matched = new ArrayList<MailMessage>(mailMessages.length);
         for (final MailMessage mailMessage : mailMessages) {
             if (searchTerm.matches(mailMessage)) {
                 matched.add(mailMessage);
             }
         }
         return matched.toArray(new MailMessage[matched.size()]);
+    }
+
+    /**
+     * Applies specified search term against given instances of {@link MailMessage}
+     * 
+     * @param mailMessages The mail messages to check
+     * @param searchTerm The search term to apply
+     * @return The matching mail messages in order of appearance
+     * @throws MailException If checking mail messages against search term fails
+     */
+    public static List<MailMessage> matches(final List<MailMessage> mailMessages, final SearchTerm<?> searchTerm) throws MailException {
+        final List<MailMessage> matched = new ArrayList<MailMessage>(mailMessages.size());
+        for (final MailMessage mailMessage : mailMessages) {
+            if (searchTerm.matches(mailMessage)) {
+                matched.add(mailMessage);
+            }
+        }
+        return matched;
     }
 
     /**
