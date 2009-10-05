@@ -380,7 +380,11 @@ public class MailException extends AbstractOXException {
         /**
          * No write access on mail folder: %1$s.
          */
-        NO_WRITE_ACCESS("No write access on mail folder: %1$s.", Category.PERMISSION, 73);
+        NO_WRITE_ACCESS("No write access on mail folder: %1$s.", Category.PERMISSION, 73),
+        /**
+         * No connection available to access mailbox
+         */
+        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 74);
 
         private final String message;
 
