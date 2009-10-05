@@ -43,5 +43,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe"/>
 	<classpathentry kind="src" path="/com.openexchange.subscribe.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.threadpool"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.microformats"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
