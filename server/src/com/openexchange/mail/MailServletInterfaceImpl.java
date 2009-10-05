@@ -444,7 +444,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs, final UserSettingMail usm) throws MailException {
+    public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs) throws MailException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
@@ -453,7 +453,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < folders.length; i++) {
             originalMails[i] = mailAccess.getMessageStorage().getMessage(prepareMailFolderParam(folders[i]), fowardMsgUIDs[i], false);
         }
-        return mailAccess.getLogicTools().getFowardMessage(originalMails, usm);
+        return mailAccess.getLogicTools().getFowardMessage(originalMails);
     }
 
     @Override
@@ -718,11 +718,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(final String folder, final long replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws MailException {
+    public MailMessage getReplyMessageForDisplay(final String folder, final long replyMsgUID, final boolean replyToAll) throws MailException {
         initConnection();
         final String fullname = prepareMailFolderParam(folder);
         final MailMessage originalMail = mailAccess.getMessageStorage().getMessage(fullname, replyMsgUID, false);
-        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm);
+        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll);
     }
 
     @Override
@@ -882,7 +882,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailPath msgref = draftMail.getMsgref();
         final MailMessage origMail;
-        if (null == msgref) {
+        if (null == msgref || !draftFullname.equals(msgref.getFolder())) {
             origMail = null;
         } else {
             origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);

@@ -1140,7 +1140,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Check for draft-edit operation: Delete old version
              */
             final MailPath msgref = composedMail.getMsgref();
-            if (msgref != null) {
+            if (msgref != null && draftFullname.equals(msgref.getFolder())) {
                 deleteMessages(msgref.getFolder(), new long[] { msgref.getUid() }, true);
                 composedMail.setMsgref(null);
             }

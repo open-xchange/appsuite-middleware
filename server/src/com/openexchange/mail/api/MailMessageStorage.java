@@ -334,7 +334,7 @@ public abstract class MailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null) {
+        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new long[] { msgref.getUid() }, true);
             draftMail.setMsgref(null);
         }
