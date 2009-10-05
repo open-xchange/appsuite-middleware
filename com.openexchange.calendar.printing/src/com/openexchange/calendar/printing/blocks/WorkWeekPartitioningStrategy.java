@@ -78,25 +78,26 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
         tools.sort(appointments);
 
         CPPartition blocks = new CPPartition();
-
         for (int i = 0, length = appointments.size(); i < length; i++) {
             CPAppointment appointment = appointments.get(i);
             if (i > 0)
                 lastAppointment = appointments.get(i - 1);
             
+            int appCount = blocks.getAppointments().size();
+            
             if (isSignalForNewWeek(appointment))
-                blocks.addFormattingInformation(new CPFormattingInfomation(i, WEEKBREAK, getWeekOfYear(appointment.getStartDate())));
+                blocks.addFormattingInformation(new CPFormattingInformation(appCount, WEEKBREAK, getWeekOfYear(appointment.getStartDate())));
 
             if (isMissingDaysInbetween(lastAppointment, appointment) )
                 for(Date day : getMissingDaysInbetween(lastAppointment, appointment))
                     if(isInWorkWeek(day)){
-                        blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK,  day));
-                        blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYNAME, getWeekDayNumber(day)));
+                        blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYBREAK,  day));
+                        blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYNAME, getWeekDayNumber(day)));
                     }
 
             if (isSignalForNewDay(appointment) && isInWorkWeek(appointment.getStartDate())){
-                blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYBREAK, appointment.getStartDate()));
-                blocks.addFormattingInformation(new CPFormattingInfomation(i, DAYNAME, getWeekDayNumber(appointment.getStartDate())));
+                blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYBREAK, appointment.getStartDate()));
+                blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYNAME, getWeekDayNumber(appointment.getStartDate())));
             }
 
             if (isWorkWeekAppointment(appointment))
@@ -105,6 +106,14 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
             if (isWorkWeekAppointment(appointment))
                 if (isOnTwoDays(appointment) || isInTwoWeeks(appointment))
                     blocks.addAppointment(appointment); // store again for use in second block
+            
+            if(i == length -1)
+                if(!isOnLastWorkDayOfWeek(appointment.getStartDate()))
+                    for(Date day : getMissingDaysInbetween(appointment, null))
+                        if(isInWorkWeek(day)){
+                            blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYBREAK,  day));
+                            blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYNAME, getWeekDayNumber(day)));
+                        }
         }
         return blocks;
     }
@@ -140,7 +149,7 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
 
     private boolean isSignalForNewWeek(CPAppointment appointment) {
         if (lastAppointment == null)
-            return false;
+            return true;
 
         return isInDifferentWeeks(lastAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
             lastAppointment.getEndDate(),
@@ -148,17 +157,26 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
     }
 
     protected List<Date> getMissingDaysInbetween(CPAppointment first, CPAppointment second) {
-        Date firstDate = null;
+        Date firstDate = null, secondDate = null;
         if(first == null){
             Calendar cal = getCalendar();
             cal.setTime(second.getStartDate());
-            cal.set(Calendar.DAY_OF_WEEK, getStartingDayOfWorkWeek());
-            cal.add(Calendar.DAY_OF_WEEK, -1);
+            cal.set(Calendar.DAY_OF_WEEK, getFirstDayOfWorkWeek());
+            cal.add(Calendar.DAY_OF_WEEK, -1); //subtract one because we want to include the first working day
             firstDate = cal.getTime();
         } else {
             firstDate = first.getStartDate();
         }
-        return getMissingDaysInbetween(firstDate, second.getStartDate());
+        if(second == null){
+            Calendar cal = getCalendar();
+            cal.setTime(first.getStartDate());
+            cal.set(Calendar.DAY_OF_WEEK, getLastDayOfWorkWeek());
+            cal.add(Calendar.DAY_OF_WEEK, 1); //add one because we want to include the last working day
+            secondDate = cal.getTime();
+        } else {
+            secondDate = second.getStartDate();
+        }
+        return getMissingDaysInbetween(firstDate, secondDate);
     }
 
     protected boolean isMissingDaysInbetween(CPAppointment first, CPAppointment second) {
@@ -166,7 +184,7 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
         if(first == null){
             Calendar cal = getCalendar();
             cal.setTime(second.getStartDate());
-            cal.set(Calendar.DAY_OF_WEEK, getStartingDayOfWorkWeek());
+            cal.set(Calendar.DAY_OF_WEEK, getFirstDayOfWorkWeek());
             cal.add(Calendar.DAY_OF_WEEK, -1);
             firstDate = cal.getTime();
         } else 
@@ -174,4 +192,9 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
         return isMissingDaysInbetween(firstDate, second.getStartDate());
     }
 
+    protected boolean isOnLastWorkDayOfWeek(Date day){
+        Calendar cal = getCalendar();
+        cal.setTime(day);
+        return cal.get(Calendar.DAY_OF_WEEK) == getLastDayOfWorkWeek();
+    }
 }
