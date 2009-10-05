@@ -260,9 +260,10 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
             return;
         }
         // Remove from general storages
-        final List<FolderStorage> generalStorages = element.getGeneralStorages();
+        final List<FolderStorage> generalStorages = new ArrayList<FolderStorage>(element.getGeneralStorages());
         generalStorages.remove(folderStorage);
         Collections.sort(generalStorages, FolderStorageComparator.getInstance());
+        element.replaceGeneralStorages(generalStorages);
     }
 
     /**
