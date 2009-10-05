@@ -91,9 +91,16 @@ public final class TwitterConfiguration {
             }
         }
         {
-            final String property = configurationService.getProperty("com.openexchange.twitter.http.useSSL");
+            String property = configurationService.getProperty("com.openexchange.twitter.http.useSSL");
             if (null != property) {
-                Configuration.setProperty("twitter4j.http.useSSL", Boolean.valueOf(property.trim()).toString());
+                property = property.trim();
+                if ("true".equalsIgnoreCase(property) || "false".equalsIgnoreCase(property)) {
+                    Configuration.setProperty("twitter4j.http.useSSL", property);
+                } else {
+                    // Not a valid boolean value
+                    log.warn(MessageFormat.format("Not a valid flag whether to use SSL over HTTP: {0}. Using fallback \"false\"", property));
+                    Configuration.setProperty("twitter4j.http.useSSL", "false");
+                }
             }
         }
         {
