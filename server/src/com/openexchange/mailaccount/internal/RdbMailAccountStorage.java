@@ -585,7 +585,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (!Attribute.UNIFIED_INBOX_ENABLED_LITERAL.equals(attribute)) {
                     final Object storageValue = attribute.doSwitch(storageGetSwitch);
                     final Object newValue = attribute.doSwitch(getSwitch);
-                    if (!storageValue.equals(newValue)) {
+                    if (null != storageValue && !storageValue.equals(newValue)) {
                         /*
                          * An attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL must not be changed
                          */
