@@ -49,6 +49,7 @@
 
 package com.openexchange.twitter.internal;
 
+import java.text.MessageFormat;
 import java.util.regex.Pattern;
 import twitter4j.Configuration;
 import com.openexchange.config.ConfigurationService;
@@ -73,8 +74,8 @@ public final class TwitterConfiguration {
      * @param configurationService The configuration service needed to read properties
      */
     public static void configure(final ConfigurationService configurationService) {
+        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(TwitterConfiguration.class);
         {
-            // twitter4j.clientVersion
             String property = configurationService.getProperty("com.openexchange.twitter.clientVersion");
             if (null == property) {
                 Configuration.setProperty("twitter4j.clientVersion", "2.0.10");
@@ -84,6 +85,7 @@ public final class TwitterConfiguration {
                     Configuration.setProperty("twitter4j.clientVersion", property);
                 } else {
                     // Not a valid version
+                    log.warn(MessageFormat.format("Not a valid version string: {0}. Using fallback \"2.0.10\"", property));
                     Configuration.setProperty("twitter4j.clientVersion", "2.0.10");
                 }
             }
@@ -113,6 +115,9 @@ public final class TwitterConfiguration {
                     Configuration.setProperty("twitter4j.http.connectionTimeout", Integer.valueOf(property.trim()).toString());
                 } catch (final NumberFormatException e) {
                     // NAN
+                    log.warn(MessageFormat.format(
+                        "Connection timeout property is not a number: {0}. Using fallback 20000.",
+                        property.trim()));
                     Configuration.setProperty("twitter4j.http.connectionTimeout", "20000");
                 }
             }
@@ -124,6 +129,7 @@ public final class TwitterConfiguration {
                     Configuration.setProperty("twitter4j.http.readTimeout", Integer.valueOf(property.trim()).toString());
                 } catch (final NumberFormatException e) {
                     // NAN
+                    log.warn(MessageFormat.format("Read timeout property is not a number: {0}. Using fallback 120000.", property.trim()));
                     Configuration.setProperty("twitter4j.http.readTimeout", "120000");
                 }
             }
@@ -135,6 +141,7 @@ public final class TwitterConfiguration {
                     Configuration.setProperty("twitter4j.http.retryCount", Integer.valueOf(property.trim()).toString());
                 } catch (final NumberFormatException e) {
                     // NAN
+                    log.warn(MessageFormat.format("Retry count property is not a number: {0}. Using fallback 3.", property.trim()));
                     Configuration.setProperty("twitter4j.http.retryCount", "3");
                 }
             }
@@ -146,6 +153,9 @@ public final class TwitterConfiguration {
                     Configuration.setProperty("twitter4j.http.retryIntervalSecs", Integer.valueOf(property.trim()).toString());
                 } catch (final NumberFormatException e) {
                     // NAN
+                    log.warn(MessageFormat.format(
+                        "Retry Interval Seconds property is not a number: {0}. Using fallback 10.",
+                        property.trim()));
                     Configuration.setProperty("twitter4j.http.retryIntervalSecs", "10");
                 }
             }
