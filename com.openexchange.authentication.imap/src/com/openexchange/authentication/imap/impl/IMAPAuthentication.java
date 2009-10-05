@@ -50,22 +50,19 @@
 package com.openexchange.authentication.imap.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
-
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
@@ -83,11 +80,34 @@ import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {
 
+    private enum PropertyNames {
+        IMAP_TIMEOUT("IMAP_TIMEOUT"),
+        IMAP_CONNECTIONTIMEOUT("IMAP_CONNECTIONTIMEOUT"),
+        USE_FULL_LOGIN_INFO("USE_FULL_LOGIN_INFO"),
+        IMAP_SERVER("IMAP_SERVER"),
+        IMAP_PORT("IMAP_PORT"),
+        USE_MULTIPLE("USE_MULTIPLE"),
+        IMAP_USE_SECURE("IMAP_USE_SECURE"),
+        IMAPAUTHENC("com.openexchange.authentication.imap.imapAuthEnc");
+
+        public String name;
+
+        private PropertyNames(String name) {
+            this.name = name;
+        }
+    }
+
     private static final Log LOG = LogFactory.getLog(IMAPAuthentication.class);
 
     private static Properties props;
 
     private final static String IMAP_AUTH_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/imapauth.properties";
+
+    /**
+     * The string for <code>ISO-8859-1</code> character encoding.
+     */
+    private static final String CHARENC_ISO8859 = "ISO-8859-1";
+
 
     private final ContextService contextService;
 
@@ -135,17 +155,30 @@ public class IMAPAuthentication implements AuthenticationService {
 
             final String context_or_domain = splitted[0];
             final String uid = splitted[1];
-            final String password = loginInfo.getPassword();
+            String password = loginInfo.getPassword();
             if ("".equals(uid.trim()) || "".equals(password.trim())) {
-                throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS);
+                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
-            if (props.get("IMAP_TIMEOUT") != null) {
-                imaptimeout = (String) props.get("IMAP_TIMEOUT");
+            if (props.get(PropertyNames.IMAPAUTHENC.name) != null ) {
+                final String authenc = (String) props.get(PropertyNames.IMAPAUTHENC.name);
+                if (password != null) {
+                    try {
+                        password = new String(password.getBytes(authenc), CHARENC_ISO8859);
+                    } catch (final UnsupportedEncodingException e) {
+                        LOG.error(e.getMessage(), e);
+                        throw LoginExceptionCodes.COMMUNICATION.create(e);
+                    }
+                }
+            }
+            
+
+            if (props.get(PropertyNames.IMAP_TIMEOUT.name) != null) {
+                imaptimeout = (String) props.get(PropertyNames.IMAP_TIMEOUT.name);
             }
 
-            if (props.get("IMAP_CONNECTIONTIMEOUT") != null) {
-                connectiontimeout = (String) props.get("IMAP_CONNECTIONTIMEOUT");
+            if (props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name) != null) {
+                connectiontimeout = (String) props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name);
             }
 
             Properties imapprops = new Properties();
@@ -156,16 +189,16 @@ public class IMAPAuthentication implements AuthenticationService {
 
            
 
-            if (props.get("USE_FULL_LOGIN_INFO") != null) {
-                use_full_login = Boolean.parseBoolean((String) props.get("USE_FULL_LOGIN_INFO"));
+            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO.name) != null) {
+                use_full_login = Boolean.parseBoolean((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO.name));
             }
 
-            if (props.get("IMAP_SERVER") != null) {
-                host = (String) props.get("IMAP_SERVER");
+            if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
+                host = (String) props.get(PropertyNames.IMAP_SERVER.name);
             }
 
-            if (props.get("IMAP_PORT") != null) {
-                port = Integer.parseInt((String) props.get("IMAP_PORT"));
+            if (props.get(PropertyNames.IMAP_PORT.name) != null) {
+                port = Integer.parseInt((String) props.get(PropertyNames.IMAP_PORT.name));
             }
 
             LOG.debug("Using imap server: " + host);
@@ -180,10 +213,10 @@ public class IMAPAuthentication implements AuthenticationService {
             }
             
             
-            // multiple imap server suport
+            // multiple imap server support
             // Added by cutmasta
             boolean USE_IMAPS = false;
-            if (props.get("USE_MULTIPLE") != null && props.getProperty("USE_MULTIPLE").equalsIgnoreCase("true")) {
+            if (props.get(PropertyNames.USE_MULTIPLE.name) != null && props.getProperty(PropertyNames.USE_MULTIPLE.name).equalsIgnoreCase("true")) {
             
             try {
                 final int ctxId = contextService.getContextId(splitted[0]);
@@ -236,7 +269,7 @@ public class IMAPAuthentication implements AuthenticationService {
             }else{
             	// ## ssl feature for single defined imap server
             	// added by cutmasta
-            	if(props.get("IMAP_USE_SECURE")!=null && props.getProperty("IMAP_USE_SECURE").equalsIgnoreCase("true")){
+            	if(props.get(PropertyNames.IMAP_USE_SECURE.name)!=null && props.getProperty(PropertyNames.IMAP_USE_SECURE.name).equalsIgnoreCase("true")){
             		USE_IMAPS = true;
             	}
             }
@@ -285,14 +318,14 @@ public class IMAPAuthentication implements AuthenticationService {
             };
         } catch (ConfigurationException e) {
             LOG.error("Error reading auth plugin config!", e);
-            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
+            throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (NoSuchProviderException e) {
             LOG.error("Error setup initial imap envorinment!", e);
-            throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
+            throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (MessagingException e) {
             LOG.info("Authentication error on host " + host + ":" + port + " for user " + user, e);
             LOG.debug("Debug imap authentication, e");
-            throw new LoginException(LoginExceptionCodes.INVALID_CREDENTIALS, e);
+            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } finally {
             try {
                 if (imapconnection != null) {
@@ -300,7 +333,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 }
             } catch (MessagingException e) {
                 LOG.error("Error closing imap connection!", e);
-                throw new LoginException(LoginExceptionCodes.COMMUNICATION, e);
+                throw LoginExceptionCodes.COMMUNICATION.create(e);
             }
         }
     }
