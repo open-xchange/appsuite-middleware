@@ -825,7 +825,7 @@ public class AppointmentBugTests extends TestCase {
         final CalendarDataObject testobject2 = csql.getObjectById(object_id, fid);
 
         assertEquals("Check that the sequence type is identical ", testobject.getRecurrenceType(), testobject2.getRecurrenceType());
-        assertEquals("Check that the interval has been changed", testobject.getInterval(), testobject2.getInterval());
+        assertFalse("Check that the interval has been changed", testobject.getInterval() == testobject2.getInterval());
 
 
         final CalendarDataObject update2 = new CalendarDataObject();
