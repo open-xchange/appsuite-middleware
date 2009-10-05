@@ -68,5 +68,7 @@ CREATE TABLE user_setting_server (
     contact_collect_enabled BOOL,
     defaultStatusPrivate INT4 UNSIGNED DEFAULT 0,
     defaultStatusPublic INT4 UNSIGNED DEFAULT 0,
+    contactCollectOnMailTransport BOOL DEFAULT TRUE,
+    contactCollectOnMailAccess BOOL DEFAULT TRUE,
     FOREIGN KEY(cid, user) REFERENCES user(cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
