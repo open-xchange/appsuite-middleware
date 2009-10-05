@@ -368,7 +368,11 @@ public class MailException extends AbstractOXException {
         /**
          * No delete access on mail folder: %1$s.
          */
-        NO_DELETE_ACCESS("No delete access on mail folder: %1$s.", Category.PERMISSION, 70);
+        NO_DELETE_ACCESS("No delete access on mail folder: %1$s.", Category.PERMISSION, 70),
+        /**
+         * Mail folder must not be moved: %1$s.
+         */
+        FOLDER_MOVE_DENIED("Mail folder must not be moved: %1$s.", Category.CODE_ERROR, 71);
 
         private final String message;
 
