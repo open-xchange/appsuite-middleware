@@ -376,7 +376,11 @@ public class MailException extends AbstractOXException {
         /**
          * Mail folder must not be updated: %1$s.
          */
-        FOLDER_UPDATE_DENIED("Mail folder must not be updated: %1$s.", Category.CODE_ERROR, 72);
+        FOLDER_UPDATE_DENIED("Mail folder must not be updated: %1$s.", Category.CODE_ERROR, 72),
+        /**
+         * No write access on mail folder: %1$s.
+         */
+        NO_WRITE_ACCESS("No write access on mail folder: %1$s.", Category.PERMISSION, 73);
 
         private final String message;
 
