@@ -87,13 +87,13 @@ public final class MailGetTest extends MessageStorageTest {
         }
 
         @Override
-        public void setMailId(String id) {
+        public void setMailId(final String id) {
             // TODO Auto-generated method stub
             
         }
 
         @Override
-        public void setUnreadMessages(int unreadMessages) {
+        public void setUnreadMessages(final int unreadMessages) {
             // TODO Auto-generated method stub
             
         }
@@ -117,7 +117,7 @@ public final class MailGetTest extends MessageStorageTest {
         }
 
         @Override
-        public MailPart getEnclosedMailPart(int index) throws MailException {
+        public MailPart getEnclosedMailPart(final int index) throws MailException {
             // TODO Auto-generated method stub
             return null;
         }
@@ -142,7 +142,7 @@ public final class MailGetTest extends MessageStorageTest {
     }
     
     private static char linebreak = '\n';
-    private String brokenContentTypeMail = "Return-Path: <schweigi@open-xchange.com>" + linebreak +
+    private final String brokenContentTypeMail = "Return-Path: <schweigi@open-xchange.com>" + linebreak +
         "Date: Thu, 20 Sep 2007 11:01:25 +0200" + linebreak + 
         "From: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak +
         "To: Thomas Schweiger <schweigi@open-xchange.com>" + linebreak + 
@@ -296,7 +296,7 @@ public final class MailGetTest extends MessageStorageTest {
     public void testMailGetBrokenContentTypeList() throws MailException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
         try {
-            MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
+            final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
             for (int i = 0; i < fetchedMails.length; i++) {
                 assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
                 assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -309,18 +309,18 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
 
-//    public void testMailGetBrokenContentTypeGet() throws MailException {
-//        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
-//        try {
-//            final MailMessage fetchedMails = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
-//            assertFalse("Missing mail ID", fetchedMails.getMailId() == null);
-//            assertTrue("Missing content type", fetchedMails.containsContentType());
-//            assertTrue("Missing flags", fetchedMails.containsFlags());
-//            assertTrue("Message must contain attachment information but signal no attachment", fetchedMails.containsHasAttachment() && !fetchedMails.hasAttachment());
-//
-//        } finally {
-//            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-//        }
-//    }
+    public void testMailGetBrokenContentTypeGet() throws MailException {
+        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
+        try {
+            final MailMessage fetchedMails = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
+            assertFalse("Missing mail ID", fetchedMails.getMailId() == null);
+            assertTrue("Missing content type", fetchedMails.containsContentType());
+            assertTrue("Missing flags", fetchedMails.containsFlags());
+            assertTrue("Message must contain attachment information but signal no attachment", fetchedMails.containsHasAttachment() && !fetchedMails.hasAttachment());
+
+        } finally {
+            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+        }
+    }
 
 }
