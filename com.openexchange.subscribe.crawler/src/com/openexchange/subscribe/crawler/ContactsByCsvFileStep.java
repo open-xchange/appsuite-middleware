@@ -100,7 +100,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], UnexpectedPag
                 for (String field : fields){
                     field = field.replaceAll("\"", "");
                     // if there is a mapping for this value in the cvs-file
-                    if (fieldMapping.containsKey(fieldCounter)) {
+                    if (fieldMapping.containsKey(fieldCounter) && !field.equals("")) {
                         resultMap.put(fieldMapping.get(fieldCounter), field);
                     }
                     
