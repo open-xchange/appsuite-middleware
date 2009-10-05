@@ -109,4 +109,9 @@ public class GetResponse extends AbstractAJAXResponse {
         }
         return retval;
     }
+
+    public JSONObject getJSON() {
+        fetchValue();
+        return (JSONObject) value;
+    }
 }

@@ -84,10 +84,9 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     public void testReadSettings() throws Throwable {
         final GetRequest request = new GetRequest(Tree.ALL);
         final GetResponse response = getClient().execute(request);
-        final String value = response.getString();
-        LOG.trace("Settings: " + value);
-        assertTrue("Got no value from server.", value.length() > 0);
-        new JSONObject(value);
+        JSONObject settings = response.getJSON();
+        LOG.trace("Settings: " + settings.toString());
+        assertTrue("Got no value from server.", settings.length() > 0);
     }
 
     /**
