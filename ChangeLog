@@ -1,3 +1,7 @@
+* 2009-10-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #14631: Added 2 new columns for contact collector settings to schema creating SQL script.
+
 * 2009-09-07 - marcus.klein@open-xchange.com
 
  - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
