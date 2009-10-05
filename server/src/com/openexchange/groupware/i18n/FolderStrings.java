@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.i18n;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 /**
  * FolderStrings contains English translations for string constants related to folder module
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FolderStrings {
+public class FolderStrings implements LocalizableStrings {
 
     // Name of the parent folder for the private user folders.
     public static final String SYSTEM_PRIVATE_FOLDER_NAME = "Private folders";

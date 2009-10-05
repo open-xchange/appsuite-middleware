@@ -47,22 +47,15 @@
  *
  */
 
-package com.openexchange.groupware;
-
-import java.io.Serializable;
+package com.openexchange.i18n;
 
 /**
- * {@link Component} - Error abbreviation
+ * Marker interface to tell the string extractor that this class contains strings that have to be translated on the backend.
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public interface Component extends Serializable {
+public interface LocalizableStrings {
 
-    /**
-     * Gets the error abbreviation
-     * 
-     * @return The error abbreviation
-     */
-    public String getAbbreviation();
+    // Empty interface for classes containing string to translate.
 
 }

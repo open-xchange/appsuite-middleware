@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.i18n;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 /**
  * {@link MailStrings} - Provides locale-specific string constants for mail module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailStrings {
+public class MailStrings implements LocalizableStrings {
 
     /**
      * Constructor must be public to enable i18n tests to read the fields with reflection.

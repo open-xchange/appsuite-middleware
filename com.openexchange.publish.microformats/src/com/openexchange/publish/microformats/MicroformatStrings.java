@@ -47,14 +47,16 @@
  *
  */
 
-package com.openexchange.groupware.i18n;
+package com.openexchange.publish.microformats;
+
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MicroformatStrings}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class MicroformatStrings {
+public final class MicroformatStrings implements LocalizableStrings {
 
     public static final String DISCLAIMER_PRIVACY = "Privacy:\n"
     +   "The data and any references contained in this webpage are shared with you under the assumption "

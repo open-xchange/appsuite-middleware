@@ -49,11 +49,13 @@
 
 package com.openexchange.groupware.i18n;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 /**
  * I18n strings for groups.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Groups {
+public final class Groups implements LocalizableStrings {
 
     /**
      * Default constructor for reading fields with reflection.

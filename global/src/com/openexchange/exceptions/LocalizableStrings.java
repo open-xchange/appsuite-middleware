@@ -50,7 +50,8 @@
 package com.openexchange.exceptions;
 
 /**
- * Marker interface to tell the string extractor that this class contains strings that have to be translated.
+ * Marker interface to tell the string extractor that this class contains strings that have to be translated for translating exception
+ * messages.
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
