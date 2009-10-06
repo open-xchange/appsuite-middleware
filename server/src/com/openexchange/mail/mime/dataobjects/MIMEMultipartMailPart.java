@@ -54,8 +54,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -206,7 +208,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     @Override
     public int getEnclosedCount() throws MailException {
-        if (count != -1) {
+    	if (count != -1) {
             return count;
         }
         final byte[] boundaryBytes = getBoundaryBytes();
@@ -236,7 +238,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                         System.arraycopy(positions, 0, newbuf, 0, positions.length);
                         positions = newbuf;
                     }
-                    positions[count] = index;
+                    positions[count] = index > 0 && '\r' == dataBytes[index - 1] ? index - 1 : index;
                 } else {
                     /*
                      * Ensure CRLF or LF immediately follows boundary, else continue boundary look-up
@@ -247,7 +249,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                             System.arraycopy(positions, 0, newbuf, 0, positions.length);
                             positions = newbuf;
                         }
-                        positions[count - 1] = index;
+                        positions[count - 1] = index > 0 && '\r' == dataBytes[index - 1] ? index - 1 : index;
                     }
                     index = newIndex;
                 }
@@ -330,7 +332,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     @Override
     public MailPart getEnclosedMailPart(final int index) throws MailException {
-        getEnclosedCount();
+    	getEnclosedCount();
         if (index < 0 || index >= count) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
@@ -341,12 +343,19 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
         int i = index;
-        int startIndex = positions[i++] + getBoundaryBytes().length;
+        int startIndex = positions[i++];
+        if ('\r' == dataBytes[startIndex]) {
+            startIndex += (getBoundaryBytes().length + 1);
+        } else {
+            startIndex += (getBoundaryBytes().length);
+        }
         /*
-         * Omit starting CRLF
+         * Omit starting CR?LF
          */
-        while ('\r' == dataBytes[startIndex] || '\n' == dataBytes[startIndex]) {
+        if ('\n' == dataBytes[startIndex]) {
             startIndex++;
+        } else if ('\r' == dataBytes[startIndex] && '\n' == dataBytes[startIndex + 1]) {
+            startIndex += 2;
         }
         final int endIndex = i >= positions.length ? dataBytes.length : positions[i];
         final byte[] subArr = new byte[endIndex - startIndex];

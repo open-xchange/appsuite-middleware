@@ -53,6 +53,7 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -65,14 +66,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Map.Entry;
+
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.contexts.Context;
@@ -142,6 +146,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
     private String altId;
 
     private boolean textAppended;
+
+    private boolean textWasEmpty;
 
     private final boolean[] modified;
 
@@ -562,14 +568,22 @@ public final class JSONMessageHandler implements MailMessageHandler {
             /*
              * Just usual plain text
              */
-            asPlainText(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode));
             if (textAppended) {
-                /*
-                 * A plain text message body has already been detected; append inline text as an attachment, too
-                 */
-                asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
+                if (textWasEmpty) {
+                    final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                    asPlainText(id, contentType.getBaseType(), content);
+                    textWasEmpty = (null == content || 0 == content.length());
+                } else {
+                    /*
+                     * A plain text message body has already been detected; append inline text as an attachment, too
+                     */
+                    asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
+                }
             } else {
+                final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                asPlainText(id, contentType.getBaseType(), content);
                 textAppended = true;
+                textWasEmpty = (null == content || 0 == content.length());
             }
             return true;
         } catch (final JSONException e) {
