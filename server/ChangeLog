@@ -1,3 +1,7 @@
+* 2009-10-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #14572: Deal with dovecot bug causing a not sieve conform response when getting sieve scripts.
+
 * 2009-09-09 - marcus.klein@open-xchange.com
 
  - Bugfix #14454: Escaped dash character in email regex for crawling contact from Google.

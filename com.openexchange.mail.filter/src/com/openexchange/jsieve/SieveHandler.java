@@ -104,6 +104,12 @@ public class SieveHandler {
 
     private final static String SIEVE_LOGOUT = "LOGOUT" + CRLF;
 
+    private static final int UNDEFINED = -1;
+
+    private static final int OK = 0;
+
+    private static final int NO = 1;
+
     /*-
      * Member section
      */
@@ -375,10 +381,58 @@ public class SieveHandler {
         if (!AUTH) {
             throw new OXSieveHandlerException("Get script not possible. Auth first.", sieve_host, sieve_host_port);
         }
-        final String get = SIEVE_GET_SCRIPT + "\"" + script_name + "\"" + CRLF;
+        final StringBuilder sb = new StringBuilder(32);
+        final String get = sb.append(SIEVE_GET_SCRIPT).append('"').append(script_name).append('"').append(CRLF).toString();
         bos_sieve.write(get.getBytes("UTF-8"));
         bos_sieve.flush();
-        final StringBuilder sb = new StringBuilder();
+        sb.setLength(0);
+        /*-
+         * If the script does not exist the server MUST reply with a NO response. Upon success a string with the contents of the script is
+         * returned followed by a OK response.
+         * 
+         * Example:
+         * 
+         * C: GETSCRIPT "myscript"
+         * S: {54+}
+         * S: #this is my wonderful script
+         * S: reject "I reject all";
+         * S:
+         * S: OK
+         */
+        {
+            final String firstLine = bis_sieve.readLine();
+            if (null == firstLine) {
+                // End of the stream reached
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
+            final int[] parsed = parseFirstLine(firstLine);
+            final int respCode = parsed[0];
+            if (NO == respCode || OK == respCode) {
+                /*
+                 * Either received a NO or an OK which indicates end of response. In both cases no script is availabe.
+                 */
+                return "";
+            }
+            sb.ensureCapacity(parsed[1]);
+        }
+        while (true) {
+            final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port);
+            }
+            if (temp.startsWith(SIEVE_OK)) {
+                if (sb.length() >= 2) {
+                    // We have to strip off the last trailing CRLF...
+                    return sb.substring(0, sb.length() - 2);
+                }
+                return sb.toString();
+            }
+            sb.append(temp);
+            sb.append(CRLF);
+        }
+        /*-
+         * 
+         * 
         boolean firstread = true;
         while (true) {
             final String temp = bis_sieve.readLine();
@@ -400,6 +454,7 @@ public class SieveHandler {
                 sb.append(CRLF);
             }
         }
+         */
     }
 
     /**
@@ -769,7 +824,101 @@ public class SieveHandler {
         return converted.replaceAll("(\\r)?\\n", "");
     }
 
+    /**
+     * Parses the first line of a SIEVE response.
+     * <p>
+     * Examples:<br>
+     * &nbsp;<code>{54+}</code><br>
+     * &nbsp;<code>No {31+}</code><br>
+     * 
+     * @param firstLine The first line
+     * @return An array of <code>int</code> with length 2. The first position holds the response code if any available ({@link #NO} or
+     *         {@link #OK}), otherwise {@link #UNDEFINED}. The second position holds the number of octets of a following literal or
+     *         {@link #UNDEFINED} if no literal is present.
+     */
+    private static int[] parseFirstLine(final String firstLine) {
+        if (null == firstLine) {
+            return null;
+        }
+        final int[] retval = new int[2];
+        retval[0] = UNDEFINED;
+        retval[1] = UNDEFINED;
+        // Check for starting "NO" or "OK"
+        final char[] chars = firstLine.toCharArray();
+        int index = 0;
+        if ('N' == chars[index] && 'O' == chars[index + 1]) {
+            retval[0] = NO;
+            index += 2;
+        } else if ('O' == chars[index] && 'K' == chars[index + 1]) {
+            retval[0] = OK;
+            index += 2;
+        }
+        // Check for a literal
+        if (index < chars.length) {
+            char c;
+            while ((index < chars.length) && (((c = chars[index]) == ' ') || (c == '\t'))) {
+                index++;
+            }
+            if (index < chars.length && '{' == chars[index]) {
+                // A literal
+                retval[1] = parseLiteralLength(readString(index, chars));
+            }
+        }
+
+        return retval;
+    }
+
+    private static final Pattern PAT_LIT_LEN = Pattern.compile("\\{([0-9]+)(\\+?)\\}");
+
+    private static int parseLiteralLength(final String respLen) {
+        final Matcher matcher = PAT_LIT_LEN.matcher(respLen);
+        if (matcher.matches()) {
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (final NumberFormatException e) {
+                log.error(e.getMessage(), e);
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    private static String readString(final int index, final char[] chars) {
+        final int size = chars.length;
+        if (index >= size) {
+            // already at end of response
+            return null;
+        }
+        // Read until delimiter reached
+        final int start = index;
+        int i = index;
+        char c;
+        while ((i < size) && ((c = chars[i]) != ' ') && (c != '\r') && (c != '\n') && (c != '\t')) {
+            i++;
+        }
+        return toString(chars, start, i);
+    }
+
+    /**
+     * Convert the chars within the specified range of the given byte array into a {@link String}. The range extends from <code>start</code>
+     * till, but not including <code>end</code>.
+     */
+    private static String toString(final char[] chars, final int start, final int end) {
+        final int size = end - start;
+        final char[] theChars = new char[size];
+        for (int i = 0, j = start; i < size;) {
+            theChars[i++] = (chars[j++]);
+        }
+        return new String(theChars);
+    }
+
+    /**
+     * Gets the capabilities.
+     * 
+     * @return The capabilities
+     */
     public Capabilities getCapabilities() {
         return this.capa;
     }
+
 }
