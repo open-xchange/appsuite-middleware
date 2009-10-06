@@ -1514,7 +1514,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             if (DEBUG) {
                 LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (").append(lowCostItems).append(
-                    ")<<< took ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                    ")<<< took ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString(), new Throwable());
             }
         }
         if (retval == null || retval.length == 0) {
