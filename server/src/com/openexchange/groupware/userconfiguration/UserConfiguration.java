@@ -961,7 +961,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
+        return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
 
     private static final String BETA = "beta";
