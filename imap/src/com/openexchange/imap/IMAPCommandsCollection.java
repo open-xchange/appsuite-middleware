@@ -1068,9 +1068,8 @@ public final class IMAPCommandsCollection {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(COMMAND_EXPUNGE, null);
                 final Response response = r[r.length - 1];
-                Boolean retval = Boolean.FALSE;
                 if (response.isOK()) {
-                    retval = Boolean.TRUE;
+                    return Boolean.TRUE;
                 } else if (response.isBAD()) {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
@@ -1084,7 +1083,7 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
-                return retval;
+                return Boolean.FALSE;
             }
         }))).booleanValue();
     }
