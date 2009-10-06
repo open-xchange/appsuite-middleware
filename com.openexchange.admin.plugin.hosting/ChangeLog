@@ -1,6 +1,6 @@
 * 2009-09-11 - marcus.klein@open-xchange.com
 
- - Bugfix #14489: Removed own implemenetation of the administration JMX interface and using now management bundle.
+ - Bugfix #14486: Removed own implemenetation of the administration JMX interface and using now management bundle.
 
 * 2009-09-07 - marcus.klein@open-xchange.com
 
