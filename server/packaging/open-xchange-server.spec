@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Oct 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14572: Deal with dovecot bug causing a not sieve conform response when getting sieve scripts.
 * Wed Sep 09 2009 - marcus.klein@open-xchange.com
  - Bugfix #14454: Escaped dash character in email regex for crawling contact from Google.
 * Fri Sep 04 2009 - marcus.klein@open-xchange.com
