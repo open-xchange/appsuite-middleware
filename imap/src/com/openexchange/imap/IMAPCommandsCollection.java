@@ -613,8 +613,10 @@ public final class IMAPCommandsCollection {
         return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Response[] r = p.command(new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(
-                    prepareStringArgument(lfolder)).toString(), null);
+                final Response[] r =
+                    p.command(
+                        new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(prepareStringArgument(lfolder)).toString(),
+                        null);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     int res = -1;
@@ -694,8 +696,9 @@ public final class IMAPCommandsCollection {
             }
         });
         if (null == ret) {
-            final ProtocolException pex = new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(
-                newFolder.getFullName()).append("\" cannot be created.").toString());
+            final ProtocolException pex =
+                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
+                    "\" cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
         // Set exists, type, and attributes
@@ -706,7 +709,8 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
 
-    private static final String ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    private static final String ALL_COLOR_LABELS =
+        "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
 
     /**
      * Clears all set color label (which are stored as user flags) from messages which correspond to given UIDs.
@@ -898,8 +902,8 @@ public final class IMAPCommandsCollection {
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command = new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(
-                    numArgument).toString();
+                final String command =
+                    new StringBuilder(numArgument.length() + 16).append("SORT (").append(sortCrit).append(") UTF-8 ").append(numArgument).toString();
                 final Response[] r = p.command(command, null);
                 final Response response = r[r.length - 1];
                 final SmartIntArray sia = new SmartIntArray(32);
@@ -965,49 +969,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */
-                final int[] newMsgSeqNums;
-                {
-                    final Response response = r[r.length - 1];
-                    final SmartIntArray tmp = new SmartIntArray(32);
-                    if (response.isOK()) {
-                        for (int i = 0, len = r.length - 1; i < len; i++) {
-                            if (!(r[i] instanceof IMAPResponse)) {
-                                r[i] = null;
-                                continue;
-                            }
-                            final IMAPResponse ir = (IMAPResponse) r[i];
-                            /*
-                             * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
-                             * messages that match the searching criteria.
-                             */
-                            if (ir.keyEquals(COMMAND_SEARCH)) {
-                                String num;
-                                while ((num = ir.readAtomString()) != null) {
-                                    try {
-                                        tmp.append(Integer.parseInt(num));
-                                    } catch (final NumberFormatException e) {
-                                        continue;
-                                    }
-                                }
-                            }
-                            r[i] = null;
-                        }
-                        p.notifyResponseHandlers(r);
-                    } else if (response.isBAD()) {
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            COMMAND_SEARCH_UNSEEN,
-                            response.toString()));
-                    } else if (response.isNO()) {
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            COMMAND_SEARCH_UNSEEN,
-                            response.toString()));
-                    } else {
-                        p.handleResult(response);
-                    }
-                    newMsgSeqNums = tmp.toArray();
-                }
+                final int[] newMsgSeqNums = handleSearchResponses(r, p);
                 /*
                  * No new messages found
                  */
@@ -1034,6 +996,50 @@ public final class IMAPCommandsCollection {
                 }
                 return newMsgs;
             }
+
+            private int[] handleSearchResponses(final Response[] r, final IMAPProtocol p) throws ProtocolException {
+                final Response response = r[r.length - 1];
+                final SmartIntArray tmp = new SmartIntArray(32);
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            r[i] = null;
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        /*
+                         * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                         * messages that match the searching criteria.
+                         */
+                        if (ir.keyEquals(COMMAND_SEARCH)) {
+                            String num;
+                            while ((num = ir.readAtomString()) != null) {
+                                try {
+                                    tmp.append(Integer.parseInt(num));
+                                } catch (final NumberFormatException e) {
+                                    continue;
+                                }
+                            }
+                        }
+                        r[i] = null;
+                    }
+                    p.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_SEARCH_UNSEEN,
+                        response.toString()));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        COMMAND_SEARCH_UNSEEN,
+                        response.toString()));
+                } else {
+                    p.handleResult(response);
+                }
+                return tmp.toArray();
+            } // End of handleSearchResponses()
+
         });
         return val;
     }
@@ -1949,7 +1955,8 @@ public final class IMAPCommandsCollection {
 
     private static final String COMMAND_FETCH_OXMARK_RFC = "FETCH 1:* (UID RFC822.HEADER.LINES (" + MessageHeaders.HDR_X_OX_MARKER + "))";
 
-    private static final String COMMAND_FETCH_OXMARK_REV1 = "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
+    private static final String COMMAND_FETCH_OXMARK_REV1 =
+        "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
 
     private static interface HeaderString {
 
