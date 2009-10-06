@@ -55,9 +55,17 @@ package com.openexchange.server.impl;
  */
 public class Version {
 
+    /**
+     * This should be only accessed by the bundle activator.
+     */
     public static String version = "";
+
     public static final String CODENAME = "Hyperion";
     public static final String NAME = "Open-Xchange";
+
+    /**
+     * This should be only accessed by the bundle activator.
+     */
     public static String buildnumber = "";
 
     private static String versionString = null;

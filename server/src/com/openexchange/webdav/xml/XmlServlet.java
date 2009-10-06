@@ -336,7 +336,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
             // SEND FIRST XML LINE
             os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-            os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.buildnumber + "\" buildname=\""
+            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
                     + Version.NAME + "\">").getBytes());
 
             if (hasObjectMode) {
@@ -556,7 +556,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
      */
     private final void commit(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, AbstractOXException {
         os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-        os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.buildnumber + "\" buildname=\""
+        os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
                 + Version.NAME + "\">").getBytes());
         os.flush();
         performActions(os, session, pendingInvocations);
