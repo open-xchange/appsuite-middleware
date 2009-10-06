@@ -965,9 +965,9 @@ public final class IMAPCommandsCollection {
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */
-                int[] newMsgSeqNums = null;
-                final Response response = r[r.length - 1];
+                final int[] newMsgSeqNums;
                 {
+                    final Response response = r[r.length - 1];
                     final SmartIntArray tmp = new SmartIntArray(32);
                     if (response.isOK()) {
                         for (int i = 0, len = r.length - 1; i < len; i++) {
