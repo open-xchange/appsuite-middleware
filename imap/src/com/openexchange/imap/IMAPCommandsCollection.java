@@ -75,7 +75,6 @@ import javax.mail.event.FolderEvent;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
-import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.mail.MailException;
@@ -953,11 +952,11 @@ public final class IMAPCommandsCollection {
      * @param folder The IMAP folder
      * @param fields The desired fields
      * @param sortField The sort-by field
-     * @param imapProperties The IMAP properties
+     * @param fastFetch Whether to perform a fast <code>FETCH</code> or not
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final IIMAPProperties imapProperties) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final boolean fastFetch) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1025,9 +1024,9 @@ public final class IMAPCommandsCollection {
                     final MailField sort = MailField.toField(sortField.getListField());
                     final FetchProfile fp;
                     if (null == sort) {
-                        fp = getFetchProfile(fields, imapProperties.isFastFetch());
+                        fp = getFetchProfile(fields, fastFetch);
                     } else {
-                        fp = getFetchProfile(fields, sort, imapProperties.isFastFetch());
+                        fp = getFetchProfile(fields, sort, fastFetch);
                     }
                     newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
                 } catch (final MessagingException e) {
