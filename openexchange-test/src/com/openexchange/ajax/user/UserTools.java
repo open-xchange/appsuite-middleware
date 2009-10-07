@@ -84,9 +84,7 @@ public final class UserTools extends Assert {
         super();
     }
 
-    public static UserImpl4Test[] searchUser(final WebConversation webCon,
-        final String searchpattern, final String session) throws AjaxException,
-        IOException, SAXException, JSONException {
+    public static UserImpl4Test[] searchUser(WebConversation webCon, String searchpattern, String session) throws AjaxException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -99,6 +97,7 @@ public final class UserTools extends Assert {
 
     public static Contact getUserContact(WebConversation webCon, String host, String session, int userId) throws AjaxException, IOException, SAXException, JSONException {
         AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        client.setProtocol("");
         client.setHostname(host);
         GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
