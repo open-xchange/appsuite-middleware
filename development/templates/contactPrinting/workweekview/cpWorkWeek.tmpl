@@ -3,11 +3,11 @@
 </#macro>
 
 <#macro date a_date>
-                  <span class="date">${a_date?string("yyyy-MM-dd")}</span>
+                  <span class="date">${a_date?string("dd.MM.yyyy, EEE")}</span>
 </#macro>
 
 <#macro datetime a_date>
-                  <span class="date time">${a_date?string("yyyy-MM-dd, HH:mm")}</span>
+                  <span class="date time">${a_date?string("dd.MM.yyyy, HH:mm")}</span>
 </#macro>
 
 <#macro time a_date>
