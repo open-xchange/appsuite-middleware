@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler.offering;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,9 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
+import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.templating.OXTemplate;
@@ -77,7 +81,7 @@ import com.openexchange.templating.TemplateService;
  */
 public class CrawlerOfferingServlet extends HttpServlet {
 
-    //TODO: Authentication ?
+    // TODO: Authentication ?
 
     private static final long serialVersionUID = -6668834083007607601L;
 
@@ -91,6 +95,10 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     private static final String SOURCE_TEMPLATE = "source.tmpl";
 
+    private static final String CONTACTS_TEMPLATE = "contacts.tmpl";
+
+    private static final String INFOSTORE_TEMPLATE = "infostore.tmpl";
+
     public static void setSources(SubscriptionSourceDiscoveryService service) {
         sources = service;
     }
@@ -102,7 +110,6 @@ public class CrawlerOfferingServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String parameter = req.getParameter("action");
-        
         if (parameter.equals("list")) {
             doList(req, resp);
         } else if (parameter.equals("source")) {
@@ -112,10 +119,54 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        super.doPost(req, resp);
+        SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
+        Map<String, Object> parameters = collectParameters(req, source);
+
+        Subscription subscription = new Subscription();
+        subscription.setSource(source);
+        subscription.setConfiguration(parameters);
+
+        try {
+            resp.setContentType("text/html");
+
+            Collection<?> content = source.getSubscribeService().getContent(subscription);
+
+            switch (source.getFolderModule()) {
+            case FolderObject.CONTACT:
+                OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
+                fillResultTemplate(template, content, "contacts", resp);
+                break;
+            case FolderObject.INFOSTORE:
+                break;
+            }
+        } catch (AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            resp.setContentType("text/html");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
-    
+
+    private Map<String, Object> collectParameters(HttpServletRequest req, SubscriptionSource source) {
+        Map<String, Object> retval = new HashMap<String, Object>();
+
+        for (FormElement element : source.getFormDescription()) {
+            switch (element.getWidget()) {
+            case INPUT:
+            case TEXT:
+            case PASSWORD:
+            case LINK:
+                retval.put(element.getName(), req.getParameter(element.getName()));
+                break;
+            case CHECKBOX:
+                Boolean value = Boolean.valueOf(req.getParameter(element.getName()));
+                retval.put(element.getName(), value);
+                break;
+            }
+        }
+
+        return retval;
+    }
+
     private void doList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             OXTemplate template = templateService.loadTemplate(LIST_TEMPLATE);
@@ -156,13 +207,13 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
         template.process(values, resp.getWriter());
     }
-    
+
     private void fillSourceTemplate(OXTemplate template, HttpServletRequest req, HttpServletResponse resp) throws TemplateException, IOException {
         List<Map<String, String>> elements = new ArrayList<Map<String, String>>();
-        
+
         SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
         DynamicFormDescription formDescription = source.getFormDescription();
-        
+
         for (FormElement element : formDescription) {
             Map<String, String> e = new HashMap<String, String>();
             e.put("id", element.getName());
@@ -170,11 +221,18 @@ public class CrawlerOfferingServlet extends HttpServlet {
             e.put("type", element.getWidget().getKeyword());
             elements.add(e);
         }
-        
+
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("ELEMENTS", elements);
-        values.put("ACTION", "https://" + req.getServerName() + "/publications/crawler?action=crawl");
-        
+        values.put("ACTION", "https://" + req.getServerName() + "/publications/crawler?action=crawl&crawler=" + source.getId());
+
+        template.process(values, resp.getWriter());
+    }
+
+    private void fillResultTemplate(OXTemplate template, Collection<?> content, String types, HttpServletResponse resp) throws TemplateException, IOException {
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("utils", new ContactTemplateUtils());
+        values.put(types, content);
         template.process(values, resp.getWriter());
     }
 
