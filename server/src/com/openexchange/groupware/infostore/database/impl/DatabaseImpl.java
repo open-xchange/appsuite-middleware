@@ -770,8 +770,8 @@ public class DatabaseImpl extends DBService {
             LOG.error("", e);
             throw new OXException(e);
         } finally {
-            finishDBTransaction();
             close(stmt, null);
+            finishDBTransaction();
             releaseWriteConnection(ctx, writeCon);
         }
         return retval;
