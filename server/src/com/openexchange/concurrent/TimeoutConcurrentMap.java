@@ -349,7 +349,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
         private final ConcurrentMap<K, ValueWrapper<V>> tmap;
 
-        public TimedRunnable(final ConcurrentMap<K, ValueWrapper<V>> tmap) {
+        TimedRunnable(final ConcurrentMap<K, ValueWrapper<V>> tmap) {
             super();
             this.tmap = tmap;
         }
