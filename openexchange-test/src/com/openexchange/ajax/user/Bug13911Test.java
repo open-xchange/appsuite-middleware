@@ -99,7 +99,7 @@ public class Bug13911Test extends AbstractAJAXSession {
      * 
      * @throws Throwable
      */
-    public void testPatternSearch() throws Throwable {
+    public void testPatternSearchMultiple() throws Throwable {
         for (final String value : new String[] {
             contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
             final String pattern = surroundWithWildcards(getPart(value));
@@ -121,12 +121,33 @@ public class Bug13911Test extends AbstractAJAXSession {
                     found = true;
                     break;
                 }
-                // System.out.println("Display name: " + test[response.getColumnPos(ContactObject.DISPLAY_NAME)]);
-                // System.out.println("Email1: " + test[response.getColumnPos(ContactObject.EMAIL1)]);
-                // System.out.println("Email2: " + test[response.getColumnPos(ContactObject.EMAIL2)]);
-                // System.out.println("Email3: " + test[response.getColumnPos(ContactObject.EMAIL3)]);
-                // System.out.println("Last name: " + test[response.getColumnPos(ContactObject.SUR_NAME)]);
-                // System.out.println("Given name: " + test[response.getColumnPos(ContactObject.GIVEN_NAME)]);
+            }
+            assertTrue("Searched user contact not found.", found);
+        }
+    }
+
+    public void testPatternSearch() throws Throwable {
+        for (final String value : new String[] {
+            contact.getDisplayName(), contact.getSurName(), contact.getGivenName(), contact.getEmail1() }) {
+            final String pattern = surroundWithWildcards(getPart(value));
+            LOG.info("Pattern: " + pattern);
+            final ContactSearchObject cso = new ContactSearchObject();
+            cso.setDisplayName(pattern);
+            cso.setEmail1(pattern);
+            cso.setEmail2(pattern);
+            cso.setEmail3(pattern);
+            cso.setSurname(pattern);
+            cso.setGivenName(pattern);
+            cso.setOrSearch(true);
+            final SearchRequest request = new SearchRequest(cso, COLUMNS, true);
+            final SearchResponse response = client.execute(request);
+            boolean found = false;
+            for (final Object[] test : response) {
+                final int id = ((Integer) test[response.getColumnPos(Contact.OBJECT_ID)]).intValue();
+                if (id == contact.getObjectID()) {
+                    found = true;
+                    break;
+                }
             }
             assertTrue("Searched user contact not found.", found);
         }
