@@ -73,7 +73,7 @@ public class GetTest extends AbstractAJAXSession {
 	    assertTrue("No ID", user.hasAndNotNull("id"));
 	    assertTrue("Wrong ID", user.getInt("id") == id);
 	    
-	    assertTrue("No aliases", user.hasAndNotNull("aliases"));
+	    assertTrue("No aliases. JSON: " + user, user.hasAndNotNull("aliases"));
 	    
 	    System.out.println(user);
 	}
