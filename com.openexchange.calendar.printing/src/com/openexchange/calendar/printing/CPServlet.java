@@ -78,8 +78,8 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link CPServlet}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - logic
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - skeleton
  */
 public class CPServlet extends PermissionServlet {
 
