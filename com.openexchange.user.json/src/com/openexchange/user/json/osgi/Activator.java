@@ -49,12 +49,14 @@
 
 package com.openexchange.user.json.osgi;
 
+import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
@@ -70,11 +72,7 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration userMultipleService;
 
-    private ServiceTracker httpTracker;
-
-    private ServiceTracker userServiceTracker;
-
-    private ServiceTracker contactInterfaceFactoryTracker;
+    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
     /**
      * Initializes a new {@link Activator}.
@@ -93,29 +91,34 @@ public class Activator implements BundleActivator {
             /*
              * User service tracker
              */
-            userServiceTracker =
-                new ServiceTracker(context, UserService.class.getName(), new RegistryServiceTrackerCustomizer<UserService>(
-                    context,
-                    ServiceRegistry.getInstance(),
-                    UserService.class));
-            userServiceTracker.open();
+            trackers.push(new ServiceTracker(context, UserService.class.getName(), new RegistryServiceTrackerCustomizer<UserService>(
+                context,
+                ServiceRegistry.getInstance(),
+                UserService.class)));
             /*
              * Contact interface factory tracker
              */
-            contactInterfaceFactoryTracker =
-                new ServiceTracker(
+            trackers.push(new ServiceTracker(
+                context,
+                ContactInterfaceFactory.class.getName(),
+                new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
                     context,
-                    ContactInterfaceFactory.class.getName(),
-                    new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                        context,
-                        ServiceRegistry.getInstance(),
-                        ContactInterfaceFactory.class));
-            contactInterfaceFactoryTracker.open();
+                    ServiceRegistry.getInstance(),
+                    ContactInterfaceFactory.class)));
             /*
              * HTTP service tracker
              */
-            httpTracker = new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context));
-            httpTracker.open();
+            trackers.push(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+            trackers.push(new ServiceTracker(
+                context,
+                ContactInterfaceDiscoveryService.class.getName(),
+                new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ContactInterfaceDiscoveryService.class)));
+            for (ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
             LOG.error(e.getMessage(), e);
@@ -125,17 +128,8 @@ public class Activator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
-            if (null != httpTracker) {
-                httpTracker.close();
-                httpTracker = null;
-            }
-            if (null != contactInterfaceFactoryTracker) {
-                contactInterfaceFactoryTracker.close();
-                contactInterfaceFactoryTracker = null;
-            }
-            if (null != userServiceTracker) {
-                userServiceTracker.close();
-                userServiceTracker = null;
+            while (!trackers.isEmpty()) {
+                trackers.pop().close();
             }
             if (null != userMultipleService) {
                 userMultipleService.unregister();
