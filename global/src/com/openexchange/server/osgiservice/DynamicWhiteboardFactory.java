@@ -168,7 +168,7 @@ public class DynamicWhiteboardFactory implements OXCloseable {
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if(args == null || args.length == 0 && TO_STRING.equals(method.getName())) {
+            if((args == null || args.length == 0) && TO_STRING.equals(method.getName())) {
                 return "OSGi Proxy ( "+klass.getName()+" ) "+hashCode();
             }
             try {
