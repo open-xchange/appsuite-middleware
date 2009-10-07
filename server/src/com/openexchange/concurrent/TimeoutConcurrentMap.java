@@ -51,6 +51,7 @@ package com.openexchange.concurrent;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.server.ServiceException;
@@ -102,6 +103,16 @@ public final class TimeoutConcurrentMap<K, V> {
         map = new ConcurrentHashMap<K, ValueWrapper<V>>();
         final TimerService timer = getInstance().getService(TimerService.class, true);
         timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
+    }
+
+    /**
+     * Returns a set view of the keys contained in this map. The set is backed by the map, so changes to the map are reflected in the set,
+     * and vice-versa.
+     * 
+     * @return A set view of the keys contained in this map.
+     */
+    public Set<K> keySet() {
+        return map.keySet();
     }
 
     /**
