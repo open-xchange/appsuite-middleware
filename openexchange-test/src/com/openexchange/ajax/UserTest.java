@@ -50,27 +50,28 @@
 package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.ajax.user.UserTools;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 public class UserTest extends AbstractAJAXTest {
 
@@ -168,33 +169,7 @@ public class UserTest extends AbstractAJAXTest {
         return user;
     }
 
-    public static UserImpl4Test loadUser(final WebConversation webCon, final int userId, final String host, final String session) throws Exception {
-
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_GET_USER);
-        parameter.setParameter(AJAXServlet.PARAMETER_ID, userId);
-
-        final WebRequest req = new GetMethodWebRequest(host + USER_URL + parameter.getURLParameters());
-        final WebResponse resp = webCon.getResponse(req);
-
-        assertEquals(200, resp.getResponseCode());
-
-        final Response response = ResponseParser.parse(resp.getText());
-
-        if (response.hasError()) {
-            fail("json error: " + response.getErrorMessage());
-        }
-
-        assertNotNull("timestamp", response.getTimestamp());
-
-        final JSONObject jsonObj = (JSONObject)response.getData();
-
-        final UserImpl4Test user = new UserImpl4Test();
-        assertTrue("check id", jsonObj.has(ParticipantsFields.ID));
-        user.setId(jsonObj.getInt(DataFields.ID));
-        user.setMail(jsonObj.getString(ContactFields.EMAIL1));
-
-        return user;
+    public static User loadUser(WebConversation webCon, int userId, String host, String session) throws AjaxException, IOException, SAXException, JSONException {
+        return UserTools.getUser(webCon, host, session, userId);
     }
 }

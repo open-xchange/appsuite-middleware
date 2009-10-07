@@ -52,7 +52,6 @@ package com.openexchange.ajax.user.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.request.ContactRequest;
 
 /**
  * {@link ListRequest}
@@ -85,7 +84,7 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
 
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_LIST_USER),
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
             new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
         };
     }

@@ -58,28 +58,24 @@ import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * {@link UserResolver}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - fix to work like GUI
- *
  */
 public class UserResolver {
+
     private AJAXClient client;
 
     public UserResolver(AJAXClient client) {
         this.client = client;
     }
-    
+
     /**
      * Finds users that match the search pattern.
      */
@@ -92,7 +88,6 @@ public class UserResolver {
         search.setEmail2(searchPattern);
         search.setEmail3(searchPattern);
         search.setOrSearch(true);
-        search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
         final SearchResponse response = client.execute(request);
         return response.getUser();
@@ -101,17 +96,9 @@ public class UserResolver {
     /**
      * Loads a user by its user id.
      */
-    public User loadUser(int identifier) throws AjaxException, IOException, SAXException, JSONException, OXException, OXJSONException {
+    public User getUser(int identifier) throws AjaxException, IOException, SAXException, JSONException {
         GetRequest request = new GetRequest(identifier, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
-        Contact contact = response.getContact();
-        UserImpl4Test user = new UserImpl4Test();
-        
-        user.setDisplayName(contact.getDisplayName());
-        user.setGivenName(contact.getGivenName());
-        user.setSurname(contact.getSurName());
-        user.setId(identifier);
-        user.setMail(contact.getEmail1());
-        return user;
+        return response.getUser();
     }
 }

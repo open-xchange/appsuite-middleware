@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
@@ -57,7 +58,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -95,75 +95,59 @@ public class UserValues {
         this.client = client;
     }
 
-    public String getInboxFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
+    public String getInboxFolder() throws AjaxException, IOException, SAXException, JSONException {
         if (null == inboxFolder) {
-            inboxFolder = ConfigTools.get(client,
-                new GetRequest(Tree.InboxFolder)).getString();
+            inboxFolder = client.execute(new GetRequest(Tree.InboxFolder)).getString();
         }
         return inboxFolder;
     }
 
-    public String getSentFolder() throws AjaxException, IOException,
-	    SAXException, JSONException {
+    public String getSentFolder() throws AjaxException, IOException, SAXException, JSONException {
 	    if (null == sentFolder) {
-	    	sentFolder = ConfigTools.get(client,
-	            new GetRequest(Tree.SentFolder)).getString();
+	    	sentFolder = client.execute(new GetRequest(Tree.SentFolder)).getString();
 	    }
 	    return sentFolder;
 	}
 
-    public String getTrashFolder() throws AjaxException, IOException,
-    SAXException, JSONException {
+    public String getTrashFolder() throws AjaxException, IOException, SAXException, JSONException {
 	    if (null == trashFolder) {
-	    	trashFolder = ConfigTools.get(client,
-	            new GetRequest(Tree.TrashFolder)).getString();
+	    	trashFolder = client.execute(new GetRequest(Tree.TrashFolder)).getString();
 	    }
 	    return trashFolder;
 	}
     
-    public String getDraftsFolder() throws AjaxException, IOException,
-    SAXException, JSONException {
+    public String getDraftsFolder() throws AjaxException, IOException, SAXException, JSONException {
 	    if (null == draftsFolder) {
-	    	draftsFolder = ConfigTools.get(client,
-	            new GetRequest(Tree.DraftsFolder)).getString();
+	    	draftsFolder = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
 	    }
 	    return draftsFolder;
 	}
     
-    public int getPrivateInfostoreFolder() throws AjaxException, IOException,
-    SAXException, JSONException {
+    public int getPrivateInfostoreFolder() throws AjaxException, IOException, SAXException, JSONException {
 	    if (null == privateInfostoreFolder) {
-	    	privateInfostoreFolder = ConfigTools.get(client,
-	            new GetRequest(Tree.PrivateInfostoreFolder)).getInteger();
+	    	privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
 	    }
 	    return privateInfostoreFolder.intValue();
 	}
     
-    public String getSendAddress() throws AjaxException, IOException,
-    SAXException, JSONException {
+    public String getSendAddress() throws AjaxException, IOException, SAXException, JSONException {
     	 if (null == sendAddress) {
-    		 sendAddress = ConfigTools.get(client,
- 	            new GetRequest(Tree.SendAddress)).getString();
+    		 sendAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
  	    }
  	    return sendAddress;
     }
 
-    public Locale getLocale() throws AjaxException, IOException, SAXException,
-        JSONException {
+    public Locale getLocale() throws AjaxException, IOException, SAXException, JSONException {
         if (null == locale) {
-            final String localeId = ConfigTools.get(client,
-                new GetRequest(Tree.Language)).getString();
+            final String localeId = client.execute(new GetRequest(Tree.Language)).getString();
             locale = LocaleTools.getLocale(localeId);
         }
         return locale;
     }
 
-    public int getPrivateAppointmentFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
+    public int getPrivateAppointmentFolder() throws AjaxException, IOException, SAXException, JSONException {
         if (-1 == privateAppointmentFolder) {
-            privateAppointmentFolder = ConfigTools.get(client,
-                new GetRequest(Tree.PrivateAppointmentFolder)).getInteger();
+            privateAppointmentFolder = client.execute(new GetRequest(Tree.PrivateAppointmentFolder)).getInteger();
         }
         return privateAppointmentFolder;
     }
@@ -171,58 +155,46 @@ public class UserValues {
     public int getPrivateContactFolder() throws AjaxException, IOException,
         SAXException, JSONException {
         if (-1 == privateContactFolder) {
-            privateContactFolder = ConfigTools.get(client, new GetRequest(
-                Tree.PrivateContactFolder)).getInteger();
+            privateContactFolder = client.execute(new GetRequest(Tree.PrivateContactFolder)).getInteger();
         }
         return privateContactFolder;
     }
 
-    public int getPrivateTaskFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
+    public int getPrivateTaskFolder() throws AjaxException, IOException, SAXException, JSONException {
         if (-1 == privateTaskFolder) {
-            privateTaskFolder = ConfigTools.get(client, new GetRequest(
-                Tree.PrivateTaskFolder)).getInteger();
+            privateTaskFolder = client.execute(new GetRequest(Tree.PrivateTaskFolder)).getInteger();
         }
         return privateTaskFolder;
     }
 
-    public Date getServerTime() throws AjaxException, IOException,
-        SAXException, JSONException {
-        long serverTime = ConfigTools.get(client,
-            new GetRequest(Tree.CurrentTime)).getLong();
+    public Date getServerTime() throws AjaxException, IOException, SAXException, JSONException {
+        long serverTime = client.execute(new GetRequest(Tree.CurrentTime)).getLong();
         serverTime -= getTimeZone().getOffset(serverTime);
         return new Date(serverTime);
     }
 
-    public TimeZone getTimeZone() throws AjaxException, IOException,
-        SAXException, JSONException {
+    public TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
         if (null == timeZone) {
-            final String tzId = ConfigTools.get(client,
-                new GetRequest(Tree.TimeZone)).getString();
+            final String tzId = client.execute(new GetRequest(Tree.TimeZone)).getString();
             timeZone = TimeZone.getTimeZone(tzId);
         }
         return timeZone;
     }
     
-    public void setTimeZone(final TimeZone timeZone) throws AjaxException, IOException, 
-    	SAXException, JSONException {
-    	ConfigTools.set(client, new SetRequest(Tree.TimeZone, timeZone.getID()));
+    public void setTimeZone(final TimeZone timeZone) throws AjaxException, IOException, SAXException, JSONException {
+        client.execute(new SetRequest(Tree.TimeZone, timeZone.getID()));
     }
 
-    public int getUserId() throws AjaxException, IOException, SAXException,
-        JSONException {
+    public int getUserId() throws AjaxException, IOException, SAXException, JSONException {
         if (-1 == userId) {
-            userId = ConfigTools.get(client, new GetRequest(Tree.Identifier))
-                .getInteger();
+            userId = client.execute(new GetRequest(Tree.Identifier)).getInteger();
         }
         return userId;
     }
 
-    public String getDefaultAddress() throws AjaxException, IOException,
-        SAXException, JSONException {
+    public String getDefaultAddress() throws AjaxException, IOException, SAXException, JSONException {
         if (null == defaultAddress) {
-            defaultAddress = ConfigTools.get(client,
-                new GetRequest(Tree.DefaultAddress)).getString();
+            defaultAddress = client.execute(new GetRequest(Tree.DefaultAddress)).getString();
         }
         return defaultAddress;
     }

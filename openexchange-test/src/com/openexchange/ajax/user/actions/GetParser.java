@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.user.json.parser.UserParser;
@@ -62,11 +63,15 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
 
     private final TimeZone timeZone;
 
+    private final int userId;
+
     /**
      * Default constructor.
+     * @param userId 
      */
-    public GetParser(boolean failOnError, TimeZone timeZone) {
+    public GetParser(boolean failOnError, int userId, TimeZone timeZone) {
         super(failOnError);
+        this.userId = userId;
         this.timeZone = timeZone;
     }
 
@@ -85,8 +90,15 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     public GetResponse parse(final String body) throws JSONException {
         final GetResponse retval = super.parse(body);
         try {
-            Contact user = UserParser.parseUserContact((JSONObject) retval.getData(), timeZone);
-            retval.setContact(user);
+            Contact contact = UserParser.parseUserContact((JSONObject) retval.getData(), timeZone);
+            retval.setContact(contact);
+            final UserImpl4Test user = new UserImpl4Test();
+            user.setId(userId);
+            user.setDisplayName(contact.getDisplayName());
+            user.setGivenName(contact.getGivenName());
+            user.setSurname(contact.getSurName());
+            user.setMail(contact.getEmail1());
+            retval.setUser(user);
         } catch (AjaxException e) {
             throw new JSONException(e);
         }

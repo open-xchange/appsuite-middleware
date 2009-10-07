@@ -47,44 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.user.actions;
+package com.openexchange.ajax.user;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.user.actions.ListRequest;
+import com.openexchange.ajax.user.actions.ListResponse;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link GetResponse}
+ * {@link ListTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class GetResponse extends AbstractAJAXResponse {
-
-    private Contact contact;
-
-    private User user;
+public class ListTest extends AbstractAJAXSession {
 
     /**
-     * @param response
+     * Initializes a new {@link ListTest}.
+     * @param name
      */
-    public GetResponse(final Response response) {
-        super(response);
+    public ListTest(String name) {
+        super(name);
     }
 
-    public Contact getContact() {
-        return contact;
-    }
-
-    void setContact(Contact contact) {
-        this.contact = contact;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    void setUser(User user) {
-        this.user = user;
+    public void testListUser() throws Exception {
+        final int[] userIdArray = { client.getValues().getUserId() };
+        final int[] cols = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME };
+        final ListRequest request = new ListRequest(userIdArray, cols);
+        final ListResponse response = client.execute(request);
+        final Contact[] contactArray = response.getUsers();
+        assertEquals("check response array", userIdArray.length, contactArray.length);
     }
 }

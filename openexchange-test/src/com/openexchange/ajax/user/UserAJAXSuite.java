@@ -56,8 +56,9 @@ public class UserAJAXSuite extends TestSuite {
 	
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
         tests.addTestSuite(GetTest.class);
+        tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(ListTest.class);
 		tests.addTestSuite(Bug13911Test.class);
 		return tests;
 	}

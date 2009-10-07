@@ -108,6 +108,6 @@ public class GetRequest extends AbstractUserRequest<GetResponse> {
      * {@inheritDoc}
      */
     public GetParser getParser() {
-        return new GetParser(true, timeZone);
+        return new GetParser(true, userId, timeZone);
     }
 }

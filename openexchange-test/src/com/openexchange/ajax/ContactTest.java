@@ -1,10 +1,59 @@
-package com.openexchange.ajax;
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
+package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Calendar;
@@ -15,7 +64,9 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
@@ -29,7 +80,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.request.ContactRequest;
+import com.openexchange.ajax.user.UserTools;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -44,6 +95,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 public class ContactTest extends AbstractAJAXTest {
 	
@@ -781,38 +833,8 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
-	public static Contact loadUser(final WebConversation webCon, final int userId, String host, final String session) throws Exception {
-		host = appendPrefix(host);
-		
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_GET_USER);
-		parameter.setParameter(DataFields.ID, userId);
-		
-		final WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
-		final WebResponse resp = webCon.getResponse(req);
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		final Response response = Response.parse(resp.getText());
-		
-		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
-		}
-		
-		final Contact contactObj = new Contact();
-		
-		final JSONObject jsonObj = (JSONObject)response.getData();
-		final ContactParser contactParser = new ContactParser();
-		contactParser.parse(contactObj, jsonObj);
-		
-		final int id = DataParser.parseInt(jsonObj, ContactFields.ID);
-		contactObj.setObjectID(id);
-
-		final int loadedUserId = DataParser.parseInt(jsonObj, ContactFields.USER_ID);
-		contactObj.setInternalUserId(loadedUserId);
-		
-		return contactObj;
+	public static Contact loadUser(final WebConversation webCon, final int userId, String host, final String session) throws AjaxException, IOException, SAXException, JSONException {
+	    return UserTools.getUserContact(webCon, host, session, userId);
 	}
 
 	public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String host, final String session) throws Exception {

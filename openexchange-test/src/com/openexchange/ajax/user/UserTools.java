@@ -61,9 +61,13 @@ import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.user.actions.GetRequest;
+import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -85,11 +89,25 @@ public final class UserTools extends Assert {
         IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
-        search.setFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
         final AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
         final SearchResponse response = Executor.execute(client, request);
     	assertNotNull("timestamp", response.getTimestamp());
     	return response.getUser();
+    }
+
+    public static Contact getUserContact(WebConversation webCon, String host, String session, int userId) throws AjaxException, IOException, SAXException, JSONException {
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        client.setHostname(host);
+        GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
+        GetResponse response = client.execute(request);
+        return response.getContact();
+    }
+
+    public static User getUser(WebConversation webCon, String host, String session, int userId) throws AjaxException, IOException, SAXException, JSONException {
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
+        client.setHostname(host);
+        return new UserResolver(client).getUser(userId);
     }
 }

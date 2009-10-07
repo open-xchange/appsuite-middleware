@@ -78,6 +78,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.URLParameter;
@@ -221,10 +222,11 @@ public final class ConfigTools extends Assert {
         return value;
     }
 
-
-    public static GetResponse get(final AJAXClient client,
-        final GetRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
+    /**
+     * @deprecated use {@link UserValues} from {@link AJAXClient} or make directly the request with {@link GetRequest}.
+     */
+    @Deprecated
+    public static GetResponse get(AJAXClient client, GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
         return client.execute(request);
     }
 
