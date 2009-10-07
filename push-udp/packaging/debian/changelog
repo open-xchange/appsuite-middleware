@@ -1,3 +1,9 @@
+open-xchange-push-udp (6.13.0.0-2) unstable; urgency=low
+
+  * build for 6.13 rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  7 Oct 2009 14:51:58 +0200
+
 open-xchange-push-udp (6.13.0.0-1) unstable; urgency=low
 
   * First build for 6.13 Rev1

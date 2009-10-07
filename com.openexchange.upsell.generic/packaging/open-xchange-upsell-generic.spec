@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 1
+%define         ox_release 2
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -76,3 +76,6 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %dir /var/www/ox6/plugins/com.openexchange.upsell.generic
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell.properties
 /var/www/ox6/plugins/com.openexchange.upsell.generic/*
+%changelog
+* Mon Oct 05 2009 - benjamin.otterbach@open-xchange.com
+ - Enhancement: Changed default upsell text.

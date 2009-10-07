@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,10 +459,28 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Oct 07 2009 - stefan.preuss@open-xchange.com
+ - Added additional search fields 'department, street_business and city_business' in module contacts (US3195)
+* Tue Oct 06 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14635: Using normal version string for WebDAV/XML interface.
+* Wed Sep 30 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #13226: Change user will not be added to participant list, if he is already member of a participating group.
+* Mon Sep 28 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14357: Fixed yearly pattern with workdays.
+* Sun Sep 27 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14571: Fixed setting "In-Reply-To" and "References" headers on reply to a message of an external mail account
+* Fri Sep 25 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14570: Enhanced error message by necessary information to recognize affected user and account
+ - Bugfix #14572: More tolerant parsing of GETSCRIPT response
+* Wed Sep 23 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14558: Implemented setting the confirm message for tasks through WebDAV/XML interface.
 * Tue Sep 22 2009 - thorben.betten@open-xchange.com
  - Bugfix #14525: Added configuration option to define SIEVE auth encoding
  - Bugfix #14533: Fixed plain-text reply version
  - Bugfix #14544: Setting right array size when resolving UIDs to sequence numbers
+* Tue Sep 22 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14453: Ignoring not loadable user contact in ImageRegistryDeleteListener and continue deleting that user.
+ - Bugfix #14561: Not converting login information to lower case in WebDAV interface login method.
 * Mon Sep 21 2009 - thorben.betten@open-xchange.com
  - Bugfix #14539: Fixed parsing of content type header
  - Bugfix #14494: Don't use CopyOnWriteArrayList in Collections.sort() routine
