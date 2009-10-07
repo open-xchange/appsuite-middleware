@@ -102,7 +102,7 @@ public class CPFormattingInformation {
 
     @Override
     public String toString() {
-        return getPosition() + "/" + getType(); 
+        return "Pos:"+getPosition() + "/Type:" + getType(); 
     }
 
     @Override
@@ -142,6 +142,5 @@ public class CPFormattingInformation {
         }
         return true;
     }
-    
 
 }
