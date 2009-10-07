@@ -50,8 +50,10 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.Date;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.tools.servlet.AjaxException;
@@ -80,7 +82,14 @@ public class MultipleAdapter implements MultipleHandler {
         if (null == actionService) {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
-        AJAXRequestData request = new AJAXRequestData(jsonObject);
+        AJAXRequestData request = new AJAXRequestData();
+        for (Entry<String, Object> entry : jsonObject.entrySet()) {
+            if (RequestConstants.DATA.equals(entry.getKey())) {
+                request.setData(entry.getValue());
+            } else {
+                request.putParameter(entry.getKey(), entry.getValue().toString());
+            }
+        }
         result = actionService.perform(request, session);
         return result.getResultObject();
     }
