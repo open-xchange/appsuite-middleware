@@ -111,7 +111,7 @@ public abstract class AbstractDateTest extends TestCase {
     }
         
     /**
-     * @return 8.1.2009 was a thursday
+     * @return 8.1.2009 was a Thursday
      */
     protected Date THURSDAY() {
         Calendar cal = Calendar.getInstance();
@@ -120,9 +120,18 @@ public abstract class AbstractDateTest extends TestCase {
         cal.set(Calendar.HOUR_OF_DAY, 12);
         return cal.getTime();
     }
-
     /**
-     * @return 11.1.2009 was a sunday
+     * @return 10.1.2009 was a Saturday
+     */
+    protected Date SATURDAY() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_YEAR, 10);
+        cal.set(Calendar.YEAR, 2009);
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        return cal.getTime();
+    }
+    /**
+     * @return 11.1.2009 was a Sunday
      */
     protected Date SUNDAY() {
         Calendar cal = Calendar.getInstance();
@@ -133,7 +142,7 @@ public abstract class AbstractDateTest extends TestCase {
     }
 
     /**
-     * @return 12.1.2009 was a monday
+     * @return 12.1.2009 was a Monday
      */
     protected Date MONDAY_NEXT_WEEK() {
         Calendar cal = Calendar.getInstance();
@@ -144,7 +153,7 @@ public abstract class AbstractDateTest extends TestCase {
     }
     
     /**
-     * @return 14.1.2009 was a wednesday
+     * @return 14.1.2009 was a Wednesday
      */
     protected Date WEDNESDAY_NEXT_WEEK() {
         Calendar cal = Calendar.getInstance();
