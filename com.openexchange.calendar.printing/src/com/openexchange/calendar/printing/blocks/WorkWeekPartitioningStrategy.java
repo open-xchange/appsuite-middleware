@@ -59,7 +59,7 @@ import com.openexchange.calendar.printing.CPType;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy implements CPPartitioningStrategy {
+public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
 
     public static final int DAYBREAK = 0;
 
@@ -67,7 +67,7 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
     
     public static final int DAYNAME = 10;
 
-    private CPAppointment lastAppointment = null;
+    private CPAppointment lastStoredAppointment = null;
 
     public boolean isPackaging(CPType type) {
         return type == CPType.WORKWEEKVIEW;
@@ -80,24 +80,35 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
         CPPartition blocks = new CPPartition();
         for (int i = 0, length = appointments.size(); i < length; i++) {
             CPAppointment appointment = appointments.get(i);
-            if (i > 0)
-                lastAppointment = appointments.get(i - 1);
+            if (i > 0){
+                CPAppointment app = appointments.get(i - 1);
+                if(isWorkWeekAppointment(app))
+                    lastStoredAppointment = app;
+            }
             
-            int appCount = blocks.getAppointments().size();
+            int pointer = blocks.getAppointments().size();
             
-            if (isSignalForNewWeek(appointment))
-                blocks.addFormattingInformation(new CPFormattingInformation(appCount, WEEKBREAK, getWeekOfYear(appointment.getStartDate())));
 
-            if (isMissingDaysInbetween(lastAppointment, appointment) )
-                for(Date day : getMissingDaysInbetween(lastAppointment, appointment))
-                    if(isInWorkWeek(day)){
-                        blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYBREAK,  day));
-                        blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYNAME, getWeekDayNumber(day)));
+            if (isMissingDaysInbetween(lastStoredAppointment, appointment) ){
+                List<Date> days = getMissingDaysInbetween(lastStoredAppointment, appointment);
+                for(Date day : days){
+                    if(isOnFirstDayOfWorkWeek(day)){
+                        addWeekBreak(blocks, pointer, day);
                     }
-
+                    if(isInWorkWeek(day)){
+                        blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK,  day));
+                        blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(day)));
+                    }
+                }
+            }
+            
+            if (isSignalForNewWeek(appointment)){
+                addWeekBreak(blocks, pointer, appointment.getStartDate());
+            }
+            
             if (isSignalForNewDay(appointment) && isInWorkWeek(appointment.getStartDate())){
-                blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYBREAK, appointment.getStartDate()));
-                blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYNAME, getWeekDayNumber(appointment.getStartDate())));
+                blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, appointment.getStartDate()));
+                blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(appointment.getStartDate())));
             }
 
             if (isWorkWeekAppointment(appointment))
@@ -111,23 +122,24 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
                 if(!isOnLastWorkDayOfWeek(appointment.getStartDate()))
                     for(Date day : getMissingDaysInbetween(appointment, null))
                         if(isInWorkWeek(day)){
-                            blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYBREAK,  day));
-                            blocks.addFormattingInformation(new CPFormattingInformation(appCount, DAYNAME, getWeekDayNumber(day)));
+                            pointer++;
+                            blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK,  day));
+                            blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(day)));
                         }
         }
         return blocks;
     }
 
+    private void addWeekBreak(CPPartition blocks, int pos, Date day) {
+        CPFormattingInformation weekBreak = new CPFormattingInformation(pos, WorkWeekPartitioningStrategy.WEEKBREAK, getWeekOfYear(day));
+        if(!blocks.getFormattingInformation().contains(weekBreak))
+            blocks.addFormattingInformation(weekBreak);
+    }
 
     private Integer getWeekDayNumber(Date day) {
         Calendar cal = getCalendar(); 
         cal.setTime(day);
         return Integer.valueOf( cal.get(Calendar.DAY_OF_WEEK) );
-    }
-
-    public Integer getWeekOfYear(Date date) {
-        getCalendar().setTime(date);
-        return Integer.valueOf( getCalendar().get(Calendar.WEEK_OF_YEAR) );
     }
 
     private boolean isOnTwoDays(CPAppointment appointment) {
@@ -139,20 +151,20 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy i
     }
 
     private boolean isSignalForNewDay(CPAppointment appointment) {
-        if (lastAppointment == null)
+        if (lastStoredAppointment == null)
             return true;
 
-        return isOnDifferentDays(lastAppointment.getStartDate(), appointment.getStartDate()) || isOnDifferentDays(
-            lastAppointment.getEndDate(),
+        return isOnDifferentDays(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isOnDifferentDays(
+            lastStoredAppointment.getEndDate(),
             appointment.getEndDate());
     }
 
     private boolean isSignalForNewWeek(CPAppointment appointment) {
-        if (lastAppointment == null)
+        if (lastStoredAppointment == null)
             return true;
 
-        return isInDifferentWeeks(lastAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
-            lastAppointment.getEndDate(),
+        return isInDifferentWeeks(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
+            lastStoredAppointment.getEndDate(),
             appointment.getEndDate());
     }
 
