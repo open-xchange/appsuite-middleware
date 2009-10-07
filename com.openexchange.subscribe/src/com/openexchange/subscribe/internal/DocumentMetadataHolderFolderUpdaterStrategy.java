@@ -59,6 +59,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
@@ -73,6 +74,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -174,17 +176,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
             return null;
         }
         try {
-            URL url = new URL(newElement.dataLink);
-            final URLConnection urlCon = url.openConnection();
-            if(HttpURLConnection.class.isInstance(urlCon)) {
-                ((HttpURLConnection) urlCon).setChunkedStreamingMode(1024);
-            }
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
-            urlCon.connect();
-            return new BufferedInputStream(urlCon.getInputStream());
-        } catch (MalformedURLException e) {
-            LOG.debug(e.getMessage(), e);
+            return HTTPToolkit.grabStream(newElement.dataLink);
         } catch (IOException e) {
             LOG.debug(e.getMessage(), e);
         }
