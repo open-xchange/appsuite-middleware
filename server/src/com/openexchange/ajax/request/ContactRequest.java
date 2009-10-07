@@ -614,6 +614,9 @@ public class ContactRequest {
         searchObj.setEmail1(DataParser.parseString(jData, ContactFields.EMAIL1));
         searchObj.setEmail2(DataParser.parseString(jData, ContactFields.EMAIL2));
         searchObj.setEmail3(DataParser.parseString(jData, ContactFields.EMAIL3));
+        searchObj.setDepartment(DataParser.parseString(jData, ContactFields.DEPARTMENT));
+        searchObj.setStreetBusiness(DataParser.parseString(jData, ContactFields.STREET_BUSINESS));
+        searchObj.setCityBusiness(DataParser.parseString(jData, ContactFields.CITY_BUSINESS));
         searchObj.setDynamicSearchField(DataParser.parseJSONIntArray(jData, "dynamicsearchfield"));
         searchObj.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
         searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));

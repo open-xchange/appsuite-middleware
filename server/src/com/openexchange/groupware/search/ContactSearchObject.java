@@ -66,6 +66,12 @@ public class ContactSearchObject extends SearchObject {
     private String email2 = null;
 
     private String email3 = null;
+    
+    private String city_business = null;
+    
+    private String street_business = null;
+    
+    private String department = null;
 
     private int ignoreOwn = 0;
 
@@ -158,7 +164,31 @@ public class ContactSearchObject extends SearchObject {
     public void setEmail3(final String email3) {
         this.email3 = email3;
     }
+    
+    public String getDepartment() {
+        return department;
+    }
 
+    public void setDepartment(final String department) {
+        this.department = department;
+    }
+
+    public String getCityBusiness() {
+        return city_business;
+    }
+
+    public void setCityBusiness(final String city_business) {
+        this.city_business = city_business;
+    }
+    
+    public String getStreetBusiness() {
+        return street_business;
+    }
+
+    public void setStreetBusiness(final String street_business) {
+        this.street_business = street_business;
+    }
+    
     public Date[] getCreationDateRange() {
         return creationDateRange;
     }

@@ -2085,7 +2085,84 @@ public class ContactMySql implements ContactSql {
                 return Contact.COMPANY;
             }
 
-        });
+        });       
+        searchFillers.add(new SearchFiller() {
+        	
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getDepartment() != null && cso.getDepartment().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.DEPARTMENT].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getDepartment());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append("( co.").append(field).append(" LIKE ? ) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new StringSQLInjector(value));
+                    }
+                }
+                return Contact.DEPARTMENT;
+            }
+        }); 
+        searchFillers.add(new SearchFiller() {
+        	
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getStreetBusiness() != null && cso.getStreetBusiness().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.STREET_BUSINESS].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getStreetBusiness());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append("( co.").append(field).append(" LIKE ? ) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new StringSQLInjector(value));
+                    }
+                }
+                return Contact.STREET_BUSINESS;
+            }
+        }); 
+        searchFillers.add(new SearchFiller() {
+        	
+            public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
+                final ContactSearchObject cso = instance.cso;
+                if (cso.getCityBusiness() != null && cso.getCityBusiness().length() > 0) {
+                    final String searchHabit = instance.search_habit;
+                    final List<SQLInjector> injectors = instance.injectors;
+
+                    final String field = Contacts.mapping[Contact.CITY_BUSINESS].getDBFieldName();
+
+                    final String value = StringCollection.prepareForSearch(cso.getCityBusiness());
+
+                    if (STR_PERCENT.equals(value)) {
+                        sb.append(' ');
+                    } else {
+                        sb.append("( co.").append(field).append(" LIKE ? ) ");
+                        if (isSingleSelect) {
+                            sb.append(searchHabit).append(' ');
+                        }
+                        injectors.add(new StringSQLInjector(value));
+                    }
+                }
+                return Contact.CITY_BUSINESS;
+            }
+        });  
+        
+        
 
         SEARCH_FILLERS = new CopyOnWriteArrayList<SearchFiller>(searchFillers);
     }

@@ -1,3 +1,7 @@
+* 2009-10-07 - stefan.preuss@open-xchange.com
+
+ - Added additional search fields 'department, street_business and city_business' in module contacts (US3195)
+
 * 2009-10-06 - marcus.klein@open-xchange.com
 
  - Bugfix #14635: Using normal version string for WebDAV/XML interface.
