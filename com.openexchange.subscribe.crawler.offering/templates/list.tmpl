@@ -1,9 +1,14 @@
-<#list LINKS as LINK>
-<div class="ox_subscriptionSource">
-	<h3 class="ox_displayName">Contact Generator</h3>
-	<span class="ox_sourceId">com.openexchange.subscribe.cisco.generator</span> <br />
-	<span class="ox_module">contacts</span>
-	<span class="ox_priority">200</span>
-	<a class="ox_link" href=${LINK.link}>${LINK.name}</a>
-</div>
-</#list>
+<html>
+	<head><title>OX Crawler</title></head>
+	<body>
+		<#list LINKS as LINK>
+		<div class="ox_subscriptionSource">
+			<h3 class="ox_displayName">Contact Generator</h3>
+			<span class="ox_sourceId">com.openexchange.subscribe.cisco.generator</span> <br />
+			<span class="ox_module">contacts</span>
+			<span class="ox_priority">200</span>
+			<a class="ox_link" href="${LINK.link}">${LINK.name}</a>
+		</div>
+		</#list>
+	</body>
+</html>

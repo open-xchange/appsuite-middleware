@@ -1,13 +1,18 @@
-<form class="ox_form" action=${ACTION} method="POST">
-	<table>
-		<#list ELEMENTS as ELEMENT>
-		<tr>
-			<td><label for=${ELEMENT.id}>${ELEMENT.displayName}</label></td>
-			<td><input id=${ELEMENT.id} name=${ELEMENT.id} type=${ELEMENT.type}></input></td>
-		</tr>
-		</#list>
-		<tr>
-			<td colspan="2"><input type="submit"></input></td>
-		</tr>
-	</table>
-</form>
+<html>
+	<head><title>OX Crawler</title></head>
+	<body>
+		<form class="ox_form" action="${ACTION}" method="POST">
+			<table>
+				<#list ELEMENTS as ELEMENT>
+				<tr>
+					<td><label for="${ELEMENT.id}">${ELEMENT.displayName}</label></td>
+					<td><input id="${ELEMENT.id}" name="${ELEMENT.id}" type="${ELEMENT.type}"></input></td>
+				</tr>
+				</#list>
+				<tr>
+					<td colspan="2"><input type="submit"></input></td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>

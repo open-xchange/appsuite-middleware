@@ -10,7 +10,7 @@ import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator implements BundleActivator {
 
-	private static final String ALIAS = "/publications/crawler/*";
+	private static final String ALIAS = "/publications/crawler";
     
     private Whiteboard whiteboard;
 

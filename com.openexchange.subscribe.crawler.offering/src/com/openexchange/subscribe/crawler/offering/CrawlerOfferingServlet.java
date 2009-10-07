@@ -119,28 +119,31 @@ public class CrawlerOfferingServlet extends HttpServlet {
     private void doList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             OXTemplate template = templateService.loadTemplate(LIST_TEMPLATE);
+            resp.setContentType("text/html");
             fillListTemplate(template, req, resp);
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             resp.setContentType("text/html");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     private void doSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             OXTemplate template = templateService.loadTemplate(SOURCE_TEMPLATE);
+            resp.setContentType("text/html");
             fillSourceTemplate(template, req, resp);
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             resp.setContentType("text/html");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     private void fillListTemplate(OXTemplate template, HttpServletRequest req, HttpServletResponse resp) throws TemplateException, IOException {
         List<Map<String, String>> links = new ArrayList<Map<String, String>>();
 
+        sources.getSources();
         for (SubscriptionSource source : sources.getSources()) {
             Map<String, String> link = new HashMap<String, String>();
             link.put("link", "https://" + req.getServerName() + "/publications/crawler?action=source&crawler=" + source.getId());
