@@ -54,13 +54,14 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPType;
 
 /**
  * {@link AbstractPartitioningStrategy}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AbstractPartitioningStrategy {
+public abstract class AbstractPartitioningStrategy implements CPPartitioningStrategy{
     
     private Calendar calendar = Calendar.getInstance();
     
@@ -76,6 +77,11 @@ public class AbstractPartitioningStrategy {
         super();
     }
 
+    public Integer getWeekOfYear(Date date) {
+        getCalendar().setTime(date);
+        return Integer.valueOf( getCalendar().get(Calendar.WEEK_OF_YEAR) );
+    }
+    
     public boolean isOnDifferentDays(Date first, Date second) {
         calendar = getCalendar();
     
@@ -125,10 +131,21 @@ public class AbstractPartitioningStrategy {
     }
     
     protected List<Date> getMissingDaysInbetween(Date first, Date second) {
-        long length = (second.getTime() - first.getTime()) /1000/60/60/24 - 1;
-        LinkedList<Date> days = new LinkedList<Date>();
-        Calendar cal = getCalendar();
+        Calendar cal = Calendar.getInstance();
         cal.setTime(first);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date refinedFirst = cal.getTime();
+        
+        cal.setTime(second);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        Date refinedSecond = cal.getTime();
+        
+        long length = (refinedSecond.getTime() - refinedFirst.getTime()) /1000/60/60/24 - 1;
+        LinkedList<Date> days = new LinkedList<Date>();
+        
+        cal.setTime(refinedFirst);
         
         for(int i = 0; i < length; i++){
             cal.add(Calendar.DAY_OF_YEAR, 1);
@@ -152,4 +169,14 @@ public class AbstractPartitioningStrategy {
         // TODO make less European
         return Calendar.FRIDAY;
     }
+    
+    protected boolean isOnFirstDayOfWorkWeek(Date day) {
+        Calendar cal = getCalendar();
+        cal.setTime(day);
+        return cal.get(Calendar.DAY_OF_WEEK) == getFirstDayOfWorkWeek();
+    }
+
+    public abstract boolean isPackaging(CPType type);
+
+    public abstract CPPartition partition(List<CPAppointment> appointments);
 }
