@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -310,6 +310,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Oct 05 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14631: Added 2 new columns for contact collector settings to schema creating SQL script.
 * Mon Sep 07 2009 - marcus.klein@open-xchange.com
  - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
 * Thu Sep 03 2009 - marcus.klein@open-xchange.com
