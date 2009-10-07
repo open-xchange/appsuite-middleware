@@ -106,6 +106,15 @@ public final class TimeoutConcurrentMap<K, V> {
     }
 
     /**
+     * Checks if map is empty.
+     * 
+     * @return <code>true</code> if map is empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    /**
      * Returns a set view of the keys contained in this map. The set is backed by the map, so changes to the map are reflected in the set,
      * and vice-versa.
      * 
