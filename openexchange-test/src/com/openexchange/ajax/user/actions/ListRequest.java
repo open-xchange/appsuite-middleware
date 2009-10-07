@@ -52,7 +52,6 @@ package com.openexchange.ajax.user.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.contact.action.AbstractContactRequest;
 import com.openexchange.ajax.request.ContactRequest;
 
 /**
@@ -60,7 +59,7 @@ import com.openexchange.ajax.request.ContactRequest;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ListRequest extends AbstractContactRequest<ListResponse> {
+public class ListRequest extends AbstractUserRequest<ListResponse> {
 
     private final int[] userIds;
 

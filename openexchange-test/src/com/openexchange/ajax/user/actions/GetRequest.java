@@ -51,33 +51,32 @@ package com.openexchange.ajax.user.actions;
 
 import java.util.TimeZone;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.contact.action.AbstractContactRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.request.ContactRequest;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link GetRequest}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GetRequest extends AbstractContactRequest<GetResponse> {
+public class GetRequest extends AbstractUserRequest<GetResponse> {
 
     /**
      * Unique identifier of the user.
      */
     private final int userId;
-    
+
     /**
-     * Timezone used for interpreting fields like last_modified and creation_date
+     * Needed for correcting time stamps from JSON.
      */
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
 
     /**
      * Default constructor.
-     * @param userId unique identifier of the user.
+     * 
+     * @param userId The unique identifier of the user.
+     * @param timeZone The time zone
      */
-    public GetRequest(final int userId, TimeZone timeZone) {
+    public GetRequest(int userId, TimeZone timeZone) {
         super();
         this.userId = userId;
         this.timeZone = timeZone;
@@ -102,9 +101,7 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
      */
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_GET_USER),
-            new Parameter(AJAXServlet.PARAMETER_ID, userId)
-        };
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
     }
 
     /**

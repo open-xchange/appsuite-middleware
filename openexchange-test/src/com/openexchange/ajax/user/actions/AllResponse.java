@@ -47,35 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.user.newactions;
+package com.openexchange.ajax.user.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-public class AllParser extends AbstractAJAXParser<AllResponse> {
-
-    /**
-     * Default constructor.
-     */
-    public AllParser(final boolean failOnError) {
-        super(failOnError);
-    }
+/**
+ * {@link AllResponse}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AllResponse extends AbstractAJAXResponse {
 
     /**
-     * {@inheritDoc}
+     * @param response
      */
-    @Override
-    protected AllResponse createResponse(final Response response) throws JSONException {
-        return new AllResponse(response);
+    public AllResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AllResponse parse(final String body) throws JSONException {
-        final AllResponse retval = super.parse(body);
-        return retval;
-    }
 }

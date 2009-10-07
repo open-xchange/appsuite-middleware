@@ -54,7 +54,6 @@ import java.util.List;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.contact.action.AbstractContactRequest;
 import com.openexchange.ajax.contact.action.ContactSearchJSONWriter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
@@ -64,7 +63,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
  * This class stores the values for searching users.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SearchRequest extends AbstractContactRequest<SearchResponse> {
+public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
 
     public final static int[] DEFAULT_COLUMNS = { DataObject.OBJECT_ID, Contact.INTERNAL_USERID, Contact.EMAIL1 };
 

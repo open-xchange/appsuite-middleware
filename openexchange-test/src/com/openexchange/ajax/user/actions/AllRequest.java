@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.user.newactions;
+package com.openexchange.ajax.user.actions;
 
 import java.util.ArrayList;
 import java.util.List;

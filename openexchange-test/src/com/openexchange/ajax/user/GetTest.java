@@ -47,60 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.user.newactions;
+package com.openexchange.ajax.user;
 
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONObject;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.user.actions.GetRequest;
+import com.openexchange.ajax.user.actions.GetResponse;
 
-/**
- * {@link GetRequest}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public class GetRequest extends AbstractUserRequest<GetResponse> {
+public class GetTest extends AbstractAJAXSession {
+	
+	public GetTest(final String name) {
+		super(name);
+	}
 
-    /**
-     * Unique identifier of the user.
-     */
-    private final int userId;
-
-    /**
-     * Default constructor.
-     * 
-     * @param userId The unique identifier of the user.
-     * @param timeZone The time zone
-     */
-    public GetRequest(final int userId) {
-        super();
-        this.userId = userId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public GetParser getParser() {
-        return new GetParser(true);
-    }
+	public void testGet() throws Exception {
+	    
+	    final int id = 2;
+	    
+	    final GetRequest getRequest = new GetRequest(id, client.getValues().getTimeZone());
+	    final GetResponse getResponse = Executor.execute(client, getRequest);
+	    
+	    final JSONObject user = (JSONObject) getResponse.getData();
+	    
+	    assertTrue("No ID", user.hasAndNotNull("id"));
+	    assertTrue("Wrong ID", user.getInt("id") == id);
+	    
+	    assertTrue("No aliases", user.hasAndNotNull("aliases"));
+	    
+	    System.out.println(user);
+	}
 }

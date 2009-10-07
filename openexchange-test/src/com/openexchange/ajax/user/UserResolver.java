@@ -53,9 +53,9 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.UserTest;
-import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.user.actions.GetRequest;
+import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.api2.OXException;
@@ -65,7 +65,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
-
 
 /**
  * {@link UserResolver}

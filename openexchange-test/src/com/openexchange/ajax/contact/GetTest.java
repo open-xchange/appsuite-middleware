@@ -67,7 +67,7 @@ public class GetTest extends ContactTest {
 		assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
 		assertTrue("object id not set", loadContact.getObjectID() > 0);
 		AJAXClient client =  new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
-        final GetResponse response =client .execute(
+		com.openexchange.ajax.user.actions.GetResponse response =client.execute(
 		    new com.openexchange.ajax.user.actions.GetRequest(userId, client.getValues().getTimeZone()));
 		loadContact = response.getContact();
 		assertNotNull("contact object is null", loadContact);

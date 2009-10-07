@@ -52,13 +52,13 @@ package com.openexchange.ajax.user;
 import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.contact.action.SearchRequest;
-import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.user.actions.GetRequest;
+import com.openexchange.ajax.user.actions.GetResponse;
+import com.openexchange.ajax.user.actions.SearchRequest;
+import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 

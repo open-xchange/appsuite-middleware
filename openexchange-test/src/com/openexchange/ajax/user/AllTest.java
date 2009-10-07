@@ -1,11 +1,12 @@
 
-package com.openexchange.ajax.user.newtests;
+package com.openexchange.ajax.user;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONArray;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.user.newactions.AllRequest;
-import com.openexchange.ajax.user.newactions.AllResponse;
+import com.openexchange.ajax.user.actions.AllRequest;
+import com.openexchange.ajax.user.actions.AllResponse;
 
 /**
  * {@link AllTest}
@@ -41,7 +42,7 @@ public class AllTest extends AbstractAJAXSession {
     public void testAllWithSort() throws Exception {
 
         final AllRequest request = new AllRequest(new int[] { 615 });
-        request.setSortColumn(615); // logininfo
+        request.setSortColumn(I(615)); // logininfo
         final AllResponse response = Executor.execute(client, request);
 
         final JSONArray users = (JSONArray) response.getData();
@@ -54,7 +55,7 @@ public class AllTest extends AbstractAJAXSession {
     public void testAllWithSort2() throws Exception {
 
         final AllRequest request = new AllRequest(new int[] { 555 });
-        request.setSortColumn(555); // email1
+        request.setSortColumn(I(555)); // email1
         final AllResponse response = Executor.execute(client, request);
 
         final JSONArray users = (JSONArray) response.getData();

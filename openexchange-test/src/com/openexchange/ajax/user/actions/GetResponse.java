@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.ajax.user.newactions;
+package com.openexchange.ajax.user.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link GetResponse}
@@ -59,6 +60,8 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class GetResponse extends AbstractAJAXResponse {
 
+    private Contact contact;
+
     /**
      * @param response
      */
@@ -66,4 +69,11 @@ public class GetResponse extends AbstractAJAXResponse {
         super(response);
     }
 
+    public Contact getContact() {
+        return contact;
+    }
+
+    void setContact(Contact contact) {
+        this.contact = contact;
+    }
 }

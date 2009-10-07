@@ -52,29 +52,22 @@ package com.openexchange.ajax.user.actions;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.user.json.parser.UserParser;
 
-/**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
 public class GetParser extends AbstractAJAXParser<GetResponse> {
 
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
 
     /**
      * Default constructor.
      */
-    public GetParser(final boolean failOnError, TimeZone timezone) {
+    public GetParser(boolean failOnError, TimeZone timeZone) {
         super(failOnError);
-        this.timeZone = timezone;
+        this.timeZone = timeZone;
     }
 
     /**
@@ -82,7 +75,7 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
      */
     @Override
     protected GetResponse createResponse(final Response response) throws JSONException {
-        return new GetResponse(response, timeZone);
+        return new GetResponse(response);
     }
 
     /**
@@ -92,12 +85,9 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     public GetResponse parse(final String body) throws JSONException {
         final GetResponse retval = super.parse(body);
         try {
-            final Contact contact = retval.getContact();
-            final JSONObject json = (JSONObject) retval.getData();
-            contact.setInternalUserId(json.getInt(ContactFields.USER_ID));
-        } catch (final OXException e) {
-            throw new JSONException(e);
-        } catch (OXJSONException e) {
+            Contact user = UserParser.parseUserContact((JSONObject) retval.getData(), timeZone);
+            retval.setContact(user);
+        } catch (AjaxException e) {
             throw new JSONException(e);
         }
         return retval;

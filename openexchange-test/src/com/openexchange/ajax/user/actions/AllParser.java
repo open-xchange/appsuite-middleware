@@ -47,18 +47,18 @@
  *
  */
 
-package com.openexchange.ajax.user.newactions;
+package com.openexchange.ajax.user.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-public class GetParser extends AbstractAJAXParser<GetResponse> {
+public class AllParser extends AbstractAJAXParser<AllResponse> {
 
     /**
      * Default constructor.
      */
-    public GetParser(final boolean failOnError) {
+    public AllParser(final boolean failOnError) {
         super(failOnError);
     }
 
@@ -66,16 +66,16 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response) throws JSONException {
-        return new GetResponse(response);
+    protected AllResponse createResponse(final Response response) throws JSONException {
+        return new AllResponse(response);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public GetResponse parse(final String body) throws JSONException {
-        final GetResponse retval = super.parse(body);
+    public AllResponse parse(final String body) throws JSONException {
+        final AllResponse retval = super.parse(body);
         return retval;
     }
 }
