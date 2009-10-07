@@ -5,6 +5,7 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.crawler.offering.CrawlerOfferingServlet;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator implements BundleActivator {
@@ -19,6 +20,7 @@ public class Activator implements BundleActivator {
 	    whiteboard = new Whiteboard(context);
 	
 	    CrawlerOfferingServlet.setSources(whiteboard.getService(SubscriptionSourceDiscoveryService.class));
+        CrawlerOfferingServlet.setTemplateService(whiteboard.getService(TemplateService.class));
 	    servletRegistration = new ServletRegistration(context, new CrawlerOfferingServlet(), ALIAS);
     }
 
