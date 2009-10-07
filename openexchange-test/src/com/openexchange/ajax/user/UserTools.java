@@ -97,7 +97,6 @@ public final class UserTools extends Assert {
 
     public static Contact getUserContact(WebConversation webCon, String host, String session, int userId) throws AjaxException, IOException, SAXException, JSONException {
         AJAXClient client = new AJAXClient(new AJAXSession(webCon, session));
-        client.setProtocol("");
         client.setHostname(host);
         GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
