@@ -51,6 +51,7 @@ package com.openexchange.calendar.printing.blocks;
 
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPCalendar;
 import com.openexchange.calendar.printing.CPType;
 
 
@@ -62,4 +63,6 @@ public interface CPPartitioningStrategy {
     public boolean isPackaging(CPType type);
     
     public CPPartition partition(List<CPAppointment> appointments);
+    
+    public void setCalendar(CPCalendar calendar);
 }
