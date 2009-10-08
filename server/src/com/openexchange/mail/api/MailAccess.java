@@ -385,7 +385,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If returning the root folder fails
      */
     public MailFolder getRootFolder() throws MailException {
-        connect0(false);
+        if (!isConnected()) {
+            connect0(false);
+        }
         return getFolderStorage().getRootFolder();
     }
 
@@ -411,7 +413,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws MailException If returning the unread count fails
      */
     public int getUnreadMessagesCount(final String fullname) throws MailException {
-        connect0(false);
+        if (!isConnected()) {
+            connect0(false);
+        }
         return getFolderStorage().getFolder(fullname).getUnreadMessageCount();
     }
 
