@@ -258,9 +258,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return 0;
         }
         try {
-            
-            final long s = System.currentTimeMillis();
-            
             /*
              * Obtain IMAP folder
              */
@@ -296,9 +293,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             } else {
                 retval = -1;
             }
-            
-            System.out.println("IMAPAccess.getUnreadMessagesCount() took " + (System.currentTimeMillis() - s) + "msec.");
-            
             return retval;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, getMailConfig(), session);
