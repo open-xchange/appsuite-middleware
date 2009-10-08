@@ -59,15 +59,7 @@ import com.openexchange.calendar.printing.CPType;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
-
-    public static final int DAYBREAK = 0;
-
-    public static final int WEEKBREAK = 1;
-    
-    public static final int DAYNAME = 10;
-
-    private CPAppointment lastStoredAppointment = null;
+public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrategy {
 
     public boolean isPackaging(CPType type) {
         return type == CPType.WORKWEEKVIEW;
@@ -118,6 +110,7 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
                 if (isOnTwoDays(appointment) || isInTwoWeeks(appointment))
                     blocks.addAppointment(appointment); // store again for use in second block
             
+            
             if(i == length -1)
                 if(!isOnLastWorkDayOfWeek(appointment.getStartDate()))
                     for(Date day : getMissingDaysInbetween(appointment, null))
@@ -130,50 +123,12 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
         return blocks;
     }
 
-    private void addWeekBreak(CPPartition blocks, int pos, Date day) {
-        CPFormattingInformation weekBreak = new CPFormattingInformation(pos, WorkWeekPartitioningStrategy.WEEKBREAK, getWeekOfYear(day));
-        if(!blocks.getFormattingInformation().contains(weekBreak))
-            blocks.addFormattingInformation(weekBreak);
-    }
-
-    private Integer getWeekDayNumber(Date day) {
-        Calendar cal = getCalendar(); 
-        cal.setTime(day);
-        return Integer.valueOf( cal.get(Calendar.DAY_OF_WEEK) );
-    }
-
-    private boolean isOnTwoDays(CPAppointment appointment) {
-        return isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate());
-    }
-
-    private boolean isInTwoWeeks(CPAppointment appointment) {
-        return isInDifferentWeeks(appointment.getStartDate(), appointment.getEndDate());
-    }
-
-    private boolean isSignalForNewDay(CPAppointment appointment) {
-        if (lastStoredAppointment == null)
-            return true;
-
-        return isOnDifferentDays(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isOnDifferentDays(
-            lastStoredAppointment.getEndDate(),
-            appointment.getEndDate());
-    }
-
-    private boolean isSignalForNewWeek(CPAppointment appointment) {
-        if (lastStoredAppointment == null)
-            return true;
-
-        return isInDifferentWeeks(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
-            lastStoredAppointment.getEndDate(),
-            appointment.getEndDate());
-    }
-
     protected List<Date> getMissingDaysInbetween(CPAppointment first, CPAppointment second) {
         Date firstDate = null, secondDate = null;
         if(first == null){
             Calendar cal = getCalendar();
             cal.setTime(second.getStartDate());
-            cal.set(Calendar.DAY_OF_WEEK, getFirstDayOfWorkWeek());
+            cal.set(Calendar.DAY_OF_WEEK, getCalendar().getFirstDayOfWorkWeek());
             cal.add(Calendar.DAY_OF_WEEK, -1); //subtract one because we want to include the first working day
             firstDate = cal.getTime();
         } else {
@@ -182,7 +137,7 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
         if(second == null){
             Calendar cal = getCalendar();
             cal.setTime(first.getStartDate());
-            cal.set(Calendar.DAY_OF_WEEK, getLastDayOfWorkWeek());
+            cal.set(Calendar.DAY_OF_WEEK, getCalendar().getLastDayOfWorkWeek());
             cal.add(Calendar.DAY_OF_WEEK, 1); //add one because we want to include the last working day
             secondDate = cal.getTime();
         } else {
@@ -196,7 +151,7 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
         if(first == null){
             Calendar cal = getCalendar();
             cal.setTime(second.getStartDate());
-            cal.set(Calendar.DAY_OF_WEEK, getFirstDayOfWorkWeek());
+            cal.set(Calendar.DAY_OF_WEEK, getCalendar().getFirstDayOfWorkWeek());
             cal.add(Calendar.DAY_OF_WEEK, -1);
             firstDate = cal.getTime();
         } else 
@@ -207,6 +162,6 @@ public class WorkWeekPartitioningStrategy extends AbstractPartitioningStrategy{
     protected boolean isOnLastWorkDayOfWeek(Date day){
         Calendar cal = getCalendar();
         cal.setTime(day);
-        return cal.get(Calendar.DAY_OF_WEEK) == getLastDayOfWorkWeek();
+        return cal.get(Calendar.DAY_OF_WEEK) == getCalendar().getLastDayOfWorkWeek();
     }
 }
