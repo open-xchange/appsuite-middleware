@@ -60,7 +60,6 @@ import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.event.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -81,6 +80,30 @@ public final class MailSessionEventHandler implements EventHandler {
      * Whether logger allows debug.
      */
     static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /**
+     * The topic on single session removal.
+     */
+    static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
+
+    /**
+     * The topic on session container removal.
+     */
+    static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
+
+    /**
+     * The property for a single session kept in event's properties.
+     * <p>
+     * Target object is an instance of <tt>com.openexchange.session.Session</tt>.
+     */
+    static final String PROP_SESSION = "com.openexchange.sessiond.session";
+
+    /**
+     * The property for a session container kept in event's properties.
+     * <p>
+     * Target object is an instance of <tt>java.util.Map&lt;String, Session&gt;</tt>.
+     */
+    static final String PROP_CONTAINER = "com.openexchange.sessiond.container";
 
     /**
      * Initializes a new {@link MailSessionEventHandler}.
@@ -114,12 +137,12 @@ public final class MailSessionEventHandler implements EventHandler {
         public void run() {
             final String topic = event.getTopic();
             try {
-                if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                    final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (TOPIC_REMOVE_SESSION.equals(topic)) {
+                    final Session session = (Session) event.getProperty(PROP_SESSION);
                     dropSessionCaches(session);
-                } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                } else if (TOPIC_REMOVE_CONTAINER.equals(topic)) {
                     @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
-                        (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        (Map<String, Session>) event.getProperty(PROP_CONTAINER);
                     for (final Session session : sessionContainer.values()) {
                         dropSessionCaches(session);
                     }

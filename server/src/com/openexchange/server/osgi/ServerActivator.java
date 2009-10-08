@@ -167,7 +167,6 @@ import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.event.SessiondEventConstants;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
@@ -489,7 +488,8 @@ public final class ServerActivator extends DeferredActivator {
         {
             registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
             final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            final String[] topics = { "com/openexchange/sessiond/remove/session", "com/openexchange/sessiond/remove/container" };
+            serviceProperties.put(EventConstants.EVENT_TOPIC, topics);
             registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
         }
         registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
