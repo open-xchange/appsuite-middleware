@@ -201,6 +201,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
         defaultMailAccess.close(true);
     }
 
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        return defaultMailAccess.getUnreadMessagesCount(fullname);
+    }
+
     public void connect() throws MailException {
         defaultMailAccess.connect(false);
         // Check path existence

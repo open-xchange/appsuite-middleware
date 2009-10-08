@@ -75,6 +75,13 @@ public interface POP3Storage {
     public void close() throws MailException;
 
     /**
+     * Convenience method to obtain folder's number of unread messages in a fast way; meaning no default folder check is performed.
+     * 
+     * @throws MailException If returning the unread count fails
+     */
+    public int getUnreadMessagesCount(final String fullname) throws MailException;
+
+    /**
      * Releases all used resources prior to closing this storage.
      */
     public void releaseResources();
