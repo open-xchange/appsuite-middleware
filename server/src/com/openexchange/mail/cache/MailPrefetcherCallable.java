@@ -130,7 +130,8 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
                 mailAccess.connect(false);
                 try {
-                    final BlockingQueue<MailMessage> q = new ArrayBlockingQueue<MailMessage>(futures.size());
+                    final int size = futures.size();
+                    final BlockingQueue<MailMessage> q = new ArrayBlockingQueue<MailMessage>(size);
                     /*
                      * Produce in a separate thread (if possible)
                      */
@@ -159,19 +160,34 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                     /*
                      * Consume
                      */
+                    final List<String> markUnseen = new ArrayList<String>(size);
                     for (final SetableFutureTask<JSONObject> f : futures) {
                         final MailMessage mm = q.take();
                         try {
+                            final boolean wasUnseen = (!mm.isSeen());
                             f.set(MessageWriter.writeRawMailMessage(accountId, mm));
+                            if (wasUnseen) {
+                                markUnseen.add(mm.getMailId());
+                            }
                         } catch (final Exception e) {
                             // LOG1.error(e.getMessage(), e);
                             f.setException(e);
                         }
                     }
+                    if (!markUnseen.isEmpty()) {
+                        /*
+                         * Explicitly mark as unseen since generating raw JSON mail representation touched mail's content
+                         */
+                        mailAccess.getMessageStorage().updateMessageFlags(
+                            fullname,
+                            markUnseen.toArray(new String[markUnseen.size()]),
+                            MailMessage.FLAG_SEEN,
+                            false);
+                    }
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - start;
                         final StringBuilder sb = new StringBuilder(128);
-                        sb.append("Put ").append(futures.size()).append(" messages from folder ").append(fullname);
+                        sb.append("Put ").append(size).append(" messages from folder ").append(fullname);
                         sb.append(" in account ").append(accountId).append(" for user ").append(session.getUserId());
                         sb.append(" in context ").append(session.getContextId()).append(" into JSON message cache in ");
                         sb.append(dur).append("msec.");

@@ -1163,44 +1163,53 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);
                             } else {
                                 // In another thread
+                                final org.apache.commons.logging.Log logger = LOG;
                                 final Callable<Object> seenCallable = new Callable<Object>() {
 
                                     public Object call() throws Exception {
-
-                                        final String[] ids = new String[] { uid };
-                                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                                        mailAccess.connect(false);
                                         try {
-                                            mailAccess.getMessageStorage().updateMessageFlags(fullname, ids, MailMessage.FLAG_SEEN, true);
-                                        } finally {
-                                            mailAccess.close(true);
-                                        }
-                                        /*
-                                         * Update caches
-                                         */
-                                        final int unread = mailAccess.getUnreadMessagesCount(fullname);
-                                        cache.switchSeenFlag(accountId, fullname, ids, true, unread, session);
-                                        try {
-                                            final int userId = session.getUserId();
-                                            final int cid = session.getContextId();
-                                            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, userId, cid)) {
-                                                /*
-                                                 * Update cache entries
-                                                 */
-                                                MailMessageCache.getInstance().updateCachedMessages(
-                                                    ids,
-                                                    accountId,
+                                            final String[] ids = new String[] { uid };
+                                            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+                                            mailAccess.connect(false);
+                                            final int unread;
+                                            try {
+                                                mailAccess.getMessageStorage().updateMessageFlags(
                                                     fullname,
-                                                    userId,
-                                                    cid,
-                                                    new MailListField[] { MailListField.FLAGS },
-                                                    new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
+                                                    ids,
+                                                    MailMessage.FLAG_SEEN,
+                                                    true);
+                                                unread = mailAccess.getUnreadMessagesCount(fullname);
+                                            } finally {
+                                                mailAccess.close(true);
                                             }
-                                        } catch (final OXCachingException e) {
-                                            LOG.error(e.getMessage(), e);
+                                            /*
+                                             * Update caches
+                                             */
+                                            cache.switchSeenFlag(accountId, fullname, ids, true, unread, session);
+                                            try {
+                                                final int userId = session.getUserId();
+                                                final int cid = session.getContextId();
+                                                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, userId, cid)) {
+                                                    /*
+                                                     * Update cache entries
+                                                     */
+                                                    MailMessageCache.getInstance().updateCachedMessages(
+                                                        ids,
+                                                        accountId,
+                                                        fullname,
+                                                        userId,
+                                                        cid,
+                                                        new MailListField[] { MailListField.FLAGS },
+                                                        new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
+                                                }
+                                            } catch (final OXCachingException e) {
+                                                logger.error(e.getMessage(), e);
+                                            }
+                                            return null;
+                                        } catch (final Exception e) {
+                                            logger.error(e.getMessage(), e);
+                                            throw e;
                                         }
-
-                                        return null;
                                     }
                                 };
                                 threadPool.submit(ThreadPools.task(seenCallable));
