@@ -54,42 +54,20 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.calendar.printing.AbstractDateTest;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class WorkWeekPartitioningTest extends AbstractDateTest {
-
-    private WorkWeekPartitioningStrategy strategy;
+public class WeekPartitioningTest extends AbstractPartitioningTest {
 
     private Calendar calendar;
-    
-    private List<CPAppointment> getExemplaryWeeks() {
-        calendar.set(Calendar.YEAR, 2009);
-        calendar.set(Calendar.DAY_OF_MONTH, 25);
-        calendar.set(Calendar.MONTH, Calendar.SEPTEMBER);
-        Date date1 = calendar.getTime();
-        CPAppointment app1 = new CPAppointment();
-        app1.setStartDate(date1);
-        app1.setEndDate(plusOneHour(date1));
-        
-        calendar.set(Calendar.DAY_OF_MONTH, 6);
-        calendar.set(Calendar.MONTH, Calendar.OCTOBER);
-        Date date2 = calendar.getTime();
-        CPAppointment app2 = new CPAppointment();
-        app2.setStartDate(date2);
-        app2.setEndDate(plusOneHour(date2));
-        
-        return Arrays.asList(app1,app2);
-    }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        strategy = new WorkWeekPartitioningStrategy();
+        strategy = new WeekPartitioningStrategy();
         strategy.setCalendar(CPCalendar.getEuropeanCalendar());
         calendar = Calendar.getInstance();
     }
@@ -97,36 +75,6 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-    }
-
-    public void testShouldPartitionConsecutiveDatesInOneWeekIntoOneBlock() {
-        CPAppointment app1 = new CPAppointment();
-        CPAppointment app2 = new CPAppointment();
-        app1.setTitle("First appointment");
-        app2.setTitle("Second appointment");
-        app1.setStartDate(WEDNESDAY());
-        app1.setEndDate(plusOneHour(WEDNESDAY()));
-        app2.setStartDate(THURSDAY());
-        app2.setEndDate(plusOneHour(THURSDAY()));
-
-        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[] { app1, app2 }));
-        boolean foundWeekBreak = false;
-        for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK & info.getPosition() == 1)
-                foundWeekBreak = true;
-        }
-        assertTrue("Two consecutive days, Wednesday and Thursday, should not have any week break info between them", !foundWeekBreak);
-        assertEquals("Partition should contain two appointments", 2, partitions.getAppointments().size());
-    }
-
-    public void testShouldNotShowWeekendAppointmentsAtAll() {
-        CPAppointment weekendAppointment = new CPAppointment();
-        weekendAppointment.setTitle("First appointment");
-        weekendAppointment.setStartDate(SUNDAY());
-        weekendAppointment.setEndDate(plusOneHour(SUNDAY()));
-
-        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[] { weekendAppointment }));
-        assertEquals("Partition should be empty", 0, partitions.getAppointments().size());
     }
 
     public void testShouldPartitionTwoDatesInTwoWeeksIntoTwoBlocks() {
@@ -176,33 +124,39 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         calendar.setTime(daysInbetween.get(4));
         assertEquals("Fifth day inbetween would be Tuesday", Calendar.TUESDAY, calendar.get(Calendar.DAY_OF_WEEK));
     }
-    
-    public void testShouldDefaultToOneDayBeforeWorkweeStartIfNoneGiven(){
-        CPAppointment first = null; //implies Sunday on European style calendar
+
+    public void testShouldDefaultToOneDayBeforeWeekStartIfNoneGiven() {
+        CPAppointment first = null; // implies Sunday on European style calendar
         CPAppointment second = new CPAppointment();
         second.setStartDate(THURSDAY());
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(first, second);
         int i = 0;
-        for(Date day: daysInbetween){
+        for (Date day : daysInbetween) {
             calendar.setTime(day);
-            assertEquals("Should be day #"+i, Calendar.MONDAY + i, calendar.get(Calendar.DAY_OF_WEEK));
+            assertEquals("Should be day #" + i, Calendar.MONDAY + i, calendar.get(Calendar.DAY_OF_WEEK));
             i++;
         }
         assertEquals("Should have three days inbetween", 3, i);
     }
 
-    public void testShouldDefaultToOneDayAfterLastWorkweekDayIfNoneGiven(){
-        CPAppointment  first = new CPAppointment();
-        first.setStartDate(MONDAY_NEXT_WEEK());
-        CPAppointment second = null; //implies Saturday on European style calendar
+    public void testShouldDefaultToOneDayAfterLastWeekDayIfNoneGiven() {
+        CPAppointment first = new CPAppointment();
+        first.setStartDate(WEDNESDAY());
+        CPAppointment second = null; // implies Monday after that on European style calendar
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(first, second);
-        int i = 0;
-        for(Date day: daysInbetween){
-            i++;
-            calendar.setTime(day);
-            assertEquals("Should be day #"+i, Calendar.MONDAY + i, calendar.get(Calendar.DAY_OF_WEEK));
+
+        int days = 0;
+        calendar.setTime(WEDNESDAY());
+        Calendar actual = Calendar.getInstance();
+        for (Date day : daysInbetween) {
+            days++;
+            calendar.add(Calendar.DAY_OF_WEEK, 1);
+            actual.setTime(day);
+            assertEquals("Should be day #" + days, calendar.get(Calendar.DAY_OF_WEEK), actual.get(Calendar.DAY_OF_WEEK));
+
         }
-        assertEquals("Should have four days inbetween Monday and Saturday", 4, i);
+        assertEquals("Should have four days inbetween Wednesday and the following Monday", 4, days);
+
     }
 
     public void testShouldGiveDayInfo() {
@@ -226,16 +180,14 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
             }
         }
 
-        assertEquals("Should contain day info for every work day", 5, numberOfDays);
+        assertEquals("Should contain day info for every day", 7, numberOfDays);
         assertTrue("Should contain Monday, even though there is no appointment", days.contains(Integer.valueOf(Calendar.MONDAY)));
         assertTrue("Should contain Tuesday, even though there is no appointment", days.contains(Integer.valueOf(Calendar.TUESDAY)));
         assertTrue("Should contain Wednesday, even though there is no appointment", days.contains(Integer.valueOf(Calendar.WEDNESDAY)));
         assertTrue("Should contain Thursday", days.contains(Integer.valueOf(Calendar.THURSDAY)));
         assertTrue("Should contain Friday, even though there is no appointment", days.contains(Integer.valueOf(Calendar.FRIDAY)));
-        assertTrue("Should not contain Saturday, because that is a weekend day", !days.contains(Integer.valueOf(Calendar.SATURDAY)));
-        assertTrue(
-            "Should not contain Sunday, because that is a weekend day, although there is an appointment",
-            !days.contains(Integer.valueOf(Calendar.SUNDAY)));
+        assertTrue("Should contain Saturday", days.contains(Integer.valueOf(Calendar.SATURDAY)));
+        assertTrue("Should contain Sunday, because there is an appointment", days.contains(Integer.valueOf(Calendar.SUNDAY)));
     }
 
     public void testShouldPutDaybreakbeforeDayNameInfo() {
@@ -272,92 +224,41 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
                 encounters++;
             }
         }
-        assertEquals("Should have 5 encounters (Mo-Fr)", 5, encounters);
+        assertEquals("Should have 7 encounters (Mo-Sun)", 7, encounters);
     }
 
-    public void testShouldPutMarkersCorrectlyEvenIfOmittingWeekendAppointments() {
-        CPAppointment app1 = new CPAppointment();
-        app1.setTitle("First appointment");
-        app1.setStartDate(THURSDAY());
-        app1.setEndDate(plusOneHour(THURSDAY()));
-
-        CPAppointment app2 = new CPAppointment();
-        app2.setTitle("Omitted appointment");
-        app2.setStartDate(SUNDAY());
-        app2.setEndDate(plusOneHour(SUNDAY()));
-
-        CPAppointment app3 = new CPAppointment();
-        app3.setTitle("Second appointment");
-        app3.setStartDate(MONDAY_NEXT_WEEK());
-        app3.setEndDate(plusOneHour(MONDAY_NEXT_WEEK()));
-
-        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[] { app1, app2, app2, app2, app3 }));
-
-        boolean rightPos = false, wrongPos = false;
-
-        for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
-                rightPos = true;
-            if(info.getPosition() > 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
-                wrongPos = true;
-        }
-        assertEquals("Should leave only two appointments, Thursday and Monday", 2, partitions.getAppointments().size());
-        assertTrue("Should find weekbreak right before position of Monday date", rightPos);
-        assertFalse("Should not find weekbreak elsewhere", wrongPos);
-    }
-    
-    public void testShouldAlwaysContainFiveDaybreaksBetweenWeekBreaks(){
-        List<CPAppointment> list = getExemplaryWeeks();
-        
-        CPPartition partition = strategy.partition(list);
-        List<CPFormattingInformation> infos = partition.getFormattingInformation();
-        int days = 5;
-        int weekCounter = 0;
-        for(CPFormattingInformation info : infos){
-            if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
-                days++;
-            if(info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK){
-                weekCounter++;
-                assertEquals("Should contain 5 days within each week, but not in week #"+weekCounter, 5, days);
-                days = 0;
-            }
-        }
-        assertEquals("Should contain 5 days left when done with last week (#"+weekCounter+")", 5, days);
-    }
-
-    public void testShouldAlwaysContainFiveDaybreaksBetweenWeekBreaksOverAWholeFuckingYear(){
+    public void testShouldAlwaysContainSevenDaybreaksBetweenWeekBreaks() {
         calendar.set(Calendar.DAY_OF_YEAR, 1);
         CPAppointment app1 = new CPAppointment();
         app1.setStartDate(calendar.getTime());
         app1.setEndDate(plusOneHour(calendar.getTime()));
-        
+
         CPAppointment app2 = new CPAppointment();
         calendar.set(Calendar.DAY_OF_YEAR, 364);
         app2.setStartDate(calendar.getTime());
         app2.setEndDate(plusOneHour(calendar.getTime()));
 
-        CPPartition partitions = strategy.partition(Arrays.asList( app1, app2 ));
+        CPPartition partitions = strategy.partition(Arrays.asList(app1, app2));
 
         List<CPFormattingInformation> infos = partitions.getFormattingInformation();
-        int days = 5;
+        int days = 7;
         int weekCounter = 0;
-        for(CPFormattingInformation info : infos){
-            if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+        for (CPFormattingInformation info : infos) {
+            if (info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
                 days++;
-            if(info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK){
+            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
+                assertEquals("Should contain 7 days within each week, but not in week #" + weekCounter, 7, days);
                 weekCounter++;
-                assertEquals("Should contain 5 days within each week, but not in week #"+weekCounter, 5, days);
                 days = 0;
             }
         }
-        assertEquals("Should contain 5 days left when done with last week (#"+weekCounter+")", 5, days);
+        assertEquals("Should contain 7 days left when done with last week (#" + weekCounter + ")", 7, days);
     }
 
-    
-    public void testShouldNotMissDayInSecondWeek(){
+    public void testShouldNotMissDayInSecondWeek() {
         calendar.set(Calendar.HOUR_OF_DAY, 9);
         calendar.set(Calendar.YEAR, 2009);
-        
+
         calendar.set(Calendar.DAY_OF_MONTH, 29);
         calendar.set(Calendar.MONTH, Calendar.SEPTEMBER);
         Date start = calendar.getTime();
@@ -371,100 +272,69 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         CPAppointment app2 = new CPAppointment();
         app2.setStartDate(end);
         app2.setEndDate(plusOneHour(end));
-        
+
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(start, end);
         assertEquals("Should find one day inbetween (when using plain dates)", 1, daysInbetween.size());
         calendar.setTime(daysInbetween.get(0));
         assertEquals("Should be Wednesday (when using plain dates)", Calendar.WEDNESDAY, calendar.get(Calendar.DAY_OF_WEEK));
-        
+
         daysInbetween = strategy.getMissingDaysInbetween(app1, app2);
         assertEquals("Should find one day inbetween (when using CPAppointments)", 1, daysInbetween.size());
         calendar.setTime(daysInbetween.get(0));
         assertEquals("Should be Wednesday (when using CPAppointments)", Calendar.WEDNESDAY, calendar.get(Calendar.DAY_OF_WEEK));
     }
-    
-    public void testShouldNotAddAnotherWeekIfLastDayWasLastWorkWeekDay(){
-        for(int day: new int[]{2,3,4}){
-            calendar.set(Calendar.YEAR, 2009);
-            calendar.set(Calendar.DAY_OF_MONTH, 25);
-            calendar.set(Calendar.MONTH, Calendar.SEPTEMBER);
-            Date date1 = calendar.getTime();
-            CPAppointment app1 = new CPAppointment();
-            app1.setStartDate(date1);
-            app1.setEndDate(plusOneHour(date1));
-            
-            //2009-10-2 is a Friday, so last day of the workweek, 10-3 and 10-4 are weekend days
-            calendar.set(Calendar.DAY_OF_MONTH, day);
-            calendar.set(Calendar.MONTH, Calendar.OCTOBER);
-            Date date2 = calendar.getTime();
-            CPAppointment app2 = new CPAppointment();
-            app2.setStartDate(date2);
-            app2.setEndDate(plusOneHour(date2));
-            
-            CPPartition partition = strategy.partition(Arrays.asList(app1,app2));
-            
-            List<CPFormattingInformation> infos = partition.getFormattingInformation();
-            
-            int dayBreaksAfterLastDate = 0;
-            for(CPFormattingInformation info:infos){
-                if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK && info.getPosition() == 2)
-                    dayBreaksAfterLastDate++;
-            }
-            assertEquals("Should not have added daybreaks after last appointment on 2009-10-"+day, 0, dayBreaksAfterLastDate);
-        }
-    }
-    
-    public void testShouldCountWeekEndDaysWhenCalculatingNumberOfDaybreaks(){
+
+    public void testShouldCountWeekEndDaysWhenCalculatingNumberOfDaybreaks() {
         CPAppointment app1 = new CPAppointment();
         app1.setTitle("First appointment");
         app1.setStartDate(THURSDAY());
         app1.setEndDate(plusOneHour(THURSDAY()));
 
         CPAppointment app2 = new CPAppointment();
-        app2.setTitle("Omitted appointment");
+        app2.setTitle("Second appointment");
         app2.setStartDate(SATURDAY());
         app2.setEndDate(plusOneHour(SATURDAY()));
 
         CPAppointment app3 = new CPAppointment();
-        app3.setTitle("Second appointment");
+        app3.setTitle("Third appointment");
         app3.setStartDate(WEDNESDAY_NEXT_WEEK());
         app3.setEndDate(plusOneHour(WEDNESDAY_NEXT_WEEK()));
 
         CPPartition partitions = strategy.partition(Arrays.asList(app1, app2, app3));
-        
+
         List<CPFormattingInformation> infos = partitions.getFormattingInformation();
         int daysBeforeWednesday = 0, daysAfterWednesday = 0;
         boolean startCounting = false;
-        for(CPFormattingInformation info: infos){
-            if(info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+        for (CPFormattingInformation info : infos) {
+            if (info.getPosition() == 2 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
                 startCounting = true;
-            if(startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
-                if(info.getPosition() == 1)
-                    daysBeforeWednesday ++;
-                if(info.getPosition() == 2)
-                    daysAfterWednesday ++;
+            if (startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+                if (info.getPosition() == 2)
+                    daysBeforeWednesday++;
+            if (info.getPosition() == 3)
+                daysAfterWednesday++;
         }
         assertEquals("Should find 3 daybreaks in week before Wednesday", 3, daysBeforeWednesday);
         assertEquals("Should find 2 daybreaks in week after Wednesday", 2, daysAfterWednesday);
     }
-    
-    public void testShouldCountWholeDaysWhenDeterminingMissingDays(){
+
+    public void testShouldCountWholeDaysWhenDeterminingMissingDays() {
         calendar.set(Calendar.YEAR, 2009);
         calendar.set(Calendar.DAY_OF_MONTH, 25);
         calendar.set(Calendar.MONTH, Calendar.SEPTEMBER);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         Date date1 = calendar.getTime();
-        
+
         calendar.set(Calendar.DAY_OF_MONTH, 27);
-        calendar.set(Calendar.HOUR_OF_DAY, 1);;
+        calendar.set(Calendar.HOUR_OF_DAY, 1);
+        ;
         Date date2 = calendar.getTime();
-        
+
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(date1, date2);
         assertEquals("Should find one day inbetween", 1, daysInbetween.size());
     }
-    
-    public void testShouldInsertYearBreak(){
-        //TODO
-    }
 
+    public void testShouldInsertYearBreak() {
+        // TODO
+    }
 }
