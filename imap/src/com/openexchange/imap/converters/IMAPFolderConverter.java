@@ -311,7 +311,7 @@ public final class IMAPFolderConverter {
                         ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
                     }
                 } else {
-                    ownPermission.parseRights((ownRights = getOwnRightsInternal(imapFolder, session, imapConfig)), imapConfig);
+                    ownPermission.parseRights((ownRights = getOwnRights(imapFolder, session, imapConfig)), imapConfig);
                 }
                 /*
                  * Check own permission against folder type
@@ -341,8 +341,8 @@ public final class IMAPFolderConverter {
                          */
                         final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
                         mailFolder.setMessageCount(status[0]);
-                        mailFolder.setMessageCount(status[1]);
-                        mailFolder.setMessageCount(status[2]);
+                        mailFolder.setNewMessageCount(status[1]);
+                        mailFolder.setUnreadMessageCount(status[2]);
                     } else {
                         // Re-throw
                         throw e;
@@ -650,7 +650,46 @@ public final class IMAPFolderConverter {
         return false;
     }
 
-    private static Rights getOwnRightsInternal(final IMAPFolder folder, final Session session, final IMAPConfig imapConfig) {
+    /**
+     * Gets the unread count from given IMAP folder.
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The unread count
+     * @throws MailException If returning unread count fails
+     */
+    public static int getUnreadCount(final IMAPFolder imapFolder) throws MailException {
+        try {
+            try {
+                return imapFolder.getUnreadMessageCount();
+            } catch (final MessagingException e) {
+                final Exception nested = e.getNextException();
+                if (nested instanceof ParsingException && nested.getMessage().indexOf("STATUS") != -1) {
+                    /*
+                     * Parsing of STATUS response failed
+                     */
+                    final int[] status = IMAPCommandsCollection.getStatus(imapFolder);
+                    return status[2];
+                }
+                // Re-throw
+                throw e;
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Gets the session user's own rights.
+     * <p>
+     * <b>Note</b>: This method assumes all preconditions were met (exists, selectable, etc.) to perform MYRIGHTS command on specified IMAP
+     * folder.
+     * 
+     * @param folder The IMAP folder
+     * @param session The session
+     * @param imapConfig The IMAP configuration
+     * @return The own rights
+     */
+    public static Rights getOwnRights(final IMAPFolder folder, final Session session, final IMAPConfig imapConfig) {
         if (folder instanceof DefaultFolder) {
             return null;
         }

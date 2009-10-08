@@ -58,12 +58,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
+import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
@@ -74,6 +76,7 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mailaccount.MailAccountException;
@@ -82,6 +85,7 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -239,6 +243,65 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Cannot occur since already initialized
              */
             return null;
+        }
+    }
+
+    @Override
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        if (!isConnected()) {
+            connect(false);
+        }
+        /*
+         * Check for root folder
+         */
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            return 0;
+        }
+        try {
+            
+            final long s = System.currentTimeMillis();
+            
+            /*
+             * Obtain IMAP folder
+             */
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
+            final boolean exists = imapFolder.exists();
+            final IMAPConfig imapConfig = getIMAPConfig();
+            if (!exists) {
+                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+            }
+            String[] attrs;
+            try {
+                attrs = imapFolder.getAttributes();
+            } catch (final NullPointerException e) {
+                /*
+                 * No attributes available.
+                 */
+                attrs = null;
+            }
+            if (null != attrs) {
+                for (final String attribute : attrs) {
+                    if ("\\NonExistent".equalsIgnoreCase(attribute)) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+                    }
+                }
+            }
+            final boolean selectable = ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0);
+            final boolean canRead =
+                ACLExtensionFactory.getInstance().getACLExtension(imapConfig).canRead(
+                    IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig));
+            final int retval;
+            if (selectable && canRead) {
+                retval = IMAPFolderConverter.getUnreadCount(imapFolder);
+            } else {
+                retval = -1;
+            }
+            
+            System.out.println("IMAPAccess.getUnreadMessagesCount() took " + (System.currentTimeMillis() - s) + "msec.");
+            
+            return retval;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, getMailConfig(), session);
         }
     }
 
