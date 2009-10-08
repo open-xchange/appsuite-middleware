@@ -201,8 +201,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private void reset() {
         super.resetFields();
-        pop3Storage = null;
-        pop3StorageProperties = null;
+        // pop3Storage = null;
+        // pop3StorageProperties = null;
         folderStorage = null;
         messageStorage = null;
         logicTools = null;
@@ -274,7 +274,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 } catch (final MailException e) {
                     LOG.error("Error while closing POP3 storage.", e);
                 }
-                pop3Storage = null;
             }
         } finally {
             /*
