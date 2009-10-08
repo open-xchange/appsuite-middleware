@@ -94,7 +94,7 @@ public final class JSONMessageCache {
     /**
      * The time-to-live in seconds for folder maps put into user map.
      */
-    private static final int TTL_USER_MAP = 3600; // 1 HOUR
+    private static final int TTL_USER_MAP = 300; // 5 Minutes
 
     /**
      * The time-to-live in seconds for ID-to-JSON map put into folder map.
