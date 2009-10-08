@@ -52,6 +52,7 @@ package com.openexchange.calendar.printing.blocks;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPCalendar;
 import com.openexchange.calendar.printing.CPType;
 
 /**
@@ -61,10 +62,16 @@ public class CPFactory {
 
     private CPType type;
 
+    private CPCalendar calendar;
+    
     private List<CPPartitioningStrategy> strategies;
 
     public void setTypeToProduce(CPType type) {
         this.type = type;
+    }
+    
+    public void setCalendar(CPCalendar calendar){
+        
     }
 
     public void addStrategy(CPPartitioningStrategy strategy) {
