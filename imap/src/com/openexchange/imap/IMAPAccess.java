@@ -283,13 +283,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
             }
-            final boolean selectable = ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0);
-            final boolean canRead =
-                ACLExtensionFactory.getInstance().getACLExtension(imapConfig).canRead(
-                    IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig));
             final int retval;
-            if (selectable && canRead) {
-                retval = IMAPFolderConverter.getUnreadCount(imapFolder);
+            /*
+             * Selectable?
+             */
+            if ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0) {
+                /*
+                 * Check read access
+                 */
+                final boolean canRead =
+                    ACLExtensionFactory.getInstance().getACLExtension(imapConfig).canRead(
+                        IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig));
+                if (canRead) {
+                    retval = IMAPFolderConverter.getUnreadCount(imapFolder);
+                } else {
+                    retval = -1;
+                }
             } else {
                 retval = -1;
             }
