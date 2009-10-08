@@ -102,7 +102,7 @@ public final class JSONMessageCache {
     private static final int TTL_FOLDER_MAP = 300; // 5 Minutes
 
     /**
-     * The max. time millis to wait for a mail's JSON representation.
+     * The max. time in milliseconds to wait for a mail's JSON representation to become available in a folder map.
      */
     private static final int MAX_WAIT_TIME_MILLIS = 100;
 
