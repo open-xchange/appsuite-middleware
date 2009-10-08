@@ -197,8 +197,9 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         }
         // String paramHdr = PATTERN_CORRECT.matcher(unfold(paramHdrArg.trim())).replaceAll("=");
         String paramHdr = unfold(paramHdrArg.trim());
-        if (paramHdr.length() > 0) {
-            final int lastPos = paramHdr.length() - 1;
+        final int length = paramHdr.length();
+        if (length > 0) {
+            final int lastPos = length - 1;
             if (paramHdr.charAt(lastPos) == ';') {
                 paramHdr = paramHdr.substring(0, lastPos);
             }

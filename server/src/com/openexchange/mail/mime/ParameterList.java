@@ -134,8 +134,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static String correctParamList(final String parameterList) {
         String toParse = parameterList;
-        if (';' != toParse.charAt(0)) {
-            toParse = new StringBuilder(toParse.length() + 2).append("; ").append(toParse).toString();
+        final int len = toParse.length();
+        if (len > 0 && ';' != toParse.charAt(0)) {
+            toParse = new StringBuilder(len + 2).append("; ").append(toParse).toString();
         }
         return PATTERN_PARAM_CORRECT.matcher(toParse).replaceAll("$1$2\"$3\"$4");
     }
