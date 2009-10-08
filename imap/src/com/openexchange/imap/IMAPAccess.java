@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.cache.MBoxEnabledCache;
@@ -291,12 +292,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check read access
                  */
-                final boolean canRead =
-                    ACLExtensionFactory.getInstance().getACLExtension(imapConfig).canRead(
-                        IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig));
-                if (canRead) {
+                final ACLExtension aclExtension = ACLExtensionFactory.getInstance().getACLExtension(imapConfig);
+                if (!aclExtension.aclSupport() || aclExtension.canRead(IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig))) {
                     retval = IMAPFolderConverter.getUnreadCount(imapFolder);
                 } else {
+                    // ACL support AND no read access
                     retval = -1;
                 }
             } else {
