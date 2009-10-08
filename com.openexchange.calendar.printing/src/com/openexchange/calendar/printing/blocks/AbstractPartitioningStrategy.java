@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPCalendar;
 import com.openexchange.calendar.printing.CPType;
 
 /**
@@ -63,19 +64,23 @@ import com.openexchange.calendar.printing.CPType;
  */
 public abstract class AbstractPartitioningStrategy implements CPPartitioningStrategy{
     
-    private Calendar calendar = Calendar.getInstance();
+    private CPCalendar calendar = new CPCalendar();
     
-    public void setCalendar(Calendar calendar) {
+    public void setCalendar(CPCalendar calendar) {
         this.calendar = calendar;
     }
 
-    public Calendar getCalendar() {
+    public CPCalendar getCalendar() {
         return calendar;
     }
     
     public AbstractPartitioningStrategy() {
         super();
     }
+    
+    public abstract boolean isPackaging(CPType type);
+    
+    public abstract CPPartition partition(List<CPAppointment> appointments);
 
     public Integer getWeekOfYear(Date date) {
         getCalendar().setTime(date);
@@ -108,29 +113,7 @@ public abstract class AbstractPartitioningStrategy implements CPPartitioningStra
         return week1 != week2 || year1 != year2;
     }
 
-    /**
-     * @return true if start or end date are in work week, false otherwise (also if not set at all)
-     */
-    public boolean isWorkWeekAppointment(CPAppointment appointment) {
-        if (appointment.getStartDate() != null && isInWorkWeek(appointment.getStartDate()))
-            return true;
-        if (appointment.getStartDate() != null && isInWorkWeek(appointment.getStartDate()))
-            return true;
-        return false;
-    }
-
-    public boolean isInWorkWeek(Date date) {
-        Calendar calendar = getCalendar();
-        calendar.setTime(date);
-        return isInWorkWeek(calendar.get(Calendar.DAY_OF_WEEK));
-    }
-
-    public boolean isInWorkWeek(int calendarDayOfWeek) {
-        // TODO: Scope of work week might need to be configurable in the future.
-        return !(calendarDayOfWeek == Calendar.SATURDAY || calendarDayOfWeek  == Calendar.SUNDAY);
-    }
-    
-    protected List<Date> getMissingDaysInbetween(Date first, Date second) {
+    public List<Date> getMissingDaysInbetween(Date first, Date second) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(first);
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -155,28 +138,27 @@ public abstract class AbstractPartitioningStrategy implements CPPartitioningStra
         return days;
     }
     
-    protected boolean isMissingDaysInbetween(Date first, Date second) {
-        return ((second.getTime() - first.getTime()) /1000/60/60/24) > 1;
-    }
-
-    protected int getFirstDayOfWorkWeek() {
-        // TODO make less European
-        return Calendar.MONDAY;
-    }
-
-
-    protected int getLastDayOfWorkWeek() {
-        // TODO make less European
-        return Calendar.FRIDAY;
+    public boolean isMissingDaysInbetween(Date first, Date second) {
+        return getMissingDaysInbetween(first, second).size() != 0;
     }
     
-    protected boolean isOnFirstDayOfWorkWeek(Date day) {
-        Calendar cal = getCalendar();
+    public boolean isOnFirstDayOfWorkWeek(Date day) {
+        CPCalendar cal = getCalendar();
         cal.setTime(day);
-        return cal.get(Calendar.DAY_OF_WEEK) == getFirstDayOfWorkWeek();
+        return cal.get(Calendar.DAY_OF_WEEK) == cal.getFirstDayOfWorkWeek();
     }
 
-    public abstract boolean isPackaging(CPType type);
+    public Integer getWeekDayNumber(Date day) {
+        Calendar cal = getCalendar();
+        cal.setTime(day);
+        return Integer.valueOf(cal.get(Calendar.DAY_OF_WEEK));
+    }
 
-    public abstract CPPartition partition(List<CPAppointment> appointments);
+    public boolean isOnTwoDays(CPAppointment appointment) {
+        return isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate());
+    }
+
+    public boolean isInTwoWeeks(CPAppointment appointment) {
+        return isInDifferentWeeks(appointment.getStartDate(), appointment.getEndDate());
+    }
 }
