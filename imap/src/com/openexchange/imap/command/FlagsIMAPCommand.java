@@ -109,10 +109,11 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
                     flagsStr = flagsStrBuilder.toString();
                 }
             }
-            args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-                uids,
-                true,
-                MAX_LENGTH + (null == flagsStr ? 0 : flagsStr.length()));
+            args =
+                isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                    uids,
+                    !silent,
+                    MAX_LENGTH + (null == flagsStr ? 0 : flagsStr.length()));
 
         }
         this.enable = enable;
