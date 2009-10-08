@@ -64,6 +64,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
 import com.openexchange.calendar.printing.blocks.CPFormattingInformation;
 import com.openexchange.calendar.printing.blocks.CPPartition;
+import com.openexchange.calendar.printing.blocks.WeekPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -76,8 +77,6 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CPServlet}
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - logic
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - skeleton
  */
@@ -159,7 +158,10 @@ public class CPServlet extends PermissionServlet {
             
             CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
+            factory.addStrategy(new WeekPartitioningStrategy());
+            factory.setCalendar(new CPCalendar());
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
+
             CPPartition partitions = factory.partition(expandedAppointments);
 
             Map<String, Object> variables = new HashMap<String, Object>();
