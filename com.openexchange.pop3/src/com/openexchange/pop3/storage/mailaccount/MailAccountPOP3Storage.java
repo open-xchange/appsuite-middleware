@@ -84,6 +84,7 @@ import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
+import com.openexchange.pop3.storage.mailaccount.util.Utility;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
@@ -128,10 +129,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
         {
             String tmp = properties.getProperty(POP3StoragePropertyNames.PROPERTY_PATH);
             if (null == tmp) {
-                final POP3Exception e = new POP3Exception(
-                    POP3Exception.Code.MISSING_PATH,
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
+                final POP3Exception e =
+                    new POP3Exception(
+                        POP3Exception.Code.MISSING_PATH,
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
                 LOG.warn("Path is null. Error:" + e.getMessage(), e);
                 // Try to compose path
                 tmp = composePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
@@ -157,9 +159,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
             final int pos = fn.lastIndexOf(sep);
             final String accoutnName;
             try {
-                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                 accoutnName = storageService.getMailAccount(pop3AccountId, user, cid).getName();
             } catch (final ServiceException e) {
                 throw new MailException(e);
@@ -202,7 +203,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     public int getUnreadMessagesCount(final String fullname) throws MailException {
-        return defaultMailAccess.getUnreadMessagesCount(fullname);
+        final String realFullname = getRealFullname(fullname);
+        return defaultMailAccess.getUnreadMessagesCount(realFullname);
     }
 
     public void connect() throws MailException {
@@ -248,11 +250,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public IMailMessageStorage getMessageStorage() throws MailException {
         if (null == messageStorage) {
-            messageStorage = new MailAccountPOP3MessageStorage(
-                defaultMailAccess.getMessageStorage(),
-                this,
-                pop3AccountId,
-                pop3Access.getSession());
+            messageStorage =
+                new MailAccountPOP3MessageStorage(defaultMailAccess.getMessageStorage(), this, pop3AccountId, pop3Access.getSession());
         }
         return messageStorage;
     }
@@ -301,11 +300,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
     public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) throws MailException {
-        final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(
-            pop3Access.getPOP3Config(),
-            pop3Access.getMailProperties(),
-            false,
-            pop3Access.getSession());
+        final POP3Store pop3Store =
+            POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, pop3Access.getSession());
         /*
          * Increase counter
          */
@@ -443,6 +439,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public POP3StorageTrashContainer getTrashContainer() throws MailException {
         return SessionPOP3StorageTrashContainer.getInstance(pop3Access);
+    }
+
+    private String getRealFullname(final String fullname) throws MailException {
+        return Utility.prependPath2Fullname(path, getSeparator(), fullname);
     }
 
 }

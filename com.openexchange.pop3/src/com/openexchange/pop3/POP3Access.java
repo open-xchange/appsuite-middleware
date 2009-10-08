@@ -103,7 +103,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
 
-    private static final ConcurrentMap<InetSocketAddress, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
+    private static final ConcurrentMap<InetSocketAddress, Future<Object>> SYNCHRONIZER_MAP =
+        new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
 
     /*-
      * Members
@@ -160,10 +161,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             // At least this property must be kept in database
             String providerName = POP3StorageUtil.getPOP3StorageProviderName(pop3Access.accountId, user, cid);
             if (null == providerName) {
-                final POP3Exception e = new POP3Exception(
-                    POP3Exception.Code.MISSING_POP3_STORAGE_NAME,
-                    Integer.valueOf(user),
-                    Integer.valueOf(cid));
+                final POP3Exception e =
+                    new POP3Exception(POP3Exception.Code.MISSING_POP3_STORAGE_NAME, Integer.valueOf(user), Integer.valueOf(cid));
                 LOG.warn("Using fallback storage \"mailaccount\". Error: " + e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
                 // Add to properties
@@ -313,6 +312,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     }
 
     @Override
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        return pop3Storage.getUnreadMessagesCount(fullname);
+    }
+
+    @Override
     public boolean ping() throws MailException {
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
@@ -351,25 +355,26 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         Future<Object> f = SYNCHRONIZER_MAP.get(server);
         boolean removeFromMap = false;
         if (null == f) {
-            final FutureTask<Object> ft = new FutureTask<Object>(new POP3SyncMessagesCallable(
-                this,
-                pop3Storage,
-                pop3StorageProperties,
-                getFolderStorage(),
-                new POP3StorageConnectCounter() {
+            final FutureTask<Object> ft =
+                new FutureTask<Object>(new POP3SyncMessagesCallable(
+                    this,
+                    pop3Storage,
+                    pop3StorageProperties,
+                    getFolderStorage(),
+                    new POP3StorageConnectCounter() {
 
-                    public void decrementCounter() {
-                        MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
-                        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-                        POP3Access.decrementCounter();
-                    }
+                        public void decrementCounter() {
+                            MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
+                            MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
+                            POP3Access.decrementCounter();
+                        }
 
-                    public void incrementCounter() {
-                        MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
-                        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-                        POP3Access.incrementCounter();
-                    }
-                }));
+                        public void incrementCounter() {
+                            MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
+                            MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
+                            POP3Access.incrementCounter();
+                        }
+                    }));
             f = SYNCHRONIZER_MAP.putIfAbsent(server, ft);
             if (f == null) {
                 /*
@@ -477,9 +482,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected IMailProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final ServiceException e) {
             throw new POP3Exception(e);
