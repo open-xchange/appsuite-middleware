@@ -389,6 +389,32 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return getFolderStorage().getRootFolder();
     }
 
+    /**
+     * Convenience method to obtain folder's number of unread messages in a fast way; meaning no default folder check is performed.
+     * <p>
+     * The same result is yielded through calling <code>getFolderStorage().getFolder().getUnreadMessageCount()</code> on a connected
+     * {@link MailAccess}.
+     * <p>
+     * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
+     * afterwards:
+     * 
+     * <pre>
+     * final MailAccess mailAccess = MailAccess.getInstance(session);
+     * final int unreadCount = mailAccess.getNumberOfUnreadMessages();
+     * try {
+     *  // Do something with unread count
+     * } finally {
+     *  mailAccess.close(putToCache)
+     * }
+     * </pre>
+     * 
+     * @throws MailException If returning the unread count fails
+     */
+    public int getUnreadMessagesCount(final String fullname) throws MailException {
+        connect0(false);
+        return getFolderStorage().getFolder(fullname).getUnreadMessageCount();
+    }
+
     private final void connect0(final boolean checkDefaultFolder) throws MailException {
         applyNewThread();
         if (isConnected()) {
@@ -412,14 +438,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             throw e;
         } catch (final Exception e) {
             final MailConfig mailConfig = getMailConfig();
-            final MailException mailExc = new MailException(
-                MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
-                e,
-                mailConfig.getServer(),
-                Integer.valueOf(session.getUserId()),
-                mailConfig.getLogin(),
-                Integer.valueOf(session.getContextId()),
-                e.getMessage());
+            final MailException mailExc =
+                new MailException(
+                    MailException.Code.DEFAULT_FOLDER_CHECK_FAILED,
+                    e,
+                    mailConfig.getServer(),
+                    Integer.valueOf(session.getUserId()),
+                    mailConfig.getLogin(),
+                    Integer.valueOf(session.getContextId()),
+                    e.getMessage());
             LOG.error(mailExc.getMessage(), mailExc);
             closeInternal();
             throw mailExc;
