@@ -330,6 +330,13 @@ public final class IMAPCommandsCollection {
         })).booleanValue();
     }
 
+    /**
+     * Gets total, recent, and unseen counts from given IMAP folder
+     * 
+     * @param imapFolder The IMAP folder
+     * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
+     * @throws MessagingException If determining counts fails
+     */
     public static int[] getStatus(final IMAPFolder imapFolder) throws MessagingException {
         return (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
