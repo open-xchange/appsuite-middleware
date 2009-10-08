@@ -83,9 +83,7 @@ public class CPParameters {
     private int folder;
 
     private List<String> missingFields;
-    
-    private boolean isValid = true;
-    
+        
     public CPParameters() {
 
     }
