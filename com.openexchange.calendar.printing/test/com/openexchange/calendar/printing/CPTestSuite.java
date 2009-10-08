@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing;
 
+import com.openexchange.calendar.printing.blocks.WeekPartitioningTest;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -66,7 +67,9 @@ public class CPTestSuite extends TestSuite {
         final TestSuite suite = new TestSuite();
         suite.addTestSuite(CPToolTest.class);
         suite.addTestSuite(WorkWeekPartitioningTest.class);
+        suite.addTestSuite(WeekPartitioningTest.class);
         suite.addTestSuite(CPTypeTest.class);
+        suite.addTestSuite(CPCalendarTest.class);
         return suite;
     }
 }
