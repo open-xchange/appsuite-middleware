@@ -488,8 +488,7 @@ public final class ServerActivator extends DeferredActivator {
         {
             registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
             final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
-            final String[] topics = { "com/openexchange/sessiond/remove/session", "com/openexchange/sessiond/remove/container" };
-            serviceProperties.put(EventConstants.EVENT_TOPIC, topics);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
             registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
         }
         registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(

@@ -106,6 +106,15 @@ public final class MailSessionEventHandler implements EventHandler {
     static final String PROP_CONTAINER = "com.openexchange.sessiond.container";
 
     /**
+     * Gets the topics.
+     * 
+     * @return The topics
+     */
+    public static String[] getTopics() {
+        return new String[] { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER };
+    }
+
+    /**
      * Initializes a new {@link MailSessionEventHandler}.
      */
     public MailSessionEventHandler() {
