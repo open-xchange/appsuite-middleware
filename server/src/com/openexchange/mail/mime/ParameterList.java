@@ -94,9 +94,10 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         final String paramNameRegex = "([\\p{ASCII}&&[^=\"\\s;]]+)";
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
         final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")"; // Grab '\"' char sequence or any non-quote character
-        PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
+        PATTERN_PARAM_LIST =
+            Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
 
-        PATTERN_PARAM_CORRECT = Pattern.compile(paramNameRegex + "( *= *)([^\" ][^; \t]*[ \t][^;]*)($|;)");
+        PATTERN_PARAM_CORRECT = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "( *= *)([^\" ][^; \t]*[ \t][^;]*)($|;)");
     }
 
     private static final String CHARSET_UTF_8 = "utf-8";
@@ -122,13 +123,21 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     /**
-     * Corrects any unquoted strings to quoted strings.
+     * Corrects given parameter list string.
+     * <ul>
+     * <li>Ensures starting <code>';'</code> character</li>
+     * <li>Turns any unquoted strings to quoted strings</li>
+     * </ul>
      * 
      * @param parameterList The parameter list's string representation to correct
      * @return The corrected parameter list's string representation.
      */
     private static String correctParamList(final String parameterList) {
-        return PATTERN_PARAM_CORRECT.matcher(parameterList).replaceAll("$1$2\"$3\"$4");
+        String toParse = parameterList;
+        if (';' != toParse.charAt(0)) {
+            toParse = new StringBuilder(toParse.length() + 2).append("; ").append(toParse).toString();
+        }
+        return PATTERN_PARAM_CORRECT.matcher(toParse).replaceAll("$1$2\"$3\"$4");
     }
 
     public int compareTo(final ParameterList other) {
@@ -211,7 +220,8 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if (value == null) {
             val = "";
         } else {
-            val = (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? unescape(value.substring(1, value.length() - 1)) : value;
+            val =
+                (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? unescape(value.substring(1, value.length() - 1)) : value;
         }
         int pos = name.indexOf('*');
         if (pos == -1) {
@@ -410,8 +420,8 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     /**
      * Special characters (binary sorted) that must be in quoted-string to be used within parameter values
      */
-    private static final char[] SPECIALS = {
-        '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
+    private static final char[] SPECIALS =
+        { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
 
     private static boolean containsSpecial(final String str) {
         final char[] chars = str.toCharArray();
