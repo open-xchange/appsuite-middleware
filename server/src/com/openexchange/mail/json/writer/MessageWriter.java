@@ -72,6 +72,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
+import com.openexchange.mail.parser.handlers.RawJSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
@@ -117,11 +118,34 @@ public final class MessageWriter {
         }
         final UserSettingMail usm;
         try {
-            usm = null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
+            usm =
+                null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
         } catch (final UserConfigurationException e) {
             throw new MailException(e);
         }
         final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, session, usm);
+        new MailMessageParser().parseMailMessage(mail, handler);
+        return handler.getJSONObject();
+    }
+
+    /**
+     * Writes raw mail as a JSON object.
+     * 
+     * @param accountId The account ID
+     * @param mail The mail to write
+     * @return The written JSON object
+     * @throws MailException If writing message fails
+     */
+    public static JSONObject writeRawMailMessage(final int accountId, final MailMessage mail) throws MailException {
+        final MailPath mailPath;
+        if (mail.getFolder() != null && mail.getMailId() != null) {
+            mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
+        } else if (mail.getMsgref() != null) {
+            mailPath = mail.getMsgref();
+        } else {
+            mailPath = MailPath.NULL;
+        }
+        final RawJSONMessageHandler handler = new RawJSONMessageHandler(accountId, mailPath, mail);
         new MailMessageParser().parseMailMessage(mail, handler);
         return handler.getJSONObject();
     }
@@ -357,7 +381,8 @@ public final class MessageWriter {
                     if ((mail.containsPrevSeen() ? mail.isPrevSeen() : mail.isSeen())) {
                         value = JSONObject.NULL;
                     } else {
-                        value = mail.getDispositionNotification() == null ? JSONObject.NULL : mail.getDispositionNotification().toUnicodeString();
+                        value =
+                            mail.getDispositionNotification() == null ? JSONObject.NULL : mail.getDispositionNotification().toUnicodeString();
                     }
                     if (withKey) {
                         if (!JSONObject.NULL.equals(value)) {

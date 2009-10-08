@@ -71,6 +71,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -129,6 +130,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -136,6 +138,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.parser.MessageParser;
+import com.openexchange.mail.json.writer.JSONObjectConverter;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
@@ -163,6 +166,8 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -186,6 +191,8 @@ import com.openexchange.tools.versit.utility.VersitUtility;
 public class Mail extends PermissionServlet implements UploadListener {
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Mail.class);
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 
@@ -965,6 +972,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final Response actionGetMessage(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
+        final long s = DEBUG ? System.currentTimeMillis() : 0L;
         /*
          * Some variables
          */
@@ -995,6 +1003,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message
              */
+
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -1002,14 +1011,14 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                /*
-                 * Get \Seen state
-                 */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
-                if (mail == null) {
-                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, uid, folderPath);
-                }
                 if (showMessageSource) {
+                    /*
+                     * Get message
+                     */
+                    final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                    if (mail == null) {
+                        throw new MailException(MailException.Code.MAIL_NOT_FOUND, uid, folderPath);
+                    }
                     final UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
                     try {
                         mail.writeTo(baos);
@@ -1087,6 +1096,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                 } else if (showMessageHeaders) {
+                    /*
+                     * Get message
+                     */
+                    final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                    if (mail == null) {
+                        throw new MailException(MailException.Code.MAIL_NOT_FOUND, uid, folderPath);
+                    }
                     final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
                     final boolean doUnseen = (unseen && wasUnseen);
                     if (doUnseen) {
@@ -1101,7 +1117,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                          */
                         mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                     } else if (wasUnseen) {
-                        triggerContactCollector(session, mail);
+                        try {
+                            if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
+                                session.getContextId(),
+                                session.getUserId()).booleanValue()) {
+                                triggerContactCollector(session, mail);
+                            }
+                        } catch (final SettingException e) {
+                            LOG.warn("Contact collector could not be triggered.", e);
+                        }
                     }
                 } else {
                     final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
@@ -1112,44 +1136,135 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Overwrite settings with request's parameters
                      */
-                    final DisplayMode displayMode;
-                    if (null != view) {
-                        if (VIEW_RAW.equals(view)) {
-                            displayMode = DisplayMode.RAW;
-                        } else if (VIEW_TEXT.equals(view)) {
-                            usmNoSave.setDisplayHtmlInlineContent(false);
-                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
-                        } else if (VIEW_HTML.equals(view)) {
-                            usmNoSave.setDisplayHtmlInlineContent(true);
-                            usmNoSave.setAllowHTMLImages(true);
-                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
-                        } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
-                            usmNoSave.setDisplayHtmlInlineContent(true);
-                            usmNoSave.setAllowHTMLImages(false);
-                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
-                        } else {
-                            LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(
-                                view).append(". Using user's mail settings as fallback."));
-                            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
-                        }
-                    } else {
-                        displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
-                    }
-                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                    final boolean doUnseen = (unseen && wasUnseen);
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                    }
-                    data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave);
-                    if (doUnseen) {
+                    final DisplayMode displayMode = detectDisplayMode(editDraft, view, usmNoSave);
+                    final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+                    final JSONMessageCache cache = JSONMessageCache.getInstance();
+                    /*
+                     * Fetch either from JSON message cache or fetch on-the-fly from storage
+                     */
+                    final int accountId = fa.getAccountId();
+                    final String fullname = fa.getFullname();
+                    if (cache.containsKey(accountId, fullname, uid, session)) {
+                        final JSONObject rawJSONMailObject = cache.get(accountId, fullname, uid, session);
                         /*
-                         * Leave mail as unseen
+                         * Check if message should be marked as seen
                          */
-                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                    } else if (wasUnseen) {
-                        triggerContactCollector(session, mail);
+                        final String flagsKey = MailJSONField.FLAGS.getKey();
+                        final int flags = rawJSONMailObject.getInt(flagsKey);
+                        final boolean wasUnseen = (flags & MailMessage.FLAG_SEEN) == 0;
+                        final boolean doUnseen = (unseen && wasUnseen);
+                        if (!doUnseen && wasUnseen) {
+                            /*
+                             * Mark message as seen
+                             */
+                            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                            if (null == threadPool) {
+                                // In this thread
+                                mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);
+                            } else {
+                                // In another thread
+                                final Callable<Object> seenCallable = new Callable<Object>() {
+
+                                    public Object call() throws Exception {
+
+                                        final String[] ids = new String[] { uid };
+                                        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+                                        mailAccess.connect(false);
+                                        try {
+                                            mailAccess.getMessageStorage().updateMessageFlags(fullname, ids, MailMessage.FLAG_SEEN, true);
+                                        } finally {
+                                            mailAccess.close(true);
+                                        }
+                                        /*
+                                         * Update caches
+                                         */
+                                        final int unread = mailAccess.getUnreadMessagesCount(fullname);
+                                        cache.switchSeenFlag(accountId, fullname, ids, true, unread, session);
+                                        try {
+                                            final int userId = session.getUserId();
+                                            final int cid = session.getContextId();
+                                            if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, userId, cid)) {
+                                                /*
+                                                 * Update cache entries
+                                                 */
+                                                MailMessageCache.getInstance().updateCachedMessages(
+                                                    ids,
+                                                    accountId,
+                                                    fullname,
+                                                    userId,
+                                                    cid,
+                                                    new MailListField[] { MailListField.FLAGS },
+                                                    new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
+                                            }
+                                        } catch (final OXCachingException e) {
+                                            LOG.error(e.getMessage(), e);
+                                        }
+
+                                        return null;
+                                    }
+                                };
+                                threadPool.submit(ThreadPools.task(seenCallable));
+                            }
+                            /*
+                             * Switch \Seen flag in JSON mail object
+                             */
+                            rawJSONMailObject.put(flagsKey, (flags | MailMessage.FLAG_SEEN));
+                            /*
+                             * Decrement UNREAD count
+                             */
+                            final String unreadKey = MailJSONField.UNREAD.getKey();
+                            final int unread = rawJSONMailObject.optInt(unreadKey);
+                            rawJSONMailObject.put(unreadKey, unread > 0 ? unread - 1 : unread);
+                        }
+                        /*
+                         * Turn to request-specific JSON mail object
+                         */
+                        final JSONObject mailObject =
+                            new JSONObjectConverter(rawJSONMailObject, displayMode, session, usmNoSave, session.getContext()).raw2Json();
+                        if (wasUnseen) {
+                            try {
+                                if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
+                                    session.getContextId(),
+                                    session.getUserId()).booleanValue()) {
+                                    triggerContactCollector(session, mailObject);
+                                }
+                            } catch (final SettingException e) {
+                                LOG.warn("Contact collector could not be triggered.", e);
+                            }
+                        }
+                        data = mailObject;
+                    } else {
+                        /*
+                         * Get message
+                         */
+                        final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                        if (mail == null) {
+                            throw new MailException(MailException.Code.MAIL_NOT_FOUND, uid, folderPath);
+                        }
+                        final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                        final boolean doUnseen = (unseen && wasUnseen);
+                        if (doUnseen) {
+                            mail.setFlag(MailMessage.FLAG_SEEN, false);
+                            final int unreadMsgs = mail.getUnreadMessages();
+                            mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+                        }
+                        data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave);
+                        if (doUnseen) {
+                            /*
+                             * Leave mail as unseen
+                             */
+                            mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                        } else if (wasUnseen) {
+                            try {
+                                if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
+                                    session.getContextId(),
+                                    session.getUserId()).booleanValue()) {
+                                    triggerContactCollector(session, mail);
+                                }
+                            } catch (final SettingException e) {
+                                LOG.warn("Contact collector could not be triggered.", e);
+                            }
+                        }
                     }
                 }
             } finally {
@@ -1173,7 +1288,38 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
+        if (DEBUG) {
+            final long d = System.currentTimeMillis() - s;
+            LOG.debug(new StringBuilder(64).append("/ajax/mail?action=get performed in ").append(d).append("msec"));
+        }
         return response;
+    }
+
+    private static DisplayMode detectDisplayMode(final boolean editDraft, final String view, final UserSettingMail usmNoSave) {
+        final DisplayMode displayMode;
+        if (null != view) {
+            if (VIEW_RAW.equals(view)) {
+                displayMode = DisplayMode.RAW;
+            } else if (VIEW_TEXT.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(false);
+                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_HTML.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(true);
+                usmNoSave.setAllowHTMLImages(true);
+                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(true);
+                usmNoSave.setAllowHTMLImages(false);
+                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else {
+                LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
+                    ". Using user's mail settings as fallback."));
+                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            }
+        } else {
+            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+        }
+        return displayMode;
     }
 
     private static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
@@ -1202,6 +1348,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                 LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
 
             }
+            if (!addrs.isEmpty()) {
+                // Add addresses
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+            // TODO:
             if (!addrs.isEmpty()) {
                 // Add addresses
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);

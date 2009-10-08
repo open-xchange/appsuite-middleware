@@ -94,7 +94,9 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.cache.MailPrefetcherCallable;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -126,6 +128,8 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -144,6 +148,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailField[] FIELDS_ID_INFO = new MailField[] { MailField.ID, MailField.FOLDER_ID };
 
     private static final String INBOX_ID = "INBOX";
+
+    private static final int MAX_NUMBER_OF_MESSAGES_2_CACHE = 50;
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailServletInterfaceImpl.class);
 
@@ -224,6 +230,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
         mailAccess.getFolderStorage().clearFolder(fullname, !backup);
         try {
+            /*
+             * Update JSON cache
+             */
+            JSONMessageCache.getInstance().removeFolder(fullnameArgument.getAccountId(), fullname, session);
             /*
              * Update message cache
              */
@@ -312,6 +322,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             try {
                 /*
+                 * Update JSON cache
+                 */
+                JSONMessageCache.getInstance().removeFolder(source.getAccountId(), sourceFullname, session);
+                JSONMessageCache.getInstance().removeFolder(dest.getAccountId(), destFullname, session);
+                /*
                  * Update message cache
                  */
                 MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), contextId);
@@ -371,6 +386,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             try {
                 /*
+                 * Update JSON cache
+                 */
+                JSONMessageCache.getInstance().removeFolder(source.getAccountId(), sourceFullname, session);
+                JSONMessageCache.getInstance().removeFolder(dest.getAccountId(), destFullname, session);
+                /*
                  * Update message cache
                  */
                 MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), contextId);
@@ -388,7 +408,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public String deleteFolder(final String folder) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
-        initConnection(argument.getAccountId());
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
         final String fullname = argument.getFullname();
         /*
          * Only backup if fullname does not denote trash (sub)folder
@@ -399,9 +420,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder()))));
         try {
             /*
+             * Update JSON cache
+             */
+            JSONMessageCache.getInstance().removeFolder(accountId, fullname, session);
+            /*
              * Update message cache
              */
-            MailMessageCache.getInstance().removeFolderMessages(argument.getAccountId(), fullname, session.getUserId(), contextId);
+            MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -421,6 +446,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             (hardDelete || UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() || (null != trashFullname && fullname.startsWith(trashFullname)));
         mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hd);
         try {
+            /*
+             * Update JSON cache
+             */
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            for (final String uid : msgUIDs) {
+                jsonMessageCache.remove(argument.getAccountId(), fullname, uid, session);
+            }
             /*
              * Update message cache
              */
@@ -823,6 +855,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
                  */
                 this.accountId = accountId;
+                /*
+                 * Prefetch messages
+                 */
+                prefetchJSONMessages(fullname, uids);
                 return mails;
             }
         } catch (final OXCachingException e) {
@@ -838,7 +874,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
+        /*
+         * Prefetch messages
+         */
+        prefetchJSONMessages(fullname, uids);
         return mails;
+    }
+
+    private void prefetchJSONMessages(final String fullname, final String[] mailIds) {
+        /*
+         * Pre-Fetch messages' JSON representations
+         */
+        try {
+            final String[] prefetchIds;
+            if (mailIds.length > MAX_NUMBER_OF_MESSAGES_2_CACHE) {
+                prefetchIds = new String[MAX_NUMBER_OF_MESSAGES_2_CACHE];
+                System.arraycopy(mailIds, 0, prefetchIds, 0, MAX_NUMBER_OF_MESSAGES_2_CACHE);
+            } else {
+                prefetchIds = mailIds;
+            }
+            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+            threadPool.submit(ThreadPools.task(new MailPrefetcherCallable(session, accountId, fullname, prefetchIds, false, threadPool)));
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -888,23 +947,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = MailField.getFields(fields);
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
+        /*
+         * Extract IDs
+         */
+        final String[] mailIds = new String[mails.length];
+        for (int i = 0; i < mailIds.length; i++) {
+            mailIds[i] = mails[i].getMailId();
+        }
         if (!onlyFolderAndID) {
-            /*
-             * Extract IDs
-             */
-            final String[] mailIds = new String[mails.length];
-            for (int i = 0; i < mailIds.length; i++) {
-                mailIds[i] = mails[i].getMailId();
-            }
             /*
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
             mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
         }
+        /*
+         * Put message information into cache
+         */
         try {
             /*
              * Remove old user cache entries
              */
+            // TODO: JSONMessageCache.getInstance().removeAllFoldersExcept(accountId, fullname, session);
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
             if ((mails != null) && (mails.length > 0) && (cachable)) {
                 /*
@@ -1116,6 +1179,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Remove old user cache entries
              */
+            JSONMessageCache.getInstance().removeFolder(accountId, fullname, session);
+            /*
+             * Remove old user cache entries
+             */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
             if ((mails.length > 0) && (mails.length < MailProperties.getInstance().getMailFetchLimit())) {
                 /*
@@ -1159,9 +1226,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     public int getUnreadMessageCount(final String folder) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
-        initConnection(accountId);
         final String fullname = argument.getFullname();
-        return mailAccess.getFolderStorage().getFolder(fullname).getUnreadMessageCount();
+
+        final int retval;
+
+        if (!init) {
+            mailAccess = MailAccess.getInstance(session, accountId);
+            retval = mailAccess.getUnreadMessagesCount(fullname);
+            mailConfig = mailAccess.getMailConfig();
+            this.accountId = accountId;
+            init = true;
+        } else if (accountId != mailAccess.getAccountId()) {
+            mailAccess.close(true);
+            mailAccess = MailAccess.getInstance(session, accountId);
+            retval = mailAccess.getUnreadMessagesCount(fullname);
+            mailConfig = mailAccess.getMailConfig();
+            this.accountId = accountId;
+        } else {
+            retval = mailAccess.getUnreadMessagesCount(fullname);
+        }
+
+        return retval;
     }
 
     private void initConnection(final int accountId) throws MailException {
@@ -1518,6 +1603,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final String[] uids = new String[] { path.getMailID() };
                     mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
                     try {
+                        /*
+                         * Update JSON cache
+                         */
+                        JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
                         if (MailMessageCache.getInstance().containsFolderMessages(
                             mailAccess.getAccountId(),
                             fullname,
@@ -1554,6 +1643,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             ids[0] = path.getMailID();
                             mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                             try {
+                                JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), path.getFolder(), session);
                                 if (MailMessageCache.getInstance().containsFolderMessages(
                                     mailAccess.getAccountId(),
                                     path.getFolder(),
@@ -1584,6 +1674,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final String[] uids = new String[] { supPath.getMailID() };
                     mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
                     try {
+                        JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
                         if (MailMessageCache.getInstance().containsFolderMessages(
                             mailAccess.getAccountId(),
                             fullname,
@@ -1622,8 +1713,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname, new MailMessage[] { sentMail });
                 try {
                     /*
-                     * Update cache
+                     * Update caches
                      */
+                    JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), sentFullname, session);
+
                     MailMessageCache.getInstance().removeFolderMessages(
                         mailAccess.getAccountId(),
                         sentFullname,
@@ -1718,6 +1811,25 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
+        /*
+         * Update caches
+         */
+        {
+            final List<String> updateIds = new ArrayList<String>(msgUID.length);
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            for (int i = 0; i < msgUID.length; i++) {
+                final String uid = msgUID[i];
+                if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
+                    updateIds.add(uid);
+                }
+            }
+            if (!updateIds.isEmpty()) {
+                /*
+                 * Update color label in JSON message cache
+                 */
+                jsonMessageCache.updateColorFlag(accountId, fullname, msgUID, newColorLabel, session);
+            }
+        }
         try {
             if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                 /*
@@ -1744,9 +1856,34 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageFlags(fullname, msgUID, flagBits, flagVal);
+        /*
+         * Update caches
+         */
+        {
+            final List<String> updateIds = new ArrayList<String>(msgUID.length);
+            final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
+            for (int i = 0; i < msgUID.length; i++) {
+                final String uid = msgUID[i];
+                if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
+                    updateIds.add(uid);
+                }
+            }
+            if (!updateIds.isEmpty()) {
+                // Optimize for set to seen/unseen
+                int flags = flagBits;
+                if ((flags & MailMessage.FLAG_SEEN) > 0) {
+                    // Strip \Seen flag from bit mask
+                    flags = (flags & ~MailMessage.FLAG_SEEN);
+                    // Invoke special method for \Seen flag
+                    final int unread = mailAccess.getUnreadMessagesCount(fullname);
+                    jsonMessageCache.switchSeenFlag(accountId, fullname, msgUID, flagVal, unread, session);
+                }
+                jsonMessageCache.updateFlags(accountId, fullname, msgUID, flags, flagVal, session);
+            }
+        }
         if (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0)) {
             /*
-             * Remove from cache
+             * Remove from caches
              */
             try {
                 if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
@@ -1867,4 +2004,5 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         return retval;
     }
+
 }

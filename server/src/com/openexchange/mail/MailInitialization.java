@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -126,6 +127,16 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                     HTMLFilterHandler.resetWhitelist();
                 }
             }, startedStack);
+            startUp(new Initialization() {
+
+                public void start() throws AbstractOXException {
+                    JSONMessageCache.initInstance();
+                }
+
+                public void stop() {
+                    JSONMessageCache.releaseInstance();
+                }
+            }, startedStack);
             /*
              * Add to cache availability registry
              */
@@ -173,6 +184,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         /*
          * Stop global mail system
          */
+        JSONMessageCache.releaseInstance();
         MIMEType2ExtMap.reset();
         HTMLFilterHandler.resetWhitelist();
         HTMLProcessingInit.getInstance().stop();

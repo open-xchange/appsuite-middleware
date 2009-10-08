@@ -62,11 +62,12 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
-import com.openexchange.ajax.customizer.folder.FolderResponseCustomizer;
 import com.openexchange.ajax.customizer.folder.multi.MultiResponseCustomizer;
 import com.openexchange.ajax.customizer.folder.osgi.FolderCustomizerTracker;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
@@ -131,6 +132,7 @@ import com.openexchange.image.ImageService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
+import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
@@ -165,6 +167,7 @@ import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.event.SessiondEventConstants;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
@@ -387,7 +390,7 @@ public final class ServerActivator extends DeferredActivator {
             FolderDeleteListenerService.class.getName(),
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
         
-        MultiResponseCustomizer multiCustomizer = new MultiResponseCustomizer();
+        final MultiResponseCustomizer multiCustomizer = new MultiResponseCustomizer();
         folderCustomizerTracker = new FolderCustomizerTracker(context, multiCustomizer);
         Folder.setFolderResponseCustomizer(multiCustomizer);
         
@@ -483,7 +486,12 @@ public final class ServerActivator extends DeferredActivator {
             ContextService.class,
             true), null));
         registrationList.add(context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(), null));
-        registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+        {
+            registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+            final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
+        }
         registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ImageService.class), null));
         // TODO: Register search service here until its encapsulated in an own bundle
