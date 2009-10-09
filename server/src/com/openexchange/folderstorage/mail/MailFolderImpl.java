@@ -54,7 +54,11 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.mail.contentType.SentContentType;
+import com.openexchange.folderstorage.mail.contentType.SpamContentType;
+import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -70,7 +74,35 @@ public final class MailFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
 
-    private boolean root;
+    /**
+     * The mail folder content type.
+     */
+    public static enum MailFolderType {
+        NONE(MailContentType.getInstance()),
+        ROOT(SystemContentType.getInstance()),
+        INBOX(MailContentType.getInstance()),
+        DRAFTS(DraftsContentType.getInstance()),
+        SENT(SentContentType.getInstance()),
+        SPAM(SpamContentType.getInstance()),
+        TRASH(TrashContentType.getInstance());
+
+        private final ContentType contentType;
+
+        private MailFolderType(final ContentType contentType) {
+            this.contentType = contentType;
+        }
+
+        /**
+         * Gets the content type associated with this mail folder type.
+         * 
+         * @return The content typ
+         */
+        public ContentType getContentType() {
+            return contentType;
+        }
+    }
+
+    private MailFolderType mailFolderType;
 
     private boolean cacheable;
 
@@ -113,12 +145,26 @@ public final class MailFolderImpl extends AbstractFolder {
                     mailFolder.getUnreadMessageCount()).append(')').toString();
             this.summary = value;
         }
-        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && "INBOX".equals(fullname);
+        this.deefault = /* mailFolder.isDefaultFolder(); */0 == accountId && mailFolder.isDefaultFolder();
         this.total = mailFolder.getMessageCount();
         this.nu = mailFolder.getNewMessageCount();
         this.unread = mailFolder.getUnreadMessageCount();
         this.deleted = mailFolder.getDeletedMessageCount();
-        this.root = mailFolder.isRootFolder();
+        if (mailFolder.isRootFolder()) {
+            mailFolderType = MailFolderType.ROOT;
+        } else if (mailFolder.isInbox()) {
+            mailFolderType = MailFolderType.INBOX;
+        } else if (mailFolder.isTrash()) {
+            mailFolderType = MailFolderType.TRASH;
+        } else if (mailFolder.isSent()) {
+            mailFolderType = MailFolderType.SENT;
+        } else if (mailFolder.isSpam()) {
+            mailFolderType = MailFolderType.SPAM;
+        } else if (mailFolder.isDrafts()) {
+            mailFolderType = MailFolderType.DRAFTS;
+        } else {
+            mailFolderType = MailFolderType.NONE;
+        }
         /*
          * Trash folder must not be cacheable
          */
@@ -139,7 +185,7 @@ public final class MailFolderImpl extends AbstractFolder {
 
     @Override
     public ContentType getContentType() {
-        return root ? SystemContentType.getInstance() : MailContentType.getInstance();
+        return mailFolderType.getContentType();
     }
 
     @Override

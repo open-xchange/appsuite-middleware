@@ -49,41 +49,29 @@
 
 package com.openexchange.folderstorage.mail.contentType;
 
-import com.openexchange.folderstorage.ContentType;
-
 /**
- * {@link MailContentType} - The folder storage content type for mail.
+ * {@link SpamContentType} - The folder storage content type for trash mail folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailContentType implements ContentType {
+public final class SpamContentType extends MailContentType {
 
-    private static final MailContentType instance = new MailContentType();
+    private static final SpamContentType instance = new SpamContentType();
 
     /**
-     * Gets the {@link MailContentType} instance.
+     * Gets the {@link SpamContentType} instance.
      * 
-     * @return The {@link MailContentType} instance
+     * @return The {@link SpamContentType} instance
      */
     public static MailContentType getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link MailContentType}.
+     * Initializes a new {@link SpamContentType}.
      */
-    protected MailContentType() {
+    private SpamContentType() {
         super();
-    }
-
-    @Override
-    public String toString() {
-        return "mail";
-    }
-
-    public int getModule() {
-        // From FolderObject.MAIL
-        return 7;
     }
 
 }
