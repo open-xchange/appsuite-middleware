@@ -141,6 +141,7 @@ public class UpdateProcess implements Runnable {
                     }
                     LOG.info("Update task " + taskName + " on schema " + schema.getSchema() + " done.");
                 }
+                LOG.info("Finished updating schema " + schema.getSchema());
             } finally {
                 if (unlock) {
                     unlockSchema(schema);
