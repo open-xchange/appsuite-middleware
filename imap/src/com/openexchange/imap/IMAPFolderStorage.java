@@ -1081,7 +1081,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 name).toString());
                         while (newFolder.exists()) {
                             /*
-                             * A folder of the same name already exists. Append appropriate appendix to folder name and check existence again.
+                             * A folder of the same name already exists. Append appropriate appendix to folder name and check existence
+                             * again.
                              */
                             sb.setLength(0);
                             newFolder =
@@ -1328,22 +1329,27 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
             }
-            if (imapConfig.isSupportsACLs() && isSelectable(f)) {
-                try {
-                    if (!getACLExtension().canLookUp(RightsCache.getCachedRights(f, true, session, accountId))) {
-                        throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullname);
+            /*
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+             */
+            synchronized (f) {
+                if (imapConfig.isSupportsACLs() && isSelectable(f)) {
+                    try {
+                        if (!getACLExtension().canLookUp(RightsCache.getCachedRights(f, true, session, accountId))) {
+                            throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullname);
+                        }
+                    } catch (final MessagingException e) {
+                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
                     }
-                } catch (final MessagingException e) {
-                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
                 }
+                final List<MailFolder> list = new ArrayList<MailFolder>();
+                final String defaultFolder = imapStore.getDefaultFolder().getFullName();
+                while (!f.getFullName().equals(defaultFolder)) {
+                    list.add(IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx));
+                    f = (IMAPFolder) f.getParent();
+                }
+                return list.toArray(new MailFolder[list.size()]);
             }
-            final List<MailFolder> list = new ArrayList<MailFolder>();
-            final String defaultFolder = imapStore.getDefaultFolder().getFullName();
-            while (!f.getFullName().equals(defaultFolder)) {
-                list.add(IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx));
-                f = (IMAPFolder) f.getParent();
-            }
-            return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
