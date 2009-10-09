@@ -70,6 +70,14 @@ public class MailFolder implements Serializable {
      */
     private static final long serialVersionUID = -8203697938992090309L;
 
+    public static enum DefaulFolderType {
+        NONE, INBOX, DRAFTS, SENT, SPAM, TRASH, CONFIRMED_SPAM, CONFIRMED_HAM;
+    }
+
+    private DefaulFolderType defaulFolderType;
+
+    private boolean b_defaulFolderType;
+
     private String name;
 
     private boolean b_name;
@@ -177,6 +185,7 @@ public class MailFolder implements Serializable {
      */
     public MailFolder() {
         super();
+        defaulFolderType = DefaulFolderType.NONE;
     }
 
     /**
@@ -287,6 +296,42 @@ public class MailFolder implements Serializable {
     public void setSubscribedSubfolders(final boolean hasSubscribedSubfolders) {
         this.hasSubscribedSubfolders = hasSubscribedSubfolders;
         b_hasSubscribedSubfolders = true;
+    }
+
+    /**
+     * Gets the default folder type.
+     * 
+     * @return The default folder type
+     */
+    public DefaulFolderType getDefaultFolderType() {
+        return defaulFolderType;
+    }
+
+    /**
+     * Checks if default folder type was set through {@link #setDefaultFolderType(DefaulFolderType)}.
+     * 
+     * @return <code>true</code> if default folder type is set; otherwise <code>false</code>
+     */
+    public boolean containsDefaultFolderType() {
+        return b_defaulFolderType;
+    }
+
+    /**
+     * Removes the default folder type.
+     */
+    public void removeDefaultFolderType() {
+        defaulFolderType = DefaulFolderType.NONE;
+        b_defaulFolderType = false;
+    }
+
+    /**
+     * Sets default folder type.
+     * 
+     * @param name the name to set
+     */
+    public void setDefaultFolderType(final DefaulFolderType defaulFolderType) {
+        this.defaulFolderType = defaulFolderType;
+        b_defaulFolderType = true;
     }
 
     /**
