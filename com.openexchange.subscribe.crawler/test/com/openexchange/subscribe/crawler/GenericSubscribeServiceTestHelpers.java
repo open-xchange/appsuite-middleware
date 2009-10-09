@@ -64,7 +64,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
 
     public static final String VALID_EMAIL_REGEX = "([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)";
     public static final String VALID_NAME = "([a-zA-Z\\sŠšŸ§-]*)";
-    public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/]*)";
+    public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/\\(\\)]*)";
     
     public GenericSubscribeServiceTestHelpers() {
         super();

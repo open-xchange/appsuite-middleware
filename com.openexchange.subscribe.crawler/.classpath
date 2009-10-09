@@ -2,6 +2,14 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry exported="true" kind="lib" path="lib/gdata-base-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gdata-client-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gdata-client-meta-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gdata-contacts-3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gdata-contacts-meta-3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gdata-core-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-collect-1.0-rc1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsr305.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
