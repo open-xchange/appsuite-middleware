@@ -51,6 +51,7 @@ package com.openexchange.mail.twitter.converters;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.twitter.dataobjects.TwitterMailFolder;
 import com.openexchange.server.impl.OCLPermission;
@@ -91,6 +92,7 @@ public final class TwitterFolderConverter {
         mailFolder.setName("Inbox");
         mailFolder.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
         mailFolder.setDefaultFolder(true);
+        mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
         /*
          * INBOX folder only holds messages but no folders
          */
@@ -147,6 +149,7 @@ public final class TwitterFolderConverter {
         mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
         mailFolder.setParentFullname(null);
         mailFolder.setDefaultFolder(false);
+        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
         /*
          * Root folder only holds folders but no messages
          */

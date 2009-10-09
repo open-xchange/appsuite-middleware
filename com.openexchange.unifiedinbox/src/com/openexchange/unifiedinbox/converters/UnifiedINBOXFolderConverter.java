@@ -59,6 +59,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.ReadOnlyMailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mailaccount.MailAccount;
@@ -70,6 +71,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
@@ -86,7 +88,8 @@ public final class UnifiedINBOXFolderConverter {
 
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class);
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
@@ -122,6 +125,7 @@ public final class UnifiedINBOXFolderConverter {
             tmp.addPermission(permission);
         }
         tmp.setDefaultFolder(false);
+        tmp.setDefaultFolderType(DefaultFolderType.NONE);
         tmp.setMessageCount(-1);
         tmp.setNewMessageCount(-1);
         tmp.setUnreadMessageCount(-1);
@@ -200,6 +204,19 @@ public final class UnifiedINBOXFolderConverter {
         }
         // What else?!
         tmp.setDefaultFolder(true);
+        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+            tmp.setDefaultFolderType(DefaultFolderType.INBOX);
+        } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+            tmp.setDefaultFolderType(DefaultFolderType.TRASH);
+        } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+            tmp.setDefaultFolderType(DefaultFolderType.SENT);
+        } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+            tmp.setDefaultFolderType(DefaultFolderType.SPAM);
+        } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+            tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
+        } else {
+            tmp.setDefaultFolderType(DefaultFolderType.NONE);
+        }
         // Set message counts
         final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullname, unifiedInboxAccountId, session, tmp, executor);
         if (hasAtLeastOneSuchFolder) {
@@ -212,9 +229,8 @@ public final class UnifiedINBOXFolderConverter {
     private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, MailException {
         final MailAccount[] accounts;
         try {
-            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
             for (int i = 0; i < arr.length; i++) {
@@ -263,9 +279,10 @@ public final class UnifiedINBOXFolderConverter {
                             }
                             // Get counts
                             final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
-                            final int[] counts = new int[] {
-                                mailFolder.getMessageCount(), mailFolder.getUnreadMessageCount(), mailFolder.getDeletedMessageCount(),
-                                mailFolder.getNewMessageCount() };
+                            final int[] counts =
+                                new int[] {
+                                    mailFolder.getMessageCount(), mailFolder.getUnreadMessageCount(), mailFolder.getDeletedMessageCount(),
+                                    mailFolder.getNewMessageCount() };
                             retval.set(true);
                             return counts;
                         } finally {
@@ -347,8 +364,8 @@ public final class UnifiedINBOXFolderConverter {
                 final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullnames[i]);
                 if (null != accountFullname && mailAccess.getFolderStorage().exists(accountFullname)) {
                     final MailFolder mf = mailAccess.getFolderStorage().getFolder(accountFullname);
-                    retval[i] = new int[] {
-                        mf.getMessageCount(), mf.getUnreadMessageCount(), mf.getDeletedMessageCount(), mf.getNewMessageCount() };
+                    retval[i] =
+                        new int[] { mf.getMessageCount(), mf.getUnreadMessageCount(), mf.getDeletedMessageCount(), mf.getNewMessageCount() };
                 } else if (LOG.isDebugEnabled()) {
                     LOG.debug(new StringBuilder(32).append("Missing folder \"").append(fullnames[i]).append("\" in account ").append(
                         accountId).toString());
@@ -377,12 +394,13 @@ public final class UnifiedINBOXFolderConverter {
         for (int i = 0; i < retval.length; i++) {
             final MailFolder tmp = retval[i] = new MailFolder();
             // Subscription not supported by Unified INBOX, so every folder is "subscribed"
+            final String fullname = fullnames[i];
             tmp.setSubscribed(true);
             tmp.setSupportsUserFlags(true);
             tmp.setRootFolder(false);
             tmp.setExists(true);
             tmp.setSeparator('/');
-            tmp.setFullname(fullnames[i]);
+            tmp.setFullname(fullname);
             tmp.setParentFullname(MailFolder.DEFAULT_FOLDER_ID);
             tmp.setName(localizedNames[i]);
             tmp.setHoldsFolders(true);
@@ -395,6 +413,19 @@ public final class UnifiedINBOXFolderConverter {
             }
             // What else?!
             tmp.setDefaultFolder(true);
+            if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+                tmp.setDefaultFolderType(DefaultFolderType.INBOX);
+            } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+                tmp.setDefaultFolderType(DefaultFolderType.TRASH);
+            } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+                tmp.setDefaultFolderType(DefaultFolderType.SENT);
+            } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+                tmp.setDefaultFolderType(DefaultFolderType.SPAM);
+            } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+                tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
+            } else {
+                tmp.setDefaultFolderType(DefaultFolderType.NONE);
+            }
             // Gather counts
             int totaCount = 0;
             int unreadCount = 0;

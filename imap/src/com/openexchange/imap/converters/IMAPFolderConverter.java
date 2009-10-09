@@ -77,6 +77,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.OCLPermission;
@@ -171,6 +172,11 @@ public final class IMAPFolderConverter {
             imapFolder.getSeparator());
     }
 
+    private static final DefaultFolderType[] TYPES =
+        {
+            DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH, DefaultFolderType.CONFIRMED_SPAM,
+            DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
+
     /**
      * Creates a folder data object from given IMAP folder.
      * 
@@ -246,6 +252,7 @@ public final class IMAPFolderConverter {
              */
             if ("INBOX".equals(imapFullname)) {
                 mailFolder.setDefaultFolder(true);
+                mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
             } else if (isDefaultFoldersChecked(session, imapConfig.getAccountId())) {
                 final int len =
                     UserSettingMailStorage.getInstance().getUserSettingMail(
@@ -254,10 +261,12 @@ public final class IMAPFolderConverter {
                 for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
                     if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session, imapConfig.getAccountId()))) {
                         mailFolder.setDefaultFolder(true);
+                        mailFolder.setDefaultFolderType(TYPES[i]);
                     }
                 }
                 if (!mailFolder.containsDefaultFolder()) {
                     mailFolder.setDefaultFolder(false);
+                    mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                 }
             }
             /*
@@ -463,6 +472,7 @@ public final class IMAPFolderConverter {
             mailFolder.setName(MailFolder.DEFAULT_FOLDER_NAME);
             mailFolder.setParentFullname(null);
             mailFolder.setDefaultFolder(false);
+            mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
             /*
              * Root folder only holds folders but no messages
              */
