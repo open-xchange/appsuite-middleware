@@ -202,14 +202,19 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig, ctx);
             }
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
-            if (f.exists()) {
+            /*
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+             */
+            synchronized (f) {
+                if (f.exists()) {
+                    return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
+                }
+                f = checkForNamespaceFolder(fullname);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+                }
                 return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
             }
-            f = checkForNamespaceFolder(fullname);
-            if (null == f) {
-                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
-            }
-            return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -223,57 +228,63 @@ public final class IMAPFolderStorage extends MailFolderStorage {
             IMAPFolder parent;
             if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
                 parent = (IMAPFolder) imapStore.getDefaultFolder();
-                final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
                 /*
                  * Request subfolders the usual way
                  */
-                final List<Folder> subfolders = new ArrayList<Folder>();
-                {
-                    final IMAPFolder[] childFolders;
-                    final long start = System.currentTimeMillis();
-                    if (subscribed) {
-                        childFolders = (IMAPFolder[]) parent.listSubscribed(PATTERN_ALL);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } else {
-                        childFolders = (IMAPFolder[]) parent.list(PATTERN_ALL);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                final List<Folder> subfolders;
+                /*
+                 * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+                 */
+                synchronized (parent) {
+                    final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
+                    subfolders = new ArrayList<Folder>();
+                    {
+                        final IMAPFolder[] childFolders;
+                        final long start = System.currentTimeMillis();
+                        if (subscribed) {
+                            childFolders = (IMAPFolder[]) parent.listSubscribed(PATTERN_ALL);
+                            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        } else {
+                            childFolders = (IMAPFolder[]) parent.list(PATTERN_ALL);
+                            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        }
+                        subfolders.addAll(Arrays.asList(childFolders));
+                        boolean containsInbox = false;
+                        for (int i = 0; i < childFolders.length && !containsInbox; i++) {
+                            containsInbox = STR_INBOX.equals(childFolders[i].getFullName());
+                        }
+                        if (!containsInbox) {
+                            /*
+                             * Add folder INBOX manually
+                             */
+                            subfolders.add(0, imapStore.getFolder(STR_INBOX));
+                        }
                     }
-                    subfolders.addAll(Arrays.asList(childFolders));
-                    boolean containsInbox = false;
-                    for (int i = 0; i < childFolders.length && !containsInbox; i++) {
-                        containsInbox = STR_INBOX.equals(childFolders[i].getFullName());
-                    }
-                    if (!containsInbox) {
+                    if (imapConfig.getImapCapabilities().hasNamespace()) {
                         /*
-                         * Add folder INBOX manually
+                         * Merge with namespace folders
                          */
-                        subfolders.add(0, imapStore.getFolder(STR_INBOX));
-                    }
-                }
-                if (imapConfig.getImapCapabilities().hasNamespace()) {
-                    /*
-                     * Merge with namespace folders
-                     */
-                    {
-                        mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(
-                            imapStore,
-                            true,
-                            session,
-                            accountId), subscribed, parent);
-                    }
-                    {
-                        mergeWithNamespaceFolders(
-                            subfolders,
-                            NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId),
-                            subscribed,
-                            parent);
-                    }
-                    {
-                        mergeWithNamespaceFolders(
-                            subfolders,
-                            NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId),
-                            subscribed,
-                            parent);
+                        {
+                            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(
+                                imapStore,
+                                true,
+                                session,
+                                accountId), subscribed, parent);
+                        }
+                        {
+                            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getUserNamespaces(
+                                imapStore,
+                                true,
+                                session,
+                                accountId), subscribed, parent);
+                        }
+                        {
+                            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getSharedNamespaces(
+                                imapStore,
+                                true,
+                                session,
+                                accountId), subscribed, parent);
+                        }
                     }
                 }
                 /*
@@ -286,27 +297,32 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 return list.toArray(new MailFolder[list.size()]);
             }
             parent = (IMAPFolder) imapStore.getFolder(parentFullname);
-            if (parent.exists()) {
-                /*
-                 * Holds LOOK-UP right?
-                 */
-                if (imapConfig.isSupportsACLs() && isSelectable(parent)) {
-                    try {
-                        if (!getACLExtension().canLookUp(RightsCache.getCachedRights(parent, true, session, accountId))) {
-                            throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, parentFullname);
-                        }
-                    } catch (final MessagingException e) {
-                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
-                    }
-                }
-                return getSubfolderArray(all, parent);
-            }
             /*
-             * Check for namespace folder
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            parent = checkForNamespaceFolder(parentFullname);
-            if (null != parent) {
-                return getSubfolderArray(all, parent);
+            synchronized (parent) {
+                if (parent.exists()) {
+                    /*
+                     * Holds LOOK-UP right?
+                     */
+                    if (imapConfig.isSupportsACLs() && isSelectable(parent)) {
+                        try {
+                            if (!getACLExtension().canLookUp(RightsCache.getCachedRights(parent, true, session, accountId))) {
+                                throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, parentFullname);
+                            }
+                        } catch (final MessagingException e) {
+                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
+                        }
+                    }
+                    return getSubfolderArray(all, parent);
+                }
+                /*
+                 * Check for namespace folder
+                 */
+                parent = checkForNamespaceFolder(parentFullname);
+                if (null != parent) {
+                    return getSubfolderArray(all, parent);
+                }
             }
             return EMPTY_PATH;
         } catch (final MessagingException e) {
@@ -441,172 +457,182 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 parent = (IMAPFolder) imapStore.getFolder(parentFullname);
                 isParentDefault = false;
             }
-            if (!parent.exists()) {
-                parent = checkForNamespaceFolder(parentFullname);
-                if (null == parent) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
-                }
-            }
             /*
-             * Check if parent holds folders
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            if (!inferiors(parent)) {
-                throw IMAPException.create(
-                    IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
-                    imapConfig,
-                    session,
-                    parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
-            }
-            /*
-             * Check ACLs if enabled
-             */
-            if (imapConfig.isSupportsACLs()) {
-                try {
-                    if (!getACLExtension().canCreate(RightsCache.getCachedRights(parent, true, session, accountId))) {
-                        throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, parentFullname);
-                    }
-                } catch (final MessagingException e) {
-                    /*
-                     * MYRIGHTS command failed for given mailbox
-                     */
-                    if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
-                        parent.getFullName(),
-                        imapStore,
-                        true,
-                        session,
-                        accountId)) {
-                        /*
-                         * No namespace support or given parent is NOT covered by user's personal namespaces.
-                         */
-                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
-                    }
-                    if (DEBUG) {
-                        LOG.debug("MYRIGHTS command failed on namespace folder", e);
+            synchronized (parent) {
+                if (!parent.exists()) {
+                    parent = checkForNamespaceFolder(parentFullname);
+                    if (null == parent) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
                     }
                 }
-            }
-            /*
-             * Check if IMAP server is in MBox format; meaning folder either hold messages or subfolders but not both
-             */
-            final char separator = parent.getSeparator();
-            final boolean mboxEnabled =
-                MBoxEnabledCache.isMBoxEnabled(
-                    imapConfig.getImapServerSocketAddress(),
-                    parent,
-                    new StringBuilder(parent.getFullName()).append(separator).toString());
-            if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
-                throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
-            }
-            if (isParentDefault) {
                 /*
-                 * Below default folder
+                 * Check if parent holds folders
                  */
-                createMe = (IMAPFolder) imapStore.getFolder(name);
-            } else {
-                createMe =
-                    (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(separator).append(name).toString());
-            }
-            if (createMe.exists()) {
-                throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
-            }
-            final int ftype;
-            if (mboxEnabled) {
-                /*
-                 * Determine folder creation type dependent on folder name
-                 */
-                ftype = createMe.getName().endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES;
-            } else {
-                ftype = FOLDER_TYPE;
-            }
-            try {
-                if (!(created = createMe.create(ftype))) {
+                if (!inferiors(parent)) {
                     throw IMAPException.create(
-                        IMAPException.Code.FOLDER_CREATION_FAILED,
+                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
                         imapConfig,
                         session,
-                        createMe.getFullName(),
-                        parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                        parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
                 }
-            } catch (final MessagingException e) {
-                if ("Unsupported type".equals(e.getMessage())) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(
-                            "IMAP folder creation failed due to unsupported type." + " Going to retry with fallback type HOLDS-MESSAGES.",
-                            e);
-                    }
-                    if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
-                        throw IMAPException.create(
-                            IMAPException.Code.FOLDER_CREATION_FAILED,
-                            imapConfig,
+                /*
+                 * Check ACLs if enabled
+                 */
+                if (imapConfig.isSupportsACLs()) {
+                    try {
+                        if (!getACLExtension().canCreate(RightsCache.getCachedRights(parent, true, session, accountId))) {
+                            throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, parentFullname);
+                        }
+                    } catch (final MessagingException e) {
+                        /*
+                         * MYRIGHTS command failed for given mailbox
+                         */
+                        if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
+                            parent.getFullName(),
+                            imapStore,
+                            true,
                             session,
-                            e,
-                            createMe.getFullName(),
-                            parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                            accountId)) {
+                            /*
+                             * No namespace support or given parent is NOT covered by user's personal namespaces.
+                             */
+                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
+                        }
+                        if (DEBUG) {
+                            LOG.debug("MYRIGHTS command failed on namespace folder", e);
+                        }
                     }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
-                    }
-                } else {
-                    throw MIMEMailException.handleMessagingException(e, imapConfig, session);
                 }
-            }
-            /*
-             * Subscribe
-             */
-            if (!MailProperties.getInstance().isSupportSubscription()) {
-                IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
-            } else if (toCreate.containsSubscribed()) {
-                IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), toCreate.isSubscribed());
-            } else {
-                IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
-            }
-            if (imapConfig.isSupportsACLs() && toCreate.containsPermissions()) {
-                final ACL[] initialACLs = getACLSafe(createMe);
-                if (initialACLs != null) {
-                    final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
-                    final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
-                    final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
-                    final Map<String, ACL> m = acl2map(newACLs);
-                    if (!equals(initialACLs, m, entity2ACL, args)) {
-                        final ACLExtension aclExtension = getACLExtension();
-                        if (!aclExtension.canSetACL(createMe.myRights())) {
+                /*
+                 * Check if IMAP server is in MBox format; meaning folder either hold messages or subfolders but not both
+                 */
+                final char separator = parent.getSeparator();
+                final boolean mboxEnabled =
+                    MBoxEnabledCache.isMBoxEnabled(
+                        imapConfig.getImapServerSocketAddress(),
+                        parent,
+                        new StringBuilder(parent.getFullName()).append(separator).toString());
+                if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
+                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
+                }
+                if (isParentDefault) {
+                    /*
+                     * Below default folder
+                     */
+                    createMe = (IMAPFolder) imapStore.getFolder(name);
+                } else {
+                    createMe =
+                        (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(separator).append(name).toString());
+                }
+                /*
+                 * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+                 */
+                synchronized (createMe) {
+                    if (createMe.exists()) {
+                        throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
+                    }
+                    final int ftype;
+                    if (mboxEnabled) {
+                        /*
+                         * Determine folder creation type dependent on folder name
+                         */
+                        ftype = createMe.getName().endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES;
+                    } else {
+                        ftype = FOLDER_TYPE;
+                    }
+                    try {
+                        if (!(created = createMe.create(ftype))) {
                             throw IMAPException.create(
-                                IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
+                                IMAPException.Code.FOLDER_CREATION_FAILED,
                                 imapConfig,
                                 session,
-                                createMe.getFullName());
+                                createMe.getFullName(),
+                                parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
                         }
-                        boolean adminFound = false;
-                        for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                            if (aclExtension.canSetACL(newACLs[i].getRights())) {
-                                adminFound = true;
+                    } catch (final MessagingException e) {
+                        if ("Unsupported type".equals(e.getMessage())) {
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn(
+                                    "IMAP folder creation failed due to unsupported type." + " Going to retry with fallback type HOLDS-MESSAGES.",
+                                    e);
                             }
+                            if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
+                                throw IMAPException.create(
+                                    IMAPException.Code.FOLDER_CREATION_FAILED,
+                                    imapConfig,
+                                    session,
+                                    e,
+                                    createMe.getFullName(),
+                                    parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                            }
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
+                            }
+                        } else {
+                            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
                         }
-                        if (!adminFound) {
-                            throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, createMe.getFullName());
-                        }
-                        /*
-                         * Apply new ACLs
-                         */
-                        final Map<String, ACL> om = acl2map(initialACLs);
-                        for (int i = 0; i < newACLs.length; i++) {
-                            createMe.addACL(validate(newACLs[i], om));
-                        }
-                        /*
-                         * Remove other ACLs
-                         */
-                        final ACL[] removedACLs = getRemovedACLs(m, initialACLs);
-                        if (removedACLs.length > 0) {
-                            for (int i = 0; i < removedACLs.length; i++) {
-                                if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
-                                    createMe.removeACL(removedACLs[i].getName());
+                    }
+                    /*
+                     * Subscribe
+                     */
+                    if (!MailProperties.getInstance().isSupportSubscription()) {
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
+                    } else if (toCreate.containsSubscribed()) {
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), toCreate.isSubscribed());
+                    } else {
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
+                    }
+                    if (imapConfig.isSupportsACLs() && toCreate.containsPermissions()) {
+                        final ACL[] initialACLs = getACLSafe(createMe);
+                        if (initialACLs != null) {
+                            final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
+                            final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
+                            final Map<String, ACL> m = acl2map(newACLs);
+                            if (!equals(initialACLs, m, entity2ACL, args)) {
+                                final ACLExtension aclExtension = getACLExtension();
+                                if (!aclExtension.canSetACL(createMe.myRights())) {
+                                    throw IMAPException.create(
+                                        IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
+                                        imapConfig,
+                                        session,
+                                        createMe.getFullName());
+                                }
+                                boolean adminFound = false;
+                                for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
+                                    if (aclExtension.canSetACL(newACLs[i].getRights())) {
+                                        adminFound = true;
+                                    }
+                                }
+                                if (!adminFound) {
+                                    throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, createMe.getFullName());
+                                }
+                                /*
+                                 * Apply new ACLs
+                                 */
+                                final Map<String, ACL> om = acl2map(initialACLs);
+                                for (int i = 0; i < newACLs.length; i++) {
+                                    createMe.addACL(validate(newACLs[i], om));
+                                }
+                                /*
+                                 * Remove other ACLs
+                                 */
+                                final ACL[] removedACLs = getRemovedACLs(m, initialACLs);
+                                if (removedACLs.length > 0) {
+                                    for (int i = 0; i < removedACLs.length; i++) {
+                                        if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
+                                            createMe.removeACL(removedACLs[i].getName());
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                    return createMe.getFullName();
                 }
             }
-            return createMe.getFullName();
         } catch (final MessagingException e) {
             if (createMe != null && created) {
                 try {
