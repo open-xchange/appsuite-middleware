@@ -82,31 +82,6 @@ public final class JSONMessageCache {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
-     * The shrinker interval in seconds for the superior user map.
-     */
-    private static final int SHRINKER_INTERVAL_USER_MAP = 60; // 1 Minute
-
-    /**
-     * The shrinker interval in seconds for folder maps.
-     */
-    private static final int SHRINKER_INTERVAL_FOLDER_MAP = 60; // 1 Minute
-
-    /**
-     * The time-to-live in seconds for folder maps put into user map.
-     */
-    private static final int TTL_USER_MAP = 300; // 5 Minutes
-
-    /**
-     * The time-to-live in seconds for an ID-to-JSON mapping put into folder map.
-     */
-    private static final int TTL_FOLDER_MAP = 300; // 5 Minutes
-
-    /**
-     * The max. time in milliseconds to wait for a mail's JSON representation to become available in a folder map.
-     */
-    private static final int MAX_WAIT_TIME_MILLIS = 100;
-
-    /**
      * The cache instance.
      */
     private static JSONMessageCache instance;
@@ -164,7 +139,7 @@ public final class JSONMessageCache {
             // Check every N seconds for timed out user maps
             superMap =
                 new TimeoutConcurrentMap<UserKey, TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>>>(
-                    SHRINKER_INTERVAL_USER_MAP);
+                    JSONMessageCacheConfiguration.getInstance().getShrinkerIntervalUserMap());
             superMap.setDefaultTimeoutListener(new TimeoutListener<TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>>>() {
 
                 public void onTimeout(final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> element) {
@@ -208,13 +183,16 @@ public final class JSONMessageCache {
      * @throws MailException If put fails
      */
     public void put(final int accountId, final String fullname, final String id, final FutureTask<JSONObject> jsonMailObject, final int userId, final int cid) throws MailException {
+        final JSONMessageCacheConfiguration cacheConfiguration = JSONMessageCacheConfiguration.getInstance();
         final UserKey userKey = new UserKey(userId, cid);
         TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap = superMap.get(userKey);
         if (null == timeoutConcurrentMap) {
             final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> newMap;
             try {
                 // Check every N seconds for timed out folder maps
-                newMap = new TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>>(SHRINKER_INTERVAL_FOLDER_MAP);
+                newMap =
+                    new TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>>(
+                        cacheConfiguration.getShrinkerIntervalFolderMap());
                 if (DEBUG) {
                     newMap.setDefaultTimeoutListener(new FolderRemovalLogger(LOG, accountId, fullname, userId, cid));
                 }
@@ -222,7 +200,7 @@ public final class JSONMessageCache {
                 throw new MailException(e);
             }
             // A user map is valid for one hour
-            timeoutConcurrentMap = superMap.putIfAbsent(userKey, newMap, TTL_USER_MAP);
+            timeoutConcurrentMap = superMap.putIfAbsent(userKey, newMap, cacheConfiguration.getTTLUserMap());
             if (null == timeoutConcurrentMap) {
                 timeoutConcurrentMap = newMap;
             }
@@ -238,7 +216,7 @@ public final class JSONMessageCache {
         if (null == objectMap) {
             final ConcurrentMap<String, FutureTask<JSONObject>> newMap = new ConcurrentHashMap<String, FutureTask<JSONObject>>();
             // A folder map is valid for 5 minutes
-            objectMap = timeoutConcurrentMap.putIfAbsent(key, newMap, TTL_FOLDER_MAP);
+            objectMap = timeoutConcurrentMap.putIfAbsent(key, newMap, cacheConfiguration.getTTLFolderMap());
             if (null == objectMap) {
                 objectMap = newMap;
             }
@@ -347,14 +325,15 @@ public final class JSONMessageCache {
          * 2. Otherwise catch possible TimeoutException and handle it by performing Future's task with calling thread
          */
         try {
+            final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             try {
-                return clone(getFromFuture(future, MAX_WAIT_TIME_MILLIS));
+                return clone(getFromFuture(future, waitTimeMillis));
             } catch (final TimeoutException e) {
                 // Not yet available
                 if (DEBUG) {
                     final StringBuilder builder = new StringBuilder(64);
                     builder.append("Wait time of ");
-                    builder.append(MAX_WAIT_TIME_MILLIS);
+                    builder.append(waitTimeMillis);
                     builder.append("millis elapsed. Fetch message with calling thread.");
                     LOG.debug(builder.toString());
 
@@ -434,10 +413,11 @@ public final class JSONMessageCache {
             /*
              * Switch seen flag in messages
              */
+            final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             final String flagsKey = MailJSONField.FLAGS.getKey();
             for (final FutureTask<JSONObject> ft : futures) {
                 try {
-                    final JSONObject jsonObject = getFromFuture(ft, MAX_WAIT_TIME_MILLIS);
+                    final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
                     final int flags = jsonObject.optInt(flagsKey);
                     jsonObject.put(flagsKey, seen ? (flags | MailMessage.FLAG_SEEN) : (flags & ~MailMessage.FLAG_SEEN));
                 } catch (final TimeoutException e) {
@@ -450,7 +430,7 @@ public final class JSONMessageCache {
             final String unreadKey = MailJSONField.UNREAD.getKey();
             for (final FutureTask<JSONObject> ft : objectMap.values()) {
                 try {
-                    final JSONObject jsonObject = getFromFuture(ft, MAX_WAIT_TIME_MILLIS);
+                    final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
                     jsonObject.put(unreadKey, unread);
                 } catch (final TimeoutException e) {
                     // Not yet available
@@ -520,9 +500,10 @@ public final class JSONMessageCache {
              * Switch seen flag in messages
              */
             final String flagsKey = MailJSONField.FLAGS.getKey();
+            final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             for (final FutureTask<JSONObject> ft : futures) {
                 try {
-                    final JSONObject jsonObject = getFromFuture(ft, MAX_WAIT_TIME_MILLIS);
+                    final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
                     final int flags = jsonObject.optInt(flagsKey);
                     jsonObject.put(flagsKey, set ? (flags | newFlags) : (flags & ~newFlags));
                 } catch (final TimeoutException e) {
@@ -588,12 +569,13 @@ public final class JSONMessageCache {
          */
         try {
             final String clKey = MailJSONField.COLOR_LABEL.getKey();
+            final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             for (final FutureTask<JSONObject> ft : futures) {
                 /*
                  * Update color flag in message
                  */
                 try {
-                    final JSONObject jsonObject = getFromFuture(ft, MAX_WAIT_TIME_MILLIS);
+                    final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
                     jsonObject.put(clKey, colorFlag);
                 } catch (final TimeoutException e) {
                     // Not yet available
