@@ -62,6 +62,8 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.exception.SchemaException;
+import com.openexchange.groupware.update.internal.PerformParametersImpl;
+import com.openexchange.groupware.update.internal.ProgressStatusImpl;
 
 /**
  * The {@link #run()} method of this class is started in a separate thread for
@@ -135,7 +137,13 @@ public class UpdateProcess implements Runnable {
                     final String taskName = task.getClass().getSimpleName();
                     try {
                         LOG.info("Starting update task " + taskName + " on schema " + schema.getSchema() + ".");
-                        task.perform(schema, contextId);
+                        if (task instanceof UpdateTaskV2) {
+                            ProgressStatus logger = new ProgressStatusImpl(taskName, schema.getSchema());
+                            PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
+                            ((UpdateTaskV2) task).perform(params);
+                        } else {
+                            task.perform(schema, contextId);
+                        }
                     } catch (AbstractOXException e) {
                         LOG.error(e.getMessage(), e);
                     }

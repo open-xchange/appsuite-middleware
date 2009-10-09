@@ -71,14 +71,19 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressStatus;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaStoreImpl;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.update.internal.PerformParametersImpl;
+import com.openexchange.groupware.update.internal.ProgressStatusImpl;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -393,7 +398,13 @@ public final class UpdateTaskToolkit {
             }
             try {
                 LOG.info("Starting update task " + className + " on schema " + schema.getSchema() + ".");
-                task.perform(schema, contextId);
+                if (task instanceof UpdateTaskV2) {
+                    ProgressStatus logger = new ProgressStatusImpl(className, schema.getSchema());
+                    PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
+                    ((UpdateTaskV2) task).perform(params);
+                } else {
+                    task.perform(schema, contextId);
+                }
             } catch (final AbstractOXException e) {
                 LOG.error(e.getMessage(), e);
                 throw new UpdateException(e);

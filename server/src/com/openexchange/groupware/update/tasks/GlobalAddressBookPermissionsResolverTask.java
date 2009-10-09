@@ -60,10 +60,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -72,8 +73,9 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressStatus;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
@@ -86,7 +88,9 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public final class GlobalAddressBookPermissionsResolverTask implements UpdateTask {
+public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAdapter {
+
+    private static final Log LOG = LogFactory.getLog(GlobalAddressBookPermissionsResolverTask.class);
 
     /**
      * Initializes a new {@link GlobalAddressBookPermissionsResolverTask}.
@@ -103,16 +107,18 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(PerformParameters params) throws AbstractOXException {
+        ProgressStatus status = params.getStatus();
         /*
          * Get all contexts with contained users
          */
-        final Map<Integer, List<Integer>> m = getAllUsers(contextId);
+        final Map<Integer, List<Integer>> m = getAllUsers(params.getContextId());
+        status.setTotal(m.size());
         /*
          * Iterate per context
          */
-        for (final Iterator<Map.Entry<Integer, List<Integer>>> it = m.entrySet().iterator(); it.hasNext();) {
-            final Map.Entry<Integer, List<Integer>> me = it.next();
+        int counter = 1;
+        for (Map.Entry<Integer, List<Integer>> me : m.entrySet()) {
             final int currentContextId = me.getKey().intValue();
             try {
                 iterateUsersPerContext(me.getValue(), currentContextId);
@@ -122,17 +128,16 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
                 sb.append(currentContextId);
                 sb.append(":\n");
                 sb.append(e.getMessage());
-                final org.apache.commons.logging.Log logger =
-                    org.apache.commons.logging.LogFactory.getLog(GlobalAddressBookPermissionsResolverTask.class);
-                logger.error(sb.toString(), e);
+                LOG.error(sb.toString(), e);
             }
+            status.setState(counter++);
         }
     }
 
     private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws UpdateException {
         final Connection readCon;
         try {
-            readCon = Database.get(contextId, false);
+            readCon = Database.getNoTimeout(contextId, false);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -162,7 +167,7 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
             throw createSQLError(e);
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(contextId, false, readCon);
+            Database.backNoTimeout(contextId, false, readCon);
         }
     }
 
@@ -261,10 +266,8 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
         /*
          * Log
          */
-        final org.apache.commons.logging.Log logger =
-            org.apache.commons.logging.LogFactory.getLog(GlobalAddressBookPermissionsResolverTask.class);
-        if (logger.isInfoEnabled()) {
-            logger.info(new StringBuilder("Global Address Book permission resolved for context ").append(contextId).toString());
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder("Global Address Book permission resolved for context ").append(contextId).toString());
         }
     }
 
@@ -277,8 +280,6 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
             final int adminUserId;
             try {
                 adminUserId = getContextMailAdmin(writeCon, contextId);
-            } catch (final DBPoolingException e) {
-                throw new UpdateException(e);
             } catch (final SQLException e) {
                 throw createSQLError(e);
             }
@@ -326,7 +327,7 @@ public final class GlobalAddressBookPermissionsResolverTask implements UpdateTas
 
     private static final String SQL_GET_CONTEXT_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
 
-    private static int getContextMailAdmin(final Connection con, final int cid) throws DBPoolingException, SQLException {
+    private static int getContextMailAdmin(final Connection con, final int cid) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
