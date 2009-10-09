@@ -84,12 +84,12 @@ public final class JSONMessageCache {
     /**
      * The shrinker interval in seconds for the superior user map.
      */
-    private static final int SHRINKER_INTERVAL_USER_MAP = 300; // 5 Minutes
+    private static final int SHRINKER_INTERVAL_USER_MAP = 60; // 1 Minute
 
     /**
      * The shrinker interval in seconds for folder maps.
      */
-    private static final int SHRINKER_INTERVAL_FOLDER_MAP = 30; // 30 Seconds
+    private static final int SHRINKER_INTERVAL_FOLDER_MAP = 60; // 1 Minute
 
     /**
      * The time-to-live in seconds for folder maps put into user map.
