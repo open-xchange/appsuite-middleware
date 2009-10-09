@@ -171,7 +171,9 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public ContentType[] getSupportedContentTypes() {
-        return new ContentType[] { MailContentType.getInstance() };
+        return new ContentType[] {
+            MailContentType.getInstance(), DraftsContentType.getInstance(), SentContentType.getInstance(), SpamContentType.getInstance(),
+            TrashContentType.getInstance() };
     }
 
     public ContentType getDefaultContentType() {
