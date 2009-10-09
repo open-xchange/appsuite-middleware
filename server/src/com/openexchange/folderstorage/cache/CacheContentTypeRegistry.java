@@ -83,7 +83,7 @@ public final class CacheContentTypeRegistry {
 
         private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
 
-        private final List<FolderStorage> generalStorages;
+        private volatile List<FolderStorage> generalStorages;
 
         public Element() {
             super();
@@ -100,8 +100,7 @@ public final class CacheContentTypeRegistry {
         }
 
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            generalStorages.clear();
-            generalStorages.addAll(replacement);
+            generalStorages = new CopyOnWriteArrayList<FolderStorage>(replacement);
         }
 
     }

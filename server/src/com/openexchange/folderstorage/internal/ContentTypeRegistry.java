@@ -87,7 +87,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
         private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
 
-        private final List<FolderStorage> generalStorages;
+        private volatile List<FolderStorage> generalStorages;
 
         public Element() {
             super();
@@ -103,9 +103,13 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
             return generalStorages;
         }
 
+        /**
+         * Performs an atomic clear&addAll by reassigning volatile variable.
+         * 
+         * @param replacement The replacement
+         */
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            generalStorages.clear();
-            generalStorages.addAll(replacement);
+            generalStorages = new CopyOnWriteArrayList<FolderStorage>(replacement);
         }
 
     }
