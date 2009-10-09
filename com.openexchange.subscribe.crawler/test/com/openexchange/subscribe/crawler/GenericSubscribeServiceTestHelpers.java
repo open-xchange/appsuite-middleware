@@ -85,7 +85,8 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         GenericSubscribeService service = new GenericSubscribeService(
             crawler.getDisplayName(),
             crawler.getId(),
-            crawler.getWorkflowString());
+            crawler.getWorkflowString(),
+            crawler.getPriority());
 
         Workflow testWorkflow = service.getWorkflow();
         Contact[] contacts = new Contact[0];
@@ -105,6 +106,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
                 System.out.println("contacts mobile phone number : " + contact.getCellularTelephone1());
                 System.out.println("contacts work phone number : " + contact.getTelephoneBusiness1());
                 System.out.println("contacts home phone number : " + contact.getTelephoneHome1());
+                System.out.println("contacts instant messenger : " + contact.getInstantMessenger1());
                 System.out.println("contacts birthday : " + contact.getBirthday());
                 System.out.println("contacts picture type : " + contact.getImageContentType());
                 System.out.println("contacts street of work : " + contact.getStreetBusiness());

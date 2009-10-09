@@ -55,6 +55,8 @@ package com.openexchange.subscribe.crawler;
 public class CrawlerDescription {
 
     private String displayName, id, workflowString;
+    
+    private int priority = 0;
 
     public CrawlerDescription() {
 
@@ -84,4 +86,16 @@ public class CrawlerDescription {
         this.workflowString = workflowString;
     }
 
+    
+    public int getPriority() {
+        return priority;
+    }
+
+    
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    
+    
 }

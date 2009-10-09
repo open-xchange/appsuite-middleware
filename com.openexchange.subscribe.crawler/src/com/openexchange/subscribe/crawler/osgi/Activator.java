@@ -85,7 +85,8 @@ public class Activator implements BundleActivator {
                 GenericSubscribeService subscribeService = new GenericSubscribeService(
                     crawler.getDisplayName(),
                     crawler.getId(),
-                    crawler.getWorkflowString());
+                    crawler.getWorkflowString(), 
+                    crawler.getPriority());
                 ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
                 services.add(serviceRegistration);
             }

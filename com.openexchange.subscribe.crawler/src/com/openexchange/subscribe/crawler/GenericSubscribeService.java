@@ -78,7 +78,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     private String workflowString;
 
-    public GenericSubscribeService(String displayName, String id, String workflowString) {
+    public GenericSubscribeService(String displayName, String id, String workflowString, int priority) {
         FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
 
         SOURCE.setDisplayName(displayName);
@@ -86,6 +86,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         SOURCE.setFormDescription(FORM);
         SOURCE.setSubscribeService(this);
         SOURCE.setFolderModule(FolderObject.CONTACT);
+        SOURCE.setPriority(priority);
         this.workflowString = workflowString;
     }
 
