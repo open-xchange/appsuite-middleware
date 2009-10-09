@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -121,9 +122,9 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
      * @param capabilities The capabilities
-     * @param trashFullname The trash folder fullname
+     * @param fullnameProvider The (optional) fullname provider
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final String trashFullname) {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final DefaultFolderFullnameProvider fullnameProvider) {
         super();
         final String fullname = mailFolder.getFullname();
         this.id = MailFolderUtility.prepareFullname(accountId, fullname);
@@ -152,23 +153,48 @@ public final class MailFolderImpl extends AbstractFolder {
         this.deleted = mailFolder.getDeletedMessageCount();
         if (mailFolder.isRootFolder()) {
             mailFolderType = MailFolderType.ROOT;
-        } else if (mailFolder.isInbox()) {
-            mailFolderType = MailFolderType.INBOX;
-        } else if (mailFolder.isTrash()) {
-            mailFolderType = MailFolderType.TRASH;
-        } else if (mailFolder.isSent()) {
-            mailFolderType = MailFolderType.SENT;
-        } else if (mailFolder.isSpam()) {
-            mailFolderType = MailFolderType.SPAM;
-        } else if (mailFolder.isDrafts()) {
-            mailFolderType = MailFolderType.DRAFTS;
         } else {
-            mailFolderType = MailFolderType.NONE;
+            if (mailFolder.containsDefaultFolderType()) {
+                if (mailFolder.isInbox()) {
+                    mailFolderType = MailFolderType.INBOX;
+                } else if (mailFolder.isTrash()) {
+                    mailFolderType = MailFolderType.TRASH;
+                } else if (mailFolder.isSent()) {
+                    mailFolderType = MailFolderType.SENT;
+                } else if (mailFolder.isSpam()) {
+                    mailFolderType = MailFolderType.SPAM;
+                } else if (mailFolder.isDrafts()) {
+                    mailFolderType = MailFolderType.DRAFTS;
+                } else {
+                    mailFolderType = MailFolderType.NONE;
+                }
+            } else if (null != fullname) {
+                try {
+                    if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                        mailFolderType = MailFolderType.DRAFTS;
+                    } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
+                        mailFolderType = MailFolderType.INBOX;
+                    } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                        mailFolderType = MailFolderType.SENT;
+                    } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                        mailFolderType = MailFolderType.SPAM;
+                    } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                        mailFolderType = MailFolderType.TRASH;
+                    } else {
+                        mailFolderType = MailFolderType.NONE;
+                    }
+                } catch (final MailException e) {
+                    org.apache.commons.logging.LogFactory.getLog(MailFolderImpl.class).error(e.getMessage(), e);
+                    mailFolderType = MailFolderType.NONE;
+                }
+            } else {
+                mailFolderType = MailFolderType.NONE;
+            }
         }
         /*
          * Trash folder must not be cacheable
          */
-        this.cacheable = !mailFolder.isDefaultFolder() || !fullname.equals(trashFullname);
+        this.cacheable = !mailFolder.isDefaultFolder() || !mailFolderType.equals(MailFolderType.TRASH);
     }
 
     @Override

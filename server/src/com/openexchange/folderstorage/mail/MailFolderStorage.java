@@ -390,10 +390,9 @@ public final class MailFolderStorage implements FolderStorage {
                         mailFolder,
                         mailAccess.getAccountId(),
                         mailAccess.getMailConfig().getCapabilities().getCapabilities(),
-                        mailAccess.getFolderStorage().getTrashFolder());
+                        new MailAccessFullnameProvider(mailAccess));
                 hasSubfolders = mailFolder.hasSubfolders();
             }
-
             retval.setTreeID(treeId);
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.
