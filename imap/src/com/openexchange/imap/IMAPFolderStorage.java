@@ -929,93 +929,102 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
-            if (!updateMe.exists()) {
-                updateMe = checkForNamespaceFolder(fullname);
-                if (null == updateMe) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
-                }
-            }
             /*
-             * Notify message storage
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
-            /*
-             * Proceed update
-             */
-            if (imapConfig.isSupportsACLs() && toUpdate.containsPermissions()) {
-                final ACL[] oldACLs = getACLSafe(updateMe);
-                if (oldACLs != null) {
-                    final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
-                    final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
-                    final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe, imapConfig);
-                    final Map<String, ACL> m = acl2map(newACLs);
-                    if (!equals(oldACLs, m, entity2ACL, args)) {
-                        /*
-                         * Default folder is affected, check if owner still holds full rights
-                         */
-                        if (getChecker().isDefaultFolder(updateMe.getFullName()) && !stillHoldsFullRights(
-                            updateMe,
-                            newACLs,
-                            imapConfig,
-                            session,
-                            ctx)) {
-                            throw IMAPException.create(
-                                IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE,
-                                imapConfig,
-                                session,
-                                updateMe.getFullName());
-                        }
-                        final ACLExtension aclExtension = getACLExtension();
-                        if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
-                            throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, updateMe.getFullName());
-                        }
-                        /*
-                         * Check new ACLs
-                         */
-                        if (newACLs.length == 0) {
-                            throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, updateMe.getFullName());
-                        }
-                        {
-                            boolean adminFound = false;
-                            for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                                if (aclExtension.canSetACL(newACLs[i].getRights())) {
-                                    adminFound = true;
-                                }
-                            }
-                            if (!adminFound) {
-                                throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, updateMe.getFullName());
-                            }
-                        }
-                        /*
-                         * Remove deleted ACLs
-                         */
-                        final ACL[] removedACLs = getRemovedACLs(m, oldACLs);
-                        if (removedACLs.length > 0) {
-                            for (int i = 0; i < removedACLs.length; i++) {
-                                if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
-                                    updateMe.removeACL(removedACLs[i].getName());
-                                }
-                            }
-                        }
-                        /*
-                         * Change existing ACLs according to new ACLs
-                         */
-                        final Map<String, ACL> om = acl2map(oldACLs);
-                        for (int i = 0; i < newACLs.length; i++) {
-                            updateMe.addACL(validate(newACLs[i], om));
-                        }
-                        /*
-                         * Since the ACLs have changed remove cached rights
-                         */
-                        RightsCache.removeCachedRights(updateMe, session, accountId);
+            synchronized (updateMe) {
+                if (!updateMe.exists()) {
+                    updateMe = checkForNamespaceFolder(fullname);
+                    if (null == updateMe) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                     }
                 }
+                /*
+                 * Notify message storage
+                 */
+                imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
+                /*
+                 * Proceed update
+                 */
+                if (imapConfig.isSupportsACLs() && toUpdate.containsPermissions()) {
+                    final ACL[] oldACLs = getACLSafe(updateMe);
+                    if (oldACLs != null) {
+                        final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
+                        final Entity2ACL entity2ACL = Entity2ACL.getInstance(imapConfig);
+                        final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, updateMe, imapConfig);
+                        final Map<String, ACL> m = acl2map(newACLs);
+                        if (!equals(oldACLs, m, entity2ACL, args)) {
+                            /*
+                             * Default folder is affected, check if owner still holds full rights
+                             */
+                            if (getChecker().isDefaultFolder(updateMe.getFullName()) && !stillHoldsFullRights(
+                                updateMe,
+                                newACLs,
+                                imapConfig,
+                                session,
+                                ctx)) {
+                                throw IMAPException.create(
+                                    IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE,
+                                    imapConfig,
+                                    session,
+                                    updateMe.getFullName());
+                            }
+                            final ACLExtension aclExtension = getACLExtension();
+                            if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
+                                throw IMAPException.create(
+                                    IMAPException.Code.NO_ADMINISTER_ACCESS,
+                                    imapConfig,
+                                    session,
+                                    updateMe.getFullName());
+                            }
+                            /*
+                             * Check new ACLs
+                             */
+                            if (newACLs.length == 0) {
+                                throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, updateMe.getFullName());
+                            }
+                            {
+                                boolean adminFound = false;
+                                for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
+                                    if (aclExtension.canSetACL(newACLs[i].getRights())) {
+                                        adminFound = true;
+                                    }
+                                }
+                                if (!adminFound) {
+                                    throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, updateMe.getFullName());
+                                }
+                            }
+                            /*
+                             * Remove deleted ACLs
+                             */
+                            final ACL[] removedACLs = getRemovedACLs(m, oldACLs);
+                            if (removedACLs.length > 0) {
+                                for (int i = 0; i < removedACLs.length; i++) {
+                                    if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
+                                        updateMe.removeACL(removedACLs[i].getName());
+                                    }
+                                }
+                            }
+                            /*
+                             * Change existing ACLs according to new ACLs
+                             */
+                            final Map<String, ACL> om = acl2map(oldACLs);
+                            for (int i = 0; i < newACLs.length; i++) {
+                                updateMe.addACL(validate(newACLs[i], om));
+                            }
+                            /*
+                             * Since the ACLs have changed remove cached rights
+                             */
+                            RightsCache.removeCachedRights(updateMe, session, accountId);
+                        }
+                    }
+                }
+                if (!MailProperties.getInstance().isIgnoreSubscription() && toUpdate.containsSubscribed()) {
+                    updateMe.setSubscribed(toUpdate.isSubscribed());
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), toUpdate.isSubscribed());
+                }
+                return updateMe.getFullName();
             }
-            if (!MailProperties.getInstance().isIgnoreSubscription() && toUpdate.containsSubscribed()) {
-                updateMe.setSubscribed(toUpdate.isSubscribed());
-                IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), toUpdate.isSubscribed());
-            }
-            return updateMe.getFullName();
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IMAPException e) {
