@@ -70,11 +70,11 @@ public class MailFolder implements Serializable {
      */
     private static final long serialVersionUID = -8203697938992090309L;
 
-    public static enum DefaulFolderType {
+    public static enum DefaultFolderType {
         NONE, INBOX, DRAFTS, SENT, SPAM, TRASH, CONFIRMED_SPAM, CONFIRMED_HAM;
     }
 
-    private DefaulFolderType defaulFolderType;
+    private DefaultFolderType defaulFolderType;
 
     private boolean b_defaulFolderType;
 
@@ -185,7 +185,7 @@ public class MailFolder implements Serializable {
      */
     public MailFolder() {
         super();
-        defaulFolderType = DefaulFolderType.NONE;
+        defaulFolderType = DefaultFolderType.NONE;
     }
 
     /**
@@ -303,12 +303,75 @@ public class MailFolder implements Serializable {
      * 
      * @return The default folder type
      */
-    public DefaulFolderType getDefaultFolderType() {
+    public DefaultFolderType getDefaultFolderType() {
         return defaulFolderType;
     }
 
     /**
-     * Checks if default folder type was set through {@link #setDefaultFolderType(DefaulFolderType)}.
+     * Checks if this mail folder denotes the INBOX folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the INBOX folder; otherwise <code>false</code>
+     */
+    public boolean isInbox() {
+        return DefaultFolderType.INBOX.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if this mail folder denotes the DRAFTS folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the DRAFTS folder; otherwise <code>false</code>
+     */
+    public boolean isDrafts() {
+        return DefaultFolderType.DRAFTS.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if this mail folder denotes the SENT folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the SENT folder; otherwise <code>false</code>
+     */
+    public boolean isSent() {
+        return DefaultFolderType.SENT.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if this mail folder denotes the SPAM folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the SPAM folder; otherwise <code>false</code>
+     */
+    public boolean isSpam() {
+        return DefaultFolderType.SPAM.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if this mail folder denotes the TRASH folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the TRASH folder; otherwise <code>false</code>
+     */
+    public boolean isTrash() {
+        return DefaultFolderType.TRASH.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if this mail folder denotes the CONFIRMED_SPAM folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the CONFIRMED_SPAM folder; otherwise <code>false</code>
+     */
+    public boolean isConfirmedSpam() {
+        return DefaultFolderType.CONFIRMED_SPAM.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if this mail folder denotes the CONFIRMED_HAM folder.
+     * 
+     * @return <code>true</code> if this mail folder denotes the CONFIRMED_HAM folder; otherwise <code>false</code>
+     */
+    public boolean isConfirmedHam() {
+        return DefaultFolderType.CONFIRMED_HAM.equals(defaulFolderType);
+    }
+
+    /**
+     * Checks if default folder type was set through {@link #setDefaultFolderType(DefaultFolderType)}.
      * 
      * @return <code>true</code> if default folder type is set; otherwise <code>false</code>
      */
@@ -320,7 +383,7 @@ public class MailFolder implements Serializable {
      * Removes the default folder type.
      */
     public void removeDefaultFolderType() {
-        defaulFolderType = DefaulFolderType.NONE;
+        defaulFolderType = DefaultFolderType.NONE;
         b_defaulFolderType = false;
     }
 
@@ -329,7 +392,7 @@ public class MailFolder implements Serializable {
      * 
      * @param name the name to set
      */
-    public void setDefaultFolderType(final DefaulFolderType defaulFolderType) {
+    public void setDefaultFolderType(final DefaultFolderType defaulFolderType) {
         this.defaulFolderType = defaulFolderType;
         b_defaulFolderType = true;
     }
