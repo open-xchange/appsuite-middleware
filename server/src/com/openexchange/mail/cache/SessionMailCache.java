@@ -107,14 +107,17 @@ public final class SessionMailCache {
     }
 
     /**
-     * Puts specified <code>entry</code> into cache if {@link SessionMailCacheEntry#getValue()} is not <code>null</code>.
+     * Puts specified <code>entry</code> into cache if {@link SessionMailCacheEntry#getValue()} is not <code>null</code>. Otherwise the a
+     * possibly previously associated value with entry's key is removed from cache.
      * <p>
      * {@link SessionMailCacheEntry#getKey()} is used as key and {@link SessionMailCacheEntry#getValue()} as value.
      * 
      * @param entry The mail cache entry
      */
     public void put(final SessionMailCacheEntry<?> entry) {
-        if (null != entry.getValue()) {
+        if (null == entry.getValue()) {
+            cache.remove(entry.getKey());
+        } else {
             cache.put(entry.getKey(), entry.getValue());
         }
     }
