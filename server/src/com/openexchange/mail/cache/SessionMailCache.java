@@ -62,8 +62,6 @@ import com.openexchange.session.Session;
  */
 public final class SessionMailCache {
 
-    private final Map<CacheKey, Object> cache;
-
     /**
      * Gets the session-bound mail cache.
      * 
@@ -93,6 +91,12 @@ public final class SessionMailCache {
         }
         return mailCache;
     }
+
+    /*-
+     * ##################################### MEMBER STUFF #####################################
+     */
+
+    private final Map<CacheKey, Object> cache;
 
     /**
      * Default constructor
