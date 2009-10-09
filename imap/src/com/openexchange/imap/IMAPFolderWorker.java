@@ -258,95 +258,107 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             isIdenticalFolder = (imapFolder == null ? false : imapFolder.getFullName().equals(fullname));
         }
         if (imapFolder != null) {
-            IMAPCommandsCollection.forceNoopCommand(imapFolder);
-            try {
-                /*
-                 * This call also checks if folder is opened
-                 */
-                final int mode = imapFolder.getMode();
-                if (isIdenticalFolder && (mode >= desiredMode)) {
+            /*
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+             */
+            synchronized (imapFolder) {
+                IMAPCommandsCollection.forceNoopCommand(imapFolder);
+                try {
                     /*
-                     * Identical folder is already opened in an appropriate mode.
+                     * This call also checks if folder is opened
                      */
-                    // IMAPCommandsCollection.updateIMAPFolder(imapFolder,
-                    // mode);
+                    final int mode = imapFolder.getMode();
+                    if (isIdenticalFolder && (mode >= desiredMode)) {
+                        /*
+                         * Identical folder is already opened in an appropriate mode.
+                         */
+                        // IMAPCommandsCollection.updateIMAPFolder(imapFolder,
+                        // mode);
+                        return imapFolder;
+                    }
+                    /*
+                     * Folder is open, so close folder
+                     */
+                    try {
+                        imapFolder.close(false);
+                    } finally {
+                        if (imapFolder == this.imapFolder) {
+                            resetIMAPFolder();
+                        }
+                    }
+                } catch (final IllegalStateException e) {
+                    /*
+                     * Folder not open
+                     */
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
+                    }
+                }
+                /*
+                 * Folder is closed here
+                 */
+                if (isIdenticalFolder) {
+                    final String imapFolderFullname = imapFolder.getFullName();
+                    try {
+                        if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
+                            throw IMAPException.create(
+                                IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
+                                imapConfig,
+                                session,
+                                imapFolderFullname);
+                        } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(
+                            imapFolder,
+                            true,
+                            session,
+                            accountId))) {
+                            throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapFolderFullname);
+                        }
+                    } catch (final MessagingException e) { // No access
+                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolderFullname);
+                    }
+                    if ((desiredMode == Folder.READ_WRITE) && ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
+                        MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
+                        STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
+                        throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolderFullname);
+                    }
+                    /*
+                     * Open identical folder in right mode
+                     */
+                    imapFolder.open(desiredMode);
                     return imapFolder;
                 }
-                /*
-                 * Folder is open, so close folder
-                 */
-                try {
-                    imapFolder.close(false);
-                } finally {
-                    if (imapFolder == this.imapFolder) {
-                        resetIMAPFolder();
-                    }
-                }
-            } catch (final IllegalStateException e) {
-                /*
-                 * Folder not open
-                 */
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
-                }
-            }
-            /*
-             * Folder is closed here
-             */
-            if (isIdenticalFolder) {
-                try {
-                    if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
-                        throw IMAPException.create(
-                            IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
-                            imapConfig,
-                            session,
-                            imapFolder.getFullName());
-                    } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(
-                        imapFolder,
-                        true,
-                        session,
-                        accountId))) {
-                        throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapFolder.getFullName());
-                    }
-                } catch (final MessagingException e) { // No access
-                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
-                }
-                if ((desiredMode == Folder.READ_WRITE) && ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
-                    MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
-                    STR_FALSE)) && IMAPCommandsCollection.isReadOnly(imapFolder)) {
-                    throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, imapFolder.getFullName());
-                }
-                /*
-                 * Open identical folder in right mode
-                 */
-                imapFolder.open(desiredMode);
-                return imapFolder;
             }
         }
-        final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullname));
-        if (!isDefaultFolder && !retval.exists()) {
-            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, retval.getFullName());
-        }
-        if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
-            throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
-        }
-        final boolean selectable = isSelectable(retval);
-        if (!selectable) { // NoSelect
-            throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, retval.getFullName());
-        }
-        try {
-            if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
-                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, retval.getFullName());
+        final IMAPFolder retval =
+            (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullname));
+        /*
+         * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+         */
+        synchronized (retval) {
+            if (!isDefaultFolder && !retval.exists()) {
+                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, retval.getFullName());
             }
-        } catch (final MessagingException e) {
-            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, retval.getFullName());
+            if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
+                throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
+            }
+            final boolean selectable = isSelectable(retval);
+            if (!selectable) { // NoSelect
+                throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, retval.getFullName());
+            }
+            try {
+                if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, retval.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, retval.getFullName());
+            }
+            if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
+                MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
+                STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
+                throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, retval.getFullName());
+            }
+            retval.open(desiredMode);
         }
-        if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
-            MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT,
-            STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
-            throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, retval.getFullName());
-        }
-        retval.open(desiredMode);
         return retval;
     }
 
