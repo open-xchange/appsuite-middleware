@@ -64,20 +64,24 @@ public class CPFactory {
 
     private CPCalendar calendar;
     
-    private List<CPPartitioningStrategy> strategies;
+    private List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
 
     public void setTypeToProduce(CPType type) {
         this.type = type;
     }
     
     public void setCalendar(CPCalendar calendar){
+        this.calendar = calendar;
         
+        if(strategies != null)
+            for(CPPartitioningStrategy strategy: strategies)
+                strategy.setCalendar(calendar);
     }
 
     public void addStrategy(CPPartitioningStrategy strategy) {
-        if (strategies == null)
-            strategies = new LinkedList<CPPartitioningStrategy>();
         strategies.add(strategy);
+        if(calendar != null)
+            strategy.setCalendar(calendar);
     }
 
     public CPPartition partition(List<CPAppointment> appointments) {
