@@ -324,12 +324,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Update JSON cache
                  */
-                JSONMessageCache.getInstance().removeFolder(source.getAccountId(), sourceFullname, session);
+                if (move) {
+                    JSONMessageCache.getInstance().removeFolder(source.getAccountId(), sourceFullname, session);
+                }
                 JSONMessageCache.getInstance().removeFolder(dest.getAccountId(), destFullname, session);
                 /*
                  * Update message cache
                  */
-                MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), contextId);
+                if (move) {
+                    MailMessageCache.getInstance().removeFolderMessages(
+                        source.getAccountId(),
+                        sourceFullname,
+                        session.getUserId(),
+                        contextId);
+                }
                 MailMessageCache.getInstance().removeFolderMessages(dest.getAccountId(), destFullname, session.getUserId(), contextId);
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
