@@ -79,7 +79,11 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.mail.contentType.SentContentType;
+import com.openexchange.folderstorage.mail.contentType.SpamContentType;
+import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -318,11 +322,43 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
-        if (!MailContentType.getInstance().equals(contentType)) {
-            // TODO: Throw appropriate folder exception
+        if (!(contentType instanceof MailContentType)) {
+            throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
-        // Return primary account's INBOX folder
-        return prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
+
+        if (MailContentType.getInstance().equals(contentType)) {
+            return prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
+        }
+        try {
+            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
+            if (null == accesses) {
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
+            }
+            /*
+             * Open mail access
+             */
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(0, storageParameters.getSession(), accesses);
+            openMailAccess(mailAccess);
+            // Return primary account's default folder
+            if (DraftsContentType.getInstance().equals(contentType)) {
+                return prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getDraftsFolder());
+            }
+            if (SentContentType.getInstance().equals(contentType)) {
+                return prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getSentFolder());
+            }
+            if (SpamContentType.getInstance().equals(contentType)) {
+                return prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getSpamFolder());
+            }
+            if (TrashContentType.getInstance().equals(contentType)) {
+                return prepareFullname(MailAccount.DEFAULT_ID, mailAccess.getFolderStorage().getTrashFolder());
+            }
+            throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        }
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
