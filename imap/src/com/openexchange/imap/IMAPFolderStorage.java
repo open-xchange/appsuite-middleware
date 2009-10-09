@@ -693,218 +693,229 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
             }
             /*
-             * Notify message storage about outstanding move
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
-            final char separator = moveMe.getSeparator();
-            final String oldParent = moveMe.getParent().getFullName();
-            final String newParent;
-            final String newName;
-            {
-                final int pos = newFullname.lastIndexOf(separator);
-                if (pos == -1) {
-                    newParent = "";
-                    newName = newFullname;
-                } else {
-                    if (pos == newFullname.length() - 1) {
-                        throw IMAPException.create(
-                            IMAPException.Code.INVALID_FOLDER_NAME,
-                            imapConfig,
-                            session,
-                            Character.valueOf(separator));
-                    }
-                    newParent = newFullname.substring(0, pos);
-                    if (!checkFolderPathValidity(newParent, separator)) {
-                        throw IMAPException.create(
-                            IMAPException.Code.INVALID_FOLDER_NAME,
-                            imapConfig,
-                            session,
-                            Character.valueOf(separator));
-                    }
-                    newName = newFullname.substring(pos + 1);
-                }
-            }
-            /*
-             * Check for move
-             */
-            final boolean move = !newParent.equals(oldParent);
-            /*
-             * Check for rename. Rename must not be performed if a move has already been done
-             */
-            final boolean rename = (!move && !newName.equals(moveMe.getName()));
-            if (move) {
+            synchronized (moveMe) {
                 /*
-                 * Perform move operation
+                 * Notify message storage about outstanding move
                  */
-                final String oldFullname = moveMe.getFullName();
-                if (getChecker().isDefaultFolder(oldFullname)) {
-                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, oldFullname);
-                }
-                IMAPFolder destFolder =
-                    ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
-                if (!destFolder.exists()) {
-                    destFolder = checkForNamespaceFolder(newParent);
-                    if (null == destFolder) {
-                        /*
-                         * Destination folder could not be found, thus an invalid name was specified by user
-                         */
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, newParent);
-                    }
-                }
-                if (!inferiors(destFolder)) {
-                    throw IMAPException.create(
-                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
-                        imapConfig,
-                        session,
-                        destFolder.getFullName());
-                }
-                if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
-                    try {
-                        if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
-                            throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
-                        }
-                    } catch (final MessagingException e) {
-                        /*
-                         * MYRIGHTS command failed for given mailbox
-                         */
-                        if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
-                            newParent,
-                            imapStore,
-                            true,
-                            session,
-                            accountId)) {
-                            /*
-                             * No namespace support or given parent is NOT covered by user's personal namespaces.
-                             */
-                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, newParent);
-                        }
-                        if (DEBUG) {
-                            LOG.debug("MYRIGHTS command failed on namespace folder", e);
-                        }
-                    }
-                }
-                final boolean mboxEnabled =
-                    MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), destFolder, new StringBuilder(
-                        destFolder.getFullName()).append(separator).toString());
-                if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
-                }
-
-                if (destFolder.getFullName().startsWith(oldFullname)) {
-                    throw IMAPException.create(
-                        IMAPException.Code.NO_MOVE_TO_SUBFLD,
-                        imapConfig,
-                        session,
-                        moveMe.getName(),
-                        destFolder.getName());
-                }
-                try {
-                    moveMe = moveFolder(moveMe, destFolder, newName);
-                } catch (final MailException e) {
-                    deleteTemporaryCreatedFolder(destFolder, newName);
-                    throw e;
-                } catch (final MessagingException e) {
-                    deleteTemporaryCreatedFolder(destFolder, newName);
-                    throw e;
-                }
-            }
-            /*
-             * Is rename operation?
-             */
-            if (rename) {
-                /*
-                 * Perform rename operation
-                 */
-                if (getChecker().isDefaultFolder(moveMe.getFullName())) {
-                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, moveMe.getFullName());
-                } else if (imapConfig.isSupportsACLs() && isSelectable(moveMe)) {
-                    try {
-                        if (!getACLExtension().canCreate(RightsCache.getCachedRights(moveMe, true, session, accountId))) {
-                            throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, moveMe.getFullName());
-                        }
-                    } catch (final MessagingException e) {
-                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, moveMe.getFullName());
-                    }
-                }
-                /*
-                 * Rename can only be invoked on a closed folder
-                 */
-                if (moveMe.isOpen()) {
-                    moveMe.close(false);
-                }
-                final boolean mboxEnabled;
-                final IMAPFolder renameFolder;
+                imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
+                final char separator = moveMe.getSeparator();
+                final String oldParent = moveMe.getParent().getFullName();
+                final String newParent;
+                final String newName;
                 {
-                    final IMAPFolder par = (IMAPFolder) moveMe.getParent();
-                    final String parentFullName = par.getFullName();
-                    final StringBuilder tmp = new StringBuilder();
-                    if (parentFullName.length() > 0) {
-                        tmp.append(parentFullName).append(separator);
+                    final int pos = newFullname.lastIndexOf(separator);
+                    if (pos == -1) {
+                        newParent = "";
+                        newName = newFullname;
+                    } else {
+                        if (pos == newFullname.length() - 1) {
+                            throw IMAPException.create(
+                                IMAPException.Code.INVALID_FOLDER_NAME,
+                                imapConfig,
+                                session,
+                                Character.valueOf(separator));
+                        }
+                        newParent = newFullname.substring(0, pos);
+                        if (!checkFolderPathValidity(newParent, separator)) {
+                            throw IMAPException.create(
+                                IMAPException.Code.INVALID_FOLDER_NAME,
+                                imapConfig,
+                                session,
+                                Character.valueOf(separator));
+                        }
+                        newName = newFullname.substring(pos + 1);
                     }
-                    tmp.append(newName);
-                    renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
-                    /*
-                     * Check for MBox
-                     */
-                    mboxEnabled =
-                        MBoxEnabledCache.isMBoxEnabled(
-                            imapConfig.getImapServerSocketAddress(),
-                            par,
-                            new StringBuilder(par.getFullName()).append(separator).toString());
-                }
-                if (renameFolder.exists()) {
-                    throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
-                }
-                if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, Character.valueOf(separator));
                 }
                 /*
-                 * Remember subscription status
+                 * Check for move
                  */
-                Map<String, Boolean> subscriptionStatus;
-                final String newFullName = renameFolder.getFullName();
-                final String oldFullName = moveMe.getFullName();
-                try {
-                    subscriptionStatus = getSubscriptionStatus(moveMe, oldFullName, newFullName);
-                } catch (final MessagingException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(moveMe.getFullName()).append(
-                            "\" and its subfolders could not be stored prior to rename operation"));
+                final boolean move = !newParent.equals(oldParent);
+                /*
+                 * Check for rename. Rename must not be performed if a move has already been done
+                 */
+                final boolean rename = (!move && !newName.equals(moveMe.getName()));
+                if (move) {
+                    /*
+                     * Perform move operation
+                     */
+                    final String oldFullname = moveMe.getFullName();
+                    if (getChecker().isDefaultFolder(oldFullname)) {
+                        throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, oldFullname);
                     }
-                    subscriptionStatus = null;
+                    IMAPFolder destFolder =
+                        ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
+                    if (!destFolder.exists()) {
+                        destFolder = checkForNamespaceFolder(newParent);
+                        if (null == destFolder) {
+                            /*
+                             * Destination folder could not be found, thus an invalid name was specified by user
+                             */
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, newParent);
+                        }
+                    }
+                    if (!inferiors(destFolder)) {
+                        throw IMAPException.create(
+                            IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
+                            imapConfig,
+                            session,
+                            destFolder.getFullName());
+                    }
+                    if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
+                        try {
+                            if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
+                                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
+                            }
+                        } catch (final MessagingException e) {
+                            /*
+                             * MYRIGHTS command failed for given mailbox
+                             */
+                            if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
+                                newParent,
+                                imapStore,
+                                true,
+                                session,
+                                accountId)) {
+                                /*
+                                 * No namespace support or given parent is NOT covered by user's personal namespaces.
+                                 */
+                                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, newParent);
+                            }
+                            if (DEBUG) {
+                                LOG.debug("MYRIGHTS command failed on namespace folder", e);
+                            }
+                        }
+                    }
+                    final boolean mboxEnabled =
+                        MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), destFolder, new StringBuilder(
+                            destFolder.getFullName()).append(separator).toString());
+                    if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
+                        throw IMAPException.create(
+                            IMAPException.Code.INVALID_FOLDER_NAME,
+                            imapConfig,
+                            session,
+                            Character.valueOf(separator));
+                    }
+
+                    if (destFolder.getFullName().startsWith(oldFullname)) {
+                        throw IMAPException.create(
+                            IMAPException.Code.NO_MOVE_TO_SUBFLD,
+                            imapConfig,
+                            session,
+                            moveMe.getName(),
+                            destFolder.getName());
+                    }
+                    try {
+                        moveMe = moveFolder(moveMe, destFolder, newName);
+                    } catch (final MailException e) {
+                        deleteTemporaryCreatedFolder(destFolder, newName);
+                        throw e;
+                    } catch (final MessagingException e) {
+                        deleteTemporaryCreatedFolder(destFolder, newName);
+                        throw e;
+                    }
                 }
-                removeSessionData(moveMe);
                 /*
-                 * Rename
+                 * Is rename operation?
                  */
-                boolean success = false;
-                final long start = System.currentTimeMillis();
-                success = moveMe.renameTo(renameFolder);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                /*
-                 * Success?
-                 */
-                if (!success) {
-                    throw IMAPException.create(IMAPException.Code.UPDATE_FAILED, imapConfig, session, moveMe.getFullName());
-                }
-                moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
-                if (moveMe.exists()) {
-                    deleteFolder(moveMe);
-                }
-                moveMe = (IMAPFolder) imapStore.getFolder(newFullName);
-                /*
-                 * Apply remembered subscription status
-                 */
-                if (subscriptionStatus == null) {
+                if (rename) {
                     /*
-                     * At least subscribe to renamed folder
+                     * Perform rename operation
                      */
-                    moveMe.setSubscribed(true);
-                } else {
-                    applySubscriptionStatus(moveMe, subscriptionStatus);
+                    if (getChecker().isDefaultFolder(moveMe.getFullName())) {
+                        throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, moveMe.getFullName());
+                    } else if (imapConfig.isSupportsACLs() && isSelectable(moveMe)) {
+                        try {
+                            if (!getACLExtension().canCreate(RightsCache.getCachedRights(moveMe, true, session, accountId))) {
+                                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, moveMe.getFullName());
+                            }
+                        } catch (final MessagingException e) {
+                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, moveMe.getFullName());
+                        }
+                    }
+                    /*
+                     * Rename can only be invoked on a closed folder
+                     */
+                    if (moveMe.isOpen()) {
+                        moveMe.close(false);
+                    }
+                    final boolean mboxEnabled;
+                    final IMAPFolder renameFolder;
+                    {
+                        final IMAPFolder par = (IMAPFolder) moveMe.getParent();
+                        final String parentFullName = par.getFullName();
+                        final StringBuilder tmp = new StringBuilder();
+                        if (parentFullName.length() > 0) {
+                            tmp.append(parentFullName).append(separator);
+                        }
+                        tmp.append(newName);
+                        renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
+                        /*
+                         * Check for MBox
+                         */
+                        mboxEnabled =
+                            MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), par, new StringBuilder(
+                                par.getFullName()).append(separator).toString());
+                    }
+                    if (renameFolder.exists()) {
+                        throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
+                    }
+                    if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
+                        throw IMAPException.create(
+                            IMAPException.Code.INVALID_FOLDER_NAME,
+                            imapConfig,
+                            session,
+                            Character.valueOf(separator));
+                    }
+                    /*
+                     * Remember subscription status
+                     */
+                    Map<String, Boolean> subscriptionStatus;
+                    final String newFullName = renameFolder.getFullName();
+                    final String oldFullName = moveMe.getFullName();
+                    try {
+                        subscriptionStatus = getSubscriptionStatus(moveMe, oldFullName, newFullName);
+                    } catch (final MessagingException e) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(moveMe.getFullName()).append(
+                                "\" and its subfolders could not be stored prior to rename operation"));
+                        }
+                        subscriptionStatus = null;
+                    }
+                    removeSessionData(moveMe);
+                    /*
+                     * Rename
+                     */
+                    boolean success = false;
+                    final long start = System.currentTimeMillis();
+                    success = moveMe.renameTo(renameFolder);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    /*
+                     * Success?
+                     */
+                    if (!success) {
+                        throw IMAPException.create(IMAPException.Code.UPDATE_FAILED, imapConfig, session, moveMe.getFullName());
+                    }
+                    moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
+                    if (moveMe.exists()) {
+                        deleteFolder(moveMe);
+                    }
+                    moveMe = (IMAPFolder) imapStore.getFolder(newFullName);
+                    /*
+                     * Apply remembered subscription status
+                     */
+                    if (subscriptionStatus == null) {
+                        /*
+                         * At least subscribe to renamed folder
+                         */
+                        moveMe.setSubscribed(true);
+                    } else {
+                        applySubscriptionStatus(moveMe, subscriptionStatus);
+                    }
                 }
+                return moveMe.getFullName();
             }
-            return moveMe.getFullName();
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final IMAPException e) {
