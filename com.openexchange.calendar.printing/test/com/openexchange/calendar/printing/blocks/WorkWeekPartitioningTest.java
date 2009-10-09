@@ -177,7 +177,7 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         assertEquals("Fifth day inbetween would be Tuesday", Calendar.TUESDAY, calendar.get(Calendar.DAY_OF_WEEK));
     }
     
-    public void testShouldDefaultToOneDayBeforeWorkweeStartIfNoneGiven(){
+    public void testShouldDefaultToOneDayBeforeWorkweekStartIfNoneGiven(){
         CPAppointment first = null; //implies Sunday on European style calendar
         CPAppointment second = new CPAppointment();
         second.setStartDate(THURSDAY());
