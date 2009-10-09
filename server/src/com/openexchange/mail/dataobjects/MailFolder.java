@@ -70,6 +70,9 @@ public class MailFolder implements Serializable {
      */
     private static final long serialVersionUID = -8203697938992090309L;
 
+    /**
+     * The default folder type.
+     */
     public static enum DefaultFolderType {
         NONE, INBOX, DRAFTS, SENT, SPAM, TRASH, CONFIRMED_SPAM, CONFIRMED_HAM;
     }
