@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
@@ -1368,7 +1369,29 @@ public class Mail extends PermissionServlet implements UploadListener {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            // TODO:
+            try {
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.FROM.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), mail)));
+                // Strip by aliases
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                final UserSettingMail usm = session.getUserSettingMail();
+                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                }
+                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                addrs.removeAll(validAddrs);
+            } catch (final AddressException e) {
+                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+            } catch (final JSONException e) {
+                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+            }
             if (!addrs.isEmpty()) {
                 // Add addresses
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);

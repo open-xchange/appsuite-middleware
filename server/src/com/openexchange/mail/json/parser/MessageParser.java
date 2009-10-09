@@ -577,11 +577,8 @@ public final class MessageParser {
         /*
          * Group referenced parts by referenced mails' paths
          */
-        final Map<String, ReferencedMailPart> groupedReferencedParts = groupReferencedParts(
-            provider,
-            session,
-            transportMailMsgref,
-            attachmentArray);
+        final Map<String, ReferencedMailPart> groupedReferencedParts =
+            groupReferencedParts(provider, session, transportMailMsgref, attachmentArray);
         /*
          * Iterate attachments array
          */
@@ -590,7 +587,8 @@ public final class MessageParser {
             ManagedFileManagement management = null;
             NextAttachment: for (int i = 1; i < len; i++) {
                 final JSONObject attachment = attachmentArray.getJSONObject(i);
-                final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+                final String seqId =
+                    attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
                 if (seqId != null && seqId.startsWith(FILE_PREFIX, 0)) {
                     /*
                      * A file reference
@@ -631,10 +629,8 @@ public final class MessageParser {
                             access = MailAccess.getInstance(session);
                             access.connect();
                         }
-                        final MailMessage referencedMail = access.getMessageStorage().getMessage(
-                            msgref.getFolder(),
-                            msgref.getMailID(),
-                            false);
+                        final MailMessage referencedMail =
+                            access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
                         referencedMailPart = provider.getNewReferencedMail(referencedMail, session);
                     } else {
                         referencedMailPart = groupedReferencedParts.get(seqId);
@@ -658,7 +654,8 @@ public final class MessageParser {
         final Set<String> groupedSeqIDs = new HashSet<String>(len);
         NextAttachment: for (int i = 1; i < len; i++) {
             final JSONObject attachment = attachmentArray.getJSONObject(i);
-            final String seqId = attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+            final String seqId =
+                attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
             if (seqId != null && seqId.startsWith(FILE_PREFIX, 0)) {
                 /*
                  * A file reference
@@ -682,10 +679,8 @@ public final class MessageParser {
         final MailAccess<?, ?> access = MailAccess.getInstance(session, parentMsgRef.getAccountId());
         access.connect();
         try {
-            final MailMessage referencedMail = access.getMessageStorage().getMessage(
-                parentMsgRef.getFolder(),
-                parentMsgRef.getMailID(),
-                false);
+            final MailMessage referencedMail =
+                access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
             if (null == referencedMail) {
                 throw new MailException(MailException.Code.REFERENCED_MAIL_NOT_FOUND, parentMsgRef.getMailID(), parentMsgRef.getFolder());
             }
@@ -750,7 +745,16 @@ public final class MessageParser {
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
 
-    private static InternetAddress[] parseAddressKey(final String key, final JSONObject jo) throws JSONException, AddressException {
+    /**
+     * Parses address field out of passed JSON object.
+     * 
+     * @param key The key of the address field
+     * @param jo The JSON object
+     * @return The parsed address(es)
+     * @throws JSONException If a JSON error occurred
+     * @throws AddressException If parsing an address fails
+     */
+    public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo) throws JSONException, AddressException {
         String value = null;
         if (!jo.has(key) || jo.isNull(key) || (value = jo.getString(key)).length() == 0) {
             return EMPTY_ADDRS;
@@ -843,8 +847,8 @@ public final class MessageParser {
 
     private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws MailException {
         try {
-            final UnifiedINBOXManagement unifiedINBOXManagement = ServerServiceRegistry.getInstance().getService(
-                UnifiedINBOXManagement.class);
+            final UnifiedINBOXManagement unifiedINBOXManagement =
+                ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
             if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(
                 session.getUserId(),
                 session.getContextId())) {

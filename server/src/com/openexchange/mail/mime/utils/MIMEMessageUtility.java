@@ -740,10 +740,13 @@ public final class MIMEMessageUtility {
      * 
      * @param addresslist - comma separated address strings
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
-     * @return array of <code>InternetAddress</code> objects
+     * @return An array of <code>InternetAddress</code> objects
      * @throws AddressException - if parsing fails
      */
     public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) throws AddressException {
+        if (null == addresslist) {
+            return new InternetAddress[0];
+        }
         final String al = replaceWithComma(unfold(addresslist));
         InternetAddress[] addrs = null;
         try {
