@@ -70,6 +70,24 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-142
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+   if ! ox_exists_property SIEVE_AUTH_ENC $pfile; then
+       ox_set_property SIEVE_AUTH_ENC "UTF-8" $pfile
+   fi
+
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles
