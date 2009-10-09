@@ -58,8 +58,6 @@ import com.openexchange.calendar.printing.CPCalendar;
 import com.openexchange.calendar.printing.CPType;
 
 /**
- * {@link AbstractPartitioningStrategy}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractPartitioningStrategy implements CPPartitioningStrategy{
@@ -85,6 +83,12 @@ public abstract class AbstractPartitioningStrategy implements CPPartitioningStra
     public Integer getWeekOfYear(Date date) {
         getCalendar().setTime(date);
         return Integer.valueOf( getCalendar().get(Calendar.WEEK_OF_YEAR) );
+    }
+    
+
+    public Integer getMonthOfYear(Date date) {
+        getCalendar().setTime(date);
+        return Integer.valueOf( getCalendar().get(Calendar.MONTH) );
     }
     
     public boolean isOnDifferentDays(Date first, Date second) {
@@ -113,6 +117,19 @@ public abstract class AbstractPartitioningStrategy implements CPPartitioningStra
         return week1 != week2 || year1 != year2;
     }
 
+    public boolean isInDifferentMonths(Date first, Date second) {
+        calendar = getCalendar();
+    
+        calendar.setTime(first);
+        int month1 = calendar.get(Calendar.MONTH);
+        int year1 = calendar.get(Calendar.YEAR);
+        calendar.setTime(second);
+        int month2 = calendar.get(Calendar.MONTH);
+        int year2 = calendar.get(Calendar.YEAR);
+    
+        return month1 != month2 || year1 != year2;
+    }
+    
     public List<Date> getMissingDaysInbetween(Date first, Date second) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(first);
@@ -160,5 +177,10 @@ public abstract class AbstractPartitioningStrategy implements CPPartitioningStra
 
     public boolean isInTwoWeeks(CPAppointment appointment) {
         return isInDifferentWeeks(appointment.getStartDate(), appointment.getEndDate());
+    }
+    
+
+    public boolean isInTwoMonths(CPAppointment appointment) {
+        return isInDifferentMonths(appointment.getStartDate(), appointment.getEndDate());
     }
 }

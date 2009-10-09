@@ -64,6 +64,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
 import com.openexchange.calendar.printing.blocks.CPFormattingInformation;
 import com.openexchange.calendar.printing.blocks.CPPartition;
+import com.openexchange.calendar.printing.blocks.MonthPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WeekPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -159,6 +160,7 @@ public class CPServlet extends PermissionServlet {
             CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
+            factory.addStrategy(new MonthPartitioningStrategy());
             factory.setCalendar(CPCalendar.getEuropeanCalendar());
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
 

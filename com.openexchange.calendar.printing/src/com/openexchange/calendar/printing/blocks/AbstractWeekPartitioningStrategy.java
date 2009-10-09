@@ -64,6 +64,10 @@ public abstract class AbstractWeekPartitioningStrategy extends AbstractPartition
 
     public static final int WEEKBREAK = 1;
 
+    public static final int MONTHBREAK = 2;
+    
+    public static final int YEARBREAK = 3;
+    
     public static final int DAYNAME = 10;
 
     protected CPAppointment lastStoredAppointment = null;
