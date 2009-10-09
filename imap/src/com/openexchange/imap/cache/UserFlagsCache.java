@@ -90,10 +90,15 @@ public final class UserFlagsCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            if (f.isOpen() && (Folder.READ_WRITE == f.getMode())) {
-                entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
-            } else {
-                entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
+            /*
+             * Obtain folder lock here to avoid multiple acquire/release when invoking folder's methods
+             */
+            synchronized (f) {
+                if (f.isOpen() && (Folder.READ_WRITE == f.getMode())) {
+                    entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
+                } else {
+                    entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
+                }
             }
             mailCache.put(entry);
         }

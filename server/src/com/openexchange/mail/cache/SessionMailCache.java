@@ -79,6 +79,7 @@ public final class SessionMailCache {
              * Class version does not match; just renew session cache.
              */
             mailCache = null;
+            session.setParameter(key, null);
         }
         if (null == mailCache) {
             synchronized (session) {
