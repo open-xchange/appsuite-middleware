@@ -202,19 +202,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig, ctx);
             }
             IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
-            /*
-             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
-             */
-            synchronized (f) {
-                if (f.exists()) {
-                    return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
-                }
-                f = checkForNamespaceFolder(fullname);
-                if (null == f) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
-                }
+            if (f.exists()) {
                 return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
             }
+            f = checkForNamespaceFolder(fullname);
+            if (null == f) {
+                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+            }
+            return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -225,9 +220,8 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     @Override
     public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
         try {
-            IMAPFolder parent;
             if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
-                parent = (IMAPFolder) imapStore.getDefaultFolder();
+                final IMAPFolder parent = (IMAPFolder) imapStore.getDefaultFolder();
                 /*
                  * Request subfolders the usual way
                  */
@@ -296,33 +290,31 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 }
                 return list.toArray(new MailFolder[list.size()]);
             }
-            parent = (IMAPFolder) imapStore.getFolder(parentFullname);
+            IMAPFolder parent = (IMAPFolder) imapStore.getFolder(parentFullname);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
-            synchronized (parent) {
-                if (parent.exists()) {
-                    /*
-                     * Holds LOOK-UP right?
-                     */
-                    if (imapConfig.isSupportsACLs() && isSelectable(parent)) {
-                        try {
-                            if (!getACLExtension().canLookUp(RightsCache.getCachedRights(parent, true, session, accountId))) {
-                                throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, parentFullname);
-                            }
-                        } catch (final MessagingException e) {
-                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
-                        }
-                    }
-                    return getSubfolderArray(all, parent);
-                }
+            if (parent.exists()) {
                 /*
-                 * Check for namespace folder
+                 * Holds LOOK-UP right?
                  */
-                parent = checkForNamespaceFolder(parentFullname);
-                if (null != parent) {
-                    return getSubfolderArray(all, parent);
+                if (imapConfig.isSupportsACLs() && isSelectable(parent)) {
+                    try {
+                        if (!getACLExtension().canLookUp(RightsCache.getCachedRights(parent, true, session, accountId))) {
+                            throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, parentFullname);
+                        }
+                    } catch (final MessagingException e) {
+                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
+                    }
                 }
+                return getSubfolderArray(all, parent);
+            }
+            /*
+             * Check for namespace folder
+             */
+            parent = checkForNamespaceFolder(parentFullname);
+            if (null != parent) {
+                return getSubfolderArray(all, parent);
             }
             return EMPTY_PATH;
         } catch (final MessagingException e) {
@@ -457,16 +449,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 parent = (IMAPFolder) imapStore.getFolder(parentFullname);
                 isParentDefault = false;
             }
+            if (!parent.exists()) {
+                parent = checkForNamespaceFolder(parentFullname);
+                if (null == parent) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
+                }
+            }
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (parent) {
-                if (!parent.exists()) {
-                    parent = checkForNamespaceFolder(parentFullname);
-                    if (null == parent) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
-                    }
-                }
                 /*
                  * Check if parent holds folders
                  */
@@ -929,16 +921,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
+            if (!updateMe.exists()) {
+                updateMe = checkForNamespaceFolder(fullname);
+                if (null == updateMe) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
+                }
+            }
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (updateMe) {
-                if (!updateMe.exists()) {
-                    updateMe = checkForNamespaceFolder(fullname);
-                    if (null == updateMe) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
-                    }
-                }
                 /*
                  * Notify message storage
                  */
@@ -1056,13 +1048,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
             }
             IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(fullname);
-            synchronized (deleteMe) {
-                if (!deleteMe.exists()) {
-                    deleteMe = checkForNamespaceFolder(fullname);
-                    if (null == deleteMe) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
-                    }
+            if (!deleteMe.exists()) {
+                deleteMe = checkForNamespaceFolder(fullname);
+                if (null == deleteMe) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
+            }
+            synchronized (deleteMe) {
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
                 if (hardDelete) {
                     /*
@@ -1129,184 +1121,192 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
             }
-            imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
-            try {
-                if (!isSelectable(f)) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, f.getFullName());
-                }
-                if (imapConfig.isSupportsACLs()) {
-                    final Rights myrights = RightsCache.getCachedRights(f, true, session, accountId);
-                    if (!getACLExtension().canRead(myrights)) {
-                        throw IMAPException.create(IMAPException.Code.NO_READ_ACCESS, imapConfig, session, f.getFullName());
+            synchronized (f) {
+                imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
+                try {
+                    if (!isSelectable(f)) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, f.getFullName());
                     }
-                    if (!getACLExtension().canDeleteMessages(myrights)) {
-                        throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, f.getFullName());
+                    if (imapConfig.isSupportsACLs()) {
+                        final Rights myrights = RightsCache.getCachedRights(f, true, session, accountId);
+                        if (!getACLExtension().canRead(myrights)) {
+                            throw IMAPException.create(IMAPException.Code.NO_READ_ACCESS, imapConfig, session, f.getFullName());
+                        }
+                        if (!getACLExtension().canDeleteMessages(myrights)) {
+                            throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, f.getFullName());
+                        }
                     }
+                } catch (final MessagingException e) {
+                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, f.getFullName());
                 }
-            } catch (final MessagingException e) {
-                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, f.getFullName());
-            }
-            /*
-             * Remove from session storage
-             */
-            IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullname);
-            f.open(Folder.READ_WRITE);
-            try {
-                int msgCount = f.getMessageCount();
-                if (msgCount == 0) {
-                    /*
-                     * Empty folder
-                     */
-                    return;
-                }
-                String trashFullname = null;
-                final boolean backup =
-                    (!hardDelete && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname =
-                        getTrashFolder()))));
-                if (backup) {
-                    imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
-                }
-                final StringBuilder debug;
-                if (DEBUG) {
-                    debug = new StringBuilder(128);
-                } else {
-                    debug = null;
-                }
-                final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
-                final long startClear = System.currentTimeMillis();
-                if (blockSize > 0) {
-                    /*
-                     * Block-wise deletion
-                     */
-                    while (msgCount > blockSize) {
+                /*
+                 * Remove from session storage
+                 */
+                IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullname);
+                f.open(Folder.READ_WRITE);
+                try {
+                    int msgCount = f.getMessageCount();
+                    if (msgCount == 0) {
                         /*
-                         * Don't adapt sequence number since folder expunge already resets message numbering
+                         * Empty folder
                          */
-                        if (backup) {
+                        return;
+                    }
+                    String trashFullname = null;
+                    final boolean backup =
+                        (!hardDelete && !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(f.getFullName().startsWith((trashFullname =
+                            getTrashFolder()))));
+                    if (backup) {
+                        imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
+                    }
+                    final StringBuilder debug;
+                    if (DEBUG) {
+                        debug = new StringBuilder(128);
+                    } else {
+                        debug = null;
+                    }
+                    final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
+                    final long startClear = System.currentTimeMillis();
+                    if (blockSize > 0) {
+                        /*
+                         * Block-wise deletion
+                         */
+                        while (msgCount > blockSize) {
+                            /*
+                             * Don't adapt sequence number since folder expunge already resets message numbering
+                             */
+                            if (backup) {
+                                try {
+                                    final long startCopy = System.currentTimeMillis();
+                                    new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                    if (DEBUG) {
+                                        debug.setLength(0);
+                                        LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
+                                            trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(
+                                            STR_MSEC).toString());
+                                    }
+                                } catch (final MessagingException e) {
+                                    if (e.getMessage().indexOf("Over quota") > -1) {
+                                        /*
+                                         * We face an Over-Quota-Exception
+                                         */
+                                        throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
+                                    }
+                                    final Exception nestedExc = e.getNextException();
+                                    if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
+                                        /*
+                                         * We face an Over-Quota-Exception
+                                         */
+                                        throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
+                                    }
+                                    throw IMAPException.create(
+                                        IMAPException.Code.MOVE_ON_DELETE_FAILED,
+                                        imapConfig,
+                                        session,
+                                        e,
+                                        new Object[0]);
+                                }
+                            }
+                            /*
+                             * Delete through storing \Deleted flag...
+                             */
+                            new FlagsIMAPCommand(f, 1, blockSize, FLAGS_DELETED, true, true).doCommand();
+                            /*
+                             * ... and perform EXPUNGE
+                             */
+                            final long startExpunge = System.currentTimeMillis();
                             try {
-                                final long startCopy = System.currentTimeMillis();
-                                new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                IMAPCommandsCollection.fastExpunge(f);
                                 if (DEBUG) {
                                     debug.setLength(0);
-                                    LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
-                                        trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
+                                    LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append("\" in ").append(
+                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
                                 }
-                            } catch (final MessagingException e) {
-                                if (e.getMessage().indexOf("Over quota") > -1) {
-                                    /*
-                                     * We face an Over-Quota-Exception
-                                     */
-                                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
-                                }
-                                final Exception nestedExc = e.getNextException();
-                                if (nestedExc != null && nestedExc.getMessage().indexOf("Over quota") > -1) {
-                                    /*
-                                     * We face an Over-Quota-Exception
-                                     */
-                                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
-                                }
-                                throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
-                            }
-                        }
-                        /*
-                         * Delete through storing \Deleted flag...
-                         */
-                        new FlagsIMAPCommand(f, 1, blockSize, FLAGS_DELETED, true, true).doCommand();
-                        /*
-                         * ... and perform EXPUNGE
-                         */
-                        final long startExpunge = System.currentTimeMillis();
-                        try {
-                            IMAPCommandsCollection.fastExpunge(f);
-                            if (DEBUG) {
-                                debug.setLength(0);
-                                LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append("\" in ").append(
-                                    (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
-                            }
-                        } catch (final FolderClosedException e) {
-                            /*
-                             * Not possible to retry since connection is broken
-                             */
-                            if (DEBUG) {
-                                debug.setLength(0);
-                                LOG.debug(debug.append("EXPUNGE command timed out in ").append((System.currentTimeMillis() - startExpunge)).append(
-                                    STR_MSEC).toString());
-                            }
-                            throw IMAPException.create(
-                                IMAPException.Code.CONNECT_ERROR,
-                                imapConfig,
-                                session,
-                                e,
-                                imapConfig.getServer(),
-                                imapConfig.getLogin());
-                        } catch (final StoreClosedException e) {
-                            /*
-                             * Not possible to retry since connection is broken
-                             */
-                            if (DEBUG) {
-                                debug.setLength(0);
-                                LOG.debug(debug.append("EXPUNGE command timed out in ").append((System.currentTimeMillis() - startExpunge)).append(
-                                    STR_MSEC).toString());
-                            }
-                            throw IMAPException.create(
-                                IMAPException.Code.CONNECT_ERROR,
-                                imapConfig,
-                                session,
-                                e,
-                                imapConfig.getServer(),
-                                imapConfig.getLogin());
-                        }
-                        /*
-                         * Decrement
-                         */
-                        msgCount -= blockSize;
-                    }
-                }
-                if (msgCount == 0) {
-                    /*
-                     * All messages already cleared through previous block-wise deletion
-                     */
-                    return;
-                }
-                if (backup) {
-                    try {
-                        final long startCopy = System.currentTimeMillis();
-                        new CopyIMAPCommand(f, trashFullname).doCommand();
-                        if (DEBUG) {
-                            debug.setLength(0);
-                            LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
-                                trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
-                        }
-                    } catch (final MessagingException e) {
-                        if (e.getNextException() instanceof CommandFailedException) {
-                            final CommandFailedException exc = (CommandFailedException) e.getNextException();
-                            if (exc.getMessage().indexOf("Over quota") > -1) {
+                            } catch (final FolderClosedException e) {
                                 /*
-                                 * We face an Over-Quota-Exception
+                                 * Not possible to retry since connection is broken
                                  */
-                                throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
+                                if (DEBUG) {
+                                    debug.setLength(0);
+                                    LOG.debug(debug.append("EXPUNGE command timed out in ").append(
+                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
+                                }
+                                throw IMAPException.create(
+                                    IMAPException.Code.CONNECT_ERROR,
+                                    imapConfig,
+                                    session,
+                                    e,
+                                    imapConfig.getServer(),
+                                    imapConfig.getLogin());
+                            } catch (final StoreClosedException e) {
+                                /*
+                                 * Not possible to retry since connection is broken
+                                 */
+                                if (DEBUG) {
+                                    debug.setLength(0);
+                                    LOG.debug(debug.append("EXPUNGE command timed out in ").append(
+                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
+                                }
+                                throw IMAPException.create(
+                                    IMAPException.Code.CONNECT_ERROR,
+                                    imapConfig,
+                                    session,
+                                    e,
+                                    imapConfig.getServer(),
+                                    imapConfig.getLogin());
                             }
+                            /*
+                             * Decrement
+                             */
+                            msgCount -= blockSize;
                         }
-                        throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
                     }
+                    if (msgCount == 0) {
+                        /*
+                         * All messages already cleared through previous block-wise deletion
+                         */
+                        return;
+                    }
+                    if (backup) {
+                        try {
+                            final long startCopy = System.currentTimeMillis();
+                            new CopyIMAPCommand(f, trashFullname).doCommand();
+                            if (DEBUG) {
+                                debug.setLength(0);
+                                LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
+                                    trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
+                            }
+                        } catch (final MessagingException e) {
+                            if (e.getNextException() instanceof CommandFailedException) {
+                                final CommandFailedException exc = (CommandFailedException) e.getNextException();
+                                if (exc.getMessage().indexOf("Over quota") > -1) {
+                                    /*
+                                     * We face an Over-Quota-Exception
+                                     */
+                                    throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA, e, new Object[0]);
+                                }
+                            }
+                            throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
+                        }
+                    }
+                    /*
+                     * Delete through storing \Deleted flag...
+                     */
+                    new FlagsIMAPCommand(f, FLAGS_DELETED, true, true).doCommand();
+                    /*
+                     * ... and perform EXPUNGE
+                     */
+                    final long start = System.currentTimeMillis();
+                    IMAPCommandsCollection.fastExpunge(f);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    if (DEBUG) {
+                        debug.setLength(0);
+                        LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
+                            System.currentTimeMillis() - startClear).append(STR_MSEC));
+                    }
+                } finally {
+                    f.close(false);
                 }
-                /*
-                 * Delete through storing \Deleted flag...
-                 */
-                new FlagsIMAPCommand(f, FLAGS_DELETED, true, true).doCommand();
-                /*
-                 * ... and perform EXPUNGE
-                 */
-                final long start = System.currentTimeMillis();
-                IMAPCommandsCollection.fastExpunge(f);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                if (DEBUG) {
-                    debug.setLength(0);
-                    LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
-                        System.currentTimeMillis() - startClear).append(STR_MSEC));
-                }
-            } finally {
-                f.close(false);
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
