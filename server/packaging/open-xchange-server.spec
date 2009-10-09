@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	15
+Release:	16
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Oct 06 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14578: Checking for empty first multipart in broken mails.
+* Mon Oct 05 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14232: Checking for drafts folder prior to deleting old draft version
 * Wed Jul 01 2009 - marcus.klein@open-xchange.com
  - Bugfix #14022: Adding additional unique indexes on prg_dates_members table to improve performance.
 * Tue Jun 30 2009 - thorben.betten@open-xchange.com
@@ -2223,7 +2227,14 @@ fi
    on the first level. 
 ########### LOOK MA! NO HANDS! CONFIGCHANGE CONFIGCHANGE#############
 in the servletmapping.properties we have a new entry:
-infostore* Fri Aug 03 2007 - thorben.betten@open-xchange.com
+infostore*:com.openexchange.webdav.Infostore
+in the apache configuration:
+JkMount /infostore ajp13
+JkMount /infostore/ ajp13
+JkMount /infostore/* ajp13
+#####################################################################
+ - Fixed Bug #8676: Return correct lockdiscovery property on LOCK for LockNull resources.
+* Fri Aug 03 2007 - thorben.betten@open-xchange.com
  - Fixed forwarding of messages with inline images
  - Fastened message cache
  - Fixed: Invalidation of user configuration now affects session, too
@@ -2632,7 +2643,10 @@ JkOptions +ForwardURICompatUnparsed
     CONFIG CHANGE: new file participant.properties and new path to this file in
     system.properties.
 * Wed Jun 20 2007 - thorben.betten@open-xchange.com
- - Bugfix #7679: Extended to allow special value "* Wed Jun 20 2007 - martin.kauss@open-xchange.com
+ - Bugfix #7679: Extended to allow special value "*" that will initialize
+   the affected server sockets (AJP & JMX) with bind address left to null,
+   thus it binds to all interfaces.
+* Wed Jun 20 2007 - martin.kauss@open-xchange.com
  - Fixed bug #7883. The reminder was set for all participants even if only
    one participant has set the reminder. This has been fixed.
  - Fixed an issue that while creating an recurring exception for whole day
