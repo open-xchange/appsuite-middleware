@@ -175,9 +175,10 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
-        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
-            MailFolderType.getInstance(),
-            MailParameterConstants.PARAM_MAIL_ACCESS);
+        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+            (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
+                MailFolderType.getInstance(),
+                MailParameterConstants.PARAM_MAIL_ACCESS);
         if (null != accesses) {
             try {
                 final Collection<MailAccess<?, ?>> values = accesses.values();
@@ -192,9 +193,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -245,9 +247,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -280,9 +283,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -330,9 +334,10 @@ public final class MailFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -346,11 +351,12 @@ public final class MailFolderStorage implements FolderStorage {
             final boolean hasSubfolders;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
                 final MailFolder rootFolder = mailAccess.getRootFolder();
-                retval = new MailFolderImpl(
-                    rootFolder,
-                    mailAccess.getAccountId(),
-                    mailAccess.getMailConfig().getCapabilities().getCapabilities(),
-                    null);
+                retval =
+                    new MailFolderImpl(
+                        rootFolder,
+                        mailAccess.getAccountId(),
+                        mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                        null);
                 /*
                  * Set proper name for non-primary account
                  */
@@ -359,13 +365,13 @@ public final class MailFolderStorage implements FolderStorage {
                      * Set proper name
                      */
                     try {
-                        final MailAccountStorageService storageService = MailServiceRegistry.getServiceRegistry().getService(
-                            MailAccountStorageService.class,
-                            true);
-                        final MailAccount mailAccount = storageService.getMailAccount(
-                            accountId,
-                            storageParameters.getUser().getId(),
-                            storageParameters.getContext().getContextId());
+                        final MailAccountStorageService storageService =
+                            MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                        final MailAccount mailAccount =
+                            storageService.getMailAccount(
+                                accountId,
+                                storageParameters.getUser().getId(),
+                                storageParameters.getContext().getContextId());
                         if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                             retval.setName(mailAccount.getName());
                         }
@@ -379,11 +385,12 @@ public final class MailFolderStorage implements FolderStorage {
             } else {
                 openMailAccess(mailAccess);
                 final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(fullname);
-                retval = new MailFolderImpl(
-                    mailFolder,
-                    mailAccess.getAccountId(),
-                    mailAccess.getMailConfig().getCapabilities().getCapabilities(),
-                    mailAccess.getFolderStorage().getTrashFolder());
+                retval =
+                    new MailFolderImpl(
+                        mailFolder,
+                        mailAccess.getAccountId(),
+                        mailAccess.getMailConfig().getCapabilities().getCapabilities(),
+                        mailAccess.getFolderStorage().getTrashFolder());
                 hasSubfolders = mailFolder.hasSubfolders();
             }
 
@@ -533,9 +540,10 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             // A mail folder denoted by fullname
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -613,9 +621,10 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
-        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
-            MailFolderType.getInstance(),
-            MailParameterConstants.PARAM_MAIL_ACCESS);
+        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+            (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
+                MailFolderType.getInstance(),
+                MailParameterConstants.PARAM_MAIL_ACCESS);
         if (null != accesses) {
             try {
                 final Collection<MailAccess<?, ?>> values = accesses.values();
@@ -658,9 +667,10 @@ public final class MailFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -698,9 +708,10 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses = (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
-                MailFolderType.getInstance(),
-                MailParameterConstants.PARAM_MAIL_ACCESS);
+            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
                 throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
             }
@@ -815,14 +826,15 @@ public final class MailFolderStorage implements FolderStorage {
                             }
                         }
                         // Copy
-                        final String destFullname = fullCopy(
-                            mailAccess,
-                            fullname,
-                            otherAccess,
-                            newParent,
-                            p.getSeparator(),
-                            storageParameters.getUser().getId(),
-                            otherAccess.getMailConfig().getCapabilities().hasPermissions());
+                        final String destFullname =
+                            fullCopy(
+                                mailAccess,
+                                fullname,
+                                otherAccess,
+                                newParent,
+                                p.getSeparator(),
+                                storageParameters.getUser().getId(),
+                                otherAccess.getMailConfig().getCapabilities().hasPermissions());
                         // Delete source
                         mailAccess.getFolderStorage().deleteFolder(fullname, true);
                         // Perform other updates
@@ -871,12 +883,13 @@ public final class MailFolderStorage implements FolderStorage {
         }
         final String destFullname = destAccess.getFolderStorage().createFolder(mfd);
         // Copy messages
-        final MailMessage[] msgs = srcAccess.getMessageStorage().getAllMessages(
-            srcFullname,
-            null,
-            MailSortField.RECEIVED_DATE,
-            OrderDirection.ASC,
-            new MailField[] { MailField.FULL });
+        final MailMessage[] msgs =
+            srcAccess.getMessageStorage().getAllMessages(
+                srcFullname,
+                null,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                new MailField[] { MailField.FULL });
         final IMailMessageStorage destMessageStorage = destAccess.getMessageStorage();
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
