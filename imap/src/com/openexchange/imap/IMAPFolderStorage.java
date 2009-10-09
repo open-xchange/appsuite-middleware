@@ -1394,10 +1394,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types) throws MailException {
         try {
             final IMAPFolder f;
-            {
-                final String fullname = folder == null ? STR_INBOX : folder;
-                final boolean isDefaultFolder = fullname.equals(DEFAULT_FOLDER_ID);
-                f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullname));
+            final String fullname = folder == null ? STR_INBOX : folder;
+            final boolean isDefaultFolder = fullname.equals(DEFAULT_FOLDER_ID);
+            f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullname));
+            /*
+             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
+             */
+            synchronized (f) {
                 if (!isDefaultFolder && !f.exists()) {
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
                 }
@@ -1417,64 +1420,64 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 } catch (final MessagingException e) {
                     throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
                 }
-            }
-            f.open(Folder.READ_ONLY);
-            if (!imapConfig.getImapCapabilities().hasQuota()) {
-                return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
-            }
-            Quota[] folderQuota = null;
-            try {
-                final long start = System.currentTimeMillis();
-                folderQuota = f.getQuota();
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            } catch (final MessagingException mexc) {
-                if (mexc.getNextException() instanceof ParsingException) {
-                    try {
-                        final long start = System.currentTimeMillis();
-                        folderQuota = IMAPCommandsCollection.getQuotaRoot(f);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } catch (final MessagingException inner) {
-                        /*
-                         * Custom parse routine failed, too
-                         */
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(inner.getMessage(), inner);
+                f.open(Folder.READ_ONLY);
+                if (!imapConfig.getImapCapabilities().hasQuota()) {
+                    return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
+                }
+                Quota[] folderQuota = null;
+                try {
+                    final long start = System.currentTimeMillis();
+                    folderQuota = f.getQuota();
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                } catch (final MessagingException mexc) {
+                    if (mexc.getNextException() instanceof ParsingException) {
+                        try {
+                            final long start = System.currentTimeMillis();
+                            folderQuota = IMAPCommandsCollection.getQuotaRoot(f);
+                            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        } catch (final MessagingException inner) {
+                            /*
+                             * Custom parse routine failed, too
+                             */
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn(inner.getMessage(), inner);
+                            }
+                            return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                         }
-                        return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
-                    }
-                } else {
-                    throw mexc;
-                }
-            }
-            if (folderQuota == null || folderQuota.length == 0) {
-                return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
-            }
-            final Quota.Resource[] resources = folderQuota[0].resources;
-            if (resources.length == 0) {
-                return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
-            }
-            final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
-            for (int i = 0; i < types.length; i++) {
-                final String typeStr = types[i].toString();
-                /*
-                 * Find corresponding resource to current type
-                 */
-                Resource resource = null;
-                for (int k = 0; k < resources.length && resource == null; k++) {
-                    if (typeStr.equalsIgnoreCase(resources[k].name)) {
-                        resource = resources[k];
+                    } else {
+                        throw mexc;
                     }
                 }
-                if (resource == null) {
+                if (folderQuota == null || folderQuota.length == 0) {
+                    return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
+                }
+                final Quota.Resource[] resources = folderQuota[0].resources;
+                if (resources.length == 0) {
+                    return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
+                }
+                final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];
+                for (int i = 0; i < types.length; i++) {
+                    final String typeStr = types[i].toString();
                     /*
-                     * No quota limitation found that applies to current resource type
+                     * Find corresponding resource to current type
                      */
-                    quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
-                } else {
-                    quotas[i] = new com.openexchange.mail.Quota(resource.limit, resource.usage, types[i]);
+                    Resource resource = null;
+                    for (int k = 0; k < resources.length && resource == null; k++) {
+                        if (typeStr.equalsIgnoreCase(resources[k].name)) {
+                            resource = resources[k];
+                        }
+                    }
+                    if (resource == null) {
+                        /*
+                         * No quota limitation found that applies to current resource type
+                         */
+                        quotas[i] = com.openexchange.mail.Quota.getUnlimitedQuota(types[i]);
+                    } else {
+                        quotas[i] = new com.openexchange.mail.Quota(resource.limit, resource.usage, types[i]);
+                    }
                 }
+                return quotas;
             }
-            return quotas;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
