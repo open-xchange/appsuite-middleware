@@ -159,7 +159,7 @@ public class CPServlet extends PermissionServlet {
             CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
-            factory.setCalendar(new CPCalendar());
+            factory.setCalendar(CPCalendar.getEuropeanCalendar());
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
 
             CPPartition partitions = factory.partition(expandedAppointments);
