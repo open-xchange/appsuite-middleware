@@ -179,7 +179,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                     }
                     if (!markUnseen.isEmpty()) {
                         /*
-                         * Explicitly mark as unseen since generating raw JSON mail representation touched mail's content
+                         * Explicitly mark as unseen since generating raw JSON mail representation touches mail's content
                          */
                         mailAccess.getMessageStorage().updateMessageFlags(
                             fullname,
