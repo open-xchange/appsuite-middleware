@@ -257,7 +257,19 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                 mailAccess.connect(false);
                 try {
                     final MailMessage mm = mailAccess.getMessageStorage().getMessage(fullname, mailId, false);
-                    return MessageWriter.writeRawMailMessage(accountId, mm);
+                    final boolean unseen = !mm.isSeen();
+                    final JSONObject rawMailMessage = MessageWriter.writeRawMailMessage(accountId, mm);
+                    if (unseen) {
+                        /*
+                         * Explicitly mark as unseen since generating raw JSON mail representation touches mail's content
+                         */
+                        mailAccess.getMessageStorage().updateMessageFlags(
+                            fullname,
+                            new String[] { mm.getMailId() },
+                            MailMessage.FLAG_SEEN,
+                            false);
+                    }
+                    return rawMailMessage;
                 } finally {
                     mailAccess.close(true);
                 }
