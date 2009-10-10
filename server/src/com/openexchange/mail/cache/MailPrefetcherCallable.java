@@ -116,8 +116,11 @@ public final class MailPrefetcherCallable implements Callable<Object> {
             for (int i = 0; i < mailIds.length; i++) {
                 final String mailId = mailIds[i];
                 if (overwrite || !cache.containsKey(accountId, fullname, mailId, session)) {
-                    final SetableFutureTask<JSONObject> f =
-                        new SetableFutureTask<JSONObject>(new MessageLoadCallable(mailId, fullname, accountId, session), mailId);
+                    final SetableFutureTask<JSONObject> f = new SetableFutureTask<JSONObject>(new MessageLoadCallable(
+                        mailId,
+                        fullname,
+                        accountId,
+                        session), mailId);
                     futures.add(f);
                     cache.put(accountId, fullname, mailId, f, session);
                 }
@@ -164,11 +167,11 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                     for (final SetableFutureTask<JSONObject> f : futures) {
                         final MailMessage mm = q.take();
                         try {
-                            final boolean wasUnseen = (!mm.isSeen());
-                            f.set(MessageWriter.writeRawMailMessage(accountId, mm));
-                            if (wasUnseen) {
+                            if (!mm.isSeen()) {
+                                // Mail is unseen
                                 markUnseen.add(mm.getMailId());
                             }
+                            f.set(MessageWriter.writeRawMailMessage(accountId, mm));
                         } catch (final Exception e) {
                             // LOG1.error(e.getMessage(), e);
                             f.setException(e);
@@ -230,8 +233,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
     private static class MessageLoadCallable implements Callable<JSONObject> {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.MessageLoadCallable.class);
+        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.MessageLoadCallable.class);
 
         private final Session session;
 
