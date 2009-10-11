@@ -1,3 +1,7 @@
+* 2009-10-11 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14625: User is no longer forced to be participant in public folders.
+
 * 2009-10-07 - stefan.preuss@open-xchange.com
 
  - Added additional search fields 'department, street_business and city_business' in module contacts (US3195)

@@ -1862,7 +1862,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 }
             }
         } else {
-            cdao.setUsers(new UserParticipant[] { up } );
+            //cdao.setUsers(new UserParticipant[] { up } );
         }
     }
     
