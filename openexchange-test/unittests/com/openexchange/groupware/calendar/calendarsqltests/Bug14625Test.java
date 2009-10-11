@@ -49,63 +49,51 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class CalendarSqlTestSuite {
+public class Bug14625Test extends CalendarSqlTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+    private CalendarDataObject appointment;
 
-        tests.addTestSuite(FullTimeSeries.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug5557Test.class);
-        tests.addTestSuite(Bug4778Test.class);
-        tests.addTestSuite(Bug13358Test.class);
-        tests.addTestSuite(Bug13121Test.class);
-        tests.addTestSuite(Bug13068Test.class);
-        tests.addTestSuite(Bug12923Test.class);
-        tests.addTestSuite(Bug12681Test.class);
-        tests.addTestSuite(Bug12662Test.class);
-        tests.addTestSuite(Bug12659Test.class);
-        tests.addTestSuite(Bug12601Test.class);
-        tests.addTestSuite(Bug12571Test.class);
-        tests.addTestSuite(Bug12509Test.class);
-        tests.addTestSuite(Bug12496Test.class);
-        tests.addTestSuite(Bug12489Test.class);
-        tests.addTestSuite(Bug12466Test.class);
-        tests.addTestSuite(Bug12413Test.class);
-        tests.addTestSuite(Bug12377Test.class);
-        tests.addTestSuite(Bug12269Test.class);
-        tests.addTestSuite(Bug12072Test.class);
-        tests.addTestSuite(Bug11881Test.class);
-        tests.addTestSuite(Bug11865Test.class);
-        tests.addTestSuite(Bug11803Test.class);
-        tests.addTestSuite(Bug11730Test.class);
-        tests.addTestSuite(Bug11708Test.class);
-        tests.addTestSuite(Bug11695Test.class);
-        tests.addTestSuite(Bug11453Test.class);
-        tests.addTestSuite(Bug11424Test.class);
-        tests.addTestSuite(Bug11316Test.class);
-        tests.addTestSuite(Bug11307Test.class);
-        tests.addTestSuite(Bug11148Test.class);
-        tests.addTestSuite(Bug11059Test.class);
-        tests.addTestSuite(Bug11051Test.class);
-        tests.addTestSuite(Bug10806Test.class);
-        tests.addTestSuite(Bug10154Test.class);
-        tests.addTestSuite(Node1077Test.class);
-        tests.addTestSuite(ParticipantsAgreeViaDifferentLoadMethods.class);
-        tests.addTestSuite(Bug13995Test.class);
-        tests.addTestSuite(Bug13446Test.class);
-        tests.addTestSuite(Bug11210Test.class);
-        tests.addTestSuite(Bug13226Test.class);
-        tests.addTestSuite(Bug14625Test.class);
-        
-        tests.addTestSuite(UserStory1906Test.class);
-        
-        return tests;
+    private FolderObject folder;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        folder = folders.createPublicFolderFor(
+            session,
+            ctx,
+            "Bug 14625 Test Folder",
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+            userId,
+            secondUserId);
+        cleanFolders.add(folder);
+        appointment = appointments.buildAppointmentWithUserParticipants(secondUser);
+        appointment.setParentFolderID(folder.getObjectID());
+        appointment.setTitle("Bug 14625 Test Appointment");
+        appointment.removeUsers();
+        appointments.save(appointment);
+        clean.add(appointment);
+    }
+
+    public void testBug14625() throws Exception {
+        CalendarDataObject loadAppointment = appointments.load(appointment.getObjectID(), folder.getObjectID());
+        assertEquals("Wrong amount of Participants.", 1, loadAppointment.getParticipants().length);
+        assertEquals("Wrong participant.", secondUserId, loadAppointment.getParticipants()[0].getIdentifier());
+        assertEquals("Wrong amount of Users.", 1, loadAppointment.getUsers().length);
+        assertEquals("Wrong user.", secondUserId, loadAppointment.getUsers()[0].getIdentifier());
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        // TODO Auto-generated method stub
+        super.tearDown();
     }
 }
