@@ -182,7 +182,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             mailAccount.setConfirmedHamFullname(getOptionalString(result.getString(20)));
             final String pers = result.getString(21);
             if (result.wasNull()) {
-                mailAccount.setPassword(null);
+                mailAccount.setPersonal(null);
             } else {
                 mailAccount.setPersonal(pers);
             }
