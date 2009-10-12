@@ -132,6 +132,11 @@ public final class JSONMessageCacheConfiguration {
     private int maxWaitTimeMillis;
 
     /**
+     * Whether to prefetch unseen mails only.
+     */
+    private boolean unseenOnly;
+
+    /**
      * Initializes a new {@link JSONMessageCacheConfiguration}.
      */
     private JSONMessageCacheConfiguration() {
@@ -220,6 +225,21 @@ public final class JSONMessageCacheConfiguration {
         }
 
         {
+            final String tmp = configuration.getProperty("com.openexchange.mail.cache.json.unseenOnly", "false").trim();
+            if ("true".equalsIgnoreCase(tmp)) {
+                unseenOnly = true;
+                logBuilder.append("\tUnseen Only: ").append(enabled).append('\n');
+            } else if ("false".equalsIgnoreCase(tmp)) {
+                unseenOnly = false;
+                logBuilder.append("\tUnseen Only: ").append(enabled).append('\n');
+            } else {
+                unseenOnly = false;
+                logBuilder.append("\tUnseen Only: Non parseable boolean value \"").append(tmp).append(fallbackPrefix).append(unseenOnly).append(
+                    '\n');
+            }
+        }
+
+        {
             final String tmp = configuration.getProperty("com.openexchange.mail.cache.json.maxWaitTimeMillis", "100").trim();
             try {
                 maxWaitTimeMillis = Integer.parseInt(tmp);
@@ -290,6 +310,15 @@ public final class JSONMessageCacheConfiguration {
      */
     public int getMaxWaitTimeMillis() {
         return maxWaitTimeMillis;
+    }
+
+    /**
+     * Whether to prefetch unseen mails only.
+     * 
+     * @return <code>true</code> if only unseen mails are prefetched; otherwise <code>false</code>
+     */
+    public boolean isUnseenOnly() {
+        return unseenOnly;
     }
 
 }
