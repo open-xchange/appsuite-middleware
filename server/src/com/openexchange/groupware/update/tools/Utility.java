@@ -55,7 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * {@link Utility} - TODO Short description of this class' purpose.
+ * {@link Utility} - Utility class.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -108,15 +108,15 @@ public final class Tools {
         return retval;
     }
 
-    public static final boolean existsPrimaryKey(Connection con, String table, String[] columns) throws SQLException {
+    public static final boolean existsPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         final List<String> foundColumns = new ArrayList<String>();
         ResultSet result = null;
         try {
             result = metaData.getPrimaryKeys(null, null, table);
             while (result.next()) {
-                String columnName = result.getString(4);
-                int columnPos = result.getInt(5);
+                final String columnName = result.getString(4);
+                final int columnPos = result.getInt(5);
                 while (foundColumns.size() < columnPos) {
                     foundColumns.add(null);
                 }
@@ -182,32 +182,32 @@ public final class Tools {
         return foundIndex;
     }
 
-    public static final String existsForeignKey(Connection con, String primaryTable, String[] primaryColumns, String foreignTable, String[] foreignColumns) throws SQLException {
+    public static final String existsForeignKey(final Connection con, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
-        Set<ForeignKey> keys = new HashSet<ForeignKey>();
+        final Set<ForeignKey> keys = new HashSet<ForeignKey>();
         ResultSet result = null;
         try {
             result = metaData.getImportedKeys(null, null, foreignTable);
             ForeignKey key = null;
             while (result.next()) {
-                String foundPrimaryTable = result.getString("PKTABLE_NAME");
-                String foundForeignTable = result.getString("FKTABLE_NAME");
-                String keyName = result.getString("FK_NAME");
-                ForeignKey tmp = new ForeignKey(keyName, foundPrimaryTable, foundForeignTable);
+                final String foundPrimaryTable = result.getString("PKTABLE_NAME");
+                final String foundForeignTable = result.getString("FKTABLE_NAME");
+                final String keyName = result.getString("FK_NAME");
+                final ForeignKey tmp = new ForeignKey(keyName, foundPrimaryTable, foundForeignTable);
                 if (null == key || !key.isSame(tmp)) {
                     key = tmp;
                     keys.add(key);
                 }
-                String primaryColumn = result.getString("PKCOLUMN_NAME");
-                String foreignColumn = result.getString("FKCOLUMN_NAME");
-                int columnPos = result.getInt("KEY_SEQ");
+                final String primaryColumn = result.getString("PKCOLUMN_NAME");
+                final String foreignColumn = result.getString("FKCOLUMN_NAME");
+                final int columnPos = result.getInt("KEY_SEQ");
                 key.setPrimaryColumn(columnPos - 1, primaryColumn);
                 key.setForeignColumn(columnPos - 1, foreignColumn);
             }
         } finally {
             closeSQLStuff(result);
         }
-        for (ForeignKey key : keys) {
+        for (final ForeignKey key : keys) {
             if (key.getPrimaryTable().equals(primaryTable) && key.getForeignTable().equals(foreignTable) && key.matches(primaryColumns, foreignColumns)) {
                 return key.getName();
             }
@@ -222,7 +222,7 @@ public final class Tools {
      * @param table table name that primary key should be dropped.
      * @throws SQLExceptionif some SQL problem occurs.
      */
-    public static final void dropPrimaryKey(Connection con, String table) throws SQLException {
+    public static final void dropPrimaryKey(final Connection con, final String table) throws SQLException {
         final String sql = "ALTER TABLE `" + table + "` DROP PRIMARY KEY";
         Statement stmt = null;
         try {
@@ -253,7 +253,7 @@ public final class Tools {
         }
     }
 
-    public static final void dropForeignKey(Connection con, String table, String foreignKey) throws SQLException {
+    public static final void dropForeignKey(final Connection con, final String table, final String foreignKey) throws SQLException {
         final String sql = "ALTER TABLE `" + table + "` DROP FOREIGN KEY `" + foreignKey + "`";
         Statement stmt = null;
         try {
@@ -273,7 +273,7 @@ public final class Tools {
      * @param columns names of the columns the primary key should cover.
      * @throws SQLException if some SQL problem occurs.
      */
-    public static final void createPrimaryKey(Connection con, String table, String[] columns) throws SQLException {
+    public static final void createPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(table);
         sql.append("` ADD PRIMARY KEY (`");
@@ -303,7 +303,7 @@ public final class Tools {
      * @param unique if this should be a unique index.
      * @throws SQLException if some SQL problem occurs.
      */
-    public static final void createIndex(Connection con, String table, String name, String[] columns, boolean unique) throws SQLException {
+    public static final void createIndex(final Connection con, final String table, final String name, final String[] columns, final boolean unique) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(table);
         sql.append("` ADD ");
@@ -341,15 +341,15 @@ public final class Tools {
      * @param columns names of the columns the index should cover.
      * @throws SQLException if some SQL problem occurs.
      */
-    public static final void createIndex(Connection con, String table, String[] columns) throws SQLException {
+    public static final void createIndex(final Connection con, final String table, final String[] columns) throws SQLException {
         createIndex(con, table, null, columns, false);
     }
 
-    public static void createForeignKey(Connection con, String primaryTable, String[] primaryColumns, String foreignTable, String[] foreignColumns) throws SQLException {
+    public static void createForeignKey(final Connection con, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
         createForeignKey(con, null, primaryTable, primaryColumns, foreignTable, foreignColumns);
     }
 
-    public static void createForeignKey(Connection con, String name, String primaryTable, String[] primaryColumns, String foreignTable, String[] foreignColumns) throws SQLException {
+    public static void createForeignKey(final Connection con, final String name, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(primaryTable);
         sql.append("` ADD FOREIGN KEY ");
@@ -394,9 +394,18 @@ public final class Tools {
         }
         return retval;
     }
-    
-    public static boolean columnExists(Connection con, String table, String column) throws SQLException {
-        DatabaseMetaData metaData = con.getMetaData();
+
+    /**
+     * Checks if specified column exists.
+     * 
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if specified column exists; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    public static boolean columnExists(final Connection con, final String table, final String column) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
         boolean retval = false;
         try {
@@ -424,7 +433,7 @@ public final class Tools {
         }
     }
 
-    public static boolean hasSequenceEntry(String sequenceTable, Connection con, int ctxId) throws SQLException {
+    public static boolean hasSequenceEntry(final String sequenceTable, final Connection con, final int ctxId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -441,10 +450,10 @@ public final class Tools {
         }
     }
 
-    public static List<Integer> getContextIDs(Connection con) throws SQLException {
+    public static List<Integer> getContextIDs(final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<Integer> contextIds = new LinkedList<Integer>();
+        final List<Integer> contextIds = new LinkedList<Integer>();
         try {
             stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
             rs = stmt.executeQuery();
@@ -462,12 +471,12 @@ public final class Tools {
         }
     }
 
-    public static void exec(Connection con, String sql, Object...args) throws SQLException {
+    public static void exec(final Connection con, final String sql, final Object...args) throws SQLException {
         PreparedStatement statement = null;
         try {
             statement = con.prepareStatement(sql);
             int i = 1;
-            for(Object arg : args) {
+            for(final Object arg : args) {
                 statement.setObject(i++, arg);
             }
             statement.execute();
