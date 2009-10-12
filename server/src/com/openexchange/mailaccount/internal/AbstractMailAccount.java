@@ -99,6 +99,8 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected String primaryAddress;
 
+    protected String personal;
+
     protected int userId;
 
     protected String spamHandler;
@@ -185,6 +187,10 @@ public abstract class AbstractMailAccount implements MailAccount {
         return primaryAddress;
     }
 
+    public String getPersonal() {
+        return personal;
+    }
+
     public String getTransportServer() {
         return transportServer;
     }
@@ -248,6 +254,15 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setPrimaryAddress(final String primaryAddress) {
         this.primaryAddress = primaryAddress;
+    }
+
+    /**
+     * Sets the personal.
+     * 
+     * @param personal The personal
+     */
+    public void setPersonal(final String personal) {
+        this.personal = personal;
     }
 
     /**

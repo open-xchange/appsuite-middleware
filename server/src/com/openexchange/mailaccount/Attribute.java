@@ -99,7 +99,9 @@ public enum Attribute {
     POP3_EXPUNGE_ON_QUIT_LITERAL(MailAccountFields.POP3_EXPUNGE_ON_QUIT, 1033),
     POP3_DELETE_WRITE_THROUGH_LITERAL(MailAccountFields.POP3_DELETE_WRITE_THROUGH, 1034),
     POP3_STORAGE_LITERAL(MailAccountFields.POP3_STORAGE, 1035),
-    POP3_PATH_LITERAL(MailAccountFields.POP3_PATH, 1036);
+    POP3_PATH_LITERAL(MailAccountFields.POP3_PATH, 1036),
+    // The personal
+    PERSONAL_LITERAL(MailAccountFields.PERSONAL, 1037);
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
         Attribute.MAIL_PORT_LITERAL,
@@ -138,6 +140,8 @@ public enum Attribute {
             return switcher.name();
         case PRIMARY_ADDRESS_LITERAL:
             return switcher.primaryAddress();
+        case PERSONAL_LITERAL:
+            return switcher.personal();
         case SPAM_HANDLER_LITERAL:
             return switcher.spamHandler();
         case TRASH_LITERAL:

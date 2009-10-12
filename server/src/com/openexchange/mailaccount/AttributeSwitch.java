@@ -64,6 +64,7 @@ public interface AttributeSwitch {
     public Object transportURL();
     public Object name();
     public Object primaryAddress();
+    public Object personal();
     public Object spamHandler();
     public Object trash();
     public Object sent();

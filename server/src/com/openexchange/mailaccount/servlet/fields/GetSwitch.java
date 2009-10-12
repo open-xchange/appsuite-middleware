@@ -103,6 +103,10 @@ public class GetSwitch implements AttributeSwitch {
         return desc.getPrimaryAddress();
     }
 
+    public Object personal() {
+        return desc.getPersonal();
+    }
+
     public Object sent() {
         return desc.getSent();
     }

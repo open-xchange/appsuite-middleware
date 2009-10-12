@@ -90,6 +90,8 @@ public final class MailAccountFields {
 
     public static final String PRIMARY_ADDRESS = "primary_address";
 
+    public static final String PERSONAL = "personal";
+
     public static final String SPAM_HANDLER = "spam_handler";
 
     public static final String TRASH = "trash";
@@ -123,8 +125,9 @@ public final class MailAccountFields {
     public static final String POP3_EXPUNGE_ON_QUIT = "pop3_expunge_on_quit";
 
     public static final String POP3_DELETE_WRITE_THROUGH = "pop3_delete_write_through";
-    
+
     public static final String POP3_STORAGE = "pop3_storage";
-    
+
     public static final String POP3_PATH = "pop3_path";
+
 }

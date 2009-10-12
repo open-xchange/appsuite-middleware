@@ -81,6 +81,8 @@ public final class MailAccountDescription implements Serializable {
 
     private String primaryAddress;
 
+    private String personal;
+
     private String spamHandler;
 
     private String trash;
@@ -189,6 +191,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public String getPrimaryAddress() {
         return primaryAddress;
+    }
+
+    /**
+     * Gets the personal.
+     * 
+     * @return The personal
+     */
+    public String getPersonal() {
+        return personal;
     }
 
     /**
@@ -487,6 +498,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setPrimaryAddress(final String primaryAddress) {
         this.primaryAddress = primaryAddress;
+    }
+
+    /**
+     * Sets the personal.
+     * 
+     * @param personal The personal
+     */
+    public void setPersonal(final String personal) {
+        this.personal = personal;
     }
 
     /**

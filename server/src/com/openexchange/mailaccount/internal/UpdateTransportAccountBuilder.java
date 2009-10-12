@@ -124,6 +124,11 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    public Object personal() {
+        bob.append("personal = ?,");
+        return null;
+    }
+
     public Object confirmedHam() {
         return null;
     }

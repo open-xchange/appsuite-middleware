@@ -78,6 +78,8 @@ public class SimMailAccount implements MailAccount {
 
     private String primaryAddress;
 
+    private String personal;
+
     private String password;
 
     private String name;
@@ -86,67 +88,71 @@ public class SimMailAccount implements MailAccount {
 
     private Map<String, String> properties;
     
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(final Map<String, String> properties) {
         this.properties = properties;
     }
 
-    public void setLogin(String login) {
+    public void setLogin(final String login) {
         this.login = login;
     }
 
-    public void setMailPort(int mailPort) {
+    public void setMailPort(final int mailPort) {
         this.mailPort = mailPort;
     }
 
-    public void setMailProtocol(String mailProtocol) {
+    public void setMailProtocol(final String mailProtocol) {
         this.mailProtocol = mailProtocol;
     }
 
-    public void setTransportSecure(boolean transportSecure) {
+    public void setTransportSecure(final boolean transportSecure) {
         this.transportSecure = transportSecure;
     }
 
-    public void setMailSecure(boolean mailSecure) {
+    public void setMailSecure(final boolean mailSecure) {
         this.mailSecure = mailSecure;
     }
 
-    public void setTransportServer(String transportServer) {
+    public void setTransportServer(final String transportServer) {
         this.transportServer = transportServer;
     }
 
-    public void setTransportProtocol(String transportProtocol) {
+    public void setTransportProtocol(final String transportProtocol) {
         this.transportProtocol = transportProtocol;
     }
 
-    public void setTransportPort(int transportPort) {
+    public void setTransportPort(final int transportPort) {
         this.transportPort = transportPort;
     }
 
-    public void setTransportPassword(String transportPassword) {
+    public void setTransportPassword(final String transportPassword) {
         this.transportPassword = transportPassword;
     }
 
-    public void setTransportLogin(String transportLogin) {
+    public void setTransportLogin(final String transportLogin) {
         this.transportLogin = transportLogin;
     }
 
-    public void setPrimaryAddress(String primaryAddress) {
+    public void setPrimaryAddress(final String primaryAddress) {
         this.primaryAddress = primaryAddress;
     }
 
-    public void setPassword(String password) {
+    public void setPersonal(final String personal) {
+        this.personal = personal;
+    }
+
+    public void setPassword(final String password) {
         this.password = password;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public void setMailServer(String mailServer) {
+    public void setMailServer(final String mailServer) {
         this.mailServer = mailServer;
     }
 
-    public void addProperty(String name, String value) {
+    public void addProperty(final String name, final String value) {
         // TODO Auto-generated method stub
 
     }
@@ -222,6 +228,10 @@ public class SimMailAccount implements MailAccount {
 
     public String getPrimaryAddress() {
         return primaryAddress;
+    }
+
+    public String getPersonal() {
+        return personal;
     }
 
     public Map<String, String> getProperties() {

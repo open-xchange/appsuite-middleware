@@ -99,6 +99,7 @@ public final class MailAccountWriter {
 
         json.put(MailAccountFields.NAME, account.getName());
         json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
+        json.put(MailAccountFields.PERSONAL, account.getPersonal());
         json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
         // Folder names
         json.put(MailAccountFields.TRASH, account.getTrash());

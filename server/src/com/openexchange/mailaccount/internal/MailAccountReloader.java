@@ -156,6 +156,11 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
         return delegate.getPrimaryAddress();
     }
 
+    public String getPersonal() {
+        updateDelegate();
+        return delegate.getPersonal();
+    }
+
     public String generateTransportServerURL() {
         updateDelegate();
         return delegate.generateTransportServerURL();

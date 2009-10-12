@@ -144,6 +144,11 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    public Object personal() {
+        bob.append("personal = ?,");
+        return null;
+    }
+
     public Object sent() {
         bob.append("sent = ?,");
         return null;

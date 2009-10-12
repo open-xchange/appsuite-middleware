@@ -96,10 +96,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class);
 
     private static final String SELECT_MAIL_ACCOUNT =
-        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
+        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_TRANSPORT_ACCOUNT =
-        "SELECT name, url, login, password, send_addr, default_flag FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
+        "SELECT name, url, login, password, send_addr, default_flag, personal FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_MAIL_ACCOUNTS = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id";
 
@@ -115,16 +115,16 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final String DELETE_TRANSPORT_ACCOUNT = "DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String UPDATE_MAIL_ACCOUNT =
-        "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ? WHERE cid = ? AND id = ? AND user = ?";
+        "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String INSERT_MAIL_ACCOUNT =
-        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_TRANSPORT_ACCOUNT =
-        "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ? WHERE cid = ? AND id = ? AND user = ?";
+        "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String INSERT_TRANSPORT_ACCOUNT =
-        "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag) VALUES (?,?,?,?,?,?,?,?,?)";
+        "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     private static final String UPDATE_UNIFIED_INBOX_FLAG =
         "UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
@@ -180,6 +180,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             mailAccount.setSpamFullname(getOptionalString(result.getString(18)));
             mailAccount.setConfirmedSpamFullname(getOptionalString(result.getString(19)));
             mailAccount.setConfirmedHamFullname(getOptionalString(result.getString(20)));
+            final String pers = result.getString(21);
+            if (result.wasNull()) {
+                mailAccount.setPassword(null);
+            } else {
+                mailAccount.setPersonal(pers);
+            }
             mailAccount.setUserId(user);
             /*
              * Fill properties
@@ -232,6 +238,10 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     } else {
                         mailAccount.setTransportPassword(transportPassword);
                     }
+                }
+                final String pers = result.getString(7);
+                if (!result.wasNull()) {
+                    mailAccount.setPersonal(pers);
                 }
             } else {
                 // throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(cid));
@@ -901,6 +911,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getSpamFullname());
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedSpamFullname());
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
+                setOptionalString(stmt, pos++, mailAccount.getPersonal());
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
@@ -922,6 +933,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.getLogin());
                 setOptionalString(stmt, pos++, encryptedTransportPassword);
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
+                setOptionalString(stmt, pos++, mailAccount.getPersonal());
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
@@ -1050,6 +1062,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getSpamFullname());
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedSpamFullname());
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
+                setOptionalString(stmt, pos++, mailAccount.getPersonal());
                 stmt.executeUpdate();
             }
             final String transportURL = mailAccount.generateTransportServerURL();
@@ -1081,6 +1094,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 stmt.setString(pos++, primaryAddress);
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
+                setOptionalString(stmt, pos++, mailAccount.getPersonal());
                 stmt.executeUpdate();
             }
             // Properties

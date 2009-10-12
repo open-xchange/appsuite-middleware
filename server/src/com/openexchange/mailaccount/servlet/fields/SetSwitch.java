@@ -119,6 +119,11 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    public Object personal() {
+        desc.setPersonal((String) value);
+        return null;
+    }
+
     public Object sent() {
         desc.setSent((String) value);
         return null;

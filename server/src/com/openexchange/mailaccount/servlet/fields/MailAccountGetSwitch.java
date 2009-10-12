@@ -100,6 +100,10 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object primaryAddress() {
         return account.getPrimaryAddress();
     }
+    
+    public Object personal() {
+        return account.getPersonal();
+    }
 
     public Object sent() {
         return account.getSent();

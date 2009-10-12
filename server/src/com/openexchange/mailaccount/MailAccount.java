@@ -204,6 +204,13 @@ public interface MailAccount extends Serializable {
     public String getPrimaryAddress();
 
     /**
+     * Gets the personal.
+     * 
+     * @return The personal
+     */
+    public String getPersonal();
+
+    /**
      * Checks if this mail account is a default account.
      * 
      * @return <code>true</code> if this mail account is a default account; otherwise <code>false</code>
