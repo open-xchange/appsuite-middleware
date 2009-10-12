@@ -279,12 +279,13 @@ public final class JSONMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
+     * @param remove <code>true</code> to remove on presence; otherwise <code>false</code>
      * @param session The session providing user and context information
      * @return The JSON mail object or <code>null</code>
      * @throws MailException If JSON mail object cannot be returned
      */
-    public JSONObject get(final int accountId, final String fullname, final String id, final Session session) throws MailException {
-        return get(accountId, fullname, id, session.getUserId(), session.getContextId());
+    public JSONObject get(final int accountId, final String fullname, final String id, final boolean remove, final Session session) throws MailException {
+        return get(accountId, fullname, id, remove, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -293,14 +294,15 @@ public final class JSONMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
+     * @param remove <code>true</code> to remove on presence; otherwise <code>false</code>
      * @param userId The user ID
      * @param cid The context ID
      * @return The <b>cloned</b> JSON mail object or <code>null</code>
      * @throws MailException If JSON mail object cannot be returned
      */
-    public JSONObject get(final int accountId, final String fullname, final String id, final int userId, final int cid) throws MailException {
-        final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
-            superMap.get(new UserKey(userId, cid));
+    public JSONObject get(final int accountId, final String fullname, final String id, final boolean remove, final int userId, final int cid) throws MailException {
+        final UserKey userKey = new UserKey(userId, cid);
+        final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap = superMap.get(userKey);
         if (null == timeoutConcurrentMap) {
             return null;
         }
@@ -327,10 +329,11 @@ public final class JSONMessageCache {
          * 1. Invoke Future.get() with a time out and return if return value is present within time out range
          * 2. Otherwise catch possible TimeoutException and handle it by performing Future's task with calling thread
          */
+        JSONObject retval = null;
         try {
             final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             try {
-                return clone(getFromFuture(future, waitTimeMillis));
+                retval = clone(getFromFuture(future, waitTimeMillis));
             } catch (final TimeoutException e) {
                 // Not yet available
                 if (DEBUG) {
@@ -351,11 +354,22 @@ public final class JSONMessageCache {
                 } else {
                     future.run();
                 }
-                return clone(getFromFuture(future));
+                retval = clone(getFromFuture(future));
             }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
+        if (remove) {
+            objectMap.remove(id);
+            if (objectMap.isEmpty()) {
+                timeoutConcurrentMap.remove(key);
+                if (timeoutConcurrentMap.isEmpty()) {
+                    superMap.remove(userKey);
+                    timeoutConcurrentMap.dispose();
+                }
+            }
+        }
+        return retval;
     }
 
     /**
