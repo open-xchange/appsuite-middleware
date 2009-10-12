@@ -371,6 +371,20 @@ public interface Folder extends Serializable, Cloneable {
     void setDefault(boolean deefault);
 
     /**
+     * Gets the default flag information.
+     * 
+     * @return The default flag information or <code>null</code> if none available
+     */
+    String getDefaultInfo();
+
+    /**
+     * Sets the default flag information.
+     * 
+     * @param defaultInfo The default flag information
+     */
+    void setDefaultInfo(String defaultInfo);
+
+    /**
      * Gets the capabilities.
      * 
      * @return The capabilities or <code>-1</code> if not supported

@@ -101,6 +101,8 @@ public abstract class AbstractFolder implements Folder {
 
     protected boolean deefault;
 
+    protected String defaultInfo;
+
     /**
      * Initializes an empty {@link AbstractFolder}.
      */
@@ -113,6 +115,7 @@ public abstract class AbstractFolder implements Folder {
         unread = -1;
         deleted = -1;
         capabilities = -1;
+        defaultInfo = null;
     }
 
     @Override
@@ -309,6 +312,14 @@ public abstract class AbstractFolder implements Folder {
 
     public void setDefault(final boolean deefault) {
         this.deefault = deefault;
+    }
+
+    public String getDefaultInfo() {
+        return defaultInfo;
+    }
+
+    public void setDefaultInfo(final String defaultInfo) {
+        this.defaultInfo = defaultInfo;
     }
 
     public int getCapabilities() {

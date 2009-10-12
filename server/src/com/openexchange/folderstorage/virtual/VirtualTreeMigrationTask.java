@@ -674,6 +674,14 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setUnread()");
         }
 
+        public String getDefaultInfo() {
+            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getDefaultInfo()");
+        }
+
+        public void setDefaultInfo(final String defaultInfo) {
+            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setDefaultInfo()");
+        }
+
     } // End of DummyFolder
 
     private static final class MailAccountComparator implements Comparator<MailAccount> {

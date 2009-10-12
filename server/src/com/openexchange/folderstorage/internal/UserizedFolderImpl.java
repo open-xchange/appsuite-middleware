@@ -275,6 +275,14 @@ public final class UserizedFolderImpl implements UserizedFolder {
         folder.setDeleted(deleted);
     }
 
+    public void setDefaultInfo(final String defaultInfo) {
+        folder.setDefaultInfo(defaultInfo);
+    }
+
+    public String getDefaultInfo() {
+        return folder.getDefaultInfo();
+    }
+
     public void setNew(final int nu) {
         folder.setNew(nu);
     }

@@ -145,6 +145,10 @@ public enum FolderField {
      */
     SUBSCR_SUBFLDS(315, "subscr_subflds"),
     /**
+     * A short text describing default folder flag.
+     */
+    STANDARD_FOLDER_INFO(316, "standard_folder_info"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),

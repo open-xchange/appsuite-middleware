@@ -157,14 +157,19 @@ public final class MailFolderImpl extends AbstractFolder {
             if (mailFolder.containsDefaultFolderType()) {
                 if (mailFolder.isInbox()) {
                     mailFolderType = MailFolderType.INBOX;
+                    defaultInfo = "INBOX";
                 } else if (mailFolder.isTrash()) {
                     mailFolderType = MailFolderType.TRASH;
+                    defaultInfo = "Trash";
                 } else if (mailFolder.isSent()) {
                     mailFolderType = MailFolderType.SENT;
+                    defaultInfo = "Sent";
                 } else if (mailFolder.isSpam()) {
                     mailFolderType = MailFolderType.SPAM;
+                    defaultInfo = "Spam";
                 } else if (mailFolder.isDrafts()) {
                     mailFolderType = MailFolderType.DRAFTS;
+                    defaultInfo = "Drafts";
                 } else {
                     mailFolderType = MailFolderType.NONE;
                 }
@@ -172,14 +177,19 @@ public final class MailFolderImpl extends AbstractFolder {
                 try {
                     if (fullname.equals(fullnameProvider.getDraftsFolder())) {
                         mailFolderType = MailFolderType.DRAFTS;
+                        defaultInfo = "Drafts";
                     } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
                         mailFolderType = MailFolderType.INBOX;
+                        defaultInfo = "INBOX";
                     } else if (fullname.equals(fullnameProvider.getSentFolder())) {
                         mailFolderType = MailFolderType.SENT;
+                        defaultInfo = "Sent";
                     } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
                         mailFolderType = MailFolderType.SPAM;
+                        defaultInfo = "Spam";
                     } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
                         mailFolderType = MailFolderType.TRASH;
+                        defaultInfo = "Trash";
                     } else {
                         mailFolderType = MailFolderType.NONE;
                     }

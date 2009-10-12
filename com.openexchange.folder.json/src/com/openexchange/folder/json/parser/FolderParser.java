@@ -134,6 +134,10 @@ public final class FolderParser {
                 // TODO: Support for this?
             }
 
+            if (folderJsonObject.hasAndNotNull(FolderField.STANDARD_FOLDER_INFO.getName())) {
+                // TODO: Support for this?
+            }
+
             if (folderJsonObject.hasAndNotNull(FolderField.PERMISSIONS_BITS.getName())) {
                 final JSONArray jsonArr = folderJsonObject.getJSONArray(FolderField.PERMISSIONS_BITS.getName());
                 final Permission[] permissions = parsePermission(jsonArr);
