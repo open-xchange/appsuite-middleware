@@ -59,11 +59,10 @@ public interface ContentType {
     /**
      * Gets this content type's module identifier.
      * <p>
-     * This method is for migration convenience only. It is supposed to be removed when new folder API is completed.
+     * This method is mainly for migration convenience.
      * 
      * @return The module identifier
      */
-    @Deprecated
     int getModule();
 
     /**
