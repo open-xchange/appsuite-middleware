@@ -117,6 +117,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
                 System.out.println("contacts postal code of private address : " + contact.getPostalCodeHome());
                 System.out.println("contacts city of private address : " + contact.getCityHome());
                 System.out.println("contacts country of private address : " + contact.getCountryHome());
+                System.out.println("contacts note : " + contact.getNote());
     
                 System.out.println("----------");
             }

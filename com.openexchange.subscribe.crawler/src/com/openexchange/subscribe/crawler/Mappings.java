@@ -172,6 +172,12 @@ public static Contact translateMapToContact(final HashMap<String, String> map) t
         if (map.containsKey("note")) {
             contact.setNote(map.get("note"));
         }
+        // a special kind of note containing the address of the contact (used if the address is only available as one String)
+        if (map.containsKey("address_note")) {
+            String htmlString  = map.get("address_note");
+            String noHTMLString = htmlString.replaceAll("\\<.*?\\>", "");
+            contact.setNote(noHTMLString);
+        }
         if (map.containsKey("profession")) {
             contact.setProfession(map.get("profession"));
         }

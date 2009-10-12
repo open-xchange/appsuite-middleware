@@ -63,8 +63,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
 
     public void testGenericSubscribeServiceForLinkedInTest() {
         // insert valid credentials here
-        String username = "roxyexchanger@ox.io";
-        String password = "secret";
+        String username = "";
+        String password = "";
 
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
@@ -105,8 +105,22 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         pageParts.add(new PagePart("(span class=\"family-name\">)([a-zA-ZŠšŸ]*)(</span>)", "last_name"));
         pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-ZŠšŸ\\x20]*)([\\s]*</p>)", "title"));
         pageParts.add(new PagePart(
-            "(<dt>Phone:</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([\\(\\)\\+\\s0-9]*)(<span class=\"type\">\\(Mobile\\))",
+            "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
             "cellular_telephone1"));
+        pageParts.add(new PagePart(
+            "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
+            "telephone_home1"));
+        pageParts.add(new PagePart(
+            "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
+            "telephone_business1"));
+        pageParts.add(new PagePart(
+            "<dt>(Address:|Adresse:|Adresse :|Direcci.n:)<\\/dt>[\\s]*<dd>[\\s]*<p>(.*\\s.*\\s.*)(<\\/dd>)",
+            "address_note"));
+        pageParts.add(new PagePart(
+            "<dt>(IM:|Mensaje instant.neo:|Messagerie instantan.e :) <\\/dt>[\\s]*<dd>[\\s]*<p>[\\s]*([^<]*)(<\\/p>)",
+            "instant_messenger1"));
+        
+        
         pageParts.add(new PagePart("(mailto:)"+VALID_EMAIL_REGEX+"(\")", "email1"));
 
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
@@ -117,7 +131,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the crawler description was updated to get the new config-files
         //dumpThis(crawler, crawler.getDisplayName());
     }
