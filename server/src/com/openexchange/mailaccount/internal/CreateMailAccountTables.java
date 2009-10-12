@@ -77,7 +77,7 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
 
     private static final String[] requiredTables = { "user" };
 
-    private static final String[] createdTables = { "user_mail_account", "user_mail_account_properties", "user_transport_account" };
+    private static final String[] createdTables = { "user_mail_account", "user_mail_account_properties", "user_transport_account", "user_transport_account_properties", "pop3_storage_ids", "pop3_storage_deleted" };
 
     private static final String[] createStatements = {
         "CREATE TABLE user_mail_account ("
