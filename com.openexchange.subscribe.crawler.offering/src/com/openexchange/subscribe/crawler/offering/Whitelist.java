@@ -59,7 +59,9 @@ import com.openexchange.config.ConfigurationService;
  */
 public class Whitelist implements Authentication {
 
-    private final String PROPERTY = "crawler.whitelist";
+    private static final String IP_V4_REGEXP = "\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z";
+
+    private static final String PROPERTY = "crawler.whitelist";
 
     private ConfigurationService configService;
 
@@ -87,7 +89,9 @@ public class Whitelist implements Authentication {
 
         String[] ips = property.trim().split(",");
         for (String ip : ips) {
-            addresses.add(ip.trim());
+            if (ip.trim().matches(IP_V4_REGEXP)) {
+                addresses.add(ip.trim());
+            }
         }
     }
 }
