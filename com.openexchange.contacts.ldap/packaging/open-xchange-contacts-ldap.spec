@@ -70,6 +70,24 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 if [ ${1:-0} -eq 2 ]; then
    . /opt/open-xchange/etc/oxfunctions.sh
 
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-145
+   # -----------------------------------------------------------------------
+   for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap/ -name "[0-9]*" -type d); do
+      if [ -d $i ]; then
+	  for prop in $(find $i -name "*.properties"); do
+	      ctx=$(basename $i)
+	      psname=$(basename $prop .properties)
+	      ostr="com.openexchange.contacts.ldap.context${ctx}.${psname}.refreshinterval"
+	      if ! grep $ostr $prop > /dev/null; then
+		  echo -e "\n${ostr}=10000" >> $prop
+	      fi
+	  done
+      fi
+   done
+
    for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap -name "*.example"); do
         ox_update_permissions "$i" root:open-xchange 640
    done
