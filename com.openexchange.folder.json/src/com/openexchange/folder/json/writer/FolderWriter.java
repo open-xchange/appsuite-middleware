@@ -277,10 +277,10 @@ public final class FolderWriter {
                 jsonPutter.put(FolderField.STANDARD_FOLDER.getName(), Boolean.valueOf(folder.isDefault()));
             }
         });
-        m.put(Integer.valueOf(FolderField.STANDARD_FOLDER_INFO.getColumn()), new FolderFieldWriter() {
+        m.put(Integer.valueOf(FolderField.STANDARD_FOLDER_TYPE.getColumn()), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                jsonPutter.put(FolderField.STANDARD_FOLDER_INFO.getName(), folder.getDefaultInfo());
+                jsonPutter.put(FolderField.STANDARD_FOLDER_TYPE.getName(), folder.getDefaultInfo());
             }
         });
         m.put(Integer.valueOf(FolderField.TOTAL.getColumn()), new FolderFieldWriter() {

@@ -134,7 +134,7 @@ public final class FolderParser {
                 // TODO: Support for this?
             }
 
-            if (folderJsonObject.hasAndNotNull(FolderField.STANDARD_FOLDER_INFO.getName())) {
+            if (folderJsonObject.hasAndNotNull(FolderField.STANDARD_FOLDER_TYPE.getName())) {
                 // TODO: Support for this?
             }
 
