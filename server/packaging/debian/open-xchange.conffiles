@@ -19,6 +19,7 @@
 /opt/open-xchange/etc/groupware/javamail.properties
 /opt/open-xchange/etc/groupware/ldap.properties
 /opt/open-xchange/etc/groupware/mail.properties
+/opt/open-xchange/etc/groupware/mailjsoncache.properties
 /opt/open-xchange/etc/groupware/notification.properties
 /opt/open-xchange/etc/groupware/participant.properties
 /opt/open-xchange/etc/groupware/server.properties
