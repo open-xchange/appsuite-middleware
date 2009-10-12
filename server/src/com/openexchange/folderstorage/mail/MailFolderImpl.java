@@ -81,11 +81,11 @@ public final class MailFolderImpl extends AbstractFolder {
     public static enum MailFolderType {
         NONE(MailContentType.getInstance(), 0),
         ROOT(SystemContentType.getInstance(), 0),
-        INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
-        DRAFTS(DraftsContentType.getInstance(), 9),
-        SENT(SentContentType.getInstance(), 10),
-        SPAM(SpamContentType.getInstance(), 11),
-        TRASH(TrashContentType.getInstance(), 12);
+        INBOX(MailContentType.getInstance(), 1),
+        DRAFTS(DraftsContentType.getInstance(), 2),
+        SENT(SentContentType.getInstance(), 3),
+        SPAM(SpamContentType.getInstance(), 4),
+        TRASH(TrashContentType.getInstance(), 5);
 
         private final ContentType contentType;
 
