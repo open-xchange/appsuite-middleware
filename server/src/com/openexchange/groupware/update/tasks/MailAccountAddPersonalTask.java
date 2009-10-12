@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -97,7 +96,7 @@ public final class MailAccountAddPersonalTask implements UpdateTask {
         }
         PreparedStatement stmt = null;
         try {
-            if (!columnExists(con, "user_mail_account", "personal")) {
+            if (!Tools.columnExists(con, "user_mail_account", "personal")) {
                 stmt =
                     con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
                 stmt.executeUpdate();
