@@ -160,8 +160,10 @@ public final class JSONMessageCacheConfiguration {
             final String tmp = configuration.getProperty("com.openexchange.mail.cache.json.enabled", "true").trim();
             if ("true".equalsIgnoreCase(tmp)) {
                 enabled = true;
+                logBuilder.append("\tEnabled: ").append(enabled).append('\n');
             } else if ("false".equalsIgnoreCase(tmp)) {
                 enabled = false;
+                logBuilder.append("\tEnabled: ").append(enabled).append('\n');
             } else {
                 enabled = true;
                 logBuilder.append("\tEnabled: Non parseable boolean value \"").append(tmp).append(fallbackPrefix).append(enabled).append(
@@ -234,6 +236,15 @@ public final class JSONMessageCacheConfiguration {
         if (logger.isInfoEnabled()) {
             logger.info(logBuilder.toString());
         }
+    }
+
+    /**
+     * Indicates if the JSON mail cache is enabled.
+     * 
+     * @return <code>true</code> if the JSON mail cache is enabled; otherwise <code>false</code>
+     */
+    public boolean isEnabled() {
+        return enabled;
     }
 
     /**
