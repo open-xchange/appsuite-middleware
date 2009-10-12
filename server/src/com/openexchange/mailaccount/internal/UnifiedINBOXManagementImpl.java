@@ -49,8 +49,14 @@
 
 package com.openexchange.mailaccount.internal;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -58,6 +64,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountExceptionFactory;
 import com.openexchange.mailaccount.MailAccountExceptionMessages;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -72,6 +79,8 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement {
 
+    private static final String SQL_CHECK = "SELECT url FROM user_mail_account WHERE cid = ? AND user = ? AND name = ?";
+
     /**
      * Initializes a new {@link UnifiedINBOXManagementImpl}.
      */
@@ -85,11 +94,10 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
 
     public void createUnifiedINBOX(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             // Check if Unified INBOX account already exists for given user
-            final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
             for (final MailAccount mailAccount : existingAccounts) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                     // User already has the Unified INBOX account set
@@ -151,9 +159,8 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
 
     public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             // Determine the ID of the Unified INBOX account for given user
             final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
             int id = -1;
@@ -179,32 +186,39 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
     }
 
     public boolean isEnabled(final int userId, final int contextId) throws MailAccountException {
-        return isEnabled(userId, contextId, null);
+        Connection con = null;
+        try {
+            con = Database.get(contextId, false);
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        }
+        try {
+            return isEnabled(userId, contextId, con);
+        } finally {
+            Database.back(contextId, false, con);
+        }
     }
 
     public boolean isEnabled(final int userId, final int contextId, final Connection con) throws MailAccountException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
-            // Look-up the Unified INBOX account for given user
-            final MailAccount[] existingAccounts;
-            if (null == con) {
-                existingAccounts = storageService.getUserMailAccounts(userId, contextId);
-            } else {
-                existingAccounts = storageService.getUserMailAccounts(userId, contextId, con);
-            }
-            for (int i = 0; i < existingAccounts.length; i++) {
-                final MailAccount mailAccount = existingAccounts[i];
-                if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol()) && mailAccount.isUnifiedINBOXEnabled()) {
+            stmt = con.prepareStatement(SQL_CHECK);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, NAME_UNIFIED_INBOX);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                final String url = rs.getString(1);
+                if (!rs.wasNull() && url != null && url.startsWith(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX, 0)) {
                     return true;
                 }
             }
             return false;
-        } catch (final ServiceException e) {
-            throw new MailAccountException(e);
-        } catch (final MailAccountException e) {
-            throw new MailAccountException(e);
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
         }
     }
 
@@ -214,9 +228,8 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
 
     public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws MailAccountException {
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             // Look-up the Unified INBOX account for given user
             final MailAccount[] existingAccounts;
             if (null == con) {
