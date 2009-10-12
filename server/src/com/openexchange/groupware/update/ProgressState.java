@@ -50,14 +50,15 @@
 package com.openexchange.groupware.update;
 
 /**
- * {@link ProgressStatus}
+ * {@link ProgressState}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ProgressStatus {
+public interface ProgressState {
 
     void setTotal(int total);
 
     void setState(int current);
 
+    void incrementState();
 }

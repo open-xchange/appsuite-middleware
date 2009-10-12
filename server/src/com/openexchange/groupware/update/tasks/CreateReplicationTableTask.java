@@ -63,8 +63,9 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -76,7 +77,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public final class CreateReplicationTableTask implements UpdateTask {
+public final class CreateReplicationTableTask extends UpdateTaskAdapter {
 
     private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectIndexes.class);
 
@@ -93,7 +94,8 @@ public final class CreateReplicationTableTask implements UpdateTask {
     }
 
     @OXThrows(category=Category.CODE_ERROR, desc="", exceptionId=1, msg="An SQL error occurred: %1$s.")
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(PerformParameters params) throws AbstractOXException {
+        final int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final Connection con = dbService.getForUpdateTask(contextId);
         try {
@@ -101,7 +103,10 @@ public final class CreateReplicationTableTask implements UpdateTask {
             if (!Tools.tableExists(con, "replicationMonitor")) {
                 createTable(con);
             }
-            insertZeros(con, dbService.getContextsInSameSchema(contextId));
+            int[] ctxIds = dbService.getContextsInSameSchema(contextId);
+            ProgressState status = params.getProgressState();
+            status.setTotal(ctxIds.length);
+            insertZeros(con, ctxIds, status);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -112,7 +117,7 @@ public final class CreateReplicationTableTask implements UpdateTask {
         }
     }
 
-    private void insertZeros(Connection con, int[] ctxIds) throws SQLException {
+    private void insertZeros(Connection con, int[] ctxIds, ProgressState status) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?,0)");
@@ -121,6 +126,7 @@ public final class CreateReplicationTableTask implements UpdateTask {
                     stmt.setInt(1, ctxId);
                     stmt.addBatch();
                 }
+                status.incrementState();
             }
             stmt.executeBatch();
         } finally {

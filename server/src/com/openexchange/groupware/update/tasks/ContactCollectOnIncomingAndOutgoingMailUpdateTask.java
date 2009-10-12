@@ -126,5 +126,4 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
             Database.backNoTimeout(contextId, true, con);
         }
     }
-
 }

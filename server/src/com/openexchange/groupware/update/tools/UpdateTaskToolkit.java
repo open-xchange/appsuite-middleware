@@ -72,7 +72,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.ProgressStatus;
+import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaStoreImpl;
@@ -399,7 +399,7 @@ public final class UpdateTaskToolkit {
             try {
                 LOG.info("Starting update task " + className + " on schema " + schema.getSchema() + ".");
                 if (task instanceof UpdateTaskV2) {
-                    ProgressStatus logger = new ProgressStatusImpl(className, schema.getSchema());
+                    ProgressState logger = new ProgressStatusImpl(className, schema.getSchema());
                     PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
                     ((UpdateTaskV2) task).perform(params);
                 } else {

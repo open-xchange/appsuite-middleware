@@ -51,14 +51,14 @@ package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.ProgressStatus;
+import com.openexchange.groupware.update.ProgressState;
 
 /**
  * {@link ProgressStatusImpl}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ProgressStatusImpl implements ProgressStatus {
+public class ProgressStatusImpl implements ProgressState {
 
     private static final Log LOG = LogFactory.getLog(ProgressStatusImpl.class);
 
@@ -72,6 +72,8 @@ public class ProgressStatusImpl implements ProgressStatus {
     private final String schema;
 
     private int total = -1;
+
+    private int state = 0;
 
     private long lastLogTime;
 
@@ -89,15 +91,21 @@ public class ProgressStatusImpl implements ProgressStatus {
         lastLogTime = System.currentTimeMillis();
     }
 
-    public void setState(int current) {
+    public void setState(int state) {
+        this.state = state;
+        logState();
+    }
+
+    public void incrementState() {
+        state++;
+        logState();
+    }
+
+    private void logState() {
         long now = System.currentTimeMillis();
         if (now > lastLogTime + logTimeDistance) {
             lastLogTime = now;
-            logState(current);
+            LOG.info("Update task " + taskName + " finished " + (state * 100 / total) + "% on schema " + schema + '.');
         }
-    }
-
-    private void logState(int current) {
-        LOG.info("Update task " + taskName + " finished " + (current * 100 / total) + "% on schema " + schema + '.');
     }
 }

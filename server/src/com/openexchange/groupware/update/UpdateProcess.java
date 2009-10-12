@@ -138,7 +138,7 @@ public class UpdateProcess implements Runnable {
                     try {
                         LOG.info("Starting update task " + taskName + " on schema " + schema.getSchema() + ".");
                         if (task instanceof UpdateTaskV2) {
-                            ProgressStatus logger = new ProgressStatusImpl(taskName, schema.getSchema());
+                            ProgressState logger = new ProgressStatusImpl(taskName, schema.getSchema());
                             PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
                             ((UpdateTaskV2) task).perform(params);
                         } else {

@@ -61,6 +61,6 @@ public interface PerformParameters {
 
     int getContextId();
 
-    ProgressStatus getStatus();
+    ProgressState getProgressState();
 
 }

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.ProgressStatus;
+import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.Schema;
 
 /**
@@ -62,12 +62,12 @@ public class PerformParametersImpl implements PerformParameters {
 
     private final Schema schema;
     private final int contextId;
-    private final ProgressStatus logger;
+    private final ProgressState logger;
 
     /**
      * Initializes a new {@link PerformParametersImpl}.
      */
-    public PerformParametersImpl(Schema schema, int contextId, ProgressStatus logger) {
+    public PerformParametersImpl(Schema schema, int contextId, ProgressState logger) {
         super();
         this.schema = schema;
         this.contextId = contextId;
@@ -78,7 +78,7 @@ public class PerformParametersImpl implements PerformParameters {
         return contextId;
     }
 
-    public ProgressStatus getStatus() {
+    public ProgressState getProgressState() {
         return logger;
     }
 

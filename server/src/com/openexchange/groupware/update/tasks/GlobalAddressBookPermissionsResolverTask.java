@@ -74,7 +74,7 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.ProgressStatus;
+import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
@@ -108,7 +108,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
     }
 
     public void perform(PerformParameters params) throws AbstractOXException {
-        ProgressStatus status = params.getStatus();
+        ProgressState status = params.getProgressState();
         /*
          * Get all contexts with contained users
          */
@@ -117,7 +117,6 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         /*
          * Iterate per context
          */
-        int counter = 1;
         for (Map.Entry<Integer, List<Integer>> me : m.entrySet()) {
             final int currentContextId = me.getKey().intValue();
             try {
@@ -130,7 +129,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
                 sb.append(e.getMessage());
                 LOG.error(sb.toString(), e);
             }
-            status.setState(counter++);
+            status.incrementState();
         }
     }
 

@@ -68,7 +68,7 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
     }
 
     public final void perform(Schema schema, int contextId) throws AbstractOXException {
-        ProgressStatus logger = new ProgressStatusImpl(this.getClass().getName(), schema.getSchema());
+        ProgressState logger = new ProgressStatusImpl(this.getClass().getName(), schema.getSchema());
         PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
         perform(params);
     }

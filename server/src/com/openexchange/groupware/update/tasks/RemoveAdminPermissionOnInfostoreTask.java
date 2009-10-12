@@ -54,10 +54,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -66,8 +64,9 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
@@ -79,7 +78,9 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
+public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
+
+    private static final Log LOG = LogFactory.getLog(RemoveAdminPermissionOnInfostoreTask.class);
 
     private final UpdateExceptionFactory exceptionFactory;
 
@@ -99,98 +100,51 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(final Schema schema, final int triggeringContextId) throws AbstractOXException {
-        final long started = System.currentTimeMillis();
-        final Set<Integer> set = getAllContexts(triggeringContextId);
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final int triggeringContextId = params.getContextId();
+        final int[] ctxIds = Database.getContextsInSameSchema(triggeringContextId);
 
-        final int size = set.size();
+        final ProgressState state = params.getProgressState();
+        state.setTotal(ctxIds.length);
         final StringBuilder sb = new StringBuilder(128);
-        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RemoveAdminPermissionOnInfostoreTask.class);
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info(sb.append("Processing ").append(size).append(" contexts in schema ").append(schema.getSchema()).toString());
-            sb.setLength(0);
-        }
-
-        int processed = 0;
-        for (final Integer contextId : set) {
-            try {
-                dropTopLevelInfostoreFolderPermissionFromAdmin(contextId.intValue());
-            } catch (final Exception e) {
-                sb.append("RemoveAdminPermissionOnInfostoreTask experienced an error while dropping ");
-                sb.append("incorrect admin permission on top level infostore folder in context ");
-                sb.append(contextId);
-                sb.append(":\n");
-                sb.append(e.getMessage());
-                LOG.error(sb.toString(), e);
-                sb.setLength(0);
-            }
-            processed++;
-            if (LOG.isInfoEnabled()) {
-                sb.append("Processed ").append(processed);
-                if (1 == processed) {
-                    sb.append(" context of ");
-                } else {
-                    sb.append(" contexts of ");
-                }
-                sb.append(size).append(" contexts in schema ").append(schema.getSchema());
-                LOG.info(sb.toString());
-
-                sb.setLength(0);
-            }
-        }
-
-        if (LOG.isInfoEnabled()) {
-            final long duration = System.currentTimeMillis() - started;
-            LOG.info(MessageFormat.format("UpdateTask ''RemoveAdminPermissionOnInfostoreTask'' successfully performed in {0}msec!", Long.valueOf(duration)));
-        }
-    }
-
-    private Set<Integer> getAllContexts(final int contextId) throws UpdateException {
         final Connection con;
         try {
-            con = Database.get(contextId, false);
+            con = Database.getNoTimeout(triggeringContextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid FROM user");
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
+            for (final int contextId : ctxIds) {
+                try {
+                    dropTopLevelInfostoreFolderPermissionFromAdmin(con, contextId);
+                } catch (final Exception e) {
+                    sb.append("RemoveAdminPermissionOnInfostoreTask experienced an error while dropping ");
+                    sb.append("incorrect admin permission on top level infostore folder in context ");
+                    sb.append(contextId);
+                    sb.append(":\n");
+                    sb.append(e.getMessage());
+                    LOG.error(sb.toString(), e);
+                    sb.setLength(0);
+                }
+                state.incrementState();
             }
-            final Set<Integer> set = new HashSet<Integer>();
-            do {
-                set.add(Integer.valueOf(rs.getInt(1)));
-            } while (rs.next());
-            return set;
-        } catch (final SQLException e) {
-            throw createSQLError(e);
         } finally {
-            closeSQLStuff(rs, stmt);
-            Database.back(contextId, false, con);
+            Database.backNoTimeout(triggeringContextId, true, con);
         }
     }
 
-    private void dropTopLevelInfostoreFolderPermissionFromAdmin(final int contextId) throws UpdateException {
+    private void dropTopLevelInfostoreFolderPermissionFromAdmin(Connection con, final int contextId) throws UpdateException {
         /*
          * Get context's admin
          */
-        final int mailAdmin = getMailAdmin(contextId);
+        final int mailAdmin = getMailAdmin(con, contextId);
         if (-1 == mailAdmin) {
             throw missingAdminError(contextId);
         }
         /*
          * Drop permission on top level infostore folder
          */
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
-        }
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
@@ -202,7 +156,6 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            Database.back(contextId, true, con);
         }
     }
 
@@ -216,13 +169,7 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
         return exceptionFactory.create(2, Integer.valueOf(contextId));
     }
 
-    private int getMailAdmin(final int contextId) throws UpdateException {
-        final Connection con;
-        try {
-            con = Database.get(contextId, false);
-        } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
-        }
+    private int getMailAdmin(final Connection con, final int contextId) throws UpdateException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -237,8 +184,6 @@ public class RemoveAdminPermissionOnInfostoreTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(contextId, false, con);
         }
     }
-
 }
