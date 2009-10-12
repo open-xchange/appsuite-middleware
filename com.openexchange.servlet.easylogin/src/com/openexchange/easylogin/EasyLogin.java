@@ -585,8 +585,13 @@ public class EasyLogin extends HttpServlet {
 			sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
 		}
 		sb.append("}\n");
-		sb.append("// now redirect correctly\n");
-		sb.append("window.location.href = document.referrer + \"?login=failed&user=\"+ u;  \n");
+		sb.append("// now redirect correctly and check if referrer contains ? then add & else add ? \n");
+		sb.append("var referrer=document.referrer\n");
+		sb.append("if(referrer.indexOf(\"?\")==-1){	\n" +
+				"window.location.href = referrer + \"?login=failed&user=\"+ u;  \n" +
+				"}else{\n" +
+				"window.location.href = referrer+ \"&login=failed&user=\"+ u;  \n" +
+				"}\n");
 		sb.append("return true; \n");
 		
 		return sb.toString();
