@@ -102,6 +102,11 @@ public final class JSONMessageCacheConfiguration {
      */
 
     /**
+     * Whether the cache is enabled.
+     */
+    private boolean enabled;
+
+    /**
      * The shrinker interval in seconds for the superior user map.
      */
     private int shrinkerIntervalUserMap;
@@ -150,6 +155,20 @@ public final class JSONMessageCacheConfiguration {
         logBuilder.append("\nLoading JSON message cache properties...\n");
 
         final String fallbackPrefix = "\". Setting to fallback: ";
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.cache.json.enabled", "true").trim();
+            if ("true".equalsIgnoreCase(tmp)) {
+                enabled = true;
+            } else if ("false".equalsIgnoreCase(tmp)) {
+                enabled = false;
+            } else {
+                enabled = true;
+                logBuilder.append("\tEnabled: Non parseable boolean value \"").append(tmp).append(fallbackPrefix).append(enabled).append(
+                    '\n');
+            }
+        }
+
         {
             final String tmp = configuration.getProperty("com.openexchange.mail.cache.json.shrinkerIntervalUserMap", "60").trim();
             try {
@@ -215,6 +234,15 @@ public final class JSONMessageCacheConfiguration {
         if (logger.isInfoEnabled()) {
             logger.info(logBuilder.toString());
         }
+    }
+
+    /**
+     * Indicates if the JSON mail cache is enabled.
+     * 
+     * @return <code>true</code> if the JSON mail cache is enabled; otherwise <code>false</code>
+     */
+    public boolean isEnabled() {
+        return enabled;
     }
 
     /**
