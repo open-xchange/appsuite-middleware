@@ -197,7 +197,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
         sources.getSources();
         for (SubscriptionSource source : sources.getSources()) {
             Map<String, String> link = new HashMap<String, String>();
-            link.put("link", "https://" + req.getServerName() + "/publications/crawler?action=source&crawler=" + source.getId());
+            link.put("link", getProtocol(req) + req.getServerName() + "/publications/crawler?action=source&crawler=" + source.getId());
             link.put("name", source.getDisplayName());
             links.add(link);
         }
@@ -224,7 +224,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("ELEMENTS", elements);
-        values.put("ACTION", "https://" + req.getServerName() + "/publications/crawler?action=crawl&crawler=" + source.getId());
+        values.put("ACTION", getProtocol(req) + req.getServerName() + "/publications/crawler?action=crawl&crawler=" + source.getId());
 
         template.process(values, resp.getWriter());
     }
@@ -234,6 +234,10 @@ public class CrawlerOfferingServlet extends HttpServlet {
         values.put("utils", new ContactTemplateUtils());
         values.put(types, content);
         template.process(values, resp.getWriter());
+    }
+    
+    private String getProtocol(HttpServletRequest req) {
+        return req.isSecure() ? "https://" : "http://";
     }
 
 }

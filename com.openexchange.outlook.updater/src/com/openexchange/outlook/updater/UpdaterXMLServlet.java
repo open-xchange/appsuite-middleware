@@ -104,7 +104,7 @@ public class UpdaterXMLServlet extends OXServlet {
     }
 
     private String getServerUrl(HttpServletRequest req) {
-        return "https://" + req.getServerName();
+        return (req.isSecure() ? "https://" : "http://") + req.getServerName();
     }
 
     private void getServerSession(HttpServletRequest req) throws ContextException {
