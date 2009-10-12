@@ -352,6 +352,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 94
             // Resolves Global Address Book's group permission to individual user permissions.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.GlobalAddressBookPermissionsResolverTask());
+            // Version 96
+            // Adds "personal" column to to mail/transport account table.
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask());
 
             // TODO: Enable virtual folder tree update task when needed
             // Version XY
