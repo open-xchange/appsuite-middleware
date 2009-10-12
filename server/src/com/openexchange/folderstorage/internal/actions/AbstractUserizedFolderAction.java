@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -196,8 +197,17 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
         final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
         if (folder.isGlobalID()) {
             // Set default folder flag
-            final FolderStorage folderStorage = getOpenedStorage(folder.getID(), treeId, storageParameters, openedStorages);
-            userizedFolder.setDefault(folder.getID().equals(folderStorage.getDefaultFolderID(getUser(), treeId, folder.getContentType(), storageParameters)));
+            final String id = folder.getID();
+            final FolderStorage folderStorage = getOpenedStorage(id, treeId, storageParameters, openedStorages);
+            final ContentType contentType = folder.getContentType();
+            final boolean isDefault = id.equals(folderStorage.getDefaultFolderID(getUser(), treeId, contentType, storageParameters));
+            if (isDefault) {
+                userizedFolder.setDefault(true);
+                userizedFolder.setDefaultType(contentType.getModule());
+            } else {
+                userizedFolder.setDefault(false);
+                userizedFolder.setDefaultType(0);
+            }
         }
         userizedFolder.setLocale(getLocale());
         // Permissions
