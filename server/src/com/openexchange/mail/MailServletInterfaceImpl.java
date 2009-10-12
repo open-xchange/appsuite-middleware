@@ -1628,7 +1628,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         /*
                          * Update JSON cache
                          */
-                        JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
+                        final JSONMessageCache cache = JSONMessageCache.getInstance();
+                        if (null != cache) {
+                            cache.removeFolder(mailAccess.getAccountId(), fullname, session);
+                        }
                         if (MailMessageCache.getInstance().containsFolderMessages(
                             mailAccess.getAccountId(),
                             fullname,
