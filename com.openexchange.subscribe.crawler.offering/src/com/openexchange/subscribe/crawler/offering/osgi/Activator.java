@@ -2,6 +2,7 @@ package com.openexchange.subscribe.crawler.offering.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.crawler.offering.CrawlerOfferingServlet;
@@ -21,6 +22,7 @@ public class Activator implements BundleActivator {
 	
 	    CrawlerOfferingServlet.setSources(whiteboard.getService(SubscriptionSourceDiscoveryService.class));
         CrawlerOfferingServlet.setTemplateService(whiteboard.getService(TemplateService.class));
+        CrawlerOfferingServlet.setConfigService(whiteboard.getService(ConfigurationService.class));
 	    servletRegistration = new ServletRegistration(context, new CrawlerOfferingServlet(), ALIAS);
     }
 

@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.crawler.offering;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.AbstractOXException;
@@ -91,6 +94,8 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     private static TemplateService templateService = null;
 
+    private static ConfigurationService configService;
+
     private static final String LIST_TEMPLATE = "list.tmpl";
 
     private static final String SOURCE_TEMPLATE = "source.tmpl";
@@ -107,42 +112,54 @@ public class CrawlerOfferingServlet extends HttpServlet {
         templateService = service;
     }
 
+    public static void setConfigService(ConfigurationService service) {
+        configService = service;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String parameter = req.getParameter("action");
-        if (parameter.equals("list")) {
-            doList(req, resp);
-        } else if (parameter.equals("source")) {
-            doSource(req, resp);
+        if (!auth(req)) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        } else {
+            String parameter = req.getParameter("action");
+            if (parameter.equals("list")) {
+                doList(req, resp);
+            } else if (parameter.equals("source")) {
+                doSource(req, resp);
+            }
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
-        Map<String, Object> parameters = collectParameters(req, source);
+        if (!auth(req)) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        } else {
+            SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
+            Map<String, Object> parameters = collectParameters(req, source);
 
-        Subscription subscription = new Subscription();
-        subscription.setSource(source);
-        subscription.setConfiguration(parameters);
+            Subscription subscription = new Subscription();
+            subscription.setSource(source);
+            subscription.setConfiguration(parameters);
 
-        try {
-            resp.setContentType("text/html");
+            try {
+                resp.setContentType("text/html");
 
-            Collection<?> content = source.getSubscribeService().getContent(subscription);
+                Collection<?> content = source.getSubscribeService().getContent(subscription);
 
-            switch (source.getFolderModule()) {
-            case FolderObject.CONTACT:
-                OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
-                fillResultTemplate(template, content, "contacts", resp);
-                break;
-            case FolderObject.INFOSTORE:
-                break;
+                switch (source.getFolderModule()) {
+                case FolderObject.CONTACT:
+                    OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
+                    fillResultTemplate(template, content, "contacts", resp);
+                    break;
+                case FolderObject.INFOSTORE:
+                    break;
+                }
+            } catch (AbstractOXException e) {
+                LOG.error(e.getMessage(), e);
+                resp.setContentType("text/html");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             }
-        } catch (AbstractOXException e) {
-            LOG.error(e.getMessage(), e);
-            resp.setContentType("text/html");
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -235,9 +252,14 @@ public class CrawlerOfferingServlet extends HttpServlet {
         values.put(types, content);
         template.process(values, resp.getWriter());
     }
-    
+
     private String getProtocol(HttpServletRequest req) {
         return req.isSecure() ? "https://" : "http://";
+    }
+
+    private boolean auth(HttpServletRequest req) {
+        Authentication authentication = new Whitelist(configService);
+        return authentication.auth(req);
     }
 
 }
