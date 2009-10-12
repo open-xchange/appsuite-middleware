@@ -96,7 +96,7 @@ public final class MailFolderImpl extends AbstractFolder {
         /**
          * Gets the content type associated with this mail folder type.
          * 
-         * @return The content typ
+         * @return The content type
          */
         public ContentType getContentType() {
             return contentType;
