@@ -436,7 +436,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update JSON cache
              */
-            JSONMessageCache.getInstance().removeFolder(accountId, fullname, session);
+            final JSONMessageCache cache = JSONMessageCache.getInstance();
+            if (null != cache) {
+                cache.removeFolder(accountId, fullname, session);
+            }
             /*
              * Update message cache
              */
@@ -464,8 +467,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Update JSON cache
              */
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
-            for (final String uid : msgUIDs) {
-                jsonMessageCache.remove(argument.getAccountId(), fullname, uid, session);
+            if (null != jsonMessageCache) {
+                for (final String uid : msgUIDs) {
+                    jsonMessageCache.remove(argument.getAccountId(), fullname, uid, session);
+                }
             }
             /*
              * Update message cache
