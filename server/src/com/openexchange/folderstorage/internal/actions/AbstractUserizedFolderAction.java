@@ -194,6 +194,11 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      */
     protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
+        if (folder.isGlobalID()) {
+            // Set default folder flag
+            final FolderStorage folderStorage = getOpenedStorage(folder.getID(), treeId, storageParameters, openedStorages);
+            userizedFolder.setDefault(folder.getID().equals(folderStorage.getDefaultFolderID(getUser(), treeId, folder.getContentType(), storageParameters)));
+        }
         userizedFolder.setLocale(getLocale());
         // Permissions
         userizedFolder.setOwnPermission(ownPermission);

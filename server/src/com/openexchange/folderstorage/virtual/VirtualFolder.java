@@ -68,22 +68,6 @@ public final class VirtualFolder implements Folder {
 
     private Folder realFolder;
 
-    /**
-     * @return
-     * @see com.openexchange.folderstorage.Folder#getDefaultInfo()
-     */
-    public String getDefaultInfo() {
-        return realFolder.getDefaultInfo();
-    }
-
-    /**
-     * @param defaultInfo
-     * @see com.openexchange.folderstorage.Folder#setDefaultInfo(java.lang.String)
-     */
-    public void setDefaultInfo(final String defaultInfo) {
-        realFolder.setDefaultInfo(defaultInfo);
-    }
-
     private Date lastModified;
 
     private int modifiedBy;
@@ -330,6 +314,14 @@ public final class VirtualFolder implements Folder {
     }
 
     public void setUnread(final int unread) {
+        // Nothing to do
+    }
+
+    public String getDefaultInfo() {
+        return realFolder.getDefaultInfo();
+    }
+
+    public void setDefaultInfo(final String defaultInfo) {
         // Nothing to do
     }
 
