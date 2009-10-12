@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,7 +72,6 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveAdminPermissionOnInfostoreTask} - Removed incorrect admin permission on top level infostore folder.
@@ -115,6 +116,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
             throw new UpdateException(e);
         }
         try {
+            con.setAutoCommit(false);
             for (final int contextId : ctxIds) {
                 try {
                     dropTopLevelInfostoreFolderPermissionFromAdmin(con, contextId);
@@ -129,7 +131,12 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
                 }
                 state.incrementState();
             }
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw createSQLError(e);
         } finally {
+            autocommit(con);
             Database.backNoTimeout(triggeringContextId, true, con);
         }
     }
@@ -155,7 +162,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            closeSQLStuff(stmt);
         }
     }
 

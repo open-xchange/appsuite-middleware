@@ -65,8 +65,9 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.services.I18nServices;
@@ -77,7 +78,7 @@ import com.openexchange.server.services.I18nServices;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public class RenameGroupTask implements UpdateTask {
+public class RenameGroupTask extends UpdateTaskAdapter {
 
     private static final Log LOG = LogFactory.getLog(RenameGroupTask.class);
 
@@ -103,14 +104,19 @@ public class RenameGroupTask implements UpdateTask {
         exceptionId = { 1 },
         msg = { "An SQL error occurred: %1$s." }
     )
-    public void perform(Schema schema, int contextId) throws AbstractOXException {
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            for (int context : Database.getContextsInSameSchema(contextId)) {
+            int[] ctxIds = Database.getContextsInSameSchema(contextId);
+            ProgressState state = params.getProgressState();
+            state.setTotal(ctxIds.length);
+            for (int context : ctxIds) {
                 String adminLanguage = getContextAdminLanguage(con, context);
                 String groupName = I18nServices.getInstance().translate(adminLanguage, Groups.STANDARD_GROUP);
                 updateGroupName(con, context, groupName);
+                state.incrementState();
             }
             con.commit();
         } catch (final SQLException e) {

@@ -73,8 +73,9 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
@@ -95,7 +96,7 @@ import com.openexchange.spamhandler.SpamHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public final class MailAccountMigrationTask implements UpdateTask {
+public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     public MailAccountMigrationTask() {
         super();
@@ -109,9 +110,10 @@ public final class MailAccountMigrationTask implements UpdateTask {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
-
+        ProgressState state = params.getProgressState();
         for (final Iterator<Map.Entry<Integer, List<Integer>>> it = m.entrySet().iterator(); it.hasNext();) {
             final Map.Entry<Integer, List<Integer>> me = it.next();
             final int currentContextId = me.getKey().intValue();
@@ -126,6 +128,7 @@ public final class MailAccountMigrationTask implements UpdateTask {
                 final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountMigrationTask.class);
                 LOG.error(sb.toString(), e);
             }
+            state.incrementState();
         }
     }
 
