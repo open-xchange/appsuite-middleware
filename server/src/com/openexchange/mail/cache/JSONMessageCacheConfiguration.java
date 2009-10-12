@@ -237,15 +237,6 @@ public final class JSONMessageCacheConfiguration {
     }
 
     /**
-     * Indicates if the JSON mail cache is enabled.
-     * 
-     * @return <code>true</code> if the JSON mail cache is enabled; otherwise <code>false</code>
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
      * Gets the shrinker interval in seconds for the superior user map.
      * 
      * @return The shrinker interval in seconds for the superior user map
