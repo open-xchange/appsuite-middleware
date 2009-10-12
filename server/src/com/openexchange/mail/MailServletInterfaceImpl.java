@@ -1840,19 +1840,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Update caches
          */
         {
-            final List<String> updateIds = new ArrayList<String>(msgUID.length);
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
-            for (int i = 0; i < msgUID.length; i++) {
-                final String uid = msgUID[i];
-                if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
-                    updateIds.add(uid);
+            if (null != jsonMessageCache) {
+                final List<String> updateIds = new ArrayList<String>(msgUID.length);
+                for (int i = 0; i < msgUID.length; i++) {
+                    final String uid = msgUID[i];
+                    if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
+                        updateIds.add(uid);
+                    }
                 }
-            }
-            if (!updateIds.isEmpty()) {
-                /*
-                 * Update color label in JSON message cache
-                 */
-                jsonMessageCache.updateColorFlag(accountId, fullname, msgUID, newColorLabel, session);
+                if (!updateIds.isEmpty()) {
+                    /*
+                     * Update color label in JSON message cache
+                     */
+                    jsonMessageCache.updateColorFlag(accountId, fullname, msgUID, newColorLabel, session);
+                }
             }
         }
         try {
@@ -1885,25 +1887,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Update caches
          */
         {
-            final List<String> updateIds = new ArrayList<String>(msgUID.length);
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
-            for (int i = 0; i < msgUID.length; i++) {
-                final String uid = msgUID[i];
-                if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
-                    updateIds.add(uid);
+            if (null != jsonMessageCache) {
+                final List<String> updateIds = new ArrayList<String>(msgUID.length);
+                for (int i = 0; i < msgUID.length; i++) {
+                    final String uid = msgUID[i];
+                    if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
+                        updateIds.add(uid);
+                    }
                 }
-            }
-            if (!updateIds.isEmpty()) {
-                // Optimize for set to seen/unseen
-                int flags = flagBits;
-                if ((flags & MailMessage.FLAG_SEEN) > 0) {
-                    // Strip \Seen flag from bit mask
-                    flags = (flags & ~MailMessage.FLAG_SEEN);
-                    // Invoke special method for \Seen flag
-                    final int unread = mailAccess.getUnreadMessagesCount(fullname);
-                    jsonMessageCache.switchSeenFlag(accountId, fullname, msgUID, flagVal, unread, session);
+                if (!updateIds.isEmpty()) {
+                    // Optimize for set to seen/unseen
+                    int flags = flagBits;
+                    if ((flags & MailMessage.FLAG_SEEN) > 0) {
+                        // Strip \Seen flag from bit mask
+                        flags = (flags & ~MailMessage.FLAG_SEEN);
+                        // Invoke special method for \Seen flag
+                        final int unread = mailAccess.getUnreadMessagesCount(fullname);
+                        jsonMessageCache.switchSeenFlag(accountId, fullname, msgUID, flagVal, unread, session);
+                    }
+                    jsonMessageCache.updateFlags(accountId, fullname, msgUID, flags, flagVal, session);
                 }
-                jsonMessageCache.updateFlags(accountId, fullname, msgUID, flags, flagVal, session);
             }
         }
         if (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0)) {
