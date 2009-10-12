@@ -1,3 +1,7 @@
+* 2009-10-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #14638: Fixed download of a mail as eml file with IE
+
 * 2009-10-11 - martin.herfurth@open-xchange.com
 
  - Bugfix #14625: User is no longer forced to be participant in public folders.

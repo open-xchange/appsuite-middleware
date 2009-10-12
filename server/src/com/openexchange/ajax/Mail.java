@@ -1035,24 +1035,19 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Write message source to output stream...
                          */
-                        final String userAgent = paramContainer.getHeader("user-agent").toLowerCase(Locale.ENGLISH);
-                        final boolean internetExplorer =
-                            (userAgent != null && userAgent.indexOf("msie") > -1 && userAgent.indexOf("windows") > -1);
-                        final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
-                        // Content-Type
                         final ContentType contentType = new ContentType();
                         contentType.setPrimaryType("application");
                         contentType.setSubType("octet-stream");
+                        final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
                         httpResponse.setContentType(contentType.toString());
-                        // Content-Disposition
-                        final String fileName =
+                        final String preparedFileName =
                             getSaveAsFileName(
                                 new StringBuilder(mail.getSubject().replaceAll(" ", "_")).append(".eml").toString(),
-                                internetExplorer,
+                                isMSIEOnWindows(paramContainer.getHeader(STR_USER_AGENT)),
                                 null);
                         httpResponse.setHeader("Content-disposition", new StringBuilder(64).append("attachment; filename=\"").append(
-                            fileName).append('"').toString());
-                        httpResponse.setContentType(contentType.toString());
+                            preparedFileName).append('"').toString());
+                        Tools.removeCachingHeader(httpResponse);
                         // Write output stream in max. 8K chunks
                         final OutputStream out = httpResponse.getOutputStream();
                         final byte[] bytes = baos.toByteArray();
