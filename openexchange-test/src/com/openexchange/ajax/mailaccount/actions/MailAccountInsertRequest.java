@@ -154,6 +154,10 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
                 return acc.getPassword();
             }
 
+            public String getPersonal() {
+                return acc.getPersonal();
+            }
+
             public String getPrimaryAddress() {
                 return acc.getPrimaryAddress();
             }

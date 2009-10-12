@@ -165,6 +165,10 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
                 return acc.getPrimaryAddress();
             }
 
+            public String getPersonal() {
+                return acc.getPersonal();
+            }
+
             public String getSent() {
                 return acc.getSent();
             }
