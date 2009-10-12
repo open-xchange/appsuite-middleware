@@ -79,18 +79,21 @@ public final class MailFolderImpl extends AbstractFolder {
      * The mail folder content type.
      */
     public static enum MailFolderType {
-        NONE(MailContentType.getInstance()),
-        ROOT(SystemContentType.getInstance()),
-        INBOX(MailContentType.getInstance()),
-        DRAFTS(DraftsContentType.getInstance()),
-        SENT(SentContentType.getInstance()),
-        SPAM(SpamContentType.getInstance()),
-        TRASH(TrashContentType.getInstance());
+        NONE(MailContentType.getInstance(), 0),
+        ROOT(SystemContentType.getInstance(), 0),
+        INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
+        DRAFTS(DraftsContentType.getInstance(), 9),
+        SENT(SentContentType.getInstance(), 10),
+        SPAM(SpamContentType.getInstance(), 11),
+        TRASH(TrashContentType.getInstance(), 12);
 
         private final ContentType contentType;
 
-        private MailFolderType(final ContentType contentType) {
+        private final int type;
+
+        private MailFolderType(final ContentType contentType, final int type) {
             this.contentType = contentType;
+            this.type = type;
         }
 
         /**
@@ -101,6 +104,16 @@ public final class MailFolderImpl extends AbstractFolder {
         public ContentType getContentType() {
             return contentType;
         }
+
+        /**
+         * Gets the type.
+         * 
+         * @return The type
+         */
+        public int getType() {
+            return type;
+        }
+
     }
 
     private MailFolderType mailFolderType;
@@ -157,19 +170,14 @@ public final class MailFolderImpl extends AbstractFolder {
             if (mailFolder.containsDefaultFolderType()) {
                 if (mailFolder.isInbox()) {
                     mailFolderType = MailFolderType.INBOX;
-                    defaultInfo = "INBOX";
                 } else if (mailFolder.isTrash()) {
                     mailFolderType = MailFolderType.TRASH;
-                    defaultInfo = "Trash";
                 } else if (mailFolder.isSent()) {
                     mailFolderType = MailFolderType.SENT;
-                    defaultInfo = "Sent";
                 } else if (mailFolder.isSpam()) {
                     mailFolderType = MailFolderType.SPAM;
-                    defaultInfo = "Spam";
                 } else if (mailFolder.isDrafts()) {
                     mailFolderType = MailFolderType.DRAFTS;
-                    defaultInfo = "Drafts";
                 } else {
                     mailFolderType = MailFolderType.NONE;
                 }
@@ -177,19 +185,14 @@ public final class MailFolderImpl extends AbstractFolder {
                 try {
                     if (fullname.equals(fullnameProvider.getDraftsFolder())) {
                         mailFolderType = MailFolderType.DRAFTS;
-                        defaultInfo = "Drafts";
                     } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
                         mailFolderType = MailFolderType.INBOX;
-                        defaultInfo = "INBOX";
                     } else if (fullname.equals(fullnameProvider.getSentFolder())) {
                         mailFolderType = MailFolderType.SENT;
-                        defaultInfo = "Sent";
                     } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
                         mailFolderType = MailFolderType.SPAM;
-                        defaultInfo = "Spam";
                     } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
                         mailFolderType = MailFolderType.TRASH;
-                        defaultInfo = "Trash";
                     } else {
                         mailFolderType = MailFolderType.NONE;
                     }
@@ -222,6 +225,16 @@ public final class MailFolderImpl extends AbstractFolder {
     @Override
     public ContentType getContentType() {
         return mailFolderType.getContentType();
+    }
+
+    @Override
+    public int getDefaultType() {
+        return mailFolderType.getType();
+    }
+
+    @Override
+    public void setDefaultType(final int defaultType) {
+        // Nothing to do
     }
 
     @Override

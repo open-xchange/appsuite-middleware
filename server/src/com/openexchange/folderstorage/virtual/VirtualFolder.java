@@ -317,11 +317,11 @@ public final class VirtualFolder implements Folder {
         // Nothing to do
     }
 
-    public String getDefaultInfo() {
-        return realFolder.getDefaultInfo();
+    public int getDefaultType() {
+        return realFolder.getDefaultType();
     }
 
-    public void setDefaultInfo(final String defaultInfo) {
+    public void setDefaultType(final int defaultType) {
         // Nothing to do
     }
 

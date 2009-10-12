@@ -105,7 +105,7 @@ public final class ParsedFolder implements Folder {
 
     protected boolean deefault;
 
-    protected String defaultInfo;
+    protected int defaultType;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -317,12 +317,12 @@ public final class ParsedFolder implements Folder {
         this.deefault = deefault;
     }
 
-    public String getDefaultInfo() {
-        return defaultInfo;
+    public int getDefaultType() {
+        return defaultType;
     }
 
-    public void setDefaultInfo(final String defaultInfo) {
-        this.defaultInfo = defaultInfo;
+    public void setDefaultType(final int defaultType) {
+        this.defaultType = defaultType;
     }
 
     public int getCapabilities() {

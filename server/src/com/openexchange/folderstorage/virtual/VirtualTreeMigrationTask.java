@@ -674,11 +674,11 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setUnread()");
         }
 
-        public String getDefaultInfo() {
+        public int getDefaultType() {
             throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getDefaultInfo()");
         }
 
-        public void setDefaultInfo(final String defaultInfo) {
+        public void setDefaultType(final int defaultType) {
             throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setDefaultInfo()");
         }
 
