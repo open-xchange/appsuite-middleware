@@ -1605,8 +1605,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 rs = stmt.executeQuery();
-                final OCLPermission[] permissions = new OCLPermission[1];
-                if (rs.next()) {
+                final List<OCLPermission> permList = new ArrayList<OCLPermission>();
+                while (rs.next()) {
                     final int entity = rs.getInt(1);
                     final OCLPermission p = new OCLPermission();
                     p.setEntity(entity);
@@ -1631,12 +1631,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                     p.setFolderAdmin(rs.getInt(6) > 0 ? true : false);
                     p.setGroupPermission(rs.getInt(7) > 0 ? true : false);
                     p.setSystem(rs.getInt(8));
-                    permissions[0] = p;
+                    permList.add(p);
                 }
                 stmt.close();
                 rs = null;
                 stmt = null;
-                return permissions;
+                return permList.toArray(new OCLPermission[permList.size()]);
             } finally {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
                 if (update) {

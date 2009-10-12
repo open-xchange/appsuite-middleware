@@ -1,3 +1,7 @@
+* 2009-10-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #14648: Load all permissions of the global address book and not only the first one.
+
 * 2009-10-06 - marcus.klein@open-xchange.com
 
  - Bugfix #14572: Deal with dovecot bug causing a not sieve conform response when getting sieve scripts.
