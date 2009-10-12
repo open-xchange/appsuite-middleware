@@ -228,10 +228,10 @@ public final class JSONMessageCacheConfiguration {
             final String tmp = configuration.getProperty("com.openexchange.mail.cache.json.unseenOnly", "false").trim();
             if ("true".equalsIgnoreCase(tmp)) {
                 unseenOnly = true;
-                logBuilder.append("\tUnseen Only: ").append(enabled).append('\n');
+                logBuilder.append("\tUnseen Only: ").append(unseenOnly).append('\n');
             } else if ("false".equalsIgnoreCase(tmp)) {
                 unseenOnly = false;
-                logBuilder.append("\tUnseen Only: ").append(enabled).append('\n');
+                logBuilder.append("\tUnseen Only: ").append(unseenOnly).append('\n');
             } else {
                 unseenOnly = false;
                 logBuilder.append("\tUnseen Only: Non parseable boolean value \"").append(tmp).append(fallbackPrefix).append(unseenOnly).append(

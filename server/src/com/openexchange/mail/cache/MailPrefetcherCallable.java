@@ -50,12 +50,18 @@
 package com.openexchange.mail.cache;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import org.json.JSONObject;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -107,35 +113,61 @@ public final class MailPrefetcherCallable implements Callable<Object> {
     }
 
     public Object call() throws Exception {
+        final JSONMessageCache cache = JSONMessageCache.getInstance();
+        if (null == cache) {
+            return null;
+        }
         try {
-            /*
-             * Create an array of futures as place holders for resulting JSON object
-             */
-            final List<SetableFutureTask<JSONObject>> futures = new ArrayList<SetableFutureTask<JSONObject>>(mailIds.length);
-            final JSONMessageCache cache = JSONMessageCache.getInstance();
-            if (null == cache) {
-                return null;
-            }
-            for (int i = 0; i < mailIds.length; i++) {
-                final String mailId = mailIds[i];
-                if (overwrite || !cache.containsKey(accountId, fullname, mailId, session)) {
-                    final SetableFutureTask<JSONObject> f = new SetableFutureTask<JSONObject>(new MessageLoadCallable(
-                        mailId,
-                        fullname,
-                        accountId,
-                        session), mailId);
-                    futures.add(f);
-                    cache.put(accountId, fullname, mailId, f, session);
+
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect(false);
+            try {
+                final Set<String> validIDs;
+                {
+                    final Set<String> unreadIDs;
+                    if (JSONMessageCacheConfiguration.getInstance().isUnseenOnly()) {
+                        final MailMessage[] unreadMails =
+                            mailAccess.getMessageStorage().getUnreadMessages(
+                                fullname,
+                                MailSortField.RECEIVED_DATE,
+                                OrderDirection.ASC,
+                                new MailField[] { MailField.ID },
+                                mailIds.length);
+                        unreadIDs = new HashSet<String>(unreadMails.length);
+                        for (final MailMessage unreadMail : unreadMails) {
+                            unreadIDs.add(unreadMail.getMailId());
+                        }
+                    } else {
+                        unreadIDs = null;
+                    }
+                    /*
+                     * Valid IDs
+                     */
+                    validIDs = new HashSet<String>(Arrays.asList(mailIds));
+                    if (null != unreadIDs) {
+                        /*
+                         * Retain unread only
+                         */
+                        validIDs.retainAll(unreadIDs);
+                    }
                 }
-            }
-            if (!futures.isEmpty()) {
                 /*
-                 * Obtain mail access, fetch messages and set result value in future
+                 * Create an array of futures as place holders for resulting JSON object
                  */
-                final long start = DEBUG ? System.currentTimeMillis() : 0L;
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                mailAccess.connect(false);
-                try {
+                final List<SetableFutureTask<JSONObject>> futures = new ArrayList<SetableFutureTask<JSONObject>>(validIDs.size());
+                for (final String mailId : validIDs) {
+                    if (overwrite || !cache.containsKey(accountId, fullname, mailId, session)) {
+                        final SetableFutureTask<JSONObject> f =
+                            new SetableFutureTask<JSONObject>(new MessageLoadCallable(mailId, fullname, accountId, session), mailId);
+                        futures.add(f);
+                        cache.put(accountId, fullname, mailId, f, session);
+                    }
+                }
+                if (!futures.isEmpty()) {
+                    /*
+                     * Obtain mail access, fetch messages and set result value in future
+                     */
+                    final long start = DEBUG ? System.currentTimeMillis() : 0L;
                     final int size = futures.size();
                     final BlockingQueue<MailMessage> q = new ArrayBlockingQueue<MailMessage>(size);
                     /*
@@ -223,9 +255,9 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                         }
                     }
                      */
-                } finally {
-                    mailAccess.close(true);
                 }
+            } finally {
+                mailAccess.close(true);
             }
             return null;
         } catch (final Exception e) {
@@ -236,7 +268,8 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
     private static class MessageLoadCallable implements Callable<JSONObject> {
 
-        private static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.MessageLoadCallable.class);
+        private static final org.apache.commons.logging.Log LOG1 =
+            org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.MessageLoadCallable.class);
 
         private final Session session;
 
