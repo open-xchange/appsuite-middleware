@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Oct 12 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14648: Load all permissions of the global address book and not only the first one.
 * Tue Oct 06 2009 - marcus.klein@open-xchange.com
  - Bugfix #14572: Deal with dovecot bug causing a not sieve conform response when getting sieve scripts.
 * Wed Sep 09 2009 - marcus.klein@open-xchange.com
