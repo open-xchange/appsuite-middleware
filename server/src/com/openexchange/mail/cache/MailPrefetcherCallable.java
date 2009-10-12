@@ -113,6 +113,9 @@ public final class MailPrefetcherCallable implements Callable<Object> {
              */
             final List<SetableFutureTask<JSONObject>> futures = new ArrayList<SetableFutureTask<JSONObject>>(mailIds.length);
             final JSONMessageCache cache = JSONMessageCache.getInstance();
+            if (null == cache) {
+                return null;
+            }
             for (int i = 0; i < mailIds.length; i++) {
                 final String mailId = mailIds[i];
                 if (overwrite || !cache.containsKey(accountId, fullname, mailId, session)) {

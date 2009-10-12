@@ -89,7 +89,7 @@ public final class JSONMessageCache {
     /**
      * Gets the cache instance.
      * 
-     * @return The cache instance
+     * @return The cache instance or <code>null</code>
      */
     public static JSONMessageCache getInstance() {
         return instance;
@@ -102,6 +102,9 @@ public final class JSONMessageCache {
      * @throws MailException If initialization fails
      */
     public static void initInstance() throws MailException {
+        if (!JSONMessageCacheConfiguration.getInstance().isEnabled()) {
+            return;
+        }
         synchronized (JSONMessageCache.class) {
             if (null == instance) {
                 instance = new JSONMessageCache();

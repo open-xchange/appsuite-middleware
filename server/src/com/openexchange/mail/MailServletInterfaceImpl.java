@@ -233,7 +233,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update JSON cache
              */
-            JSONMessageCache.getInstance().removeFolder(fullnameArgument.getAccountId(), fullname, session);
+            final JSONMessageCache cache = JSONMessageCache.getInstance();
+            if (null != cache) {
+                cache.removeFolder(fullnameArgument.getAccountId(), fullname, session);
+            }
             /*
              * Update message cache
              */
@@ -324,10 +327,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Update JSON cache
                  */
-                if (move) {
-                    JSONMessageCache.getInstance().removeFolder(source.getAccountId(), sourceFullname, session);
+                final JSONMessageCache cache = JSONMessageCache.getInstance();
+                if (null != cache) {
+                    if (move) {
+                        cache.removeFolder(source.getAccountId(), sourceFullname, session);
+                    }
+                    cache.removeFolder(dest.getAccountId(), destFullname, session);
                 }
-                JSONMessageCache.getInstance().removeFolder(dest.getAccountId(), destFullname, session);
                 /*
                  * Update message cache
                  */
@@ -430,7 +436,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Update JSON cache
              */
-            JSONMessageCache.getInstance().removeFolder(accountId, fullname, session);
+            final JSONMessageCache cache = JSONMessageCache.getInstance();
+            if (null != cache) {
+                cache.removeFolder(accountId, fullname, session);
+            }
             /*
              * Update message cache
              */
@@ -458,8 +467,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Update JSON cache
              */
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
-            for (final String uid : msgUIDs) {
-                jsonMessageCache.remove(argument.getAccountId(), fullname, uid, session);
+            if (null != jsonMessageCache) {
+                for (final String uid : msgUIDs) {
+                    jsonMessageCache.remove(argument.getAccountId(), fullname, uid, session);
+                }
             }
             /*
              * Update message cache
@@ -1187,7 +1198,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Remove old user cache entries
              */
-            JSONMessageCache.getInstance().removeFolder(accountId, fullname, session);
+            final JSONMessageCache cache = JSONMessageCache.getInstance();
+            if (null != cache) {
+                cache.removeFolder(accountId, fullname, session);
+            }
             /*
              * Remove old user cache entries
              */
@@ -1614,7 +1628,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         /*
                          * Update JSON cache
                          */
-                        JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
+                        final JSONMessageCache cache = JSONMessageCache.getInstance();
+                        if (null != cache) {
+                            cache.removeFolder(mailAccess.getAccountId(), fullname, session);
+                        }
                         if (MailMessageCache.getInstance().containsFolderMessages(
                             mailAccess.getAccountId(),
                             fullname,
@@ -1823,19 +1840,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Update caches
          */
         {
-            final List<String> updateIds = new ArrayList<String>(msgUID.length);
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
-            for (int i = 0; i < msgUID.length; i++) {
-                final String uid = msgUID[i];
-                if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
-                    updateIds.add(uid);
+            if (null != jsonMessageCache) {
+                final List<String> updateIds = new ArrayList<String>(msgUID.length);
+                for (int i = 0; i < msgUID.length; i++) {
+                    final String uid = msgUID[i];
+                    if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
+                        updateIds.add(uid);
+                    }
                 }
-            }
-            if (!updateIds.isEmpty()) {
-                /*
-                 * Update color label in JSON message cache
-                 */
-                jsonMessageCache.updateColorFlag(accountId, fullname, msgUID, newColorLabel, session);
+                if (!updateIds.isEmpty()) {
+                    /*
+                     * Update color label in JSON message cache
+                     */
+                    jsonMessageCache.updateColorFlag(accountId, fullname, msgUID, newColorLabel, session);
+                }
             }
         }
         try {

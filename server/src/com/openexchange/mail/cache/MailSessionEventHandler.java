@@ -197,7 +197,10 @@ public final class MailSessionEventHandler implements EventHandler {
             /*
              * JSON message cache
              */
-            JSONMessageCache.getInstance().removeUser(userId, contextId);
+            final JSONMessageCache cache = JSONMessageCache.getInstance();
+            if (null != cache) {
+                cache.removeUser(userId, contextId);
+            }
             if (DEBUG) {
                 LOG.debug(new StringBuilder("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
             }
