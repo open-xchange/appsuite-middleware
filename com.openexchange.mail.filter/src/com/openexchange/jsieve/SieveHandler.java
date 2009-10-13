@@ -259,7 +259,7 @@ public class SieveHandler {
              * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again directly as
              * response for the STARTTLS command.
              */
-            if (capa.getImplementation().startsWith("Cyrus")) {
+            if (capa.getImplementation().startsWith("Cyrus") || capa.getImplementation().startsWith("NEMESIS")) {
 	            measureStart();
 	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
 	            bos_sieve.flush();
