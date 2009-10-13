@@ -1,5 +1,9 @@
 * 2009-10-12 - thorben.betten@open-xchange.com
 
+ - Bugfix #14655: Fixed wrong sieve capability check if TLS is used
+ 
+* 2009-10-12 - thorben.betten@open-xchange.com
+
  - Bugfix #14638: Fixed download of a mail as eml file with IE
 
 * 2009-10-11 - martin.herfurth@open-xchange.com

@@ -278,11 +278,11 @@ public class SieveHandler {
             /*
              * Fire CAPABILITY command
              */
-            measureStart();
-            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
-            bos_sieve.flush();
-            measureEnd("capability");
-            commandBuilder.setLength(0);
+//            measureStart();
+//            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
+//            bos_sieve.flush();
+//            measureEnd("capability");
+//            commandBuilder.setLength(0);
             /*
              * Read capabilities
              */
