@@ -1,7 +1,7 @@
-* 2009-10-12 - thorben.betten@open-xchange.com
+* 2009-10-13 - marcus.klein@open-xchange.com
 
- - Bugfix #14655: Fixed wrong sieve capability check if TLS is used
- 
+ - Bugfix #14655: Conditionally sending CAPABILITY after STARTTLS only for Cyrus that is not sieve draft conform. dovecot is conform.
+
 * 2009-10-12 - thorben.betten@open-xchange.com
 
  - Bugfix #14638: Fixed download of a mail as eml file with IE
