@@ -190,6 +190,7 @@ public class CPTool {
             RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
             temp.setStartDate(new Date(recurringResult.getStart()));
             temp.setEndDate(new Date(recurringResult.getEnd()));
+            temp.setOriginal(appointment);
             all.add(temp);
         }
         return all;

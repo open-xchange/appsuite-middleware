@@ -63,6 +63,8 @@ public class CPAppointment {
 
     private Date startDate, endDate;
 
+    private Appointment original;
+    
     public CPAppointment() {
         super();
     }
@@ -74,6 +76,7 @@ public class CPAppointment {
         setLocation(mother.getLocation());
         setStartDate(mother.getStartDate());
         setEndDate(mother.getEndDate());
+        setOriginal(mother);
     }
 
     public String getTitle() {
@@ -114,6 +117,14 @@ public class CPAppointment {
 
     public void setEndDate(Date end) {
         this.endDate = end;
+    }
+    
+    public void setOriginal(Appointment original) {
+        this.original = original;
+    }
+    
+    public Appointment getOriginal() {
+        return original;
     }
 
     @Override
