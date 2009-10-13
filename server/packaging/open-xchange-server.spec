@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Oct 13 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14655: Conditionally sending CAPABILITY after STARTTLS only for Cyrus that is not sieve draft conform. dovecot is conform.
 * Mon Oct 12 2009 - marcus.klein@open-xchange.com
  - Bugfix #14648: Load all permissions of the global address book and not only the first one.
 * Tue Oct 06 2009 - marcus.klein@open-xchange.com
