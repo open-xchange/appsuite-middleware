@@ -66,12 +66,13 @@ public class CPTestSuite extends TestSuite {
 
     public static Test suite() {
         final TestSuite suite = new TestSuite();
+        suite.addTestSuite(CPTypeTest.class);
+        suite.addTestSuite(CPCalendarTest.class);
+        suite.addTestSuite(CPParameterTest.class);
         suite.addTestSuite(CPToolTest.class);
         suite.addTestSuite(WorkWeekPartitioningTest.class);
         suite.addTestSuite(WeekPartitioningTest.class);
         suite.addTestSuite(MonthPartitioningTest.class);
-        suite.addTestSuite(CPTypeTest.class);
-        suite.addTestSuite(CPCalendarTest.class);
         return suite;
     }
 }

@@ -127,20 +127,23 @@ public class CPServlet extends PermissionServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> debuggingItems = new LinkedList<String>();
         CPTool tool = new CPTool();
-        
+
         resp.setContentType("text/html");
 
         ServerSession session = getSessionObject(req);
         try {
             CPParameters params = new CPParameters(req);
+            if (params.hasUnparseableFields()) {
+                throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(params.getUnparseableFields(), ","));
+            }
             if (params.isMissingFields()) {
                 throw new ServletException("Missing one or more parameters: " + Strings.join(params.getMissingFields(), ","));
             }
-            if(CPType.getByTemplateName(params.getTemplate()) == null){
+            if (CPType.getByTemplateName(params.getTemplate()) == null) {
                 throw new ServletException("Cannot find template " + params.getTemplate());
             }
 
-            if(tool.isBlockTemplate(params))
+            if (tool.isBlockTemplate(params))
                 tool.calculateNewStartAndEnd(params);
             OXTemplate template = templates.loadTemplate(params.getTemplate());
 
@@ -156,7 +159,7 @@ public class CPServlet extends PermissionServlet {
                 calendarTools);
 
             tool.sort(expandedAppointments);
-            
+
             CPFactory factory = new CPFactory();
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
@@ -173,20 +176,18 @@ public class CPServlet extends PermissionServlet {
             variables.put(VIEW_END, params.getEnd());
             variables.put(DEBUG, debuggingItems);
 
-            for(CPAppointment app : partitions.getAppointments()){
+            for (CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());
             }
-            for(CPFormattingInformation info: partitions.getFormattingInformation()){
+            for (CPFormattingInformation info : partitions.getFormattingInformation()) {
                 debuggingItems.add(info.toString());
             }
-            
+
             template.process(variables, resp.getWriter());
         } catch (Throwable t) {
             writeException(resp, t);
         }
     }
-
-
 
     /**
      * Write an exception message as HTML to the response

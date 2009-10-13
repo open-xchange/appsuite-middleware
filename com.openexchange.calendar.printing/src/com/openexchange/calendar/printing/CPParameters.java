@@ -71,19 +71,18 @@ public class CPParameters {
 
     public static final String WORK_WEEK_DURATION = "work_week_days_amount";
 
-
     private Date start, end, workDayStart, workDayEnd;
-    
+
     private int weekStart, workWeekStart, workWeekDuration;
 
     private String template;
-    
+
     private TimeZone timezone;
 
     private int folder;
 
-    private List<String> missingFields;
-        
+    private List<String> missingFields, unparseableFields;
+
     public CPParameters() {
 
     }
@@ -125,62 +124,50 @@ public class CPParameters {
         this.folder = folder;
     }
 
-    
     public Date getWorkDayStart() {
         return workDayStart;
     }
 
-    
     public void setWorkDayStart(Date workDayStart) {
         this.workDayStart = workDayStart;
     }
 
-    
     public Date getWorkDayEnd() {
         return workDayEnd;
     }
 
-    
     public void setWorkDayEnd(Date workDayEnd) {
         this.workDayEnd = workDayEnd;
     }
 
-    
     public int getWeekStart() {
         return weekStart;
     }
 
-    
     public void setWeekStart(int weekStart) {
         this.weekStart = weekStart;
     }
 
-    
     public int getWorkWeekStart() {
         return workWeekStart;
     }
 
-    
     public void setWorkWeekStart(int workWeekStart) {
         this.workWeekStart = workWeekStart;
     }
 
-    
     public int getWorkWeekDuration() {
         return workWeekDuration;
     }
 
-    
     public void setWorkWeekDuration(int workWeekDuration) {
         this.workWeekDuration = workWeekDuration;
     }
 
-    
     public TimeZone getTimezone() {
         return timezone;
     }
 
-    
     public void setTimezone(TimeZone timezone) {
         this.timezone = timezone;
     }
@@ -193,67 +180,85 @@ public class CPParameters {
         return missingFields != null;
     }
 
-    public void parseRequest(HttpServletRequest req) {
-        LinkedList<String> missingFields = new LinkedList<String>();
-
-        String start = req.getParameter(AJAXServlet.PARAMETER_START);
-        if (start == null)
-            missingFields.add(AJAXServlet.PARAMETER_START);
-        else
-            this.start = new Date(Long.valueOf(start).longValue());
-
-        String end = req.getParameter(AJAXServlet.PARAMETER_END);
-        if (end == null)
-            missingFields.add(AJAXServlet.PARAMETER_END);
-        else
-            this.end = new Date(Long.valueOf(end).longValue());
-
-        String workDayStartTime = req.getParameter(WORK_DAY_START_TIME);
-        if (workDayStartTime == null)
-            missingFields.add(WORK_DAY_START_TIME);
-        else
-            this.workDayStart = new Date(Long.valueOf(workDayStartTime).longValue());
-        
-        String workDayEndTime = req.getParameter(WORK_DAY_END_TIME);
-        if (workDayEndTime == null)
-            missingFields.add(WORK_DAY_END_TIME);
-        else
-            this.workDayEnd = new Date(Long.valueOf(workDayEndTime).longValue());
-        
-        String weekStartDay = req.getParameter(WEEK_START_DAY);
-        if (weekStartDay == null)
-            missingFields.add(WEEK_START_DAY);
-        else
-            this.weekStart = Integer.valueOf(weekStartDay).intValue();
-        
-        String workWeekStartDay = req.getParameter(WORK_WEEK_START_DAY);
-        if (workWeekStartDay == null)
-            missingFields.add(WORK_WEEK_START_DAY);
-        else
-            this.workWeekStart = Integer.valueOf(workWeekStartDay).intValue();
-        
-        String workWeekDuration = req.getParameter(WORK_WEEK_DURATION);
-        if (workWeekDuration == null)
-            missingFields.add(WORK_WEEK_DURATION);
-        else
-            this.workWeekDuration = Integer.valueOf(workWeekDuration).intValue();
-        
-        String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        this.folder = Integer.valueOf(folder).intValue();
-
-        String templateName = req.getParameter(AJAXServlet.PARAMETER_TEMPLATE);
-        if (templateName == null)
-            missingFields.add(AJAXServlet.PARAMETER_TEMPLATE);
-        else
-            this.template = templateName;
-        
-        String timezone = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        if (timezone == null)
-            missingFields.add(AJAXServlet.PARAMETER_TIMEZONE);
-        else
-            this.timezone = TimeZone.getTimeZone(timezone);    
+    public void setUnparseableFields(List<String> fields) {
+        this.unparseableFields = fields;
     }
 
+    public List<String> getUnparseableFields() {
+        return unparseableFields;
+    }
+
+    public boolean hasUnparseableFields() {
+        return unparseableFields == null;
+    }
+
+    public void parseRequest(HttpServletRequest req) {
+        missingFields = new LinkedList<String>();
+        unparseableFields = new LinkedList<String>();
+
+        start = extractDateParam(req, AJAXServlet.PARAMETER_START);
+        end = extractDateParam(req, AJAXServlet.PARAMETER_END);
+        workDayStart = extractDateParam(req, WORK_DAY_START_TIME);
+        workDayEnd = extractDateParam(req, WORK_DAY_END_TIME);
+        weekStart = extractIntParam(req, WEEK_START_DAY);
+        workWeekStart = extractIntParam(req, WORK_WEEK_START_DAY);
+        workWeekDuration = extractIntParam(req, WORK_WEEK_DURATION);
+        folder = extractIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
+        template = extractStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
+        timezone = extractTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
+    }
+
+    private Date extractDateParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingFields.add(parameter);
+        else {
+            try {
+                return new Date(Long.valueOf(val).longValue());
+            } catch (NumberFormatException e) {
+                unparseableFields.add(parameter);
+                missingFields.add(parameter);
+            }
+        }
+        return null;
+    }
+
+    private int extractIntParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingFields.add(parameter);
+        else {
+            try {
+                return Integer.valueOf(val).intValue();
+            } catch (NumberFormatException e) {
+                unparseableFields.add(parameter);
+                missingFields.add(parameter);
+            }
+        }
+        return -1;
+    }
+
+    private TimeZone extractTimezoneParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingFields.add(parameter);
+        else {
+            try {
+                return TimeZone.getTimeZone(val);
+            } catch (NumberFormatException e) {
+                unparseableFields.add(parameter);
+                missingFields.add(parameter);
+            }
+        }
+        return null;
+    }
+
+    private String extractStringParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingFields.add(parameter);
+        return val;
+    }
     @Override
     public String toString() {
         return CPParameters.class.getName() + ": Start = " + start + ", end = " + end + ", folder = " + folder + ", template = " + template + ", missing fields : " + isMissingFields();
