@@ -68,9 +68,8 @@ import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 
 /**
- * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see {@see <a
- * href="http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt"
- * >http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt</a>}
+ * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
+ * {@see <a href="http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt">http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt</a>}
  * 
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
@@ -257,13 +256,16 @@ public class SieveHandler {
             bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
             bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
             /*
-             * Fire CAPABILITY command
+             * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again directly as
+             * response for the STARTTLS command.
              */
-            measureStart();
-            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
-            bos_sieve.flush();
-            measureEnd("capability");
-            commandBuilder.setLength(0);
+            if (capa.getImplementation().startsWith("Cyrus")) {
+	            measureStart();
+	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
+	            bos_sieve.flush();
+	            measureEnd("capability");
+	            commandBuilder.setLength(0);
+            }
             /*
              * Read capabilities
              */
