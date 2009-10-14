@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar.printing.blocks;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
@@ -58,7 +57,7 @@ import com.openexchange.calendar.printing.CPType;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractWeekPartitioningStrategy extends AbstractPartitioningStrategy {
+public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalculator implements CPPartitioningStrategy{
 
     public static final int DAYBREAK = 0;
 
@@ -98,24 +97,5 @@ public abstract class AbstractWeekPartitioningStrategy extends AbstractPartition
         return isInDifferentWeeks(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
             lastStoredAppointment.getEndDate(),
             appointment.getEndDate());
-    }
-
-    /**
-     * @return true if start or end date are in work week, false otherwise (also if not set at all)
-     */
-    public boolean isWorkWeekAppointment(CPAppointment appointment) {
-        if (appointment.getStartDate() == null)
-            return false;
-        return isInWorkWeek(appointment.getStartDate());
-    }
-
-    public boolean isInWorkWeek(Date date) {
-        Calendar calendar = getCalendar();
-        calendar.setTime(date);
-        return isInWorkWeek(calendar.get(Calendar.DAY_OF_WEEK));
-    }
-
-    public boolean isInWorkWeek(int calendarDayOfWeek) {
-        return getCalendar().getWorkWeekDays().contains(Integer.valueOf(calendarDayOfWeek));
     }
 }
