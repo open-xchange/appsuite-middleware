@@ -94,7 +94,7 @@ public class Called implements Expectation {
         
         int index = 0;
         for (Object object : args) {
-            assertEquals("Argument mismatch at "+index, object, args[index++]);
+            assertEquals("Argument mismatch at "+index, this.args[index++],object);
         }
                     
     }
