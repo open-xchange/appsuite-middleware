@@ -305,4 +305,26 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return url;
     }
 
+    
+    public static String getAPI_KEY() {
+        return API_KEY;
+    }
+
+    
+    public static void setAPI_KEY(String api_key) {
+        API_KEY = api_key;
+    }
+
+    
+    public static String getSECRET() {
+        return SECRET;
+    }
+
+    
+    public static void setSECRET(String secret) {
+        SECRET = secret;
+    }
+    
+    
+
 }
