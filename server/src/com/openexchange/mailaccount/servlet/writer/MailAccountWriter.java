@@ -137,9 +137,16 @@ public final class MailAccountWriter {
         return json;
     }
 
-    public static JSONArray writeArray(final MailAccount[] userMailAccounts, final List<Attribute> attributes) {
+    /**
+     * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
+     * 
+     * @param mailAccounts The mail accounts
+     * @param attributes The attributes
+     * @return A JSON array of JSON arrays for each account
+     */
+    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes) {
         final JSONArray rows = new JSONArray();
-        for (final MailAccount account : userMailAccounts) {
+        for (final MailAccount account : mailAccounts) {
             final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
             final JSONArray row = new JSONArray();
             for (final Attribute attribute : attributes) {
