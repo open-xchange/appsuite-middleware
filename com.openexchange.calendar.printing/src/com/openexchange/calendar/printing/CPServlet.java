@@ -51,7 +51,6 @@ package com.openexchange.calendar.printing;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -138,7 +137,9 @@ public class CPServlet extends PermissionServlet {
                     ","));
             }
             if (params.isMissingMandatoryFields()) {
-                throw new ServletException("Missing one or more mandatory parameters: " + Strings.join(params.getMissingMandatoryFields(), ","));
+                throw new ServletException("Missing one or more mandatory parameters: " + Strings.join(
+                    params.getMissingMandatoryFields(),
+                    ","));
             }
             if (CPType.getByTemplateName(params.getTemplate()) == null) {
                 throw new ServletException("Cannot find template " + params.getTemplate());
@@ -149,8 +150,14 @@ public class CPServlet extends PermissionServlet {
             OXTemplate template = templates.loadTemplate(params.getTemplate());
 
             AppointmentSQLInterface appointmentSql = appointmentSqlFactory.createAppointmentSql(session);
-            SearchIterator<Appointment> iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
-                Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, params.getStart(), params.getEnd(), -1, null);
+            SearchIterator<Appointment> iterator;
+            if (params.hasFolder()) {
+                iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
+                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, params.getStart(), params.getEnd(), -1, null);
+            } else {
+                iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
+                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, -1, null);
+            }
 
             List<CPAppointment> expandedAppointments = tool.expandAppointements(
                 SearchIteratorAdapter.toList(iterator),
@@ -165,10 +172,10 @@ public class CPServlet extends PermissionServlet {
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
             factory.addStrategy(new MonthPartitioningStrategy());
-            
+
             CPCalendar cal = CPCalendar.getEuropeanCalendar();
             modifyCalendar(cal, params);
-            
+
             factory.setCalendar(cal);
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
 
@@ -201,25 +208,25 @@ public class CPServlet extends PermissionServlet {
         LOG.error(t.getMessage(), t);
         // TODO Write HTML page as response
     }
-    
+
     /**
      * Modify a calendar according to the given parameters
      */
-    public void modifyCalendar(CPCalendar calendar, CPParameters params){
-        if(params.hasTimezone())
+    public void modifyCalendar(CPCalendar calendar, CPParameters params) {
+        if (params.hasTimezone())
             calendar.setTimeZone(params.getTimezone());
-        if(params.hasWeekStart())
+        if (params.hasWeekStart())
             calendar.setFirstDayOfWeek(params.getWeekStart());
-        if(params.hasWorkWeekDuration())
+        if (params.hasWorkWeekDuration())
             calendar.setWorkWeekDurationInDays(params.getWorkWeekDuration());
-        if(params.hasWorkWeekStart())
+        if (params.hasWorkWeekStart())
             calendar.setWorkWeekStartingDay(params.getWorkWeekStart());
-        if(params.hasWorkDayEnd()){
+        if (params.hasWorkDayEnd()) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(params.getWorkDayEnd());
             calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
         }
-        if(params.hasWorkDayStart()){
+        if (params.hasWorkDayStart()) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(params.getWorkDayStart());
             calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
