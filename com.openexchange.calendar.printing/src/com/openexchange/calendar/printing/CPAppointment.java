@@ -53,7 +53,7 @@ import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * The view of an appointment. A stupid version without any recurrence pattern, day spanning and so on.
+ * The view of an appointment. A dumbed-down version without recurrence pattern, day spanning and so on.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
