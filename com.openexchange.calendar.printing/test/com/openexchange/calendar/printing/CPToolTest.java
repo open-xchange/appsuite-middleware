@@ -65,7 +65,7 @@ public class CPToolTest extends AbstractDateTest {
     @Override
     protected void setUp() throws Exception {
         tool = new CPTool();
-        tool.setCalendar(Calendar.getInstance());
+        tool.setCalendar(CPCalendar.getEuropeanCalendar());
         super.setUp();
     }
 
@@ -217,6 +217,42 @@ public class CPToolTest extends AbstractDateTest {
         assertEquals("Should not change start date on first", app.getStartDate(), actual.getStartDate());
         actual = apps.get(1);
         assertEquals("Should not change end date on last", app.getEndDate(), actual.getEndDate());
+    }
+    
+    public void testShouldSplit23HourTwoDayAppointmentProperly(){
+        Appointment app = new Appointment();
+        app.setTitle("Two-day long appointment");
+        
+        Calendar cal = getCalendar();
+        cal.set(Calendar.YEAR, 2007);
+        cal.set(Calendar.DAY_OF_YEAR, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 2);
+        app.setStartDate(cal.getTime());
+        cal.set(Calendar.DAY_OF_YEAR, 2);
+        cal.set(Calendar.HOUR_OF_DAY, 1);
+        app.setEndDate(cal.getTime());
+        
+        List<Appointment> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should produce two appointments", 2, apps.size());
+    }
+    
+    public void testShouldSplit47HourThreeDayAppointmentProperly(){
+        Appointment app = new Appointment();
+        app.setTitle("Two-day long appointment");
+        
+        Calendar cal = getCalendar();
+        cal.set(Calendar.YEAR, 2007);
+        cal.set(Calendar.DAY_OF_YEAR, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 2);
+        app.setStartDate(cal.getTime());
+        cal.set(Calendar.DAY_OF_YEAR, 3);
+        cal.set(Calendar.HOUR_OF_DAY, 1);
+        app.setEndDate(cal.getTime());
+        
+        List<Appointment> apps = tool.splitIntoSingleDays(app);
+        for(Appointment temp: apps)
+            System.out.println(temp.getStartDate() + " / " + temp.getEndDate());
+        assertEquals("Should produce three appointments", 3, apps.size());
     }
 
     private void checkBlockTemplate(boolean expected, String templateName) {
