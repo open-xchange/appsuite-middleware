@@ -50,6 +50,8 @@
 package com.openexchange.outlook.updater;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.outlook.updater.impl.LocaleSpecificFileTool;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
@@ -79,7 +82,7 @@ public class UpdaterXMLServlet extends OXServlet {
     
     private static MailAccountStorageService mailAccountStorageService;
 
-    private ServerSession session;
+    private static ResourceLoader loader = null;
 
     public static void setTemplateService(TemplateService templateService) {
         UpdaterXMLServlet.templateService = templateService;
@@ -89,13 +92,21 @@ public class UpdaterXMLServlet extends OXServlet {
         UpdaterXMLServlet.mailAccountStorageService = service;
     }
     
+    public static void setResourceLoader(ResourceLoader service) {
+        loader = service;
+    }
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            getServerSession(req);
+            ServerSession session = getServerSession(req);
             OXTemplate template = templateService.loadTemplate(TEMPLATE_NAME);
-            ParameterCollector collector = new ParameterCollector(getServerUrl(req), session, mailAccountStorageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
-            template.process(collector.getParametersWithKeyword(), resp.getWriter());
+            String serverUrl = getServerUrl(req);
+            ParameterCollector collector = new ParameterCollector(serverUrl, session, mailAccountStorageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+            Map<String,Object> values = new HashMap<String, Object>(collector.getParametersWithKeyword());
+            values.put("FILETOOL", new LocaleSpecificFileTool(loader, getLocale(session), serverUrl+"/ajax/updater/files/"));
+            
+            template.process(values, resp.getWriter());
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -103,12 +114,16 @@ public class UpdaterXMLServlet extends OXServlet {
         }
     }
 
+    private String getLocale(ServerSession session) {
+        return session.getUser().getLocale().getLanguage()+"_"+session.getUser().getLocale().getCountry();
+    }
+
     private String getServerUrl(HttpServletRequest req) {
         return (req.isSecure() ? "https://" : "http://") + req.getServerName();
     }
 
-    private void getServerSession(HttpServletRequest req) throws ContextException {
-        session = new ServerSessionAdapter(getSession(req));
+    private ServerSession getServerSession(HttpServletRequest req) throws ContextException {
+        return new ServerSessionAdapter(getSession(req));
     }
 
     @Override

@@ -47,36 +47,58 @@
  *
  */
 
-package com.openexchange.outlook.updater.osgi;
+package com.openexchange.outlook.updater.impl;
 
 import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.net.URL;
-import org.osgi.framework.Bundle;
 import com.openexchange.outlook.updater.ResourceLoader;
 
 
 /**
- * {@link BundleResourceLoader}
+ * {@link LocaleSpecificFileTool}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class BundleResourceLoader implements ResourceLoader{
+public class LocaleSpecificFileTool {
 
-    private Bundle bundle;
-    
-    public BundleResourceLoader(Bundle bundle) {
-        this.bundle = bundle;
+    private static final String DEFAULT_LOCALE = "en_US";
+    private String locale;
+    private ResourceLoader loader;
+    private String urlPrefix;
+
+    public LocaleSpecificFileTool(ResourceLoader loader, String locale, String urlPrefix) {
+        this.loader = loader;
+        this.locale = locale;
+        this.urlPrefix = urlPrefix;
     }
-    
-    public InputStream get(String name) throws IOException {
-        URL entry = bundle.getEntry("/Resources/"+name);
-        if(entry == null) {
-            throw new FileNotFoundException();
+
+    public String md5(String name) throws IOException {
+        String localizedName = tryLocales(name, locale, DEFAULT_LOCALE);
+        return loader.getMD5(localizedName);
+    }
+
+    private String tryLocales(String name, String...locales) {
+        for(String locale : locales) {
+            String localizedName = insertLocale(name, locale);
+            if(loader.exists(localizedName)) {
+                return localizedName;
+            }
         }
-        return entry.openStream();
+        return null;
+    }
+
+    public String insertLocale(String name, String locale) {
+        StringBuilder builder = new StringBuilder(name.length()+locale.length()+1);
+        int index = name.lastIndexOf('.');
+        if(index == -1) {
+            return builder.append(name).append('.').append(locale).toString();
+        }
+        return builder.append(name.substring(0, index)).append('.').append(locale).append(name.substring(index)).toString();
+    }
+
+    public String url(String name) {
+        String localizedName = tryLocales(name, locale, DEFAULT_LOCALE);
+        return urlPrefix+localizedName;
     }
 
 }

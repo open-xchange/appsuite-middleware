@@ -61,4 +61,6 @@ import java.io.InputStream;
  */
 public interface ResourceLoader {
     public InputStream get(String name) throws IOException;
+    public String getMD5(String name) throws IOException;
+    public boolean exists(String name);
 }

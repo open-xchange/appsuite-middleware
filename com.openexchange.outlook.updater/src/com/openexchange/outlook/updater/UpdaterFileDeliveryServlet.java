@@ -126,7 +126,7 @@ public class UpdaterFileDeliveryServlet extends OXServlet {
             
             byte[] buffer = new byte[1024];
             int bytesRead = 0;
-            while((bytesRead = is.read(buffer))!=0) {
+            while((bytesRead = is.read(buffer))!=-1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
             outputStream.flush();

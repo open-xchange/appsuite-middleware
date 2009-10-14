@@ -47,65 +47,75 @@
  *
  */
 
-package com.openexchange.outlook.updater.osgi;
+package com.openexchange.outlook.updater.impl;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.outlook.updater.ResourceLoader;
 
 
 /**
- * {@link CompositeResourceLoader}
+ * {@link AbstractResourceLoader}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class CompositeResourceLoader implements ResourceLoader {
-
-    List<ResourceLoader> loaders = null;
-    
-    public CompositeResourceLoader(ResourceLoader...elements) {
-        loaders = Arrays.asList(elements);
-    }
-    
-    public InputStream get(String name) throws IOException {
-        for(ResourceLoader loader : loaders) {
-            try {
-                InputStream is = loader.get(name);
-                if(is != null) {
-                    return is;
-                }
-            } catch (FileNotFoundException x) {
-                // Ignore and try different loader
-            }
-        }
-        throw new FileNotFoundException();
-    }
+public abstract class AbstractResourceLoader implements ResourceLoader {
+    private static final Log LOG = LogFactory.getLog(AbstractResourceLoader.class);
+    private Map<String, String> md5Cache = new HashMap<String, String>();
 
     public String getMD5(String name) throws IOException {
-        for(ResourceLoader loader : loaders) {
-            try {
-                String digest = loader.getMD5(name);
-                if(digest != null) {
-                    return digest;
-                }
-            } catch (FileNotFoundException x) {
-                // Ignore and try different loader
-            }
+        if(md5Cache.containsKey(name)) {
+            return md5Cache.get(name);
         }
-        throw new FileNotFoundException();
+        return md5Cache.put(name, calculateMD5(name));
+    }
+    
+    protected String calculateMD5(String name) throws IOException {
+        InputStream inputStream = get(name);
+        if(inputStream == null) {
+            return null;
+        }
+        return DigestUtils.md5Hex(grabBytes(inputStream));
     }
 
+    protected byte[] grabBytes(InputStream inputStream) throws IOException {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            BufferedInputStream in = new BufferedInputStream(inputStream);
+            int data = 0;
+            while((data = in.read()) != -1) {
+                out.write(data);
+            }
+            return out.toByteArray();
+        } finally {
+            inputStream.close();
+        }
+    }
+    
     public boolean exists(String name) {
-        for (ResourceLoader loader : loaders) {
-            if(loader.exists(name)) {
-                return true;
+        InputStream is = null;
+        try {
+            is = get(name);
+        } catch (FileNotFoundException x) {
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                LOG.warn(e.getMessage(), e);
             }
         }
-        return false;
+        return is != null;
     }
 
 }

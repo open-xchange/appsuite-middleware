@@ -59,13 +59,14 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.outlook.updater.ResourceLoader;
+import com.openexchange.outlook.updater.impl.AbstractResourceLoader;
 
 /**
  * {@link FileSystemResourceLoader}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileSystemResourceLoader implements ResourceLoader, PropertyListener {
+public class FileSystemResourceLoader extends AbstractResourceLoader implements ResourceLoader, PropertyListener {
 
     private static final Log LOG = LogFactory.getLog(FileSystemResourceLoader.class);
 
@@ -117,6 +118,7 @@ public class FileSystemResourceLoader implements ResourceLoader, PropertyListene
     }
 
     public synchronized void onPropertyChange(PropertyEvent event) {
+        
         parentDir = new File(event.getValue());
     }
     

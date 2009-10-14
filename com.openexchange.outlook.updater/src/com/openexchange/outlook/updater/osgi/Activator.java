@@ -87,6 +87,7 @@ public class Activator extends DeferredActivator {
         
         UpdaterXMLServlet.setTemplateService(getService(TemplateService.class));
         UpdaterXMLServlet.setMailAccountStorageService(getService(MailAccountStorageService.class));
+        UpdaterXMLServlet.setResourceLoader(loader);
         
         registration = new ServletRegistration(context, new UpdaterInstallerServlet(), ALIAS);
         xmlRegistration = new ServletRegistration(context, new UpdaterXMLServlet(), UPDATER_XML_ALIAS);
@@ -117,9 +118,8 @@ public class Activator extends DeferredActivator {
         config.getProperty(PATH_PROP, fileSystemResourceLoader);
         fileSystemResourceLoader.setParentDirectory(new File(path));
         
-        BundleResourceLoader bundleLoader = new BundleResourceLoader(context.getBundle());
         
-        loader = new CompositeResourceLoader(bundleLoader, fileSystemResourceLoader);
+        loader = fileSystemResourceLoader;
     }
     
     private void configureName(ConfigurationService config) {
