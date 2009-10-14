@@ -83,9 +83,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CPServlet extends PermissionServlet {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -5186422014968264569L;
 
     private static TemplateService templates = null;
@@ -134,7 +131,9 @@ public class CPServlet extends PermissionServlet {
         try {
             CPParameters params = new CPParameters(req);
             if (params.hasUnparseableFields()) {
-                throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(params.getUnparseableFields(), ","));
+                throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(
+                    params.getUnparseableFields(),
+                    ","));
             }
             if (params.isMissingFields()) {
                 throw new ServletException("Missing one or more parameters: " + Strings.join(params.getMissingFields(), ","));
