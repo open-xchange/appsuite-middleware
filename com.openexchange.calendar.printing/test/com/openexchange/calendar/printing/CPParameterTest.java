@@ -389,7 +389,7 @@ public class CPParameterTest extends TestCase {
         MockRequest mockRequest = new MockRequest();
         mockRequest.setParameter(CPParameters.WEEK_START_DAY, "Elvis");
         CPParameters params = new CPParameters(mockRequest);
-        assertFalse("Parameter with bullshit value given, should fail", params.hasUnparseableFields());
+        assertTrue("Parameter with bullshit value given, should fail", params.hasUnparseableFields());
         assertTrue("Parameter with bullshit value given, should be listed as missing field", params.getUnparseableFields().contains(
             CPParameters.WEEK_START_DAY));
     }
