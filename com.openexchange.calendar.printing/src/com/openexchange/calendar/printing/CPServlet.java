@@ -213,10 +213,6 @@ public class CPServlet extends PermissionServlet {
      * Modify a calendar according to the given parameters
      */
     public void modifyCalendar(CPCalendar calendar, CPParameters params) {
-        if(true)
-            return;
-        if (params.hasTimezone())
-            calendar.setTimeZone(params.getTimezone());
         if (params.hasWeekStart())
             calendar.setFirstDayOfWeek(params.getWeekStart());
         if (params.hasWorkWeekDuration())
@@ -233,5 +229,9 @@ public class CPServlet extends PermissionServlet {
             cal.setTime(params.getWorkDayStart());
             calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
         }
+        if(true)
+            return;
+        if (params.hasTimezone())
+            calendar.setTimeZone(params.getTimezone());
     }
 }
