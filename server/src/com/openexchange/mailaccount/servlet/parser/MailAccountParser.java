@@ -165,7 +165,7 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.PRIMARY_ADDRESS_LITERAL);
         }
         if (json.has(MailAccountFields.PERSONAL)) {
-            account.setPersonal(parseString(json, MailAccountFields.PERSONAL).trim());
+            account.setPersonal(parseString(json, MailAccountFields.PERSONAL));
             attributes.add(Attribute.PERSONAL_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM_HANDLER)) {
