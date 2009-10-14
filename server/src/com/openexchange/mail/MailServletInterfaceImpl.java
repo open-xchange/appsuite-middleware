@@ -130,7 +130,7 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.timer.TimerService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -1601,13 +1601,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Check if timer service is available to delegate execution
                  */
-                final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                if (null == timerService) {
+                final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                if (null == threadPool) {
                     // Execute in this thread
                     r.run();
                 } else {
                     // Delegate runnable to thread pool
-                    timerService.schedule(r, 1000);
+                    threadPool.submit(ThreadPools.task(r), CallerRunsBehavior.getInstance());
                 }
             }
             /*
