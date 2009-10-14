@@ -62,7 +62,7 @@ import com.openexchange.tools.servlet.http.HTTPServletRegistration;
  */
 public class Activator extends DeferredActivator implements BundleActivator {
 
-    private static final String ALIAS = "/ajax/printCalendar";
+    public static final String ALIAS = "/ajax/printCalendar";
 
     private static Class[] services = new Class[] {
         TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
