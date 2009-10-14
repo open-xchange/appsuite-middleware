@@ -207,43 +207,43 @@ public class ReportClient extends AbstractJMXTools {
 		this.displayonly = setShortLongOpt(parser, OPT_DISPLAY_ONLY_SHORT, OPT_DISPLAY_ONLY_LONG, "Display report without sending it (Disables default)", false, NeededQuadState.notneeded);
 	}
     
-    private String sendReport(final MBeanServerConnection mbc) throws MalformedURLException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
-    	String metadata = getMetadata(mbc);
-    	
-    	StringBuffer report = new StringBuffer();
-    	report.append(POST_LICENSE_KEYS_KEY);
-    	report.append("=");
-    	report.append(URLEncoder.encode(getLicenseKey(), URL_ENCODING));
-    	report.append("&");
-    	report.append(POST_METADATA_KEY);
-    	report.append("=");
-    	report.append(URLEncoder.encode(metadata, URL_ENCODING));
-    	
-	    HttpsURLConnection httpsURLConnection= (HttpsURLConnection) new URL(REPORT_SERVER_URL).openConnection();
-	    httpsURLConnection.setUseCaches(false);
-	    httpsURLConnection.setDoOutput(true);
-	    httpsURLConnection.setDoInput(true);
-	    httpsURLConnection.setRequestMethod("POST");
-	    httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-	    
-	    DataOutputStream stream = new DataOutputStream(httpsURLConnection.getOutputStream ());
-	    stream.writeBytes(report.toString());
-	    stream.flush();
-	    stream.close();
-	    
-	    if (httpsURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-	    	throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
-	    } else {
-    		BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-    		String buffer = "";
-    		while ((buffer = in.readLine()) != null) {
-    			System.out.println(buffer);
-    		}
-    		in.close();
-	    }
-	    
-	    return metadata;
-    }
+	private String sendReport(final MBeanServerConnection mbc) throws MalformedURLException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
+		String metadata = getMetadata(mbc);
+
+		StringBuffer report = new StringBuffer();
+		report.append(POST_LICENSE_KEYS_KEY);
+		report.append("=");
+		report.append(URLEncoder.encode(getLicenseKey(), URL_ENCODING));
+		report.append("&");
+		report.append(POST_METADATA_KEY);
+		report.append("=");
+		report.append(URLEncoder.encode(metadata, URL_ENCODING));
+
+		HttpsURLConnection httpsURLConnection= (HttpsURLConnection) new URL(REPORT_SERVER_URL).openConnection();
+		httpsURLConnection.setUseCaches(false);
+		httpsURLConnection.setDoOutput(true);
+		httpsURLConnection.setDoInput(true);
+		httpsURLConnection.setRequestMethod("POST");
+		httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+		DataOutputStream stream = new DataOutputStream(httpsURLConnection.getOutputStream ());
+		stream.writeBytes(report.toString());
+		stream.flush();
+		stream.close();
+
+		if (httpsURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
+		} else {
+			BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
+			String buffer = "";
+			while ((buffer = in.readLine()) != null) {
+				System.out.println(buffer);
+			}
+			in.close();
+		}
+
+		return metadata;
+	}
     
     private String getLicenseKey() {
     	return "OX-AS-MK-123456-987";
