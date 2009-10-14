@@ -334,6 +334,29 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should find one day inbetween", 1, daysInbetween.size());
     }
 
+    public void testShouldWorkEvenWithDifferentWeekStart(){
+        CPCalendar cal = CPCalendar.getEuropeanCalendar();
+        cal.setFirstDayOfWeek(Calendar.THURSDAY);
+        
+        CPAppointment app1 = new CPAppointment();
+        CPAppointment app2 = new CPAppointment();
+        app1.setStartDate(WEDNESDAY());
+        app1.setEndDate(plusOneHour(WEDNESDAY()));
+        app2.setStartDate(THURSDAY());
+        app2.setEndDate(plusOneHour(THURSDAY()));
+        
+        strategy.setCalendar(cal);
+        CPPartition partition = strategy.partition(Arrays.asList(app1,app2));
+        
+        List<CPFormattingInformation> infos = partition.getFormattingInformation();
+        boolean found = false;
+        for(CPFormattingInformation info: infos){
+            if(info.getPosition() == 1 && info.getType() == WeekPartitioningStrategy.WEEKBREAK)
+                found = true;
+        }
+        assertTrue("Should place weekbreak between Wednesday and Thursday if first day of the week is set to the latter", found);
+    }
+    
     public void testShouldInsertYearBreak() {
         // TODO
     }
