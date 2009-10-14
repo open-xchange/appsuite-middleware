@@ -6,6 +6,10 @@
                   <span class="date">${a_date?string("dd.MM.yyyy, EEE")}</span>
 </#macro>
 
+<#macro month a_date>
+                  <span class="date">${a_date?string("MMM")}</span>
+</#macro>
+
 <#macro datetime a_date>
                   <span class="date time">${a_date?string("dd.MM.yyyy, HH:mm")}</span>
 </#macro>
@@ -26,7 +30,7 @@
    	  </#if>
       <#if info.position == appointment_index && info.type == 1>
       <tr>
-         <td colspan="5">
+         <td colspan="7">
             <h2 class="weekNumber">
                Calendar week ${info.additionalInformation}
             </h2>
@@ -55,7 +59,7 @@
          width: 100%;
       }
       th {
-         width:20%;
+         width:14%;
       }
       .duration {
          font-size: 80%;
@@ -81,10 +85,10 @@
 
 <body>
    <h1>
-      Workweek: 
-      <@date start />
+      Month: 
+      <@month start />
       - 
-      <@date end />
+      <@month end />
       <@timezone start />
    </h1>
    
@@ -95,6 +99,8 @@
          <th>Wednesday</th>
          <th>Thursday</th>
          <th>Friday</th>
+         <th>Saturday</th>
+         <th>Sunday</th>
       </tr>
       
       <#list appointments as appointment>
@@ -107,8 +113,7 @@
                      <@time appointment.endDate />
                   </td>
                   <td class="info">
-                     ${appointment.title}<br />
-                     <@date appointment.startDate />
+                     ${appointment.title}
                   </td>
                </tr>
             </table>
