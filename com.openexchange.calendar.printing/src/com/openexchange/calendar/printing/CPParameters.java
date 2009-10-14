@@ -141,6 +141,10 @@ public class CPParameters {
     public void setFolder(int folder) {
         this.folder = folder;
     }
+    
+    public boolean hasFolder(){
+        return folder != -1;
+    }
 
     public Date getWorkDayStart() {
         return workDayStart;
@@ -252,7 +256,7 @@ public class CPParameters {
         weekStart = extractOptionalIntParam(req, PARAMETER_WEEK_START_DAY);
         workWeekStart = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_START_DAY);
         workWeekDuration = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_DURATION);
-        folder = extractMandatoryIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
+        folder = extractOptionalIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
         template = extractMandatoryStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
         usertemplate = extractOptionalStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
         timezone = extractOptionalTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
