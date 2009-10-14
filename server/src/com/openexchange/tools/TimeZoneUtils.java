@@ -50,12 +50,8 @@
 package com.openexchange.tools;
 
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 /**
  * {@link TimeZoneUtils} - Utility class for time zone.
@@ -71,7 +67,7 @@ public final class TimeZoneUtils {
         super();
     }
 
-    private static final ConcurrentMap<String, Future<TimeZone>> ZONE_CACHE = new ConcurrentHashMap<String, Future<TimeZone>>();
+    private static final ConcurrentMap<String, TimeZone> ZONE_CACHE = new ConcurrentHashMap<String, TimeZone>();
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.
@@ -81,30 +77,15 @@ public final class TimeZoneUtils {
      * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
      */
     public static TimeZone getTimeZone(final String ID) {
-        Future<TimeZone> f = ZONE_CACHE.get(ID);
-        if (f == null) {
-            final FutureTask<TimeZone> ft = new FutureTask<TimeZone>(new Callable<TimeZone>() {
-
-                public TimeZone call() throws Exception {
-                    return TimeZone.getTimeZone(ID);
-                }
-            });
-            f = ZONE_CACHE.putIfAbsent(ID, ft);
-            if (null == f) {
-                ft.run();
-                f = ft;
+        TimeZone tz = ZONE_CACHE.get(ID);
+        if (tz == null) {
+            final TimeZone tmp =  TimeZone.getTimeZone(ID);
+            tz = ZONE_CACHE.putIfAbsent(ID, tmp);
+            if (null == tz) {
+                tz = tmp;
             }
         }
-        try {
-            return f.get();
-        } catch (final InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
-            final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimeZoneUtils.class);
-            LOG.error(e.getMessage(), e);
-        }
-        return TimeZoneUtils.getTimeZone(ID);
+        return tz;
     }
 
     /**
