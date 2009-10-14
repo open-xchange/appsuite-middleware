@@ -463,6 +463,40 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         assertEquals("Should find one day inbetween", 1, daysInbetween.size());
     }
     
+    public void testShouldWorkWithDifferentWorkWeekLength(){
+        CPAppointment app1 = new CPAppointment();
+        CPAppointment app2 = new CPAppointment();
+        CPAppointment app3 = new CPAppointment();
+        CPAppointment app4 = new CPAppointment();
+        app1.setStartDate(WEDNESDAY());
+        app1.setEndDate(plusOneHour(WEDNESDAY()));
+        app2.setStartDate(THURSDAY());
+        app2.setEndDate(plusOneHour(THURSDAY()));
+        app3.setStartDate(SUNDAY());
+        app3.setEndDate(plusOneHour(SUNDAY()));
+        app4.setStartDate(MONDAY_NEXT_WEEK());
+        app4.setEndDate(plusOneHour(MONDAY_NEXT_WEEK()));
+        
+        CPCalendar cal = CPCalendar.getEuropeanCalendar();
+        cal.setWorkWeekStartingDay(Calendar.WEDNESDAY);
+        cal.setWorkWeekDurationInDays(2);
+        strategy.setCalendar(cal);
+        CPPartition partitions = strategy.partition(Arrays.asList(app1,app2,app3,app4));
+     
+        assertEquals("Should contain only two appointments", 2, partitions.getAppointments().size());
+        boolean foundWednesday = false, foundThursday = false;
+        
+        for(CPAppointment app : partitions.getAppointments()){
+            calendar.setTime(app.getStartDate());
+            if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY)
+                foundWednesday = true;
+            if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY)
+                foundThursday = true;
+        }
+        assertTrue("Wednesday should be in there", foundWednesday);
+        assertTrue("Thursday should be in there", foundThursday);
+    }
+
     public void testShouldInsertYearBreak(){
         //TODO
     }
