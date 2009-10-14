@@ -57,19 +57,19 @@ import com.openexchange.calendar.printing.CPType;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalculator implements CPPartitioningStrategy{
+public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalculator implements CPPartitioningStrategy {
 
     public static final int DAYBREAK = 0;
 
     public static final int WEEKBREAK = 1;
 
     public static final int MONTHBREAK = 2;
-    
+
     public static final int YEARBREAK = 3;
-    
+
     public static final int DAYNAME = 10;
-    
-    public static final int FILLDAY = 11; //a day that is only used to fill up the beginning or end of weeks or months
+
+    public static final int FILLDAY = 11; // a day that is only used to fill up the beginning or end of weeks or months
 
     protected CPAppointment lastStoredAppointment = null;
 
@@ -77,12 +77,48 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
 
     public abstract CPPartition partition(List<CPAppointment> appointments);
 
-    protected void addWeekBreak(CPPartition blocks, int pos, Date day) {
-        CPFormattingInformation weekBreak = new CPFormattingInformation(pos, AbstractWeekPartitioningStrategy.WEEKBREAK, getWeekOfYear(day));
-        if (!blocks.getFormattingInformation().contains(weekBreak))
+    private int lastDay = -1, lastWeek = -1, lastMonth = -1, lastYear = -1;
+    
+    protected void addDayBreak(CPPartition blocks, int pointer, Date day) {
+        CPFormattingInformation dayBreak = new CPFormattingInformation(
+            pointer,
+            AbstractWeekPartitioningStrategy.DAYBREAK,
+            getDayOfYear(day));
+        if(lastDay != getWeekOfYear(day).intValue())
+            blocks.addFormattingInformation(dayBreak);
+        lastDay = getDayOfYear(day).intValue();
+    }
+    
+    protected void addWeekBreak(CPPartition blocks, int pointer, Date day) {
+        CPFormattingInformation weekBreak = new CPFormattingInformation(
+            pointer,
+            AbstractWeekPartitioningStrategy.WEEKBREAK,
+            getWeekOfYear(day));
+        if(lastWeek != getWeekOfYear(day).intValue())
             blocks.addFormattingInformation(weekBreak);
+        lastWeek = getWeekOfYear(day).intValue();
     }
 
+    protected void addMonthBreak(CPPartition blocks, int pointer, Date day) {
+        CPFormattingInformation monthBreak = new CPFormattingInformation(
+            pointer,
+            AbstractWeekPartitioningStrategy.MONTHBREAK,
+            day);
+        if(lastMonth != getMonthOfYear(day).intValue())
+            blocks.addFormattingInformation(monthBreak);
+        lastMonth = getMonthOfYear(day).intValue();
+    }
+
+    protected void addYearBreak(CPPartition blocks, int pointer, Date date) {
+        CPFormattingInformation yearBreak = new CPFormattingInformation(
+            pointer,
+            AbstractWeekPartitioningStrategy.YEARBREAK,
+            date);
+        if(lastYear != getYear(date).intValue())
+            blocks.addFormattingInformation(yearBreak);
+        lastYear = getYear(date).intValue();
+    }
+    
     protected boolean isSignalForNewDay(CPAppointment appointment) {
         if (lastStoredAppointment == null)
             return true;

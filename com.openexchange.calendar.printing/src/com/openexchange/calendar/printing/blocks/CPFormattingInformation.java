@@ -109,7 +109,6 @@ public class CPFormattingInformation {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((additionalInformation == null) ? 0 : additionalInformation.hashCode());
         result = prime * result + position;
         result = prime * result + type;
         return result;
@@ -127,13 +126,6 @@ public class CPFormattingInformation {
             return false;
         }
         CPFormattingInformation other = (CPFormattingInformation) obj;
-        if (additionalInformation == null) {
-            if (other.additionalInformation != null) {
-                return false;
-            }
-        } else if (!additionalInformation.equals(other.additionalInformation)) {
-            return false;
-        }
         if (position != other.position) {
             return false;
         }
@@ -142,5 +134,7 @@ public class CPFormattingInformation {
         }
         return true;
     }
+
+ 
 
 }

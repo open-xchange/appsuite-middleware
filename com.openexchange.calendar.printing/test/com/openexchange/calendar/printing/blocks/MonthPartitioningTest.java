@@ -52,6 +52,7 @@ package com.openexchange.calendar.printing.blocks;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
@@ -196,12 +197,12 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         CPPartition partitions = strategy.partition(Arrays.asList(app1, app2));
 
         List<CPFormattingInformation> infos = partitions.getFormattingInformation();
-        int months = 0;
+        List<Date> months = new LinkedList<Date>();
         for (CPFormattingInformation info : infos) 
             if (info.getType() == AbstractWeekPartitioningStrategy.MONTHBREAK)
-                months++;
+                months.add((Date)info.getAdditionalInformation());
 
-        assertEquals("Should contain twelve months per yes", 12, months);
+        assertEquals("Should contain twelve months per year", 12, months.size());
     }
 
     public void testShouldNotMissDayInSecondWeek() {

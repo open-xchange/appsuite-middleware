@@ -159,15 +159,6 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
             appointment.getEndDate());
     }
 
-    private void addMonthBreak(CPPartition blocks, int pointer, Date day) {
-        CPFormattingInformation weekBreak = new CPFormattingInformation(
-            pointer,
-            AbstractWeekPartitioningStrategy.MONTHBREAK,
-            getMonthOfYear(day));
-        if (!blocks.getFormattingInformation().contains(weekBreak))
-            blocks.addFormattingInformation(weekBreak);
-    }
-
     private boolean isOnFirstDayOfMonth(Date day) {
         // TODO move method to CPCalendar
         CPCalendar cal = getCalendar();

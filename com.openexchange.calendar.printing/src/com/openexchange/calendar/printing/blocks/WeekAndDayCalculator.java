@@ -75,6 +75,11 @@ public abstract class WeekAndDayCalculator {
         super();
     }
 
+    public Integer getDayOfYear(Date date) {
+        getCalendar().setTime(date);
+        return Integer.valueOf(getCalendar().get(Calendar.DAY_OF_YEAR));
+    }
+    
     public Integer getWeekOfYear(Date date) {
         getCalendar().setTime(date);
         return Integer.valueOf(getCalendar().get(Calendar.WEEK_OF_YEAR));
@@ -83,6 +88,11 @@ public abstract class WeekAndDayCalculator {
     public Integer getMonthOfYear(Date date) {
         getCalendar().setTime(date);
         return Integer.valueOf(getCalendar().get(Calendar.MONTH));
+    }
+    
+    public Integer getYear(Date date) {
+        getCalendar().setTime(date);
+        return Integer.valueOf(getCalendar().get(Calendar.YEAR));
     }
 
     public boolean isOnDifferentDays(Date first, Date second) {
