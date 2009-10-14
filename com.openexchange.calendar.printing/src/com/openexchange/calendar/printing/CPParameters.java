@@ -81,7 +81,9 @@ public class CPParameters {
 
     private int folder;
 
-    private List<String> missingFields, unparseableFields;
+    private List<String> missingFields  = new LinkedList<String>();
+    
+    private List<String> unparseableFields = new LinkedList<String>();
 
     public CPParameters() {
 
@@ -177,7 +179,7 @@ public class CPParameters {
     }
 
     public boolean isMissingFields() {
-        return missingFields != null;
+        return missingFields.size() > 0;
     }
 
     public void setUnparseableFields(List<String> fields) {
@@ -189,11 +191,10 @@ public class CPParameters {
     }
 
     public boolean hasUnparseableFields() {
-        return unparseableFields == null;
+        return unparseableFields.size() > 0;
     }
 
     public void parseRequest(HttpServletRequest req) {
-        missingFields = new LinkedList<String>();
         unparseableFields = new LinkedList<String>();
 
         start = extractDateParam(req, AJAXServlet.PARAMETER_START);
