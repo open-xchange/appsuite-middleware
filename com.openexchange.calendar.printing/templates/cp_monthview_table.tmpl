@@ -6,6 +6,10 @@
                   <span class="date">${a_date?string("dd.MM.yyyy, EEE")}</span>
 </#macro>
 
+<#macro month a_date>
+                  <span class="date">${a_date?string("MMM")}</span>
+</#macro>
+
 <#macro datetime a_date>
                   <span class="date time">${a_date?string("dd.MM.yyyy, HH:mm")}</span>
 </#macro>
@@ -81,10 +85,10 @@
 
 <body>
    <h1>
-      Week: 
-      <@date start />
+      Month: 
+      <@month start />
       - 
-      <@date end />
+      <@month end />
       <@timezone start />
    </h1>
    

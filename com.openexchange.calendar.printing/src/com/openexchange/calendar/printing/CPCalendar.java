@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -158,5 +159,27 @@ public class CPCalendar extends GregorianCalendar {
         return getWorkWeekDays().get(0).intValue();
     }
     
+    public boolean isOnFirstDayOfWeek(Date day){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(day);
+        return cal.get(Calendar.DAY_OF_WEEK) == getFirstDayOfWeek();
+    }
+
+    public boolean isOnLastDayOfWeek(Date day){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(day);
+        return cal.get(Calendar.DAY_OF_WEEK) == getLastDayOfWeek();
+    }
     
+    public boolean isOnFirstDayOfWorkWeek(Date day) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(day);
+        return cal.get(Calendar.DAY_OF_WEEK) == getFirstDayOfWorkWeek();
+    }
+    
+    public boolean isOnLastDayOfWorkWeek(Date day) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(day);
+        return cal.get(Calendar.DAY_OF_WEEK) == getLastDayOfWorkWeek();
+    }
 }

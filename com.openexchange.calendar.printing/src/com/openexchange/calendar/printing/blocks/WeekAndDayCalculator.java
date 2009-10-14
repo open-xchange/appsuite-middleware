@@ -153,12 +153,6 @@ public abstract class WeekAndDayCalculator {
         return getMissingDaysInbetween(first, second).size() != 0;
     }
 
-    public boolean isOnFirstDayOfWorkWeek(Date day) {
-        CPCalendar cal = getCalendar();
-        cal.setTime(day);
-        return cal.get(Calendar.DAY_OF_WEEK) == cal.getFirstDayOfWorkWeek();
-    }
-
     public Integer getWeekDayNumber(Date day) {
         Calendar cal = getCalendar();
         cal.setTime(day);

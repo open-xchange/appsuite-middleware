@@ -382,24 +382,24 @@ public class CPParameterTest extends TestCase {
     public void testShouldCryIfMissingFields() {
         MockRequest mockRequest = new MockRequest();
         CPParameters params = new CPParameters(mockRequest);
-        assertTrue("No parameters given, should miss fields", params.isMissingFields());
+        assertTrue("No parameters given, should miss fields", params.isMissingMandatoryFields());
     }
 
     public void testShouldCryIfCannotParseValue() {
         MockRequest mockRequest = new MockRequest();
-        mockRequest.setParameter(CPParameters.WEEK_START_DAY, "Elvis");
+        mockRequest.setParameter(CPParameters.PARAMETER_WEEK_START_DAY, "Elvis");
         CPParameters params = new CPParameters(mockRequest);
         assertTrue("Parameter with bullshit value given, should fail", params.hasUnparseableFields());
         assertTrue("Parameter with bullshit value given, should be listed as missing field", params.getUnparseableFields().contains(
-            CPParameters.WEEK_START_DAY));
+            CPParameters.PARAMETER_WEEK_START_DAY));
     }
 
     public void testShouldNotLeaveMissingParamFieldEmptyWhenEncounteringNumberFormatExceptionWhileParsingFieldValue() {
         MockRequest mockRequest = new MockRequest();
-        mockRequest.setAttribute(CPParameters.WEEK_START_DAY, "Elvis");
+        mockRequest.setAttribute(CPParameters.PARAMETER_WEEK_START_DAY, "Elvis");
         CPParameters params = new CPParameters(mockRequest);
-        assertTrue("Should still miss fields", params.isMissingFields());
-        assertTrue("Should at least miss the field it was trying to parse", params.getMissingFields().contains(CPParameters.WEEK_START_DAY));
+        assertTrue("Should still miss fields", params.isMissingOptionalFields());
+        assertTrue("Should at least miss the field it was trying to parse", params.getMissingOptionalFields().contains(CPParameters.PARAMETER_WEEK_START_DAY));
 
     }
 }

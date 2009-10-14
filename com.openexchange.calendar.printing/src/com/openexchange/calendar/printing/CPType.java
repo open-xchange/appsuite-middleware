@@ -59,8 +59,8 @@ public enum CPType {
     DAYVIEW("DayView", 0),
     WORKWEEKVIEW("WorkWeekView", 1),
     WEEKVIEW("WeekView", 2),
-    MONTHLYVIEW("MonthlyView", 3),
-    YEARLYVIEW("YearlyView", 4);
+    MONTHLYVIEW("MonthView", 3),
+    YEARLYVIEW("YearView", 4);
 
     private String name;
 

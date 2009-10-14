@@ -89,8 +89,9 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        CPCalendar oxCal = CPCalendar.getEuropeanCalendar();
         strategy = new WorkWeekPartitioningStrategy();
-        strategy.setCalendar(CPCalendar.getEuropeanCalendar());
+        strategy.setCalendar(oxCal);
         calendar = Calendar.getInstance();
     }
 

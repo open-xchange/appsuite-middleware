@@ -61,32 +61,36 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class CPParameters {
 
-    public static final String WEEK_START_DAY = "week_start_day";
+    public static final String PARAMETER_WEEK_START_DAY = "week_start_day";
 
-    public static final String WORK_DAY_START_TIME = "work_day_start_time";
+    public static final String PARAMETER_WORK_DAY_START_TIME = "work_day_start_time";
 
-    public static final String WORK_DAY_END_TIME = "work_day_end_time";
+    public static final String PARAMETER_WORK_DAY_END_TIME = "work_day_end_time";
 
-    public static final String WORK_WEEK_START_DAY = "work_week_start_day";
+    public static final String PARAMETER_WORK_WEEK_START_DAY = "work_week_start_day";
 
-    public static final String WORK_WEEK_DURATION = "work_week_days_amount";
+    public static final String PARAMETER_WORK_WEEK_DURATION = "work_week_days_amount";
+
+    public static final String PARAMETER_USERTEMPLATE = "usertemplate";
 
     private Date start, end, workDayStart, workDayEnd;
 
     private int weekStart, workWeekStart, workWeekDuration;
 
-    private String template;
+    private String template, usertemplate;
 
     private TimeZone timezone;
 
     private int folder;
 
-    private List<String> missingFields  = new LinkedList<String>();
-    
+    private List<String> missingMandatoryFields = new LinkedList<String>();
+
+    private List<String> missingOptionalFields = new LinkedList<String>();
+
     private List<String> unparseableFields = new LinkedList<String>();
 
     public CPParameters() {
-
+        super();
     }
 
     public CPParameters(HttpServletRequest req) {
@@ -118,6 +122,18 @@ public class CPParameters {
         this.template = template;
     }
 
+    public String getUserTemplate() {
+        return usertemplate;
+    }
+
+    public void setUserTemplate(String template) {
+        this.usertemplate = template;
+    }
+    
+    public boolean hasUserTemplate(){
+        return this.usertemplate != null;
+    }
+
     public int getFolder() {
         return folder;
     }
@@ -133,6 +149,10 @@ public class CPParameters {
     public void setWorkDayStart(Date workDayStart) {
         this.workDayStart = workDayStart;
     }
+    
+    public boolean hasWorkDayStart(){
+        return this.workDayStart != null;
+    }
 
     public Date getWorkDayEnd() {
         return workDayEnd;
@@ -140,6 +160,10 @@ public class CPParameters {
 
     public void setWorkDayEnd(Date workDayEnd) {
         this.workDayEnd = workDayEnd;
+    }
+    
+    public boolean hasWorkDayEnd(){
+        return this.workDayEnd != null;
     }
 
     public int getWeekStart() {
@@ -149,6 +173,10 @@ public class CPParameters {
     public void setWeekStart(int weekStart) {
         this.weekStart = weekStart;
     }
+        
+    public boolean hasWeekStart(){
+        return this.weekStart != -1;
+    }
 
     public int getWorkWeekStart() {
         return workWeekStart;
@@ -156,6 +184,10 @@ public class CPParameters {
 
     public void setWorkWeekStart(int workWeekStart) {
         this.workWeekStart = workWeekStart;
+    }
+    
+    public boolean hasWorkWeekStart(){
+        return this.workWeekStart != -1;
     }
 
     public int getWorkWeekDuration() {
@@ -165,6 +197,10 @@ public class CPParameters {
     public void setWorkWeekDuration(int workWeekDuration) {
         this.workWeekDuration = workWeekDuration;
     }
+    
+    public boolean hasWorkWeekDuration(){
+        return this.workWeekDuration != -1;
+    }
 
     public TimeZone getTimezone() {
         return timezone;
@@ -173,13 +209,25 @@ public class CPParameters {
     public void setTimezone(TimeZone timezone) {
         this.timezone = timezone;
     }
-
-    public List<String> getMissingFields() {
-        return this.missingFields;
+        
+    public boolean hasTimezone(){
+        return this.timezone != null;
     }
 
-    public boolean isMissingFields() {
-        return missingFields.size() > 0;
+    public List<String> getMissingMandatoryFields() {
+        return missingMandatoryFields;
+    }
+
+    public boolean isMissingMandatoryFields() {
+        return missingMandatoryFields.size() > 0;
+    }
+
+    public List<String> getMissingOptionalFields() {
+        return missingOptionalFields;
+    }
+
+    public boolean isMissingOptionalFields() {
+        return missingOptionalFields.size() > 0;
     }
 
     public void setUnparseableFields(List<String> fields) {
@@ -197,72 +245,111 @@ public class CPParameters {
     public void parseRequest(HttpServletRequest req) {
         unparseableFields = new LinkedList<String>();
 
-        start = extractDateParam(req, AJAXServlet.PARAMETER_START);
-        end = extractDateParam(req, AJAXServlet.PARAMETER_END);
-        workDayStart = extractDateParam(req, WORK_DAY_START_TIME);
-        workDayEnd = extractDateParam(req, WORK_DAY_END_TIME);
-        weekStart = extractIntParam(req, WEEK_START_DAY);
-        workWeekStart = extractIntParam(req, WORK_WEEK_START_DAY);
-        workWeekDuration = extractIntParam(req, WORK_WEEK_DURATION);
-        folder = extractIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
-        template = extractStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
-        timezone = extractTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
+        start = extractMandatoryDateParam(req, AJAXServlet.PARAMETER_START);
+        end = extractMandatoryDateParam(req, AJAXServlet.PARAMETER_END);
+        workDayStart = extractOptionalDateParam(req, PARAMETER_WORK_DAY_START_TIME);
+        workDayEnd = extractOptionalDateParam(req, PARAMETER_WORK_DAY_END_TIME);
+        weekStart = extractOptionalIntParam(req, PARAMETER_WEEK_START_DAY);
+        workWeekStart = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_START_DAY);
+        workWeekDuration = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_DURATION);
+        folder = extractMandatoryIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
+        template = extractMandatoryStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
+        usertemplate = extractOptionalStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
+        timezone = extractOptionalTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
     }
 
-    private Date extractDateParam(HttpServletRequest req, String parameter) {
+    private Date extractOptionalDateParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
         if (val == null)
-            missingFields.add(parameter);
+            missingOptionalFields.add(parameter);
         else {
             try {
                 return new Date(Long.valueOf(val).longValue());
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
-                missingFields.add(parameter);
+                missingOptionalFields.add(parameter);
             }
         }
         return null;
     }
 
-    private int extractIntParam(HttpServletRequest req, String parameter) {
+    private Date extractMandatoryDateParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
         if (val == null)
-            missingFields.add(parameter);
+            missingMandatoryFields.add(parameter);
+        else {
+            try {
+                return new Date(Long.valueOf(val).longValue());
+            } catch (NumberFormatException e) {
+                unparseableFields.add(parameter);
+                missingMandatoryFields.add(parameter);
+            }
+        }
+        return null;
+    }
+
+    private int extractOptionalIntParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingOptionalFields.add(parameter);
         else {
             try {
                 return Integer.valueOf(val).intValue();
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
-                missingFields.add(parameter);
+                missingOptionalFields.add(parameter);
             }
         }
         return -1;
     }
 
-    private TimeZone extractTimezoneParam(HttpServletRequest req, String parameter) {
+    private int extractMandatoryIntParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
         if (val == null)
-            missingFields.add(parameter);
+            missingMandatoryFields.add(parameter);
+        else {
+            try {
+                return Integer.valueOf(val).intValue();
+            } catch (NumberFormatException e) {
+                unparseableFields.add(parameter);
+                missingMandatoryFields.add(parameter);
+            }
+        }
+        return -1;
+    }
+
+    private TimeZone extractOptionalTimezoneParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingOptionalFields.add(parameter);
         else {
             try {
                 return TimeZone.getTimeZone(val);
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
-                missingFields.add(parameter);
+                missingOptionalFields.add(parameter);
             }
         }
         return null;
     }
 
-    private String extractStringParam(HttpServletRequest req, String parameter) {
+    private String extractOptionalStringParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
         if (val == null)
-            missingFields.add(parameter);
+            missingOptionalFields.add(parameter);
         return val;
     }
+    
+    private String extractMandatoryStringParam(HttpServletRequest req, String parameter) {
+        String val = req.getParameter(parameter);
+        if (val == null)
+            missingMandatoryFields.add(parameter);
+        return val;
+    }
+
     @Override
     public String toString() {
-        return CPParameters.class.getName() + ": Start = " + start + ", end = " + end + ", folder = " + folder + ", template = " + template + ", missing fields : " + isMissingFields();
+        return CPParameters.class.getName() + ": Start = " + start + ", end = " + end + ", folder = " + folder + ", template = " + template + ", missing fields : " + isMissingMandatoryFields();
     }
 
 }

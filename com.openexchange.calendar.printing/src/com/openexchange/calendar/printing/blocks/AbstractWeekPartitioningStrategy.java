@@ -68,6 +68,8 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     public static final int YEARBREAK = 3;
     
     public static final int DAYNAME = 10;
+    
+    public static final int FILLDAY = 11; //a day that is only used to fill up the beginning or end of weeks or months
 
     protected CPAppointment lastStoredAppointment = null;
 

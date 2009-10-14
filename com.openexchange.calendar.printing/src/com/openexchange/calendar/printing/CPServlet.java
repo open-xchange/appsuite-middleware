@@ -50,6 +50,8 @@
 package com.openexchange.calendar.printing;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,8 +137,8 @@ public class CPServlet extends PermissionServlet {
                     params.getUnparseableFields(),
                     ","));
             }
-            if (params.isMissingFields()) {
-                throw new ServletException("Missing one or more parameters: " + Strings.join(params.getMissingFields(), ","));
+            if (params.isMissingMandatoryFields()) {
+                throw new ServletException("Missing one or more mandatory parameters: " + Strings.join(params.getMissingMandatoryFields(), ","));
             }
             if (CPType.getByTemplateName(params.getTemplate()) == null) {
                 throw new ServletException("Cannot find template " + params.getTemplate());
@@ -163,7 +165,11 @@ public class CPServlet extends PermissionServlet {
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
             factory.addStrategy(new MonthPartitioningStrategy());
-            factory.setCalendar(CPCalendar.getEuropeanCalendar());
+            
+            CPCalendar cal = CPCalendar.getEuropeanCalendar();
+            modifyCalendar(cal, params);
+            
+            factory.setCalendar(cal);
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
 
             CPPartition partitions = factory.partition(expandedAppointments);
@@ -194,5 +200,29 @@ public class CPServlet extends PermissionServlet {
     private void writeException(HttpServletResponse resp, Throwable t) {
         LOG.error(t.getMessage(), t);
         // TODO Write HTML page as response
+    }
+    
+    /**
+     * Modify a calendar according to the given parameters
+     */
+    public void modifyCalendar(CPCalendar calendar, CPParameters params){
+        if(params.hasTimezone())
+            calendar.setTimeZone(params.getTimezone());
+        if(params.hasWeekStart())
+            calendar.setFirstDayOfWeek(params.getWeekStart());
+        if(params.hasWorkWeekDuration())
+            calendar.setWorkWeekDurationInDays(params.getWorkWeekDuration());
+        if(params.hasWorkWeekStart())
+            calendar.setWorkWeekStartingDay(params.getWorkWeekStart());
+        if(params.hasWorkDayEnd()){
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(params.getWorkDayEnd());
+            calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
+        }
+        if(params.hasWorkDayStart()){
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(params.getWorkDayStart());
+            calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
+        }
     }
 }
