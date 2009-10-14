@@ -767,28 +767,14 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     public QuotedInternetAddress(final String address) throws AddressException {
         super();
-        // use our address parsing utility routine to parse the string
-        final InternetAddress a[] = parse(address, true);
-        // if we got back anything other than a single address, it's an error
-        if (a.length != 1) {
-            throw new AddressException("Illegal address", address);
-        }
-
-        /*
-         * Now copy the contents of the single address we parsed into the current object, which will be returned from the constructor. XXX -
-         * this sure is a round-about way of getting this done.
-         */
-        final QuotedInternetAddress internetAddress = (QuotedInternetAddress) a[0];
-        this.address = internetAddress.address;
-        this.personal = internetAddress.personal;
-        this.encodedPersonal = internetAddress.encodedPersonal;
+        parseAddress0(address);
     }
 
     /**
      * Initializes a new {@link QuotedInternetAddress}.
      * <p>
      * Parse the given string and create an InternetAddress. If strict is <code>false</code>, the detailed syntax of the address isn't
-     * checked.
+     * checked. toACE
      * 
      * @param address The address in RFC822 format
      * @param strict <code>true</code> enforce RFC822 syntax; otherwise <code>false</code>
@@ -832,6 +818,40 @@ public final class QuotedInternetAddress extends InternetAddress {
         super();
         this.address = toACE(address);
         setPersonal(personal, charset);
+    }
+
+    /**
+     * Parses the given string into this {@link QuotedInternetAddress}.
+     * 
+     * @param address The address in RFC822 format
+     * @throws AddressException If parsing the address fails
+     */
+    public void parseAddress(final String address) throws AddressException {
+        parseAddress0(address);
+    }
+
+    /**
+     * Internal parse routine.
+     * 
+     * @param address The address in RFC822 format
+     * @throws AddressException If parsing the address fails
+     */
+    private void parseAddress0(final String address) throws AddressException {
+        // use our address parsing utility routine to parse the string
+        final InternetAddress a[] = parse(address, true);
+        // if we got back anything other than a single address, it's an error
+        if (a.length != 1) {
+            throw new AddressException("Illegal address", address);
+        }
+
+        /*
+         * Now copy the contents of the single address we parsed into the current object, which will be returned from the constructor. XXX -
+         * this sure is a round-about way of getting this done.
+         */
+        final QuotedInternetAddress internetAddress = (QuotedInternetAddress) a[0];
+        this.address = internetAddress.address;
+        this.personal = internetAddress.personal;
+        this.encodedPersonal = internetAddress.encodedPersonal;
     }
 
     /**
