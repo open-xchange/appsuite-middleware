@@ -82,5 +82,6 @@ public class CPTypeTest extends TestCase {
         checkType("", null);
         checkType("666/template.tmpl", null);
         checkType("/1/666/template.tmpl", null);
+        checkType("cp_666_template.tmpl", null);
     }
 }
