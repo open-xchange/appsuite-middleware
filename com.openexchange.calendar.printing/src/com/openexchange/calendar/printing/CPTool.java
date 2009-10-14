@@ -60,6 +60,7 @@ import java.util.regex.Pattern;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.printing.blocks.WeekAndDayCalculator;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -68,9 +69,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CPTool {
-
-    private Calendar calendar;
+public class CPTool extends WeekAndDayCalculator {
 
     /**
      * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
@@ -130,14 +129,15 @@ public class CPTool {
     }
 
     public List<Appointment> splitIntoSingleDays(Appointment appointment) {
-        List<Appointment> appointments = new LinkedList<Appointment>();        
-        final long duration = (appointment.getEndDate().getTime() - appointment.getStartDate().getTime()) / 1000 / 60 / 60 / 24;       
-        
-        if(duration == 0){
+        List<Appointment> appointments = new LinkedList<Appointment>();
+
+        if (!isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate())) {
             appointments.add(appointment);
-            return appointments; 
+            return appointments;
         }
-        
+
+        int duration = getMissingDaysInbetween(appointment.getStartDate(), appointment.getEndDate()).size() + 1;
+
         Calendar newStartCal = Calendar.getInstance();
         newStartCal.setTime(appointment.getStartDate());
         newStartCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -195,13 +195,4 @@ public class CPTool {
         }
         return all;
     }
-
-    public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
-    }
-
-    public Calendar getCalendar() {
-        return calendar;
-    }
-
 }
