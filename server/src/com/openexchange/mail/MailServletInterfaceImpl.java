@@ -183,9 +183,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     MailServletInterfaceImpl(final Session session) throws MailException {
         super();
         try {
-            this.ctx =
-                (session instanceof ServerSession) ? ((ServerSession) session).getContext() : ContextStorage.getInstance().getContext(
-                    session.getContextId());
+            this.ctx = (session instanceof ServerSession) ? ((ServerSession) session).getContext() : ContextStorage.getInstance().getContext(
+                session.getContextId());
         } catch (final ContextException e) {
             throw new MailException(e);
         }
@@ -226,8 +225,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Only backup if no hard-delete is set in user's mail configuration and fullname does not denote trash (sub)folder
          */
-        final boolean backup =
-            (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
+        final boolean backup = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
         mailAccess.getFolderStorage().clearFolder(fullname, !backup);
         try {
             /*
@@ -288,8 +286,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
                 final int spamAction;
                 if (usm.isSpamEnabled()) {
-                    spamAction =
-                        spamFullname.equals(sourceFullname) ? SPAM_HAM : (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+                    spamAction = spamFullname.equals(sourceFullname) ? SPAM_HAM : (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
                 } else {
                     spamAction = SPAM_NOOP;
                 }
@@ -390,8 +387,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
             // Fetch messages from source folder
-            final MailMessage[] messages =
-                mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FULL });
+            final MailMessage[] messages = mailAccess.getMessageStorage().getMessages(
+                sourceFullname,
+                msgUIDs,
+                new MailField[] { MailField.FULL });
             // Append them to destination folder
             final String[] maildIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
             // Delete source messages if a move shall be performed
@@ -402,12 +401,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Update JSON cache
                  */
-                JSONMessageCache.getInstance().removeFolder(source.getAccountId(), sourceFullname, session);
-                JSONMessageCache.getInstance().removeFolder(dest.getAccountId(), destFullname, session);
-                /*
-                 * Update message cache
-                 */
-                MailMessageCache.getInstance().removeFolderMessages(source.getAccountId(), sourceFullname, session.getUserId(), contextId);
+                final JSONMessageCache cache = JSONMessageCache.getInstance();
+                if (cache != null) {
+                    if (move) {
+                        cache.removeFolder(source.getAccountId(), sourceFullname, session);
+                    }
+                    cache.removeFolder(dest.getAccountId(), destFullname, session);
+                }
+                if (move) {
+                    /*
+                     * Update message cache
+                     */
+                    MailMessageCache.getInstance().removeFolderMessages(
+                        source.getAccountId(),
+                        sourceFullname,
+                        session.getUserId(),
+                        contextId);
+                }
                 MailMessageCache.getInstance().removeFolderMessages(dest.getAccountId(), destFullname, session.getUserId(), contextId);
             } catch (final OXCachingException e) {
                 LOG.error(e.getMessage(), e);
@@ -428,10 +438,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Only backup if fullname does not denote trash (sub)folder
          */
-        final String retval =
-            prepareFullname(mailAccess.getAccountId(), mailAccess.getFolderStorage().deleteFolder(
-                fullname,
-                (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder()))));
+        final String retval = prepareFullname(mailAccess.getAccountId(), mailAccess.getFolderStorage().deleteFolder(
+            fullname,
+            (fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder()))));
         try {
             /*
              * Update JSON cache
@@ -459,8 +468,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Hard-delete if hard-delete is set in user's mail configuration or fullname denotes trash (sub)folder
          */
         final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
-        final boolean hd =
-            (hardDelete || UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() || (null != trashFullname && fullname.startsWith(trashFullname)));
+        final boolean hd = (hardDelete || UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() || (null != trashFullname && fullname.startsWith(trashFullname)));
         mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hd);
         try {
             /*
@@ -867,8 +875,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             fullname = argument.getFullname();
         }
         try {
-            final MailMessage[] mails =
-                MailMessageCache.getInstance().getMessages(uids, accountId, fullname, session.getUserId(), contextId);
+            final MailMessage[] mails = MailMessageCache.getInstance().getMessages(
+                uids,
+                accountId,
+                fullname,
+                session.getUserId(),
+                contextId);
             if (null != mails) {
                 /*
                  * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
@@ -884,8 +896,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error(e.getMessage(), e);
         }
         initConnection(accountId);
-        final MailMessage[] mails =
-            mailAccess.getMessageStorage().getMessages(fullname, uids, MailField.toFields(MailListField.getFields(fields)));
+        final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(
+            fullname,
+            uids,
+            MailField.toFields(MailListField.getFields(fields)));
         try {
             if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
@@ -927,11 +941,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
         checkPatternLength(searchPatterns);
-        final SearchTerm<?> searchTerm =
-            (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
-                searchCols,
-                searchPatterns,
-                linkSearchTermsWithOR);
+        final SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
+            searchCols,
+            searchPatterns,
+            linkSearchTermsWithOR);
         return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields);
     }
 
@@ -942,14 +955,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
-        MailMessage[] mails =
-            mailAccess.getMessageStorage().searchMessages(
-                fullname,
-                null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                MailSortField.getField(sortCol),
-                OrderDirection.getOrderDirection(order),
-                searchTerm,
-                FIELDS_ID_INFO);
+        MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(
+            fullname,
+            null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+            MailSortField.getField(sortCol),
+            OrderDirection.getOrderDirection(order),
+            searchTerm,
+            FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
@@ -1143,22 +1155,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
-        final SearchTerm<?> searchTerm =
-            (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
-                searchCols,
-                searchPatterns,
-                linkSearchTermsWithOR);
+        final SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
+            searchCols,
+            searchPatterns,
+            linkSearchTermsWithOR);
         /*
          * Identify and thread-sort messages according to search term while only fetching their IDs
          */
-        MailMessage[] mails =
-            mailAccess.getMessageStorage().getThreadSortedMessages(
-                fullname,
-                fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                MailSortField.getField(sortCol),
-                OrderDirection.getOrderDirection(order),
-                searchTerm,
-                FIELDS_ID_INFO);
+        MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(
+            fullname,
+            fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+            MailSortField.getField(sortCol),
+            OrderDirection.getOrderDirection(order),
+            searchTerm,
+            FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
@@ -1450,15 +1460,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             }
                         }
                         // Copy
-                        final String destFullname =
-                            fullCopy(
-                                mailAccess,
-                                fullname,
-                                otherAccess,
-                                newParent,
-                                p.getSeparator(),
-                                session.getUserId(),
-                                otherAccess.getMailConfig().getCapabilities().hasPermissions());
+                        final String destFullname = fullCopy(
+                            mailAccess,
+                            fullname,
+                            otherAccess,
+                            newParent,
+                            p.getSeparator(),
+                            session.getUserId(),
+                            otherAccess.getMailConfig().getCapabilities().hasPermissions());
                         // Delete source
                         mailAccess.getFolderStorage().deleteFolder(fullname, true);
                         // Perform other updates
@@ -1511,13 +1520,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final String destFullname = destAccess.getFolderStorage().createFolder(mfd);
         // Copy messages
-        final MailMessage[] msgs =
-            srcAccess.getMessageStorage().getAllMessages(
-                srcFullname,
-                null,
-                MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC,
-                new MailField[] { MailField.FULL });
+        final MailMessage[] msgs = srcAccess.getMessageStorage().getAllMessages(
+            srcFullname,
+            null,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            new MailField[] { MailField.FULL });
         final IMailMessageStorage destMessageStorage = destAccess.getMessageStorage();
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
