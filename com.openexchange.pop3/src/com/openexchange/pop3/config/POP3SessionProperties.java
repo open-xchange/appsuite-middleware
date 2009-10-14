@@ -107,30 +107,27 @@ public final class POP3SessionProperties {
      */
     private static void initializePOP3Properties() {
         /*
-         * Force initialization of default MIME session
-         */
-        MIMEDefaultSession.getDefaultSession();
-        /*
          * Define POP3 session properties
          */
-        pop3SessionProperties = ((Properties) (System.getProperties().clone()));
+        pop3SessionProperties = MIMEDefaultSession.getDefaultMailProperties();
         /*
          * Set some global JavaMail properties
          */
-        if (!pop3SessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-            pop3SessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+        final Properties properties = pop3SessionProperties;
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
         }
-        if (!pop3SessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-            pop3SessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
+            properties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
         }
-        if (!pop3SessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-            pop3SessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
         }
-        if (!pop3SessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-            pop3SessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
         }
         /*
@@ -139,35 +136,35 @@ public final class POP3SessionProperties {
          * objects are needed, the POP3Store will provide them from the connection pool, or create them if none are available. When a folder
          * is closed, its POP3 protocol object is returned to the connection pool if the pool is not over capacity.
          */
-        pop3SessionProperties.put("mail.pop3.connectionpoolsize", "1");
+        properties.put("mail.pop3.connectionpoolsize", "1");
         /*
          * A mechanism is provided for timing out idle connection pool POP3 protocol objects. Timed out connections are closed and removed
          * (pruned) from the connection pool.
          */
-        pop3SessionProperties.put("mail.pop3.connectionpooltimeout", "1000");
-        if (!pop3SessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-            pop3SessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
+        properties.put("mail.pop3.connectionpooltimeout", "1000");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
             System.getProperties().put(
                 MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
                 MailProperties.getInstance().getDefaultMimeCharset());
         }
         if (POP3Properties.getInstance().getPOP3Timeout() > 0) {
-            pop3SessionProperties.put("mail.pop3.timeout", String.valueOf(POP3Properties.getInstance().getPOP3Timeout()));
+            properties.put("mail.pop3.timeout", String.valueOf(POP3Properties.getInstance().getPOP3Timeout()));
         }
         if (POP3Properties.getInstance().getPOP3ConnectionTimeout() > 0) {
-            pop3SessionProperties.put(
+            properties.put(
                 "mail.pop3.connectiontimeout",
                 String.valueOf(POP3Properties.getInstance().getPOP3ConnectionTimeout()));
         }
         /*
          * RSET before quit means any messages, that have been marked as deleted by the POP3 server, are unmarked.
          */
-        pop3SessionProperties.put("mail.pop3.rsetbeforequit", "true");
+        properties.put("mail.pop3.rsetbeforequit", "true");
         if (MailProperties.getInstance().getJavaMailProperties() != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
              */
-            pop3SessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
+            properties.putAll(MailProperties.getInstance().getJavaMailProperties());
         }
     }
 }

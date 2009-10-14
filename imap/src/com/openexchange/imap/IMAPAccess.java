@@ -335,13 +335,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession =
-                setConnectProperties(
-                    config.getPort(),
-                    config.isSecure(),
-                    imapConfProps.getImapTimeout(),
-                    imapConfProps.getImapConnectionTimeout(),
-                    imapProps);
+            final javax.mail.Session imapSession = setConnectProperties(
+                config.getPort(),
+                config.isSecure(),
+                imapConfProps.getImapTimeout(),
+                imapConfProps.getImapConnectionTimeout(),
+                imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -417,13 +416,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession =
-                setConnectProperties(
-                    config.getPort(),
-                    config.isSecure(),
-                    imapConfProps.getImapTimeout(),
-                    imapConfProps.getImapConnectionTimeout(),
-                    imapProps);
+            imapSession = setConnectProperties(
+                config.getPort(),
+                config.isSecure(),
+                imapConfProps.getImapTimeout(),
+                imapConfProps.getImapConnectionTimeout(),
+                imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -802,6 +800,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
         }
+        /*
+         * Create new IMAP session from initialized properties
+         */
         return javax.mail.Session.getInstance(imapProps, null);
     }
 

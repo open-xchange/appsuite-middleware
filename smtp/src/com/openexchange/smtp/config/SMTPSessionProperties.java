@@ -107,31 +107,31 @@ public final class SMTPSessionProperties {
      */
     private static void initializeSMTPProperties() {
         /*
-         * Define imap properties
+         * Define SMTP properties
          */
-        MIMEDefaultSession.getDefaultSession();
-        sessionProperties = ((Properties) (System.getProperties().clone()));
+        sessionProperties = MIMEDefaultSession.getDefaultMailProperties();
         /*
          * Set some global JavaMail properties
          */
-        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+        final Properties properties = sessionProperties;
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
         }
-        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
+            properties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
         }
-        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
         }
-        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
         }
-        if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-            sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
             System.getProperties().put(
                 MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
                 MailProperties.getInstance().getDefaultMimeCharset());
@@ -140,7 +140,7 @@ public final class SMTPSessionProperties {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
              */
-            sessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
+            properties.putAll(MailProperties.getInstance().getJavaMailProperties());
         }
     }
 }

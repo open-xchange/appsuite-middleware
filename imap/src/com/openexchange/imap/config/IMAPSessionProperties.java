@@ -107,30 +107,27 @@ public final class IMAPSessionProperties {
      */
     private static void initializeIMAPProperties() {
         /*
-         * Force initialization of default MIME session
-         */
-        MIMEDefaultSession.getDefaultSession();
-        /*
          * Define imap session properties
          */
-        imapSessionProperties = ((Properties) (System.getProperties().clone()));
+        imapSessionProperties = MIMEDefaultSession.getDefaultMailProperties();
         /*
          * Set some global JavaMail properties
          */
-        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
-            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+        final Properties properties = imapSessionProperties;
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
         }
-        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
-            imapSessionProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT)) {
+            properties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
         }
-        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
-            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
         }
-        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
-            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
             System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
         }
         /*
@@ -139,23 +136,34 @@ public final class IMAPSessionProperties {
          * objects are needed, the IMAPStore will provide them from the connection pool, or create them if none are available. When a folder
          * is closed, its IMAP protocol object is returned to the connection pool if the pool is not over capacity.
          */
-        imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+        properties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
         /*
          * A mechanism is provided for timing out idle connection pool IMAP protocol objects. Timed out connections are closed and removed
          * (pruned) from the connection pool.
          */
-        imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
-        if (!imapSessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-            imapSessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
+        properties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
+        if (!properties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+            properties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
             System.getProperties().put(
                 MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
                 MailProperties.getInstance().getDefaultMimeCharset());
         }
-        if (MailProperties.getInstance().getJavaMailProperties() != null) {
+        /*
+         * Maximum size of a message to buffer in memory when appending to an IMAP folder. If not set, or set to -1, there is no maximum and
+         * all messages are buffered. If set to 0, no messages are buffered. If set to (e.g.) 8192, messages of 8K bytes or less are
+         * buffered, larger messages are not buffered. Buffering saves cpu time at the expense of short term memory usage. If you commonly
+         * append very large messages to IMAP mailboxes you might want to set this to a moderate value (1M or less).
+         */
+        properties.put("mail.imap.appendbuffersize", "1048576");
+        /*
+         * Apply configured JavaMail properties from file
+         */
+        final Properties javaMailProperties = MailProperties.getInstance().getJavaMailProperties();
+        if (javaMailProperties != null) {
             /*
              * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
              */
-            imapSessionProperties.putAll(MailProperties.getInstance().getJavaMailProperties());
+            properties.putAll(javaMailProperties);
         }
     }
 }
