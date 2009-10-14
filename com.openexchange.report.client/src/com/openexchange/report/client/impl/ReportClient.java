@@ -79,24 +79,24 @@ import com.openexchange.report.client.jmx.AbstractJMXTools;
 public class ReportClient extends AbstractJMXTools {
 		
 	private static final String REPORT_SERVER_URL = "https://activation.open-xchange.com";
-	
-	private static final String POST_LICENSE_KEYS_KEY = "license_keys";
-	
-	private static final String POST_METADATA_KEY = "client_information";
-	
-	private static final String URL_ENCODING = "UTF-8";
-	
-	private static final char OPT_SEND_ONLY_SHORT = 's';
-	
-    private static final String OPT_SEND_ONLY_LONG = "sendonly";
-    
-	private static final char OPT_DISPLAY_ONLY_SHORT = 'd';
-	
-    private static final String OPT_DISPLAY_ONLY_LONG = "displayonly";
-        
-    private Option displayonly = null;
 
-    private Option sendonly = null;
+	private static final String POST_LICENSE_KEYS_KEY = "license_keys";
+
+	private static final String POST_METADATA_KEY = "client_information";
+
+	private static final String URL_ENCODING = "UTF-8";
+
+	private static final char OPT_SEND_ONLY_SHORT = 's';
+
+	private static final String OPT_SEND_ONLY_LONG = "sendonly";
+
+	private static final char OPT_DISPLAY_ONLY_SHORT = 'd';
+
+	private static final String OPT_DISPLAY_ONLY_LONG = "displayonly";
+
+	private Option displayonly = null;
+
+	private Option sendonly = null;
 
     public static void main(final String args[]) {
         final ReportClient t = new ReportClient();
