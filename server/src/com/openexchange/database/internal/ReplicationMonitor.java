@@ -144,7 +144,7 @@ public final class ReplicationMonitor {
     static Connection checkActualAndFallback(Pools pools, Assignment assign, FetchAndSchema fetch, boolean write) throws DBPoolingException {
         Connection retval;
         try {
-            retval = fetch.get(pools, assign, write, !write);
+            retval = fetch.get(pools, assign, write, false);
             incrementFetched(assign, write);
         } catch (PoolingException e) {
             DBPoolingException e1 = DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
@@ -193,6 +193,8 @@ public final class ReplicationMonitor {
             poolId = assign.getWritePoolId();
             if (poolId != assign.getReadPoolId() && !usedAsRead) {
                 ReplicationMonitor.increaseTransactionCounter(assign, con);
+            } else {
+                LOG.info("Not updating transaction counter.");
             }
         } else {
             poolId = assign.getReadPoolId();
