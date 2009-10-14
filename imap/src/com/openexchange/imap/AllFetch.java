@@ -181,6 +181,12 @@ public final class AllFetch {
 
     private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
 
+    private static final String KEY_FETCH = "FETCH";
+
+    private static final String ITEM_UID = "UID";
+
+    private static final String ITEM_INTERNALDATE = "INTERNALDATE";
+
     /**
      * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date.
      * 
@@ -215,12 +221,11 @@ public final class AllFetch {
                 final List<MailMessage> l = new ArrayList<MailMessage>(len);
                 if (response.isOK()) {
                     final String fullname = imapFolder.getFullName();
-                    final String internaldate = "INTERNALDATE";
                     for (int j = 0; j < len; j++) {
-                        if ("FETCH".equals(((IMAPResponse) r[j]).getKey())) {
+                        if (KEY_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                             final FetchResponse fr = (FetchResponse) r[j];
-                            final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, "UID").uid), fullname);
-                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, internaldate).getDate());
+                            final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, ITEM_UID).uid), fullname);
+                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE).getDate());
                             l.add(m);
                             r[j] = null;
                         }
@@ -337,7 +342,7 @@ public final class AllFetch {
                     final String fullname = imapFolder.getFullName();
                     // final String internaldate = "INTERNALDATE";
                     for (int j = 0; j < len; j++) {
-                        if ("FETCH".equals(((IMAPResponse) r[j]).getKey())) {
+                        if (KEY_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                             final FetchResponse fr = (FetchResponse) r[j];
                             final MailMessage m = new IDMailMessage(null, fullname);
                             final int itemCount = fr.getItemCount();
