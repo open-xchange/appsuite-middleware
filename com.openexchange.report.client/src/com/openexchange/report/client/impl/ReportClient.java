@@ -77,7 +77,7 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.report.client.jmx.AbstractJMXTools;
 
 public class ReportClient extends AbstractJMXTools {
-		
+
 	private static final String REPORT_SERVER_URL = "https://activation.open-xchange.com";
 
 	private static final String POST_LICENSE_KEYS_KEY = "license_keys";
@@ -98,115 +98,115 @@ public class ReportClient extends AbstractJMXTools {
 
 	private Option sendonly = null;
 
-    public static void main(final String args[]) {
-        final ReportClient t = new ReportClient();
-        t.start(args);
-    }
-    
-    public void start(final String args[]) {
-        final AdminParser parser = new AdminParser("report");
-        
-        setOptions(parser);
+	public static void main(final String args[]) {
+		final ReportClient t = new ReportClient();
+		t.start(args);
+	}
 
-        try {
-            parser.ownparse(args);
+	public void start(final String args[]) {
+		final AdminParser parser = new AdminParser("report");
 
-            final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
-            final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
-            HashMap<String, String[]> env = null;
-            
-            if( jmxuser != null && jmxuser.trim().length() > 0 ) {
-                if( jmxpass == null ) {
-                    throw new IllegalOptionValueException(this.jmxpass,null);
-                }
-                env = new HashMap<String, String[]>();
-                String[] creds = new String[]{ jmxuser, jmxpass };
-                env.put(JMXConnector.CREDENTIALS, creds);
-            }
+		setOptions(parser);
 
-            final String host = (String) parser.getOptionValue(this.host);
-            if (null != host) {
-                JMX_HOST = host;
-            }
-            
-            if ((null != parser.getOptionValue(this.sendonly) && (null != parser.getOptionValue(this.displayonly)))) {
-                System.err.println("More than one of the stat options given. Using the default one one only (display and send)");
-                
-                final MBeanServerConnection initConnection = initConnection(false, env);
-                String metadata = sendReport(initConnection);
-                System.out.println(metadata);
-            } else {
-                int count = 0;
-                if (null != parser.getOptionValue(this.sendonly)) {
-                    final MBeanServerConnection initConnection = initConnection(false, env);
-                    sendReport(initConnection);
-                    count++;
-                }
-                if (null != parser.getOptionValue(this.displayonly)) {
-                    if (0 == count) {
-                        final MBeanServerConnection initConnection = initConnection(false, env);
-                        System.out.println(getMetadata(initConnection));
-                    }
-                    count++;
-                }
-                if (0 == count) {
-                	System.err.println("No option selected. Using the default one one (display and send)");
-                	
-                    final MBeanServerConnection initConnection = initConnection(false, env);
-                    String metadata = sendReport(initConnection);
-                    System.out.println(metadata);
-                }
-            }
-        } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(e.getMessage(), parser);
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final MalformedURLException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final IOException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final InstanceNotFoundException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final AttributeNotFoundException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final IntrospectionException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final MBeanException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final ReflectionException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final InterruptedException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final NullPointerException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } finally {
-            closeConnection();
-        }
-    }
-    
+		try {
+			parser.ownparse(args);
+
+			final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
+			final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
+			HashMap<String, String[]> env = null;
+
+			if( jmxuser != null && jmxuser.trim().length() > 0 ) {
+				if( jmxpass == null ) {
+					throw new IllegalOptionValueException(this.jmxpass,null);
+				}
+				env = new HashMap<String, String[]>();
+				String[] creds = new String[]{ jmxuser, jmxpass };
+				env.put(JMXConnector.CREDENTIALS, creds);
+			}
+
+			final String host = (String) parser.getOptionValue(this.host);
+			if (null != host) {
+				JMX_HOST = host;
+			}
+
+			if ((null != parser.getOptionValue(this.sendonly) && (null != parser.getOptionValue(this.displayonly)))) {
+				System.err.println("More than one of the stat options given. Using the default one one only (display and send)");
+
+				final MBeanServerConnection initConnection = initConnection(false, env);
+				String metadata = sendReport(initConnection);
+				System.out.println(metadata);
+			} else {
+				int count = 0;
+				if (null != parser.getOptionValue(this.sendonly)) {
+					final MBeanServerConnection initConnection = initConnection(false, env);
+					sendReport(initConnection);
+					count++;
+				}
+				if (null != parser.getOptionValue(this.displayonly)) {
+					if (0 == count) {
+						final MBeanServerConnection initConnection = initConnection(false, env);
+						System.out.println(getMetadata(initConnection));
+					}
+					count++;
+				}
+				if (0 == count) {
+					System.err.println("No option selected. Using the default one one (display and send)");
+
+					final MBeanServerConnection initConnection = initConnection(false, env);
+					String metadata = sendReport(initConnection);
+					System.out.println(metadata);
+				}
+			}
+		} catch (final IllegalOptionValueException e) {
+			printError("Illegal option value : " + e.getMessage(), parser);
+			parser.printUsage();
+			sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+		} catch (final UnknownOptionException e) {
+			printError("Unrecognized options on the command line: " + e.getMessage(), parser);
+			parser.printUsage();
+			sysexit(SYSEXIT_UNKNOWN_OPTION);
+		} catch (final MissingOptionException e) {
+			printError(e.getMessage(), parser);
+			parser.printUsage();
+			sysexit(SYSEXIT_MISSING_OPTION);
+		} catch (final MalformedURLException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final IOException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final InstanceNotFoundException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final AttributeNotFoundException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final IntrospectionException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final MBeanException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final ReflectionException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final InterruptedException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} catch (final NullPointerException e) {
+			printServerException(e, parser);
+			sysexit(1);
+		} finally {
+			closeConnection();
+		}
+	}
+
 	private void setOptions(AdminParser parser) {
 		super.setOptionsAbstract(parser);
 		this.sendonly = setShortLongOpt(parser, OPT_SEND_ONLY_SHORT, OPT_SEND_ONLY_LONG, "Send report without displaying it (Disables default)", false, NeededQuadState.notneeded);
 		this.displayonly = setShortLongOpt(parser, OPT_DISPLAY_ONLY_SHORT, OPT_DISPLAY_ONLY_LONG, "Display report without sending it (Disables default)", false, NeededQuadState.notneeded);
 	}
-    
+
 	private String sendReport(final MBeanServerConnection mbc) throws MalformedURLException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
 		String metadata = getMetadata(mbc);
 
@@ -244,27 +244,27 @@ public class ReportClient extends AbstractJMXTools {
 
 		return metadata;
 	}
-    
-    private String getLicenseKey() {
-    	return "OX-AS-MK-123456-987";
-    }
-    
-    private String getMetadata(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-    	StringBuffer report = new StringBuffer();
-    	
-    	report.append(getStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor").toString());
-    	report.append(getStats(mbc, "com.openexchange.ajp13.najp.AJPv13ListenerMonitor"));
-    	report.append(getStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor"));
-    	report.append(getStats(mbc, "com.openexchange.api2.MailInterfaceMonitor"));
-    	report.append(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
-        
-    	report.append(getStats(mbc, "com.sun.management.UnixOperatingSystem"));
-    	report.append(getStats(mbc, "sun.management.RuntimeImpl"));
-        
-    	report.append(getStats(mbc, "sun.management.MemoryPoolImpl"));
-    	report.append(getStats(mbc, "sun.management.ThreadImpl"));
-    	
-    	return report.toString();
-    }
-    
+
+	private String getLicenseKey() {
+		return "OX-AS-MK-123456-987";
+	}
+
+	private String getMetadata(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+		StringBuffer report = new StringBuffer();
+
+		report.append(getStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor").toString());
+		report.append(getStats(mbc, "com.openexchange.ajp13.najp.AJPv13ListenerMonitor"));
+		report.append(getStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor"));
+		report.append(getStats(mbc, "com.openexchange.api2.MailInterfaceMonitor"));
+		report.append(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
+
+		report.append(getStats(mbc, "com.sun.management.UnixOperatingSystem"));
+		report.append(getStats(mbc, "sun.management.RuntimeImpl"));
+
+		report.append(getStats(mbc, "sun.management.MemoryPoolImpl"));
+		report.append(getStats(mbc, "sun.management.ThreadImpl"));
+
+		return report.toString();
+	}
+
 }
