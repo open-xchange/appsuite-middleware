@@ -74,7 +74,7 @@ public interface RefusedExecutionBehavior<V> {
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
-     * @return Task's result or <code>null</code>
+     * @return Task's result or {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant if task has been discarded
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */

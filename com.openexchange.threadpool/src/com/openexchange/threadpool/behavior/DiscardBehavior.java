@@ -84,6 +84,7 @@ public final class DiscardBehavior implements RefusedExecutionBehavior<Object> {
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
+     * @return The {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant.
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */

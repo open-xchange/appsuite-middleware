@@ -84,6 +84,7 @@ public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
+     * @return Nothing since a {@link RejectedExecutionException} is immediately thrown.
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */

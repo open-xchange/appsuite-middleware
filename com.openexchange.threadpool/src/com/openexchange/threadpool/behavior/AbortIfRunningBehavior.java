@@ -84,6 +84,7 @@ public final class AbortIfRunningBehavior implements RefusedExecutionBehavior<Ob
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
+     * @return {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant if pool is shut down.
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */

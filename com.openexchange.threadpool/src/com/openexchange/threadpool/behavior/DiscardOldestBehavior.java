@@ -86,6 +86,7 @@ public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Obj
      * 
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
+     * @return Task's result or {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant if pool is shut down.
      * @throws Exception If task execution fails
      * @throws RejectedExecutionException If there is no remedy
      */
