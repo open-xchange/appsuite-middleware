@@ -945,7 +945,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Returns a properly formatted address (RFC 822 syntax) of Unicode characters.
      * 
-     * @return Unicode address string
+     * @return The Unicode address string
      */
     @Override
     public String toUnicodeString() {
@@ -956,7 +956,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
             return new StringBuilder(32).append(quotePhrase(p)).append(" <").append(toIDN(address)).append('>').toString();
         } else if (isGroup() || isSimple()) {
-            return address;
+            return toIDN(address);
         } else {
             return new StringBuilder().append('<').append(toIDN(address)).append('>').toString();
         }
