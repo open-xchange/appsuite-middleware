@@ -71,6 +71,8 @@ public final class MIMEDefaultSession {
 
     private static volatile Session instance;
 
+    private static volatile Properties properties;
+
     /**
      * Applies basic properties to system properties and instantiates the singleton instance of {@link Session}.
      * 
@@ -86,30 +88,51 @@ public final class MIMEDefaultSession {
                      * Define session properties
                      */
                     final Properties systemProperties = System.getProperties();
-                    systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
-                    systemProperties.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
-                    systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
-                    systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
-                    final MailProperties mailProperties = MailProperties.getInstance();
-                    final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
-                    if (null == defaultMimeCharset) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
-                        }
-                        systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
-                    } else {
-                        systemProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
-                    }
-                    if (mailProperties.getJavaMailProperties() != null) {
-                        /*
-                         * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
-                         */
-                        systemProperties.putAll(mailProperties.getJavaMailProperties());
-                    }
+                    systemProperties.putAll(getDefaultMailProperties());
                     instance = tmp = Session.getInstance(((Properties) (systemProperties.clone())), null);
                 }
             }
         }
         return tmp;
     }
+
+    /**
+     * Gets a clone of the default mail properties.
+     * 
+     * @return A clone of the default mail properties
+     */
+    public static Properties getDefaultMailProperties() {
+        Properties p = properties;
+        if (null == properties) {
+            synchronized (MIMEDefaultSession.class) {
+                p = properties;
+                if (null == properties) {
+                    p = properties = new Properties();
+                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
+                    p.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
+                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
+                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+                    final MailProperties mailProperties = MailProperties.getInstance();
+                    final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
+                    if (null == defaultMimeCharset) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
+                        }
+                        p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+                    } else {
+                        p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
+                    }
+                    final Properties javaMailProperties = mailProperties.getJavaMailProperties();
+                    if (javaMailProperties != null) {
+                        /*
+                         * Overwrite current JavaMail-Specific properties with the ones defined in javamail.properties
+                         */
+                        p.putAll(javaMailProperties);
+                    }
+                }
+            }
+        }
+        return (Properties) p.clone();
+    }
+
 }
