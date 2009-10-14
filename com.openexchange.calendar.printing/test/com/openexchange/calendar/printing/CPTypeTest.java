@@ -66,15 +66,15 @@ public class CPTypeTest extends TestCase {
     public void testShouldFindCorrectTypeByTemplateName() {
         CPType evil = CPType.WORKWEEKVIEW;
         for (CPType type : CPType.values()) {
-            checkType(type.getName() + "/" + evil.getName() + "someTemplate", type);
-            checkType(type.getName() + "/" + "someTemplate" + evil.getName(), type);
-            checkType(evil.getName() + "/" + type.getName() + "/" + "someTemplate", type);
-            checkType(type.getName() + "/" + evil.getName() + "/" + "someTemplate", evil);
+            checkType("cp_" + type.getName() + "_" + evil.getName() + "someTemplate", type);
+            checkType("cp_" + type.getName() + "_" + "someTemplate" + evil.getName(), type);
+            checkType("cp_" + evil.getName() + "_" + type.getName() + "_" + "someTemplate", evil);
+            checkType("cp_" + type.getName() + "_" + evil.getName() + "_" + "someTemplate", type);
 
-            checkType(type.getNumber() + "/" + evil.getNumber() + "someTemplate", type);
-            checkType(type.getNumber() + "/" + "someTemplate" + evil.getNumber(), type);
-            checkType(evil.getNumber() + "/" + type.getNumber() + "/" + "someTemplate", type);
-            checkType(type.getNumber() + "/" + evil.getNumber() + "/" + "someTemplate", evil);
+            checkType("cp_" + type.getNumber() + "_" + evil.getNumber() + "someTemplate", type);
+            checkType("cp_" + type.getNumber() + "_" + "someTemplate" + evil.getNumber(), type);
+            checkType("cp_" + evil.getNumber() + "_" + type.getNumber() + "_" + "someTemplate", evil);
+            checkType("cp_" + type.getNumber() + "_" + evil.getNumber() + "_" + "someTemplate", type);
         }
     }
 

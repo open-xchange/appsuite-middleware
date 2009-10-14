@@ -110,7 +110,7 @@ public enum CPType {
     }
 
     public static CPType getByTemplateName(String string) {
-        Matcher matcher = Pattern.compile("([^/]+)/[^/]+$").matcher(string);
+        Matcher matcher = Pattern.compile("cp_([^_]+)_.+$").matcher(string);
         if(! matcher.find())
             return null;
         CPType find;
