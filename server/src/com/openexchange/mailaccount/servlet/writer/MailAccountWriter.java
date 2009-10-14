@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 import com.openexchange.mailaccount.servlet.fields.MailAccountGetSwitch;
 
 /**
- * {@link MailAccountWriter} - TODO Short description of this class' purpose.
+ * {@link MailAccountWriter} - Writes mail account as JSON data.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
