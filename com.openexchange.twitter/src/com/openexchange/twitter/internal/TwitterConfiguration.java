@@ -171,13 +171,7 @@ public final class TwitterConfiguration {
     }
 
     private static boolean isValidVersionString(final String version) {
-        final StringBuilder sb = new StringBuilder(24);
-        sb.append("[\\d\\w]+");
-        sb.append('(');
-        sb.append("[\\.,-]");
-        sb.append("[\\d\\w]+");
-        sb.append(")*");
-        return version != null && Pattern.compile(sb.toString()).matcher(version).matches();
+        return version != null && Pattern.compile("[\\d\\w]+([\\d\\w]+)*").matcher(version).matches();
     }
 
 }
