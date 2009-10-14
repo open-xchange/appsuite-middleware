@@ -145,6 +145,8 @@ import com.openexchange.user.UserService;
  */
 final class MailServletInterfaceImpl extends MailServletInterface {
 
+    private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
+
     private static final MailField[] FIELDS_ID_INFO = new MailField[] { MailField.ID, MailField.FOLDER_ID };
 
     private static final String INBOX_ID = "INBOX";
@@ -387,10 +389,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
             // Fetch messages from source folder
-            final MailMessage[] messages = mailAccess.getMessageStorage().getMessages(
-                sourceFullname,
-                msgUIDs,
-                new MailField[] { MailField.FULL });
+            final MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, FIELDS_FULL);
             // Append them to destination folder
             final String[] maildIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
             // Delete source messages if a move shall be performed
@@ -1525,7 +1524,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             null,
             MailSortField.RECEIVED_DATE,
             OrderDirection.ASC,
-            new MailField[] { MailField.FULL });
+            FIELDS_FULL);
         final IMailMessageStorage destMessageStorage = destAccess.getMessageStorage();
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
