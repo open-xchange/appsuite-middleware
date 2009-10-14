@@ -204,7 +204,8 @@ public interface MailAccount extends Serializable {
     public String getPrimaryAddress();
 
     /**
-     * Gets the personal.
+     * Gets the personal part of primary email address; e.g.<br>
+     * <code>Jane Doe &lt;jane.doe@somewhere.com&gt;</code>
      * 
      * @return The personal
      */
