@@ -213,6 +213,8 @@ public class CPServlet extends PermissionServlet {
      * Modify a calendar according to the given parameters
      */
     public void modifyCalendar(CPCalendar calendar, CPParameters params) {
+        if(true)
+            return;
         if (params.hasTimezone())
             calendar.setTimeZone(params.getTimezone());
         if (params.hasWeekStart())
