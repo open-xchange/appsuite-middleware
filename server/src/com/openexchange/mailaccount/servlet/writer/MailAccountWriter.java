@@ -73,7 +73,7 @@ public final class MailAccountWriter {
     /**
      * Writes specified mail account to a JSON object.
      * 
-     * @param account The mail account to written from mail account's data
+     * @param account The mail account to write
      * @return A JSON object filled with
      * @throws JSONException If writing JSON fails
      */
