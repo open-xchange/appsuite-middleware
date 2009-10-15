@@ -1,2 +1,4 @@
 opt/open-xchange/bundles
+opt/open-xchange/files
+opt/open-xchange/etc/groupware
 opt/open-xchange/etc/groupware/osgi/bundle.d

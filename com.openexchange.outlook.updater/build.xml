@@ -48,6 +48,7 @@
 	<property name="jsonjar" value="json.jar" />
 	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar" />
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+    <property name="configjar" value="com.openexchange.configread.jar"/>
 
 
 	<!-- Classpath -->
@@ -61,6 +62,8 @@
 		<pathelement location="${bundlesdir}/${templatingjar}" />
 
 		<pathelement location="${bundlesdir}/${osgiservicesjar}" />
+
+		<pathelement location="${bundlesdir}/${configjar}" />
 
 		<pathelement location="${bundlesdir}/${serverjar}" />
 
