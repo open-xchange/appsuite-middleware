@@ -166,7 +166,7 @@ public class TestTemplateService extends TestCase {
         SimBuilder infostoreBuilder = new SimBuilder();
         infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "new-template").andReturn(null);
         oxfolderHelperBuilder.expectCall("getGlobalTemplateFolder", session).andReturn(null);
-        infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File");
+        infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File\n");
         
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
@@ -176,7 +176,7 @@ public class TestTemplateService extends TestCase {
         assertNotNull(template);
         StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Test Content In File\n", writer.toString());
+        assertTrue(writer.toString().contains("Test Content In File"));
         
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();
@@ -189,8 +189,8 @@ public class TestTemplateService extends TestCase {
         oxfolderHelperBuilder.expectCall("createPrivateTemplateFolder", session).andReturn(privateTemplateFolder);
             
         SimBuilder infostoreBuilder = new SimBuilder();
-        infostoreBuilder.expectCall("findTemplateInFolder", session, privateTemplateFolder, "new-template").andReturn(null);
-        infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File");
+        infostoreBuilder.expectCall("findTemplateInFolder", session, globalTemplateFolder, "new-template").andReturn(null);
+        infostoreBuilder.expectCall("storeTemplateInFolder", session, privateTemplateFolder, "new-template", "Test Content In File\n");
         
         templateService.setOXFolderHelper(oxfolderHelperBuilder.getSim(OXFolderHelper.class));
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
@@ -200,7 +200,7 @@ public class TestTemplateService extends TestCase {
         assertNotNull(template);
         StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Test Content In File\n", writer.toString());
+        assertTrue(writer.toString().contains("Test Content In File"));
         
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();
