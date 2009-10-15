@@ -1545,7 +1545,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     private static String getFetchCommand(final MailFields fields) {
-        final StringBuilder command = new StringBuilder(128);
+        final StringBuilder command = new StringBuilder(64);
         if (fields.contains(MailField.RECEIVED_DATE)) {
             command.append("INTERNALDATE ");
         }
