@@ -624,8 +624,6 @@ if [ -n "$ADD_LICENSE" ]; then
     fi
 fi
 
-exit
-
 if [ -d ${SERVERCONF} ]; then
     setup_groupware
     echo
