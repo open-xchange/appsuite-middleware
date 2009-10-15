@@ -69,6 +69,7 @@ import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.report.client.configuration.ReportConfiguration;
 
 public class ReportClient extends AbstractJMXTools {
 
@@ -91,6 +92,8 @@ public class ReportClient extends AbstractJMXTools {
 	private Option displayonly = null;
 
 	private Option sendonly = null;
+	
+	private ReportConfiguration reportConfiguration;
 
 	public static void main(final String args[]) {
 		final AbstractJMXTools t = new ReportClient();
@@ -135,11 +138,13 @@ public class ReportClient extends AbstractJMXTools {
 
     private String sendReport(final MBeanServerConnection mbc) throws MalformedURLException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
         String metadata = getMetadata(mbc);
+        
+        reportConfiguration = new ReportConfiguration();
 
         StringBuffer report = new StringBuffer();
         report.append(POST_LICENSE_KEYS_KEY);
         report.append("=");
-        report.append(URLEncoder.encode(getLicenseKey(), URL_ENCODING));
+        report.append(URLEncoder.encode(reportConfiguration.getLicenseKeys(), URL_ENCODING));
         report.append("&");
         report.append(POST_METADATA_KEY);
         report.append("=");
@@ -163,16 +168,12 @@ public class ReportClient extends AbstractJMXTools {
             BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
             String buffer = "";
             while ((buffer = in.readLine()) != null) {
-                System.out.println(buffer);
+                System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
             }
             in.close();
         }
 
         return metadata;
-    }
-
-    private String getLicenseKey() {
-        return "OX-AS-MK-123456-987";
     }
 
     private String getMetadata(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
