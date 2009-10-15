@@ -93,7 +93,7 @@ public final class Management {
      * @param name of the pool.
      * @param pool the pool to monitor.
      */
-    private void registerMBean(final String name, final ConnectionPool pool) {
+    private void registerPool(final String name, final ConnectionPool pool) {
         try {
             if (null != managementService) {
                 ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
@@ -110,10 +110,16 @@ public final class Management {
 
     public void registerMBeans() {
         for (final Map.Entry<Integer, ConnectionPool> entry : pools.entrySet()) {
-            registerMBean(createMBeanName(entry.getKey().intValue()), entry.getValue());
+            registerPool(createMBeanName(entry.getKey().intValue()), entry.getValue());
         }
+        registerOverview();
+    }
+
+    private void registerOverview() {
         try {
-            managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
+            if (null != overview) {
+                managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
+            }
         } catch (ManagementException e) {
             LOG.error(e.getMessage(), e);
         } catch (MalformedObjectNameException e) {
@@ -175,7 +181,7 @@ public final class Management {
     public void addPool(int poolId, ConnectionPool pool) {
         pools.put(I(poolId), pool);
         if (null != managementService) {
-            registerMBean(createMBeanName(poolId), pool);
+            registerPool(createMBeanName(poolId), pool);
         }
     }
 
@@ -188,5 +194,8 @@ public final class Management {
 
     public void addOverview(Overview overview) {
         this.overview = overview;
+        if (null != managementService) {
+            registerOverview();
+        }
     }
 }
