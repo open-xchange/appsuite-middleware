@@ -38,9 +38,9 @@
                                         mysql_real_escape_string($client_information),
                                         mysql_real_escape_string($license_keys)
                                 ))) {
-                                        echo 'activation.open-xchange.com said: could not update report';
+                                        echo 'could not update report';
                                 } else {
-                                        echo 'activation.open-xchange.com said: report successfully updated';
+                                        echo 'report successfully updated';
                                 }
                         } else {
                                 if (!mysql_query(sprintf("INSERT into reports set ".
@@ -52,9 +52,9 @@
                                         mysql_real_escape_string($connection_information),
                                         mysql_real_escape_string($client_information)
                                 ))) {
-                                        echo 'activation.open-xchange.com said: could not create report';
+                                        echo 'could not create report';
                                 } else {
-                                        echo 'activation.open-xchange.com said: report successfully created';
+                                        echo 'report successfully created';
                                 }
                         }
                 } else {
@@ -68,10 +68,10 @@
                                 }
                                 $missing_parameters .= 'client_information';
                         }
-                        echo 'activation.open-xchange.com said: missing parameters: '.$missing_parameters;
+                        echo 'missing parameters: '.$missing_parameters;
                 }
         } else {
-                echo 'activation.open-xchange.com said: database error';
+                echo 'database error';
         }
 
         mysql_close($connect);
@@ -90,4 +90,3 @@
         } 
         
 ?>
-        
