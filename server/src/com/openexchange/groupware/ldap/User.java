@@ -159,27 +159,27 @@ public interface User extends Serializable {
     String getTimeZone();
 
     /**
-	 * Getter for preferredLanguage. The preferred language of the user.
-	 * According to RFC 2798 and 2068 it should be something like de-de, en-gb
-	 * or en.
-	 * 
-	 * @return Preferred Language.
-	 */
-	String getPreferredLanguage();
-
-	/**
-	 * Getter for locale constructed from set preferred language.
-	 * 
-	 * @see #getPreferredLanguage()
-	 * @return Locale
-	 */
-	Locale getLocale();
+     * Getter for preferredLanguage. The preferred language of the user.
+     * According to RFC 2798 and 2068 it should be something like de-de, en-gb
+     * or en.
+     * 
+     * @return Preferred Language.
+     */
+    String getPreferredLanguage();
 
     /**
-	 * Getter for groups.
-	 * 
-	 * @return the groups this user is member of.
-	 */
+     * Getter for locale constructed from set preferred language.
+     * 
+     * @see #getPreferredLanguage()
+     * @return Locale
+     */
+    Locale getLocale();
+
+    /**
+     * Getter for groups.
+     * 
+     * @return the groups this user is member of.
+     */
     int[] getGroups();
 
     /**
@@ -188,6 +188,7 @@ public interface User extends Serializable {
     int getContactId();
 
     /**
+     * TODO a user can have multiple logins.
      * @return the login information of the user.
      */
     String getLoginInfo();
