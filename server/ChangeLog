@@ -1,3 +1,7 @@
+* 2009-10-14 - marcus.klein@open-xchange.com
+
+ - Added information about user module access permission to detail method of reporting JMX interface.
+
 * 2009-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #14655: Conditionally sending CAPABILITY after STARTTLS only for Cyrus that is not sieve draft conform. dovecot is conform.

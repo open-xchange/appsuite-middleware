@@ -49,17 +49,24 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.server.impl.DBPool;
@@ -109,6 +116,17 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         } catch (final OXException e) {
             throw new UserConfigurationException(e);
         } catch (final SQLException e) {
+            throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
+        }
+    }
+
+    @Override
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+        try {
+            return loadUserConfiguration(ctx, null, users);
+        } catch (DBPoolingException e) {
+            throw new UserConfigurationException(e);
+        } catch (SQLException e) {
             throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         }
     }
@@ -372,6 +390,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
+    private static final String LOAD_SOME_USER_CONFIGURATIONS = "SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (";
     private static final String COUNT_USERS_BY_PERMISSION = "SELECT COUNT(permissions) FROM user_configuration WHERE cid = ? AND permissions = ?";
 
     /**
@@ -419,6 +438,42 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
         }
+    }
+
+    public static UserConfiguration[] loadUserConfiguration(Context ctx, Connection conArg, User[] users) throws DBPoolingException, SQLException {
+        if (0 == users.length) {
+            return new UserConfiguration[0];
+        }
+        final Connection con;
+        final boolean closeCon;
+        if (null == conArg) {
+            con = DBPool.pickup(ctx);
+            closeCon = true;
+        } else {
+            con = conArg;
+            closeCon = false;
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
+        try {
+            stmt = con.prepareStatement(getIN(LOAD_SOME_USER_CONFIGURATIONS, users.length));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            Map<Integer, User> userMap = new HashMap<Integer, User>(users.length, 1);
+            for (User user : users) {
+                stmt.setInt(pos++, user.getId());
+                userMap.put(I(user.getId()), user);
+            }
+            result = stmt.executeQuery();
+            while (result.next()) {
+                User user = userMap.get(I(result.getInt(1)));
+                retval.add(new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx));
+            }
+        } finally {
+            closeResources(result, stmt, closeCon ? con : null, true, ctx);
+        }
+        return retval.toArray(new UserConfiguration[retval.size()]);
     }
 
     /*-

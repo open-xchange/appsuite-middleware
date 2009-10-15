@@ -50,6 +50,7 @@
 package com.openexchange.userconf.internal;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -79,6 +80,10 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
 
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws UserConfigurationException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
+    }
+
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+        return UserConfigurationStorage.getInstance().getUserConfiguration(ctx, users);
     }
 
     public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {

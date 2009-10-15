@@ -112,6 +112,13 @@ public abstract class Refresher<T extends Serializable> {
         return service.getCache(regionName);
     }
 
+    protected void cache(T obj) throws CacheException {
+        final Cache cache = getCache();
+        if (null != cache) {
+            cache.put(key, obj);
+        }
+    }
+
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
      * @throws AbstractOXException if loading or putting into cache fails.

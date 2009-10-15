@@ -69,7 +69,7 @@ public interface UserService {
      * @return The unique identifier of the user.
      * @throws UserException if an error occurs while searching the user or the user doesn't exist.
      */
-    public int getUserId(String loginInfo, Context context) throws UserException;
+    int getUserId(String loginInfo, Context context) throws UserException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
@@ -79,7 +79,15 @@ public interface UserService {
      * @param context The context.
      * @throws UserException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
-    public User getUser(int uid, Context context) throws UserException;
+    User getUser(int uid, Context context) throws UserException;
+
+    /**
+     * Reads all user for the given context. Use this method if you need a lot of users from that context because this method uses
+     * optimized storage loading mechanisms to get all user information from the storage fastly.
+     * @param ctx the context
+     * @return an array with all users from the given context.
+     */
+    User[] getUser(Context ctx) throws UserException;
 
     /**
      * This method updates some values of a user.
@@ -88,7 +96,7 @@ public interface UserService {
      * @param context The context.
      * @throws UserException if an error occurs.
      */
-    public void updateUser(User user, Context context) throws UserException;
+    void updateUser(User user, Context context) throws UserException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
@@ -98,7 +106,7 @@ public interface UserService {
      * @return a User object if the user was found by its email address or <code>null</code> if no user could be found.
      * @throws UserException if an error occurs.
      */
-    public User searchUser(String email, Context context) throws UserException;
+    User searchUser(String email, Context context) throws UserException;
 
     /**
      * Returns an array with all user identifier of the context.
@@ -107,7 +115,7 @@ public interface UserService {
      * @return an array with all user identifier of the context.
      * @throws UserException if generating this list fails.
      */
-    public int[] listAllUser(Context context) throws UserException;
+    int[] listAllUser(Context context) throws UserException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
@@ -117,7 +125,7 @@ public interface UserService {
      * @return The unique identifiers of the users.
      * @throws UserException if an error occurs during the search.
      */
-    public int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
+    int[] resolveIMAPLogin(String imapLogin, Context context) throws UserException;
 
     /**
      * Searches users who where modified later than the given date.
@@ -127,7 +135,7 @@ public interface UserService {
      * @return a string array with the uids of the matching user.
      * @throws UserException if an error occurs during the search.
      */
-    public int[] listModifiedUser(Date modifiedSince, Context context) throws UserException;
+    int[] listModifiedUser(Date modifiedSince, Context context) throws UserException;
 
     /**
      * Removes a user from the cache if caching is used.
@@ -136,7 +144,7 @@ public interface UserService {
      * @param userId unique identifier of the user.
      * @throws UserException if removing gives an exception.
      */
-    public void invalidateUser(Context ctx, int userId) throws UserException;
+    void invalidateUser(Context ctx, int userId) throws UserException;
 
     /**
      * Authenticates the given password against the given user object.
@@ -146,6 +154,6 @@ public interface UserService {
      * @return <code>true</code> if the password matches.
      * @throws UserException if password check mechanism has problems.
      */
-    public boolean authenticate(User user, String password) throws UserException;
+    boolean authenticate(User user, String password) throws UserException;
 
 }

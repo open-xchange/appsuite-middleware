@@ -71,12 +71,16 @@ public final class UserServiceImpl implements UserService {
         super();
     }
 
-    public User getUser(final int uid, final Context context) throws UserException {
+    public User getUser(int uid, Context context) throws UserException {
         try {
             return UserStorage.getInstance().getUser(uid, context);
         } catch (final LdapException e) {
             throw new UserException(e);
         }
+    }
+
+    public User[] getUser(Context context) throws UserException {
+        return UserStorage.getInstance().getUser(context);
     }
 
     public int getUserId(final String loginInfo, final Context context) throws UserException {

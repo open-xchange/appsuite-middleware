@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -59,6 +61,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -192,6 +195,36 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             }
         }
         return (UserConfiguration) userConfig.clone();
+    }
+
+    @Override
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+        if (cache == null) {
+            return getFallback().getUserConfiguration(ctx, users);
+        }
+        List<User> toLoad = new ArrayList<User>(users.length);
+        List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
+        for (User user : users) {
+            UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(user.getId(), ctx));
+            if (null == userConfig) {
+                toLoad.add(user);
+            } else {
+                retval.add((UserConfiguration) userConfig.clone());
+            }
+        }
+        UserConfiguration[] userConfigs = delegateStorage.getUserConfiguration(ctx, toLoad.toArray(new User[toLoad.size()]));
+        for (UserConfiguration userConfig : userConfigs) {
+            cacheWriteLock.lock();
+            try {
+                cache.put(getKey(userConfig.getUserId(), ctx), userConfig);
+            } catch (CacheException e) {
+                throw new UserConfigurationException(e);
+            } finally {
+                cacheWriteLock.unlock();
+            }
+            retval.add((UserConfiguration) userConfig.clone());
+        }
+        return retval.toArray(new UserConfiguration[retval.size()]);
     }
 
     @Override
