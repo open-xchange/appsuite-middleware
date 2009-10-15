@@ -67,7 +67,7 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCode = exitCode;
             }
         };
-        statisticTools.start(new String[]{"-x"});
+        statisticTools.start(new String[]{"-x"}, "showruntimestats");
         assertTrue("Expected 0 as return code!",0==this.returnCode);
     }
 
@@ -79,7 +79,7 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCode = exitCode;
             }
         };
-        statisticTools.start(new String[]{"-x", "-A"});
+        statisticTools.start(new String[]{"-x", "-A"}, "showruntimestats");
         assertTrue("Expected 0 as return code!",0==this.returnCode);
     }
     
