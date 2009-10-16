@@ -49,6 +49,9 @@
 
 package com.openexchange.imap;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -494,6 +497,50 @@ public final class AllFetch {
          * Both references are not null
          */
         return null;
+    }
+
+    static void applyTrace(final com.sun.mail.iap.Protocol protocol, final boolean trace) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
+        traceInputField.setAccessible(true);
+        /*
+         * Fetch trace input stream
+         */
+        final com.sun.mail.util.TraceInputStream tracer = (com.sun.mail.util.TraceInputStream) traceInputField.get(protocol);
+        tracer.setTrace(trace);
+        /*
+         * Fetch tracer's stream
+         */
+        final Field outField = com.sun.mail.util.TraceInputStream.class.getDeclaredField("traceOut");
+        outField.setAccessible(true);
+        /*
+         * Backup old
+         */
+        final java.io.OutputStream oldOut = (java.io.OutputStream) outField.get(tracer);
+        /*
+         * Set new
+         */
+        outField.set(tracer, new SBOutputStream());
+
+    }
+
+    private static final class SBOutputStream extends OutputStream {
+
+        private final StringBuilder sb;
+
+        public SBOutputStream() {
+            super();
+            sb = new StringBuilder(1024);
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            sb.append((char) (b & 0xFF));
+        }
+
+        public String getTrace() {
+            return sb.toString();
+        }
+
     }
 
 }
