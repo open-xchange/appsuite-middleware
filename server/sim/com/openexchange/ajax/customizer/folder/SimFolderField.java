@@ -49,34 +49,53 @@
 
 package com.openexchange.ajax.customizer.folder;
 
-import org.json.JSONWriter;
-import com.openexchange.ajax.customizer.CustomizerFactory;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link FolderGetCustomizerAdapter}
+ * {@link SimFolderField}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class FolderGetCustomizerAdapter<T extends FolderGetCustomizerAdapter<T>> extends FolderReadCustomizerAdapter<T> implements FolderGetCustomizer {
+public class SimFolderField implements AdditionalFolderField {
 
-    protected int folderId;
-    protected String folderIdentifier;
+    private int columnId;
+    private String columnName;
+    private Object value;
+    private Object jsonValue;
 
-    public void appendData(JSONWriter jsonwriter, FolderObject fo) {
-
+    public int getColumnID() {
+        return columnId;
     }
 
-    public void setFolderId(int folderId) {
-        this.folderId = folderId;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setFolderIdentifier(String folderIdentifier) {
-        this.folderIdentifier = folderIdentifier;
+    public Object getValue(FolderObject folder, ServerSession session) {
+        return value;
     }
 
- 
+    public Object renderJSON(Object value) {
+        return jsonValue;
+    }
+    
+    public void setColumnId(int columnId) {
+        this.columnId = columnId;
+    }
+    
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+    
+    public void setJsonValue(Object jsonValue) {
+        this.jsonValue = jsonValue;
+    }
 
 }

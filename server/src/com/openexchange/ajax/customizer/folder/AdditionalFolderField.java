@@ -49,13 +49,21 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link FolderRootCustomizerAdapter}
+ * {@link AdditionalFolderField}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class FolderRootCustomizerAdapter<T extends FolderRootCustomizerAdapter<T>> extends FolderListCustomizerAdapter<T> implements FolderRootCustomizer {
-
+public interface AdditionalFolderField {
+    
+    public int getColumnID();
+    public String getColumnName();
+    public Object getValue(FolderObject folder, ServerSession session);
+    public Object renderJSON(Object value);
+    
 }

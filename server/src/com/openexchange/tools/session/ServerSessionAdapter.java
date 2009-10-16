@@ -84,6 +84,25 @@ public class ServerSessionAdapter implements ServerSession {
             this.user = user;
         }
     }
+    
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     * 
+     * @param session The delegate session
+     * @param ctx The session's context object
+     * @param user The session's user object
+     */
+    public ServerSessionAdapter(final Session session, final Context ctx, final User user, UserConfiguration userConfiguration) {
+        super();
+        if (ServerSession.class.isInstance(session)) {
+            this.serverSession = (ServerSession) session;
+        } else {
+            this.session = session;
+            this.ctx = ctx;
+            this.user = user;
+            this.userConfiguration = userConfiguration;
+        }
+    }
 
     public int getContextId() {
         return session().getContextId();

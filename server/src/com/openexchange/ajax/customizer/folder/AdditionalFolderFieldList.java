@@ -47,62 +47,95 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder.multi;
+package com.openexchange.ajax.customizer.folder;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.customizer.CustomizerFactory;
-import com.openexchange.ajax.customizer.folder.FolderGetCustomizer;
-import com.openexchange.ajax.customizer.folder.FolderReadCustomizer;
-import com.openexchange.ajax.helper.ParamContainer;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link MultiReadCustomizer}
+ * {@link AdditionalFolderFieldList}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public abstract class MultiReadCustomizer<T extends FolderReadCustomizer> extends MultiCustomizer<T> implements FolderReadCustomizer {
+public class AdditionalFolderFieldList {
+    // TODO: Track service ranking and allow fields to overwrite other fields.
 
-    public void customizeResponse(Response response) {
-        for(FolderReadCustomizer customizer : customizers) {
-            customizer.customizeResponse(response);
+    private static final Log LOG = LogFactory.getLog(AdditionalFolderFieldList.class);
+    
+    private Map<Integer, AdditionalFolderField> byColId = new HashMap<Integer, AdditionalFolderField>();
+    private Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
+    
+    public synchronized void addField(AdditionalFolderField field) {
+        if(byColId.containsKey(field.getColumnID()) || byName.containsKey(field.getColumnName())) {
+            warnAboutCollision(field);
+            return;
         }
+        byColId.put(field.getColumnID(), field);
+        byName.put(field.getColumnName(), field);
     }
 
-    public void setColumns(int[] columns) {
-        for(FolderReadCustomizer customizer : customizers) {
-            customizer.setColumns(columns);
-        }
+    private void warnAboutCollision(AdditionalFolderField field) {
+        LOG.warn("Collision in folder fields. Field '"+field.getColumnName()+"' : "+field.getColumnID()+" has already been taken. Ignoring second service.");
     }
 
-    public void setContext(Context ctx) {
-        for(FolderReadCustomizer customizer : customizers) {
-            customizer.setContext(ctx);
+    public AdditionalFolderField get(int col) {
+        if(!knows(col)) {
+            return new NullField(col);
         }
+        return byColId.get(col);
     }
 
-    public void setParameters(ParamContainer params) throws AbstractOXException {
-        for(FolderReadCustomizer customizer : customizers) {
-            customizer.setParameters(params);
-        }
+    public AdditionalFolderField get(String col) {
+        return byName.get(col);
+    }
+
+    public boolean knows(int col) {
+        return byColId.containsKey(col);
     }
     
-    public T copyAsNeeded(ServerSession session) {
-        MultiReadCustomizer<T> copy = newInstance();
-        for(T customizer : customizers) {
-            if(CustomizerFactory.class.isInstance(customizer)) {
-                copy.addCustomizer((T) ((CustomizerFactory) customizer).newInstance(session));
-            } else {
-                copy.addCustomizer(customizer);
-            }
-        }
-        return (T) copy;
+    public boolean knows(String col) {
+        return byName.containsKey(col);
     }
 
-    protected abstract MultiReadCustomizer<T> newInstance();
+    public synchronized void remove(int colId) {
+        if(!knows(colId)) {
+            return;
+        }
+        AdditionalFolderField f = get(colId);
+        byName.remove(f.getColumnName());
+        byColId.remove(colId);
+    }
+    
+    private static final class NullField implements AdditionalFolderField {
+        
+        private int columnId;
+        
+        private NullField(int columnId) {
+            super();
+            this.columnId = columnId;
+        }
 
+        public int getColumnID() {
+            return columnId;
+        }
+
+        public String getColumnName() {
+            return null;
+        }
+
+        public Object getValue(FolderObject folder, ServerSession session) {
+            return null;
+        }
+
+        public Object renderJSON(Object value) {
+            return null;
+        }
+        
+    }
 }

@@ -85,7 +85,6 @@ Import-Package: com.davekoelle,
  org.w3c.dom
 Export-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
- com.openexchange.ajax.customizer,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.helper,

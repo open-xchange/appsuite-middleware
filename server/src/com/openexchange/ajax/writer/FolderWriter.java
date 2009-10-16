@@ -61,8 +61,8 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.customizer.folder.FolderGetCustomizer;
-import com.openexchange.ajax.customizer.folder.FolderListCustomizer;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -80,6 +80,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * FolderWriter
@@ -97,6 +98,10 @@ public final class FolderWriter extends DataWriter {
     final UserConfiguration userConfig;
 
     final Context ctx;
+    
+    final ServerSession session;
+    
+    private AdditionalFolderFieldList fields = null;
 
     /**
      * {@link FolderFieldWriter} - A writer for folder fields
@@ -339,11 +344,13 @@ public final class FolderWriter extends DataWriter {
      * @param ctx The session's context
      * @param timeZone The time zone identifier
      */
-    public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone) {
+    public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, AdditionalFolderFieldList fields) {
         super(null == timeZone ? getTimeZoneBySession(session, ctx) : getTimeZone(timeZone), jw);
         this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         this.ctx = ctx;
+        this.fields = fields;
+        this.session = new ServerSessionAdapter(session, ctx, user, userConfig);
     }
 
     private static TimeZone getTimeZoneBySession(final Session session, final Context ctx) {
@@ -362,8 +369,8 @@ public final class FolderWriter extends DataWriter {
      * @param locale The user's locale to get appropriate folder name used in display
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsObject(final FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
-        writeOXFolderFieldsAsObject(customizer, fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
+    public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
+        writeOXFolderFieldsAsObject(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
     }
 
     /**
@@ -376,7 +383,7 @@ public final class FolderWriter extends DataWriter {
      * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsObject(final FolderGetCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
+    public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
         try {
             final int[] fs;
             if (fields == null) {
@@ -391,7 +398,6 @@ public final class FolderWriter extends DataWriter {
                 for (int i = 0; i < fs.length; i++) {
                     writers[i].writeField(jsonwriter, fo, true, name, hasSubfolders);
                 }
-                customizer.appendData(jsonwriter, fo);
             } finally {
                 jsonwriter.endObject();
             }
@@ -413,8 +419,8 @@ public final class FolderWriter extends DataWriter {
      * @param locale The user's locale to get appropriate folder name used in display
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsArray(final FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
-        writeOXFolderFieldsAsArray(customizer, fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
+    public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final Locale locale) throws OXException {
+        writeOXFolderFieldsAsArray(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
     }
 
     /**
@@ -427,7 +433,7 @@ public final class FolderWriter extends DataWriter {
      * @param hasSubfolders <code>1</code> to indicate subfolders, <code>0</code> to indicate no subfolders, or <code>-1</code> to omit
      * @throws OXException If an OX error occurs
      */
-    public void writeOXFolderFieldsAsArray(final FolderListCustomizer customizer, final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
+    public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final String name, final int hasSubfolders) throws OXException {
         try {
             final FolderFieldWriter[] writers = getFolderFieldWriter(fields);
             jsonwriter.array();
@@ -435,7 +441,6 @@ public final class FolderWriter extends DataWriter {
                 for (int i = 0; i < fields.length; i++) {
                     writers[i].writeField(jsonwriter, fo, false, name, hasSubfolders);
                 }
-                customizer.appendData(jsonwriter, fo);
             } finally {
                 jsonwriter.endArray();
             }
@@ -663,17 +668,23 @@ public final class FolderWriter extends DataWriter {
                     };
                     break Fields;
                 default:
-                    if (LOG.isWarnEnabled()) {
+                    
+                    if (!this.fields.knows(field) && LOG.isWarnEnabled()) {
                         LOG.warn("Unknown folder field: " + field);
                     }
+                    
+                    final AdditionalFolderField folderField = this.fields.get(field);
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
                         public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                             if (withKey) {
-                                return;
+                                if(folderField.getColumnName() == null) {
+                                    return;
+                                }
+                                jsonwriter.key(folderField.getColumnName());
                             }
-                            jsonwriter.value(JSONObject.NULL);
+                            jsonwriter.value(folderField.renderJSON(folderField.getValue(fo, session)));
                         }
                     };
                 }

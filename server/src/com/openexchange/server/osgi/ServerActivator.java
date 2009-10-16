@@ -68,8 +68,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
-import com.openexchange.ajax.customizer.folder.multi.MultiResponseCustomizer;
-import com.openexchange.ajax.customizer.folder.osgi.FolderCustomizerTracker;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.api2.RdbContactInterfaceFactory;
@@ -229,8 +229,6 @@ public final class ServerActivator extends DeferredActivator {
 
     private Boolean adminBundleInstalled;
 
-    private FolderCustomizerTracker folderCustomizerTracker;
-
     /**
      * Initializes a new {@link ServerActivator}
      */
@@ -389,9 +387,6 @@ public final class ServerActivator extends DeferredActivator {
             FolderDeleteListenerService.class.getName(),
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
         
-        final MultiResponseCustomizer multiCustomizer = new MultiResponseCustomizer();
-        folderCustomizerTracker = new FolderCustomizerTracker(context, multiCustomizer);
-        Folder.setFolderResponseCustomizer(multiCustomizer);
         
         /*
          * Register EventHandler
@@ -464,6 +459,10 @@ public final class ServerActivator extends DeferredActivator {
                 PublicationTargetDiscoveryService.class.getName(),
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
+            // Folder Fields
+            
+            serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
+            
             // Start up server the usual way
             starter.start();
         }
@@ -471,7 +470,6 @@ public final class ServerActivator extends DeferredActivator {
         for (final ServiceTracker tracker : serviceTrackerList) {
             tracker.open();
         }
-        folderCustomizerTracker.open();
         // Register server's services
         registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
         registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
@@ -480,11 +478,7 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(UserService.class.getName(), ServerServiceRegistry.getInstance().getService(
             UserService.class,
             true), null));
-        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        registrationList.add(context.registerService(
-            UserConfigurationService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class),
-            null));
+        registrationList.add(context.registerService(UserConfigurationService.class.getName(), new UserConfigurationServiceImpl(), null));
         registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ContextService.class,
             true), null));
@@ -639,7 +633,6 @@ public final class ServerActivator extends DeferredActivator {
                 tracker.close();
             }
             serviceTrackerList.clear();
-            folderCustomizerTracker.close();
             ServerRequestHandlerRegistry.getInstance().clearRegistry();
             /*
              * Unregister EventHandler

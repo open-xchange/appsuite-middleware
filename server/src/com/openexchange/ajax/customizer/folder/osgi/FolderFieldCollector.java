@@ -47,24 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
+package com.openexchange.ajax.customizer.folder.osgi;
 
-import org.json.JSONWriter;
-import com.openexchange.groupware.container.FolderObject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 
 
 /**
- * {@link FolderGetCustomizer}
+ * {@link FolderFieldCollector}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface FolderGetCustomizer extends FolderReadCustomizer {
+public class FolderFieldCollector implements ServiceTrackerCustomizer {
 
-    void setFolderIdentifier(String folderIdentifier);
+    private AdditionalFolderFieldList list;
+    private BundleContext context;
+    
+    public FolderFieldCollector(BundleContext context, AdditionalFolderFieldList list) {
+        super();
+        this.list = list;
+        this.context = context;
+    }
 
-    void setFolderId(int folderId);
+    public Object addingService(ServiceReference reference) {
+        AdditionalFolderField field = (AdditionalFolderField) context.getService(reference);
+        list.addField(field);
+        return field;
+    }
 
-    void appendData(JSONWriter jsonwriter, FolderObject fo);
+    public void modifiedService(ServiceReference reference, Object service) {
+
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        AdditionalFolderField field = (AdditionalFolderField) service;
+        list.remove(field.getColumnID());
+    }
 
 }
