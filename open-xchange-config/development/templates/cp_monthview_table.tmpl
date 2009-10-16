@@ -28,11 +28,16 @@
    	  </tr>
    	  
    	  </#if>
-      <#if info.position == appointment_index && info.type == 1>
+     <#if info.position == appointment_index && info.type == 11 && info.additionalInformation == 2>
+        <td class="filler" />
+     </#if>
+     
+   	  
+      <#if info.position == appointment_index && info.type == 2>
       <tr>
          <td colspan="7">
             <h2 class="weekNumber">
-               Calendar week ${info.additionalInformation}
+               <@month info.additionalInformation />
             </h2>
          </td>
       </tr>
