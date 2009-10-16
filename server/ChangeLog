@@ -1,3 +1,7 @@
+* 2009-10-16 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14653: No notification mails for pseudo changes.
+
 * 2009-10-14 - marcus.klein@open-xchange.com
 
  - Added information about user module access permission to detail method of reporting JMX interface.
