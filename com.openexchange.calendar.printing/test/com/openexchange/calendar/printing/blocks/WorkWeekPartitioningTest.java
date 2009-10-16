@@ -327,6 +327,7 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
     }
 
     public void testShouldAlwaysContainFiveDaybreaksBetweenWeekBreaksOverAWholeFuckingYear(){
+        calendar.set(Calendar.YEAR, 2007); //1.1.2007 is a Monday. Other years might not have 5 work days on the first week.
         calendar.set(Calendar.DAY_OF_YEAR, 1);
         CPAppointment app1 = new CPAppointment();
         app1.setStartDate(calendar.getTime());
