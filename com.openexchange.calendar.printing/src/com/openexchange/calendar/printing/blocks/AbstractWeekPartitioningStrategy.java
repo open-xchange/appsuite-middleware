@@ -100,12 +100,14 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     }
 
     protected void addWeekBreak(CPPartition blocks, int pointer, Date day) {
+        if (lastWeek == getWeekOfYear(day).intValue())
+            return;
         CPFormattingInformation weekBreak = new CPFormattingInformation(
             pointer,
             AbstractWeekPartitioningStrategy.WEEKBREAK,
             getWeekOfYear(day));
-        if (lastWeek != getWeekOfYear(day).intValue())
-            blocks.addFormattingInformation(weekBreak);
+        blocks.addFormattingInformation(weekBreak);
+        fillUpBeginningOfWorkWeek(blocks.getFormattingInformation(), day, pointer);
         lastWeek = getWeekOfYear(day).intValue();
     }
 
@@ -177,7 +179,37 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
         else
             insertionPoint++; // insert after the month/year break
         for (int i = 0; i < fillersToAdd; i++)
-            info.add(insertionPoint, new CPFormattingInformation(position, FILLDAY));
+            info.add(insertionPoint, new CPFormattingInformation(position, FILLDAY, Integer.valueOf(MONTHBREAK)));
     }
 
+    protected void fillUpBeginningOfWorkWeek(List<CPFormattingInformation> info, Date day, int position) {
+        if(!isInWorkWeek(day))
+            return;
+        CPCalendar cal = getCalendar();
+        cal.setTime(day);
+        int dayInYear = cal.get(Calendar.DAY_OF_YEAR);
+        
+        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWorkWeek());
+        Date firstDayOfWorkWeek = cal.getTime();
+        int firstDayOfWorkWeekInMonthInYear = cal.get(Calendar.DAY_OF_YEAR);
+
+        int fillersToAdd = 0;
+        if (isMissingDaysInbetween(firstDayOfWorkWeek, day))
+            fillersToAdd = getMissingDaysInbetween(firstDayOfWorkWeek, day).size();
+        if (dayInYear!= firstDayOfWorkWeekInMonthInYear)
+            fillersToAdd++; // takes care of the one day not covered by "inbetween"
+
+        int insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, WEEKBREAK));
+        if (insertionPoint == -1)
+            insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, MONTHBREAK));
+        if (insertionPoint == -1)
+            insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, YEARBREAK));
+        if (insertionPoint == -1)
+            insertionPoint = 0;
+        else
+            insertionPoint++; // insert after the week/month/year break
+
+        for (int i = 0; i < fillersToAdd; i++)
+            info.add(insertionPoint, new CPFormattingInformation(position, FILLDAY, Integer.valueOf(WEEKBREAK)));
+    }
 }
