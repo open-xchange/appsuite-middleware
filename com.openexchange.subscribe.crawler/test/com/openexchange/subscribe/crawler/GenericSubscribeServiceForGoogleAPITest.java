@@ -57,7 +57,7 @@ import org.ho.yaml.Yaml;
 
 /**
  * {@link GenericSubscribeServiceForGoogleAPITest}
- *
+ * Preferred way to crawl Google.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForGoogleAPITest extends GenericSubscribeServiceTestHelpers {
