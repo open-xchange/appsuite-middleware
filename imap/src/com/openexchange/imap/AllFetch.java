@@ -300,17 +300,55 @@ public final class AllFetch {
     }
 
     /**
+     * The low cost fetch item enumeration.
+     */
+    public static enum LowCostItem {
+        INTERNALDATE("INTERNALDATE"), UID("UID"), FLAGS("FLAGS"), BODYSTRUCTURE("BODYSTRUCTURE"), SIZE("RFC822.SIZE");
+
+        private final String item;
+
+        private LowCostItem(final String item) {
+            this.item = item;
+        }
+
+        /**
+         * Gets the Fetch item string.
+         * 
+         * @return The Fetch item string
+         */
+        public String getItem() {
+            return item;
+        }
+
+    }
+
+    /**
+     * Gets the fetch items' string representation; e.g <code>"UID INTERNALDATE"</code>.
+     * 
+     * @param items The items
+     * @return The string representation
+     */
+    public static String getFetchCommand(final LowCostItem[] items) {
+        final StringBuilder command = new StringBuilder(64);
+        command.append(items[0].getItem());
+        for (int i = 1; i < items.length; i++) {
+            command.append(' ').append(items[i].getItem());
+        }
+        return command.toString();
+    }
+
+    /**
      * Fetches all messages from given IMAP folder and pre-fills instances with given low-cost fetch item list.
      * <p>
      * Since returned instances are sorted, the low-cost fetch item list must contain <code>"INTERNALDATE"</code>.
      * 
      * @param imapFolder The IMAP folder
-     * @param lowCostItems The low-cost fetch item list; e.g <code>"UID INTERNALDATE"</code>
+     * @param items The low-cost fetch items
      * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
      * @return All messages from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final String lowCostItems, final boolean ascending) throws MessagingException {
+    public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final LowCostItem[] items, final boolean ascending) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
@@ -331,7 +369,11 @@ public final class AllFetch {
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
                  */
-                final String command = new StringBuilder(12 + lowCostItems.length()).append("FETCH 1:* (").append(lowCostItems).append(')').toString();
+                final String command;
+                {
+                    final String lowCostItems = getFetchCommand(items);
+                    command = new StringBuilder(12 + lowCostItems.length()).append("FETCH 1:* (").append(lowCostItems).append(')').toString();
+                }
                 final Response[] r = p.command(command, null);
                 final int len = r.length - 1;
                 final Response response = r[len];
