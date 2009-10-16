@@ -53,9 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
 import com.openexchange.mail.MailException;
@@ -109,69 +107,109 @@ public final class AllFetch {
         public abstract void handleItem(final Item item, final MailMessage m, final org.apache.commons.logging.Log logger) throws MailException;
     }
 
-    private static final FetchItemHandler UID_ITEM_HANDLER = new FetchItemHandler() {
-
-        public void handleItem(final Item item, final MailMessage m, final Log logger) {
-            m.setMailId(String.valueOf(((UID) item).uid));
-        }
-    };
-
-    private static final FetchItemHandler INTERNALDATE_ITEM_HANDLER = new FetchItemHandler() {
-
-        public void handleItem(final Item item, final MailMessage m, final Log logger) {
-            m.setReceivedDate(((INTERNALDATE) item).getDate());
-        }
-    };
-
-    private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
-
-        public void handleItem(final Item item, final MailMessage m, final Log logger) throws MailException {
-            MIMEMessageConverter.parseFlags((FLAGS) item, m);
-        }
-    };
-
-    private static final FetchItemHandler SIZE_ITEM_HANDLER = new FetchItemHandler() {
-
-        public void handleItem(final Item item, final MailMessage m, final Log logger) {
-            m.setSize(((RFC822SIZE) item).size);
-        }
-    };
-
-    private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
-
-        public void handleItem(final Item item, final MailMessage m, final Log logger) throws MailException {
-            final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final StringBuilder sb = new StringBuilder();
-            sb.append(bs.type).append('/').append(bs.subtype);
-            if (bs.cParams != null) {
-                sb.append(bs.cParams);
-            }
-            try {
-                m.setContentType(new ContentType(sb.toString()));
-            } catch (final MailException e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(e.getMessage(), e);
-                }
-                m.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
-            }
-            m.setHasAttachment(bs.isMulti() && ("MIXED".equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
-        }
-    };
-
     /**
-     * The map of {@link FetchItemHandler}s.
+     * The low cost fetch item enumeration.
      */
-    static final Map<Class<? extends Item>, FetchItemHandler> MAP;
+    public static enum LowCostItem {
+        /**
+         * INTERNALDATE
+         */
+        INTERNALDATE("INTERNALDATE", INTERNALDATE.class, new FetchItemHandler() {
 
-    static {
-        final Map<Class<? extends Item>, FetchItemHandler> m = new HashMap<Class<? extends Item>, FetchItemHandler>(6);
-        m.put(UID.class, UID_ITEM_HANDLER);
-        m.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        m.put(FLAGS.class, FLAGS_ITEM_HANDLER);
-        m.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        m.put(BODYSTRUCTURE.class, BODYSTRUCTURE_ITEM_HANDLER);
-        m.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        MAP = Collections.unmodifiableMap(m);
+            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+                m.setReceivedDate(((INTERNALDATE) item).getDate());
+            }
+        }),
+        /**
+         * UID
+         */
+        UID("UID", UID.class, new FetchItemHandler() {
+
+            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+                m.setMailId(String.valueOf(((UID) item).uid));
+            }
+        }),
+        /**
+         * FLAGS
+         */
+        FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
+
+            public void handleItem(final Item item, final MailMessage m, final Log logger) throws MailException {
+                MIMEMessageConverter.parseFlags((FLAGS) item, m);
+            }
+        }),
+        /**
+         * BODYSTRUCTURE
+         */
+        BODYSTRUCTURE("BODYSTRUCTURE", BODYSTRUCTURE.class, new FetchItemHandler() {
+
+            public void handleItem(final Item item, final MailMessage m, final Log logger) throws MailException {
+                final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
+                final StringBuilder sb = new StringBuilder();
+                sb.append(bs.type).append('/').append(bs.subtype);
+                if (bs.cParams != null) {
+                    sb.append(bs.cParams);
+                }
+                try {
+                    m.setContentType(new ContentType(sb.toString()));
+                } catch (final MailException e) {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn(e.getMessage(), e);
+                    }
+                    m.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
+                }
+                m.setHasAttachment(bs.isMulti() && ("MIXED".equalsIgnoreCase(bs.subtype) || MIMEMessageUtility.hasAttachments(bs)));
+            }
+        }),
+        /**
+         * SIZE
+         */
+        SIZE("RFC822.SIZE", RFC822SIZE.class, new FetchItemHandler() {
+
+            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+                m.setSize(((RFC822SIZE) item).size);
+            }
+        });
+
+        private final String item;
+
+        private final Class<? extends Item> itemClass;
+
+        private final FetchItemHandler itemHandler;
+
+        private LowCostItem(final String item, final Class<? extends Item> itemClass, final FetchItemHandler itemHandler) {
+            this.item = item;
+            this.itemClass = itemClass;
+            this.itemHandler = itemHandler;
+        }
+
+        /**
+         * Gets the Fetch item string.
+         * 
+         * @return The Fetch item string
+         */
+        public String getItemString() {
+            return item;
+        }
+
+        /**
+         * Gets the item class.
+         * 
+         * @return The item class
+         */
+        public Class<? extends Item> getItemClass() {
+            return itemClass;
+        }
+
+        /**
+         * Gets the item handler.
+         * 
+         * @return The item handler
+         */
+        public FetchItemHandler getItemHandler() {
+            return itemHandler;
+        }
+
     }
 
     /*-
@@ -300,29 +338,6 @@ public final class AllFetch {
     }
 
     /**
-     * The low cost fetch item enumeration.
-     */
-    public static enum LowCostItem {
-        INTERNALDATE("INTERNALDATE"), UID("UID"), FLAGS("FLAGS"), BODYSTRUCTURE("BODYSTRUCTURE"), SIZE("RFC822.SIZE");
-
-        private final String item;
-
-        private LowCostItem(final String item) {
-            this.item = item;
-        }
-
-        /**
-         * Gets the Fetch item string.
-         * 
-         * @return The Fetch item string
-         */
-        public String getItem() {
-            return item;
-        }
-
-    }
-
-    /**
      * Gets the fetch items' string representation; e.g <code>"UID INTERNALDATE"</code>.
      * 
      * @param items The items
@@ -330,9 +345,9 @@ public final class AllFetch {
      */
     public static String getFetchCommand(final LowCostItem[] items) {
         final StringBuilder command = new StringBuilder(64);
-        command.append(items[0].getItem());
+        command.append(items[0].getItemString());
         for (int i = 1; i < items.length; i++) {
-            command.append(' ').append(items[i].getItem());
+            command.append(' ').append(items[i].getItemString());
         }
         return command.toString();
     }
@@ -380,21 +395,15 @@ public final class AllFetch {
                 final List<MailMessage> l = new ArrayList<MailMessage>(len);
                 if (response.isOK()) {
                     final String fullname = imapFolder.getFullName();
-                    // final String internaldate = "INTERNALDATE";
                     for (int j = 0; j < len; j++) {
                         final Response resp = r[j];
                         if (resp instanceof FetchResponse) {
                             final FetchResponse fr = (FetchResponse) resp;
                             final MailMessage m = new IDMailMessage(null, fullname);
-                            final int itemCount = fr.getItemCount();
-                            for (int k = 0; k < itemCount; k++) {
-                                final Item item = fr.getItem(k);
-                                final FetchItemHandler itemHandler = MAP.get(item.getClass());
-                                if (null == itemHandler) {
-                                    throw new ProtocolException("Unsupported FETCH item: " + item.getClass().getName());
-                                }
+                            for (final LowCostItem lowCostItem : items) {
+                                final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString());
                                 try {
-                                    itemHandler.handleItem(item, m, logger);
+                                    lowCostItem.getItemHandler().handleItem(item, m, logger);
                                 } catch (final MailException e) {
                                     logger.error(e.getMessage(), e);
                                 }
