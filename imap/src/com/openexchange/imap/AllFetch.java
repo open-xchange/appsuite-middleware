@@ -74,7 +74,6 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822SIZE;
@@ -180,8 +179,6 @@ public final class AllFetch {
      */
 
     private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
-
-    private static final String KEY_FETCH = "FETCH";
 
     private static final String ITEM_UID = "UID";
 
@@ -343,8 +340,9 @@ public final class AllFetch {
                     final String fullname = imapFolder.getFullName();
                     // final String internaldate = "INTERNALDATE";
                     for (int j = 0; j < len; j++) {
-                        if (KEY_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            final FetchResponse fr = (FetchResponse) r[j];
+                        final Response resp = r[j];
+                        if (resp instanceof FetchResponse) {
+                            final FetchResponse fr = (FetchResponse) resp;
                             final MailMessage m = new IDMailMessage(null, fullname);
                             final int itemCount = fr.getItemCount();
                             for (int k = 0; k < itemCount; k++) {
