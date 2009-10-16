@@ -93,7 +93,6 @@ public class CPTool extends WeekAndDayCalculator {
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.MILLISECOND, 999);
         params.setEnd(cal.getTime());
-
     }
 
     /**
@@ -102,8 +101,9 @@ public class CPTool extends WeekAndDayCalculator {
      */
     public boolean isBlockTemplate(CPParameters params) {
         String basic = "/[^/]+$";
-        Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName() + basic).matcher(params.getTemplate());
-        Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber() + basic).matcher(params.getTemplate());
+        String template = (params.hasUserTemplate()) ? params.getUserTemplate() : params.getTemplate();
+        Matcher m1 = Pattern.compile(CPType.WORKWEEKVIEW.getName() + basic).matcher(template);
+        Matcher m2 = Pattern.compile(CPType.WORKWEEKVIEW.getNumber() + basic).matcher(template);
         return m1.find() || m2.find();
     }
 

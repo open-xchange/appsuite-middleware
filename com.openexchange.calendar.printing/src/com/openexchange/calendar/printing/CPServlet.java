@@ -50,6 +50,7 @@
 package com.openexchange.calendar.printing;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -147,7 +148,12 @@ public class CPServlet extends PermissionServlet {
 
             if (tool.isBlockTemplate(params))
                 tool.calculateNewStartAndEnd(params);
-            OXTemplate template = templates.loadTemplate(params.getTemplate());
+
+            OXTemplate template;
+            if(params.hasUserTemplate())
+                template = templates.loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
+            else 
+                template = templates.loadTemplate(params.getTemplate());
 
             AppointmentSQLInterface appointmentSql = appointmentSqlFactory.createAppointmentSql(session);
             SearchIterator<Appointment> iterator;
@@ -203,9 +209,12 @@ public class CPServlet extends PermissionServlet {
 
     /**
      * Write an exception message as HTML to the response
+     * @throws IOException 
      */
-    private void writeException(HttpServletResponse resp, Throwable t) {
+    private void writeException(HttpServletResponse resp, Throwable t) throws IOException {
         LOG.error(t.getMessage(), t);
+        PrintWriter writer = resp.getWriter();
+        writer.append(t.getMessage());
         // TODO Write HTML page as response
     }
 
@@ -229,8 +238,6 @@ public class CPServlet extends PermissionServlet {
             cal.setTime(params.getWorkDayStart());
             calendar.setWorkDayStartingHours(cal.get(Calendar.HOUR_OF_DAY));
         }
-        if(true)
-            return;
         if (params.hasTimezone())
             calendar.setTimeZone(params.getTimezone());
     }

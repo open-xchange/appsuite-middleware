@@ -258,7 +258,7 @@ public class CPParameters {
         workWeekDuration = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_DURATION);
         folder = extractOptionalIntParam(req, AJAXServlet.PARAMETER_FOLDERID);
         template = extractMandatoryStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
-        usertemplate = extractOptionalStringParam(req, AJAXServlet.PARAMETER_TEMPLATE);
+        usertemplate = extractOptionalStringParam(req, PARAMETER_USERTEMPLATE);
         timezone = extractOptionalTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
     }
 

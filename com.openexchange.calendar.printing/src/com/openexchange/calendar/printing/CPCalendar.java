@@ -154,7 +154,16 @@ public class CPCalendar extends GregorianCalendar {
     public int getLastDayOfWorkWeek() {
         return getWorkWeekDays().get(getWorkWeekDays().size() - 1).intValue();
     }
-
+    
+    public int getLastDayOfMonth() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(getTime());
+        cal.add(MONTH, 1);
+        cal.set(DAY_OF_MONTH, 1);
+        cal.add(DAY_OF_MONTH, -1);
+        return cal.get(DAY_OF_MONTH);
+    }
+    
     public int getFirstDayOfWorkWeek() {
         return getWorkWeekDays().get(0).intValue();
     }

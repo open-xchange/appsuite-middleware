@@ -83,28 +83,21 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
             if (isMissingDaysInbetween(lastStoredAppointment, appointment)) {
                 List<Date> days = getMissingDaysInbetween(lastStoredAppointment, appointment);
                 for (Date day : days) {
-                    if (isOnFirstDayOfMonth(day)) {
+                    if (isOnFirstDayOfMonth(day))
                         addMonthBreak(blocks, pointer, day);
-                    }
-                    if (getCalendar().isOnFirstDayOfWeek(day)) {
+                    if (getCalendar().isOnFirstDayOfWeek(day)) 
                         addWeekBreak(blocks, pointer, day);
-                    }
-                    blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, day));
-                    blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(day)));
+                    addDayBreak(blocks, pointer, day);
                 }
             }
-            if (isSignalForNewMonth(appointment)) {
+            if (isSignalForNewMonth(appointment))
                 addMonthBreak(blocks, pointer, appointment.getStartDate());
-            }
 
-            if (isSignalForNewWeek(appointment)) {
+            if (isSignalForNewWeek(appointment))
                 addWeekBreak(blocks, pointer, appointment.getStartDate());
-            }
 
-            if (isSignalForNewDay(appointment)) {
-                blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, appointment.getStartDate()));
-                blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(appointment.getStartDate())));
-            }
+            if (isSignalForNewDay(appointment))
+                addDayBreak(blocks, pointer, appointment.getStartDate());
 
             blocks.addAppointment(appointment);
 
@@ -113,34 +106,11 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
 
             if (i == length - 1)
                 if (!isOnLastDayOfMonth(appointment.getStartDate()))
-                    for (Date day : getMissingDaysInbetween(appointment, null)) {
-                        pointer++;
-                        blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, day));
-                        blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(day)));
-                    }
+                    for (Date day : getMissingDaysInbetween(appointment, null))
+                        addDayBreak(blocks, ++pointer, day);
         }
         cleanup(blocks);
         return blocks;
-    }
-
-    private void cleanup(CPPartition blocks) {
-    }
-
-    public boolean isInsidePresentationRange(Date day, List<CPAppointment> appointments) {
-        if (appointments == null || appointments.size() == 0)
-            return false;
-        CPAppointment first = appointments.get(0);
-        CPAppointment last = appointments.get(appointments.size() - 1);
-
-        Calendar rangeStart = Calendar.getInstance();
-        rangeStart.setTime(first.getStartDate());
-
-        Calendar rangeEnd = Calendar.getInstance();
-        rangeEnd.setTime(last.getEndDate());
-
-        Calendar actual = Calendar.getInstance();
-        actual.setTime(day);
-        return actual.get(Calendar.YEAR) >= rangeStart.get(Calendar.YEAR) && actual.get(Calendar.YEAR) <= rangeEnd.get(Calendar.YEAR) && actual.get(Calendar.MONTH) >= rangeStart.get(Calendar.MONTH) && actual.get(Calendar.MONTH) <= rangeEnd.get(Calendar.MONTH);
     }
 
     private boolean isOnLastDayOfMonth(Date day) {
@@ -148,15 +118,6 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
         cal.setTime(day);
         cal.add(Calendar.DAY_OF_MONTH, 1);
         return cal.get(Calendar.DAY_OF_MONTH) == 1;
-    }
-
-    private boolean isSignalForNewMonth(CPAppointment appointment) {
-        if (lastStoredAppointment == null)
-            return true;
-
-        return isInDifferentMonths(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isOnDifferentDays(
-            lastStoredAppointment.getEndDate(),
-            appointment.getEndDate());
     }
 
     private boolean isOnFirstDayOfMonth(Date day) {

@@ -83,13 +83,10 @@ public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrate
             if (isMissingDaysInbetween(lastStoredAppointment, appointment)) {
                 List<Date> days = getMissingDaysInbetween(lastStoredAppointment, appointment);
                 for (Date day : days) {
-                    if (getCalendar().isOnFirstDayOfWorkWeek(day)) {
+                    if (getCalendar().isOnFirstDayOfWorkWeek(day))
                         addWeekBreak(blocks, pointer, day);
-                    }
-                    if (isInWorkWeek(day)) {
-                        blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, day));
-                        blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(day)));
-                    }
+                    if (isInWorkWeek(day)) 
+                        addDayBreak(blocks, pointer, day);
                 }
             }
 
@@ -97,9 +94,11 @@ public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrate
                 addWeekBreak(blocks, pointer, appointment.getStartDate());
             }
 
-            if (isSignalForNewDay(appointment) && isInWorkWeek(appointment.getStartDate())) {
-                blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, appointment.getStartDate()));
-                blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(appointment.getStartDate())));
+            if (isSignalForNewDay(appointment)) {
+                if(isInWorkWeek(appointment.getStartDate()))
+                    addDayBreak(blocks, pointer, appointment.getStartDate());
+                else
+                    blocks.addFormattingInformation(new CPFormattingInformation(pointer, FILLDAY));                    
             }
 
             if (isWorkWeekAppointment(appointment))
@@ -114,8 +113,7 @@ public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrate
                     for (Date day : getMissingDaysInbetween(appointment, null))
                         if (isInWorkWeek(day)) {
                             pointer++;
-                            blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYBREAK, day));
-                            blocks.addFormattingInformation(new CPFormattingInformation(pointer, DAYNAME, getWeekDayNumber(day)));
+                            addDayBreak(blocks, pointer, day);
                         }
         }
         return blocks;
@@ -155,5 +153,9 @@ public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrate
         } else
             firstDate = first.getStartDate();
         return isMissingDaysInbetween(firstDate, second.getStartDate());
+    }
+
+    @Override
+    protected void cleanup(CPPartition partition) {
     }
 }
