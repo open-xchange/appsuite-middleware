@@ -222,8 +222,9 @@ public final class AllFetch {
                 if (response.isOK()) {
                     final String fullname = imapFolder.getFullName();
                     for (int j = 0; j < len; j++) {
-                        if (KEY_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                            final FetchResponse fr = (FetchResponse) r[j];
+                        final Response resp = r[j];
+                        if (resp instanceof FetchResponse) {
+                            final FetchResponse fr = (FetchResponse) resp;
                             final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, ITEM_UID).uid), fullname);
                             m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE).getDate());
                             l.add(m);
