@@ -76,28 +76,26 @@ public abstract class WeekAndDayCalculator {
     }
 
     public Integer getDayOfYear(Date date) {
-        getCalendar().setTime(date);
-        return Integer.valueOf(getCalendar().get(Calendar.DAY_OF_YEAR));
+        calendar.setTime(date);
+        return Integer.valueOf(calendar.get(Calendar.DAY_OF_YEAR));
     }
-    
+
     public Integer getWeekOfYear(Date date) {
-        getCalendar().setTime(date);
-        return Integer.valueOf(getCalendar().get(Calendar.WEEK_OF_YEAR));
+        calendar.setTime(date);
+        return Integer.valueOf(calendar.get(Calendar.WEEK_OF_YEAR));
     }
 
     public Integer getMonthOfYear(Date date) {
-        getCalendar().setTime(date);
-        return Integer.valueOf(getCalendar().get(Calendar.MONTH));
+        calendar.setTime(date);
+        return Integer.valueOf(calendar.get(Calendar.MONTH));
     }
-    
+
     public Integer getYear(Date date) {
-        getCalendar().setTime(date);
-        return Integer.valueOf(getCalendar().get(Calendar.YEAR));
+        calendar.setTime(date);
+        return Integer.valueOf(calendar.get(Calendar.YEAR));
     }
 
     public boolean isOnDifferentDays(Date first, Date second) {
-        calendar = getCalendar();
-
         calendar.setTime(first);
         int day1 = calendar.get(Calendar.DAY_OF_YEAR);
         int year1 = calendar.get(Calendar.YEAR);
@@ -109,8 +107,6 @@ public abstract class WeekAndDayCalculator {
     }
 
     public boolean isInDifferentWeeks(Date first, Date second) {
-        calendar = getCalendar();
-
         calendar.setTime(first);
         int week1 = calendar.get(Calendar.WEEK_OF_YEAR);
         int year1 = calendar.get(Calendar.YEAR);
@@ -122,8 +118,6 @@ public abstract class WeekAndDayCalculator {
     }
 
     public boolean isInDifferentMonths(Date first, Date second) {
-        calendar = getCalendar();
-
         calendar.setTime(first);
         int month1 = calendar.get(Calendar.MONTH);
         int year1 = calendar.get(Calendar.YEAR);
@@ -135,25 +129,24 @@ public abstract class WeekAndDayCalculator {
     }
 
     public List<Date> getMissingDaysInbetween(Date first, Date second) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(first);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date refinedFirst = cal.getTime();
+        calendar.setTime(first);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date refinedFirst = calendar.getTime();
 
-        cal.setTime(second);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        Date refinedSecond = cal.getTime();
+        calendar.setTime(second);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        Date refinedSecond = calendar.getTime();
 
         long length = (refinedSecond.getTime() - refinedFirst.getTime()) / 1000 / 60 / 60 / 24 - 1;
         LinkedList<Date> days = new LinkedList<Date>();
 
-        cal.setTime(refinedFirst);
+        calendar.setTime(refinedFirst);
 
         for (int i = 0; i < length; i++) {
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            days.add(cal.getTime());
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            days.add(calendar.getTime());
         }
 
         return days;
@@ -164,9 +157,8 @@ public abstract class WeekAndDayCalculator {
     }
 
     public Integer getWeekDayNumber(Date day) {
-        Calendar cal = getCalendar();
-        cal.setTime(day);
-        return Integer.valueOf(cal.get(Calendar.DAY_OF_WEEK));
+        calendar.setTime(day);
+        return Integer.valueOf(calendar.get(Calendar.DAY_OF_WEEK));
     }
 
     public boolean isOnTwoDays(CPAppointment appointment) {
@@ -191,13 +183,12 @@ public abstract class WeekAndDayCalculator {
     }
 
     public boolean isInWorkWeek(Date date) {
-        Calendar calendar = getCalendar();
         calendar.setTime(date);
         return isInWorkWeek(calendar.get(Calendar.DAY_OF_WEEK));
     }
 
     public boolean isInWorkWeek(int calendarDayOfWeek) {
-        return getCalendar().getWorkWeekDays().contains(Integer.valueOf(calendarDayOfWeek));
+        return calendar.getWorkWeekDays().contains(Integer.valueOf(calendarDayOfWeek));
     }
 
 }
