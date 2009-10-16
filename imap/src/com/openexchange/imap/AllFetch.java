@@ -499,14 +499,26 @@ public final class AllFetch {
         return null;
     }
 
-    static void applyTrace(final com.sun.mail.iap.Protocol protocol, final boolean trace) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    static TracerState applyTrace(final com.sun.mail.iap.Protocol protocol, final SBOutputStream outputStream) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
         traceInputField.setAccessible(true);
         /*
          * Fetch trace input stream
          */
         final com.sun.mail.util.TraceInputStream tracer = (com.sun.mail.util.TraceInputStream) traceInputField.get(protocol);
-        tracer.setTrace(trace);
+        /*
+         * Fetch tracer's flag
+         */
+        final Field traceField = com.sun.mail.util.TraceInputStream.class.getDeclaredField("trace");
+        traceField.setAccessible(true);
+        /*
+         * Backup old
+         */
+        final boolean oldTrace = traceField.getBoolean(tracer);
+        /*
+         * Set new
+         */
+        tracer.setTrace(true);
         /*
          * Fetch tracer's stream
          */
@@ -519,7 +531,54 @@ public final class AllFetch {
         /*
          * Set new
          */
-        outField.set(tracer, new SBOutputStream());
+        outField.set(tracer, outputStream);
+        /*
+         * Return old state
+         */
+        return new TracerState(oldTrace, oldOut);
+    }
+
+    static void restoreTraceState(final com.sun.mail.iap.Protocol protocol, final TracerState tracerState) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
+        traceInputField.setAccessible(true);
+        /*
+         * Fetch trace input stream
+         */
+        final com.sun.mail.util.TraceInputStream tracer = (com.sun.mail.util.TraceInputStream) traceInputField.get(protocol);
+        /*
+         * Restore flag
+         */
+        tracer.setTrace(tracerState.isTrace());
+        /*
+         * Fetch tracer's stream
+         */
+        final Field outField = com.sun.mail.util.TraceInputStream.class.getDeclaredField("traceOut");
+        outField.setAccessible(true);
+        /*
+         * Restore out
+         */
+        outField.set(tracer, tracerState.getOut());
+    }
+
+    private static final class TracerState {
+
+        private final boolean trace;
+
+        private final java.io.OutputStream out;
+
+        public TracerState(final boolean trace, final OutputStream out) {
+            super();
+            this.trace = trace;
+            this.out = out;
+        }
+
+        public boolean isTrace() {
+            return trace;
+        }
+
+        public java.io.OutputStream getOut() {
+            return out;
+        }
 
     }
 
@@ -527,6 +586,9 @@ public final class AllFetch {
 
         private final StringBuilder sb;
 
+        /**
+         * Initializes a new {@link SBOutputStream}.
+         */
         public SBOutputStream() {
             super();
             sb = new StringBuilder(1024);
@@ -537,6 +599,27 @@ public final class AllFetch {
             sb.append((char) (b & 0xFF));
         }
 
+        @Override
+        public void write(final byte b[], final int off, final int len) throws IOException {
+            if (b == null) {
+                throw new NullPointerException("data is null");
+            } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+                throw new IndexOutOfBoundsException();
+            } else if (len == 0) {
+                return;
+            }
+            final char[] chars = new char[len];
+            for (int i = 0; i < chars.length; i++) {
+                chars[i] = (char) (b[off + i] & 0xFF);
+            }
+            sb.append(chars);
+        }
+
+        /**
+         * Gets the trace.
+         * 
+         * @return The trace
+         */
         public String getTrace() {
             return sb.toString();
         }
