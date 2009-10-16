@@ -132,8 +132,8 @@ public class PagePartSequenceTest extends TestCase {
         String page =">51379ÊLeverkusen<br>Germany</td>";
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
-        pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_home"));
-        pageParts.add(new PagePart("(>)([a-zA-ZŠšŸ]*)(<\\/td>)", "country_home"));
+        pageParts.add(new PagePart("()([a-zA-Z\u00e4\u00f6\u00fc]*)(<br)", "city_home"));
+        pageParts.add(new PagePart("(>)([a-zA-Z\u00e4\u00f6\u00fc]*)(<\\/td>)", "country_home"));
         
         PagePartSequence sequence = new PagePartSequence(pageParts, page);
         HashMap<String, String> map = sequence.retrieveInformation();

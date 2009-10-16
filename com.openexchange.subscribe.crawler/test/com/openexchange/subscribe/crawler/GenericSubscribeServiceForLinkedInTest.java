@@ -98,20 +98,20 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "(/profile\\?viewProfile=).*(goback).*"));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart(
-            "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-ZŠšŸ\\s]*\">)",
+            "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-Z\u00e4\u00f6\u00fc\\s]*\">)",
             "image"));
         pageParts.add(new PagePart("(<h1 class=\"n fn\">)"));
-        pageParts.add(new PagePart("(span class=\"given-name\">)([a-zA-ZŠšŸ]*)(</span>)", "first_name"));
-        pageParts.add(new PagePart("(span class=\"family-name\">)([a-zA-ZŠšŸ]*)(</span>)", "last_name"));
-        pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-ZŠšŸ\\x20]*)([\\s]*</p>)", "title"));
+        pageParts.add(new PagePart("(span class=\"given-name\">)([a-zA-Z\u00e4\u00f6\u00fc]*)(</span>)", "first_name"));
+        pageParts.add(new PagePart("(span class=\"family-name\">)([a-zA-Z\u00e4\u00f6\u00fc]*)(</span>)", "last_name"));
+        pageParts.add(new PagePart("(<p class=\"title\">[\\s]*)([a-zA-Z\u00e4\u00f6\u00fc\\x20]*)([\\s]*</p>)", "title"));
         pageParts.add(new PagePart(
-            "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
+            "<dt>(Phone:|Telefon:|Tel\u00e9fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
             "cellular_telephone1"));
         pageParts.add(new PagePart(
-            "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
+            "<dt>(Phone:|Telefon:|Tel\u00e9fono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
             "telephone_home1"));
         pageParts.add(new PagePart(
-            "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
+            "<dt>(Phone:|Telefon:|Tel\u00e9fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*"+VALID_PHONE_REGEX+"<span class=\"type\">\\((Mobile|mobile)\\)",
             "telephone_business1"));
         pageParts.add(new PagePart(
             "<dt>(Address:|Adresse:|Adresse :|Direcci.n:)<\\/dt>[\\s]*<dd>[\\s]*<p>(.*\\s.*\\s.*)(<\\/dd>)",
@@ -131,7 +131,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the crawler description was updated to get the new config-files
         //dumpThis(crawler, crawler.getDisplayName());
     }

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import org.ho.yaml.YamlConfig;
 
 /**
  * {@link GenericSubscribeServiceForWebDeTest}
@@ -94,20 +95,20 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         pageParts.add(new PagePart("(width=\"282\"><b>)"+VALID_NAME+"(<)", "display_name"));
         pageParts.add(new PagePart("E\\-Mail\\-Adressen"));
         pageParts.add(new PagePart("(<b>Privat</b></td><td class=\"b\" width=\"277\"><a href=[^>]*>)"+VALID_EMAIL_REGEX+"(<)", "email2"));
-        pageParts.add(new PagePart("(<b>BŸro</b></td><td class=\"b\" width=\"277\"><a href=[^>]*>)"+VALID_EMAIL_REGEX+"(<)", "email1"));
+        pageParts.add(new PagePart("(<b>B.ro</b></td><td class=\"b\" width=\"277\"><a href=[^>]*>)"+VALID_EMAIL_REGEX+"(<)", "email1"));
         pageParts.add(new PagePart("Telefonnummern"));
         pageParts.add(new PagePart("(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_home1"));
         pageParts.add(new PagePart("(<b>Mobil<\\/b><\\/td><td class=\"b\" width=\"277\">[^>]*>)"+VALID_PHONE_REGEX+"(<)", "cellular_telephone1"));
-        pageParts.add(new PagePart("(<b>BŸro<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_business1"));
+        pageParts.add(new PagePart("(<b>B.ro<\\/b><\\/td><td class=\"b\" width=\"277\">)"+VALID_PHONE_REGEX+"(<)", "telephone_business1"));
         pageParts.add(new PagePart("Adressen"));
         pageParts.add(new PagePart("(<b>Privat<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)", "street_home"));
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
-        pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_home"));
-        pageParts.add(new PagePart("(>)([a-zA-ZŠšŸ]*)(<\\/td>)", "country_home"));
-        pageParts.add(new PagePart("(<b>BŸro<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)", "street_business"));
+        pageParts.add(new PagePart("()([a-zA-Z\u00e4\u00f6\u00fc]*)(<br)", "city_home"));
+        pageParts.add(new PagePart("(>)([a-zA-Z\u00e4\u00f6\u00fc]*)(<\\/td>)", "country_home"));
+        pageParts.add(new PagePart("(<b>B.ro<\\/b><\\/td><td class=\"b\" width=\"507\">)([^<]*)(<br)", "street_business"));
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_business"));
-        pageParts.add(new PagePart("()([a-zA-ZŠšŸ]*)(<br)", "city_business"));
-        pageParts.add(new PagePart("(>)([a-zA-ZŠšŸ]*)(<\\/td>)", "country_business"));
+        pageParts.add(new PagePart("()([a-zA-Z\u00e4\u00f6\u00fc]*)(<br)", "city_business"));
+        pageParts.add(new PagePart("(>)([a-zA-Z\u00e4\u00f6\u00fc]*)(<\\/td>)", "country_business"));
         
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
 
