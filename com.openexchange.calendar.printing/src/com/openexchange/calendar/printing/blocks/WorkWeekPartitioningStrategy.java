@@ -85,7 +85,7 @@ public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrate
                 for (Date day : days) {
                     if (getCalendar().isOnFirstDayOfWorkWeek(day))
                         addWeekBreak(blocks, pointer, day);
-                    if (isInWorkWeek(day)) 
+                    if (isInWorkWeek(day))
                         addDayBreak(blocks, pointer, day);
                 }
             }
@@ -94,12 +94,8 @@ public class WorkWeekPartitioningStrategy extends AbstractWeekPartitioningStrate
                 addWeekBreak(blocks, pointer, appointment.getStartDate());
             }
 
-            if (isSignalForNewDay(appointment)) {
-                if(isInWorkWeek(appointment.getStartDate()))
-                    addDayBreak(blocks, pointer, appointment.getStartDate());
-                else
-                    blocks.addFormattingInformation(new CPFormattingInformation(pointer, FILLDAY));                    
-            }
+            if (isSignalForNewDay(appointment) && isInWorkWeek(appointment.getStartDate()))
+                addDayBreak(blocks, pointer, appointment.getStartDate());
 
             if (isWorkWeekAppointment(appointment))
                 blocks.addAppointment(appointment);
