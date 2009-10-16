@@ -61,6 +61,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -75,33 +76,54 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
     private PagePartSequence pageParts;
+    
+    private String titleExceptionsRegex, linkToTargetPage;
 
     private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
         this.description = description;
         this.pageParts = pageParts;
+        titleExceptionsRegex = "";
+        linkToTargetPage = "";
+    }
+    
+    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, String titleExceptionsRegex, String linkToTargetPage) {
+        this.description = description;
+        this.pageParts = pageParts;
+        this.titleExceptionsRegex = titleExceptionsRegex;
+        this.linkToTargetPage = linkToTargetPage;
     }
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep() {
-
+        titleExceptionsRegex = "";
+        linkToTargetPage = "";
     }
 
-    public void execute(final WebClient webClient) {
+    public void execute(final WebClient webClient) throws SubscriptionException {
         final Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
         for (final HtmlAnchor anchor : input) {
             try {
-                final HtmlPage page = anchor.click();
-                Contact contact = new Contact();
-                String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
-                pageParts.setPage(pageString);
-                final HashMap<String, String> map = pageParts.retrieveInformation();
-
-                contact = Mappings.translateMapToContact(map);
-
-                SANITIZER.sanitize(contact);
-                contactObjects.add(contact);
+                HtmlPage page = anchor.click();
+                // in case the reached page is not yet the one with (all) the contact info and there is one more link to click
+                if (!linkToTargetPage.equals("")){
+                   PageByLinkRegexStep step = new PageByLinkRegexStep("", linkToTargetPage);
+                   step.setInput(page);
+                   step.execute(webClient);
+                   page = step.getOutput();
+                }
+                if (!page.getTitleText().matches(titleExceptionsRegex)){
+                    Contact contact = new Contact();
+                    String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
+                    pageParts.setPage(pageString);
+                    final HashMap<String, String> map = pageParts.retrieveInformation();
+    
+                    contact = Mappings.translateMapToContact(map);
+    
+                    SANITIZER.sanitize(contact);
+                    contactObjects.add(contact);
+                }
 
             } catch (final VersitException e) {
                 exception = e;
@@ -137,4 +159,26 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         this.pageParts = pageParts;
     }
 
+    
+    public String getTitleExceptionsRegex() {
+        return titleExceptionsRegex;
+    }
+
+    
+    public void setTitleExceptionsRegex(String titleExceptionsRegex) {
+        this.titleExceptionsRegex = titleExceptionsRegex;
+    }
+
+    
+    public String getLinkToTargetPage() {
+        return linkToTargetPage;
+    }
+
+    
+    public void setLinkToTargetPage(String linkToTargetPage) {
+        this.linkToTargetPage = linkToTargetPage;
+    }
+
+    
+    
 }

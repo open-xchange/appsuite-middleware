@@ -54,9 +54,10 @@ import java.util.List;
 import org.ho.yaml.Yaml;
 
 /**
+ * This is NOT the preferred way to crawl Facebook. FacebookWeb delivers much more information.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeServiceForFacebookTest extends GenericSubscribeServiceTestHelpers {
+public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeServiceTestHelpers {
 
     public void testGenericSubscribeServiceForFacebook() {
         // insert valid credentials here

@@ -58,7 +58,7 @@ import org.ho.yaml.Yaml;
  * Works but preferred way for crawling Google is API crawling.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeServiceForGoogleMailTest extends GenericSubscribeServiceTestHelpers {
+public class GenericSubscribeServiceForGoogleWebTest extends GenericSubscribeServiceTestHelpers {
 
     public void testGenericSubscribeServiceForGoogleMail() {
         // insert valid credentials here

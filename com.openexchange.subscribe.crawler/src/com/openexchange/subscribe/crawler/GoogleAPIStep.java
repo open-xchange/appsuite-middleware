@@ -183,7 +183,6 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                         }
                     }
                 }
-                
                 for (StructuredPostalAddress pa :entry.getStructuredPostalAddresses()){
                     if (pa.getRel() != null){
                         if (pa.getRel().endsWith("work")){                            
@@ -191,6 +190,8 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                             if (pa.getPostcode() != null) contact.setPostalCodeBusiness(pa.getPostcode().getValue());
                             if (pa.getCity() != null) contact.setCityBusiness(pa.getCity().getValue());
                             if (pa.getCountry() != null) contact.setCountryBusiness(pa.getCountry().getValue());
+                            //TODO: This will be used to write the address to the contacts note-field if the data is not structured
+                            //System.out.println("***** "+"Work:\n"+pa.getFormattedAddress().getValue()+"\n");
                         }
                         if (pa.getRel().endsWith("home")){
                             if (pa.getStreet() != null) contact.setStreetHome(pa.getStreet().getValue());
@@ -205,8 +206,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                             if (pa.getCountry() != null) contact.setCountryOther(pa.getCountry().getValue());
                         }
                     }
-                }
-                
+                }   
                 for (Im im : entry.getImAddresses()) {
                     if (im.getProtocol() != null) {
                         String regex = "[^#]*#([a-zA-ZŠšŸ€…†]*)";

@@ -1,0 +1,112 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.subscribe.crawler;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import org.ho.yaml.Yaml;
+
+/**
+ * {@link GenericSubscribeServiceForFacebookWebTest}
+ * This is the preferred way to crawl Facebook.
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ */
+public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeServiceTestHelpers {
+
+    public void testGenericSubscribeServiceForFacebook() {
+        // insert valid credentials here
+        String username = "";
+        String password = "";
+
+        // create a CrawlerDescription
+        CrawlerDescription crawler = new CrawlerDescription();
+        crawler.setDisplayName("Facebook");
+        crawler.setId("com.openexchange.subscribe.crawler.facebook");
+        List<Step> steps = new LinkedList<Step>();
+
+        steps.add(new LoginPageByFormActionStep(
+            "Login to facebook.com",
+            "https://m.facebook.com/",
+            "",
+            "",
+            "https://login.facebook.com/login.php?",
+            "email",
+            "pass",
+            "(\\/friends.*)",
+            1,
+            "https://m.facebook.com"));
+        steps.add(new PageByLinkRegexStep("click the friends-link", "\\/friends.*"));
+        steps.add(new PageByLinkRegexStep("click the all-link", "\\/friends.php?.*&a.*"));
+        steps.add(new AnchorsByLinkRegexStep(
+            "click all the individual friends links on all subpages.",
+            "\\/friends.php?.*&a&f.*",
+            "\\/profile.php.*&id.*",
+            ".*&id=([0-9]*)&.*"));
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(<div class=\"sectitle\">)([^<]*)(<\\/div>)", "display_name"));
+        pageParts.add(new PagePart("(<img src=\")([^\"]*)(\")", "image"));
+        pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):<\\/td><td  valign=\"top\">([^<]*)(</td>)","instant_messenger1"));
+        pageParts.add(new PagePart("(Mobile Number|Handynummer):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "cellular_telephone1"));
+        pageParts.add(new PagePart("(Phone|Telefon):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "telephone_business1"));
+        pageParts.add(new PagePart("(Current Address|Aktuelle Adresse):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","address_note"));
+        PagePartSequence sequence = new PagePartSequence(pageParts, "");
+        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
+            "Get the info-bits from the contact-page.",
+            sequence,
+            "Facebook.*(Your Profile|Dein Profil)", ".*&v=info.*"));
+        Workflow workflow = new Workflow(steps);
+        crawler.setWorkflowString(Yaml.dump(workflow));
+
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        // uncomment this if the if the crawler description was updated to get the new config-files
+        //dumpThis(crawler, crawler.getDisplayName());
+    }
+}

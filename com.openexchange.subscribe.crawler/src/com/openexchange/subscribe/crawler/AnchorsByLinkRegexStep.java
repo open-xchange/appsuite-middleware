@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -71,12 +73,19 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
 
     private String subpageLinkRegex;
 
-    private ArrayList<String> subpagesHref;
+    private ArrayList<String> subpagesHref, outputHref, uniqueIds;
 
     private ArrayList<HtmlPage> subpages;
+    
+    private String identifyingCriteria;
 
     public AnchorsByLinkRegexStep() {
+        this.subpagesHref = new ArrayList<String>();
+        this.outputHref = new ArrayList<String>();
+        this.uniqueIds = new ArrayList<String>();
+        this.subpages = new ArrayList<HtmlPage>();
         output = new ArrayList<HtmlAnchor>();
+        identifyingCriteria = "";
     }
 
     public AnchorsByLinkRegexStep(String description, String subpageLinkRegex, String linkRegex) {
@@ -84,8 +93,23 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         this.subpageLinkRegex = subpageLinkRegex;
         this.linkRegex = linkRegex;
         this.subpagesHref = new ArrayList<String>();
+        this.outputHref = new ArrayList<String>();
+        this.uniqueIds = new ArrayList<String>();
         this.subpages = new ArrayList<HtmlPage>();
         output = new ArrayList<HtmlAnchor>();
+        identifyingCriteria = "";
+    }
+    
+    public AnchorsByLinkRegexStep(String description, String subpageLinkRegex, String linkRegex, String identifyingCriteria) {
+        this.description = description;
+        this.subpageLinkRegex = subpageLinkRegex;
+        this.linkRegex = linkRegex;
+        this.subpagesHref = new ArrayList<String>();
+        this.outputHref = new ArrayList<String>();
+        this.uniqueIds = new ArrayList<String>();
+        this.subpages = new ArrayList<HtmlPage>();
+        output = new ArrayList<HtmlAnchor>();
+        this.identifyingCriteria = identifyingCriteria;
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
@@ -108,10 +132,26 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
             }
             // traverse the subpages
             for (HtmlPage subpage : subpages) {
-                for (HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {                    
+                for (HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {  
                     // get the result pages
-                    if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex) && !output.contains(possibleLinkToResultpage)) {
-                        output.add(possibleLinkToResultpage);
+                    if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex) && !outputHref.contains(possibleLinkToResultpage.getHrefAttribute())) {
+                        if (identifyingCriteria.equals("")){
+                            output.add(possibleLinkToResultpage);
+                            outputHref.add(possibleLinkToResultpage.getHrefAttribute());
+                        // if differentiating by href alone is not enough to prevent double links
+                        } else {
+                            Pattern pattern = Pattern.compile(identifyingCriteria);
+                            Matcher matcher = pattern.matcher(possibleLinkToResultpage.getHrefAttribute());
+                            if (matcher.matches()) {
+                                String uniqueId = matcher.group(1);
+                                if (!uniqueIds.contains(uniqueId) && uniqueId!=null) {
+                                    output.add(possibleLinkToResultpage);
+                                    outputHref.add(possibleLinkToResultpage.getHrefAttribute());
+                                    uniqueIds.add(uniqueId);
+                                }
+                            }
+                        }
+                        
                     }
                 }
             }
@@ -166,6 +206,16 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
 
     public void setLinkRegex(String linkRegex) {
         this.linkRegex = linkRegex;
+    }
+
+    
+    public String getIdentifyingCriteria() {
+        return identifyingCriteria;
+    }
+
+    
+    public void setIdentifyingCriteria(String identifyingCriteria) {
+        this.identifyingCriteria = identifyingCriteria;
     }
 
 }
