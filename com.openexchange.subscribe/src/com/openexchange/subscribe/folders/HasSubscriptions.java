@@ -47,30 +47,66 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.subscribe.folders;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Activator}
- *
+ * {@link HasSubscriptions}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class Activator extends CompositeBundleActivator {
-
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
-        new FolderFieldActivator()};
+public class HasSubscriptions implements AdditionalFolderField {
+    private static final Log LOG = LogFactory.getLog(HasSubscriptions.class);
     
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private SubscriptionSourceDiscoveryService discovery = null;
+
+    public HasSubscriptions(SubscriptionSourceDiscoveryService discovery) {
+        super();
+        this.discovery = discovery;
+    }
+
+    public int getColumnID() {
+        return 3020;
+    }
+
+    public String getColumnName() {
+        return "com.openexchange.subscribe.subscriptionFlag";
+    }
+
+    public Object getValue(FolderObject folder, ServerSession session) {
+        if (!session.getUserConfiguration().isSubscription()) {
+            return false;
+        }
+
+        List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
+        try {
+            for (SubscriptionSource subscriptionSource : sources) {
+                boolean hasSubscriptions = !subscriptionSource.getSubscribeService().loadSubscriptions(
+                    session.getContext(),
+                    "" + folder.getObjectID(),
+                    session.getPassword()).isEmpty();
+                if(hasSubscriptions) {
+                    return true;
+                }
+            }
+        } catch (AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+
+        return false;
+    }
+
+    public Object renderJSON(Object value) {
+        return value;
     }
 
 }

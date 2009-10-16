@@ -6,7 +6,8 @@ Bundle-Version: 6.13.0.0
 Bundle-Activator: com.openexchange.publish.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.api,
+Import-Package: com.openexchange.ajax.customizer.folder,
+ com.openexchange.api,
  com.openexchange.api2,
  com.openexchange.caching,
  com.openexchange.contact,
@@ -28,6 +29,7 @@ Import-Package: com.openexchange.api,
  com.openexchange.groupware.infostore,
  com.openexchange.groupware.infostore.utils,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.modules,
  com.openexchange.groupware.results,
  com.openexchange.groupware.search,
  com.openexchange.groupware.tx,

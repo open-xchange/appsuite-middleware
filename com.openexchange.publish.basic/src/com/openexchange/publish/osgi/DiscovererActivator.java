@@ -59,6 +59,7 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.folders.IsPublished;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.FolderSecurityStrategy;
 import com.openexchange.publish.sql.PublicationSQLStorage;
@@ -95,6 +96,8 @@ public class DiscovererActivator implements BundleActivator {
         discoveryDict.put(Constants.SERVICE_RANKING, 256);
         
         discoveryRegistration = context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
+        
+        FolderFieldActivator.DISCOVERER = compositeDiscovererCollector;
         
         DBProvider provider = whiteboard.getService(DBProvider.class);
         GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);

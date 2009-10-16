@@ -64,6 +64,8 @@ public class DiscoveryActivator implements BundleActivator {
         
         discoveryRegistration = context.registerService(SubscriptionSourceDiscoveryService.class.getName(), discoveryCollector, discoveryDict);
         
+        FolderFieldActivator.DISCOVERY = discoveryCollector;
+        
         componentRegistration = new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
         
         List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(1);

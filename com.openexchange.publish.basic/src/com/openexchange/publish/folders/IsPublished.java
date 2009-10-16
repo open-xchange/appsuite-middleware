@@ -47,30 +47,64 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.folders;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Collection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.modules.Module;
 
 
 /**
- * {@link Activator}
+ * {@link IsPublished}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class IsPublished implements AdditionalFolderField {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
-        new FolderFieldActivator()};
+    private static final Log LOG = LogFactory.getLog(IsPublished.class);
     
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private PublicationTargetDiscoveryService discovery = null;
+    
+    public IsPublished(PublicationTargetDiscoveryService discovery) {
+        this.discovery = discovery;
+    }
+    
+    public int getColumnID() {
+        return 3010;
+    }
+
+    public String getColumnName() {
+        return "com.openexchange.publish.publicationFlag";
+    }
+
+    public Object getValue(FolderObject folder, ServerSession session) {
+        if(!session.getUserConfiguration().isPublication()) {
+            return false;
+        }
+        try {
+            Collection<PublicationTarget> targets = discovery.getTargetsForEntityType(Module.getModuleString(folder.getModule(), folder.getObjectID()));
+            for(PublicationTarget target : targets) {
+                boolean hasPublications  = !target.getPublicationService().getAllPublications(session.getContext(), ""+folder.getObjectID()).isEmpty();
+                if( hasPublications ) {
+                    return true;
+                }
+            }
+        } catch (PublicationException x) {
+            LOG.error(x.getMessage(), x);
+        }
+        return false;
+    }
+
+    public Object renderJSON(Object value) {
+        return value;
     }
 
 }

@@ -50,27 +50,29 @@
 package com.openexchange.subscribe.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.folders.HasSubscriptions;
 
 
 /**
- * {@link Activator}
+ * {@link FolderFieldActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class FolderFieldActivator implements BundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
-        new FolderFieldActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public static SubscriptionSourceDiscoveryService DISCOVERY;
+
+    public void start(BundleContext context) throws Exception {
+        context.registerService(AdditionalFolderField.class.getName(), new HasSubscriptions(DISCOVERY), null);
+        
+    }
+
+    public void stop(BundleContext context) throws Exception {
+
     }
 
 }

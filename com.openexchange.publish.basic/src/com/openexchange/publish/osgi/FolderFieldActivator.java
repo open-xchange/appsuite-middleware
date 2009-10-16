@@ -47,30 +47,31 @@
  *
  */
 
-package com.openexchange.subscribe.osgi;
+package com.openexchange.publish.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.folders.IsPublished;
 
 
 /**
- * {@link Activator}
+ * {@link FolderFieldActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class Activator extends CompositeBundleActivator {
+public class FolderFieldActivator implements BundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
-        new FolderFieldActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public static PublicationTargetDiscoveryService DISCOVERER;
+
+    public void start(BundleContext context) throws Exception {
+        context.registerService(AdditionalFolderField.class.getName(), new IsPublished(DISCOVERER), null);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+
     }
 
 }
