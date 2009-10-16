@@ -22,8 +22,10 @@
       </#if>
    	  <#if info.position == appointment_index && info.type == 1 && info_index != 0>
    	  </tr>
-   	  
    	  </#if>
+      <#if info.position == appointment_index && info.type == 11 && info.additionalInformation == 1>
+        <td class="filler" />
+      </#if>
       <#if info.position == appointment_index && info.type == 1>
       <tr>
          <td colspan="5">
@@ -89,14 +91,6 @@
    </h1>
    
    <table border="1">
-      <tr>
-         <th>Monday</th>
-         <th>Tuesday</th>
-         <th>Wednesday</th>
-         <th>Thursday</th>
-         <th>Friday</th>
-      </tr>
-      
       <#list appointments as appointment>
          <@do_breaks formattinginfo appointment_index />
             <table class="appointment">
