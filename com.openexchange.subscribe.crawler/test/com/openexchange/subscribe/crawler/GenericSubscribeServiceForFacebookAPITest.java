@@ -71,7 +71,7 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new FacebookAPIStep(
-            "Get a user«s friend information from facebook via facebook-java-api",
+            "Get a users friend information from facebook via facebook-java-api",
             "",
             "",
             "",
