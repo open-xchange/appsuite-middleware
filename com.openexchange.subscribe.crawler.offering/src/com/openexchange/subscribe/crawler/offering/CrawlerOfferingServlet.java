@@ -67,6 +67,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
 import com.openexchange.subscribe.Subscription;
@@ -96,13 +97,13 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     private static ConfigurationService configService;
 
-    private static final String LIST_TEMPLATE = "list.tmpl";
+    private static final String LIST_TEMPLATE = "offering_list.tmpl";
 
-    private static final String SOURCE_TEMPLATE = "source.tmpl";
+    private static final String SOURCE_TEMPLATE = "offering_source.tmpl";
 
-    private static final String CONTACTS_TEMPLATE = "contacts.tmpl";
+    private static final String CONTACTS_TEMPLATE = "offering_contacts.tmpl";
 
-    private static final String INFOSTORE_TEMPLATE = "infostore.tmpl";
+    private static final String INFOSTORE_TEMPLATE = "offering_infostore.tmpl";
 
     public static void setSources(SubscriptionSourceDiscoveryService service) {
         sources = service;
@@ -132,34 +133,34 @@ public class CrawlerOfferingServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!auth(req)) {
+        if(!auth(req)) {
             resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        } else {
-            SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
-            Map<String, Object> parameters = collectParameters(req, source);
+            return;
+        }
+        SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
+        Map<String, Object> parameters = collectParameters(req, source);
 
-            Subscription subscription = new Subscription();
-            subscription.setSource(source);
-            subscription.setConfiguration(parameters);
+        Subscription subscription = new Subscription();
+        subscription.setSource(source);
+        subscription.setConfiguration(parameters);
 
-            try {
-                resp.setContentType("text/html");
+        try {
+            resp.setContentType("text/html;charset=UTF-8");
 
-                Collection<?> content = source.getSubscribeService().getContent(subscription);
+            Collection<?> content = source.getSubscribeService().getContent(subscription);
 
-                switch (source.getFolderModule()) {
-                case FolderObject.CONTACT:
-                    OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
-                    fillResultTemplate(template, content, "contacts", resp);
-                    break;
-                case FolderObject.INFOSTORE:
-                    break;
-                }
-            } catch (AbstractOXException e) {
-                LOG.error(e.getMessage(), e);
-                resp.setContentType("text/html");
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            switch (source.getFolderModule()) {
+            case FolderObject.CONTACT:
+                OXTemplate template = templateService.loadTemplate(CONTACTS_TEMPLATE);
+                fillResultTemplate(template, content, "contacts", resp);
+                break;
+            case FolderObject.INFOSTORE:
+                break;
             }
+        } catch (AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            resp.setContentType("text/html;charset=UTF-8");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -187,11 +188,11 @@ public class CrawlerOfferingServlet extends HttpServlet {
     private void doList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             OXTemplate template = templateService.loadTemplate(LIST_TEMPLATE);
-            resp.setContentType("text/html");
+            resp.setContentType("text/html;charset=UTF-8");
             fillListTemplate(template, req, resp);
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
-            resp.setContentType("text/html");
+            resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -199,11 +200,11 @@ public class CrawlerOfferingServlet extends HttpServlet {
     private void doSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             OXTemplate template = templateService.loadTemplate(SOURCE_TEMPLATE);
-            resp.setContentType("text/html");
+            resp.setContentType("text/html;charset=UTF-8");
             fillSourceTemplate(template, req, resp);
         } catch (AbstractOXException e) {
             LOG.error(e.getMessage(), e);
-            resp.setContentType("text/html");
+            resp.setContentType("text/html;charset=UTF-8");
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -242,7 +243,9 @@ public class CrawlerOfferingServlet extends HttpServlet {
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("ELEMENTS", elements);
         values.put("ACTION", getProtocol(req) + req.getServerName() + "/publications/crawler?action=crawl&crawler=" + source.getId());
-
+        values.put("SOURCE", source);
+        values.put("MODULE", Module.getModuleString(source.getFolderModule(), -1));
+        
         template.process(values, resp.getWriter());
     }
 
