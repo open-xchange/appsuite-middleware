@@ -269,8 +269,6 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
                         LOG.error(dbe.getMessage(), dbe);
                         retval = false;
                     }
-                } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
                 } catch (final Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
