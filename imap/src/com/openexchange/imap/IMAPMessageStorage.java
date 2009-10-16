@@ -1527,7 +1527,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         {
             final LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
             final long start = System.currentTimeMillis();
-            retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order));
+            retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order), imapConfig, session);
             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             if (DEBUG) {
                 LOG.debug(new StringBuilder(128).append(fullname).append(": IMAP all fetch >>>FETCH 1:* (").append(

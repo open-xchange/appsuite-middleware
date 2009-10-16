@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.List;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -63,6 +64,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.session.Session;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -227,10 +229,12 @@ public final class AllFetch {
      * 
      * @param imapFolder The IMAP folder
      * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
+     * @param config The IMAP configuration
+     * @param session The session
      * @return All messages from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending) throws MessagingException {
+    public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
@@ -260,8 +264,10 @@ public final class AllFetch {
                         final Response resp = r[j];
                         if (resp instanceof FetchResponse) {
                             final FetchResponse fr = (FetchResponse) resp;
-                            final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(UID.class, fr, ITEM_UID).uid), fullname);
-                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE).getDate());
+                            final MailMessage m = new IDMailMessage(
+                                String.valueOf(getItemOf(UID.class, fr, ITEM_UID, config, session).uid),
+                                fullname);
+                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE, config, session).getDate());
                             l.add(m);
                             r[j] = null;
                         }
@@ -295,12 +301,14 @@ public final class AllFetch {
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
      * @param itemName The item name to generate appropriate error message on absence
+     * @param config The IMAP configuration
+     * @param session The session
      * @return The item associated with given class in specified <i>FETCH</i> response.
      */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName) throws ProtocolException {
+    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName, final IMAPConfig config, final Session session) throws ProtocolException {
         final I retval = getItemOf(clazz, fetchResponse);
         if (null == retval) {
-            throw missingFetchItem(itemName);
+            throw missingFetchItem(itemName, config, session);
         }
         return retval;
     }
@@ -330,11 +338,15 @@ public final class AllFetch {
      * <code>&quot;Missing &lt;itemName&gt; item in FETCH response.&quot;</code>
      * 
      * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
+     * @param config The IMAP configuration
+     * @param session The session
      * @return A new protocol exception with appropriate message.
      */
-    static ProtocolException missingFetchItem(final String itemName) {
-        return new ProtocolException(
-            new StringBuilder(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
+    static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
+        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
+        sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
+        sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
+        return new ProtocolException(sb.toString());
     }
 
     /**
@@ -360,10 +372,12 @@ public final class AllFetch {
      * @param imapFolder The IMAP folder
      * @param items The low-cost fetch items
      * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
+     * @param config The IMAP configuration
+     * @param session The session
      * @return All messages from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final LowCostItem[] items, final boolean ascending) throws MessagingException {
+    public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final LowCostItem[] items, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
@@ -401,7 +415,7 @@ public final class AllFetch {
                             final FetchResponse fr = (FetchResponse) resp;
                             final MailMessage m = new IDMailMessage(null, fullname);
                             for (final LowCostItem lowCostItem : items) {
-                                final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString());
+                                final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                 try {
                                     lowCostItem.getItemHandler().handleItem(item, m, logger);
                                 } catch (final MailException e) {
