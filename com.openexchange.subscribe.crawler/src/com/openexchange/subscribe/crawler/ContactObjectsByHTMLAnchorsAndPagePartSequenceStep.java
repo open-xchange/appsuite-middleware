@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
