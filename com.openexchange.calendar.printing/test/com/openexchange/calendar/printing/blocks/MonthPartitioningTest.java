@@ -57,7 +57,6 @@ import java.util.List;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
 
-
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -182,7 +181,6 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should contain day breaks for every day of January", 31, numberOfDayBreaks);
     }
 
-
     public void testShouldAlwaysContainTwelveMonthbreaksPerYear() {
         calendar.set(Calendar.DAY_OF_YEAR, 1);
         CPAppointment app1 = new CPAppointment();
@@ -198,9 +196,9 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
 
         List<CPFormattingInformation> infos = partitions.getFormattingInformation();
         List<Date> months = new LinkedList<Date>();
-        for (CPFormattingInformation info : infos) 
+        for (CPFormattingInformation info : infos)
             if (info.getType() == AbstractWeekPartitioningStrategy.MONTHBREAK)
-                months.add((Date)info.getAdditionalInformation());
+                months.add((Date) info.getAdditionalInformation());
 
         assertEquals("Should contain twelve months per year", 12, months.size());
     }
@@ -282,6 +280,30 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
 
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(date1, date2);
         assertEquals("Should find one day inbetween", 1, daysInbetween.size());
+    }
+
+    public void testShouldInsertFillerIfMonthsFirstWeekDoesContainDaysFromLastMonth() {
+        // if the first day of a month is a wednesday, then you need to fill up the beginning of the week with place holders for week views.
+        // Other views may chose to ignore them. The situation is: You have a month break (but no week break in the beginning, because the
+        // week didn't begin on Wednesday), then four fillers, then three normal days, then the first week break of the month.
+        CPAppointment app = new CPAppointment();
+        app.setStartDate(WEDNESDAY());
+        app.setEndDate(plusOneHour(WEDNESDAY()));
+        CPPartition partition = strategy.partition(Arrays.asList(app));
+        int daysCounted = 0, fillersCounted = 0;
+        boolean doCounting = false;
+        for (CPFormattingInformation info : partition.getFormattingInformation()) {
+            if (info.getType() == MonthPartitioningStrategy.MONTHBREAK)
+                doCounting = true;
+            if (info.getType() == MonthPartitioningStrategy.WEEKBREAK)
+                doCounting = false;
+            if (doCounting && info.getType() == MonthPartitioningStrategy.FILLDAY)
+                fillersCounted++;
+            if (doCounting && info.getType() == MonthPartitioningStrategy.DAYBREAK)
+                daysCounted++;
+        }
+        assertEquals("First week should have four normal days", 4, daysCounted);
+        assertEquals("First week should have three filler markers", 3, fillersCounted);
     }
 
     public void testShouldInsertYearBreak() {
