@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -59,6 +58,7 @@ import java.util.Date;
 import java.util.List;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
+import com.openexchange.imap.IMAPTracer.TracerState;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -282,7 +282,7 @@ public final class AllFetch {
                 final SBOutputStream sbout = new SBOutputStream();
                 TracerState tracerState = null;
                 try {
-                    tracerState = enableTrace(p, sbout);
+                    tracerState = IMAPTracer.enableTrace(p, sbout);
                 } catch (final SecurityException e) {
                     logger.error(e.getMessage(), e);
                 } catch (final IllegalArgumentException e) {
@@ -350,7 +350,7 @@ public final class AllFetch {
                 } finally {
                     if (null != tracerState) {
                         try {
-                            restoreTraceState(p, tracerState);
+                            IMAPTracer.restoreTraceState(p, tracerState);
                         } catch (final SecurityException e) {
                             logger.error(e.getMessage(), e);
                         } catch (final IllegalArgumentException e) {
@@ -414,115 +414,6 @@ public final class AllFetch {
          * Both references are not null
          */
         return null;
-    }
-
-    /**
-     * Enables the {@link com.sun.mail.util.TraceInputStream TraceInputStream} of specified protocol.
-     * 
-     * @param protocol The protocol
-     * @param outputStream The output stream to apply to protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}
-     * @return The previous state of protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}
-     * @throws SecurityException If a security error occurs
-     * @throws NoSuchFieldException If a field does not exist
-     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field
-     *             (or a subclass or implementor thereof)
-     * @throws IllegalAccessException If the underlying field is inaccessible
-     */
-    static TracerState enableTrace(final com.sun.mail.iap.Protocol protocol, final OutputStream outputStream) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
-        traceInputField.setAccessible(true);
-        /*
-         * Fetch trace input stream
-         */
-        final com.sun.mail.util.TraceInputStream tracer = (com.sun.mail.util.TraceInputStream) traceInputField.get(protocol);
-        /*
-         * Fetch tracer's flag
-         */
-        final Field traceField = com.sun.mail.util.TraceInputStream.class.getDeclaredField("trace");
-        traceField.setAccessible(true);
-        /*
-         * Backup old
-         */
-        final boolean oldTrace = traceField.getBoolean(tracer);
-        /*
-         * Set new
-         */
-        tracer.setTrace(true);
-        /*
-         * Fetch tracer's stream
-         */
-        final Field outField = com.sun.mail.util.TraceInputStream.class.getDeclaredField("traceOut");
-        outField.setAccessible(true);
-        /*
-         * Backup old
-         */
-        final OutputStream oldOut = (OutputStream) outField.get(tracer);
-        /*
-         * Set new
-         */
-        outField.set(tracer, outputStream);
-        /*
-         * Return old state
-         */
-        return new TracerState(oldTrace, oldOut);
-    }
-
-    /**
-     * Restores specified trace state for given protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}.
-     * 
-     * @param protocol The protocol whose {@link com.sun.mail.util.TraceInputStream TraceInputStream} shall be restored
-     * @param tracerState The trace state to restore
-     * @throws SecurityException If a security error occurs
-     * @throws NoSuchFieldException If a field does not exist
-     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field
-     *             (or a subclass or implementor thereof)
-     * @throws IllegalAccessException If the underlying field is inaccessible
-     */
-    static void restoreTraceState(final com.sun.mail.iap.Protocol protocol, final TracerState tracerState) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
-        traceInputField.setAccessible(true);
-        /*
-         * Fetch trace input stream
-         */
-        final com.sun.mail.util.TraceInputStream tracer = (com.sun.mail.util.TraceInputStream) traceInputField.get(protocol);
-        /*
-         * Restore flag
-         */
-        tracer.setTrace(tracerState.isTrace());
-        /*
-         * Fetch tracer's stream
-         */
-        final Field outField = com.sun.mail.util.TraceInputStream.class.getDeclaredField("traceOut");
-        outField.setAccessible(true);
-        /*
-         * Restore out
-         */
-        outField.set(tracer, tracerState.getOut());
-    }
-
-    /**
-     * Helper class to store the state of a {@link com.sun.mail.util.TraceInputStream TraceInputStream} instance.
-     */
-    private static final class TracerState {
-
-        private final boolean trace;
-
-        private final java.io.OutputStream out;
-
-        public TracerState(final boolean trace, final OutputStream out) {
-            super();
-            this.trace = trace;
-            this.out = out;
-        }
-
-        public boolean isTrace() {
-            return trace;
-        }
-
-        public java.io.OutputStream getOut() {
-            return out;
-        }
-
     }
 
     /**
