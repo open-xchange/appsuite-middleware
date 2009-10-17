@@ -221,12 +221,6 @@ public final class AllFetch {
      * ######################## METHODS ########################
      */
 
-    private static final String COMMAND_FETCH = "FETCH 1:* (UID INTERNALDATE)";
-
-    private static final String ITEM_UID = "UID";
-
-    private static final String ITEM_INTERNALDATE = "INTERNALDATE";
-
     /**
      * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date.
      * 
@@ -238,183 +232,11 @@ public final class AllFetch {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
-            /*
-             * Empty folder...
-             */
-            return new MailMessage[0];
-        }
-        final org.apache.commons.logging.Log logger = LOG;
-        return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                /*
-                 * Enable tracer
-                 */
-                final SBOutputStream sbout = new SBOutputStream();
-                TracerState tracerState = null;
-                try {
-                    tracerState = enableTrace(p, sbout);
-                } catch (final SecurityException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final IllegalArgumentException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final NoSuchFieldException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (final IllegalAccessException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                /*-
-                 * Arguments:  sequence set
-                 * message data item names or macro
-                 * 
-                 * Responses:  untagged responses: FETCH
-                 * 
-                 * Result:     OK - fetch completed
-                 *             NO - fetch error: can't fetch that data
-                 *             BAD - command unknown or arguments invalid
-                 */
-                try {
-                    final Response[] r = p.command(COMMAND_FETCH, null);
-                    final int len = r.length - 1;
-                    final Response response = r[len];
-                    final List<MailMessage> l = new ArrayList<MailMessage>(len);
-                    if (response.isOK()) {
-                        final String fullname = imapFolder.getFullName();
-                        try {
-                            for (int j = 0; j < len; j++) {
-                                final Response resp = r[j];
-                                if (resp instanceof FetchResponse) {
-                                    final FetchResponse fr = (FetchResponse) resp;
-                                    final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(
-                                        UID.class,
-                                        fr,
-                                        ITEM_UID,
-                                        config,
-                                        session).uid), fullname);
-                                    m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE, config, session).getDate());
-                                    l.add(m);
-                                    r[j] = null;
-                                }
-                            }
-                        } catch (final ProtocolException e) {
-                            if (tracerState != null) {
-                                final StringBuilder sb = sbout.getTrace();
-                                sb.insert(0, "\nIMAP trace:\n");
-                                sb.insert(0, e.getMessage());
-                                logger.error(sb.toString());
-                            }
-                            throw e;
-                        }
-                        p.notifyResponseHandlers(r);
-                    } else if (response.isBAD()) {
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            COMMAND_FETCH,
-                            response.toString()));
-                    } else if (response.isNO()) {
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            COMMAND_FETCH,
-                            response.toString()));
-                    } else {
-                        p.handleResult(response);
-                    }
-                    Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
-                    return l.toArray(new MailMessage[l.size()]);
-                } finally {
-                    if (null != tracerState) {
-                        try {
-                            restoreTraceState(p, tracerState);
-                        } catch (final SecurityException e) {
-                            logger.error(e.getMessage(), e);
-                        } catch (final IllegalArgumentException e) {
-                            logger.error(e.getMessage(), e);
-                        } catch (final NoSuchFieldException e) {
-                            logger.error(e.getMessage(), e);
-                        } catch (final IllegalAccessException e) {
-                            logger.error(e.getMessage(), e);
-                        }
-                    }
-                }
-            }
-
-        }));
+        return fetchLowCost(imapFolder, new LowCostItem[] { LowCostItem.UID, LowCostItem.INTERNALDATE }, ascending, config, session);
     }
 
     /**
-     * Gets the item associated with given class in specified <i>FETCH</i> response; throws an appropriate protocol exception if not present
-     * in given <i>FETCH</i> response.
-     * 
-     * @param <I> The returned item's class
-     * @param clazz The item class to look for
-     * @param fetchResponse The <i>FETCH</i> response
-     * @param itemName The item name to generate appropriate error message on absence
-     * @param config The IMAP configuration
-     * @param session The session
-     * @return The item associated with given class in specified <i>FETCH</i> response.
-     */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName, final IMAPConfig config, final Session session) throws ProtocolException {
-        final I retval = getItemOf(clazz, fetchResponse);
-        if (null == retval) {
-            throw missingFetchItem(itemName, config, session);
-        }
-        return retval;
-    }
-
-    /**
-     * Gets the item associated with given class in specified <i>FETCH</i> response.
-     * 
-     * @param <I> The returned item's class
-     * @param clazz The item class to look for
-     * @param fetchResponse The <i>FETCH</i> response
-     * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
-     * @see #getItemOf(Class, FetchResponse, String)
-     */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
-        final int len = fetchResponse.getItemCount();
-        for (int i = 0; i < len; i++) {
-            final Item item = fetchResponse.getItem(i);
-            if (clazz.isInstance(item)) {
-                return clazz.cast(item);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Generates a new protocol exception according to following template:<br>
-     * <code>&quot;Missing &lt;itemName&gt; item in FETCH response.&quot;</code>
-     * 
-     * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
-     * @param config The IMAP configuration
-     * @param session The session
-     * @return A new protocol exception with appropriate message.
-     */
-    static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
-        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
-        sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
-        sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
-        return new ProtocolException(sb.toString());
-    }
-
-    /**
-     * Gets the fetch items' string representation; e.g <code>"UID INTERNALDATE"</code>.
-     * 
-     * @param items The items
-     * @return The string representation
-     */
-    public static String getFetchCommand(final LowCostItem[] items) {
-        final StringBuilder command = new StringBuilder(64);
-        command.append(items[0].getItemString());
-        for (int i = 1; i < items.length; i++) {
-            command.append(' ').append(items[i].getItemString());
-        }
-        return command.toString();
-    }
-
-    /**
-     * Fetches all messages from given IMAP folder and pre-fills instances with given low-cost fetch item list.
+     * Fetches all messages from given IMAP folder and pre-fills instances with fullname and given low-cost fetch item list.
      * <p>
      * Since returned instances are sorted, the low-cost fetch item list must contain <code>"INTERNALDATE"</code>.
      * 
@@ -746,6 +568,77 @@ public final class AllFetch {
             return sb;
         }
 
+    }
+
+    /**
+     * Gets the item associated with given class in specified <i>FETCH</i> response; throws an appropriate protocol exception if not present
+     * in given <i>FETCH</i> response.
+     * 
+     * @param <I> The returned item's class
+     * @param clazz The item class to look for
+     * @param fetchResponse The <i>FETCH</i> response
+     * @param itemName The item name to generate appropriate error message on absence
+     * @param config The IMAP configuration
+     * @param session The session
+     * @return The item associated with given class in specified <i>FETCH</i> response.
+     */
+    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName, final IMAPConfig config, final Session session) throws ProtocolException {
+        final I retval = getItemOf(clazz, fetchResponse);
+        if (null == retval) {
+            throw missingFetchItem(itemName, config, session);
+        }
+        return retval;
+    }
+
+    /**
+     * Gets the item associated with given class in specified <i>FETCH</i> response.
+     * 
+     * @param <I> The returned item's class
+     * @param clazz The item class to look for
+     * @param fetchResponse The <i>FETCH</i> response
+     * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
+     * @see #getItemOf(Class, FetchResponse, String)
+     */
+    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+        final int len = fetchResponse.getItemCount();
+        for (int i = 0; i < len; i++) {
+            final Item item = fetchResponse.getItem(i);
+            if (clazz.isInstance(item)) {
+                return clazz.cast(item);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Generates a new protocol exception according to following template:<br>
+     * <code>&quot;Missing &lt;itemName&gt; item in FETCH response.&quot;</code>
+     * 
+     * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
+     * @param config The IMAP configuration
+     * @param session The session
+     * @return A new protocol exception with appropriate message.
+     */
+    static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
+        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
+        sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
+        sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
+        return new ProtocolException(sb.toString());
+    }
+
+    /**
+     * Gets the fetch items' string representation; e.g <code>"UID INTERNALDATE"</code>.
+     * 
+     * @param items The items
+     * @return The string representation
+     */
+    public static String getFetchCommand(final LowCostItem[] items) {
+        final StringBuilder command = new StringBuilder(64);
+        command.append(items[0].getItemString());
+        for (int i = 1; i < items.length; i++) {
+            command.append(' ').append(items[i].getItemString());
+        }
+        return command.toString();
     }
 
 }
