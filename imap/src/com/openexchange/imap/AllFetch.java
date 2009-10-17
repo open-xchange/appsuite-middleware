@@ -244,9 +244,26 @@ public final class AllFetch {
              */
             return new MailMessage[0];
         }
+        final org.apache.commons.logging.Log logger = LOG;
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                /*
+                 * Enable tracer
+                 */
+                final SBOutputStream sbout = new SBOutputStream();
+                TracerState tracerState = null;
+                try {
+                    tracerState = enableTrace(p, sbout);
+                } catch (final SecurityException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final IllegalArgumentException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final NoSuchFieldException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final IllegalAccessException e) {
+                    logger.error(e.getMessage(), e);
+                }
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -257,40 +274,69 @@ public final class AllFetch {
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
                  */
-                final Response[] r = p.command(COMMAND_FETCH, null);
-                final int len = r.length - 1;
-                final Response response = r[len];
-                final List<MailMessage> l = new ArrayList<MailMessage>(len);
-                if (response.isOK()) {
-                    final String fullname = imapFolder.getFullName();
-                    for (int j = 0; j < len; j++) {
-                        final Response resp = r[j];
-                        if (resp instanceof FetchResponse) {
-                            final FetchResponse fr = (FetchResponse) resp;
-                            final MailMessage m = new IDMailMessage(
-                                String.valueOf(getItemOf(UID.class, fr, ITEM_UID, config, session).uid),
-                                fullname);
-                            m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE, config, session).getDate());
-                            l.add(m);
-                            r[j] = null;
+                try {
+                    final Response[] r = p.command(COMMAND_FETCH, null);
+                    final int len = r.length - 1;
+                    final Response response = r[len];
+                    final List<MailMessage> l = new ArrayList<MailMessage>(len);
+                    if (response.isOK()) {
+                        final String fullname = imapFolder.getFullName();
+                        try {
+                            for (int j = 0; j < len; j++) {
+                                final Response resp = r[j];
+                                if (resp instanceof FetchResponse) {
+                                    final FetchResponse fr = (FetchResponse) resp;
+                                    final MailMessage m = new IDMailMessage(String.valueOf(getItemOf(
+                                        UID.class,
+                                        fr,
+                                        ITEM_UID,
+                                        config,
+                                        session).uid), fullname);
+                                    m.setReceivedDate(getItemOf(INTERNALDATE.class, fr, ITEM_INTERNALDATE, config, session).getDate());
+                                    l.add(m);
+                                    r[j] = null;
+                                }
+                            }
+                        } catch (final ProtocolException e) {
+                            if (tracerState != null) {
+                                final StringBuilder sb = sbout.getTrace();
+                                sb.insert(0, "\nIMAP trace:\n");
+                                sb.insert(0, e.getMessage());
+                                logger.error(sb.toString());
+                            }
+                            throw e;
+                        }
+                        p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            COMMAND_FETCH,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            COMMAND_FETCH,
+                            response.toString()));
+                    } else {
+                        p.handleResult(response);
+                    }
+                    Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
+                    return l.toArray(new MailMessage[l.size()]);
+                } finally {
+                    if (null != tracerState) {
+                        try {
+                            restoreTraceState(p, tracerState);
+                        } catch (final SecurityException e) {
+                            logger.error(e.getMessage(), e);
+                        } catch (final IllegalArgumentException e) {
+                            logger.error(e.getMessage(), e);
+                        } catch (final NoSuchFieldException e) {
+                            logger.error(e.getMessage(), e);
+                        } catch (final IllegalAccessException e) {
+                            logger.error(e.getMessage(), e);
                         }
                     }
-                    p.notifyResponseHandlers(r);
-                } else if (response.isBAD()) {
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_FETCH,
-                        response.toString()));
-                } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_FETCH,
-                        response.toString()));
-                } else {
-                    p.handleResult(response);
                 }
-                Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
-                return l.toArray(new MailMessage[l.size()]);
             }
 
         }));
@@ -406,45 +452,92 @@ public final class AllFetch {
                     final String lowCostItems = getFetchCommand(items);
                     command = new StringBuilder(12 + lowCostItems.length()).append("FETCH 1:* (").append(lowCostItems).append(')').toString();
                 }
-                final Response[] r = p.command(command, null);
-                final int len = r.length - 1;
-                final Response response = r[len];
-                final List<MailMessage> l = new ArrayList<MailMessage>(len);
-                if (response.isOK()) {
-                    final String fullname = imapFolder.getFullName();
-                    for (int j = 0; j < len; j++) {
-                        final Response resp = r[j];
-                        if (resp instanceof FetchResponse) {
-                            final FetchResponse fr = (FetchResponse) resp;
-                            final MailMessage m = new IDMailMessage(null, fullname);
-                            for (final LowCostItem lowCostItem : items) {
-                                final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
-                                try {
-                                    lowCostItem.getItemHandler().handleItem(item, m, logger);
-                                } catch (final MailException e) {
-                                    logger.error(e.getMessage(), e);
+                /*
+                 * Enable tracer
+                 */
+                final SBOutputStream sbout = new SBOutputStream();
+                TracerState tracerState = null;
+                try {
+                    tracerState = enableTrace(p, sbout);
+                } catch (final SecurityException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final IllegalArgumentException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final NoSuchFieldException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final IllegalAccessException e) {
+                    logger.error(e.getMessage(), e);
+                }
+                try {
+                    final Response[] r = p.command(command, null);
+                    final int len = r.length - 1;
+                    final Response response = r[len];
+                    final List<MailMessage> l = new ArrayList<MailMessage>(len);
+                    if (response.isOK()) {
+                        final String fullname = imapFolder.getFullName();
+                        try {
+                            for (int j = 0; j < len; j++) {
+                                final Response resp = r[j];
+                                if (resp instanceof FetchResponse) {
+                                    final FetchResponse fr = (FetchResponse) resp;
+                                    final MailMessage m = new IDMailMessage(null, fullname);
+                                    for (final LowCostItem lowCostItem : items) {
+                                        final Item item = getItemOf(
+                                            lowCostItem.getItemClass(),
+                                            fr,
+                                            lowCostItem.getItemString(),
+                                            config,
+                                            session);
+                                        try {
+                                            lowCostItem.getItemHandler().handleItem(item, m, logger);
+                                        } catch (final MailException e) {
+                                            logger.error(e.getMessage(), e);
+                                        }
+                                    }
+                                    l.add(m);
+                                    r[j] = null;
                                 }
                             }
-                            l.add(m);
-                            r[j] = null;
+                        } catch (final ProtocolException e) {
+                            if (tracerState != null) {
+                                final StringBuilder sb = sbout.getTrace();
+                                sb.insert(0, "\nIMAP trace:\n");
+                                sb.insert(0, e.getMessage());
+                                logger.error(sb.toString());
+                            }
+                            throw e;
+                        }
+                        p.notifyResponseHandlers(r);
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            response.toString()));
+                    } else {
+                        p.handleResult(response);
+                    }
+                    Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
+                    return l.toArray(new MailMessage[l.size()]);
+                } finally {
+                    if (null != tracerState) {
+                        try {
+                            restoreTraceState(p, tracerState);
+                        } catch (final SecurityException e) {
+                            logger.error(e.getMessage(), e);
+                        } catch (final IllegalArgumentException e) {
+                            logger.error(e.getMessage(), e);
+                        } catch (final NoSuchFieldException e) {
+                            logger.error(e.getMessage(), e);
+                        } catch (final IllegalAccessException e) {
+                            logger.error(e.getMessage(), e);
                         }
                     }
-                    p.notifyResponseHandlers(r);
-                } else if (response.isBAD()) {
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
-                } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        response.toString()));
-                } else {
-                    p.handleResult(response);
                 }
-                Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
-                return l.toArray(new MailMessage[l.size()]);
             }
 
         }));
@@ -499,7 +592,19 @@ public final class AllFetch {
         return null;
     }
 
-    static TracerState applyTrace(final com.sun.mail.iap.Protocol protocol, final SBOutputStream outputStream) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    /**
+     * Enables the {@link com.sun.mail.util.TraceInputStream TraceInputStream} of specified protocol.
+     * 
+     * @param protocol The protocol
+     * @param outputStream The output stream to apply to protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}
+     * @return The previous state of protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}
+     * @throws SecurityException If a security error occurs
+     * @throws NoSuchFieldException If a field does not exist
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field
+     *             (or a subclass or implementor thereof)
+     * @throws IllegalAccessException If the underlying field is inaccessible
+     */
+    static TracerState enableTrace(final com.sun.mail.iap.Protocol protocol, final OutputStream outputStream) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
         traceInputField.setAccessible(true);
         /*
@@ -527,7 +632,7 @@ public final class AllFetch {
         /*
          * Backup old
          */
-        final java.io.OutputStream oldOut = (java.io.OutputStream) outField.get(tracer);
+        final OutputStream oldOut = (OutputStream) outField.get(tracer);
         /*
          * Set new
          */
@@ -538,6 +643,17 @@ public final class AllFetch {
         return new TracerState(oldTrace, oldOut);
     }
 
+    /**
+     * Restores specified trace state for given protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}.
+     * 
+     * @param protocol The protocol whose {@link com.sun.mail.util.TraceInputStream TraceInputStream} shall be restored
+     * @param tracerState The trace state to restore
+     * @throws SecurityException If a security error occurs
+     * @throws NoSuchFieldException If a field does not exist
+     * @throws IllegalArgumentException If the specified object is not an instance of the class or interface declaring the underlying field
+     *             (or a subclass or implementor thereof)
+     * @throws IllegalAccessException If the underlying field is inaccessible
+     */
     static void restoreTraceState(final com.sun.mail.iap.Protocol protocol, final TracerState tracerState) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         final Field traceInputField = com.sun.mail.iap.Protocol.class.getDeclaredField("traceInput");
         traceInputField.setAccessible(true);
@@ -560,6 +676,9 @@ public final class AllFetch {
         outField.set(tracer, tracerState.getOut());
     }
 
+    /**
+     * Helper class to store the state of a {@link com.sun.mail.util.TraceInputStream TraceInputStream} instance.
+     */
     private static final class TracerState {
 
         private final boolean trace;
@@ -582,6 +701,9 @@ public final class AllFetch {
 
     }
 
+    /**
+     * An {@link OutputStream} writing to a {@link StringBuilder} instance.
+     */
     private static final class SBOutputStream extends OutputStream {
 
         private final StringBuilder sb;
@@ -591,7 +713,7 @@ public final class AllFetch {
          */
         public SBOutputStream() {
             super();
-            sb = new StringBuilder(1024);
+            sb = new StringBuilder(8192);
         }
 
         @Override
@@ -620,8 +742,8 @@ public final class AllFetch {
          * 
          * @return The trace
          */
-        public String getTrace() {
-            return sb.toString();
+        public StringBuilder getTrace() {
+            return sb;
         }
 
     }

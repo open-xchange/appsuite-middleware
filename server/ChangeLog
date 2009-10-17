@@ -1,3 +1,7 @@
+* 2009-10-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #14336: Enhanced logging if a fetch item is missing in IMAP server's FETCH response
+
 * 2009-10-16 - martin.herfurth@open-xchange.com
 
  - Bugfix #14653: No notification mails for pseudo changes.
