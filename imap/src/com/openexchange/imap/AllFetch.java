@@ -221,6 +221,8 @@ public final class AllFetch {
      * ######################## METHODS ########################
      */
 
+    private static final LowCostItem[] ITEMS = new LowCostItem[] { LowCostItem.UID, LowCostItem.INTERNALDATE };
+
     /**
      * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date.
      * 
@@ -232,7 +234,7 @@ public final class AllFetch {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
-        return fetchLowCost(imapFolder, new LowCostItem[] { LowCostItem.UID, LowCostItem.INTERNALDATE }, ascending, config, session);
+        return fetchLowCost(imapFolder, ITEMS, ascending, config, session);
     }
 
     /**
