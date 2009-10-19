@@ -1,3 +1,7 @@
+* 2009-10-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #14668: Reading values correctly from user_attribute table.
+
 * 2009-10-17 - thorben.betten@open-xchange.com
 
  - Bugfix #14336: Enhanced logging if a fetch item is missing in IMAP server's FETCH response

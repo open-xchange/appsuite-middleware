@@ -207,7 +207,7 @@ public class RdbUserStorage extends UserStorage {
         loadLoginInfo(ctx, con, users);
         loadContact(ctx, con, users);
         loadGroups(ctx, con, users);
-        loadAliases(ctx, con, users);
+        loadAttributes(ctx, con, users);
         return users.values().toArray(new UserImpl[users.size()]);
     }
 
@@ -326,7 +326,7 @@ public class RdbUserStorage extends UserStorage {
     
     private static final String STR_ALIAS = "alias";
     
-    private void loadAliases(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
+    private void loadAttributes(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
         Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -350,7 +350,7 @@ public class RdbUserStorage extends UserStorage {
                     set = new HashSet<String>();
                     attrs.put(name, set);
                 }
-                set.add(result.getString(2));
+                set.add(result.getString(3));
             }
         } catch (SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
