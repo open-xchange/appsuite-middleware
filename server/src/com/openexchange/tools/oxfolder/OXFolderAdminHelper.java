@@ -172,12 +172,12 @@ public final class OXFolderAdminHelper {
      * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
      * 
      * @param editable <code>true</code> if context's admin has administer permission on public folder(s); otherwise <code>false</code>
-     * @param userId The ID of the user for whom the option shall be set
      * @param cid The context ID
+     * @param userId The ID of the user for whom the option shall be set
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
-    public void setPublicFolderEditable(final boolean editable, final int userId, final int cid, final Connection writeCon) throws OXException {
+    public void setPublicFolderEditable(final boolean editable, final int cid, final int userId, final Connection writeCon) throws OXException {
         final int admin;
         try {
             admin = getContextAdminID(cid, writeCon);
