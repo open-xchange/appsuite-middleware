@@ -140,7 +140,7 @@ public interface ContactInterface {
      * 
      * @param userId The User ID
      * @return User's contact
-     * @throws OXException
+     * @throws OXException If loading the user fails
      */
     public Contact getUserById(int userId) throws OXException;
 
@@ -150,7 +150,7 @@ public interface ContactInterface {
      * @param userId The User ID
      * @param performReadCheck <code>true</code> to perform read check; otherwise <code>false</code>
      * @return User's contact
-     * @throws OXException
+     * @throws OXException If loading the user fails
      */
     public Contact getUserById(int userId, boolean performReadCheck) throws OXException;
 
