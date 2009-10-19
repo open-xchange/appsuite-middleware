@@ -49,13 +49,15 @@
 
 package com.openexchange.folder.json.osgi;
 
+import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
-import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -65,41 +67,40 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration folderMultipleService;
 
-    private ServiceTracker httpTracker;
-
-    private ServiceTracker folderServiceTracker;
-
-    private ServiceTracker ctServiceTracker;
+    private List<ServiceTracker> trackers;
 
     public void start(final BundleContext context) throws Exception {
-        folderMultipleService = context.registerService(
-            MultipleHandlerFactoryService.class.getName(),
-            new FolderMultipleHandlerFactory(),
-            null);
-        folderServiceTracker = new ServiceTracker(
+        folderMultipleService =
+            context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null);
+        trackers = new ArrayList<ServiceTracker>(6);
+        trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
             context,
-            FolderService.class.getName(),
-            new RegistryServiceTrackerCustomizer<FolderService>(context, ServiceRegistry.getInstance(), FolderService.class));
-        folderServiceTracker.open();
-        httpTracker = new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context));
-        httpTracker.open();
-        ctServiceTracker = new ServiceTracker(
+            getInstance(),
+            FolderService.class)));
+        trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+        trackers.add(new ServiceTracker(
             context,
             ContentTypeDiscoveryService.class.getName(),
-            new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(
-                context,
-                ServiceRegistry.getInstance(),
-                ContentTypeDiscoveryService.class));
-        ctServiceTracker.open();
+            new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
+        /*
+         * Open trackers
+         */
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
     }
 
     public void stop(final BundleContext context) throws Exception {
-        ctServiceTracker.close();
-        ctServiceTracker = null;
-        httpTracker.close();
-        httpTracker = null;
-        folderServiceTracker.close();
-        folderServiceTracker = null;
+        if (null != trackers) {
+            /*
+             * Close trackers
+             */
+            for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            trackers.clear();
+            trackers = null;
+        }
         folderMultipleService.unregister();
         folderMultipleService = null;
     }

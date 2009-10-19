@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.writer;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -388,6 +389,44 @@ public final class FolderWriter {
      * @throws FolderException If writing JSON array fails
      */
     public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders) throws FolderException {
+        final int[] cols = null == fields ? ALL_FIELDS : fields;
+        final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
+        for (int i = 0; i < ffws.length; i++) {
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            if (null == ffw) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                }
+                ffw = UNKNOWN_FIELD_FFW;
+            }
+            ffws[i] = ffw;
+        }
+        try {
+            final JSONArray jsonArray = new JSONArray();
+            final JSONArrayPutter jsonPutter = new JSONArrayPutter();
+            for (final UserizedFolder folder : folders) {
+                final JSONArray folderArray = new JSONArray();
+                jsonPutter.setJSONArray(folderArray);
+                for (final FolderFieldWriter ffw : ffws) {
+                    ffw.writeField(jsonPutter, folder);
+                }
+                jsonArray.put(folderArray);
+            }
+            return jsonArray;
+        } catch (final JSONException e) {
+            throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
+     * 
+     * @param fields The fields to write to each JSON array or <code>null</code> to write all
+     * @param folders The folders
+     * @return The JSON array carrying JSON arrays of given folders
+     * @throws FolderException If writing JSON array fails
+     */
+    public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders) throws FolderException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
