@@ -136,20 +136,20 @@ public interface ContactInterface {
     public Contact getObjectById(int objectId, int inFolder) throws OXException;
 
     /**
-     * Loads one contact of the given user id
+     * Loads the contact of the given user id
      * 
      * @param userId The User ID
-     * @return return the ContactObject
+     * @return User's contact
      * @throws OXException
      */
     public Contact getUserById(int userId) throws OXException;
 
     /**
-     * Loads one contact of the given user id
+     * Loads the contact of the given user id
      * 
      * @param userId The User ID
      * @param performReadCheck <code>true</code> to perform read check; otherwise <code>false</code>
-     * @return return the ContactObject
+     * @return User's contact
      * @throws OXException
      */
     public Contact getUserById(int userId, boolean performReadCheck) throws OXException;
