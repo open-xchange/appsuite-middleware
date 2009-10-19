@@ -63,7 +63,7 @@ public final class DraftsContentType extends MailContentType {
      * 
      * @return The {@link DraftsContentType} instance
      */
-    public static MailContentType getInstance() {
+    public static DraftsContentType getInstance() {
         return instance;
     }
 
@@ -72,6 +72,11 @@ public final class DraftsContentType extends MailContentType {
      */
     private DraftsContentType() {
         super();
+    }
+
+    @Override
+    public int getModule() {
+        return 9;
     }
 
 }

@@ -63,7 +63,7 @@ public final class TrashContentType extends MailContentType {
      * 
      * @return The {@link TrashContentType} instance
      */
-    public static MailContentType getInstance() {
+    public static TrashContentType getInstance() {
         return instance;
     }
 
@@ -72,6 +72,11 @@ public final class TrashContentType extends MailContentType {
      */
     private TrashContentType() {
         super();
+    }
+
+    @Override
+    public int getModule() {
+        return 12;
     }
 
 }

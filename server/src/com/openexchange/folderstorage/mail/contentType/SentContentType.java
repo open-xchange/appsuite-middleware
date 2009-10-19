@@ -63,7 +63,7 @@ public final class SentContentType extends MailContentType {
      * 
      * @return The {@link SentContentType} instance
      */
-    public static MailContentType getInstance() {
+    public static SentContentType getInstance() {
         return instance;
     }
 
@@ -72,6 +72,11 @@ public final class SentContentType extends MailContentType {
      */
     private SentContentType() {
         super();
+    }
+
+    @Override
+    public int getModule() {
+        return 10;
     }
 
 }

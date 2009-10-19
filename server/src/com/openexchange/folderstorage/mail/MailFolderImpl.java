@@ -79,21 +79,20 @@ public final class MailFolderImpl extends AbstractFolder {
      * The mail folder content type.
      */
     public static enum MailFolderType {
-        NONE(MailContentType.getInstance(), 0),
-        ROOT(SystemContentType.getInstance(), 0),
-        INBOX(MailContentType.getInstance(), 1),
-        DRAFTS(DraftsContentType.getInstance(), 2),
-        SENT(SentContentType.getInstance(), 3),
-        SPAM(SpamContentType.getInstance(), 4),
-        TRASH(TrashContentType.getInstance(), 5);
+        NONE(MailContentType.getInstance()),
+        ROOT(SystemContentType.getInstance()), INBOX(MailContentType.getInstance()), // FolderObject.MAIL
+        DRAFTS(DraftsContentType.getInstance()),
+        SENT(SentContentType.getInstance()),
+        SPAM(SpamContentType.getInstance()),
+        TRASH(TrashContentType.getInstance());
 
         private final ContentType contentType;
 
         private final int type;
 
-        private MailFolderType(final ContentType contentType, final int type) {
+        private MailFolderType(final ContentType contentType) {
             this.contentType = contentType;
-            this.type = type;
+            this.type = contentType.getModule();
         }
 
         /**
@@ -119,13 +118,6 @@ public final class MailFolderImpl extends AbstractFolder {
     private MailFolderType mailFolderType;
 
     private boolean cacheable;
-
-    /**
-     * Initializes an empty {@link MailFolderImpl}.
-     */
-    public MailFolderImpl() {
-        super();
-    }
 
     /**
      * Initializes a new {@link MailFolderImpl} from given mail folder.

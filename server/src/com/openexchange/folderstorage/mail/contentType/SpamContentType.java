@@ -63,7 +63,7 @@ public final class SpamContentType extends MailContentType {
      * 
      * @return The {@link SpamContentType} instance
      */
-    public static MailContentType getInstance() {
+    public static SpamContentType getInstance() {
         return instance;
     }
 
@@ -72,6 +72,11 @@ public final class SpamContentType extends MailContentType {
      */
     private SpamContentType() {
         super();
+    }
+
+    @Override
+    public int getModule() {
+        return 11;
     }
 
 }
