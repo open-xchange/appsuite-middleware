@@ -738,6 +738,13 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                                 }
                             }
                             setOptionalString(stmt, pos++, encryptedPassword);
+                        } else if (Attribute.PERSONAL_LITERAL == attribute) {
+                            final String personal = mailAccount.getPersonal();
+                            if (isEmpty(personal)) {
+                                stmt.setNull(pos++, Types.VARCHAR);
+                            } else {
+                                stmt.setString(pos++, personal);
+                            }
                         } else {
                             stmt.setObject(pos++, value);
                         }

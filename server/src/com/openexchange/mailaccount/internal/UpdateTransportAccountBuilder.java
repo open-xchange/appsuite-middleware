@@ -66,7 +66,8 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         Attribute.TRANSPORT_LOGIN_LITERAL,
         Attribute.TRANSPORT_PASSWORD_LITERAL,
         Attribute.TRANSPORT_URL_LITERAL,
-        Attribute.PRIMARY_ADDRESS_LITERAL);
+        Attribute.PRIMARY_ADDRESS_LITERAL,
+        Attribute.PERSONAL_LITERAL);
 
     private static final Set<Attribute> PROPERTY_ATTRIBUTES = EnumSet.of(
         Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL,
