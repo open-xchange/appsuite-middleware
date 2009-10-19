@@ -202,27 +202,27 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
         }
         if (json.has(MailAccountFields.TRASH_FULLNAME)) {
-            account.setTrash(parseString(json, MailAccountFields.TRASH_FULLNAME).trim());
+            account.setTrashFullname(parseString(json, MailAccountFields.TRASH_FULLNAME).trim());
             attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SENT_FULLNAME)) {
-            account.setSent(parseString(json, MailAccountFields.SENT_FULLNAME).trim());
+            account.setSentFullname(parseString(json, MailAccountFields.SENT_FULLNAME).trim());
             attributes.add(Attribute.SENT_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.DRAFTS_FULLNAME)) {
-            account.setDrafts(parseString(json, MailAccountFields.DRAFTS_FULLNAME).trim());
+            account.setDraftsFullname(parseString(json, MailAccountFields.DRAFTS_FULLNAME).trim());
             attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM_FULLNAME)) {
-            account.setSpam(parseString(json, MailAccountFields.SPAM_FULLNAME).trim());
+            account.setSpamFullname(parseString(json, MailAccountFields.SPAM_FULLNAME).trim());
             attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_SPAM_FULLNAME)) {
-            account.setConfirmedSpam(parseString(json, MailAccountFields.CONFIRMED_SPAM_FULLNAME).trim());
+            account.setConfirmedSpamFullname(parseString(json, MailAccountFields.CONFIRMED_SPAM_FULLNAME).trim());
             attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_HAM_FULLNAME)) {
-            account.setConfirmedHam(parseString(json, MailAccountFields.CONFIRMED_HAM_FULLNAME).trim());
+            account.setConfirmedHamFullname(parseString(json, MailAccountFields.CONFIRMED_HAM_FULLNAME).trim());
             attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
         }
         final Map<String, String> props = new HashMap<String, String>();
