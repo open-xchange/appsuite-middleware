@@ -803,7 +803,9 @@ public class Folder extends SessionServlet {
                             /*
                              * Internal users folder not visible to current user
                              */
-                            LOG.error(e.getMessage(), e);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(e.getMessage(), e);
+                            }
                         }
                     }
                     final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(parentId, null)).asQueue();
