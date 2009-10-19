@@ -1152,7 +1152,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
          */
         if (mailAccount.isUnifiedINBOXEnabled()) {
             final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-            if (null != management && !management.isEnabled(user, cid, con)) {
+            if (null != management && !management.exists(user, cid, con)) {
                 management.createUnifiedINBOX(user, cid, con);
             }
         }
