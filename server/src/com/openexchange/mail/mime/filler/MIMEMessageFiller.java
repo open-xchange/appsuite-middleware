@@ -271,7 +271,7 @@ public class MIMEMessageFiller {
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
 
-                final Contact c = contactInterface.getUserById(ctx.getMailadmin());
+                final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                     final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(
                         c.getCompany(),
