@@ -75,6 +75,11 @@ public interface FolderStorage {
     public static final String ROOT_ID = "0";
 
     /**
+     * The reserved identifier for public folder: <code>"2"</code>.
+     */
+    public static final String PUBLIC_ID = "2";
+
+    /**
      * Gets the content types supported by this folder storage.
      * <p>
      * A zero length array means this folder storage supports all content types for a certain tree identifier.
