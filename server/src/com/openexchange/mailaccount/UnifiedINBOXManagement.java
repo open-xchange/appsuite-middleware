@@ -107,6 +107,31 @@ public interface UnifiedINBOXManagement {
     public void deleteUnifiedINBOX(int userId, int contextId, Connection con) throws MailAccountException;
 
     /**
+     * Checks if the Unified INBOX account exists for given user in specified context.
+     * <p>
+     * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return <code>true</code> if the Unified INBOX account exists for given user in specified context; otherwise <code>false</code>
+     * @throws MailAccountException If checking Unified INBOX account's enabled status fails
+     */
+    public boolean exists(int userId, int contextId) throws MailAccountException;
+
+    /**
+     * Checks if the Unified INBOX account exists for given user in specified context.
+     * <p>
+     * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection to use
+     * @return <code>true</code> if the Unified INBOX account exists for given user in specified context; otherwise <code>false</code>
+     * @throws MailAccountException If checking Unified INBOX account's enabled status fails
+     */
+    public boolean exists(int userId, int contextId, Connection con) throws MailAccountException;
+
+    /**
      * Checks if the Unified INBOX account is enabled for given user in specified context.
      * <p>
      * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.

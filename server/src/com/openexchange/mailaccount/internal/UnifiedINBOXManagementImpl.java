@@ -81,6 +81,8 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
 
     private static final String SQL_CHECK = "SELECT url FROM user_mail_account WHERE cid = ? AND user = ? AND name = ?";
 
+    private static final String SQL_ENABLED = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND unified_inbox > 0";
+
     /**
      * Initializes a new {@link UnifiedINBOXManagementImpl}.
      */
@@ -185,7 +187,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
-    public boolean isEnabled(final int userId, final int contextId) throws MailAccountException {
+    public boolean exists(final int userId, final int contextId) throws MailAccountException {
         Connection con = null;
         try {
             con = Database.get(contextId, false);
@@ -193,13 +195,13 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
             throw new MailAccountException(e);
         }
         try {
-            return isEnabled(userId, contextId, con);
+            return exists(userId, contextId, con);
         } finally {
             Database.back(contextId, false, con);
         }
     }
 
-    public boolean isEnabled(final int userId, final int contextId, final Connection con) throws MailAccountException {
+    public boolean exists(final int userId, final int contextId, final Connection con) throws MailAccountException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -218,7 +220,37 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         } catch (final SQLException e) {
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
-            closeSQLStuff(null, stmt);
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    public boolean isEnabled(final int userId, final int contextId) throws MailAccountException {
+        Connection con = null;
+        try {
+            con = Database.get(contextId, false);
+        } catch (final DBPoolingException e) {
+            throw new MailAccountException(e);
+        }
+        try {
+            return isEnabled(userId, contextId, con);
+        } finally {
+            Database.back(contextId, false, con);
+        }
+    }
+
+    public boolean isEnabled(final int userId, final int contextId, final Connection con) throws MailAccountException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_ENABLED);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
