@@ -118,7 +118,7 @@ public final class UpdateAction extends AbstractUserAction {
         /*
          * Get last-modified from server
          */
-        final Date lastModified = contactInterface.getUserById(id).getLastModified();
+        final Date lastModified = contactInterface.getUserById(id, false).getLastModified();
         return new AJAXRequestResult(new JSONObject(), lastModified);
     }
 

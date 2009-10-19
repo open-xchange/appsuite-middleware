@@ -100,7 +100,7 @@ public final class GetAction extends AbstractUserAction {
             ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
                 Constants.USER_ADDRESS_BOOK_FOLDER_ID,
                 session);
-        final Contact userContact = contactInterface.getUserById(userId);
+        final Contact userContact = contactInterface.getUserById(userId, false);
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         /*
          * Write user as JSON object

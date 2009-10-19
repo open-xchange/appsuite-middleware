@@ -203,7 +203,7 @@ public final class AllAction extends AbstractUserAction {
                     users = allUsers.subList(lhl, rhl).toArray(EMPTY_USERS);
                     contacts = new Contact[users.length];
                     for (int i = 0; i < contacts.length; i++) {
-                        contacts[i] = contactInterface.getUserById(users[i].getId());
+                        contacts[i] = contactInterface.getUserById(users[i].getId(), false);
                     }
                 }
             } else {
