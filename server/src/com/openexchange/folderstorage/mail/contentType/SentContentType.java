@@ -74,9 +74,4 @@ public final class SentContentType extends MailContentType {
         super();
     }
 
-    @Override
-    public int getModule() {
-        return 10;
-    }
-
 }

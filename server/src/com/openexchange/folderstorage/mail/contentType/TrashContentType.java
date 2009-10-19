@@ -74,9 +74,4 @@ public final class TrashContentType extends MailContentType {
         super();
     }
 
-    @Override
-    public int getModule() {
-        return 12;
-    }
-
 }

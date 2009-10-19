@@ -74,9 +74,4 @@ public final class DraftsContentType extends MailContentType {
         super();
     }
 
-    @Override
-    public int getModule() {
-        return 9;
-    }
-
 }

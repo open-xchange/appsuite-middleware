@@ -74,9 +74,4 @@ public final class SpamContentType extends MailContentType {
         super();
     }
 
-    @Override
-    public int getModule() {
-        return 11;
-    }
-
 }
