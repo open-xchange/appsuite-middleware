@@ -54,10 +54,12 @@ import java.util.Locale;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
@@ -136,6 +138,8 @@ public final class IMAPFolderConverter {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderConverter.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final Rights RIGHTS_EMPTY = new Rights();
 
     /**
@@ -174,8 +178,8 @@ public final class IMAPFolderConverter {
 
     private static final DefaultFolderType[] TYPES =
         {
-            DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH, DefaultFolderType.CONFIRMED_SPAM,
-            DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
+            DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH,
+            DefaultFolderType.CONFIRMED_SPAM, DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
 
     /**
      * Creates a folder data object from given IMAP folder.
@@ -557,12 +561,7 @@ public final class IMAPFolderConverter {
                     session.getUserId(),
                     imapFolder.getFullName(),
                     imapFolder.getSeparator());
-            final StringBuilder debugBuilder;
-            if (LOG.isDebugEnabled()) {
-                debugBuilder = new StringBuilder(128);
-            } else {
-                debugBuilder = null;
-            }
+            final StringBuilder debugBuilder = DEBUG ? new StringBuilder(128) : null;
             for (int j = 0; j < acls.length; j++) {
                 final ACLPermission aclPerm = new ACLPermission();
                 try {
@@ -570,7 +569,7 @@ public final class IMAPFolderConverter {
                     mailFolder.addPermission(aclPerm);
                 } catch (final AbstractOXException e) {
                     if (isUnknownEntityError(e)) {
-                        if (LOG.isDebugEnabled()) {
+                        if (DEBUG) {
                             debugBuilder.setLength(0);
                             LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acls[j].getName()).append(
                                 "\" to a system user").toString());
@@ -619,7 +618,10 @@ public final class IMAPFolderConverter {
     }
 
     private static boolean isUnknownEntityError(final AbstractOXException e) {
-        return EnumComponent.ACL_ERROR.equals(e.getComponent()) && Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == e.getDetailNumber();
+        final Component component = e.getComponent();
+        final int detailNumber = e.getDetailNumber();
+        return (EnumComponent.ACL_ERROR.equals(component) && (Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == detailNumber))
+            || (EnumComponent.USER.equals(component) && (LdapException.Code.USER_NOT_FOUND.getDetailNumber() == detailNumber));
     }
 
     private static boolean checkForNamespaceFolder(final String fullname, final IMAPStore imapStore, final Session session, final int accountId) throws MessagingException {
