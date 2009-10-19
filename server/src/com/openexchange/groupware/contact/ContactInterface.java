@@ -145,6 +145,16 @@ public interface ContactInterface {
     public Contact getUserById(int userId) throws OXException;
 
     /**
+     * Loads one contact of the given user id
+     * 
+     * @param userId The User ID
+     * @param performReadCheck <code>true</code> to perform read check; otherwise <code>false</code>
+     * @return return the ContactObject
+     * @throws OXException
+     */
+    public Contact getUserById(int userId, boolean performReadCheck) throws OXException;
+
+    /**
      * Lists all modified objects in a folder
      * 
      * @param folderID The Folder ID
