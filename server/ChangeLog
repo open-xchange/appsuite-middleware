@@ -1,6 +1,7 @@
 * 2009-10-19 - marcus.klein@open-xchange.com
 
  - Bugfix #14668: Reading values correctly from user_attribute table.
+ - Bugfix #14672: Not removing aliases from the attributes set of a user.
 
 * 2009-10-17 - thorben.betten@open-xchange.com
 

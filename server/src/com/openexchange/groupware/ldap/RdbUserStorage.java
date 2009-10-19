@@ -363,7 +363,7 @@ public class RdbUserStorage extends UserStorage {
              * Check for aliases
              */
             {
-                Set<String> aliases = attrs.remove(STR_ALIAS);
+                Set<String> aliases = attrs.get(STR_ALIAS);
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
