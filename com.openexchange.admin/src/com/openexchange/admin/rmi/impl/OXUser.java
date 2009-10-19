@@ -1178,20 +1178,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    public static void checkAndSetLanguage(final User user) throws InvalidDataException {
+    public static void checkAndSetLanguage(User user) throws InvalidDataException {
 		final String lang = user.getLanguage();
 		if (lang == null) {
-			user
-					.setLanguage(new StringBuilder(FALLBACK_LANGUAGE_CREATE.length() + FALLBACK_COUNTRY_CREATE.length()
-							+ 1).append(FALLBACK_LANGUAGE_CREATE).append('_').append(FALLBACK_COUNTRY_CREATE)
-							.toString());
+			user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' +FALLBACK_COUNTRY_CREATE);
 		} else {
 			if (lang.indexOf('_') == -1) {
 				throw new InvalidDataException("language must contain an underscore, e.g. en_US");
 			}
 		}
 	}
-    
+
     private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
 
         checkAndSetLanguage(usr);
