@@ -156,7 +156,7 @@ public final class IMAPTracer {
     public static interface TracerState {
 
         /**
-         * Gets the trace flag
+         * Gets the trace flag.
          * 
          * @return The trace flag
          */
