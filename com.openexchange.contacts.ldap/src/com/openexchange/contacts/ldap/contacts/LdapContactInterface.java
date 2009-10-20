@@ -196,7 +196,7 @@ public class LdapContactInterface implements ContactInterface {
         // NUL             0x00
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ldapfilter.length(); i++) {
-            char curChar = ldapfilter.charAt(i);
+            final char curChar = ldapfilter.charAt(i);
             switch (curChar) {
                 case '\\':
                     sb.append("\\5c");
@@ -425,6 +425,11 @@ public class LdapContactInterface implements ContactInterface {
         return new ArrayIterator<Contact>(contacts.toArray(new Contact[contacts.size()]));
     }
 
+    public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
+        LOG.info("Called getUserById");
+        return null;
+    }
+    
     public Contact getUserById(final int userId) throws OXException {
         LOG.info("Called getUserById");
         return null;
@@ -490,7 +495,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, boolean deleted) throws LdapException {
+    private ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, final boolean deleted) throws LdapException {
         final ArrayList<Contact> arrayList = new ArrayList<Contact>();
         final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
         final boolean distributionlist = both || ContactTypes.distributionlists.equals(folderprop.getContacttypes());
@@ -689,7 +694,7 @@ public class LdapContactInterface implements ContactInterface {
     private void searchAndFetch(final boolean distributionslist, final int folderId, final Set<Integer> columns, final String baseDN, final String filter, final ArrayList<Contact> arrayList, final LdapInterface iface) throws LdapException {
         iface.search(baseDN, filter, distributionslist, columns, new FillClosure() {
 
-            public void execute(LdapGetter ldapGetter) throws LdapException {
+            public void execute(final LdapGetter ldapGetter) throws LdapException {
                 if (distributionslist) {
                     final Contact retval = Mapper.getDistriContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, admin_id);
                     arrayList.add(retval);
