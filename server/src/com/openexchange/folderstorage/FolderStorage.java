@@ -75,9 +75,9 @@ public interface FolderStorage {
     public static final String ROOT_ID = "0";
 
     /**
-     * The reserved identifier for public folder: <code>"2"</code>.
+     * The reserved identifier for private folder: <code>"1"</code>.
      */
-    public static final String PUBLIC_ID = "2";
+    public static final String PRIVATE_ID = "1";
 
     /**
      * Gets the content types supported by this folder storage.
