@@ -81,6 +81,22 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPoolServiceImpl.class);
 
     /**
+     * Creates a new {@link ThreadPoolServiceImpl} with the given properties.
+     * 
+     * @param properties The properties
+     * @return A new {@link ThreadPoolServiceImpl} instance
+     */
+    public static ThreadPoolServiceImpl newInstance(final ThreadPoolProperties properties) {
+        return newInstance(
+            properties.getCorePoolSize(),
+            properties.getMaximumPoolSize(),
+            properties.getKeepAliveTime(),
+            properties.getWorkQueue(),
+            properties.getWorkQueueSize(),
+            properties.getRefusedExecutionBehavior());
+    }
+
+    /**
      * Creates a new {@link ThreadPoolServiceImpl} with the given initial parameters.
      * 
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
@@ -91,6 +107,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @param workQueueSize The size of the work queue; zero for unlimited size
      * @param refusedExecutionBehavior The default behavior to obey when execution is blocked because the thread bounds and queue capacities
      *            are reached.
+     * @return A new {@link ThreadPoolServiceImpl} instance
      * @throws IllegalArgumentException If corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize or either <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> cannot
      *             be resolved.

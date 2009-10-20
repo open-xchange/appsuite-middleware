@@ -113,14 +113,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
              * Initialize thread pool
              */
             final ThreadPoolProperties init = new ThreadPoolProperties().init(getService(ConfigurationService.class));
-            threadPool =
-                ThreadPoolServiceImpl.newInstance(
-                    init.getCorePoolSize(),
-                    init.getMaximumPoolSize(),
-                    init.getKeepAliveTime(),
-                    init.getWorkQueue(),
-                    init.getWorkQueueSize(),
-                    init.getRefusedExecutionBehavior());
+            threadPool = ThreadPoolServiceImpl.newInstance(init);
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
