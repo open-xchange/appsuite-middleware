@@ -166,7 +166,6 @@ public final class SystemSharedFolder {
          */
         final Map<String, Integer> displayNames;
         {
-            final UserStorage us = UserStorage.getInstance();
             final Queue<FolderObject> q;
             try {
                 q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
@@ -192,6 +191,7 @@ public final class SystemSharedFolder {
             final StringHelper strHelper = new StringHelper(user.getLocale());
             final int size = q.size();
             displayNames = new HashMap<String, Integer>(size);
+            final UserStorage us = UserStorage.getInstance();
             final Iterator<FolderObject> iter = q.iterator();
             for (int i = 0; i < size; i++) {
                 final FolderObject sharedFolder = iter.next();
