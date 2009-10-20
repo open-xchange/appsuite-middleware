@@ -166,6 +166,8 @@ public final class SharedPrefixFolder {
          * This highly user-specific folder is NOT cacheable
          */
         final DatabaseFolder retval = new DatabaseFolder(virtualOwnerFolder, false);
+        retval.setID(folderIdentifier);
+        retval.setParentID(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         retval.setGlobal(false);
 
         final Queue<FolderObject> q;
