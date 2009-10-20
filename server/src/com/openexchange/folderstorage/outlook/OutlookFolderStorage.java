@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.outlook;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -73,7 +74,6 @@ import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -199,7 +199,8 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         // Get default folder
-        final FolderStorage byContentType = OutlookFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, contentType);
+        final FolderStorage byContentType =
+            OutlookFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, contentType);
         if (null == byContentType) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
@@ -231,7 +232,6 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         if (FolderStorage.ROOT_ID.equals(folderId)) {
             final Folder rootFolder;
-            final SortableId[] ids;
             {
                 // Get real folder storage
                 final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
@@ -242,7 +242,119 @@ public final class OutlookFolderStorage implements FolderStorage {
                 try {
                     // Get folder
                     rootFolder = folderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
-                    ids = folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+                    folderStorage.commitTransaction(storageParameters);
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+            final OutlookFolder outlookRootFolder = new OutlookFolder(rootFolder);
+            outlookRootFolder.setTreeID(treeId);
+            outlookRootFolder.setSubfolderIDs(null);
+            return outlookRootFolder;
+        }
+        /*
+         * Check for private folder
+         */
+        if (FolderStorage.PRIVATE_ID.equals(folderId)) {
+            final Folder privateFolder;
+            {
+                // Get real folder storage
+                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
+                folderStorage.startTransaction(storageParameters, false);
+                try {
+                    // Get folder
+                    privateFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
+                    folderStorage.commitTransaction(storageParameters);
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+            final OutlookFolder outlookPrivateFolder = new OutlookFolder(privateFolder);
+            outlookPrivateFolder.setTreeID(treeId);
+            outlookPrivateFolder.setSubfolderIDs(null);
+            return outlookPrivateFolder;
+        }
+        /*
+         * Other folder than root or private
+         */
+        final OutlookFolder outlookFolder;
+        {
+            final Folder realFolder;
+            {
+                // Get real folder storage
+                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
+                folderStorage.startTransaction(storageParameters, false);
+                try {
+                    // Get folder
+                    realFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
+                    folderStorage.commitTransaction(storageParameters);
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+            outlookFolder = new OutlookFolder(realFolder);
+            outlookFolder.setTreeID(treeId);
+            // Set subfolders if empty
+            final String[] realSubfolderIDs = realFolder.getSubfolderIDs();
+            outlookFolder.setSubfolderIDs(null != realSubfolderIDs && realSubfolderIDs.length == 0 ? realSubfolderIDs : null);
+        }
+        // Load folder data from database
+        final User user = storageParameters.getUser();
+        Select.fillFolder(
+            storageParameters.getContext().getContextId(),
+            Integer.parseInt(treeId),
+            user.getId(),
+            user.getLocale(),
+            outlookFolder,
+            storageType);
+        return outlookFolder;
+    }
+
+    public FolderType getFolderType() {
+        return folderType;
+    }
+
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+        return new String[0];
+    }
+
+    public StoragePriority getStoragePriority() {
+        return StoragePriority.NORMAL;
+    }
+
+    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
+        final User user = storageParameters.getUser();
+        final Locale locale = user.getLocale();
+        if (FolderStorage.ROOT_ID.equals(parentId)) {
+            final SortableId[] ids;
+            {
+                // Get real folder storage
+                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, parentId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
+                }
+                folderStorage.startTransaction(storageParameters, false);
+                try {
+                    // Get folder
+                    ids = folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, parentId, storageParameters);
                     folderStorage.commitTransaction(storageParameters);
                 } catch (final FolderException e) {
                     folderStorage.rollback(storageParameters);
@@ -258,10 +370,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final List<MailAccount> accounts;
                 try {
                     final MailAccount[] mailAccounts =
-                        mass.getUserMailAccounts(storageParameters.getUser().getId(), storageParameters.getContext().getContextId());
+                        mass.getUserMailAccounts(user.getId(), storageParameters.getContext().getContextId());
                     accounts = new ArrayList<MailAccount>(mailAccounts.length);
                     accounts.addAll(Arrays.asList(mailAccounts));
-                    Collections.sort(accounts, new MailAccountComparator(storageParameters.getUser().getLocale()));
+                    Collections.sort(accounts, new MailAccountComparator(locale));
                 } catch (final MailAccountException e) {
                     throw new FolderException(e);
                 }
@@ -280,28 +392,34 @@ public final class OutlookFolderStorage implements FolderStorage {
             } else {
                 subfolderIDs = toIDList(ids);
             }
-            final OutlookFolder outlookRootFolder = new OutlookFolder(rootFolder);
-            outlookRootFolder.setTreeID(treeId);
-            outlookRootFolder.setSubfolderIDs(subfolderIDs.toArray(new String[subfolderIDs.size()]));
-            return outlookRootFolder;
+            final SortableId[] ret = new SortableId[subfolderIDs.size()];
+            int i = 0;
+            for (final String id : subfolderIDs) {
+                ret[i] = new OutlookId(id, i);
+                i++;
+            }
+            return ret;
         }
         /*
          * Check for private folder
          */
-        if (FolderStorage.PRIVATE_ID.equals(folderId)) {
-            final Folder privateFolder;
-            final SortableId[] ids;
+        if (FolderStorage.PRIVATE_ID.equals(parentId)) {
+            final TreeMap<String, String> treeMap = new TreeMap<String, String>(new FolderNameComparator(locale));
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                final FolderStorage folderStorage =
+                    OutlookFolderStorageRegistry.getInstance().getDedicatedFolderStorage(realTreeId, parentId);
                 if (null == folderStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
                 }
                 folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get folder
-                    privateFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
-                    ids = folderStorage.getSubfolders(realTreeId, folderId, storageParameters);
+                    final SortableId[] ids = folderStorage.getSubfolders(realTreeId, parentId, storageParameters);
+                    for (final SortableId sortableId : ids) {
+                        final String id = sortableId.getId();
+                        treeMap.put(folderStorage.getFolder(realTreeId, id, storageParameters).getLocalizedName(locale), id);
+                    }
                     folderStorage.commitTransaction(storageParameters);
                 } catch (final FolderException e) {
                     folderStorage.rollback(storageParameters);
@@ -311,7 +429,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
-            final SortableId[] mailIDs;
             {
                 // Get real folder storage for primary mail folder
                 final String fullname = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
@@ -322,7 +439,11 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get IDs
-                    mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
+                    final SortableId[] mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
+                    for (final SortableId sortableId : mailIDs) {
+                        final String id = sortableId.getId();
+                        treeMap.put(folderStorage.getFolder(realTreeId, id, storageParameters).getLocalizedName(locale), id);
+                    }
                     folderStorage.commitTransaction(storageParameters);
                 } catch (final FolderException e) {
                     folderStorage.rollback(storageParameters);
@@ -332,34 +453,31 @@ public final class OutlookFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
-            final List<String> subfolderIDs = new ArrayList<String>(mailIDs.length + ids.length);
-            subfolderIDs.addAll(toIDList(ids));
-            subfolderIDs.addAll(toIDList(mailIDs));
-            Collections.sort(subfolderIDs, new Select.FolderNameComparator(storageParameters.getUser().getLocale()));
-            final OutlookFolder outlookPrivateFolder = new OutlookFolder(privateFolder);
-            outlookPrivateFolder.setTreeID(treeId);
-            outlookPrivateFolder.setSubfolderIDs(subfolderIDs.toArray(new String[subfolderIDs.size()]));
-            return outlookPrivateFolder;
+            final Collection<String> sortedIDs = treeMap.values();
+            final SortableId[] ret = new SortableId[sortedIDs.size()];
+            int i = 0;
+            for (final String id : sortedIDs) {
+                ret[i] = new OutlookId(id, i);
+                i++;
+            }
+            return ret;
         }
         /*
          * Other folder than root or private
          */
-        final OutlookFolder outlookFolder;
         final List<String[]> l;
         {
-            final Folder realFolder;
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, parentId);
                 if (null == folderStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
                 }
                 folderStorage.startTransaction(storageParameters, false);
                 try {
-                    // Get folder
-                    realFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
                     // Get real subfolders
-                    final String[] realSubfolderIds = getSubfolderIDs(realFolder, folderStorage, storageParameters);
+                    final String[] realSubfolderIds =
+                        getSubfolderIDs(folderStorage.getFolder(realTreeId, parentId, storageParameters), folderStorage, storageParameters);
                     l = new ArrayList<String[]>(realSubfolderIds.length);
                     for (final String realSubfolderId : realSubfolderIds) {
                         l.add(new String[] {
@@ -374,49 +492,17 @@ public final class OutlookFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
-            outlookFolder = new OutlookFolder(realFolder);
-            outlookFolder.setTreeID(treeId);
         }
         // Load folder data from database
-        final User user = storageParameters.getUser();
-        final Locale locale = user.getLocale();
-        if (Select.fillFolder(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
-            user.getId(),
-            locale,
-            outlookFolder,
-            l,
-            storageType)) {
-            return outlookFolder;
-        }
-        /*
-         * Nothing to fill, not contained in database table. Just apply real subfolder identifiers and return.
-         */
-        final TreeMap<String, String> treeMap = new TreeMap<String, String>(new Select.FolderNameComparator(locale));
-        final StringHelper stringHelper = new StringHelper(locale);
-        for (final String[] realSubfolderId : l) {
-            treeMap.put(stringHelper.getString(realSubfolderId[1]), realSubfolderId[0]);
-        }
-        outlookFolder.setSubfolderIDs(treeMap.values().toArray(new String[treeMap.size()]));
-        return outlookFolder;
-    }
-
-    public FolderType getFolderType() {
-        return folderType;
-    }
-
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
-        return new String[0];
-    }
-
-    public StoragePriority getStoragePriority() {
-        return StoragePriority.NORMAL;
-    }
-
-    public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
-        final Folder outlookFolder = getFolder(treeId, parentId, storageParameters);
-        final String[] ids = outlookFolder.getSubfolderIDs();
+        final String[] ids =
+            Select.getSubfolderIds(
+                storageParameters.getContext().getContextId(),
+                Integer.parseInt(treeId),
+                user.getId(),
+                locale,
+                parentId,
+                l,
+                StorageType.WORKING);
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = new OutlookId(ids[i], i);
@@ -480,6 +566,22 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
 
     } // End of MailAccountComparator
+
+    private static final class FolderNameComparator implements Comparator<String> {
+
+        private final Collator collator;
+
+        public FolderNameComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final String o1, final String o2) {
+            return collator.compare(o1, o2);
+        }
+
+    } // End of FolderNameComparator
 
     private static List<String> toIDList(final SortableId[] ids) {
         final List<String> l = new ArrayList<String>(ids.length);

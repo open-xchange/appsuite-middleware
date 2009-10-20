@@ -181,6 +181,29 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return null;
     }
 
+    /**
+     * Gets the dedicated folder storage for specified tree-folder-pair.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @return The dedicated folder storage for specified tree-folder-pair or <code>null</code>
+     */
+    public FolderStorage getDedicatedFolderStorage(final String treeId, final String folderId) {
+        /*
+         * Obtain candidates by tree identifier
+         */
+        final List<FolderStorage> storages = registry.get(treeId);
+        if (null == storages) {
+            return null;
+        }
+        for (final FolderStorage folderStorage : storages) {
+            if (folderStorage.getFolderType().servesFolderId(folderId)) {
+                return folderStorage;
+            }
+        }
+        return null;
+    }
+
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
         if (!genStorages.isEmpty()) {
             /*

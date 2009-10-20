@@ -197,7 +197,7 @@ public final class OutlookFolder implements Folder {
     }
 
     public String[] getSubfolderIDs() {
-        return null == subfolders ? realFolder.getSubfolderIDs() : subfolders;
+        return subfolders;
     }
 
     public String getTreeID() {
@@ -258,7 +258,7 @@ public final class OutlookFolder implements Folder {
     }
 
     public boolean isCacheable() {
-        return realFolder.isCacheable();
+        return false;
     }
 
     public int getCapabilities() {

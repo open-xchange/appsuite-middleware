@@ -61,9 +61,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderException;
@@ -176,12 +174,11 @@ public final class Select {
      * @param user The user identifier
      * @param locale The user's locale (needed for proper sorting of possible subfolders)
      * @param outlookFolder The folder to fill
-     * @param l The real subfolder identifiers
      * @param storageType The storage type to use
      * @return <code>true</code> if folder was present in tables; otherwise <code>false</code>
      * @throws FolderException If filling the folder fails
      */
-    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final List<String[]> l, final StorageType storageType) throws FolderException {
+    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, /*final List<String[]> l, */final StorageType storageType) throws FolderException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
@@ -241,7 +238,8 @@ public final class Select {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
             stmt = null;
-            outlookFolder.setSubfolderIDs(getSubfolderIds(cid, tree, user, locale, folderId, l, storageType, con));
+            // Subfolder IDs
+            // outlookFolder.setSubfolderIDs(getSubfolderIds(cid, tree, user, locale, folderId, l, storageType, con));
             // Select permissions
             try {
                 stmt = con.prepareStatement(working ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
@@ -398,11 +396,7 @@ public final class Select {
                 while (rs.next()) {
                     treeMap.put(stringHelper.getString(rs.getString(2)), rs.getString(pos));
                 }
-                final Set<Entry<String, String>> entrySet = treeMap.entrySet();
-                subfolderIds = new ArrayList<String>(entrySet.size());
-                for (final Entry<String, String> entry : entrySet) {
-                    subfolderIds.add(entry.getValue());
-                }
+                subfolderIds = new ArrayList<String>(treeMap.values());
             }
             return subfolderIds.toArray(new String[subfolderIds.size()]);
         } catch (final SQLException e) {
