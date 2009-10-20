@@ -119,6 +119,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
                     init.getMaximumPoolSize(),
                     init.getKeepAliveTime(),
                     init.getWorkQueue(),
+                    init.getWorkQueueSize(),
                     init.getRefusedExecutionBehavior());
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();

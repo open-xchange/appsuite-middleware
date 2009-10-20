@@ -68,6 +68,8 @@ public final class ThreadPoolProperties {
 
     private String workQueue;
 
+    private int workQueueSize;
+
     private String refusedExecutionBehavior;
 
     /**
@@ -130,12 +132,31 @@ public final class ThreadPoolProperties {
                 }
             }
 
-            workQueue = "synchronous";
+            workQueueSize = 0;
             {
-                final String tmp = configurationService.getProperty("com.openexchange.threadpool.workQueue");
+                final String tmp = configurationService.getProperty("com.openexchange.threadpool.workQueueSize");
                 if (null != tmp) {
-                    workQueue = tmp.trim();
+                    try {
+                        workQueueSize = Integer.parseInt(tmp.trim());
+                    } catch (final NumberFormatException e) {
+                        workQueueSize = 0;
+                    }
                 }
+            }
+
+            if (workQueueSize <= 0) {
+                workQueue = "synchronous";
+                {
+                    final String tmp = configurationService.getProperty("com.openexchange.threadpool.workQueue");
+                    if (null != tmp) {
+                        workQueue = tmp.trim();
+                    }
+                }
+            } else {
+                /*
+                 * Set to "linked" if workQueueSize > 0
+                 */
+                workQueue = "linked";
             }
 
             refusedExecutionBehavior = "abort";
@@ -210,6 +231,18 @@ public final class ThreadPoolProperties {
      */
     public String getWorkQueue() {
         return workQueue;
+    }
+
+    /**
+     * Gets the work queue size.
+     * <p>
+     * Note: If size of work queue is set to a value greater than zero, {@link #getWorkQueue()} is implicitly set to <code>"linked"</code>
+     * to accomplish a bounded work queue.
+     * 
+     * @return The work queue size
+     */
+    public int getWorkQueueSize() {
+        return workQueueSize;
     }
 
     /**

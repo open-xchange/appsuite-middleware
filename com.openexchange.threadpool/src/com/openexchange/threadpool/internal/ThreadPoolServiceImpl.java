@@ -88,6 +88,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
      *            threads will wait for new tasks before terminating.
      * @param workQueue The queue to use for holding tasks before they are executed.
+     * @param workQueueSize The size of the work queue; zero for unlimited size
      * @param refusedExecutionBehavior The default behavior to obey when execution is blocked because the thread bounds and queue capacities
      *            are reached.
      * @throws IllegalArgumentException If corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
@@ -95,12 +96,13 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *             be resolved.
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
-    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final String refusedExecutionBehavior) {
+    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final String refusedExecutionBehavior) {
         final RejectedExecutionType ret = RejectedExecutionType.getRejectedExecutionType(refusedExecutionBehavior);
         if (null == ret) {
             throw new IllegalArgumentException("Unknown refused execution behavior: " + refusedExecutionBehavior);
         }
-        final ThreadPoolServiceImpl newInst = new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue);
+        final ThreadPoolServiceImpl newInst =
+            new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize);
         final DelegatingRejectedExecutionHandler reh = new DelegatingRejectedExecutionHandler(ret.getHandler(), newInst);
         newInst.threadPoolExecutor.setRejectedExecutionHandler(reh);
         return newInst;
@@ -116,11 +118,12 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
      *            threads will wait for new tasks before terminating.
      * @param workQueue The queue to use for holding tasks before they are executed.
+     * @param workQueueSize The size of the work queue
      * @throws IllegalArgumentException if corePoolSize, or keepAliveTime less than zero, or if maximumPoolSize less than or equal to zero,
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue) {
+    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize) {
         final QueueType queueType = QueueType.getQueueType(workQueue);
         if (null == queueType) {
             throw new IllegalArgumentException("Unknown queue type: " + workQueue);
@@ -131,7 +134,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                 maximumPoolSize,
                 keepAliveTime,
                 TimeUnit.MILLISECONDS,
-                queueType.newWorkQueue(),
+                queueType.newWorkQueue(workQueueSize),
                 new CustomThreadFactory("OXWorker-"));
     }
 

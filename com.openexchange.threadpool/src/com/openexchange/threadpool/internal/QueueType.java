@@ -63,7 +63,7 @@ public enum QueueType {
      */
     SYNCHRONOUS("synchronous", new IQueueProvider() {
 
-        public BlockingQueue<Runnable> newWorkQueue() {
+        public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
             return QueueProvider.getInstance().newSynchronousQueue();
         }
     }),
@@ -72,8 +72,8 @@ public enum QueueType {
      */
     LINKED("linked", new IQueueProvider() {
 
-        public BlockingQueue<Runnable> newWorkQueue() {
-            return QueueProvider.getInstance().newLinkedQueue();
+        public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
+            return QueueProvider.getInstance().newLinkedQueue(fixedCapacity);
         }
     });
 
@@ -89,10 +89,11 @@ public enum QueueType {
     /**
      * Creates a new work queue of this type.
      * 
+     * @param fixedCapacity The fixed capacity
      * @return A new work queue of this type
      */
-    public BlockingQueue<Runnable> newWorkQueue() {
-        return queueProvider.newWorkQueue();
+    public BlockingQueue<Runnable> newWorkQueue(final int fixedCapacity) {
+        return queueProvider.newWorkQueue(fixedCapacity);
     }
 
     /**
@@ -113,7 +114,7 @@ public enum QueueType {
 
     private static interface IQueueProvider {
 
-        BlockingQueue<Runnable> newWorkQueue();
+        BlockingQueue<Runnable> newWorkQueue(int fixedCapacity);
     }
 
 }

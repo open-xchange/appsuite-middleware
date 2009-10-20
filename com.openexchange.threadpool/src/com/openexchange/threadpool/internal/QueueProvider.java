@@ -144,10 +144,11 @@ public abstract class QueueProvider {
      * Gets a newly created linked queue.
      * 
      * @param <V> The queue's type
+     * @param fixedCapacity The fixed capacity
      * @return A newly created linked queue
      */
-    public final <V> BlockingQueue<V> newLinkedQueue() {
-        return new LinkedBlockingQueue<V>();
+    public final <V> BlockingQueue<V> newLinkedQueue(final int fixedCapacity) {
+        return fixedCapacity > 0 ? new LinkedBlockingQueue<V>(fixedCapacity) : new LinkedBlockingQueue<V>();
     }
 
     /**
@@ -155,9 +156,10 @@ public abstract class QueueProvider {
      * 
      * @param <V> The queue's type
      * @param clazz The queue's type class
+     * @param fixedCapacity The fixed capacity
      * @return A newly created linked queue
      */
-    public final <V extends Object> BlockingQueue<V> newLinkedQueue(final Class<? extends V> clazz) {
-        return new LinkedBlockingQueue<V>();
+    public final <V extends Object> BlockingQueue<V> newLinkedQueue(final Class<? extends V> clazz, final int fixedCapacity) {
+        return fixedCapacity > 0 ? new LinkedBlockingQueue<V>(fixedCapacity) : new LinkedBlockingQueue<V>();
     }
 }
