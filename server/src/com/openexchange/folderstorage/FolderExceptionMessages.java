@@ -58,120 +58,80 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public class FolderExceptionMessages implements LocalizableStrings {
 
-    /**
-     * Unexpected error: %1$s
-     */
+    // Unexpected error: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
-    /**
-     * I/O error: %1$s
-     */
+    // I/O error: %1$s
     public static final String IO_ERROR_MSG = "I/O error: %1$s";
 
-    /**
-     * SQL error: %1$s
-     */
+    // SQL error: %1$s
     public static final String SQL_ERROR_MSG = "SQL error: %1$s";
 
-    /**
-     * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
-     */
-    public static final String NO_STORAGE_FOR_ID_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and folder identifier \"%2$s\".";
+    // No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
+    public static final String NO_STORAGE_FOR_ID_MSG =
+        "No appropriate folder storage for tree identifier \"%1$s\" and folder identifier \"%2$s\".";
 
-    /**
-     * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
-     */
-    public static final String NO_STORAGE_FOR_CT_MSG = "No appropriate folder storage for tree identifier \"%1$s\" and content type \"%2$s\".";
+    // No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
+    public static final String NO_STORAGE_FOR_CT_MSG =
+        "No appropriate folder storage for tree identifier \"%1$s\" and content type \"%2$s\".";
 
-    /**
-     * Missing session.
-     */
+    // Missing session.
     public static final String MISSING_SESSION_MSG = "Missing session.";
 
-    /**
-     * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
-     */
+    // Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
     public static final String FOLDER_NOT_VISIBLE_MSG = "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\"";
 
-    /**
-     * JSON error: %1$s
-     */
+    // JSON error: %1$s
     public static final String JSON_ERROR_MSG = "JSON error: %1$s";
 
-    /**
-     * Missing tree identifier.
-     */
+    // Missing tree identifier.
     public static final String MISSING_TREE_ID_MSG = "Missing tree identifier.";
 
-    /**
-     * Missing parent folder identifier.
-     */
+    // Missing parent folder identifier.
     public static final String MISSING_PARENT_ID_MSG = "Missing parent folder identifier.";
 
-    /**
-     * Missing folder identifier.
-     */
+    // Missing folder identifier.
     public static final String MISSING_FOLDER_ID_MSG = "Missing folder identifier.";
 
-    /**
-     * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
-     */
-    public static final String INVALID_CONTENT_TYPE_MSG = "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%3$s\" for user %4$s in context %5$s.";
+    // Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
+    public static final String INVALID_CONTENT_TYPE_MSG =
+        "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%3$s\" for user %4$s in context %5$s.";
 
-    /**
-     * Move operation not permitted.
-     */
+    // Move operation not permitted.
     public static final String MOVE_NOT_PERMITTED_MSG = "Move operation not permitted.";
 
-    /**
-     * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
-     */
+    // A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
     public static final String EQUAL_NAME_MSG = "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree \"%3$s\".";
 
-    /**
-     * Subscribe operation not permitted on tree "%1$s".
-     */
+    // Subscribe operation not permitted on tree "%1$s".
     public static final String NO_REAL_SUBSCRIBE_MSG = "Subscribe operation not permitted on tree \"%1$s\".";
 
-    /**
-     * Un-Subscribe operation not permitted on tree "%1$s".
-     */
+    // Un-Subscribe operation not permitted on tree "%1$s".
     public static final String NO_REAL_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on tree \"%1$s\".";
 
-    /**
-     * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
-     */
+    // Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
     public static final String NO_UNSUBSCRIBE_MSG = "Un-Subscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\".";
 
-    /**
-     * Unknown content type: %1$s.
-     */
+    // Unknown content type: %1$s.
     public static final String UNKNOWN_CONTENT_TYPE_MSG = "Unknown content type: %1$s.";
 
-    /**
-     * Missing parameter: %1$s.
-     */
+    // Missing parameter: %1$s.
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
 
-    /**
-     * Missing property: %1$s.
-     */
+    // Missing property: %1$s.
     public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s.";
 
-    /**
-     * Unsupported storage type: %1$s.
-     */
+    // Unsupported storage type: %1$s.
     public static final String UNSUPPORTED_STORAGE_TYPE_MSG = "Unsupported storage type: %1$s.";
 
-    /**
-     * The object has been changed in the meantime.
-     */
+    // The object has been changed in the meantime.
     public static final String CONCURRENT_MODIFICATION_MSG = "The object has been changed in the meantime.";
 
-    /**
-     * Folder "%1$s" could not be found in tree "%2$s".
-     */
+    // Folder "%1$s" could not be found in tree "%2$s".
     public static final String NOT_FOUND_MSG = "Folder \"%1$s\" could not be found in tree \"%2$s\".";
+
+    // No default folder available for content type "%1$s" in tree "%2$s".
+    public static final String NO_DEFAULT_FOLDER_MSG = "No default folder available for content type \"%1$s\" in tree \"%2$s\".";
 
     /**
      * Initializes a new {@link FolderExceptionMessages}

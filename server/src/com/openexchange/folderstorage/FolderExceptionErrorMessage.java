@@ -154,7 +154,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Folder "%1$s" could not be found in tree "%2$s".
      */
-    NOT_FOUND(FolderExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 23);
+    NOT_FOUND(FolderExceptionMessages.NOT_FOUND_MSG, Category.CODE_ERROR, 23),
+    /**
+     * No default folder available for content type "%1$s" in tree "%2$s".
+     */
+    NO_DEFAULT_FOLDER(FolderExceptionMessages.NO_DEFAULT_FOLDER_MSG, Category.CODE_ERROR, 24);
 
     private final Category category;
 
