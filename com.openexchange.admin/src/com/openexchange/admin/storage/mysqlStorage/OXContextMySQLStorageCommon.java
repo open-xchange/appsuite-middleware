@@ -49,7 +49,9 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,7 +78,6 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.update.UpdateTaskCollection;
 
 public class OXContextMySQLStorageCommon {
 
@@ -238,113 +239,92 @@ public class OXContextMySQLStorageCommon {
         oxs.create(ctx, admin_user, access, con, internal_user_id, contact_id, uid_number);
     }
 
-    public final void deleteContextFromConfigDB(final Connection configdb_write_con, final int context_id) throws SQLException {
+    public final void deleteContextFromConfigDB(Connection configCon, int contextId) throws SQLException {
         // find out what db_schema context belongs to
         PreparedStatement stmt3 = null;
         PreparedStatement stmt2 = null;
         PreparedStatement stmt = null;
         try {
-            boolean cs2db_broken = false;
-            stmt2 = configdb_write_con.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid = ?");
-            stmt2.setInt(1, context_id);
+            boolean cs2dbBroken = false;
+            stmt2 = configCon.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid=?");
+            stmt2.setInt(1, contextId);
             stmt2.executeQuery();
             ResultSet rs = stmt2.getResultSet();
-            String db_schema = null;
-            int pool_id = -1;
+            String dbSchema = null;
+            int poolId = -1;
             if (!rs.next()) {
-                // throw new OXContextException("Unable to determine db_schema
-                // of context " + context_id);
-                cs2db_broken = true;
-                log.error("Unable to determine db_schema of context " + context_id);
+                // throw new OXContextException("Unable to determine db_schema of context " + context_id);
+                cs2dbBroken = true;
+                log.error("Unable to determine db_schema of context " + contextId);
             } else {
-                db_schema = rs.getString("db_schema");
-                pool_id = ((Integer) rs.getInt("write_db_pool_id")).intValue();
+                dbSchema = rs.getString(1);
+                poolId = rs.getInt(2);
             }
             stmt2.close();
-            // System.out.println("############# db_schema = " + db_schema);
             if (log.isDebugEnabled()) {
-                log.debug("Deleting context_server2dbpool mapping for context " + context_id);
+                log.debug("Deleting context_server2dbpool mapping for context " + contextId);
             }
             // delete context from context_server2db_pool
-            stmt2 = configdb_write_con.prepareStatement("DELETE FROM context_server2db_pool WHERE cid = ?");
-            stmt2.setInt(1, context_id);
+            stmt2 = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
+            stmt2.setInt(1, contextId);
             stmt2.executeUpdate();
             stmt2.close();
-            // configdb_write_con.commit(); // temp disabled by c utmasta
-
             // tell pool, that database has been removed
             try {
-                com.openexchange.databaseold.Database.reset(context_id);
+                com.openexchange.databaseold.Database.reset(contextId);
             } catch (DBPoolingException e) {
                 log.error(e.getMessage(), e);
             }
 
-            if (!cs2db_broken) {
+            if (!cs2dbBroken) {
                 try {
                     // check if any other context uses the same db_schema
                     // if not, delete it
-                    stmt2 = configdb_write_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema = ?");
-                    stmt2.setString(1, db_schema);
+                    stmt2 = configCon.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema=?");
+                    stmt2.setString(1, dbSchema);
                     stmt2.executeQuery();
                     rs = stmt2.getResultSet();
     
                     if (!rs.next()) {
                         // get auth data from db_pool to delete schema
-                        stmt3 = configdb_write_con.prepareStatement("SELECT url,driver,login,password FROM db_pool WHERE db_pool_id = ?");
-                        stmt3.setInt(1, pool_id);
+                        stmt3 = configCon.prepareStatement("SELECT url,driver,login,password FROM db_pool WHERE db_pool_id=?");
+                        stmt3.setInt(1, poolId);
                         stmt3.executeQuery();
                         final ResultSet rs3 = stmt3.getResultSet();
     
                         if (!rs3.next()) {
-                            throw new StorageException("Unable to determine authentication data of pool_id " + pool_id);
+                            throw new StorageException("Unable to determine authentication data of pool_id " + poolId);
                         }
-                        final Database db = new Database(rs3.getString("login"), rs3.getString("password"), rs3.getString("driver"), rs3.getString("url"), db_schema);
+                        final Database db = new Database(rs3.getString("login"), rs3.getString("password"), rs3.getString("driver"), rs3.getString("url"), dbSchema);
                         if (log.isDebugEnabled()) {
-                            log.debug("Deleting database " + db_schema);
+                            log.debug("Deleting database " + dbSchema);
                         }
                         oxutilcommon.deleteDatabase(db);
-    
                         stmt3.close();
                     }
                     stmt2.close();
-                } catch (final Exception e) {
-                    log.error("Problem deleting database while doing rollback, cid=" + context_id + ": ", e);
+                } catch (Exception e) {
+                    log.error("Problem deleting database while doing rollback, cid=" + contextId + ": ", e);
                 }
             }
             if (log.isDebugEnabled()) {
-                log.debug("Deleting login2context entries for context " + context_id);
+                log.debug("Deleting login2context entries for context " + contextId);
             }
-            stmt = configdb_write_con.prepareStatement("DELETE FROM login2context WHERE cid = ?");
-            stmt.setInt(1, context_id);
+            stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
             if (log.isDebugEnabled()) {
-                log.debug("Deleting context entry for context " + context_id);
+                log.debug("Deleting context entry for context " + contextId);
             }
-            stmt = configdb_write_con.prepareStatement("DELETE FROM context WHERE cid = ?");
-            stmt.setInt(1, context_id);
+            stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-    
         } finally {
             closePreparedStatement(stmt);
             closePreparedStatement(stmt2);
             closePreparedStatement(stmt3);
-        }
-    }
-
-    private void deleteSequenceTables(int contextId, Connection con) throws SQLException {
-        log.debug("Deleting sequence entries for context " + contextId);
-        PreparedStatement stmt = null;
-        try {
-            for (String tableName : determineSequenceTables(con)) {
-                stmt = con.prepareStatement("DELETE FROM `" + tableName + "` WHERE cid=?");
-                stmt.setInt(1, contextId);
-                stmt.executeUpdate();
-                stmt.close();
-            }
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 
@@ -365,22 +345,22 @@ public class OXContextMySQLStorageCommon {
         return tmp.toArray(new String[tmp.size()]);
     }
 
-    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws SQLException, StorageException {
+    public void fillContextAndServer2DBPool(Context ctx, Connection con, Database db) throws StorageException {
         // dbid is the id in db_pool of database engine to use for next context
     
         // if read id -1 (not set by client ) or 0 (there is no read db for this
         // cluster) then read id must be same as write id
         // else the db pool cannot resolve the database
-        if (null == db.getRead_id() || 0 == db.getRead_id()) {
+        if (null == db.getRead_id() || 0 == db.getRead_id().intValue()) {
             db.setRead_id(db.getId());
         }
     
         // create context entry in configdb
         // quota is in MB, but we store in Byte
-        long quota_max_temp = ctx.getMaxQuota();
+        long quota_max_temp = ctx.getMaxQuota().longValue();
         if (quota_max_temp != -1) {
             quota_max_temp *= Math.pow(2, 20);
-            ctx.setMaxQuota(quota_max_temp);
+            ctx.setMaxQuota(L(quota_max_temp));
         }
         fillContextTable(ctx, con);
     
@@ -388,39 +368,18 @@ public class OXContextMySQLStorageCommon {
         fillContextServer2DBPool(ctx, db, con);
     }
 
-    public final void handleCreateContextRollback(final Connection configdb_write_con, final Connection ox_write_con, final int context_id) {
+    public final void handleCreateContextRollback(Connection configCon, Connection oxCon, int contextId) {
+        // Creating the whole context is now done in a transaction. Rolling back this transaction should be sufficient to remove the context
+        // if creation fails.
+        rollback(oxCon);
+        // remove all entries from configuration database because everything to configuration database has been commited.
         try {
-            if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                configdb_write_con.rollback();
+            if (configCon != null) {
+                deleteContextFromConfigDB(configCon, contextId);
+                configCon.commit();
             }
-        } catch (final SQLException expd) {
-            log.error("Error processing rollback of configdb connection!", expd);
-        }
-        try {
-            // remove all entries from configdb cause rollback might not be
-            // enough
-            // cause of contextserver2dbpool entries
-            if (configdb_write_con != null) {
-                deleteContextFromConfigDB(configdb_write_con, context_id);
-            }
-        } catch (final SQLException ecp) {
-            log.error("SQL Error removing/rollback entries from configdb for context " + context_id, ecp);
-        }
-        try {
-            if (ox_write_con != null && !ox_write_con.getAutoCommit()) {
-                ox_write_con.rollback();
-            }
-        } catch (final SQLException ex) {
-            log.error("SQL Error processing rollback of ox connection!", ex);
-    
-        }
-        try {
-            // delete sequences
-            if (ox_write_con != null) {
-                deleteSequenceTables(context_id, ox_write_con);
-            }
-        } catch (final SQLException ep) {
-            log.error("SQL Error deleting sequence tables on rollback create context", ep);
+        } catch (SQLException e) {
+            log.error("SQL Error removing/rollback entries from configdb for context " + contextId, e);
         }
     }
 
@@ -497,23 +456,6 @@ public class OXContextMySQLStorageCommon {
         return retval;
     }
 
-    public final void initVersionTable(final int context_id, final Connection con) throws SQLException, StorageException {
-        PreparedStatement ps = null;
-    
-        try {
-            ps = con.prepareStatement("INSERT INTO version (version,locked,gw_compatible,admin_compatible,server) VALUES(?,?,?,?,?);");
-            ps.setInt(1, UpdateTaskCollection.getHighestVersion());
-            ps.setInt(2, 0);
-            ps.setInt(3, 1);
-            ps.setInt(4, 1);
-            ps.setString(5, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
-            ps.executeUpdate();
-            ps.close();
-        } finally {
-            closePreparedStatement(ps);
-        }
-    }
-
     private final int getMyServerID(final Connection configdb_write_con) throws SQLException, StorageException {
         PreparedStatement sstmt = null;
         int sid = 0;
@@ -537,38 +479,27 @@ public class OXContextMySQLStorageCommon {
         return sid;
     }
 
-    private final void fillContextServer2DBPool(final Context ctx, final Database db, final Connection configdb_write_con) throws SQLException, StorageException {
-
+    private final void fillContextServer2DBPool(Context ctx, Database db, Connection configdbCon) throws StorageException {
         PreparedStatement stmt = null;
         try {
-            if (null != db.getScheme() && null != db.getRead_id() && null != db.getId()) {
-                int read_id = -1;
-                int write_id = -1;
-                String db_schema = "openexchange";
-                read_id = db.getRead_id();
-                write_id = db.getId();
-                db_schema = db.getScheme();
-
-                // ok database pools exist in configdb
-                final int server_id = getMyServerID(configdb_write_con);
-                stmt = configdb_write_con.prepareStatement("INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema)" + " VALUES " + " (?,?,?,?,?)");
-                stmt.setInt(1, server_id);
-                stmt.setInt(2, ctx.getId());
-                stmt.setInt(3, read_id);
-                stmt.setInt(4, write_id);
-                stmt.setString(5, db_schema);
-                stmt.executeUpdate();
-                stmt.close();
-            }
+            stmt = configdbCon.prepareStatement("INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES  (?,?,?,?,?)");
+            stmt.setInt(1, getMyServerID(configdbCon));
+            stmt.setInt(2, ctx.getId().intValue());
+            stmt.setInt(3, db.getRead_id().intValue());
+            stmt.setInt(4, db.getId().intValue());
+            stmt.setString(5, db.getScheme());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
         } finally {
-            closePreparedStatement(stmt);
+            closeSQLStuff(stmt);
         }
     }
 
-    private final void fillContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException {
+    private final void fillContextTable(Context ctx, Connection configdbCon) throws StorageException {
         PreparedStatement stmt = null;
         try {
-            stmt = configdb_write_con.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
+            stmt = configdbCon.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
             stmt.setInt(1, ctx.getId().intValue());
             if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
                 stmt.setString(2, ctx.getName());
@@ -580,7 +511,8 @@ public class OXContextMySQLStorageCommon {
             stmt.setString(5, ctx.getFilestore_name());
             stmt.setLong(6, ctx.getMaxQuota().longValue());
             stmt.executeUpdate();
-            stmt.close();
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
         } finally {
             closePreparedStatement(stmt);
         }
