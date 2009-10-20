@@ -109,7 +109,7 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonObject);
+        return new AJAXRequestResult(jsonObject, userContact.getLastModified());
     }
 
 }
