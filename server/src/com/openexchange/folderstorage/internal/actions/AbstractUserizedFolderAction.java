@@ -82,9 +82,9 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
 
     private final FolderServiceDecorator decorator;
 
-    private TimeZone timeZone;
+    private volatile TimeZone timeZone;
 
-    private Locale locale;
+    private volatile Locale locale;
 
     /**
      * Initializes a new {@link AbstractUserizedFolderAction}.
@@ -156,11 +156,17 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      * @return The time zone
      */
     protected TimeZone getTimeZone() {
-        if (null == timeZone) {
-            final TimeZone tz = null == decorator ? null : decorator.getTimeZone();
-            timeZone = tz == null ? Tools.getTimeZone(getUser().getTimeZone()) : tz;
+        TimeZone tmp = timeZone;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = timeZone;
+                if (null == tmp) {
+                    final TimeZone tz = null == decorator ? null : decorator.getTimeZone();
+                    tmp = timeZone = (tz == null ? Tools.getTimeZone(getUser().getTimeZone()) : tz);
+                }
+            }
         }
-        return timeZone;
+        return tmp;
     }
 
     /**
@@ -172,11 +178,17 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      * @return The locale
      */
     protected Locale getLocale() {
-        if (null == locale) {
-            final Locale l = null == decorator ? null : decorator.getLocale();
-            locale = l == null ? getUser().getLocale() : l;
+        Locale tmp = locale;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = locale;
+                if (null == tmp) {
+                    final Locale l = null == decorator ? null : decorator.getLocale();
+                    tmp = locale = l == null ? getUser().getLocale() : l;
+                }
+            }
         }
-        return locale;
+        return tmp;
     }
 
     /**
