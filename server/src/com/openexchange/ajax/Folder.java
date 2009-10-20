@@ -873,7 +873,7 @@ public class Folder extends SessionServlet {
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
                         } catch (final OXFolderException e) {
-                            if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
+                            if (FolderCode.NO_MODULE_ACCESS.getNumber() == e.getDetailNumber() && Category.USER_CONFIGURATION.equals(e.getCategory())) {
                                 /*
                                  * No non-tree-visible public contact folders due to user configuration
                                  */
