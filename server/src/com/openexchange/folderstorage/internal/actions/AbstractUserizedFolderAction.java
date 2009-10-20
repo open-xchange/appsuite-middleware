@@ -256,7 +256,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
                 final String folderId = folder.getID();
                 final FolderStorage[] ss = folderStorageDiscoverer.getFolderStoragesForParent(treeId, folderId);
                 visibleSubfolderIds = new ArrayList<String>(1);
-                for (int i = 0; visibleSubfolderIds.size() <= 0 && i < ss.length; i++) {
+                for (int i = 0; visibleSubfolderIds.isEmpty() && i < ss.length; i++) {
                     final FolderStorage curStorage = ss[i];
                     boolean alreadyOpened = false;
                     final Iterator<FolderStorage> it = openedStorages.iterator();
@@ -283,7 +283,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
             /*
              * Check until first visible subfolder found
              */
-            for (int i = 0; visibleSubfolderIds.size() <= 0 && i < subfolders.length; i++) {
+            for (int i = 0; visibleSubfolderIds.isEmpty() && i < subfolders.length; i++) {
                 final String id = subfolders[i];
                 final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
                 /*
