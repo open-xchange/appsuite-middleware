@@ -63,7 +63,6 @@ import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.user.json.field.DistributionListField;
 import com.openexchange.user.json.field.UserField;
@@ -90,7 +89,7 @@ public final class UserParser {
      * @return The parsed user
      * @throws AjaxException If parsing user data fails
      */
-    public static User parseUserData(final JSONObject userJSONObject, final int userId) throws AjaxException {
+    public static ParsedUser parseUserData(final JSONObject userJSONObject, final int userId) throws AjaxException {
         try {
             final ParsedUser user = new ParsedUser();
             if (userJSONObject.has(UserField.LOCALE.getName())) {

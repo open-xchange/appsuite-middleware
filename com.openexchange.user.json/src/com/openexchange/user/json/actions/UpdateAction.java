@@ -50,6 +50,7 @@
 package com.openexchange.user.json.actions;
 
 import java.util.Date;
+import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,6 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.Utility;
+import com.openexchange.user.json.parser.ParsedUser;
 import com.openexchange.user.json.parser.UserParser;
 import com.openexchange.user.json.services.ServiceRegistry;
 
@@ -95,7 +97,8 @@ public final class UpdateAction extends AbstractUserAction {
          * Get user service to get contact ID
          */
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-        final int contactId = userService.getUser(id, session.getContext()).getContactId();
+        final User storageUser = userService.getUser(id, session.getContext());
+        final int contactId = storageUser.getContactId();
         /*
          * Parse user contact
          */
@@ -113,8 +116,18 @@ public final class UpdateAction extends AbstractUserAction {
         /*
          * Update user, too
          */
-        final User parsedUser = UserParser.parseUserData(jData, id);
-        userService.updateUser(parsedUser, session.getContext());
+        final ParsedUser parsedUser = UserParser.parseUserData(jData, id);
+        final String parsedTimeZone = parsedUser.getTimeZone();
+        final Locale parsedLocale = parsedUser.getLocale();
+        if ((null != parsedTimeZone) || (null != parsedLocale)) {
+            if (null == parsedTimeZone) {
+                parsedUser.setTimeZone(storageUser.getTimeZone());
+            }
+            if (null == parsedLocale) {
+                parsedUser.setLocale(storageUser.getLocale());
+            }
+            userService.updateUser(parsedUser, session.getContext());
+        }
         /*
          * Get last-modified from server
          */
