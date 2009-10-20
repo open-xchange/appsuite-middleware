@@ -152,18 +152,18 @@ public final class SearchAction extends AbstractUserAction {
              */
             final UserField sortField = UserField.getUserOnlyField(orderBy);
             final SearchIterator<Contact> it;
-            if (null != sortField) {
-                // Get contact iterator with dummy search fields
-                final ContactSearchMultiplexer multiplexer =
-                    new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
-                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
-                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", checkedCols);
-            } else {
+            if (null == sortField) {
                 // Sort field is a contact field: pass as it is
                 final ContactSearchMultiplexer multiplexer =
                     new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
                 final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
                 it = multiplexer.extendedSearch(session, searchObj, orderBy, orderDirection, checkedCols);
+            } else {
+                // Get contact iterator with dummy search fields
+                final ContactSearchMultiplexer multiplexer =
+                    new ContactSearchMultiplexer(ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
+                final int[] checkedCols = checkForRequiredField(columns, UserField.INTERNAL_USERID.getColumn());
+                it = multiplexer.extendedSearch(session, searchObj, UserField.DISPLAY_NAME.getColumn(), "asc", checkedCols);
             }
             /*
              * Collect contacts from iterator
