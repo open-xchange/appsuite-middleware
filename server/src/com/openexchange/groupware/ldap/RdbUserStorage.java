@@ -80,7 +80,7 @@ import com.openexchange.tools.Collections.SmartIntArray;
  */
 public class RdbUserStorage extends UserStorage {
 
-    private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapLogin,imapLogin,smtpServer,mailDomain," +
+    private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
         "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";
 
     private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
