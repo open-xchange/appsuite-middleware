@@ -603,7 +603,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             updateUnifiedINBOXEnabled(mailAccount.isUnifiedINBOXEnabled(), MailAccount.DEFAULT_ID, user, cid, con);
             /*
-             * Automatically check Unified INBOX enablement
+             * Automatically check Unified INBOX existence
              */
             if (mailAccount.isUnifiedINBOXEnabled()) {
                 final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
@@ -780,7 +780,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 closeSQLStuff(null, stmt);
             }
             /*
-             * Automatically check Unified INBOX enablement
+             * Automatically check Unified INBOX existence
              */
             if (attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
                 final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
@@ -975,7 +975,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             con.commit();
             autocommit(con);
             /*
-             * Automatically check Unified INBOX enablement
+             * Automatically check Unified INBOX existence
              */
             if (mailAccount.isUnifiedINBOXEnabled()) {
                 final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
@@ -1148,7 +1148,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             closeSQLStuff(null, stmt);
         }
         /*
-         * Automatically check Unified INBOX enablement
+         * Automatically check Unified INBOX existence
          */
         if (mailAccount.isUnifiedINBOXEnabled()) {
             final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
