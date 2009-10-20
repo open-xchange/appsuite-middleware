@@ -199,7 +199,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         // Get default folder
-        final FolderStorage byContentType = OutlookFolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
+        final FolderStorage byContentType = OutlookFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, contentType);
         if (null == byContentType) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }

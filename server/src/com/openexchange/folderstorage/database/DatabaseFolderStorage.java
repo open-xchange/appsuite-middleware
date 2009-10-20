@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
@@ -139,7 +140,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] {
             TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(),
-            InfostoreContentType.getInstance(), UnboundContentType.getInstance() };
+            InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
     }
 
     public ContentType getDefaultContentType() {
@@ -335,10 +336,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
             } else {
-                throw new FolderException(new OXFolderException(
-                    OXFolderException.FolderCode.UNKNOWN_MODULE,
-                    contentType.toString(),
-                    Integer.valueOf(context.getContextId())));
+                return null;
             }
             return String.valueOf(folderId);
         } catch (final DBPoolingException e) {

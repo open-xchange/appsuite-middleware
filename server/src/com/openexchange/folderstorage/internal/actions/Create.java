@@ -238,9 +238,8 @@ public final class Create extends AbstractAction {
                 /*
                  * Find the real storage which is capable to create the folder
                  */
-                final FolderStorage capStorage = folderStorageDiscoverer.getFolderStorageByContentType(
-                    FolderStorage.REAL_TREE_ID,
-                    folderContentType);
+                final FolderStorage capStorage =
+                    folderStorageDiscoverer.getFolderStorageByContentType(FolderStorage.REAL_TREE_ID, folderContentType);
                 if (null == capStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
                 }
@@ -249,11 +248,20 @@ public final class Create extends AbstractAction {
                  * 1. Create at default location in capable real storage
                  */
                 {
-                    final String realParentId = capStorage.getDefaultFolderID(
-                        user,
-                        FolderStorage.REAL_TREE_ID,
-                        capStorage.getDefaultContentType(),
-                        storageParameters);
+                    final String realParentId =
+                        capStorage.getDefaultFolderID(
+                            user,
+                            FolderStorage.REAL_TREE_ID,
+                            capStorage.getDefaultContentType(),
+                            storageParameters);
+                    if (null == realParentId) {
+                        /*
+                         * No default folder found
+                         */
+                        throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(
+                            capStorage.getDefaultContentType(),
+                            FolderStorage.REAL_TREE_ID);
+                    }
                     // TODO: Check permission for obtained default folder ID?
                     final Folder clone4Real = (Folder) toCreate.clone();
                     clone4Real.setParentID(realParentId);

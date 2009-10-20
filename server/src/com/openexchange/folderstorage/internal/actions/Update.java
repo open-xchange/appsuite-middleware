@@ -332,6 +332,14 @@ public final class Update extends AbstractAction {
                     FolderStorage.REAL_TREE_ID,
                     realStorage.getDefaultContentType(),
                     storageParameters);
+                if (null == defaultParentId) {
+                    /*
+                     * No default folder found
+                     */
+                    throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(
+                        realStorage.getDefaultContentType(),
+                        FolderStorage.REAL_TREE_ID);
+                }
                 // TODO: Check permission for obtained default folder ID?
                 final Folder clone4Real = (Folder) folder.clone();
                 clone4Real.setParentID(defaultParentId);
