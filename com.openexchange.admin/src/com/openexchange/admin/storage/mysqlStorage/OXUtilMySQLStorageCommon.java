@@ -66,12 +66,14 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.tools.sql.DBUtils;
 
 public class OXUtilMySQLStorageCommon {
@@ -80,7 +82,7 @@ public class OXUtilMySQLStorageCommon {
 
     private static AdminCache cache = ClientAdminThread.cache;
 
-    public void createDatabase(final Database db) throws StorageException {
+    public void createDatabase(Database db) throws StorageException {
         final List<String> createTableStatements;
         try {
             createTableStatements = cache.getOXDBInitialQueries();
@@ -111,6 +113,7 @@ public class OXUtilMySQLStorageCommon {
             con.setCatalog(db.getScheme());
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
+            initVersionTable(con);
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -221,6 +224,23 @@ public class OXUtilMySQLStorageCommon {
             }
         }
         return null;
+    }
+
+    public static final void initVersionTable(Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO version (version,locked,gw_compatible,admin_compatible,server) VALUES(?,?,?,?,?);");
+            stmt.setInt(1, UpdateTaskCollection.getHighestVersion());
+            stmt.setInt(2, 0);
+            stmt.setInt(3, 1);
+            stmt.setInt(4, 1);
+            stmt.setString(5, cache.getProperties().getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
     public void deleteDatabase(Database db) throws StorageException {

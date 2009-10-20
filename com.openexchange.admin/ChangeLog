@@ -1,3 +1,7 @@
+* 2009-10-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.
+
 * 2009-10-05 - marcus.klein@open-xchange.com
 
  - Bugfix #14631: Added 2 new columns for contact collector settings to schema creating SQL script.
