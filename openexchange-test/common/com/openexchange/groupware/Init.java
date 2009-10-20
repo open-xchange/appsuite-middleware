@@ -338,6 +338,7 @@ public final class Init {
                 props.getMaximumPoolSize(),
                 props.getKeepAliveTime(),
                 props.getWorkQueue(),
+                props.getWorkQueueSize(),
                 props.getRefusedExecutionBehavior());
         services.put(ThreadPoolService.class, threadPool);
         final TimerService timer = new CustomThreadPoolExecutorTimerService((CustomThreadPoolExecutor) threadPool.getExecutor());
