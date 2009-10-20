@@ -47,33 +47,75 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.outlook;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.database.DatabaseId;
 
 /**
- * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.
+ * {@link OutlookId} - A MS Outlook ID which orders subfolder by name in a locale-sensitive way.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualServiceRegistry {
+public final class OutlookId implements SortableId {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private final String folderId;
+
+    private final int ordinal;
 
     /**
-     * Gets the service registry
+     * Initializes a new {@link DatabaseId}.
      * 
-     * @return The service registry
+     * @param folderId The folder identifier
+     * @param ordinal The ordinal
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public OutlookId(final String folderId, final int ordinal) {
+        super();
+        this.folderId = folderId;
+        this.ordinal = ordinal;
     }
 
-    /**
-     * Initializes a new {@link IMAPServiceRegistry}
-     */
-    private VirtualServiceRegistry() {
-        super();
+    public String getId() {
+        return folderId;
+    }
+
+    public Priority getPriority() {
+        return Priority.HIGH;
+    }
+
+    public int compareTo(final SortableId o) {
+        // Compare by ordinal
+        if (o instanceof OutlookId) {
+            final int thisVal = this.ordinal;
+            final int anotherVal = ((OutlookId) o).ordinal;
+            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
+        }
+        final int thisPrio = Priority.HIGH.ordinal();
+        final int anotherPrio = (o).getPriority().ordinal();
+        return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ordinal;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof OutlookId)) {
+            return false;
+        }
+        final OutlookId other = (OutlookId) obj;
+        if (ordinal != other.ordinal) {
+            return false;
+        }
+        return true;
     }
 
 }

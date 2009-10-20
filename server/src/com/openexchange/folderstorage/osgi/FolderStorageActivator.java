@@ -67,7 +67,7 @@ import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivat
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
-import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator;
+import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -122,7 +122,8 @@ public final class FolderStorageActivator implements BundleActivator {
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
             activators.add(new CacheFolderStorageActivator()); // Cache impl
-            activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
+            activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
+            // activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
             BundleActivator activator = null;
             for (final Iterator<BundleActivator> iter = activators.iterator(); iter.hasNext();) {
                 try {

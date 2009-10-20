@@ -47,33 +47,68 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.outlook.sql;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import java.sql.PreparedStatement;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
+import com.openexchange.server.ServiceException;
 
 /**
- * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.
+ * {@link Utility}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+final class Utility {
 
     /**
-     * Gets the service registry
-     * 
-     * @return The service registry
+     * Initializes a new {@link Utility}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    private Utility() {
+        super();
     }
 
     /**
-     * Initializes a new {@link IMAPServiceRegistry}
+     * Gets the {@link DatabaseService} from service registry.
+     * 
+     * @return The {@link DatabaseService} from service registry
+     * @throws FolderException If {@link DatabaseService} is not contained in service registry
      */
-    private VirtualServiceRegistry() {
-        super();
+    static DatabaseService getDatabaseService() throws FolderException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = OutlookServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
+        return databaseService;
+    }
+
+    /**
+     * Debugs given statement's SQL string.
+     * 
+     * @param stmt The statement
+     */
+    static void debugSQL(final PreparedStatement stmt) {
+        if (null != stmt) {
+            final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Utility.class);
+            if (LOG.isDebugEnabled()) {
+                final String sql = getSQLString(stmt);
+                LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+            }
+        }
+    }
+
+    /**
+     * Extracts SQL string from passed statement.
+     * 
+     * @param stmt The statement
+     * @return The extracted SQL string
+     */
+    static String getSQLString(final PreparedStatement stmt) {
+        final String toString = stmt.toString();
+        return toString.substring(toString.indexOf(": ") + 2);
     }
 
 }

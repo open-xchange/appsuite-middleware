@@ -47,33 +47,36 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.outlook;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.FolderType;
 
 /**
- * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.
+ * {@link OutlookFolderType} - The MS Outlook folder type.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+public final class OutlookFolderType implements FolderType {
 
     /**
-     * Gets the service registry
-     * 
-     * @return The service registry
+     * Initializes a new {@link OutlookFolderType}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    public OutlookFolderType() {
+        super();
     }
 
-    /**
-     * Initializes a new {@link IMAPServiceRegistry}
-     */
-    private VirtualServiceRegistry() {
-        super();
+    public boolean servesFolderId(final String folderId) {
+        // A virtual storage serves every folder ID except null
+        return (null != folderId);
+    }
+
+    public boolean servesTreeId(final String treeId) {
+        return !FolderStorage.REAL_TREE_ID.equals(treeId);
+    }
+
+    public boolean servesParentId(final String parentId) {
+        return servesFolderId(parentId);
     }
 
 }

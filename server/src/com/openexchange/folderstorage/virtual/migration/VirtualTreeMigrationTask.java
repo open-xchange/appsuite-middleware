@@ -47,33 +47,26 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.virtual.migration;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.virtual.VirtualPermission;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -83,24 +76,14 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -198,57 +181,53 @@ public class VirtualTreeMigrationTask implements UpdateTask {
     }
 
     private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws UpdateException {
-        try {
-            /*
-             * Get context
-             */
-            final Context ctx;
-            {
-                final int mailAdmin = getMailAdmin(contextId);
-                if (-1 == mailAdmin) {
-                    throw missingAdminError(contextId);
-                }
-                final ContextImpl ctxi = new ContextImpl(contextId);
-                ctxi.setMailadmin(mailAdmin);
-                ctx = ctxi;
+        /*
+         * Get context
+         */
+        final Context ctx;
+        {
+            final int mailAdmin = getMailAdmin(contextId);
+            if (-1 == mailAdmin) {
+                throw missingAdminError(contextId);
             }
-            /*
-             * Iterate users
-             */
+            final ContextImpl ctxi = new ContextImpl(contextId);
+            ctxi.setMailadmin(mailAdmin);
+            ctx = ctxi;
+        }
+        /*
+         * Iterate users
+         */
 
-            final int size = users.size();
-            final StringBuilder sb = new StringBuilder(128);
+        final int size = users.size();
+        final StringBuilder sb = new StringBuilder(128);
+        if (LOG.isInfoEnabled()) {
+            LOG.info(sb.append("Processing ").append(size).append(" users in context ").append(contextId).toString());
+            sb.setLength(0);
+        }
+
+        int processed = 0;
+        for (final Integer userId : users) {
+            final int user = userId.intValue();
+            if (!virtualTreeExists(user, ctx)) {
+                /*
+                 * Create root folder
+                 */
+                createVirtualRootFolder(user, ctx);
+                /*
+                 * Create user top level
+                 */
+                createVirtualTopLevel(user, ctx);
+                /*
+                 * Create default folders below private folder
+                 */
+                createVirtualPrivateFolderLevel(user, ctx);
+            }
+            processed++;
             if (LOG.isInfoEnabled()) {
-                LOG.info(sb.append("Processing ").append(size).append(" users in context ").append(contextId).toString());
+                LOG.info(sb.append("Processed ").append(processed).append(" users of ").append(size).append(" users in context ").append(
+                    contextId).toString());
                 sb.setLength(0);
             }
-
-            int processed = 0;
-            for (final Integer userId : users) {
-                final int user = userId.intValue();
-                if (!virtualTreeExists(user, ctx)) {
-                    /*
-                     * Create root folder
-                     */
-                    createVirtualRootFolder(user, ctx);
-                    /*
-                     * Create user top level
-                     */
-                    createVirtualTopLevel(user, ctx);
-                    /*
-                     * Create default folders below private folder
-                     */
-                    createVirtualPrivateFolderLevel(user, ctx);
-                }
-                processed++;
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(sb.append("Processed ").append(processed).append(" users of ").append(size).append(" users in context ").append(
-                        contextId).toString());
-                    sb.setLength(0);
-                }
-            }
-        } catch (final ServiceException e) {
-            throw new UpdateException(e);
         }
     }
 
@@ -292,6 +271,11 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             folder.setParentID(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
             folder.setSubscribed(true);
             Insert.insertFolder(ctx.getContextId(), 1, user, folder);
+            /*
+             * Insert other mail default folders: Drafts, Sent, Spam, and Trash
+             */
+            
+            
         } catch (final OXException e) {
             throw new UpdateException(e);
         } catch (final FolderException e) {
@@ -299,7 +283,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
         }
     }
 
-    private static void createVirtualTopLevel(final int user, final Context ctx) throws ServiceException, UpdateException {
+    private static void createVirtualTopLevel(final int user, final Context ctx) throws UpdateException {
         final int treeId = 1;
         final String treeIdentifier = String.valueOf(treeId);
         {
@@ -366,43 +350,6 @@ public class VirtualTreeMigrationTask implements UpdateTask {
                 Database.back(ctx, true, con);
             }
         }
-        try {
-            if (UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx).isMultipleMailAccounts()) {
-                final User userObj = UserStorage.getStorageUser(user, ctx);
-                /*
-                 * Now insert user's external mail accounts on top level
-                 */
-                final List<MailAccount> accounts;
-                {
-                    final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                        MailAccountStorageService.class,
-                        true);
-                    final MailAccount[] mailAccounts = storageService.getUserMailAccounts(user, ctx.getContextId());
-                    accounts = new ArrayList<MailAccount>(mailAccounts.length);
-                    accounts.addAll(Arrays.asList(mailAccounts));
-                    Collections.sort(accounts, new MailAccountComparator(userObj.getLocale()));
-                }
-                if (!accounts.isEmpty()) {
-                    for (final MailAccount mailAccount : accounts) {
-                        final DummyFolder mailFolder = new DummyFolder();
-                        if (!mailAccount.isDefaultAccount()) {
-                            mailFolder.setName(mailAccount.getName());
-                            mailFolder.setID(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
-                            mailFolder.setTreeID(treeIdentifier);
-                            mailFolder.setParentID(FolderStorage.ROOT_ID);
-                            mailFolder.setSubscribed(true);
-                            Insert.insertFolder(ctx.getContextId(), treeId, user, mailFolder);
-                        }
-                    }
-                }
-            }
-        } catch (final MailAccountException e) {
-            throw new UpdateException(e);
-        } catch (final UserConfigurationException e) {
-            throw new UpdateException(e);
-        } catch (final FolderException e) {
-            throw new UpdateException(e);
-        }
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task VirtualTreeMigrationTask: %1$s." })
@@ -463,257 +410,5 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             Database.back(ctx, false, con);
         }
     }
-
-    private static final class DummyFolder implements Folder {
-
-        private static final long serialVersionUID = 8179196440833088118L;
-
-        private Date lastModified;
-
-        private int modifiedBy;
-
-        private String treeId;
-
-        private String id;
-
-        private String name;
-
-        private String parent;
-
-        private Permission[] permissions;
-
-        private boolean subscribed;
-
-        public DummyFolder() {
-            super();
-            modifiedBy = -1;
-        }
-
-        @Override
-        public Object clone() {
-            try {
-                return super.clone();
-            } catch (final CloneNotSupportedException e) {
-                throw new InternalError(e.getMessage());
-            }
-        }
-
-        public int getCapabilities() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getCapabilities()");
-        }
-
-        public ContentType getContentType() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getContentType()");
-        }
-
-        public int getCreatedBy() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getCreatedBy()");
-        }
-
-        public java.util.Date getCreationDate() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getCreationDate()");
-        }
-
-        public int getDeleted() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getDeleted()");
-        }
-
-        public String getID() {
-            return id;
-        }
-
-        public java.util.Date getLastModified() {
-            return lastModified;
-        }
-
-        public String getLocalizedName(final Locale locale) {
-            return name;
-        }
-
-        public int getModifiedBy() {
-            return modifiedBy;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getNew() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getNew()");
-        }
-
-        public String getParentID() {
-            return parent;
-        }
-
-        public Permission[] getPermissions() {
-            return permissions;
-        }
-
-        public String[] getSubfolderIDs() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getSubfolderIDs()");
-        }
-
-        public String getSummary() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getSummary()");
-        }
-
-        public int getTotal() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getTotal()");
-        }
-
-        public String getTreeID() {
-            return treeId;
-        }
-
-        public Type getType() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getType()");
-        }
-
-        public int getUnread() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getUnread()");
-        }
-
-        public boolean isCacheable() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.isCacheable()");
-        }
-
-        public boolean isDefault() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.isDefault()");
-        }
-
-        public boolean isGlobalID() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.isGlobalID()");
-        }
-
-        public boolean isSubscribed() {
-            return subscribed;
-        }
-
-        public boolean isVirtual() {
-            return true;
-        }
-
-        public void setCapabilities(final int capabilities) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setCapabilities()");
-        }
-
-        public void setContentType(final ContentType contentType) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setContentType()");
-        }
-
-        public void setCreatedBy(final int createdBy) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setCreatedBy()");
-        }
-
-        public void setCreationDate(final java.util.Date creationDate) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setCreationDate()");
-        }
-
-        public void setDefault(final boolean deefault) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setDefault()");
-        }
-
-        public void setDeleted(final int deleted) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setDeleted()");
-        }
-
-        public void setID(final String id) {
-            this.id = id;
-        }
-
-        public void setLastModified(final Date lastModified) {
-            this.lastModified = lastModified;
-        }
-
-        public void setModifiedBy(final int modifiedBy) {
-            this.modifiedBy = modifiedBy;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        public void setNew(final int nu) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setNew()");
-        }
-
-        public void setParentID(final String parentId) {
-            this.parent = parentId;
-        }
-
-        public void setPermissions(final Permission[] permissions) {
-            this.permissions = permissions;
-        }
-
-        public void setSubfolderIDs(final String[] subfolderIds) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setSubfolderIDs()");
-        }
-
-        public void setSubscribed(final boolean subscribed) {
-            this.subscribed = subscribed;
-        }
-
-        public void setSummary(final String summary) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setSummary()");
-        }
-
-        public void setTotal(final int total) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setTotal()");
-        }
-
-        public void setTreeID(final String id) {
-            this.treeId = id;
-        }
-
-        public void setType(final Type type) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setType()");
-        }
-
-        public void setUnread(final int unread) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setUnread()");
-        }
-
-        public int getDefaultType() {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getDefaultInfo()");
-        }
-
-        public void setDefaultType(final int defaultType) {
-            throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setDefaultInfo()");
-        }
-
-    } // End of DummyFolder
-
-    private static final class MailAccountComparator implements Comparator<MailAccount> {
-
-        private final Collator collator;
-
-        public MailAccountComparator(final Locale locale) {
-            super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
-        }
-
-        public int compare(final MailAccount o1, final MailAccount o2) {
-            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
-                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
-                    return 0;
-                }
-                return -1;
-            } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
-                return 1;
-            }
-            if (o1.isDefaultAccount()) {
-                if (o2.isDefaultAccount()) {
-                    return 0;
-                }
-                return -1;
-            } else if (o2.isDefaultAccount()) {
-                return 1;
-            }
-            return collator.compare(o1.getName(), o2.getName());
-        }
-
-    } // End of MailAccountComparator
 
 }

@@ -47,33 +47,69 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.outlook.sql;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.virtual.VirtualServiceRegistry;
+import com.openexchange.server.ServiceException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.
+ * {@link Update} - SQL for updating a MS outlook folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+public final class Update {
 
     /**
-     * Gets the service registry
-     * 
-     * @return The service registry
+     * Initializes a new {@link Update}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    private Update() {
+        super();
     }
 
     /**
-     * Initializes a new {@link IMAPServiceRegistry}
+     * Updates specified folder.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folder The folder
+     * @throws FolderException If update fails
      */
-    private VirtualServiceRegistry() {
-        super();
+    public static void updateFolder(final int cid, final int tree, final int user, final Folder folder) throws FolderException {
+        final DatabaseService databaseService = Utility.getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            con.setAutoCommit(false); // BEGIN
+            Delete.deleteFolder(cid, tree, user, folder.getID(), false, con);
+            Insert.insertFolder(cid, tree, user, folder, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final FolderException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(cid, con);
+        }
     }
 
 }

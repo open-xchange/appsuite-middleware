@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage.outlook;
 
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.
+ * {@link OutlookServiceRegistry} - The service registry for MS Outlook folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualServiceRegistry {
+public final class OutlookServiceRegistry {
 
     private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
@@ -72,7 +72,7 @@ public final class VirtualServiceRegistry {
     /**
      * Initializes a new {@link IMAPServiceRegistry}
      */
-    private VirtualServiceRegistry() {
+    private OutlookServiceRegistry() {
         super();
     }
 

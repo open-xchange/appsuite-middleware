@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.virtual;
 
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 
 /**
  * {@link VirtualFolderType} - The virtual folder type.
@@ -72,7 +73,7 @@ public final class VirtualFolderType implements FolderType {
     }
 
     public boolean servesTreeId(final String treeId) {
-        return !FolderStorage.REAL_TREE_ID.equals(treeId);
+        return !FolderStorage.REAL_TREE_ID.equals(treeId) && !OutlookFolderStorage.OUTLOOK_TREE_ID.equals(treeId);
     }
 
     public boolean servesParentId(final String parentId) {
