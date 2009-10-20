@@ -52,6 +52,7 @@ package com.openexchange.groupware.contact;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import junit.framework.TestCase;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
@@ -65,7 +66,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 
 /**
@@ -83,13 +83,13 @@ public class ContactSearchMuliplexerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        ContactSQLInterface iface1 = contactsWithSearchResult(11,12,13);
-        ContactSQLInterface iface2 = contactsWithSearchResult(21,22,23);
-        ContactSQLInterface iface3 = contactsWithSearchResult(31,32,33);
+        final ContactSQLInterface iface1 = contactsWithSearchResult(11,12,13);
+        final ContactSQLInterface iface2 = contactsWithSearchResult(21,22,23);
+        final ContactSQLInterface iface3 = contactsWithSearchResult(31,32,33);
         
-        ContactSQLInterface standard = contactsWithSearchResult(1,2,3);
+        final ContactSQLInterface standard = contactsWithSearchResult(1,2,3);
     
-        SimContactInterfaceDiscoveryService discoveryService = new SimContactInterfaceDiscoveryService();
+        final SimContactInterfaceDiscoveryService discoveryService = new SimContactInterfaceDiscoveryService();
         discoveryService.register(iface1, 1);
         discoveryService.register(iface2, 2);
         discoveryService.register(iface3, 3);
@@ -103,13 +103,13 @@ public class ContactSearchMuliplexerTest extends TestCase {
 
     public void testSearchInSpecificFolders() throws SearchIteratorException, OXException {
         
-        ContactSearchObject contactSearchObject = new ContactSearchObject();
+        final ContactSearchObject contactSearchObject = new ContactSearchObject();
         contactSearchObject.addFolder(1);
         contactSearchObject.addFolder(3);
         contactSearchObject.addFolder(1337);
         
         
-        SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", new int[]{Contact.OBJECT_ID});
+        final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", new int[]{Contact.OBJECT_ID});
         
         assertNotNull(contacts);
         // Folder 2 is not searched, so 21,22 and 23 will be missing
@@ -118,60 +118,60 @@ public class ContactSearchMuliplexerTest extends TestCase {
     }
     
     public void testSearchEverywhere() throws SearchIteratorException, OXException {
-        ContactSearchObject contactSearchObject = new ContactSearchObject();
+        final ContactSearchObject contactSearchObject = new ContactSearchObject();
         
         
-        SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", new int[]{Contact.OBJECT_ID});
+        final SearchIterator<Contact> contacts = searchMultiplexer.extendedSearch(session, contactSearchObject, Contact.OBJECT_ID, "ASC", new int[]{Contact.OBJECT_ID});
         
         assertNotNull(contacts);
         assertIDs(contacts, 1,2,3,11,12,13,21,22,23,31,32,33);
     }
     
-    private void assertIDs(SearchIterator<Contact> results, int...ids) throws SearchIteratorException, OXException {
+    private void assertIDs(final SearchIterator<Contact> results, final int...ids) throws SearchIteratorException, OXException {
         int index = 0;
         while(results.hasNext()) {
-            Contact c = results.next();
-            int currentId = ids[index++];
+            final Contact c = results.next();
+            final int currentId = ids[index++];
             assertEquals("Unexpected element at index: "+(index-1), currentId, c.getObjectID());
         }
         assertEquals(ids.length, index);
     }
 
-    private ContactSQLInterface contactsWithSearchResult(int...ids) {
+    private ContactSQLInterface contactsWithSearchResult(final int...ids) {
         final List<Contact> contacts = new LinkedList<Contact>();
-        for(int id : ids) {
-            Contact contact = new Contact();
+        for(final int id : ids) {
+            final Contact contact = new Contact();
             contact.setObjectID(id);
             contacts.add(contact);
         }
         
         return new ContactSQLInterface() {
 
-            public void deleteContactObject(int objectId, int inFolder, Date clientLastModified) throws OXObjectNotFoundException, OXConflictException, OXException {
+            public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXObjectNotFoundException, OXConflictException, OXException {
                 // TODO Auto-generated method stub
                 
             }
 
-            public void insertContactObject(Contact contactObj) throws OXException {
+            public void insertContactObject(final Contact contactObj) throws OXException {
                 // TODO Auto-generated method stub
                 
             }
 
-            public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException, OXConcurrentModificationException {
+            public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXConcurrentModificationException {
                 // TODO Auto-generated method stub
                 
             }
 
-            public SearchIterator<Contact> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
+            public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
                 return new SearchIteratorAdapter<Contact>(contacts.iterator());
             }
 
-            public SearchIterator<Contact> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
+            public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final String orderDir, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
-            public SearchIterator<Contact> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+            public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -186,32 +186,37 @@ public class ContactSearchMuliplexerTest extends TestCase {
                 return null;
             }
 
-            public SearchIterator<Contact> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+            public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
-            public int getNumberOfContacts(int folderId) throws OXException {
+            public int getNumberOfContacts(final int folderId) throws OXException {
                 // TODO Auto-generated method stub
                 return 0;
             }
 
-            public Contact getObjectById(int objectId, int inFolder) throws OXException {
+            public Contact getObjectById(final int objectId, final int inFolder) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
-            public SearchIterator<Contact> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException {
+            public SearchIterator<Contact> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
-            public Contact getUserById(int userId) throws OXException {
+            public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
-            public SearchIterator<Contact> searchContacts(String searchpattern, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
+            public Contact getUserById(final int userId) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final String orderDir, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
