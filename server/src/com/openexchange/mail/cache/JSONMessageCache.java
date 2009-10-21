@@ -359,7 +359,7 @@ public final class JSONMessageCache {
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
-        if (remove) {
+        if (remove && null != retval) {
             objectMap.remove(id);
             if (objectMap.isEmpty()) {
                 timeoutConcurrentMap.remove(key);
