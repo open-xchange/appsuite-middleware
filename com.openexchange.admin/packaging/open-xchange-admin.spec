@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -310,6 +310,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Oct 20 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.
 * Mon Oct 05 2009 - marcus.klein@open-xchange.com
  - Bugfix #14631: Added 2 new columns for contact collector settings to schema creating SQL script.
 * Mon Sep 07 2009 - marcus.klein@open-xchange.com
