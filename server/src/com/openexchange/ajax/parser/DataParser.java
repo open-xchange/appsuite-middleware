@@ -82,7 +82,7 @@ public abstract class DataParser {
         this(false, timeZone);
     }
 
-    protected DataParser(boolean parseAll, TimeZone timeZone) {
+    protected DataParser(final boolean parseAll, final TimeZone timeZone) {
         super();
         this.parseAll = parseAll;
         this.timeZone = timeZone;
@@ -119,13 +119,11 @@ public abstract class DataParser {
      *            The optional field name
      * @return The optional field's value or <code>null</code> if there's no
      *         such field
-     * @throws JSONException
-     *             If a JSON error occurs
      */
-    public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
+    public static String parseString(final JSONObject jsonObj, final String name) {
         String retval = null;
         if (jsonObj.hasAndNotNull(name)) {
-            final String test = jsonObj.getString(name);
+            final String test = jsonObj.optString(name);
             if (0 != test.length()) {
                 retval = test;
             }
