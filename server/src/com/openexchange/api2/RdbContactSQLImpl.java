@@ -57,6 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -463,7 +464,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         }
         final Contact[] contacts;
         try {
-            final Set<Integer> foundContacts = new HashSet<Integer>();
+            final Set<String> foundAddresses = new HashSet<String>();
             final Contact[] contactSearchResults;
             ResultSet result = null;
             PreparedStatement stmt = null;
@@ -474,7 +475,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 while (result.next()) {
                     final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
                     tmp.add(contact);
-                    foundContacts.add(Integer.valueOf(contact.getObjectID()));
+                    foundAddresses.add(contact.getEmail1());
                 }
                 contactSearchResults = tmp.toArray(new Contact[tmp.size()]);
             } catch (final SQLException e) {
@@ -492,7 +493,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     final String aliasColumn = "ua.value";
                     {
                         /*
-                         * Compose statement: SEarch for matching users' aliases but ignore own aliases
+                         * Compose statement: Search for matching users' aliases but ignore own aliases
                          */
                         String select = cs.getSelect();
                         final StringBuilder sb = new StringBuilder(select.length());
@@ -519,14 +520,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     stmt.setInt(pos++, userId);
                     result = stmt.executeQuery();
                     final List<Contact> tmp = new ArrayList<Contact>();
+                    final String email1Column = MessageFormat.format("co.{0}", Contacts.mapping[Contact.EMAIL1].getDBFieldName());
                     while (result.next()) {
                         /*
                          * Check if associated contact was already found by previous search
                          */
-                        if (!foundContacts.contains(Integer.valueOf(result.getInt(7)))) {
+                        if (!foundAddresses.contains(result.getString(email1Column))) {
                             final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
-                            final String aliasAddress = result.getString(aliasColumn);
-                            contact.setEmail1(aliasAddress);
+                            contact.setEmail1(result.getString(aliasColumn));
                             tmp.add(contact);
                         }
                     }
