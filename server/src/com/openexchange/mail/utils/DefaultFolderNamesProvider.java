@@ -61,6 +61,7 @@ import static com.openexchange.mail.utils.StorageUtility.INDEX_DRAFTS;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SENT;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_SPAM;
 import static com.openexchange.mail.utils.StorageUtility.INDEX_TRASH;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
@@ -75,7 +76,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class DefaultFolderNamesProvider {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DefaultFolderNamesProvider.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(DefaultFolderNamesProvider.class);
 
     private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
@@ -99,9 +101,8 @@ public final class DefaultFolderNamesProvider {
             fallbackProvider = DEFAULT_PROVIDER;
         } else {
             try {
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                 fallbackProvider = new DefaultAccountProvider(storageService.getDefaultMailAccount(user, cid));
             } catch (final ServiceException e) {
                 throw new MailException(e);
@@ -213,13 +214,19 @@ public final class DefaultFolderNamesProvider {
      * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
+        final FullnameArgument trashFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getTrashFullname());
+        final FullnameArgument sentFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getSentFullname());
+        final FullnameArgument draftsFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getDraftsFullname());
+        final FullnameArgument spamFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getSpamFullname());
+        final FullnameArgument csfn = MailFolderUtility.prepareMailFolderParam(mailAccount.getConfirmedSpamFullname());
+        final FullnameArgument chfn = MailFolderUtility.prepareMailFolderParam(mailAccount.getConfirmedHamFullname());
         return getDefaultFolderFullnames(
-            mailAccount.getTrashFullname(),
-            mailAccount.getSentFullname(),
-            mailAccount.getDraftsFullname(),
-            mailAccount.getSpamFullname(),
-            mailAccount.getConfirmedSpamFullname(),
-            mailAccount.getConfirmedHamFullname(),
+            null == trashFn ? null : trashFn.getFullname(),
+            null == sentFn ? null : sentFn.getFullname(),
+            null == draftsFn ? null : draftsFn.getFullname(),
+            null == spamFn ? null : spamFn.getFullname(),
+            null == csfn ? null : csfn.getFullname(),
+            null == chfn ? null : chfn.getFullname(),
             isSpamEnabled);
     }
 

@@ -53,6 +53,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +67,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
@@ -163,9 +165,8 @@ public final class MailAccountRequest {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
@@ -207,9 +208,8 @@ public final class MailAccountRequest {
                 }
             }
 
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             for (int i = 0; i < ids.length; i++) {
                 final int id = ids[i];
@@ -249,20 +249,14 @@ public final class MailAccountRequest {
                 throw MailAccountExceptionMessages.CREATION_FAILED.create();
             }
 
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final int id = storageService.insertMailAccount(
-                accountDescription,
-                session.getUserId(),
-                session.getContext(),
-                session.getPassword());
+            final int id =
+                storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session.getPassword());
 
-            final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
-                id,
-                session.getUserId(),
-                session.getContextId()));
+            final JSONObject jsonAccount =
+                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return jsonAccount;
         } catch (final AbstractOXException e) {
@@ -288,14 +282,11 @@ public final class MailAccountRequest {
                 /*
                  * ID is delivered, but password not set. Thus load from storage version.
                  */
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storageService =
+                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-                final String encodedPassword = storageService.getMailAccount(
-                    accountDescription.getId(),
-                    session.getUserId(),
-                    session.getContextId()).getPassword();
+                final String encodedPassword =
+                    storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
                 accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, session.getPassword()));
             }
 
@@ -502,6 +493,21 @@ public final class MailAccountRequest {
         return validated;
     }
 
+    private static final EnumSet<Attribute> DEFAULT =
+        EnumSet.of(
+            Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+            Attribute.CONFIRMED_HAM_LITERAL,
+            Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+            Attribute.CONFIRMED_SPAM_LITERAL,
+            Attribute.DRAFTS_FULLNAME_LITERAL,
+            Attribute.DRAFTS_LITERAL,
+            Attribute.SENT_FULLNAME_LITERAL,
+            Attribute.SENT_LITERAL,
+            Attribute.SPAM_FULLNAME_LITERAL,
+            Attribute.SPAM_LITERAL,
+            Attribute.TRASH_FULLNAME_LITERAL,
+            Attribute.TRASH_LITERAL);
+
     private JSONObject actionUpate(final JSONObject jsonObject) throws AjaxException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
@@ -516,9 +522,8 @@ public final class MailAccountRequest {
                     Integer.valueOf(session.getContextId()));
             }
 
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final int id = accountDescription.getId();
             if (-1 == id) {
@@ -541,10 +546,30 @@ public final class MailAccountRequest {
                 session.getContextId(),
                 session.getPassword());
 
-            final JSONObject jsonAccount = MailAccountWriter.write(storageService.getMailAccount(
-                id,
-                session.getUserId(),
-                session.getContextId()));
+            if (fieldsToUpdate.removeAll(DEFAULT)) {
+                /*
+                 * Drop all session parameters related to default folders for this account
+                 */
+                session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
+                session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
+                /*
+                 * Re-Init account's default folders
+                 */
+                try {
+                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, id);
+                    mailAccess.connect(false);
+                    try {
+                        mailAccess.getFolderStorage().checkDefaultFolders();
+                    } finally {
+                        mailAccess.close(true);
+                    }
+                } catch (final MailException e) {
+                    LOG.warn(e.getMessage(), e);
+                }
+            }
+
+            final JSONObject jsonAccount =
+                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
             return jsonAccount;
         } catch (final AbstractOXException e) {
@@ -557,9 +582,8 @@ public final class MailAccountRequest {
 
         final List<Attribute> attributes = getColumns(colString);
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
@@ -601,9 +625,8 @@ public final class MailAccountRequest {
 
         final List<Attribute> attributes = getColumns(colString);
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
 
