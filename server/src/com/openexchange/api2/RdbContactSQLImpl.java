@@ -106,6 +106,7 @@ import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -462,22 +463,19 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         } catch (final DBPoolingException e) {
             throw EXCEPTIONS.create(13, e);
         }
-        final Contact[] contacts;
+        final List<Contact> contacts = new ArrayList<Contact>(32);
         try {
             final Set<String> foundAddresses = new HashSet<String>();
-            final Contact[] contactSearchResults;
             ResultSet result = null;
             PreparedStatement stmt = null;
             try {
                 stmt = cs.getSqlStatement(con);
                 result = stmt.executeQuery();
-                final List<Contact> tmp = new ArrayList<Contact>();
                 while (result.next()) {
                     final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
-                    tmp.add(contact);
+                    contacts.add(contact);
                     foundAddresses.add(contact.getEmail1());
                 }
-                contactSearchResults = tmp.toArray(new Contact[tmp.size()]);
             } catch (final SQLException e) {
                 throw EXCEPTIONS.create(18, e, I(ctx.getContextId()), I(userId));
             } finally {
@@ -487,7 +485,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
 
             if (considerUsersAliases) {
-                final Contact[] aliasSearchResults;
                 try {
                     int pos;
                     final String aliasColumn = "ua.value";
@@ -519,7 +516,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     stmt.setString(pos++, prepareForSearch(searchobject.getEmail1(), false, true, true));
                     stmt.setInt(pos++, userId);
                     result = stmt.executeQuery();
-                    final List<Contact> tmp = new ArrayList<Contact>();
                     final String email1Column = MessageFormat.format("co.{0}", Contacts.mapping[Contact.EMAIL1].getDBFieldName());
                     while (result.next()) {
                         /*
@@ -528,10 +524,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                         if (!foundAddresses.contains(result.getString(email1Column))) {
                             final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
                             contact.setEmail1(result.getString(aliasColumn));
-                            tmp.add(contact);
+                            contacts.add(contact);
                         }
                     }
-                    aliasSearchResults = tmp.toArray(new Contact[tmp.size()]);
                 } catch (final SQLException e) {
                     throw EXCEPTIONS.create(18, e, I(ctx.getContextId()), I(userId));
                 } finally {
@@ -539,28 +534,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     result = null;
                     stmt = null;
                 }
-                final int aliasLen = aliasSearchResults.length;
-                if (aliasLen > 0) {
-                    final int searchLen = contactSearchResults.length;
-                    contacts = new Contact[searchLen + aliasLen];
-                    System.arraycopy(contactSearchResults, 0, contacts, 0, searchLen);
-                    System.arraycopy(aliasSearchResults, 0, contacts, searchLen, aliasLen);
-                } else {
-                    contacts = contactSearchResults;
-                }
-            } else {
-                contacts = contactSearchResults;
             }
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
 
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
-            java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
+            java.util.Collections.sort(contacts, new UseCountComparator(specialSort));
         } else if (specialSort) {
-            java.util.Arrays.sort(contacts, new ContactComparator());
+            java.util.Collections.sort(contacts, new ContactComparator());
         }
-        return new ArrayIterator<Contact>(contacts);
+        return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
 
     @OXThrowsMultiple(category = {
