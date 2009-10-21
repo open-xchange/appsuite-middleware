@@ -106,7 +106,7 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.PASSWORD_LITERAL);
         }
         // Expect URL or separate fields for protocol, server, port, and secure
-        if (json.has(MailAccountFields.MAIL_URL)) {
+        if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
             attributes.add(Attribute.MAIL_URL_LITERAL);
             attributes.addAll(Attribute.MAIL_URL_ATTRIBUTES);
@@ -127,7 +127,7 @@ public class MailAccountParser extends DataParser {
                 account.setMailServer(account.getMailServer().trim());
             }
         }
-        if (json.has(MailAccountFields.TRANSPORT_URL)) {
+        if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {
             account.parseTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL).trim());
             attributes.add(Attribute.TRANSPORT_URL_LITERAL);
             attributes.addAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
@@ -161,7 +161,8 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.NAME_LITERAL);
         }
         if (json.has(MailAccountFields.PRIMARY_ADDRESS)) {
-            account.setPrimaryAddress(parseString(json, MailAccountFields.PRIMARY_ADDRESS).trim());
+            final String string = parseString(json, MailAccountFields.PRIMARY_ADDRESS);
+            account.setPrimaryAddress(null == string ? string : string.trim());
             attributes.add(Attribute.PRIMARY_ADDRESS_LITERAL);
         }
         if (json.has(MailAccountFields.PERSONAL)) {
@@ -169,32 +170,39 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.PERSONAL_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM_HANDLER)) {
-            account.setSpamHandler(parseString(json, MailAccountFields.SPAM_HANDLER).trim());
+            final String string = parseString(json, MailAccountFields.SPAM_HANDLER);
+            account.setSpamHandler(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_HANDLER_LITERAL);
         }
         // Folder names
         if (json.has(MailAccountFields.TRASH)) {
-            account.setTrash(parseString(json, MailAccountFields.TRASH).trim());
+            final String string = parseString(json, MailAccountFields.TRASH);
+            account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
         }
         if (json.has(MailAccountFields.SENT)) {
-            account.setSent(parseString(json, MailAccountFields.SENT).trim());
+            final String string = parseString(json, MailAccountFields.SENT);
+            account.setSent(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_LITERAL);
         }
         if (json.has(MailAccountFields.DRAFTS)) {
-            account.setDrafts(parseString(json, MailAccountFields.DRAFTS).trim());
+            final String string = parseString(json, MailAccountFields.DRAFTS);
+            account.setDrafts(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM)) {
-            account.setSpam(parseString(json, MailAccountFields.SPAM).trim());
+            final String string = parseString(json, MailAccountFields.SPAM);
+            account.setSpam(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_SPAM)) {
-            account.setConfirmedSpam(parseString(json, MailAccountFields.CONFIRMED_SPAM).trim());
+            final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM);
+            account.setConfirmedSpam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_HAM)) {
-            account.setConfirmedHam(parseString(json, MailAccountFields.CONFIRMED_HAM).trim());
+            final String string = parseString(json, MailAccountFields.CONFIRMED_HAM);
+            account.setConfirmedHam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
         }
         if (json.has(MailAccountFields.UNIFIED_INBOX_ENABLED)) {
@@ -202,47 +210,53 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
         }
         if (json.has(MailAccountFields.TRASH_FULLNAME)) {
-            account.setTrashFullname(parseString(json, MailAccountFields.TRASH_FULLNAME).trim());
+            final String string = parseString(json, MailAccountFields.TRASH_FULLNAME);
+            account.setTrashFullname(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SENT_FULLNAME)) {
-            account.setSentFullname(parseString(json, MailAccountFields.SENT_FULLNAME).trim());
+            final String string = parseString(json, MailAccountFields.SENT_FULLNAME);
+            account.setSentFullname(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.DRAFTS_FULLNAME)) {
-            account.setDraftsFullname(parseString(json, MailAccountFields.DRAFTS_FULLNAME).trim());
+            final String string = parseString(json, MailAccountFields.DRAFTS_FULLNAME);
+            account.setDraftsFullname(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM_FULLNAME)) {
-            account.setSpamFullname(parseString(json, MailAccountFields.SPAM_FULLNAME).trim());
+            final String string = parseString(json, MailAccountFields.SPAM_FULLNAME);
+            account.setSpamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_SPAM_FULLNAME)) {
-            account.setConfirmedSpamFullname(parseString(json, MailAccountFields.CONFIRMED_SPAM_FULLNAME).trim());
+            final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM_FULLNAME);
+            account.setConfirmedSpamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_HAM_FULLNAME)) {
-            account.setConfirmedHamFullname(parseString(json, MailAccountFields.CONFIRMED_HAM_FULLNAME).trim());
+            final String string = parseString(json, MailAccountFields.CONFIRMED_HAM_FULLNAME);
+            account.setConfirmedHamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
         }
         final Map<String, String> props = new HashMap<String, String>();
-        if (json.has(MailAccountFields.POP3_DELETE_WRITE_THROUGH)) {
+        if (json.hasAndNotNull(MailAccountFields.POP3_DELETE_WRITE_THROUGH)) {
             props.put("pop3.deletewt", json.getString(MailAccountFields.POP3_DELETE_WRITE_THROUGH).trim());
             attributes.add(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL);
         }
-        if (json.has(MailAccountFields.POP3_EXPUNGE_ON_QUIT)) {
+        if (json.hasAndNotNull(MailAccountFields.POP3_EXPUNGE_ON_QUIT)) {
             props.put("pop3.expunge", json.getString(MailAccountFields.POP3_EXPUNGE_ON_QUIT).trim());
             attributes.add(Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL);
         }
-        if (json.has(MailAccountFields.POP3_REFRESH_RATE)) {
+        if (json.hasAndNotNull(MailAccountFields.POP3_REFRESH_RATE)) {
             props.put("pop3.refreshrate", json.getString(MailAccountFields.POP3_REFRESH_RATE).trim());
             attributes.add(Attribute.POP3_REFRESH_RATE_LITERAL);
         }
-        if (json.has(MailAccountFields.POP3_STORAGE)) {
+        if (json.hasAndNotNull(MailAccountFields.POP3_STORAGE)) {
             props.put("pop3.storage", json.getString(MailAccountFields.POP3_STORAGE).trim());
             attributes.add(Attribute.POP3_STORAGE_LITERAL);
         }
-        if (json.has(MailAccountFields.POP3_PATH)) {
+        if (json.hasAndNotNull(MailAccountFields.POP3_PATH)) {
             props.put("pop3.path", json.getString(MailAccountFields.POP3_PATH).trim());
             attributes.add(Attribute.POP3_PATH_LITERAL);
         }
