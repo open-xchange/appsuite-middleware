@@ -539,9 +539,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     result = null;
                     stmt = null;
                 }
-                contacts = new Contact[contactSearchResults.length + aliasSearchResults.length];
-                System.arraycopy(contactSearchResults, 0, contacts, 0, contactSearchResults.length);
-                System.arraycopy(aliasSearchResults, 0, contacts, contactSearchResults.length, aliasSearchResults.length);
+                final int aliasLen = aliasSearchResults.length;
+                if (aliasLen > 0) {
+                    final int searchLen = contactSearchResults.length;
+                    contacts = new Contact[searchLen + aliasLen];
+                    System.arraycopy(contactSearchResults, 0, contacts, 0, searchLen);
+                    System.arraycopy(aliasSearchResults, 0, contacts, searchLen, aliasLen);
+                } else {
+                    contacts = contactSearchResults;
+                }
             } else {
                 contacts = contactSearchResults;
             }
