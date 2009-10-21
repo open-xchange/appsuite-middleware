@@ -1042,7 +1042,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         httpResponse.setContentType(contentType.toString());
                         final String preparedFileName =
                             getSaveAsFileName(
-                                new StringBuilder(mail.getSubject().replaceAll(" ", "_")).append(".eml").toString(),
+                                new StringBuilder(mail.getSubject()).append(".eml").toString(),
                                 isMSIEOnWindows(paramContainer.getHeader(STR_USER_AGENT)),
                                 null);
                         httpResponse.setHeader("Content-disposition", new StringBuilder(64).append("attachment; filename=\"").append(
@@ -1675,8 +1675,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Set Content-Type and Content-Disposition header
                  */
-                final String fileName =
-                    new StringBuilder(32).append(getSimpleName(folderPath)).append('_').append(uid).append(".zip").toString();
+                final String fileName;
+                {
+                    final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
+                    fileName = new StringBuilder(subject).append(".zip").toString();
+                }
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
