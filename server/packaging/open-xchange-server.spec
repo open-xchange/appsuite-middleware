@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,24 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Oct 19 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14668: Reading values correctly from user_attribute table.
+ - Bugfix #14672: Not removing aliases from the attributes set of a user.
+* Mon Oct 19 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14676: Ignoring unknown entity when parsing ACLs
+ - Bugfix #14671: Proper check if Unified INBOX is enabled
+* Sat Oct 17 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14336: Enhanced logging if a fetch item is missing in IMAP server's FETCH response
+* Fri Oct 16 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14653: No notification mails for pseudo changes.
+* Wed Oct 14 2009 - marcus.klein@open-xchange.com
+ - Added information about user module access permission to detail method of reporting JMX interface.
+* Tue Oct 13 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14655: Conditionally sending CAPABILITY after STARTTLS only for Cyrus that is not sieve draft conform. dovecot is conform.
+* Mon Oct 12 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14638: Fixed download of a mail as eml file with IE
+* Sun Oct 11 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14625: User is no longer forced to be participant in public folders.
 * Wed Oct 07 2009 - stefan.preuss@open-xchange.com
  - Added additional search fields 'department, street_business and city_business' in module contacts (US3195)
 * Tue Oct 06 2009 - marcus.klein@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-easylogin (6.13.0.0-3) unstable; urgency=low
+
+  * build for 6.13 rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 21 Oct 2009 15:31:15 +0200
+
 open-xchange-easylogin (6.13.0.0-2) unstable; urgency=low
 
   * build for 6.13 rev2
