@@ -607,7 +607,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             if (mailAccount.isUnifiedINBOXEnabled()) {
                 final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-                if (null != management && management.exists(user, cid, con)) {
+                if (null != management && !management.exists(user, cid, con)) {
                     management.createUnifiedINBOX(user, cid, con);
                 }
             }
@@ -784,7 +784,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             if (attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL) && mailAccount.isUnifiedINBOXEnabled()) {
                 final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-                if (null != management && management.exists(user, cid, con)) {
+                if (null != management && !management.exists(user, cid, con)) {
                     management.createUnifiedINBOX(user, cid, con);
                 }
             }
@@ -979,7 +979,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             if (mailAccount.isUnifiedINBOXEnabled()) {
                 final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-                if (null != management && management.exists(user, cid, con)) {
+                if (null != management && !management.exists(user, cid, con)) {
                     management.createUnifiedINBOX(user, cid, con);
                 }
             }
