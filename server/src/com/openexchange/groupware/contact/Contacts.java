@@ -154,7 +154,7 @@ public final class Contacts {
 
     @OXThrows(
         category = Category.USER_INPUT,
-        desc = "The entered E-Mail address is not confirm to RFC822 and therefore it is not accepted.",
+        desc = "The entered E-Mail address is not conform to RFC822 and therefore it is not accepted.",
         exceptionId = 0,
         msg = "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
     )
