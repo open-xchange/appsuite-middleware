@@ -560,6 +560,21 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    private static final EnumSet<Attribute> DEFAULT =
+        EnumSet.of(
+            Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
+            Attribute.CONFIRMED_HAM_LITERAL,
+            Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
+            Attribute.CONFIRMED_SPAM_LITERAL,
+            Attribute.DRAFTS_FULLNAME_LITERAL,
+            Attribute.DRAFTS_LITERAL,
+            Attribute.SENT_FULLNAME_LITERAL,
+            Attribute.SENT_LITERAL,
+            Attribute.SPAM_FULLNAME_LITERAL,
+            Attribute.SPAM_LITERAL,
+            Attribute.TRASH_FULLNAME_LITERAL,
+            Attribute.TRASH_LITERAL);
+
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             if (!attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL)) {
@@ -696,6 +711,12 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                                 stmt.setNull(pos++, Types.VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
+                            }
+                        } else if (DEFAULT.contains(attribute)) {
+                            if (null == value) {
+                                stmt.setObject(pos++, "");
+                            } else {
+                                stmt.setObject(pos++, value);
                             }
                         } else {
                             stmt.setObject(pos++, value);
