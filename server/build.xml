@@ -82,7 +82,7 @@
 	<property name="libidnjar" value="libidn-1.9.jar"/>
     <property name="springbeanjar" value="spring-beans_1.2.7.jar"/>
     <property name="springcorejar" value="spring-core_1.2.7.jar"/>
-    <property name="tnefjar" value="tnef-1.4.0.jar"/>
+    <property name="tnefjar" value="tnef-1.5.0.jar"/>
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
