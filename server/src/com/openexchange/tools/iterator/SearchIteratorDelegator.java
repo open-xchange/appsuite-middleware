@@ -64,9 +64,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
     private final Iterator<T> delegate;
 
-    private int size;
-
-    private boolean b_size;
+    private final int size;
 
     private final List<AbstractOXException> warnings;
 
@@ -79,6 +77,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         super();
         delegate = iter;
         warnings = new ArrayList<AbstractOXException>(2);
+        size = -1;
     }
 
     /**
@@ -96,7 +95,6 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         delegate = iter;
         this.size = size;
         warnings = new ArrayList<AbstractOXException>(2);
-        b_size = true;
     }
 
     public boolean hasNext() {
@@ -112,14 +110,14 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
     }
 
     public int size() {
-        if (!b_size) {
+        if (size < 0) {
             throw new UnsupportedOperationException("Size has not been set for this iterator");
         }
         return size;
     }
 
     public boolean hasSize() {
-        return b_size;
+        return (size >= 0);
     }
 
     public void addWarning(final AbstractOXException warning) {
