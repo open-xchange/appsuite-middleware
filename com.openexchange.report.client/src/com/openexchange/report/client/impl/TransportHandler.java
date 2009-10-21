@@ -51,17 +51,28 @@ package com.openexchange.report.client.impl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -72,7 +83,11 @@ import com.openexchange.report.client.container.Total;
 
 public class TransportHandler {
 
-	private static final String REPORT_SERVER_URL = "http://activation.open-xchange.com";
+	private static final String REPORT_SERVER_URL = "https://activation.open-xchange.com/";
+	
+	private static final String SSL_CERTIFICATE_FILESYSTEM_LOCACTION = "/bla/blub";
+	
+	private static final String SSL_CERTIFICATE_PASSWORD = "secret";
 	
 	private static final String POST_LICENSE_KEYS_KEY = "license_keys";
 
@@ -82,7 +97,7 @@ public class TransportHandler {
 	
 	public TransportHandler() {	}
 	
-    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails) throws IOException, JSONException  {
+    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, CertificateException  {
     	JSONObject metadata = buildJSONObject(totals, contextDetails);
     	
     	ReportConfiguration reportConfiguration = new ReportConfiguration();
@@ -94,9 +109,10 @@ public class TransportHandler {
         report.append("&");
         report.append(POST_METADATA_KEY);
         report.append("=");
-        report.append(metadata);
+        report.append(URLEncoder.encode(metadata.toString(), URL_ENCODING));
 
         HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL(REPORT_SERVER_URL).openConnection();
+        httpsURLConnection.setSSLSocketFactory(getFactory());
         httpsURLConnection.setUseCaches(false);
         httpsURLConnection.setDoOutput(true);
         httpsURLConnection.setDoInput(true);
@@ -108,7 +124,7 @@ public class TransportHandler {
         stream.flush();
         stream.close();
 
-        if (httpsURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+        if (httpsURLConnection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
             throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
@@ -119,6 +135,25 @@ public class TransportHandler {
             in.close();
         }
     }
+    
+    private SSLSocketFactory getFactory() throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException, UnrecoverableKeyException, KeyManagementException {
+    	File pKeyFile = new File(SSL_CERTIFICATE_FILESYSTEM_LOCACTION);
+    	
+    	KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+    	KeyStore keyStore = KeyStore.getInstance("PKCS12");
+
+    	InputStream keyInput = new FileInputStream(pKeyFile);
+    	keyStore.load(keyInput, SSL_CERTIFICATE_PASSWORD.toCharArray());
+    	keyInput.close();
+
+    	keyManagerFactory.init(keyStore, SSL_CERTIFICATE_PASSWORD.toCharArray());
+
+    	SSLContext context = SSLContext.getInstance("TLS");
+    	context.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
+
+    	return context.getSocketFactory();    	    	
+    }
+
     
     private JSONObject buildJSONObject(List<Total> totals, List<ContextDetail> contextDetails) throws JSONException {
     	JSONObject retval = new JSONObject();
@@ -136,8 +171,6 @@ public class TransportHandler {
     		contextDetailObjectJSON.put("id", tmp.getId());
     		contextDetailObjectJSON.put("age", tmp.getAge());
     		contextDetailObjectJSON.put("created", tmp.getCreated());
-    		
-    		JSONArray x = new JSONArray();
     		
     		JSONObject moduleAccessCombinations = new JSONObject();
     		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
