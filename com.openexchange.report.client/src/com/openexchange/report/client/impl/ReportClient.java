@@ -51,6 +51,11 @@ package com.openexchange.report.client.impl;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -129,12 +134,30 @@ public class ReportClient extends AbstractJMXTools {
                     print(totals, contextDetails, parser);
                 }
             }
-		} catch (MalformedObjectNameException e1) {
-			e1.printStackTrace();
-		} catch (NullPointerException e1) {
-			e1.printStackTrace();
+		} catch (MalformedObjectNameException e) {
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (NullPointerException e) {
+            printServerException(e, parser);
+            sysexit(1);
 		} catch (JSONException e) {
-			e.printStackTrace();
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (KeyManagementException e) {
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (NoSuchAlgorithmException e) {
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (CertificateException e) {
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (KeyStoreException e) {
+            printServerException(e, parser);
+            sysexit(1);
+		} catch (UnrecoverableKeyException e) {
+            printServerException(e, parser);
+            sysexit(1);
 		}
     }
 
@@ -152,12 +175,14 @@ public class ReportClient extends AbstractJMXTools {
         		NeededQuadState.notneeded);
         this.csv = setShortLongOpt(parser, OPT_CSV_SHORT,
         		OPT_CSV_LONG,
-        		"Show as CSV",
+        		"Show output as CSV",
         		false,
         		NeededQuadState.notneeded);
     }
     	
     private void print(List<Total> totals, List<ContextDetail> contextDetails, final AdminParser parser) {
+    	System.out.println("");
+    	
     	if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createTotalList(totals)).write();
         } else {
