@@ -50,6 +50,7 @@
 package com.openexchange.api2;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,7 +59,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
@@ -383,6 +386,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
+        boolean considerUsersAliases = false;
         if (searchobject.getEmailAutoComplete()) {
             searchobject.addFolder(oxfs.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID());
             try {
@@ -393,10 +397,19 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             } catch (final SettingException e) {
                 LOG.error(e.getMessage(), e);
             }
-            searchobject.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            /*
+             * Append GAB only if enabled for requesting user
+             */
+            final int gabID = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+            final EffectivePermission oclPerm = oxfs.getFolderPermission(gabID, userId, userConfiguration);
+            if (oclPerm.isFolderVisible() && oclPerm.canReadAllObjects()) {
+                searchobject.addFolder(gabID);
+                considerUsersAliases = true;
+            }
         }
         if (searchobject.hasFolders()) {
-            for (final int folderId : searchobject.getFolders()) {
+            final int[] folders = searchobject.getFolders();
+            for (final int folderId : folders) {
                 final FolderObject contactFolder = new OXFolderAccess(ctx).getFolderObject(folderId);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
                     throw EXCEPTIONS.createOXConflictException(14, I(folderId), I(ctx.getContextId()), I(userId));
@@ -409,7 +422,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     throw EXCEPTIONS.createOXConflictException(16, I(folderId), I(ctx.getContextId()), I(userId));
                 }
             }
-            searchobject.setAllFolderSQLINString(cs.buildFolderSearch(userId, memberInGroups, searchobject.getFolders(), session));
+            searchobject.setAllFolderSQLINString(cs.buildFolderSearch(userId, memberInGroups, folders, session));
         } else {
             try {
                 searchobject.setAllFolderSQLINString(cs.buildAllFolderSearchString(userId, memberInGroups, session).toString());
@@ -449,21 +462,89 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             throw EXCEPTIONS.create(13, e);
         }
         final Contact[] contacts;
-        ResultSet result = null;
-        PreparedStatement stmt = null;
         try {
-            stmt = cs.getSqlStatement(con);
-            result = stmt.executeQuery();
-            final List<Contact> tmp = new ArrayList<Contact>();
-            while (result.next()) {
-                final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
-                tmp.add(contact);
+            final Set<Integer> foundContacts = new HashSet<Integer>();
+            final Contact[] contactSearchResults;
+            ResultSet result = null;
+            PreparedStatement stmt = null;
+            try {
+                stmt = cs.getSqlStatement(con);
+                result = stmt.executeQuery();
+                final List<Contact> tmp = new ArrayList<Contact>();
+                while (result.next()) {
+                    final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
+                    tmp.add(contact);
+                    foundContacts.add(Integer.valueOf(contact.getObjectID()));
+                }
+                contactSearchResults = tmp.toArray(new Contact[tmp.size()]);
+            } catch (final SQLException e) {
+                throw EXCEPTIONS.create(18, e, I(ctx.getContextId()), I(userId));
+            } finally {
+                DBUtils.closeSQLStuff(result, stmt);
+                result = null;
+                stmt = null;
             }
-            contacts = tmp.toArray(new Contact[tmp.size()]);
-        } catch (final SQLException e) {
-            throw EXCEPTIONS.create(18, e, I(ctx.getContextId()), I(userId));
+
+            if (considerUsersAliases) {
+                final Contact[] aliasSearchResults;
+                try {
+                    int pos;
+                    final String aliasColumn = "ua.value";
+                    {
+                        /*
+                         * Compose statement: SEarch for matching users' aliases but ignore own aliases
+                         */
+                        String select = cs.getSelect();
+                        final StringBuilder sb = new StringBuilder(select.length());
+                        pos = select.indexOf(" FROM");
+                        if (pos < 0) {
+                            pos = select.indexOf(" from");
+                            if (pos < 0) {
+                                throw new SQLException("SELECT statement does not contain \"FROM\".");
+                            }
+                        }
+                        select =
+                            sb.append(select.substring(0, pos)).append(',').append(aliasColumn).append(select.substring(pos)).toString();
+                        sb.setLength(0);
+                        sb.append(select);
+                        sb.append(" JOIN user_attribute AS ua ON co.cid = ? AND ua.cid = ? AND co.userid = ua.id");
+                        sb.append(" WHERE ua.name = ? AND value LIKE ? AND co.userid != ? GROUP BY co.intfield01");
+                        stmt = con.prepareStatement(sb.toString());
+                    }
+                    pos = 1;
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setString(pos++, "alias");
+                    stmt.setString(pos++, prepareForSearch(searchobject.getEmail1(), false, true, true));
+                    stmt.setInt(pos++, userId);
+                    result = stmt.executeQuery();
+                    final List<Contact> tmp = new ArrayList<Contact>();
+                    while (result.next()) {
+                        /*
+                         * Check if associated contact was already found by previous search
+                         */
+                        if (!foundContacts.contains(Integer.valueOf(result.getInt(7)))) {
+                            final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
+                            final String aliasAddress = result.getString(aliasColumn);
+                            contact.setEmail1(aliasAddress);
+                            tmp.add(contact);
+                        }
+                    }
+                    aliasSearchResults = tmp.toArray(new Contact[tmp.size()]);
+                } catch (final SQLException e) {
+                    throw EXCEPTIONS.create(18, e, I(ctx.getContextId()), I(userId));
+                } finally {
+                    DBUtils.closeSQLStuff(result, stmt);
+                    result = null;
+                    stmt = null;
+                }
+                contacts = new Contact[contactSearchResults.length + aliasSearchResults.length];
+                System.arraycopy(contactSearchResults, 0, contacts, 0, contactSearchResults.length);
+                System.arraycopy(aliasSearchResults, 0, contacts, contactSearchResults.length, aliasSearchResults.length);
+            } else {
+                contacts = contactSearchResults;
+            }
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
 
