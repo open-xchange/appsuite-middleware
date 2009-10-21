@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,11 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Tue Oct 20 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.
+* Wed Oct 14 2009 - choeger@open-xchange.com
+ - API change: new option(s) --no-license/--add-license
+   --add-license now required, can be overridden with --no-license
 * Fri Sep 11 2009 - marcus.klein@open-xchange.com
  - Bugfix #14486: Removed own implemenetation of the administration JMX interface and using now management bundle.
 * Mon Sep 07 2009 - marcus.klein@open-xchange.com
