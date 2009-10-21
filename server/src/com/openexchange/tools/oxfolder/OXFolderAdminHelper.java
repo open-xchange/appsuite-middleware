@@ -860,7 +860,7 @@ public final class OXFolderAdminHelper {
             fo.setType(FolderObject.PRIVATE);
             fo.setFolderName(defaultCalName);
             fo.setModule(FolderObject.CALENDAR);
-            int newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
+            int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder("User's default CALENDAR folder successfully created").toString());
@@ -870,7 +870,7 @@ public final class OXFolderAdminHelper {
              */
             fo.setFolderName(defaultConName);
             fo.setModule(FolderObject.CONTACT);
-            newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder("User's default CONTACT folder successfully created").toString());
@@ -880,7 +880,7 @@ public final class OXFolderAdminHelper {
              */
             fo.setFolderName(defaultTaskName);
             fo.setModule(FolderObject.TASK);
-            newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder("User's default TASK folder successfully created").toString());
@@ -895,7 +895,7 @@ public final class OXFolderAdminHelper {
             fo.setType(FolderObject.PUBLIC);
             fo.setFolderName(displayName);
             fo.setModule(FolderObject.INFOSTORE);
-            newFolderId = OXFolderSQL.getNextSerial(ctx, writeCon);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             if (LOG.isInfoEnabled()) {
                 LOG.info("User's default INFOSTORE folder successfully created");

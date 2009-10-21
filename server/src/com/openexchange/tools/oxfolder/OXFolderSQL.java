@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -1288,6 +1287,17 @@ public final class OXFolderSQL {
         }
     }
 
+    /**
+     * This method is used to generate identifier when creating a context.
+     * @param ctx context to create.
+     * @param con writable connection to the context database in transaction mode - autocommit is false.
+     * @return a unique identifier for a folder.
+     * @throws SQLException if generating this unique folder identifier fails.
+     */
+    public static int getNextSerialForAdmin(Context ctx, Connection con) throws SQLException {
+        return IDGenerator.getId(ctx, Types.FOLDER, con);
+    }
+
     static void hardDeleteOXFolder(final int folderId, final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
         Connection writeCon = writeConArg;
         boolean closeWrite = false;
@@ -1328,13 +1338,13 @@ public final class OXFolderSQL {
             throw e;
         } finally {
             if (isAuto) {
-                autocommit(writeCon);
+                writeCon.setAutoCommit(true);
             }
             closeResources(null, stmt, closeWrite ? writeCon : null, false, ctx);
         }
     }
 
-    /*-
+    /*
      * -------------- Helper methods for OXFolderDeleteListener (User removal) --------------
      */
 
