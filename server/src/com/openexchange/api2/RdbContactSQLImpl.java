@@ -57,7 +57,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -506,7 +505,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                         sb.setLength(0);
                         sb.append(select);
                         sb.append(" JOIN user_attribute AS ua ON co.cid = ? AND ua.cid = ? AND co.userid = ua.id");
-                        sb.append(" WHERE ua.name = ? AND value LIKE ? AND co.userid != ? GROUP BY co.intfield01");
+                        sb.append(" WHERE ua.name = ? AND value LIKE ? AND co.userid != ?");
                         stmt = con.prepareStatement(sb.toString());
                     }
                     pos = 1;
@@ -516,14 +515,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     stmt.setString(pos++, prepareForSearch(searchobject.getEmail1(), false, true, true));
                     stmt.setInt(pos++, userId);
                     result = stmt.executeQuery();
-                    final String email1Column = MessageFormat.format("co.{0}", Contacts.mapping[Contact.EMAIL1].getDBFieldName());
                     while (result.next()) {
                         /*
                          * Check if associated contact was already found by previous search
                          */
-                        if (!foundAddresses.contains(result.getString(email1Column))) {
+                        final String alias = result.getString(aliasColumn);
+                        if (!foundAddresses.contains(alias)) {
                             final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
-                            contact.setEmail1(result.getString(aliasColumn));
+                            contact.setEmail1(alias);
                             contacts.add(contact);
                         }
                     }
