@@ -64,7 +64,7 @@ public class CPPartition {
 
     private Map<String, String> metaData = new HashMap<String, String>();
 
-    private List<CPFormattingInformation> formattingInformation = new LinkedList<CPFormattingInformation>();;
+    private List<CPFormattingInformation> formattingInformation = new LinkedList<CPFormattingInformation>();
 
     public void addAppointment(CPAppointment appointment) {
         appointments.add(appointment);

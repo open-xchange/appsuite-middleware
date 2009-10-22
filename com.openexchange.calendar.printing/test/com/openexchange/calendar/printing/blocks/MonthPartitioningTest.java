@@ -275,7 +275,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
 
         calendar.set(Calendar.DAY_OF_MONTH, 27);
         calendar.set(Calendar.HOUR_OF_DAY, 1);
-        ;
+
         Date date2 = calendar.getTime();
 
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(date1, date2);

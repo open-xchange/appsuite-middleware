@@ -458,7 +458,7 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         Date date1 = calendar.getTime();
         
         calendar.set(Calendar.DAY_OF_MONTH, 27);
-        calendar.set(Calendar.HOUR_OF_DAY, 1);;
+        calendar.set(Calendar.HOUR_OF_DAY, 1);
         Date date2 = calendar.getTime();
         
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(date1, date2);
