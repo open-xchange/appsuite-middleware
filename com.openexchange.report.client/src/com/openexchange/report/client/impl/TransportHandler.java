@@ -51,27 +51,19 @@ package com.openexchange.report.client.impl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,12 +74,12 @@ import com.openexchange.report.client.container.ContextModuleAccessCombination;
 import com.openexchange.report.client.container.Total;
 
 public class TransportHandler {
-
-	private static final String REPORT_SERVER_URL = "https://activation.open-xchange.com/";
 	
-	private static final String SSL_CERTIFICATE_FILESYSTEM_LOCACTION = "/bla/blub";
+	private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
 	
-	private static final String SSL_CERTIFICATE_PASSWORD = "secret";
+	private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
+	
+	private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";
 	
 	private static final String POST_LICENSE_KEYS_KEY = "license_keys";
 
@@ -97,12 +89,16 @@ public class TransportHandler {
 	
 	public TransportHandler() {	}
 	
-    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, CertificateException  {
-    	JSONObject metadata = buildJSONObject(totals, contextDetails);
+    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, CertificateException  {
+    	JSONObject metadata = buildJSONObject(totals, contextDetails, versions);
     	
     	ReportConfiguration reportConfiguration = new ReportConfiguration();
 
         StringBuffer report = new StringBuffer();
+        report.append(POST_CLIENT_AUTHENTICATION_STRING_KEY);
+        report.append("=");
+        report.append(URLEncoder.encode(REPORT_SERVER_CLIENT_AUTHENTICATION_STRING, URL_ENCODING));
+        report.append("&");
         report.append(POST_LICENSE_KEYS_KEY);
         report.append("=");
         report.append(URLEncoder.encode(reportConfiguration.getLicenseKeys(), URL_ENCODING));
@@ -111,8 +107,7 @@ public class TransportHandler {
         report.append("=");
         report.append(URLEncoder.encode(metadata.toString(), URL_ENCODING));
 
-        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL(REPORT_SERVER_URL).openConnection();
-        httpsURLConnection.setSSLSocketFactory(getFactory());
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://"+REPORT_SERVER_URL+"/").openConnection();
         httpsURLConnection.setUseCaches(false);
         httpsURLConnection.setDoOutput(true);
         httpsURLConnection.setDoInput(true);
@@ -135,31 +130,14 @@ public class TransportHandler {
             in.close();
         }
     }
-    
-    private SSLSocketFactory getFactory() throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException, UnrecoverableKeyException, KeyManagementException {
-    	File pKeyFile = new File(SSL_CERTIFICATE_FILESYSTEM_LOCACTION);
-    	
-    	KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-    	KeyStore keyStore = KeyStore.getInstance("PKCS12");
-
-    	InputStream keyInput = new FileInputStream(pKeyFile);
-    	keyStore.load(keyInput, SSL_CERTIFICATE_PASSWORD.toCharArray());
-    	keyInput.close();
-
-    	keyManagerFactory.init(keyStore, SSL_CERTIFICATE_PASSWORD.toCharArray());
-
-    	SSLContext context = SSLContext.getInstance("TLS");
-    	context.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
-
-    	return context.getSocketFactory();    	    	
-    }
 
     
-    private JSONObject buildJSONObject(List<Total> totals, List<ContextDetail> contextDetails) throws JSONException {
+    private JSONObject buildJSONObject(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws JSONException {
     	JSONObject retval = new JSONObject();
 
     	JSONObject total = new JSONObject();
     	JSONObject detail = new JSONObject();
+    	JSONObject version = new JSONObject();
 
     	for (Total tmp : totals) {
     		total.put("contexts", tmp.getContexts());
@@ -182,9 +160,13 @@ public class TransportHandler {
     		contextDetailObjectJSON.put("module access combinations", moduleAccessCombinations);
     		detail.put(tmp.getId(), contextDetailObjectJSON);
     	}
-
+    	
+    	version.put("admin", versions[0]);
+    	version.put("groupware", versions[1]);
+    	    	
     	retval.put("total", total);
     	retval.put("detail", detail);
+    	retval.put("version", version);
 
     	return retval;
     }

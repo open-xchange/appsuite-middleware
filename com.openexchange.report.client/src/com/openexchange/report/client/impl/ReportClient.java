@@ -111,27 +111,28 @@ public class ReportClient extends AbstractJMXTools {
 			
         	List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
         	List<ContextDetail> contextDetails = ObjectHandler.getDetailObjects(initConnection);
+        	String[] versions = VersionHandler.getServerVersion();
 
         	if ((null != parser.getOptionValue(this.sendonly) &&
         			(null != parser.getOptionValue(this.displayonly)))) {
                 System.err.println("More than one of the stat options given. Using the default one one only (display and send)");
-                new TransportHandler().sendReport(totals, contextDetails);
-                print(totals, contextDetails, parser);
+                new TransportHandler().sendReport(totals, contextDetails, versions);
+                print(totals, contextDetails, versions, parser);
             } else {
                 int count = 0;
                 if (null != parser.getOptionValue(this.sendonly)) {
-                	new TransportHandler().sendReport(totals, contextDetails);
+                	new TransportHandler().sendReport(totals, contextDetails, versions);
                 }
                 if (null != parser.getOptionValue(this.displayonly)) {
                     if (0 == count) {
-                    	print(totals, contextDetails, parser);
+                    	print(totals, contextDetails, versions, parser);
                     }
                     count++;
                 }
                 if (0 == count) {
                     System.err.println("No option selected. Using the default one one (display and send)");
-                    new TransportHandler().sendReport(totals, contextDetails);
-                    print(totals, contextDetails, parser);
+                    new TransportHandler().sendReport(totals, contextDetails, versions);
+                    print(totals, contextDetails, versions, parser);
                 }
             }
 		} catch (MalformedObjectNameException e) {
@@ -180,7 +181,15 @@ public class ReportClient extends AbstractJMXTools {
         		NeededQuadState.notneeded);
     }
     	
-    private void print(List<Total> totals, List<ContextDetail> contextDetails, final AdminParser parser) {
+    private void print(List<Total> totals, List<ContextDetail> contextDetails, String[] versions, final AdminParser parser) {
+    	System.out.println("");
+    	
+    	if (null != parser.getOptionValue(this.csv)) {
+            new CSVWriter(System.out, ObjectHandler.createVersionList(versions)).write();
+        } else {
+            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createVersionList(versions)).write();
+        }
+    	
     	System.out.println("");
     	
     	if (null != parser.getOptionValue(this.csv)) {

@@ -162,5 +162,13 @@ public class ObjectHandler {
 
     	return retval;
     }
+    
+    protected static List<List<Object>> createVersionList(String[] versions) {
+    	List<List<Object>> retval = new ArrayList<List<Object>>();
+    	retval.add(Arrays.asList((Object)"module", "version"));
+    	retval.add(Arrays.asList((Object)"admin", versions[0]));
+    	retval.add(Arrays.asList((Object)"groupware", versions[0]));
+    	return retval;
+    }
 	
 }
