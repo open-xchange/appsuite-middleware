@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-09-29 15:19+0200\n"
+"PO-Revision-Date: 2009-10-22 13:53+0200\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -35,6 +35,9 @@ msgstr "'Depth' muss >= 1 sein, ist jedoch %1$d."
 
 msgid "'Entries' must be >= 1 but is %1$d."
 msgstr "'Entries' müssen >= 1 sein, sind jedoch %1$d."
+
+msgid "A DBPool error occurred in context %1$s"
+msgstr "Es trat ein DBPool-Fehler im Kontext %1$s auf"
 
 msgid "A DBPool error occurred: 1$%s"
 msgstr "Es trat ein DBPool-Fehler auf: 1$%s"
@@ -80,8 +83,13 @@ msgid ""
 "A SQL error occurred while performing task "
 "GlobalAddressBookPermissionsResolverTask: %1$s."
 msgstr ""
-"Beim Ausführen der Aufgabe GlobalAddressBookPermissionsResolverTask trat ein SQL-"
-"Fehler auf: %1$s."
+"Beim Ausführen der Aufgabe GlobalAddressBookPermissionsResolverTask trat ein "
+"SQL-Fehler auf: %1$s."
+
+msgid "A SQL error occurred while performing task MailAccountAddPersonalTask: %1$s."
+msgstr ""
+"Beim Ausführen der Aufgabe MailAccountAddPersonalTask trat ein SQL-Fehler auf: "
+"%1$s."
 
 msgid "A SQL error occurred while performing task MailAccountCreateTablesTask: %1$s."
 msgstr ""
@@ -90,8 +98,8 @@ msgstr ""
 
 msgid "A SQL error occurred while performing task MailAccountMigrationTask: %1$s."
 msgstr ""
-"Beim Ausführen der Aufgabe MailAccountMigrationTask trat ein SQL-Fehler "
-"auf: %1$s."
+"Beim Ausführen der Aufgabe MailAccountMigrationTask trat ein SQL-Fehler auf: "
+"%1$s."
 
 msgid ""
 "A SQL error occurred while performing task NewInfostoreFolderTreeUpdateTask: "
@@ -273,9 +281,6 @@ msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
 msgid "An IO error occurred: %s"
 msgstr "Es trat ein E/A-Fehler auf: %s"
-
-msgid "An SQL error occurred in context %1$s"
-msgstr "Es trat ein SQL-Fehler im Kontext %1$s auf."
 
 msgid ""
 "An SQL error occurred while performing task "
@@ -1395,9 +1400,8 @@ msgstr "Header \"content-type\" zeigt keinen Multipart-Inhalt an"
 msgid "Header %1$s could not be properly parsed"
 msgstr "Header %1$s konnte nicht korrekt analysiert werden."
 
-#, fuzzy
 msgid "Html-2-Text conversion failed: %1$s"
-msgstr "Datenerhaltung fehlgeschlagen: %1$s."
+msgstr "HTML-2-Textkonvertierung fehlgeschlagen: %1$s."
 
 msgid "I/O error while writing to Writer object: %s"
 msgstr "E/A-Fehler beim Schreiben in Writer Objekt: %s"
@@ -1671,6 +1675,15 @@ msgstr ""
 msgid "Mail folder could not be found: %1$s."
 msgstr "Der E-Mail-Ordner konnte nicht gefunden werden: %1$s."
 
+msgid "Mail folder must not be deleted: %1$s."
+msgstr "Der E-Mail-Ordner darf nicht gelöscht werden: %1$s."
+
+msgid "Mail folder must not be moved: %1$s."
+msgstr "Der E-Mail-Ordner darf nicht verschoben werden: %1$s."
+
+msgid "Mail folder must not be updated: %1$s."
+msgstr "Der E-Mail-Ordner darf nicht aktualisiert werden: %1$s."
+
 msgid "Mail server indicates a bad command. Server response: %1$s"
 msgstr "Der Mailserver zeigt einen fehlerhaften Befehl an. Server-Antwort: %1$s"
 
@@ -1934,6 +1947,9 @@ msgstr "Kein Cache gefunden für Bereichsname: %1$s"
 msgid "No changes found. No update requiered. Context %1$d Object %2$d"
 msgstr "Keine Änderungen gefunden. Kein Update erforderlich. Kontext %1$d Objekt %2$d"
 
+msgid "No connection available to access mailbox"
+msgstr "Keine Verbindung zum Zugriff auf die Mailbox verfügbar"
+
 msgid "No content available in mail part"
 msgstr "Teil der E-Mail ist leer."
 
@@ -1960,6 +1976,9 @@ msgstr "Kein Standard-Constructor in der Servlet-Klasse \"%s\" angegeben"
 
 msgid "No default folder could be found in module %1$s for user %2$s in context %3$s"
 msgstr "Kein Standardordner gefunden im Modul %1$s für Benutzer %2$s im Kontext %3$s"
+
+msgid "No delete access on mail folder: %1$s."
+msgstr "Kein Löschzugriff auf E-Mail-Ordner %1$s"
 
 msgid "No folder permission."
 msgstr "Keine Ordnerberechtigung"
@@ -2018,6 +2037,9 @@ msgstr "Kein solches Element"
 
 msgid "No transport provider could be found for protocol/URL \"%1$s\""
 msgstr "Kein Transport-Provider für Protokoll/Url \"%1$s\" gefunden."
+
+msgid "No write access on mail folder: %1$s."
+msgstr "Kein Schreibzugriff auf E-Mail-Ordner %1$s"
 
 msgid "No write permission."
 msgstr "Keine Schreibberechtigung."
@@ -2195,7 +2217,9 @@ msgid "Put into cache failed."
 msgstr "Legen in Cache fehlgeschlagen"
 
 msgid "Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s"
-msgstr "Empfangsbestätigung kann nicht gesendet werden: fehlender Header %1$s in der Nachricht %2$s"
+msgstr ""
+"Empfangsbestätigung kann nicht gesendet werden: fehlender Header %1$s in der "
+"Nachricht %2$s"
 
 msgid "Recurrence position %1$s does not exist"
 msgstr "Wiederkehrende Position %1$s ist nicht vorhanden"
@@ -2356,7 +2380,7 @@ msgid "Spam handler initialization failed: %1$s"
 msgstr "Initialisierung des Spam-Handlers fehlgeschlagen: %1$s"
 
 msgid "Spamd returned wrong exit code \"%s\""
-msgstr ""
+msgstr "Spamd gab falschen 'exit'-Code \"%s\" zurück"
 
 msgid "Start date %1$s must be before end date %2$s."
 msgstr "Das Startdatum %1$s muss vor dem Enddatum %2$s liegen."
@@ -2546,9 +2570,7 @@ msgstr ""
 "Das Objekt konnte nicht losgelöst werden, da das Update an einem "
 "zugrundeliegenden Objekt fehlschlug."
 
-#. *
-#. * The object has been changed in the meantime.
-#.
+#. The object has been changed in the meantime.
 msgid "The object has been changed in the meantime."
 msgstr "Das Objekt hat sich mittlerweile geändert."
 
@@ -2566,15 +2588,19 @@ msgid "The parameter \"%s\" must be an integer value but is \"%s\""
 msgstr "Der Parameter \"%s\" muss eine Ganzzahl sein, ist aber \"%s\""
 
 msgid "The parameter \"%s\" must be an long value but is \"%s\""
-msgstr ""
+msgstr "Der Parameter \"%s\" muss ein langer Wert sein, ist jedoch \"%s\""
 
 msgid "The parameter \"%s\" must be set in the property file if spamd is true"
-msgstr "Der Parameter \"%s\" muss in der Property-Datei festgelegt sein, wenn spamdb auf true gesetzt ist."
+msgstr ""
+"Der Parameter \"%s\" muss in der Property-Datei festgelegt sein, wenn spamdb "
+"auf true gesetzt ist."
 
 msgid ""
 "The parameter \"userSource\" must be set in the property file if spamd is "
 "true"
-msgstr "Der Parameter \"userSource\" muss in der Property-Datei festgelegt sein, wenn spamdb auf true gesetzt ist."
+msgstr ""
+"Der Parameter \"userSource\" muss in der Property-Datei festgelegt sein, "
+"wenn spamdb auf true gesetzt ist."
 
 msgid "The recurrence pattern is too complex. Giving up."
 msgstr "Das Serienmuster ist zu komplex. Der Vorgang wird abgebrochen."
@@ -2967,9 +2993,7 @@ msgstr ""
 "Unerwartetes Paket mit leerem Body von Webserver erhalten. Total-Received: %1"
 "$d | Content-Length: %2$d."
 
-#. *
-#. * Unexpected error: %1$s
-#.
+#. Unexpected error: %1$s
 msgid "Unexpected error: %1$s"
 msgstr "Unerwarteter Fehler: %1$s"
 
@@ -3703,6 +3727,7 @@ msgstr "Datei nicht gefunden. %1$s"
 #. *
 #. * I/O error: %1$s
 #.
+#. I/O error: %1$s
 msgid "I/O error: %1$s"
 msgstr "E/A-Fehler: %1$s"
 
@@ -3712,67 +3737,44 @@ msgstr "E/A-Fehler: %1$s"
 msgid "No such managed file associated with ID: %1$s"
 msgstr "Keine verwaltete Datei vorhanden mit ID: %1$s"
 
-#. *
-#. * SQL error: %1$s
-#.
+#. SQL error: %1$s
 msgid "SQL error: %1$s"
 msgstr "SQL-Fehler: %1$s"
 
-#. *
-#. * No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
-#.
 msgid ""
 "No appropriate folder storage for tree identifier \"%1$s\" and folder "
 "identifier \"%2$s\"."
 msgstr "Kein passender Ordner-Speicher für Baum-ID \"%1$s\" und Ordner-ID \"%2$s\"."
 
-#. *
-#. * No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
-#.
 msgid ""
 "No appropriate folder storage for tree identifier \"%1$s\" and content type "
 "\"%2$s\"."
 msgstr "Kein passender Ordner-Speicher für Baum-ID  \"%1$s\" und Inhaltstyp \"%2$s\"."
 
-#. *
-#. * Missing session.
-#.
+#. Missing session.
 msgid "Missing session."
 msgstr "Fehlende Sitzung."
 
-#. *
-#. * Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
-#.
+#. Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
 msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
 msgstr "Ordner \"%1$s\" ist im Kontext \"%3$s\" für Benutzer \"%2$s\" nicht sichtbar"
 
-#. *
-#. * JSON error: %1$s
-#.
+#. JSON error: %1$s
 msgid "JSON error: %1$s"
 msgstr "JSON-Fehler: %1$s"
 
-#. *
-#. * Missing tree identifier.
-#.
+#. Missing tree identifier.
 msgid "Missing tree identifier."
 msgstr "Fehlende ID für Baum."
 
-#. *
-#. * Missing parent folder identifier.
-#.
+#. Missing parent folder identifier.
 msgid "Missing parent folder identifier."
 msgstr "Fehlende ID für übergeordneten Ordner."
 
-#. *
-#. * Missing folder identifier.
-#.
+#. Missing folder identifier.
 msgid "Missing folder identifier."
 msgstr "Fehlende Ordner-ID."
 
-#. *
-#. * Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
-#.
 msgid ""
 "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree "
 "\"%3$s\" for user %4$s in context %5$s."
@@ -3780,15 +3782,11 @@ msgstr ""
 "Übergeordneter Ordner \"%1$s\" erlaubt im Kontext %5$s im Baum \"%3$s\" "
 "keinen Inhaltstyp \"%2$s\" für den Benutzer %4$s."
 
-#. *
-#. * Move operation not permitted.
-#.
+#. Move operation not permitted.
 msgid "Move operation not permitted."
 msgstr "Verschiebe-Aktion nicht erlaubt."
 
-#. *
-#. * A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
-#.
+#. A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
 msgid ""
 "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree "
 "\"%3$s\"."
@@ -3796,53 +3794,41 @@ msgstr ""
 "Eine Verzeichnis namens \"%1$s\" ist bereits im übergeordneten Ordner \"%2$s"
 "\" im Baum \"%3$s\" vorhanden."
 
-#. *
-#. * Subscribe operation not permitted on tree "%1$s".
-#.
+#. Subscribe operation not permitted on tree "%1$s".
 msgid "Subscribe operation not permitted on tree \"%1$s\"."
 msgstr "Abonnier-Vorgang nicht im Baum \"%1$s\" erlaubt."
 
-#. *
-#. * Un-Subscribe operation not permitted on tree "%1$s".
-#.
+#. Un-Subscribe operation not permitted on tree "%1$s".
 msgid "Un-Subscribe operation not permitted on tree \"%1$s\"."
 msgstr "Abbestellen nicht erlaubt im Baum \"%1$s\"."
 
-#. *
-#. * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
-#.
+#. Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
 msgid "Un-Subscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\"."
 msgstr "Abbestellen im Baum \"%2$s\" nicht erlaubt im Ordner \"%1$s\"."
 
-#. *
-#. * Unknown content type: %1$s.
-#.
+#. Unknown content type: %1$s.
 msgid "Unknown content type: %1$s."
 msgstr "Unbekannter Inhalts-Typ: %1$s."
 
-#. *
-#. * Missing parameter: %1$s.
-#.
+#. Missing parameter: %1$s.
 msgid "Missing parameter: %1$s."
 msgstr "Fehlender Parameter: %1$s"
 
-#. *
-#. * Missing property: %1$s.
-#.
+#. Missing property: %1$s.
 msgid "Missing property: %1$s."
 msgstr "Fehlende Eigenschaft: %1$s."
 
-#. *
-#. * Unsupported storage type: %1$s.
-#.
+#. Unsupported storage type: %1$s.
 msgid "Unsupported storage type: %1$s."
 msgstr "Nicht unterstützter Speicher-Typ: %1$s."
 
-#. *
-#. * Folder "%1$s" could not be found in tree "%2$s".
-#.
+#. Folder "%1$s" could not be found in tree "%2$s".
 msgid "Folder \"%1$s\" could not be found in tree \"%2$s\"."
 msgstr "Ordner \"%1$s\" konnte nicht im Baum \"%2$s\" gefunden werden."
+
+#. No default folder available for content type "%1$s" in tree "%2$s".
+msgid "No default folder available for content type \"%1$s\" in tree \"%2$s\"."
+msgstr "Kein Standardordner verfügbar für den Content-Typ \"%1$s\" im Baum \"%2$s\"."
 
 #. Unexpected error: %1$s.
 msgid "Unexpected error: %1$s."
@@ -3895,16 +3881,16 @@ msgid ""
 "Password encryption failed for login %1$s on server %2$s (user=%3$s, context="
 "%4$s)."
 msgstr ""
-"Passwortverschlüsselung fehlgeschlagen für Login %1$s auf Server %2$s (Benutzer=%3$s, Kontext="
-"%4$s)."
+"Passwortverschlüsselung fehlgeschlagen für Login %1$s auf Server %2$s "
+"(Benutzer=%3$s, Kontext=%4$s)."
 
 #. Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
 msgid ""
 "Password decryption failed for login %1$s on server %2$s (user=%3$s, context="
 "%4$s)."
 msgstr ""
-"Passwortentschlüsselung fehlgeschlagen für Login %1$s auf Server %2$s (Benutzer=%3$s, Kontext="
-"%4$s)."
+"Passwortentschlüsselung fehlgeschlagen für Login %1$s auf Server %2$s "
+"(Benutzer=%3$s, Kontext=%4$s)."
 
 #. The Unified INBOX account already exists for user %1$s in context %2$s.
 msgid "The Unified INBOX account already exists for user %1$s in context %2$s."
