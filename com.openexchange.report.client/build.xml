@@ -64,7 +64,7 @@
 	</target>
 
 	<target name="jar" depends="prepare,compile">
-		<jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
+		<jar jarfile="${tmp.dir}/${bundle.name}">
 			<fileset dir="${output}" />
 		</jar>
 	</target>
