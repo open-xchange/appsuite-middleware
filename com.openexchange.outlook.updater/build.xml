@@ -1,275 +1,258 @@
 <project name="com.openexchange.outlook.updater" default="install" basedir=".">
 
 	<!-- Customizable values -->
-	<property name="destdir" value="" />
-	<property name="prefix" value="/opt/open-xchange" />
-	<property name="sevenZip" value="7za" />
-	<property name="files.dir" location="files" />
-
-
-	<!-- Bundle dependencies -->
-	<property name="commonBundle" value="com.openexchange.common" />
+	<property name="destdir" value=""/>
+	<property name="prefix" value="/opt/open-xchange"/>
 
 	<!-- helper programs -->
+    <property name="sevenZip" value="7za"/>
 
 	<!-- Constants -->
-	<property name="tmp.dir" value="tmp" />
+	<property name="tmp.dir" value="tmp"/>
+    <property name="conf.dir" value="conf"/>
+    <property name="files.dir" location="files"/>
+    <property name="template.dir" value="templates"/>
 
-	<property file="META-INF/MANIFEST.MF" />
-	<property file="build.properties" />
-	<property file="files.properties" />
+	<property file="META-INF/MANIFEST.MF"/>
+	<property file="build.properties"/>
+	<property file="files.properties"/>
 
-	<property name="version" value="${Bundle-Version}" />
-	<property name="bundle.name" value="${Bundle-SymbolicName}.jar" />
-	<property name="composite.name" value="open-xchange-publish-json-${version}" />
+	<property name="version" value="${Bundle-Version}"/>
+	<property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+	<property name="composite.name" value="open-xchange-outlook-updater-${version}"/>
 
-	<property name="common.conf.install.dir" value="${prefix}/etc" />
-	<property name="conf.install.dir" value="${common.conf.install.dir}/groupware" />
-	<property name="confInstallCopyDir" location="${destdir}${conf.install.dir}" />
-
-	<property name="conf.dir" value="conf" />
-	<property name="template.dir" value="templates" />
-
-	<property name="templateInstallCopyDir" value="${destdir}/${prefix}/templates" />
+	<property name="common.conf.install.dir" value="${prefix}/etc"/>
+	<property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
+	<property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
+	<property name="templateInstallCopyDir" value="${destdir}/${prefix}/templates"/>
 
 	<!-- Install Constants -->
-	<property name="bundlesdir" value="${prefix}/bundles" />
-	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d" />
-	<property name="files" value="${prefix}/files" />
+	<property name="bundlesdir" value="${prefix}/bundles"/>
+	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+	<property name="files" value="${prefix}/files"/>
+
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
 
 	<!-- JAR names for classpath -->
-	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-
-
-	<property name="globaljar" value="com.openexchange.global.jar" />
-	<property name="serverjar" value="com.openexchange.server.jar" />
-	<property name="templatingjar" value="com.openexchange.templating.jar" />
-	<property name="jsonjar" value="json.jar" />
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar" />
-	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
+    <property name="commonscodecjar" value="commons-codec-1.3.jar"/>
+	<property name="globaljar" value="com.openexchange.global.jar"/>
+	<property name="templatingjar" value="com.openexchange.templating.jar"/>
     <property name="configjar" value="com.openexchange.configread.jar"/>
-
+    <property name="serverjar" value="com.openexchange.server.jar"/>
+    <property name="smtpjar" value="com.openexchange.smtp.jar"/>
 
 	<!-- Classpath -->
 	<path id="project.classpath">
-		<pathelement location="${bundlesdir}/${osgijar}" />
-
-		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
-
-		<pathelement location="${bundlesdir}/${globaljar}" />
-
-		<pathelement location="${bundlesdir}/${templatingjar}" />
-
-		<pathelement location="${bundlesdir}/${osgiservicesjar}" />
-
-		<pathelement location="${bundlesdir}/${configjar}" />
-
-		<pathelement location="${bundlesdir}/${serverjar}" />
-
-		<pathelement location="${bundlesdir}/${servletjar}" />
-
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}" />
-
-		<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}" />
+		<pathelement location="${bundlesdir}/${osgijar}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+        <pathelement location="${bundlesdir}/${servletjar}"/>
+	    <pathelement location="${bundlesdir}/${commonBundle}/${commonscodecjar}"/>
+		<pathelement location="${bundlesdir}/${globaljar}"/>
+		<pathelement location="${bundlesdir}/${templatingjar}"/>
+		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${serverjar}"/>
+	    <pathelement location="${bundlesdir}/${smtpjar}"/>
 	</path>
 
 	<!-- Compile -->
 	<target name="prepare">
-		<mkdir dir="${output..}" />
-		<mkdir dir="${output..}/files" />
-		<mkdir dir="${tmp.dir}" />
-		<mkdir dir="${tmp.dir}/${conf.dir}" />
-		<mkdir dir="${tmp.dir}/${template.dir}" />
+		<mkdir dir="${output..}"/>
+		<mkdir dir="${tmp.dir}"/>
+		<mkdir dir="${tmp.dir}/${conf.dir}"/>
+        <mkdir dir="${tmp.dir}/files"/>
+		<mkdir dir="${tmp.dir}/${template.dir}"/>
 	</target>
 
 	<target name="create7ZippedUpdaterInstallers" depends="prepare">
 		<antcall target="create7zip">
-			<param name="file" value="${files.dir}/OXUpdater_German_${oxupdater.version}.msi" />
-			<param name="common" value="OXUpdater.msi" />
-			<param name="locale" value="de_DE" />
+			<param name="file" value="${files.dir}/OXUpdater_German_${oxupdater.version}.msi"/>
+			<param name="common" value="OXUpdater.msi"/>
+			<param name="locale" value="de_DE"/>
 		</antcall>
 		<antcall target="create7zip">
-			<param name="file" value="${files.dir}/OXUpdater_English_${oxupdater.version}.msi" />
-			<param name="common" value="OXUpdater.msi" />
-			<param name="locale" value="en_US" />
+			<param name="file" value="${files.dir}/OXUpdater_English_${oxupdater.version}.msi"/>
+			<param name="common" value="OXUpdater.msi"/>
+			<param name="locale" value="en_US"/>
 		</antcall>
 		<antcall target="create7zip">
-			<param name="file" value="${files.dir}/OXUpdater_French_${oxupdater.version}.msi" />
-			<param name="common" value="OXUpdater.msi" />
-			<param name="locale" value="fr_FR" />
+			<param name="file" value="${files.dir}/OXUpdater_French_${oxupdater.version}.msi"/>
+			<param name="common" value="OXUpdater.msi"/>
+			<param name="locale" value="fr_FR"/>
 		</antcall>
 		<antcall target="create7zip">
-			<param name="file" value="${files.dir}/OXUpdater_Spanish_${oxupdater.version}.msi" />
-			<param name="common" value="OXUpdater.msi" />
-			<param name="locale" value="es_ES" />
+			<param name="file" value="${files.dir}/OXUpdater_Spanish_${oxupdater.version}.msi"/>
+			<param name="common" value="OXUpdater.msi"/>
+			<param name="locale" value="es_ES"/>
 		</antcall>
 		<antcall target="create7zip">
-			<param name="file" value="${files.dir}/OXUpdater_Swedish_${oxupdater.version}.msi" />
-			<param name="common" value="OXUpdater.msi" />
-			<param name="locale" value="sv_SE" />
+			<param name="file" value="${files.dir}/OXUpdater_Swedish_${oxupdater.version}.msi"/>
+			<param name="common" value="OXUpdater.msi"/>
+			<param name="locale" value="sv_SE"/>
 		</antcall>
 		<antcall target="create7zip">
-			<param name="file" value="${files.dir}/OXUpdater_Dutch_${oxupdater.version}.msi" />
-			<param name="common" value="OXUpdater.msi" />
-			<param name="locale" value="nl_NL" />
+			<param name="file" value="${files.dir}/OXUpdater_Dutch_${oxupdater.version}.msi"/>
+			<param name="common" value="OXUpdater.msi"/>
+			<param name="locale" value="nl_NL"/>
 		</antcall>
 	</target>
 
 	<target name="createOXtenderInstallersNamedByJavaLocaleConvention">
 		<antcall target="renameLocaleBased">
-			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_German_${oxtender.version}.msi" />
-			<param name="common" value="OXtender_for_Microsoft_Outlook" />
-			<param name="locale" value="de_DE" />
+			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_German_${oxtender.version}.msi"/>
+			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
+			<param name="locale" value="de_DE"/>
 		</antcall>
 		<antcall target="renameLocaleBased">
-			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_English_${oxtender.version}.msi" />
-			<param name="common" value="OXtender_for_Microsoft_Outlook" />
-			<param name="locale" value="en_US" />
+			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_English_${oxtender.version}.msi"/>
+			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
+			<param name="locale" value="en_US"/>
 		</antcall>
 		<antcall target="renameLocaleBased">
-			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_French_${oxtender.version}.msi" />
-			<param name="common" value="OXtender_for_Microsoft_Outlook" />
-			<param name="locale" value="fr_FR" />
+			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_French_${oxtender.version}.msi"/>
+			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
+			<param name="locale" value="fr_FR"/>
 		</antcall>
 		<antcall target="renameLocaleBased">
-			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_Spanish_${oxtender.version}.msi" />
-			<param name="common" value="OXtender_for_Microsoft_Outlook" />
-			<param name="locale" value="es_ES" />
+			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_Spanish_${oxtender.version}.msi"/>
+			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
+			<param name="locale" value="es_ES"/>
 		</antcall>
 		<antcall target="renameLocaleBased">
-			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_Swedish_${oxtender.version}.msi" />
-			<param name="common" value="OXtender_for_Microsoft_Outlook" />
-			<param name="locale" value="sv_SE" />
+			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_Swedish_${oxtender.version}.msi"/>
+			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
+			<param name="locale" value="sv_SE"/>
 		</antcall>
 		<antcall target="renameLocaleBased">
-			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_Dutch_${oxtender.version}.msi" />
-			<param name="common" value="OXtender_for_Microsoft_Outlook" />
-			<param name="locale" value="nl_NL" />
+			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_Dutch_${oxtender.version}.msi"/>
+			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
+			<param name="locale" value="nl_NL"/>
 		</antcall>
 	</target>
 
 	<target name="compile" depends="prepare">
 		<javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-			<classpath refid="project.classpath" />
+			<classpath refid="project.classpath"/>
 		</javac>
 	</target>
 
 	<target name="jar" depends="prepare,compile">
 		<jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
-			<fileset dir="${output..}" />
+			<fileset dir="${output..}"/>
 		</jar>
 	</target>
 
 	<target name="patchConfig" depends="prepare">
-		<move tofile="${tmp.dir}/${conf.dir}/updater.properties" file="conf/updater.properties.in" overwrite="true" />
+		<move tofile="${tmp.dir}/${conf.dir}/updater.properties" file="${conf.dir}/updater.properties.in" overwrite="true"/>
 		<replace file="${tmp.dir}/${conf.dir}/updater.properties">
-			<replacefilter token="@filepath@" value="${files}" />
+			<replacefilter token="@filepath@" value="${files}"/>
 		</replace>
 	</target>
 
 	<target name="patchTemplate" depends="prepare">
-		<move tofile="${tmp.dir}/${template.dir}/updater.tmpl" file="templates/updater.tmpl.in" overwrite="true" />
+		<move tofile="${tmp.dir}/${template.dir}/updater.tmpl" file="templates/updater.tmpl.in" overwrite="true"/>
 		<replace file="${tmp.dir}/${template.dir}/updater.tmpl">
-			<replacefilter token="@oxtender.version@" value="${oxtender.version}" />
-			<replacefilter token="@oxtender.releaseDate@" value="${oxtender.releaseDate}" />
+			<replacefilter token="@oxtender.version@" value="${oxtender.version}"/>
+			<replacefilter token="@oxtender.releaseDate@" value="${oxtender.releaseDate}"/>
 		</replace>
 	</target>
 
-
 	<!-- Install targets -->
-	<target name="install" depends="installJar,installConfig,installFiles,installTemplates" />
+	<target name="install" depends="installJar,installConfig,installFiles,installTemplates"/>
 
 	<target name="installTemplates" depends="patchTemplate">
-		<mkdir dir="${templateInstallCopyDir}" />
+		<mkdir dir="${templateInstallCopyDir}"/>
 		<copy todir="${templatefInstallCopyDir}" overwrite="true">
 			<fileset dir="${tmp.dir}/${template.dir}">
-				<include name="**" />
-				<exclude name="*.in" />
+				<include name="**"/>
+				<exclude name="*.in"/>
 			</fileset>
 		</copy>
 	</target>
 
 	<target name="installFiles" depends="create7ZippedUpdaterInstallers,createOXtenderInstallersNamedByJavaLocaleConvention">
-		<mkdir name="${destdir}/${files}" />
+		<mkdir name="${destdir}/${files}"/>
 		<copy todir="${destdir}/${files}">
-			<fileset dir="${output..}/files">
-				<include name="**" />
-				<exclude name="CVS" />
+			<fileset dir="${tmp.dir}/files">
+				<include name="**"/>
+				<exclude name="CVS"/>
 			</fileset>
 		</copy>
 		<copy todir="${destdir}/${files}">
 			<fileset dir="Resources">
-				<include name="**" />
-				<exclude name="CVS" />
+				<include name="**"/>
+				<exclude name="CVS"/>
 			</fileset>
 		</copy>
-
 	</target>
 
-
 	<target name="installConfig" depends="patchConfig">
-		<mkdir dir="${confInstallCopyDir}" />
+		<mkdir dir="${confInstallCopyDir}"/>
 		<copy todir="${confInstallCopyDir}" overwrite="true">
 			<fileset dir="${tmp.dir}/${conf.dir}">
-				<include name="**" />
-				<exclude name="*.in" />
-				<exclude name="CVS" />
-				<exclude name="osgi/**" />
+				<include name="**"/>
+				<exclude name="*.in"/>
+				<exclude name="CVS"/>
+				<exclude name="osgi/**"/>
 			</fileset>
 		</copy>
-		<mkdir dir="${destdir}/${bundle.d}" />
-		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
+		<mkdir dir="${destdir}/${bundle.d}"/>
+		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
 	</target>
 
 	<target name="installJar" depends="jar">
-		<mkdir dir="${destdir}/${bundlesdir}" />
+		<mkdir dir="${destdir}/${bundlesdir}"/>
 		<copy todir="${destdir}/${bundlesdir}">
 			<fileset dir="${tmp.dir}">
-				<include name="${bundle.name}" />
+				<include name="${bundle.name}"/>
 			</fileset>
 		</copy>
 	</target>
 
 	<!-- Dist -->
 	<target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package" />
-		<delete dir="${dist-package}" />
-		<mkdir dir="${dist-package}/${composite.name}" />
+		<property name="dist-package" value="dist-package"/>
+		<delete dir="${dist-package}"/>
+		<mkdir dir="${dist-package}/${composite.name}"/>
 		<copy todir="${dist-package}/${composite.name}">
 			<fileset dir=".">
-				<exclude name="**${dist-package}/**" />
-				<exclude name="**debian/**" />
-				<exclude name="**CVS/**" />
-				<exclude name="Todo" />
+				<exclude name="**${dist-package}/**"/>
+				<exclude name="**debian/**"/>
+				<exclude name="**CVS/**"/>
+				<exclude name="Todo"/>
 			</fileset>
 		</copy>
-		<tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip" />
+		<tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
 		<!-- dpkg-source does not like anything else -->
-		<delete dir="${dist-package}" />
+		<delete dir="${dist-package}"/>
 	</target>
 
 	<target name="clean">
-		<delete dir="${tmp.dir}" />
-		<delete dir="${output..}" />
+		<delete dir="${tmp.dir}"/>
+		<delete dir="${output..}"/>
 	</target>
 
 	<!-- Macros -->
 	<!-- This macro needs the properties "file", "common", and "locale" -->
 	<target name="create7zip">
-		<copy file="${file}" tofile="${common}" />
+		<copy file="${file}" tofile="${common}"/>
 		<!-- create 7z archive with common + . + locale + . + 7z -->
 		<exec executable="${sevenZip}" failonerror="yes">
-			<arg value="a" />
-			<arg value="${common}.${locale}.7z" />
-			<arg value="${common}" />
+			<arg value="a"/>
+			<arg value="${common}.${locale}.7z"/>
+			<arg value="${common}"/>
 		</exec>
-		<move file="${common}.${locale}.7z" todir="${output..}/files" />
-		<delete file="${common}" />
+		<move file="${common}.${locale}.7z" todir="${tmp.dir}/files"/>
+		<delete file="${common}"/>
 	</target>
 
 	<target name="renameLocaleBased">
-		<move file="${file}" tofile="${output..}/files/${common}.${locale}.msi" />
+		<move file="${file}" tofile="${tmp.dir}/files/${common}.${locale}.msi"/>
 	</target>
 
 </project>
