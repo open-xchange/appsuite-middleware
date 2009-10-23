@@ -75,6 +75,7 @@
 			<param name="common" value="OXUpdater.msi"/>
 			<param name="locale" value="de_DE"/>
 		</antcall>
+	    <!--
 		<antcall target="create7zip">
 			<param name="file" value="${files.dir}/OXUpdater_English_${oxupdater.version}.msi"/>
 			<param name="common" value="OXUpdater.msi"/>
@@ -100,6 +101,7 @@
 			<param name="common" value="OXUpdater.msi"/>
 			<param name="locale" value="nl_NL"/>
 		</antcall>
+		-->
 	</target>
 
 	<target name="createOXtenderInstallersNamedByJavaLocaleConvention">
@@ -108,6 +110,7 @@
 			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
 			<param name="locale" value="de_DE"/>
 		</antcall>
+	    <!--
 		<antcall target="renameLocaleBased">
 			<param name="file" value="${files.dir}/OXtender_for_Microsoft_Outlook_English_${oxtender.version}.msi"/>
 			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
@@ -133,6 +136,7 @@
 			<param name="common" value="OXtender_for_Microsoft_Outlook"/>
 			<param name="locale" value="nl_NL"/>
 		</antcall>
+		-->
 	</target>
 
 	<target name="compile" depends="prepare">
@@ -176,7 +180,7 @@
 	</target>
 
 	<target name="installFiles" depends="create7ZippedUpdaterInstallers,createOXtenderInstallersNamedByJavaLocaleConvention">
-		<mkdir name="${destdir}/${files}"/>
+		<mkdir dir="${destdir}/${files}"/>
 		<copy todir="${destdir}/${files}">
 			<fileset dir="${tmp.dir}/files">
 				<include name="**"/>
@@ -240,15 +244,14 @@
 	<!-- Macros -->
 	<!-- This macro needs the properties "file", "common", and "locale" -->
 	<target name="create7zip">
-		<copy file="${file}" tofile="${common}"/>
+		<copy file="${file}" tofile="${tmp.dir}/files/${common}"/>
 		<!-- create 7z archive with common + . + locale + . + 7z -->
-		<exec executable="${sevenZip}" failonerror="yes">
+		<exec executable="${sevenZip}" dir="${tmp.dir}/files" failonerror="yes">
 			<arg value="a"/>
 			<arg value="${common}.${locale}.7z"/>
 			<arg value="${common}"/>
 		</exec>
-		<move file="${common}.${locale}.7z" todir="${tmp.dir}/files"/>
-		<delete file="${common}"/>
+		<delete file="${tmp.dir}/files/${common}"/>
 	</target>
 
 	<target name="renameLocaleBased">
