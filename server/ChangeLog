@@ -1,3 +1,7 @@
+* 2009-10-16 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14653: No notification mails for pseudo changes.
+
 * 2009-10-13 - marcus.klein@open-xchange.com
 
  - Bugfix #14655: Conditionally sending CAPABILITY after STARTTLS only for Cyrus that is not sieve draft conform. dovecot is conform.

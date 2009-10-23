@@ -2187,6 +2187,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final int ucols[] = new int[26];
         int uc = CalendarOperation.fillUpdateArray(cdao, edao, ucols);
         final MBoolean cup = new MBoolean(false);
+        boolean realChange = uc > 0;
         if (uc > 0 || collection.check(cdao.getUsers(), edao.getUsers())) {
 
             ucols[uc++] = Appointment.LAST_MODIFIED;
@@ -2226,7 +2227,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                     statementFiller.fillStatement(pst, a + 1, cdao);
                 }
                 if(!skipParticipants) {
-                    updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
+                    boolean temp = updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
+                    realChange = realChange || temp;
                 }
                 final int ret = pst.executeUpdate();
                 if (ret == 0) {
@@ -2272,7 +2274,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         final boolean solo_reminder = collection.checkForSoloReminderUpdate(cdao, ucols, cup);
         collection.checkAndRemovePastReminders(cdao, edao);
-        if (!solo_reminder) {
+        if (!solo_reminder && realChange) {
             collection.triggerModificationEvent(so, edao, cdao);
         }
         if(rec_action == collection.RECURRING_CREATE_EXCEPTION) {
@@ -2378,7 +2380,22 @@ public class CalendarMySQL implements CalendarSqlImp {
         return false;
     }
 
-    private final void updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, final MBoolean cup) throws SQLException, OXException, LdapException {
+    /**
+     * Updates the participants.
+     * 
+     * @param cdao
+     * @param edao
+     * @param uid
+     * @param cid
+     * @param writecon
+     * @param cup
+     * @return A boolean, which indicates, if any changes are made to the participants, except confirmation updates.
+     * @throws SQLException
+     * @throws OXException
+     * @throws LdapException
+     */
+    private final boolean updateParticipants(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int cid, final Connection writecon, final MBoolean cup) throws SQLException, OXException, LdapException {
+        boolean retval = false;
         final Participant[] participants = cdao.getParticipants();
         UserParticipant[] users = cdao.getUsers();
 
@@ -2470,6 +2487,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         if (new_participants != null && new_participants.length > 0) {
             final Set<Integer> knownExternalIds = createExternalIdentifierSet(old_participants);
+            retval = true;
             cup.setMBoolean(true);
             PreparedStatement dr = null;
             try {
@@ -2527,6 +2545,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (deleted_participants != null && deleted_participants.length > 0) {
+            retval = true;
             cup.setMBoolean(true);
             PreparedStatement pd = null;
             PreparedStatement pde = null;
@@ -2561,6 +2580,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (new_userparticipants != null && new_userparticipants.length > 0) {
+            retval = true;
             cup.setMBoolean(true);
             PreparedStatement pi = null;
             try {
@@ -2908,6 +2928,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (deleted_userparticipants != null && deleted_userparticipants.length > 0) {
+            retval = true;
             cup.setMBoolean(true);
             PreparedStatement pd = null;
             try {
@@ -3051,6 +3072,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         collection.fillEventInformation(cdao, edao, edao.getUsers(), new_userparticipants, deleted_userparticipants, edao.getParticipants(), new_participants, deleted_participants);
 
+        return retval;
     }
 
     private void prepareConfirmation(final CalendarDataObject edao, final UserParticipant[] modified_userparticipants, final PreparedStatement pu, final int a) throws SQLException {
