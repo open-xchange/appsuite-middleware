@@ -3,6 +3,8 @@
 	<!-- Customizable values -->
 	<property name="destdir" value="" />
 	<property name="prefix" value="/opt/open-xchange" />
+	<property name="source" value="src/" />
+	<property name="output" value="build/" />
 	
 	<!-- Constants -->
 	<property name="project.name" value="com.openexchange.report.client"/>
