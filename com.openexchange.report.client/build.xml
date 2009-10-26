@@ -14,7 +14,7 @@
 	<property name="version" value="6.13.0.0" />
 	<property name="bundle.name" value="${project.name}.jar" />
 	<property name="composite.name" value="open-xchange-report-client-${version}" />
-    <property name="etcdir"  value="etc"/>
+	<property name="etcdir"  value="etc"/>
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	
     <!-- Bundle dependencies -->
@@ -69,14 +69,8 @@
 		</jar>
 	</target>
 
-	<!-- Install targets -->	
-    <target name="installInclude">
-		<mkdir dir="${destdir}/${bundle.d}" />
-		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" 
-			message="${bundlesdir}/${bundle.name}@start${line.separator}" />
-    </target>
-	
-	<target name="installJar" depends="jar,installInclude">
+	<!-- Install targets -->
+	<target name="installJar" depends="jar">
 		<mkdir dir="${destdir}/${bundlesdir}" />
 		<copy todir="${destdir}/${bundlesdir}">
 			<fileset dir="${tmp.dir}">
