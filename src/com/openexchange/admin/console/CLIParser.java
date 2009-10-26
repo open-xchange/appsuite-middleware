@@ -12,6 +12,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
+/**
+ * {@link CLIParser} - The command-line parser.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class CLIParser {
 
     private String[] remainingArgs;
