@@ -95,9 +95,16 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class);
 
-    private static final String SELECT_MAIL_ACCOUNT = "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
+    /**
+     * The constant in the Java programming language, sometimes referred to as a type code, that identifies the generic SQL type VARCHAR.
+     */
+    private static final int TYPE_VARCHAR = Types.VARCHAR;
 
-    private static final String SELECT_TRANSPORT_ACCOUNT = "SELECT name, url, login, password, send_addr, default_flag, personal FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
+    private static final String SELECT_MAIL_ACCOUNT =
+        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String SELECT_TRANSPORT_ACCOUNT =
+        "SELECT name, url, login, password, send_addr, default_flag, personal FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_MAIL_ACCOUNTS = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id";
 
@@ -105,21 +112,31 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String SELECT_BY_PRIMARY_ADDR = "SELECT id, user FROM user_mail_account WHERE cid = ? AND primary_addr = ?";
 
-    private static final String SELECT_ACCOUNT_BY_PRIMARY_ADDR = "SELECT id FROM user_mail_account WHERE cid = ? AND primary_addr = ? AND user = ?";
+    private static final String SELECT_ACCOUNT_BY_PRIMARY_ADDR =
+        "SELECT id FROM user_mail_account WHERE cid = ? AND primary_addr = ? AND user = ?";
 
     private static final String DELETE_MAIL_ACCOUNT = "DELETE FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String DELETE_TRANSPORT_ACCOUNT = "DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
-    private static final String UPDATE_MAIL_ACCOUNT = "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
+    private static final String UPDATE_MAIL_ACCOUNT =
+        "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
-    private static final String INSERT_MAIL_ACCOUNT = "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_MAIL_ACCOUNT =
+        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_TRANSPORT_ACCOUNT = "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
+    private static final String UPDATE_TRANSPORT_ACCOUNT =
+        "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
-    private static final String INSERT_TRANSPORT_ACCOUNT = "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal) VALUES (?,?,?,?,?,?,?,?,?,?)";
+    private static final String INSERT_TRANSPORT_ACCOUNT =
+        "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String UPDATE_UNIFIED_INBOX_FLAG = "UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
+    private static final String UPDATE_UNIFIED_INBOX_FLAG =
+        "UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String UPDATE_PERSONAL1 = "UPDATE user_mail_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
+
+    private static final String UPDATE_PERSONAL2 = "UPDATE user_transport_account SET personal = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int user, final int cid) throws MailAccountException {
         Connection con = null;
@@ -575,16 +592,21 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             Attribute.TRASH_FULLNAME_LITERAL,
             Attribute.TRASH_LITERAL);
 
+    private static final EnumSet<Attribute> PRIMARY_EDITABLE =
+        EnumSet.of(Attribute.UNIFIED_INBOX_ENABLED_LITERAL, Attribute.PERSONAL_LITERAL);
+
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws MailAccountException {
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
-            if (!attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL)) {
+            final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
+            final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
+            if (!containsUnifiedInbox && !containsPersonal) {
                 /*
-                 * An attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL must not be changed
+                 * Another attribute must not be changed
                  */
                 throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.NO_DEFAULT_UPDATE, I(user), I(cid));
             }
             /*
-             * Ensure only Attribute.UNIFIED_INBOX_ENABLED_LITERAL should really be changed
+             * Ensure only allowed attributes should really be changed
              */
             final MailAccount storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
             /*
@@ -593,18 +615,19 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             final MailAccountGetSwitch storageGetSwitch = new MailAccountGetSwitch(storageVersion);
             final GetSwitch getSwitch = new GetSwitch(mailAccount);
             /*
-             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL
+             * Iterate attributes and compare their values except the one for Attribute.UNIFIED_INBOX_ENABLED_LITERAL and
+             * Attribute.PERSONAL_LITERAL
              */
             for (final Attribute attribute : attributes) {
                 /*
-                 * Check for an attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL
+                 * Check for an attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL and Attribute.PERSONAL_LITERAL
                  */
-                if (!Attribute.UNIFIED_INBOX_ENABLED_LITERAL.equals(attribute)) {
+                if (!PRIMARY_EDITABLE.contains(attribute)) {
                     final Object storageValue = attribute.doSwitch(storageGetSwitch);
                     final Object newValue = attribute.doSwitch(getSwitch);
                     if (null != storageValue && !storageValue.equals(newValue)) {
                         /*
-                         * An attribute different from Attribute.UNIFIED_INBOX_ENABLED_LITERAL must not be changed
+                         * Another attribute must not be changed
                          */
                         throw MailAccountExceptionFactory.getInstance().create(
                             MailAccountExceptionMessages.NO_DEFAULT_UPDATE,
@@ -613,18 +636,26 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                     }
                 }
             }
-            /*
-             * OK, update UNIFIED_INBOX_ENABLED flag.
-             */
-            updateUnifiedINBOXEnabled(mailAccount.isUnifiedINBOXEnabled(), MailAccount.DEFAULT_ID, user, cid, con);
-            /*
-             * Automatically check Unified INBOX existence
-             */
-            if (mailAccount.isUnifiedINBOXEnabled()) {
-                final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
-                if (null != management && !management.exists(user, cid, con)) {
-                    management.createUnifiedINBOX(user, cid, con);
+            if (containsUnifiedInbox) {
+                /*
+                 * OK, update UNIFIED_INBOX_ENABLED flag.
+                 */
+                updateUnifiedINBOXEnabled(mailAccount.isUnifiedINBOXEnabled(), MailAccount.DEFAULT_ID, user, cid, con);
+                /*
+                 * Automatically check Unified INBOX existence
+                 */
+                if (mailAccount.isUnifiedINBOXEnabled()) {
+                    final UnifiedINBOXManagement management = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
+                    if (null != management && !management.exists(user, cid, con)) {
+                        management.createUnifiedINBOX(user, cid, con);
+                    }
                 }
+            }
+            if (containsPersonal) {
+                /*
+                 * OK, update PERSONAL string.
+                 */
+                updatePersonal(mailAccount.getPersonal(), MailAccount.DEFAULT_ID, user, cid, con);
             }
         } else {
             /*
@@ -708,7 +739,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         } else if (Attribute.PERSONAL_LITERAL == attribute) {
                             final String personal = mailAccount.getPersonal();
                             if (isEmpty(personal)) {
-                                stmt.setNull(pos++, Types.VARCHAR);
+                                stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
                             }
@@ -762,7 +793,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                         } else if (Attribute.PERSONAL_LITERAL == attribute) {
                             final String personal = mailAccount.getPersonal();
                             if (isEmpty(personal)) {
-                                stmt.setNull(pos++, Types.VARCHAR);
+                                stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
                             }
@@ -829,9 +860,42 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    private void updatePersonal(final String personal, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(UPDATE_PERSONAL1);
+            int pos = 1;
+            if (null == personal) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, personal);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            // Transport table, too
+            stmt = con.prepareStatement(UPDATE_PERSONAL2);
+            pos = 1;
+            if (null == personal) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, personal);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     private void updateProperty(final int cid, final int user, final int accountId, final String name, final String newValue, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
-
         try {
             stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
             int pos = 1;
@@ -921,7 +985,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 final String sh = mailAccount.getSpamHandler();
                 if (null == sh) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, sh);
                 }
@@ -940,7 +1004,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, personal);
                 }
@@ -967,7 +1031,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.getPrimaryAddress());
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, personal);
                 }
@@ -1074,7 +1138,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
                 stmt.setString(pos++, mailAccount.getLogin());
                 if (mailAccount.isDefaultFlag()) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     setOptionalString(stmt, pos++, encryptedPassword);
                 }
@@ -1088,7 +1152,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
                 final String sh = mailAccount.getSpamHandler();
                 if (null == sh) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, sh);
                 }
@@ -1101,7 +1165,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getConfirmedHamFullname());
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, personal);
                 }
@@ -1130,7 +1194,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, transportURL);
                 stmt.setString(pos++, mailAccount.getTransportLogin());
                 if (mailAccount.isDefaultFlag()) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     setOptionalString(stmt, pos++, encryptedTransportPassword);
                 }
@@ -1138,7 +1202,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setInt(pos++, mailAccount.isDefaultFlag() ? 1 : 0);
                 final String personal = mailAccount.getPersonal();
                 if (isEmpty(personal)) {
-                    stmt.setNull(pos++, Types.VARCHAR);
+                    stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, personal);
                 }
