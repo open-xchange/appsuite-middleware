@@ -54,9 +54,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCommonInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.console.user.UserAbstraction;
@@ -77,7 +77,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="master Admin password";
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="master Admin user name";
     
-    protected Option contextQuotaOption = null;
+    protected CLIOption contextQuotaOption = null;
 
     protected String contextname = null;
     
@@ -102,7 +102,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
     
-    protected void parseAndSetExtensions(final AdminParser parser, final Context ctx, Credentials auth) {
+    protected void parseAndSetExtensions(final AdminParser parser, final Context ctx, final Credentials auth) {
         // We don't check for subclasses being null here because if someone has forgotten
         // to set the options he will directly fix it and thus there no need for the
         // future to check everytime
@@ -116,15 +116,17 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
     
+    @Override
     protected void setAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
+    @Override
     protected void setAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
-    protected void setExtensionOptions(final AdminParser parser, Class<? extends ContextConsoleCommonInterface> clazz) {
+    protected void setExtensionOptions(final AdminParser parser, final Class<? extends ContextConsoleCommonInterface> clazz) {
         try {
             this.subclasses = ServiceLoader.load(clazz);
         } catch (final IllegalAccessException e) {
@@ -159,7 +161,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Context ctx : ctxs) {
             data.add(makeData(ctx, new ClosureInterface() {
-                public ArrayList<String> getData(Context ctx) {
+                public ArrayList<String> getData(final Context ctx) {
                     return getHumanReableDataOfAllExtensions(ctx, parser);
                 }
             }));
@@ -208,7 +210,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     
         for (final Context ctx_tmp : ctxs) {
             data.add(makeData(ctx_tmp, new ClosureInterface() {
-                public ArrayList<String> getData(Context ctx) {
+                public ArrayList<String> getData(final Context ctx) {
                     return getCSVDataOfAllExtensions(ctx_tmp, parser);
                 }
 
@@ -218,7 +220,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         doCSVOutput(columns, data);
     }
 
-    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(AdminParser parser) {
+    protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final AdminParser parser) {
         return new ArrayList<String>();
     }
     

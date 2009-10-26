@@ -55,9 +55,6 @@ import java.net.URISyntaxException;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
@@ -166,7 +163,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         }
     }
 
-    protected void printErrors(final String id, final Integer ctxid, final Exception e, AdminParser parser) {
+    protected void printErrors(final String id, final Integer ctxid, final Exception e, final AdminParser parser) {
         // Remember that all the exceptions in this list must be written in the order with the lowest exception first
         // e.g. if Aexception extends Bexception then Aexception has to be written before Bexception in this list. Otherwise
         // the if clause for Bexception will match beforehand
@@ -214,13 +211,18 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         } else if (e instanceof IllegalAccessException) {
             printError(id, ctxid, e.getMessage(), parser);
             sysexit(1);
-        } else if (e instanceof IllegalOptionValueException) {
-            final IllegalOptionValueException exc = (IllegalOptionValueException) e;
+        } else if (e instanceof CLIParseException) {
+            final CLIParseException exc = (CLIParseException) e;
+            printError(id, ctxid, "Failed parsing command line: " + exc.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } else if (e instanceof CLIIllegalOptionValueException) {
+            final CLIIllegalOptionValueException exc = (CLIIllegalOptionValueException) e;
             printError(id, ctxid, "Illegal option value : " + exc.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } else if (e instanceof UnknownOptionException) {
-            final UnknownOptionException exc = (UnknownOptionException) e;
+        } else if (e instanceof CLIUnknownOptionException) {
+            final CLIUnknownOptionException exc = (CLIUnknownOptionException) e;
             printError(id, ctxid, "Unrecognized options on the command line: " + exc.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);

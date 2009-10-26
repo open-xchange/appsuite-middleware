@@ -53,13 +53,12 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.CLIIllegalOptionValueException;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -87,13 +86,13 @@ public class JobControl extends BasicCommandlineOptions {
 
     private static final char OPT_FLUSH_SHORT = 'f';
     
-    private Option list = null;
+    private CLIOption list = null;
 
-    private Option delete = null;
+    private CLIOption delete = null;
 
-    private Option details = null;
+    private CLIOption details = null;
 
-    private Option flush = null;
+    private CLIOption flush = null;
     
     public static void main(final String[] args) {
         new JobControl(args);
@@ -160,15 +159,25 @@ public class JobControl extends BasicCommandlineOptions {
         } catch (final NotBoundException e) {
             printServerException(e,parser);
             sysexit(1);
-        } catch (final IllegalOptionValueException e) {
+        } catch (final CLIParseException e) {
+            printError("Parsing command-line failed : " + e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } catch (final CLIIllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
+        }
+        /*-
+         * 
+         * 
+        catch (final CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
+        }
+        */
+        catch (final MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);

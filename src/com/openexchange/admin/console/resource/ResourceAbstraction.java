@@ -52,11 +52,10 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 
@@ -77,14 +76,14 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_RECIPIENT_LONG = "mailrecipients";
     protected static final char OPT_RECIPIENT_SHORT = 'm';
     
-    protected Option resourceDisplayNameOption = null;
-    protected Option resourceNameOption = null;
-    protected Option resourceAvailableOption = null;
-    protected Option resourceDescriptionOption = null;
-    protected Option resourceEmailOption = null;
-    protected Option resourceIdOption = null;
+    protected CLIOption resourceDisplayNameOption = null;
+    protected CLIOption resourceNameOption = null;
+    protected CLIOption resourceAvailableOption = null;
+    protected CLIOption resourceDescriptionOption = null;
+    protected CLIOption resourceEmailOption = null;
+    protected CLIOption resourceIdOption = null;
 
-    protected Option resourceRecipientOption = null;
+    protected CLIOption resourceRecipientOption = null;
     
     // For right error output
     protected String resourceid = null;
