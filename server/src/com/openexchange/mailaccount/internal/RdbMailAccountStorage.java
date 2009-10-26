@@ -577,6 +577,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    /**
+     * Contains attributes which denote an account's default folders.
+     */
     private static final EnumSet<Attribute> DEFAULT =
         EnumSet.of(
             Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
@@ -592,6 +595,9 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             Attribute.TRASH_FULLNAME_LITERAL,
             Attribute.TRASH_LITERAL);
 
+    /**
+     * Contains attributes which are allowed to be edited for primary mail account.
+     */
     private static final EnumSet<Attribute> PRIMARY_EDITABLE =
         EnumSet.of(Attribute.UNIFIED_INBOX_ENABLED_LITERAL, Attribute.PERSONAL_LITERAL);
 
