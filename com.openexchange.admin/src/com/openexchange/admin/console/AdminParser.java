@@ -354,7 +354,7 @@ public class AdminParser extends CLIParser {
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here
-    public final void ownparse(final String[] args) throws CLIParseException, CLIIllegalOptionValueException, MissingOptionException {
+    public final void ownparse(final String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
         parse(args);

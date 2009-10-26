@@ -58,6 +58,7 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
+import com.openexchange.admin.console.CLIUnknownOptionException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -167,17 +168,11 @@ public class JobControl extends BasicCommandlineOptions {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        }
-        /*-
-         * 
-         * 
-        catch (final CLIUnknownOptionException e) {
+        } catch (final CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        }
-        */
-        catch (final MissingOptionException e) {
+        } catch (final MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
