@@ -13,7 +13,6 @@
 
 	<property file="META-INF/MANIFEST.MF"/>
 	<property file="build.properties"/>
-	<property file="files.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
 	<property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
