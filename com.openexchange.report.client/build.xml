@@ -15,7 +15,7 @@
 	<property name="bundle.name" value="${project.name}.jar" />
 	<property name="composite.name" value="open-xchange-report-client-${version}" />
 	<property name="etcdir"  value="etc"/>
-	<property name="oxconfdir" value="etc/admindaemon"/>
+	<property name="oxconfdir" value="etc/groupware"/>
 	
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -41,7 +41,7 @@
     <filterset id="pathsubst">
         <filter token="oxprefix"          value="${prefix}"/>
         <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
-        <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
+        <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-scriptconf.sh"/>
     </filterset>
 	
 	<!-- Classpath -->
