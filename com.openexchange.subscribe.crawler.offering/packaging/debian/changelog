@@ -1,0 +1,5 @@
+open-xchange-subscribe-crawler-offering (6.13.0.0-0) unstable; urgency=low
+
+  * Initial version.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 26 Oct 2009 16:54:00 +0100
