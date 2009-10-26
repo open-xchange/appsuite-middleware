@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-calendar-printing
+Name:           open-xchange-subscribe-crawler-offering
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-templating >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
@@ -51,7 +51,7 @@ Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVER
 #
 
 %description
-Provides services for calendar printing via templates
+Offers crawlers to other crawler installation
   
 Authors:
 --------
