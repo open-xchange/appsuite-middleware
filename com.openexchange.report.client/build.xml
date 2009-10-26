@@ -22,6 +22,7 @@
 	
 	<!-- Install Constants -->
 	<property name="bundlesdir" value="${prefix}/bundles" />
+	<property name="sbindir"  value="${prefix}/sbin"/>
 	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d" />
 	
     <!-- Replacements -->
@@ -79,10 +80,19 @@
 		</copy>
 	</target>
 	
-    <target name="install" depends="replacer,installJar"/>
+	<target name="installBin" depends="replacer">
+        <mkdir dir="${destdir}/${prefix}/sbin"/>
+        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
+            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
+        </copy>
+    	<chmod perm="755">
+            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
+        </chmod>
+    </target>
+	
+    <target name="install" depends="installJar,installBin"/>
 
 	<!-- Replace targets -->	
-	
     <target name="replacer">
         <copy todir="." overwrite="true">
             <mapper type="glob" from="*.in" to="*"/>
