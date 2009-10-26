@@ -45,7 +45,7 @@
 			&& $client_information != null
 			&& strlen($client_information) > 0) {
 			
-			if (strcmp($authenticationstring, $clientauthenticationstring) = 0) {
+			if ($authenticationstring == $clientauthenticationstring) {
 				$search_existing_report_id = mysql_query(
 					sprintf("SELECT id from reports where license_keys = '%s'",
 						mysql_real_escape_string($license_keys))
