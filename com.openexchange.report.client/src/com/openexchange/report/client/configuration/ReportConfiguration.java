@@ -71,6 +71,7 @@ public class ReportConfiguration {
             if (null == propDir) {
             	throw new IOException("Missing property \"openexchange.propdir2\"");
             }
+            System.out.println(propDir);
             final File licensePropFile = new File(propDir, "license.properties");
             if (!licensePropFile.exists() || !licensePropFile.isFile()) {
             	throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append("license.properties").append("\" couldn't be found").toString());
