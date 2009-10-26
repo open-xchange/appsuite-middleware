@@ -3,11 +3,12 @@ package com.openexchange.admin.console;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -226,8 +227,9 @@ public class CLIParser {
      * @param argv The command line
      * @throws CLIParseException If parsing fails
      * @throws CLIIllegalOptionValueException If an illegal option occurs
+     * @throws CLIUnknownOptionException If an unknown option occurs
      */
-    public void parse(final String[] argv) throws CLIParseException, CLIIllegalOptionValueException {
+    public void parse(final String[] argv) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException {
         parse(argv, Locale.getDefault());
     }
 
@@ -297,14 +299,45 @@ public class CLIParser {
      * @param locale The locale
      * @throws CLIParseException If parsing fails
      * @throws CLIIllegalOptionValueException If an illegal option occurs
+     * @throws CLIUnknownOptionException If an unknown option occurs
      */
-    public void parse(final String[] argv, final Locale locale) throws CLIParseException, CLIIllegalOptionValueException {
+    public void parse(final String[] argv, final Locale locale) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException {
         try {
             cliCommandLine = new PosixParser().parse(cliOptions, argv);
 
             LongOptionProvider lp = null;
             ShortOptionProvider sp = null;
 
+            for (@SuppressWarnings("unchecked") final Iterator<Option> iter = cliCommandLine.iterator(); iter.hasNext();) {
+                final Option parsedOption = iter.next();
+                final String parsedLongOpt = parsedOption.getLongOpt();
+
+                final CLIOption opt = options.get("--"+parsedLongOpt);
+                if (null == opt) {
+                    throw new CLIUnknownOptionException(parsedLongOpt);
+                }
+                
+                final String shortForm = opt.shortForm();
+                if (null == shortForm) {
+                    if (null == lp) {
+                        lp = new LongOptionProvider(opt.longForm(), cliCommandLine);
+                    } else {
+                        lp.set(opt.longForm());
+                    }
+                    handleOption(opt, shortForm, locale, lp);
+                } else {
+                    if (null == sp) {
+                        sp = new ShortOptionProvider(shortForm.charAt(0), cliCommandLine);
+                    } else {
+                        sp.set(shortForm.charAt(0));
+                    }
+                    handleOption(opt, shortForm, locale, sp);
+                }
+            }
+            
+            /*-
+             * TODO: Enable this to allow unknown options
+             * 
             for (final CLIOption opt : new HashSet<CLIOption>(options.values())) {
                 final String shortForm = opt.shortForm();
                 if (null == shortForm) {
@@ -323,6 +356,7 @@ public class CLIParser {
                     handleOption(opt, shortForm, locale, sp);
                 }
             }
+            */
         } catch (final ParseException e) {
             throw new CLIParseException(argv, e);
         }

@@ -290,17 +290,11 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        }
-        /*-
-         * 
-         * 
-        catch (final CLIUnknownOptionException e) {
+        } catch (final CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        }
-        */
-        catch (final MissingOptionException e) {
+        } catch (final MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
