@@ -179,7 +179,7 @@ public class CLIParser {
     }
 
     /**
-     * Gets given optiobn's value.
+     * Gets given option's value.
      * 
      * @return the parsed value of the given option, or <code>null</code> if the option was not set
      */
