@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -21,15 +20,12 @@ public class CLIParser {
 
     private final Map<String, List<Object>> values = new HashMap<String, List<Object>>(16);
 
-    private final CommandLineParser cliParser;
-
     private final Options cliOptions;
 
     private CommandLine cliCommandLine;
 
     public CLIParser() {
         super();
-        cliParser = new PosixParser();
         cliOptions = new Options();
     }
 
