@@ -179,7 +179,9 @@ public class CLIParser {
     }
 
     /**
-     * @return the parsed value of the given Option, or null if the option was not set
+     * Gets given optiobn's value.
+     * 
+     * @return the parsed value of the given option, or <code>null</code> if the option was not set
      */
     public Object getOptionValue(final CLIOption o, final Object def, final boolean remove) {
         if (null == cliCommandLine) {
