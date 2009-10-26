@@ -14,7 +14,7 @@ import org.apache.commons.cli.PosixParser;
 
 /**
  * {@link CLIParser} - The command-line parser.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CLIParser {
@@ -59,6 +59,8 @@ public class CLIParser {
     /**
      * Convenience method for adding a string option.
      * 
+     * @param shortForm The option's short form
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addStringOption(final char shortForm, final String longForm) {
@@ -68,6 +70,7 @@ public class CLIParser {
     /**
      * Convenience method for adding a string option.
      * 
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addStringOption(final String longForm) {
@@ -77,6 +80,7 @@ public class CLIParser {
     /**
      * Convenience method for adding a settable boolean option.
      * 
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addSettableBooleanOption(final String longForm) {
@@ -86,6 +90,8 @@ public class CLIParser {
     /**
      * Convenience method for adding an integer option.
      * 
+     * @param shortForm The option's short form
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addIntegerOption(final char shortForm, final String longForm) {
@@ -95,6 +101,7 @@ public class CLIParser {
     /**
      * Convenience method for adding an integer option.
      * 
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addIntegerOption(final String longForm) {
@@ -104,6 +111,8 @@ public class CLIParser {
     /**
      * Convenience method for adding a long integer option.
      * 
+     * @param shortForm The option's short form
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addLongOption(final char shortForm, final String longForm) {
@@ -113,6 +122,7 @@ public class CLIParser {
     /**
      * Convenience method for adding a long integer option.
      * 
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addLongOption(final String longForm) {
@@ -122,6 +132,8 @@ public class CLIParser {
     /**
      * Convenience method for adding a double option.
      * 
+     * @param shortForm The option's short form
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addDoubleOption(final char shortForm, final String longForm) {
@@ -131,6 +143,7 @@ public class CLIParser {
     /**
      * Convenience method for adding a double option.
      * 
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addDoubleOption(final String longForm) {
@@ -140,6 +153,8 @@ public class CLIParser {
     /**
      * Convenience method for adding a boolean option.
      * 
+     * @param shortForm The option's short form
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addBooleanOption(final char shortForm, final String longForm) {
@@ -149,6 +164,7 @@ public class CLIParser {
     /**
      * Convenience method for adding a boolean option.
      * 
+     * @param longForm The option's long form
      * @return the new Option
      */
     public CLIOption addBooleanOption(final String longForm) {
