@@ -151,8 +151,7 @@ public class ContextDetail {
 	
 	public ContextModuleAccessCombination getModuleAccessCombination(
 			int position) {
-		return ((ContextModuleAccessCombination)
-				moduleAccessCombinations.get(position));
+		return moduleAccessCombinations.get(position);
 	}
 	
 	public void setModuleAccessCombination(

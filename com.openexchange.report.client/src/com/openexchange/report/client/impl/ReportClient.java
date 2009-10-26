@@ -51,14 +51,8 @@ package com.openexchange.report.client.impl;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -66,9 +60,7 @@ import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ReflectionException;
-
 import org.json.JSONException;
-
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -105,6 +97,7 @@ public class ReportClient extends AbstractJMXTools {
 		t.start(args, "report");
 	}
 
+    @Override
     protected void furtherOptionsHandling(final AdminParser parser, HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
 		try {
 			final MBeanServerConnection initConnection = initConnection(false, env);
@@ -144,24 +137,10 @@ public class ReportClient extends AbstractJMXTools {
 		} catch (JSONException e) {
             printServerException(e, parser);
             sysexit(1);
-		} catch (KeyManagementException e) {
-            printServerException(e, parser);
-            sysexit(1);
-		} catch (NoSuchAlgorithmException e) {
-            printServerException(e, parser);
-            sysexit(1);
-		} catch (CertificateException e) {
-            printServerException(e, parser);
-            sysexit(1);
-		} catch (KeyStoreException e) {
-            printServerException(e, parser);
-            sysexit(1);
-		} catch (UnrecoverableKeyException e) {
-            printServerException(e, parser);
-            sysexit(1);
 		}
     }
 
+    @Override
     public void setFurtherOptions(AdminParser parser) {
         this.sendonly = setShortLongOpt(parser,
         		OPT_SEND_ONLY_SHORT,

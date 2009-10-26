@@ -72,7 +72,6 @@ import com.openexchange.report.client.container.Total;
 
 public class ObjectHandler {
 	
-    @SuppressWarnings("unchecked")
 	protected static List<Total> getTotalObjects(MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
     	TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(new ObjectName("com.openexchange.reporting", "name", "Reporting"), "Total");
         
@@ -147,7 +146,7 @@ public class ObjectHandler {
     	for (ContextDetail tmp : contextDetails) {         
     		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {             
     			sorted.add(Arrays.asList((Object) 
-    					new Integer(tmp.getId()).intValue(),
+    					new Integer(tmp.getId()),
     					tmp.getAge(),
     					tmp.getCreated(),
     					moduleAccessCombination.getUserAccessCombination(),

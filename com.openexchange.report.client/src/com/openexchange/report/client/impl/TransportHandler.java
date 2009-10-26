@@ -56,18 +56,10 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.List;
-
 import javax.net.ssl.HttpsURLConnection;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
@@ -89,7 +81,7 @@ public class TransportHandler {
 	
 	public TransportHandler() {	}
 	
-    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws IOException, JSONException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException, CertificateException  {
+    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws IOException, JSONException {
     	JSONObject metadata = buildJSONObject(totals, contextDetails, versions);
     	
     	ReportConfiguration reportConfiguration = new ReportConfiguration();
@@ -121,14 +113,13 @@ public class TransportHandler {
 
         if (httpsURLConnection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
             throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
-        } else {
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-            String buffer = "";
-            while ((buffer = in.readLine()) != null) {
-                System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
-            }
-            in.close();
         }
+        BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
+        String buffer = "";
+        while ((buffer = in.readLine()) != null) {
+            System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
+        }
+        in.close();
     }
 
     
