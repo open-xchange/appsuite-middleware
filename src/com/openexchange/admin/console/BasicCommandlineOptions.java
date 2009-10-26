@@ -51,9 +51,7 @@ package com.openexchange.admin.console;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
@@ -161,12 +159,12 @@ public abstract class BasicCommandlineOptions {
     protected static String ADMIN_PASSWORD         = null;
     protected static String NEW_USER_PASSWORD      = null;
     
-    protected Option contextOption = null;
-    protected Option contextNameOption = null;
-    protected Option adminUserOption = null;
-    protected Option adminPassOption = null;
-    protected Option searchOption = null;
-    protected Option csvOutputOption = null;
+    protected CLIOption contextOption = null;
+    protected CLIOption contextNameOption = null;
+    protected CLIOption adminUserOption = null;
+    protected CLIOption adminPassOption = null;
+    protected CLIOption searchOption = null;
+    protected CLIOption csvOutputOption = null;
     
     // Used for right error output
     protected Integer ctxid = null;
@@ -182,7 +180,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     public static final Hashtable<String,String> getEnvOptions() {
-        Hashtable<String, String> opts = new Hashtable<String, String>();
+        final Hashtable<String, String> opts = new Hashtable<String, String>();
         for( final String opt : ENV_OPTIONS ) {
             try {
                 final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
@@ -192,16 +190,16 @@ public abstract class BasicCommandlineOptions {
                     val = "<NOT SET>";
                 }
                 opts.put(opt, val);
-            } catch (SecurityException e) {
+            } catch (final SecurityException e) {
                 System.err.println("unable to get commandline option \""+opt+"\"");
                 e.printStackTrace();
-            } catch (NoSuchFieldException e) {
+            } catch (final NoSuchFieldException e) {
                 System.err.println("unable to get commandline option \""+opt+"\"");
                 e.printStackTrace();
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 System.err.println("unable to get commandline option \""+opt+"\"");
                 e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (final IllegalAccessException e) {
                 System.err.println("unable to get commandline option \""+opt+"\"");
                 e.printStackTrace();
             }
@@ -223,18 +221,18 @@ public abstract class BasicCommandlineOptions {
                 setRMI_HOSTNAME(setOpt);
             } else {
                 try {
-                    Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
+                    final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
                     f.set(this, setOpt);
-                } catch (SecurityException e) {
+                } catch (final SecurityException e) {
                     System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
                     e.printStackTrace();
-                } catch (NoSuchFieldException e) {
+                } catch (final NoSuchFieldException e) {
                     System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
                     e.printStackTrace();
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
                     e.printStackTrace();
-                } catch (IllegalAccessException e) {
+                } catch (final IllegalAccessException e) {
                     System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
                     e.printStackTrace();
                 }
@@ -357,9 +355,9 @@ public abstract class BasicCommandlineOptions {
         
     }
    
-    protected final Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
+    protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
         
-        final Option retval = admp.addOption(longopt, longopt, description, required,hasarg);
+        final CLIOption retval = admp.addOption(longopt, longopt, description, required,hasarg);
 //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
 //        if (hasarg) {
 //            retval.hasArg();
@@ -368,41 +366,41 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
-    protected final Option setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+    protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
-        final Option retval = admp.addOption(longopt, longopt, description, required, hasarg, extended);
+        final CLIOption retval = admp.addOption(longopt, longopt, description, required, hasarg, extended);
         return retval;
     }
 
-    protected final Option setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+    protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
-        final Option retval = admp.addOption(longopt, argdescription, description, required, hasarg, extended);
+        final CLIOption retval = admp.addOption(longopt, argdescription, description, required, hasarg, extended);
         return retval;
     }
     
-    protected final Option setIntegerLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+    protected final CLIOption setIntegerLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
-        final Option retval = admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
+        final CLIOption retval = admp.addIntegerOption(longopt, argdescription, description, required, hasarg, extended);
         return retval;
     }
     
-    protected final Option setSettableBooleanLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
+    protected final CLIOption setSettableBooleanLongOpt(final AdminParser admp, final String longopt, final String argdescription, final String description, final boolean hasarg, final boolean required, final boolean extended) {
         
-        final Option retval = admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
+        final CLIOption retval = admp.addSettableBooleanOption(longopt, argdescription, description, required, hasarg, extended);
         return retval;
     }
 
-    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
-        final Option retval = admp.addOption(shortopt, longopt, argdescription, description, required);       
+    protected final CLIOption setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
+        final CLIOption retval = admp.addOption(shortopt, longopt, argdescription, description, required);       
         return retval;
     }
 
-    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
-        final Option retval = admp.addOption(shortopt,longopt, longopt, description, required, hasarg);       
+    protected final CLIOption setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
+        final CLIOption retval = admp.addOption(shortopt,longopt, longopt, description, required, hasarg);       
         return retval;
     }
     
-    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {
+    protected final CLIOption setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -411,7 +409,7 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
-    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final String defaultvalue, final boolean required) {
+    protected final CLIOption setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final String defaultvalue, final boolean required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -451,7 +449,7 @@ public abstract class BasicCommandlineOptions {
 //    }
     
     @Deprecated
-    protected final Option addDefaultArgName(final AdminParser admp,final Option option) {
+    protected final CLIOption addDefaultArgName(final AdminParser admp,final CLIOption option) {
 //        return addArgName(option, option.getLongOpt(admp));
         // FIXME
         return null;
@@ -645,7 +643,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    protected final NeededQuadState convertBooleantoTriState(boolean needed) {
+    protected final NeededQuadState convertBooleantoTriState(final boolean needed) {
         if (needed) {
             return NeededQuadState.needed;
         } else {
