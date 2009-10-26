@@ -33,7 +33,10 @@ public class CLIParser {
     }
 
     /**
-     * Add the specified Option to the list of accepted options
+     * Adds the specified option to the list of options
+     * 
+     * @param opt The option to add
+     * @return The added option
      */
     public CLIOption addOption(final CLIOption opt) {
         if (opt.shortForm() != null) {
