@@ -50,10 +50,9 @@ package com.openexchange.admin.console.context;
 
 import java.rmi.RemoteException;
 import java.util.Arrays;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserHostingAbstraction;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -96,11 +95,11 @@ public class ContextHostingAbstraction extends UserHostingAbstraction {
     static final char OPT_FILESTORE_SHORT = 'f';
     static final String OPT_FILESTORE_LONG = "filestore";
     
-    private Option addLoginMappingOption = null;
-    private Option removeLoginMappingOption = null;
+    private CLIOption addLoginMappingOption = null;
+    private CLIOption removeLoginMappingOption = null;
     
-    private Option databaseIdOption = null;
-    private Option databaseNameOption = null;
+    private CLIOption databaseIdOption = null;
+    private CLIOption databaseNameOption = null;
     
     private String[] remove_mappings = null;
     private String[] add_mappings = null;
@@ -110,7 +109,7 @@ public class ContextHostingAbstraction extends UserHostingAbstraction {
     
     protected Integer filestoreid = null;
     
-    protected Option targetFilestoreIDOption = null;
+    protected CLIOption targetFilestoreIDOption = null;
     
 
 //    protected Option maintenanceReasonIDOption = null;
@@ -157,13 +156,13 @@ public class ContextHostingAbstraction extends UserHostingAbstraction {
         createMessageForStdout(id, ctxid, text, parser);
     }
     
-    public void parseAndSetRemoveLoginMapping(AdminParser parser) {
+    public void parseAndSetRemoveLoginMapping(final AdminParser parser) {
         if (parser.getOptionValue(this.removeLoginMappingOption) != null) {
             this.remove_mappings = ((String) parser.getOptionValue(this.removeLoginMappingOption)).split(",");
         }
     }
 
-    public void parseAndSetAddLoginMapping(AdminParser parser) {
+    public void parseAndSetAddLoginMapping(final AdminParser parser) {
         if (parser.getOptionValue(this.addLoginMappingOption) != null) {
             this.add_mappings = ((String) parser.getOptionValue(this.addLoginMappingOption)).split(",");
         }
@@ -173,7 +172,7 @@ public class ContextHostingAbstraction extends UserHostingAbstraction {
         // check if wants to change login mappings, then first load current mappings from server
         if(add_mappings!=null || remove_mappings!=null){
             if (change) {
-                Context server_ctx = oxres.getData(ctx, auth);
+                final Context server_ctx = oxres.getData(ctx, auth);
                 ctx.setLoginMappings(server_ctx.getLoginMappings());
             } else {
                 ctx.addLoginMapping(ctx.getIdAsString());

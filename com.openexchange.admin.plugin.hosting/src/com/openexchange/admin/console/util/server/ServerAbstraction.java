@@ -49,8 +49,8 @@
 package com.openexchange.admin.console.util.server;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Server;
 
@@ -62,10 +62,10 @@ public abstract class ServerAbstraction extends UtilAbstraction {
     static final char OPT_NAME_SHORT = 'n';
 
     protected String serverid = null;
-    protected Option serverIdOption = null;
+    protected CLIOption serverIdOption = null;
 
     protected String servername = null;
-    protected Option serverNameOption = null;
+    protected CLIOption serverNameOption = null;
 
     @Override
     protected String getObjectName() {
@@ -86,7 +86,7 @@ public abstract class ServerAbstraction extends UtilAbstraction {
         }
     }
 
-    protected void setServeridOption(AdminParser parser) {
+    protected void setServeridOption(final AdminParser parser) {
         serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, NeededQuadState.eitheror);
     }
 

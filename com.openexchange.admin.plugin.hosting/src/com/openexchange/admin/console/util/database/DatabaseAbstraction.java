@@ -50,8 +50,8 @@
 package com.openexchange.admin.console.util.database;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -90,19 +90,19 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     protected final static char OPT_NAME_IS_MASTER_SHORT = 'm';
     protected final static String OPT_NAME_IS_MASTER_LONG = "master";
     
-    protected Option databaseIdOption = null;
-    protected Option databaseUsernameOption = null;
-    protected Option databaseDriverOption = null;
-    protected Option databasePasswdOption = null;
-    protected Option databaseIsMasterOption = null;
-    protected Option databaseMasterIDOption = null;
-    protected Option databaseWeightOption = null;
-    protected Option databaseNameOption = null;
-    protected Option hostnameOption = null;
-    protected Option maxUnitsOption = null;
-    protected Option poolHardlimitOption = null;
-    protected Option poolInitialOption = null;
-    protected Option poolMaxOption = null;
+    protected CLIOption databaseIdOption = null;
+    protected CLIOption databaseUsernameOption = null;
+    protected CLIOption databaseDriverOption = null;
+    protected CLIOption databasePasswdOption = null;
+    protected CLIOption databaseIsMasterOption = null;
+    protected CLIOption databaseMasterIDOption = null;
+    protected CLIOption databaseWeightOption = null;
+    protected CLIOption databaseNameOption = null;
+    protected CLIOption hostnameOption = null;
+    protected CLIOption maxUnitsOption = null;
+    protected CLIOption poolHardlimitOption = null;
+    protected CLIOption poolInitialOption = null;
+    protected CLIOption poolMaxOption = null;
     
     // Needed for right error output
     protected String dbid = null;

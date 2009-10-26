@@ -49,10 +49,9 @@
 package com.openexchange.admin.console.util.filestore;
 
 import java.net.URISyntaxException;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
@@ -66,13 +65,13 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     protected final static char OPT_NAME_STORE_MAX_CTX_SHORT = 'x';
     protected final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
     
-    protected Option filestoreIdOption = null;
+    protected CLIOption filestoreIdOption = null;
 
-    protected Option filestorePathOption = null;
+    protected CLIOption filestorePathOption = null;
     
-    protected Option filestoreSizeOption = null;
+    protected CLIOption filestoreSizeOption = null;
     
-    protected Option filestoreMaxContextsOption = null;
+    protected CLIOption filestoreMaxContextsOption = null;
     
     protected String filestoreid = null;
     

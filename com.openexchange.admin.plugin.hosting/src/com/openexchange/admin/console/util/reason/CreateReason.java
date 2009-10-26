@@ -49,10 +49,9 @@
 package com.openexchange.admin.console.util.reason;
 
 import java.rmi.Naming;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -68,7 +67,7 @@ public class CreateReason extends ReasonAbstraction {
 
     private final static String OPT_NAME_REASON_TEXT_LONG = "reasontext";
 
-    private Option reasonTextOption = null;
+    private CLIOption reasonTextOption = null;
 
     public CreateReason(final String[] args2) {
     

@@ -49,13 +49,13 @@
 package com.openexchange.admin.console.user;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.CmdLineParser.Option;
 
 public class UserHostingAbstraction extends ObjectNamingAbstraction {
     
     // which access rights template should be used
-    private Option accessRightsCombinationName = null;
+    private CLIOption accessRightsCombinationName = null;
 
     private static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
     

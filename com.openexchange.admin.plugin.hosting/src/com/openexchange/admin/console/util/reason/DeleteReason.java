@@ -49,10 +49,9 @@
 package com.openexchange.admin.console.util.reason;
 
 import java.rmi.Naming;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -68,7 +67,7 @@ public class DeleteReason extends ReasonAbstraction {
 
     private final static String OPT_NAME_REASON_ID_LONG = "reasonid";
 
-    private Option reasonIDOption = null;
+    private CLIOption reasonIDOption = null;
 
     public DeleteReason(final String[] args2) {
     
@@ -86,7 +85,7 @@ public class DeleteReason extends ReasonAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
     
             reason_id = (String) parser.getOptionValue(this.reasonIDOption);
-            MaintenanceReason[] mrs = new MaintenanceReason[1];
+            final MaintenanceReason[] mrs = new MaintenanceReason[1];
             mrs[0] = new MaintenanceReason();
             mrs[0].setId(Integer.parseInt(reason_id));
             oxutil.deleteMaintenanceReason(mrs, auth);

@@ -49,9 +49,9 @@
 package com.openexchange.admin.console.util;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 
 /**
  * 
@@ -61,7 +61,7 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 public abstract class UtilAbstraction extends ObjectNamingAbstraction {
     
     // for all tools
-    protected Option searchOption = null;
+    protected CLIOption searchOption = null;
 
     //  Setting names for options
     protected final static char OPT_NAME_SEARCH_PATTERN_SHORT = 's';

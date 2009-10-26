@@ -62,7 +62,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class StatisticTools extends AbstractJMXTools {
@@ -99,28 +98,29 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
     
-    private Option xchangestats = null;
+    private CLIOption xchangestats = null;
 
-    private Option runtimestats = null;
+    private CLIOption runtimestats = null;
 
-    private Option osstats = null;
+    private CLIOption osstats = null;
 
-    private Option threadingstats = null;
+    private CLIOption threadingstats = null;
 
-    private Option allstats = null;
+    private CLIOption allstats = null;
 
-    private Option admindaemonstats = null;
+    private CLIOption admindaemonstats = null;
 
-    private Option showoperation = null;
+    private CLIOption showoperation = null;
 
-    private Option dooperation = null;
+    private CLIOption dooperation = null;
     
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
         st.start(args, "showruntimestats");
     }
 
-    protected void furtherOptionsHandling(final AdminParser parser, HashMap<String, String[]> env) throws InterruptedException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException {
+    @Override
+    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) throws InterruptedException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException {
         boolean admin = false;
         if (null != parser.getOptionValue(this.admindaemonstats)) {
             admin = true;
@@ -197,7 +197,8 @@ public class StatisticTools extends AbstractJMXTools {
         }
     }
 
-    protected void setFurtherOptions(AdminParser parser) {
+    @Override
+    protected void setFurtherOptions(final AdminParser parser) {
         this.xchangestats = setShortLongOpt(parser, OPT_STATS_SHORT, OPT_STATS_LONG, "shows Open-Xchange stats", false, NeededQuadState.notneeded);
         this.runtimestats = setShortLongOpt(parser, OPT_RUNTIME_STATS_SHORT, OPT_RUNTIME_STATS_LONG, "shows Java runtime stats", false, NeededQuadState.notneeded);
         this.osstats = setShortLongOpt(parser, OPT_OS_STATS_SHORT, OPT_OS_STATS_LONG, "shows operating system stats", false, NeededQuadState.notneeded);
