@@ -24,6 +24,9 @@ public class CLIParser {
 
     private CommandLine cliCommandLine;
 
+    /**
+     * Initializes a new {@link CLIParser}.
+     */
     public CLIParser() {
         super();
         cliOptions = new Options();
