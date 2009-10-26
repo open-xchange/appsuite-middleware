@@ -61,7 +61,7 @@ public class CLIParser {
      * 
      * @param shortForm The option's short form
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addStringOption(final char shortForm, final String longForm) {
         return addOption(new CLIOption.CLIStringOption(shortForm, longForm));
@@ -71,7 +71,7 @@ public class CLIParser {
      * Convenience method for adding a string option.
      * 
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addStringOption(final String longForm) {
         return addOption(new CLIOption.CLIStringOption(longForm));
@@ -81,7 +81,7 @@ public class CLIParser {
      * Convenience method for adding a settable boolean option.
      * 
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addSettableBooleanOption(final String longForm) {
         return addOption(new CLIOption.CLISettableBooleanOption(longForm));
@@ -92,7 +92,7 @@ public class CLIParser {
      * 
      * @param shortForm The option's short form
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addIntegerOption(final char shortForm, final String longForm) {
         return addOption(new CLIOption.CLIIntegerOption(shortForm, longForm));
@@ -102,7 +102,7 @@ public class CLIParser {
      * Convenience method for adding an integer option.
      * 
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addIntegerOption(final String longForm) {
         return addOption(new CLIOption.CLIIntegerOption(longForm));
@@ -113,7 +113,7 @@ public class CLIParser {
      * 
      * @param shortForm The option's short form
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addLongOption(final char shortForm, final String longForm) {
         return addOption(new CLIOption.CLILongOption(shortForm, longForm));
@@ -123,7 +123,7 @@ public class CLIParser {
      * Convenience method for adding a long integer option.
      * 
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addLongOption(final String longForm) {
         return addOption(new CLIOption.CLILongOption(longForm));
@@ -134,7 +134,7 @@ public class CLIParser {
      * 
      * @param shortForm The option's short form
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addDoubleOption(final char shortForm, final String longForm) {
         return addOption(new CLIOption.CLIDoubleOption(shortForm, longForm));
@@ -144,7 +144,7 @@ public class CLIParser {
      * Convenience method for adding a double option.
      * 
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addDoubleOption(final String longForm) {
         return addOption(new CLIOption.CLIDoubleOption(longForm));
@@ -155,7 +155,7 @@ public class CLIParser {
      * 
      * @param shortForm The option's short form
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addBooleanOption(final char shortForm, final String longForm) {
         return addOption(new CLIOption.CLIBooleanOption(shortForm, longForm));
@@ -165,7 +165,7 @@ public class CLIParser {
      * Convenience method for adding a boolean option.
      * 
      * @param longForm The option's long form
-     * @return the new Option
+     * @return The added option
      */
     public CLIOption addBooleanOption(final String longForm) {
         return addOption(new CLIOption.CLIBooleanOption(longForm));
