@@ -64,9 +64,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -121,7 +121,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected class OptionAndMethod {
         private Method method = null;
         
-        private Option option = null;
+        private CLIOption option = null;
         
         private String returntype = null;
         
@@ -133,11 +133,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.method = method;
         }
         
-        public final Option getOption() {
+        public final CLIOption getOption() {
             return this.option;
         }
         
-        public final void setOption(final Option option) {
+        public final void setOption(final CLIOption option) {
             this.option = option;
         }
         
@@ -145,7 +145,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
          * @param method
          * @param option
          */
-        public OptionAndMethod(final Method method, final Option option, final String returntype) {
+        public OptionAndMethod(final Method method, final CLIOption option, final String returntype) {
             super();
             this.method = method;
             this.option = option;
@@ -239,60 +239,60 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
 
-    protected Option userNameOption = null;
-    protected Option displayNameOption = null;
-    protected Option givenNameOption = null;
-    protected Option surNameOption = null;
-    protected Option passwordOption = null;
-    protected Option primaryMailOption = null;
-    protected Option languageOption = null;
-    protected Option timezoneOption = null;
-    protected Option departmentOption = null;
-    protected Option companyOption = null;
-    protected Option aliasesOption = null;
-    protected Option idOption = null;
-    protected Option imapOnlyOption = null;
-    protected Option dbOnlyOption = null;
-    protected Option extendedOption = null;
-    protected Option imapQuotaOption = null;
-    protected Option inetMailAccessOption = null;
-    protected Option spamFilterOption = null;
+    protected CLIOption userNameOption = null;
+    protected CLIOption displayNameOption = null;
+    protected CLIOption givenNameOption = null;
+    protected CLIOption surNameOption = null;
+    protected CLIOption passwordOption = null;
+    protected CLIOption primaryMailOption = null;
+    protected CLIOption languageOption = null;
+    protected CLIOption timezoneOption = null;
+    protected CLIOption departmentOption = null;
+    protected CLIOption companyOption = null;
+    protected CLIOption aliasesOption = null;
+    protected CLIOption idOption = null;
+    protected CLIOption imapOnlyOption = null;
+    protected CLIOption dbOnlyOption = null;
+    protected CLIOption extendedOption = null;
+    protected CLIOption imapQuotaOption = null;
+    protected CLIOption inetMailAccessOption = null;
+    protected CLIOption spamFilterOption = null;
     
     // access to modules
-    protected Option accessCalendarOption = null;
-    protected Option accessContactOption = null;
-    protected Option accessDelegateTasksOption = null;
-    protected Option accessEditPublicFolderOption = null;
-    protected Option accessForumOption = null;
-    protected Option accessIcalOption = null;
-    protected Option accessInfostoreOption = null;
-    protected Option accessPinboardWriteOption = null;
-    protected Option accessProjectsOption = null;
-    protected Option accessReadCreateSharedFolderOption = null;
-    protected Option accessRssBookmarkOption = null;
-    protected Option accessRssPortalOption = null;
-    protected Option accessSyncmlOption = null;
-    protected Option accessTasksOption = null;
-    protected Option accessVcardOption = null;
-    protected Option accessWebdavOption = null;
-    protected Option accessWebdavXmlOption = null;
-    protected Option accessWebmailOption = null;
-    protected Option accessEditGroupOption = null;
-    protected Option accessEditResourceOption = null;
-    protected Option accessEditPasswordOption = null;
-    protected Option accessCollectEmailAddresses = null;
-    protected Option accessMultipleMailAccounts = null;
-    protected Option accessPublication = null;
-    protected Option accessSubscription = null;
-    protected Option accessActiveSync = null;
-    protected Option accessUSM = null;
-    protected Option accessGAB = null;
-    protected Option accessPublicFolderEditable = null;
+    protected CLIOption accessCalendarOption = null;
+    protected CLIOption accessContactOption = null;
+    protected CLIOption accessDelegateTasksOption = null;
+    protected CLIOption accessEditPublicFolderOption = null;
+    protected CLIOption accessForumOption = null;
+    protected CLIOption accessIcalOption = null;
+    protected CLIOption accessInfostoreOption = null;
+    protected CLIOption accessPinboardWriteOption = null;
+    protected CLIOption accessProjectsOption = null;
+    protected CLIOption accessReadCreateSharedFolderOption = null;
+    protected CLIOption accessRssBookmarkOption = null;
+    protected CLIOption accessRssPortalOption = null;
+    protected CLIOption accessSyncmlOption = null;
+    protected CLIOption accessTasksOption = null;
+    protected CLIOption accessVcardOption = null;
+    protected CLIOption accessWebdavOption = null;
+    protected CLIOption accessWebdavXmlOption = null;
+    protected CLIOption accessWebmailOption = null;
+    protected CLIOption accessEditGroupOption = null;
+    protected CLIOption accessEditResourceOption = null;
+    protected CLIOption accessEditPasswordOption = null;
+    protected CLIOption accessCollectEmailAddresses = null;
+    protected CLIOption accessMultipleMailAccounts = null;
+    protected CLIOption accessPublication = null;
+    protected CLIOption accessSubscription = null;
+    protected CLIOption accessActiveSync = null;
+    protected CLIOption accessUSM = null;
+    protected CLIOption accessGAB = null;
+    protected CLIOption accessPublicFolderEditable = null;
     
     
     // non-generic extended option
-    protected Option addGUISettingOption = null;
-    protected Option removeGUISettingOption = null;
+    protected CLIOption addGUISettingOption = null;
+    protected CLIOption removeGUISettingOption = null;
 
     protected static final String OPT_ADD_GUI_SETTING_LONG = "addguipreferences";
     protected static final String OPT_REMOVE_GUI_SETTING_LONG = "removeguipreferences";
@@ -595,7 +595,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
     }
     
-    protected final boolean accessOption2BooleanCreate(final AdminParser parser,final Option accessOption){
+    protected final boolean accessOption2BooleanCreate(final AdminParser parser,final CLIOption accessOption){
         // option was set, check what text was sent
         final String optionValue = (String) parser.getOptionValue(accessOption);
         if (optionValue == null) {
@@ -735,7 +735,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return changed;
     }
     
-    protected final boolean accessOption2BooleanChange(final AdminParser parser, final Option accessOption) {
+    protected final boolean accessOption2BooleanChange(final AdminParser parser, final CLIOption accessOption) {
         // option was set, check what text was sent
         final String optionValue = (String) parser.getOptionValue(accessOption);
         if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
@@ -857,19 +857,19 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         for (final MethodAndNames methodandnames : methArrayList) {
             if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
                 if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true);
+                    final CLIOption option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_INTEGER)) {
-                    final Option option = setIntegerLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true);
+                    final CLIOption option = setIntegerLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-                    final Option option = setSettableBooleanLongOpt(parser, methodandnames.getName().toLowerCase(), "true / false", methodandnames.getName(), true, false, true);
+                    final CLIOption option = setSettableBooleanLongOpt(parser, methodandnames.getName().toLowerCase(), "true / false", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true);
+                    final CLIOption option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
-                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true);
+                    final CLIOption option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 }
             }            
