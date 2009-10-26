@@ -84,10 +84,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -110,10 +106,10 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        int contextId = params.getContextId();
+    public void perform(final PerformParameters params) throws AbstractOXException {
+        final int contextId = params.getContextId();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
-        ProgressState state = params.getProgressState();
+        final ProgressState state = params.getProgressState();
         for (final Iterator<Map.Entry<Integer, List<Integer>>> it = m.entrySet().iterator(); it.hasNext();) {
             final Map.Entry<Integer, List<Integer>> me = it.next();
             final int currentContextId = me.getKey().intValue();
@@ -135,7 +131,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
     private static Map<Integer, List<Integer>> getAllUsers(final int contextId) throws UpdateException {
         final Connection writeCon;
         try {
-            writeCon = Database.get(contextId, false);
+            writeCon = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
@@ -165,7 +161,29 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             throw createSQLError(e);
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(contextId, false, writeCon);
+            Database.back(contextId, true, writeCon);
+        }
+    }
+
+    private static boolean existsPrimaryMailAccount(final int userId, final int contextId) throws UpdateException {
+        final Connection writeCon;
+        try {
+            writeCon = Database.get(contextId, true);
+        } catch (final DBPoolingException e) {
+            throw new UpdateException(e);
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, MailAccount.DEFAULT_ID);
+            stmt.setInt(3, userId);
+            return stmt.executeQuery().next();
+        } catch (final SQLException e) {
+            throw createSQLError(e);
+        } finally {
+            closeSQLStuff(stmt);
+            Database.back(contextId, true, writeCon);
         }
     }
 
@@ -176,30 +194,26 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         checkAndInsertMailAccountSequence(ctx);
         // Proceed with user data migration to new mail account tables
         try {
+            final RdbUserStorage rdbUserStorage = new RdbUserStorage();
             final StringBuilder sb = new StringBuilder(256);
             for (final Integer userId : users) {
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
                 // Check for default account
-                try {
-                    storageService.getDefaultMailAccount(userId.intValue(), ctx.getContextId());
+                if (existsPrimaryMailAccount(userId.intValue(), contextId)) {
                     if (LOG.isInfoEnabled()) {
                         sb.setLength(0);
                         LOG.info(sb.append("Default mail account already exists for user ").append(userId).append(" in context ").append(
                             ctx.getContextId()));
                     }
                     continue;
-                } catch (final MailAccountException e) {
-                    // Expected exception since default account should not exist
-                    if (LOG.isTraceEnabled()) {
-                        sb.setLength(0);
-                        LOG.trace(sb.append("Creating default mail account for user ").append(userId).append(" in context ").append(
-                            ctx.getContextId()));
-                    }
+                }
+                // Default account does not exist
+                if (LOG.isTraceEnabled()) {
+                    sb.setLength(0);
+                    LOG.trace(sb.append("Creating default mail account for user ").append(userId).append(" in context ").append(
+                        ctx.getContextId()));
                 }
                 // Create default account
-                final User user = new RdbUserStorage().getUser(userId.intValue(), ctx);
+                final User user = rdbUserStorage.getUser(userId.intValue(), ctx);
                 final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(userId.intValue(), ctx);
                 try {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
@@ -208,8 +222,6 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                 }
             }
         } catch (final LdapException e) {
-            throw new UpdateException(e);
-        } catch (final ServiceException e) {
             throw new UpdateException(e);
         }
     }
@@ -342,7 +354,8 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt =
+                con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             int pos = 1;
             // cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam,
             // confirmed_ham, spam_handler
@@ -376,7 +389,8 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.executeUpdate();
             stmt.close();
             // cid, id, user, name, url, login, password, send_addr, default_flag
-            stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag) VALUES (?,?,?,?,?,?,?,?,?)");
+            stmt =
+                con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag) VALUES (?,?,?,?,?,?,?,?,?)");
             pos = 1;
             stmt.setLong(pos++, cid);
             stmt.setLong(pos++, id);
@@ -391,7 +405,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            closeSQLStuff(null, stmt);
+            closeSQLStuff(stmt);
             Database.back(cid, true, con);
         }
     }

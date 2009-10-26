@@ -1,3 +1,7 @@
+* 2009-10-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #14694: Using a write-connection to check for an already existing mail account to avoid mast-slave-latency problems
+
 * 2009-10-21 - thorben.betten@open-xchange.com
 
  - Bugfix #14688: Dropping cached account's default folders if updated
