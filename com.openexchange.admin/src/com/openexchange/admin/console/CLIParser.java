@@ -44,12 +44,13 @@ public class CLIParser {
      * @return The added option
      */
     public CLIOption addOption(final CLIOption opt) {
-        if (opt.shortForm() != null) {
-            this.options.put("-" + opt.shortForm(), opt);
+        final String shortForm = opt.shortForm();
+        if (shortForm != null) {
+            this.options.put("-" + shortForm, opt);
         }
         this.options.put("--" + opt.longForm(), opt);
 
-        cliOptions.addOption(opt.shortForm(), opt.longForm(), opt.wantsValue(), "");
+        cliOptions.addOption(shortForm, opt.longForm(), opt.wantsValue(), "");
 
         return opt;
     }
