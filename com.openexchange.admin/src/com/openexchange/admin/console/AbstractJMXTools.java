@@ -72,9 +72,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
@@ -100,11 +97,11 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected String JMX_HOST = "localhost";
 
-    protected Option host = null;
+    protected CLIOption host = null;
 
-    protected Option jmxpass = null;
+    protected CLIOption jmxpass = null;
 
-    protected Option jmxuser = null;
+    protected CLIOption jmxuser = null;
 
     JMXConnector c = null;
 
@@ -122,11 +119,11 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     @SuppressWarnings("unchecked")
     protected StringBuffer getStats(final MBeanServerConnection mbc, final String class_name) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
-        StringBuffer retval = new StringBuffer();
+        final StringBuffer retval = new StringBuffer();
 
         final Iterator<ObjectInstance> itr = mbc.queryMBeans(null, null).iterator();
         while (itr.hasNext()) {
-            final ObjectInstance oin = (ObjectInstance) itr.next();
+            final ObjectInstance oin = itr.next();
 
             final ObjectName obj = oin.getObjectName();
             final MBeanInfo info = mbc.getMBeanInfo(obj);
@@ -179,9 +176,9 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
             public void run() {
                 try {
                     c = JMXConnectorFactory.connect(serviceurl, env);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     exc[0] = e;
-                } catch (RuntimeException e) {
+                } catch (final RuntimeException e) {
                     excr[0] = e;
                 }
             }
@@ -201,7 +198,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         return c.getMBeanServerConnection();
     }
 
-    protected void setOptions(AdminParser parser) {
+    protected void setOptions(final AdminParser parser) {
         this.host = setShortLongOpt(parser, OPT_HOST_SHORT, OPT_HOST_LONG, "host", "specifies the host", false);
         this.jmxuser = setShortLongOpt(parser, OPT_JMX_AUTH_USER_SHORT, OPT_JMX_AUTH_USER_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
         this.jmxpass = setShortLongOpt(parser, OPT_JMX_AUTH_PASSWORD_SHORT, OPT_JMX_AUTH_PASSWORD_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
@@ -249,16 +246,16 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
     }
 
-    protected HashMap<String, String[]> setCreds(final AdminParser parser, HashMap<String, String[]> env) throws IllegalOptionValueException {
+    protected HashMap<String, String[]> setCreds(final AdminParser parser, HashMap<String, String[]> env) throws CLIIllegalOptionValueException {
         final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
         final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
         
         if( jmxuser != null && jmxuser.trim().length() > 0 ) {
             if( jmxpass == null ) {
-                throw new IllegalOptionValueException(this.jmxpass,null);
+                throw new CLIIllegalOptionValueException(this.jmxpass,null);
             }
             env = new HashMap<String, String[]>();
-            String[] creds = new String[]{ jmxuser, jmxpass };
+            final String[] creds = new String[]{ jmxuser, jmxpass };
             env.put(JMXConnector.CREDENTIALS, creds);
         }
         return env;
@@ -285,15 +282,25 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
             readAndSetHost(parser);
 
             furtherOptionsHandling(parser, env);
-        } catch (final IllegalOptionValueException e) {
+        } catch (final CLIParseException e) {
+            printError("Parsing command-line failed : " + e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } catch (final CLIIllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
+        }
+        /*-
+         * 
+         * 
+        catch (final CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
+        }
+        */
+        catch (final MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);

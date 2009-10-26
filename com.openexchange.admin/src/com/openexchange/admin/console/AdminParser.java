@@ -51,7 +51,6 @@ package com.openexchange.admin.console;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
-
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
  * 1. The ability to output help texts
  * 2. The ability to have mandatory options
  */
-public class AdminParser extends CmdLineParser {
+public class AdminParser extends CLIParser {
     public enum NeededQuadState {
         notneeded,
         possibly,
@@ -81,24 +80,24 @@ public class AdminParser extends CmdLineParser {
     
     private static final String OPT_NAME_NONEWLINE_DESCRIPTION = "Remove all newlines (\\n) from output";
     
-    private ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
+    private final ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
     
     private String appname = null;
     
-    final private Option helpoption;
+    final private CLIOption helpoption;
     
-    final private Option envoption;
+    final private CLIOption envoption;
     
-    private Option checkuniquenessoption;
+    private final CLIOption checkuniquenessoption;
     
-    private Option extendedoption;
+    private CLIOption extendedoption;
     
-    private Option noNewlineOption;
+    private final CLIOption noNewlineOption;
     
     private class OptionInfo {
         public NeededQuadState needed = NeededQuadState.notneeded;
 
-        public Option option = null;
+        public CLIOption option = null;
 
         public String shortForm = null;
 
@@ -112,7 +111,7 @@ public class AdminParser extends CmdLineParser {
 
         public boolean hidden = false;
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final char shortForm, final String longForm, final String longFormParameterDescription, final String description) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final char shortForm, final String longForm, final String longFormParameterDescription, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -122,7 +121,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final String longForm, final String longFormParameterDescription, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -131,7 +130,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final char shortForm, final String longForm, final String description) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final char shortForm, final String longForm, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -140,7 +139,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String description) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final String longForm, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -148,7 +147,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String description, final boolean extended) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final String longForm, final String description, final boolean extended) {
             super();
             this.needed = needed;
             this.option = option;
@@ -157,7 +156,7 @@ public class AdminParser extends CmdLineParser {
             this.extended = extended;
         }
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String description, final boolean extended, final boolean hidden) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final String longForm, final String description, final boolean extended, final boolean hidden) {
             super();
             this.needed = needed;
             this.option = option;
@@ -167,7 +166,7 @@ public class AdminParser extends CmdLineParser {
             this.hidden = hidden;
         }
 
-        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description, final boolean extended) {
+        public OptionInfo(final NeededQuadState needed, final CLIOption option, final String longForm, final String longFormParameterDescription, final String description, final boolean extended) {
             super();
             this.needed = needed;
             this.option = option;
@@ -198,8 +197,8 @@ public class AdminParser extends CmdLineParser {
      * @param needed
      * @return
      */
-    public final Option addOption(final char shortForm, final String longForm, final String description, final boolean needed) {
-        final Option retval = addStringOption(shortForm, longForm);
+    public final CLIOption addOption(final char shortForm, final String longForm, final String description, final boolean needed) {
+        final CLIOption retval = addStringOption(shortForm, longForm);
         this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, shortForm, longForm, description));
 
         return retval;
@@ -216,8 +215,8 @@ public class AdminParser extends CmdLineParser {
      * @param description
      * @return
      */
-    public final Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
-        final Option retval = this.addStringOption(shortForm, longForm);
+    public final CLIOption addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
+        final CLIOption retval = this.addStringOption(shortForm, longForm);
         this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, shortForm, longForm, longFormParameterDescription, description));
         return retval;
     }
@@ -231,13 +230,13 @@ public class AdminParser extends CmdLineParser {
      * @param hasarg
      * @return
      */
-    public final Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final NeededQuadState needed, final boolean hasarg) {
+    public final CLIOption addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final NeededQuadState needed, final boolean hasarg) {
         if (hasarg) {
-            final Option retval = this.addStringOption(shortForm, longForm);
+            final CLIOption retval = this.addStringOption(shortForm, longForm);
             this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
             return retval;
         } else {
-            final Option retval = this.addBooleanOption(shortForm, longForm);
+            final CLIOption retval = this.addBooleanOption(shortForm, longForm);
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, shortForm, longForm, description));
             return retval;
         }
@@ -251,8 +250,8 @@ public class AdminParser extends CmdLineParser {
      * @param needed
      * @return
      */
-    public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
-        final Option retval = this.addStringOption(longForm);
+    public final CLIOption addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed) {
+        final CLIOption retval = this.addStringOption(longForm);
         this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description));
         return retval;
     }
@@ -265,13 +264,13 @@ public class AdminParser extends CmdLineParser {
      * @param hasarg
      * @return
      */
-    public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
+    public final CLIOption addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
         if (hasarg) {
-            final Option retval = this.addStringOption(longForm);
+            final CLIOption retval = this.addStringOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description));
             return retval;
         } else {
-            final Option retval = this.addBooleanOption(longForm);
+            final CLIOption retval = this.addBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
             return retval;
         }
@@ -286,13 +285,13 @@ public class AdminParser extends CmdLineParser {
      * @param extended
      * @return
      */
-    public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
+    public final CLIOption addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
         if (hasarg) {
-            final Option retval = this.addStringOption(longForm);
+            final CLIOption retval = this.addStringOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
             return retval;
         } else {
-            final Option retval = this.addBooleanOption(longForm);
+            final CLIOption retval = this.addBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
@@ -307,13 +306,13 @@ public class AdminParser extends CmdLineParser {
      * @param extended
      * @return
      */
-    public final Option addIntegerOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
+    public final CLIOption addIntegerOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
         if (hasarg) {
-            final Option retval = this.addIntegerOption(longForm);
+            final CLIOption retval = this.addIntegerOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
             return retval;
         } else {
-            final Option retval = this.addBooleanOption(longForm);
+            final CLIOption retval = this.addBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
@@ -328,19 +327,19 @@ public class AdminParser extends CmdLineParser {
      * @param extended
      * @return
      */
-    private final Option addOption(final String longForm, final String description, final boolean needed, final boolean extended, final boolean hidden) {
-        final Option retval = this.addBooleanOption(longForm);
+    private final CLIOption addOption(final String longForm, final String description, final boolean needed, final boolean extended, final boolean hidden) {
+        final CLIOption retval = this.addBooleanOption(longForm);
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended, hidden));
         return retval;
     }
     
-    public final Option addSettableBooleanOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
+    public final CLIOption addSettableBooleanOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
         if (hasarg) {
-            final Option retval = this.addSettableBooleanOption(longForm);
+            final CLIOption retval = this.addSettableBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
             return retval;
         } else {
-            final Option retval = this.addBooleanOption(longForm);
+            final CLIOption retval = this.addBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
@@ -355,7 +354,7 @@ public class AdminParser extends CmdLineParser {
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here
-    public final void ownparse(final String[] args) throws IllegalOptionValueException, UnknownOptionException, MissingOptionException {
+    public final void ownparse(final String[] args) throws CLIParseException, CLIIllegalOptionValueException, MissingOptionException {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
         parse(args);
@@ -398,7 +397,7 @@ public class AdminParser extends CmdLineParser {
     public final void printEnvUsage() {
         System.out.println("\nThe following environment variables and their current value are known\n" +
         		"and can be modified to change behaviour:\n");
-        Hashtable<String, String> env = BasicCommandlineOptions.getEnvOptions();
+        final Hashtable<String, String> env = BasicCommandlineOptions.getEnvOptions();
         for( final String key : env.keySet()) {
             System.out.println("\t" + key + "=" + env.get(key));
         }
@@ -488,7 +487,7 @@ public class AdminParser extends CmdLineParser {
         }
     }
 
-    private NeededQuadState convertBooleantoTriState(boolean needed) {
+    private NeededQuadState convertBooleantoTriState(final boolean needed) {
         if (needed) {
             return NeededQuadState.needed;
         } else {

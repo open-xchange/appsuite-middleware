@@ -52,22 +52,21 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Group;
 
 public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
-    protected Option addMemberOption = null;
-    protected Option removeMemberOption = null;
-    protected Option IdOption = null;
-    protected Option nameOption = null;
-    protected Option displayNameOption = null;
-    protected Option mailOption = null;
+    protected CLIOption addMemberOption = null;
+    protected CLIOption removeMemberOption = null;
+    protected CLIOption IdOption = null;
+    protected CLIOption nameOption = null;
+    protected CLIOption displayNameOption = null;
+    protected CLIOption mailOption = null;
     
     protected static final String OPT_NAME_GROUPNAME_LONG = "name";
     protected static final char OPT_NAME_GROUPNAME = 'n';
@@ -91,13 +90,13 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected String groupid = null;
     protected String groupName = null;
     
-    protected void setAddMembersOption(final AdminParser admp,boolean required) {
+    protected void setAddMembersOption(final AdminParser admp,final boolean required) {
         addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "userid(s)", "List of members to add to group, separated by comma", required);
 //        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
         
     }
 
-    protected void setRemoveMembersOption(final AdminParser admp,boolean required) {
+    protected void setRemoveMembersOption(final AdminParser admp,final boolean required) {
         removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group, separated by comma", true, convertBooleantoTriState(required));
     }
 
@@ -109,11 +108,11 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
         nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, required);
     }
     
-    protected void setGroupDisplayNameOption(final AdminParser admp,boolean required) {
+    protected void setGroupDisplayNameOption(final AdminParser admp,final boolean required) {
         displayNameOption = setShortLongOpt(admp,OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, convertBooleantoTriState(required));
     }
     
-    protected void setMailOption(final AdminParser admp,boolean required) {
+    protected void setMailOption(final AdminParser admp,final boolean required) {
         mailOption = setShortLongOpt(admp,OPT_MAILADDRESS_SHORT, OPT_MAILADDRESS_LONG, "email address if the group should receive mail", true, convertBooleantoTriState(required));
     }
     
@@ -121,6 +120,7 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
         return (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
     }
     
+    @Override
     protected String getObjectName() {
         return "group";
     }
