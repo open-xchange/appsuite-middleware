@@ -263,6 +263,7 @@
          includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/,com/openexchange/admin/plugins/"
          excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
+    	<copy file="${bundlesdir}/${commonsclijar}" tofile="ox_admin_cli.jar" todir="jar"/>
     </target>
 
 
