@@ -255,7 +255,7 @@ public class CLIParser {
     /**
      * Parses specified command line.
      * 
-     * @param argv The command line
+     * @param argv The command line arguments
      * @throws CLIParseException If parsing fails
      * @throws CLIIllegalOptionValueException If an illegal option occurs
      * @throws CLIUnknownOptionException If an unknown option occurs
@@ -326,7 +326,7 @@ public class CLIParser {
     /**
      * Parses specified command line.
      * 
-     * @param argv The command line
+     * @param argv The command line arguments
      * @param locale The locale
      * @throws CLIParseException If parsing fails
      * @throws CLIIllegalOptionValueException If an illegal option occurs
