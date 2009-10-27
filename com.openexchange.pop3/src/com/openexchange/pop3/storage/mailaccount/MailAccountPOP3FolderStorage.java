@@ -60,6 +60,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
@@ -146,20 +147,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     private String getStandardFolder(final int index) throws MailException {
-        if (!isDefaultFoldersChecked()) {
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        if (!isDefaultFoldersChecked(mailSessionCache)) {
             checkDefaultFolders();
         }
         final String retval = getDefaultMailFolder(index);
         if (retval != null) {
             return retval;
         }
-        setDefaultFoldersChecked(false);
+        setDefaultFoldersChecked(false, mailSessionCache);
         checkDefaultFolders();
         return getDefaultMailFolder(index);
     }
 
     private String getDefaultMailFolder(final int index) {
-        final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.getParamDefaultFolderArray(accountId));
+        final String[] arr =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         return arr == null ? null : arr[index];
     }
 
@@ -175,8 +178,8 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
 
     private static final DefaultFolderType[] TYPES =
         {
-            DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH, DefaultFolderType.CONFIRMED_SPAM,
-            DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
+            DefaultFolderType.DRAFTS, DefaultFolderType.SENT, DefaultFolderType.SPAM, DefaultFolderType.TRASH,
+            DefaultFolderType.CONFIRMED_SPAM, DefaultFolderType.CONFIRMED_HAM, DefaultFolderType.INBOX };
 
     private void setDefaultFolderInfo(final MailFolder mailFolder) throws MailException {
         final String fullname = mailFolder.getFullname();
@@ -193,9 +196,10 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
     }
 
     public void checkDefaultFolders() throws MailException {
-        if (!isDefaultFoldersChecked()) {
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        if (!isDefaultFoldersChecked(mailSessionCache)) {
             synchronized (session) {
-                if (isDefaultFoldersChecked()) {
+                if (isDefaultFoldersChecked(mailSessionCache)) {
                     return;
                 }
                 /*
@@ -262,7 +266,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator(), 0));
                     }
                 }
-                setDefaultFoldersChecked(true);
+                setDefaultFoldersChecked(true, mailSessionCache);
             }
         }
     }
@@ -294,21 +298,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         return stripPathFromFullname(path, fn);
     }
 
-    private boolean isDefaultFoldersChecked() {
-        final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId));
+    private boolean isDefaultFoldersChecked(final MailSessionCache mailSessionCache) {
+        final Boolean b = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
         return (b != null) && b.booleanValue();
     }
 
-    private void setDefaultFoldersChecked(final boolean checked) {
-        session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId), Boolean.valueOf(checked));
+    private void setDefaultFoldersChecked(final boolean checked, final MailSessionCache mailSessionCache) {
+        mailSessionCache.putParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked(), Boolean.valueOf(checked));
     }
 
     private void setDefaultMailFolder(final int index, final String fullname) {
-        final String key = MailSessionParameterNames.getParamDefaultFolderArray(accountId);
-        String[] arr = (String[]) session.getParameter(key);
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        final String key = MailSessionParameterNames.getParamDefaultFolderArray();
+        String[] arr = mailSessionCache.getParameter(accountId, key);
         if (null == arr) {
             arr = new String[7];
-            session.setParameter(key, arr);
+            mailSessionCache.putParameter(accountId, key, arr);
         }
         arr[index] = fullname;
     }

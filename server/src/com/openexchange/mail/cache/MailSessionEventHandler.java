@@ -54,10 +54,7 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -167,25 +164,7 @@ public final class MailSessionEventHandler implements EventHandler {
              */
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
-            {
-                final MailAccountStorageService storageService =
-                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                if (null != storageService) {
-                    try {
-                        final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId);
-                        for (final MailAccount account : accounts) {
-                            final String key = MailSessionParameterNames.getParamMailCache(account.getId());
-                            final SessionMailCache sessionMailCache = (SessionMailCache) session.getParameter(key);
-                            if (null != sessionMailCache) {
-                                sessionMailCache.clear();
-                                session.setParameter(key, null);
-                            }
-                        }
-                    } catch (final MailAccountException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
-            }
+            MailSessionCache.dropInstance(session);
             /*
              * Message cache
              */

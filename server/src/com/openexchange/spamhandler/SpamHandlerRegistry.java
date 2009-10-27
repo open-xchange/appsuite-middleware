@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
@@ -156,10 +157,11 @@ public final class SpamHandlerRegistry {
      * @throws MailException If no supporting spam handler can be found
      */
     public static SpamHandler getSpamHandlerBySession(final Session session, final int accountId, final MailProvider mailProvider) throws MailException {
-        final String key = MailSessionParameterNames.getParamSpamHandler(accountId);
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        final String key = MailSessionParameterNames.getParamSpamHandler();
         SpamHandler handler;
         try {
-            handler = (SpamHandler) session.getParameter(key);
+            handler = mailSessionCache.getParameter(accountId, key);
         } catch (final ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
@@ -174,9 +176,8 @@ public final class SpamHandlerRegistry {
          */
         final MailAccount mailAccount;
         try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
         } catch (final ServiceException e) {
             throw new MailException(e);
@@ -190,12 +191,12 @@ public final class SpamHandlerRegistry {
             mailProviderGetter = new SimpleMailProviderGetter(mailProvider);
         }
         handler = getSpamHandler0(mailAccount, mailProviderGetter);
-        if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
+        //if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
             /*
              * Cache in session
              */
-            session.setParameter(key, handler);
-        }
+            mailSessionCache.putParameter(accountId, key, handler);
+        //}
         return handler;
     }
 

@@ -67,7 +67,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
-import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
@@ -550,8 +550,12 @@ public final class MailAccountRequest {
                 /*
                  * Drop all session parameters related to default folders for this account
                  */
+                MailSessionCache.getInstance(session).removeAccountParameters(id);
+                /*-
+                 * 
                 session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
                 session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
+                 */
                 /*
                  * Re-Init account's default folders
                  */

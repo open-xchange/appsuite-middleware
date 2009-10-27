@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -90,9 +91,11 @@ public final class TransportProviderRegistry {
      * @throws MailException If no supporting transport provider can be found
      */
     public static TransportProvider getTransportProviderBySession(final Session session, final int accountId) throws MailException {
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        final String key = MailSessionParameterNames.getParamTransportProvider();
         TransportProvider provider;
         try {
-            provider = (TransportProvider) session.getParameter(MailSessionParameterNames.PARAM_TRANSPORT_PROVIDER);
+            provider = mailSessionCache.getParameter(accountId, key);
         } catch (final ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
@@ -116,11 +119,9 @@ public final class TransportProviderRegistry {
         }
         provider = getTransportProvider(protocol);
         if (null == provider || !provider.supportsProtocol(protocol)) {
-            throw new MailException(
-                MailException.Code.UNKNOWN_TRANSPORT_PROTOCOL,
-                TransportConfig.getTransportServerURL(session, accountId));
+            throw new MailException(MailException.Code.UNKNOWN_TRANSPORT_PROTOCOL, transportServerURL);
         }
-        session.setParameter(MailSessionParameterNames.PARAM_TRANSPORT_PROVIDER, provider);
+        mailSessionCache.putParameter(accountId, key, provider);
         return provider;
     }
 

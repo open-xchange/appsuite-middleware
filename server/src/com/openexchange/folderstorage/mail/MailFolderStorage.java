@@ -93,6 +93,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -508,12 +509,14 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     private boolean isDefaultFoldersChecked(final int accountId, final Session session) {
-        final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId));
+        final Boolean b =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
         return (b != null) && b.booleanValue();
     }
 
     private String[] getSortedDefaultMailFolders(final int accountId, final Session session) {
-        final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.getParamDefaultFolderArray(accountId));
+        final String[] arr =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         if (arr == null) {
             return new String[0];
         }

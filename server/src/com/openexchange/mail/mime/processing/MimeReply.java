@@ -78,6 +78,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -155,7 +156,8 @@ public final class MimeReply {
             /*
              * Properly set preferToAsRecipient dependent on whether original mail's folder denotes the default sent folder or drafts folder
              */
-            final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.getParamDefaultFolderArray(accountId));
+            final String[] arr =
+                MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
             if (arr == null) {
                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
                 mailAccess.connect();
@@ -721,9 +723,7 @@ public final class MimeReply {
 
         final List<String> replyTexts;
 
-        public ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder,
-          final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession,
-          final Locale locale, final List<String> replyTexts) {
+        public ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Locale locale, final List<String> replyTexts) {
             super();
             this.retvalContentType = retvalContentType;
             this.textBuilder = textBuilder;

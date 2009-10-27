@@ -88,10 +88,11 @@ public final class MailProviderRegistry {
      * @throws MailException If no supporting mail provider can be found
      */
     public static MailProvider getMailProviderBySession(final Session session, final int accountId) throws MailException {
-        final String key = MailSessionParameterNames.getParamMailProvider(accountId);
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        final String key = MailSessionParameterNames.getParamMailProvider();
         MailProvider provider;
         try {
-            provider = (MailProvider) session.getParameter(key);
+            provider = mailSessionCache.getParameter(accountId, key);
         } catch (final ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
@@ -115,9 +116,9 @@ public final class MailProviderRegistry {
         }
         provider = getMailProvider(protocol);
         if (null == provider || !provider.supportsProtocol(protocol)) {
-            throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, MailConfig.getMailServerURL(session, accountId));
+            throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, mailServerURL);
         }
-        session.setParameter(key, provider);
+        mailSessionCache.putParameter(accountId, key, provider);
         return provider;
     }
 

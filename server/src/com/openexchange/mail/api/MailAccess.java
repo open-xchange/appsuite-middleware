@@ -624,8 +624,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
              * Admin mail login is not permitted per configuration
              */
             Context ctx;
+            final String key = MailSessionParameterNames.getParamSessionContext();
             try {
-                ctx = (Context) session.getParameter(MailSessionParameterNames.getParamSessionContext(accountId));
+                ctx = (Context) session.getParameter(key);
             } catch (final ClassCastException e1) {
                 ctx = null;
             }
@@ -635,6 +636,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 } catch (final ContextException e) {
                     throw new MailException(e);
                 }
+                session.setParameter(key, ctx);
             }
             if (session.getUserId() == ctx.getMailadmin()) {
                 throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));

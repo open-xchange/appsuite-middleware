@@ -110,6 +110,7 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -156,12 +157,12 @@ public class Folder extends SessionServlet {
 
     private static transient final Log LOG = LogFactory.getLog(Folder.class);
 
-    private static final AdditionalFolderFieldList FIELDS= new AdditionalFolderFieldList();
-    
+    private static final AdditionalFolderFieldList FIELDS = new AdditionalFolderFieldList();
+
     public static AdditionalFolderFieldList getAdditionalFields() {
         return FIELDS;
     }
-    
+
     private static final AbstractOXException getWrappingOXException(final Throwable cause) {
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
@@ -312,10 +313,10 @@ public class Folder extends SessionServlet {
             /*
              * Read in parameters
              */
-            
+
             final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-            
+
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS);
@@ -337,9 +338,8 @@ public class Folder extends SessionServlet {
                      */
                     hasSubfolder = 0;
                 }
-                lastModified = rootFolder.getLastModified() == null ? lastModified : Math.max(
-                    lastModified,
-                    rootFolder.getLastModified().getTime());
+                lastModified =
+                    rootFolder.getLastModified() == null ? lastModified : Math.max(lastModified, rootFolder.getLastModified().getTime());
                 jsonWriter.array();
                 try {
                     for (final FolderFieldWriter ffw : writers) {
@@ -404,7 +404,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
-        
+
         Date lastModifiedDate = null;
         /*
          * Start response
@@ -425,8 +425,7 @@ public class Folder extends SessionServlet {
             if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
                 ignoreMailfolder = true;
             }
-            
-            
+
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS);
             int parentId = -1;
             if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
@@ -441,14 +440,16 @@ public class Folder extends SessionServlet {
                     /*
                      * Append non-tree visible task folders
                      */
-                    final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).asQueue();
+                    final Queue<FolderObject> q =
+                        ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).asQueue();
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified = listFolder.getLastModified() == null ? lastModified : Math.max(
-                            lastModified,
-                            listFolder.getLastModified().getTime());
+                        lastModified =
+                            listFolder.getLastModified() == null ? lastModified : Math.max(
+                                lastModified,
+                                listFolder.getLastModified().getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -462,14 +463,16 @@ public class Folder extends SessionServlet {
                     /*
                      * Append non-tree visible calendar folders
                      */
-                    final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).asQueue();
+                    final Queue<FolderObject> q =
+                        ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).asQueue();
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified = listFolder.getLastModified() == null ? lastModified : Math.max(
-                            lastModified,
-                            listFolder.getLastModified().getTime());
+                        lastModified =
+                            listFolder.getLastModified() == null ? lastModified : Math.max(
+                                lastModified,
+                                listFolder.getLastModified().getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -483,14 +486,16 @@ public class Folder extends SessionServlet {
                     /*
                      * Append non-tree visible contact folders
                      */
-                    final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicContactFolders()).asQueue();
+                    final Queue<FolderObject> q =
+                        ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicContactFolders()).asQueue();
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified = listFolder.getLastModified() == null ? lastModified : Math.max(
-                            lastModified,
-                            listFolder.getLastModified().getTime());
+                        lastModified =
+                            listFolder.getLastModified() == null ? lastModified : Math.max(
+                                lastModified,
+                                listFolder.getLastModified().getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -504,14 +509,16 @@ public class Folder extends SessionServlet {
                     /*
                      * Append non-tree visible infostore folders
                      */
-                    final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders()).asQueue();
+                    final Queue<FolderObject> q =
+                        ((FolderObjectIterator) foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders()).asQueue();
                     final int size = q.size();
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified = listFolder.getLastModified() == null ? lastModified : Math.max(
-                            lastModified,
-                            listFolder.getLastModified().getTime());
+                        lastModified =
+                            listFolder.getLastModified() == null ? lastModified : Math.max(
+                                lastModified,
+                                listFolder.getLastModified().getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -533,7 +540,8 @@ public class Folder extends SessionServlet {
                      * Get subfolders' iterator
                      */
                     if (FolderCacheManager.isEnabled()) {
-                        lastModified = FolderCacheManager.getInstance().getFolderObject(parentId, true, ctx, null).getLastModified().getTime();
+                        lastModified =
+                            FolderCacheManager.getInstance().getFolderObject(parentId, true, ctx, null).getLastModified().getTime();
                     } else {
                         lastModified = FolderObject.loadFolderObjectFromDB(parentId, ctx).getLastModified().getTime();
                     }
@@ -576,12 +584,13 @@ public class Folder extends SessionServlet {
                     try {
                         it = foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders();
                         if (it.hasNext()) {
-                            final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
-                                FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
-                                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, locale),
-                                FolderObject.INFOSTORE,
-                                true,
-                                FolderObject.SYSTEM_TYPE);
+                            final FolderObject virtualListFolder =
+                                FolderObject.createVirtualFolderObject(
+                                    FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
+                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, locale),
+                                    FolderObject.INFOSTORE,
+                                    true,
+                                    FolderObject.SYSTEM_TYPE);
                             folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                         }
                     } finally {
@@ -594,9 +603,8 @@ public class Folder extends SessionServlet {
                     final Map<String, Integer> displayNames;
                     {
                         final UserStorage us = UserStorage.getInstance();
-                        final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(
-                            FolderObject.SYSTEM_SHARED_FOLDER_ID,
-                            null)).asQueue();
+                        final Queue<FolderObject> q =
+                            ((FolderObjectIterator) foldersqlinterface.getSubfolders(FolderObject.SYSTEM_SHARED_FOLDER_ID, null)).asQueue();
                         /*
                          * Gather all display names
                          */
@@ -626,9 +634,8 @@ public class Folder extends SessionServlet {
                     final List<String> sortedDisplayNames = new ArrayList<String>(displayNames.keySet());
                     Collections.sort(sortedDisplayNames, new DisplayNameComparator(locale));
                     for (final String displayName : sortedDisplayNames) {
-                        final FolderObject virtualOwnerFolder = FolderObject.createVirtualSharedFolderObject(
-                            displayNames.get(displayName).intValue(),
-                            displayName);
+                        final FolderObject virtualOwnerFolder =
+                            FolderObject.createVirtualSharedFolderObject(displayNames.get(displayName).intValue(), displayName);
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -654,12 +661,10 @@ public class Folder extends SessionServlet {
                              */
                             final List<MailAccount> accounts;
                             if (session.getUserConfiguration().isMultipleMailAccounts()) {
-                                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                                    MailAccountStorageService.class,
-                                    true);
-                                final MailAccount[] accountsArr = storageService.getUserMailAccounts(
-                                    session.getUserId(),
-                                    session.getContextId());
+                                final MailAccountStorageService storageService =
+                                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                                final MailAccount[] accountsArr =
+                                    storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                                 final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                                 tmp.addAll(Arrays.asList(accountsArr));
                                 // Sort them
@@ -667,9 +672,8 @@ public class Folder extends SessionServlet {
                                 accounts = tmp;
                             } else {
                                 accounts = new ArrayList<MailAccount>(1);
-                                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                                    MailAccountStorageService.class,
-                                    true);
+                                final MailAccountStorageService storageService =
+                                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                                 accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                             }
                             if (!accounts.isEmpty()) {
@@ -677,8 +681,8 @@ public class Folder extends SessionServlet {
                                     /*
                                      * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
                                      */
-                                    final UnifiedINBOXManagement uim = ServerServiceRegistry.getInstance().getService(
-                                        UnifiedINBOXManagement.class);
+                                    final UnifiedINBOXManagement uim =
+                                        ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
                                     if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                                         accounts.remove(0);
                                     }
@@ -714,9 +718,10 @@ public class Folder extends SessionServlet {
                                                     return null;
                                                 }
                                                 try {
-                                                    final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                                        columns,
-                                                        mailAccess.getMailConfig());
+                                                    final MailFolderFieldWriter[] mailFolderWriters =
+                                                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                                            columns,
+                                                            mailAccess.getMailConfig());
                                                     final JSONArray ja = new JSONArray();
                                                     if (mailAccount.isDefaultAccount()) {
                                                         for (int i = 0; i < mailFolderWriters.length; i++) {
@@ -760,7 +765,8 @@ public class Folder extends SessionServlet {
                                             }
                                         });
                                     }
-                                    completionFuture = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
+                                    completionFuture =
+                                        ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
                                 }
                                 /*
                                  * Wait for completion
@@ -831,12 +837,13 @@ public class Folder extends SessionServlet {
                         SearchIterator<FolderObject> it = null;
                         try {
                             if ((it = foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).hasNext()) {
-                                final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
-                                    FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, locale),
-                                    FolderObject.SYSTEM_MODULE,
-                                    true,
-                                    FolderObject.SYSTEM_TYPE);
+                                final FolderObject virtualListFolder =
+                                    FolderObject.createVirtualFolderObject(
+                                        FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                                        FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, locale),
+                                        FolderObject.SYSTEM_MODULE,
+                                        true,
+                                        FolderObject.SYSTEM_TYPE);
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
@@ -861,12 +868,13 @@ public class Folder extends SessionServlet {
                         }
                         try {
                             if ((it = foldersqlinterface.getNonTreeVisiblePublicContactFolders()).hasNext()) {
-                                final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
-                                    FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
-                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, locale),
-                                    FolderObject.SYSTEM_MODULE,
-                                    true,
-                                    FolderObject.SYSTEM_TYPE);
+                                final FolderObject virtualListFolder =
+                                    FolderObject.createVirtualFolderObject(
+                                        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
+                                        FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, locale),
+                                        FolderObject.SYSTEM_MODULE,
+                                        true,
+                                        FolderObject.SYSTEM_TYPE);
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
@@ -891,12 +899,13 @@ public class Folder extends SessionServlet {
                         }
                         try {
                             if ((it = foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).hasNext()) {
-                                final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
-                                    FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
-                                    FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, locale),
-                                    FolderObject.SYSTEM_MODULE,
-                                    true,
-                                    FolderObject.SYSTEM_TYPE);
+                                final FolderObject virtualListFolder =
+                                    FolderObject.createVirtualFolderObject(
+                                        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
+                                        FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, locale),
+                                        FolderObject.SYSTEM_MODULE,
+                                        true,
+                                        FolderObject.SYSTEM_TYPE);
                                 if (FolderCacheManager.isInitialized()) {
                                     FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
                                 }
@@ -940,9 +949,10 @@ public class Folder extends SessionServlet {
                 final Iterator<FolderObject> iter = q.iterator();
                 for (int i = 0; i < size; i++) {
                     final FolderObject sharedFolder = iter.next();
-                    lastModified = sharedFolder.getLastModified() == null ? lastModified : Math.max(
-                        lastModified,
-                        sharedFolder.getLastModified().getTime());
+                    lastModified =
+                        sharedFolder.getLastModified() == null ? lastModified : Math.max(
+                            lastModified,
+                            sharedFolder.getLastModified().getTime());
                     jsonWriter.array();
                     try {
                         for (final FolderFieldWriter ffw : writers) {
@@ -966,9 +976,8 @@ public class Folder extends SessionServlet {
                      * E-Mail folder
                      */
                     it = mailInterface.getChildFolders(parentIdentifier, all);
-                    final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                        columns,
-                        mailInterface.getMailConfig());
+                    final MailFolderFieldWriter[] writers =
+                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
                     final int size = it.size();
                     boolean inboxFound = false;
                     for (int i = 0; i < size; i++) {
@@ -1077,8 +1086,7 @@ public class Folder extends SessionServlet {
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
-            
-            
+
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS);
             int folderId = -1;
             if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
@@ -1139,9 +1147,8 @@ public class Folder extends SessionServlet {
                      * Pre-Select field writers
                      */
                     it = mailInterface.getPathToDefaultFolder(folderIdentifier);
-                    final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                        columns,
-                        mailInterface.getMailConfig());
+                    final MailFolderFieldWriter[] writers =
+                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
                     final int size = it.size();
                     final int accountID = mailInterface.getAccountID();
                     for (int i = 0; i < size; i++) {
@@ -1161,13 +1168,10 @@ public class Folder extends SessionServlet {
                          */
                         final MailFolder defaultFolder = mailInterface.getFolder(preparedFullname, true);
                         if (defaultFolder != null) {
-                            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                                MailAccountStorageService.class,
-                                true);
-                            final MailAccount mailAccount = storageService.getMailAccount(
-                                accountID,
-                                session.getUserId(),
-                                session.getContextId());
+                            final MailAccountStorageService storageService =
+                                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                            final MailAccount mailAccount =
+                                storageService.getMailAccount(accountID, session.getUserId(), session.getContextId());
                             final JSONArray ja = new JSONArray();
                             for (final MailFolderFieldWriter w : writers) {
                                 w.writeField(
@@ -1189,11 +1193,8 @@ public class Folder extends SessionServlet {
                      */
                     FolderObject privateFolder;
                     if (FolderCacheManager.isEnabled()) {
-                        privateFolder = FolderCacheManager.getInstance().getFolderObject(
-                            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                            true,
-                            ctx,
-                            null);
+                        privateFolder =
+                            FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true, ctx, null);
                     } else {
                         privateFolder = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, ctx);
                     }
@@ -1288,8 +1289,7 @@ public class Folder extends SessionServlet {
             final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
             final boolean ignoreDeleted = STRING_DELETED.equalsIgnoreCase(paramContainer.getStringParam(PARAMETER_IGNORE));
             lastModified = Math.max(timestamp.getTime(), lastModified);
-            
-            
+
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
             final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
             /*
@@ -1410,9 +1410,8 @@ public class Folder extends SessionServlet {
                  */
                 final List<MailAccount> accounts;
                 if (session.getUserConfiguration().isMultipleMailAccounts()) {
-                    final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                        MailAccountStorageService.class,
-                        true);
+                    final MailAccountStorageService storageService =
+                        ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
@@ -1421,9 +1420,8 @@ public class Folder extends SessionServlet {
                     accounts = tmp;
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
-                    final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                        MailAccountStorageService.class,
-                        true);
+                    final MailAccountStorageService storageService =
+                        ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                     accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
                 if (!accounts.isEmpty()) {
@@ -1449,7 +1447,11 @@ public class Folder extends SessionServlet {
                              */
                             final boolean initialized;
                             {
-                                final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(mailAccount.getId()));
+                                final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+                                final Boolean b =
+                                    mailSessionCache.getParameter(
+                                        mailAccount.getId(),
+                                        MailSessionParameterNames.getParamDefaultFolderChecked());
                                 initialized = (b != null) && b.booleanValue();
                             }
                             if (initialized) {
@@ -1474,9 +1476,10 @@ public class Folder extends SessionServlet {
                                             return null;
                                         }
                                         try {
-                                            final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                                                columns,
-                                                mailAccess.getMailConfig());
+                                            final MailFolderFieldWriter[] mailFolderWriters =
+                                                com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                                    columns,
+                                                    mailAccess.getMailConfig());
                                             final JSONArray ja = new JSONArray();
                                             if (mailAccount.isDefaultAccount()) {
                                                 for (int i = 0; i < mailFolderWriters.length; i++) {
@@ -1606,14 +1609,17 @@ public class Folder extends SessionServlet {
             final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
-      
+
             int folderId = -1;
             if ((folderId = getUnsignedInteger(folderIdentifier)) >= 0) {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 final FolderObject fo = foldersqlinterface.getFolderById(folderId);
                 lastModifiedDate = fo.getLastModified();
                 jsonWriter = new OXJSONWriter();
-                new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS).writeOXFolderFieldsAsObject(columns, fo, session.getUser().getLocale());
+                new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS).writeOXFolderFieldsAsObject(
+                    columns,
+                    fo,
+                    session.getUser().getLocale());
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 int userId = -1;
                 try {
@@ -1630,9 +1636,8 @@ public class Folder extends SessionServlet {
                 try {
                     mailInterface = MailServletInterface.getInstance(session);
                     final MailFolder f = mailInterface.getFolder(folderIdentifier, true);
-                    final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                        columns,
-                        mailInterface.getMailConfig());
+                    final MailFolderFieldWriter[] writers =
+                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
                     final JSONObject jo = new JSONObject();
                     for (final MailFolderFieldWriter writer : writers) {
                         writer.writeField(jo, mailInterface.getAccountID(), f, true);

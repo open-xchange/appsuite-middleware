@@ -85,11 +85,10 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for default folder flag.
      * 
-     * @param accountId The account ID
      * @return The parameter name for default folder flag
      */
-    public static String getParamDefaultFolderChecked(final int accountId) {
-        return new StringBuilder(16).append(PARAM_DEF_FLD_FLAG).append(accountId).toString();
+    public static String getParamDefaultFolderChecked() {
+        return PARAM_DEF_FLD_FLAG;
     }
 
     /**
@@ -100,11 +99,10 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for mail folder separator.
      * 
-     * @param accountId The account ID
      * @return The parameter name for mail folder separator
      */
-    public static String getParamSeparator(final int accountId) {
-        return new StringBuilder(16).append(PARAM_SEPARATOR).append(accountId).toString();
+    public static String getParamSeparator() {
+        return PARAM_SEPARATOR;
     }
 
     /**
@@ -115,11 +113,10 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for default folder array.
      * 
-     * @param accountId The account ID
      * @return The parameter name for default folder array
      */
-    public static String getParamDefaultFolderArray(final int accountId) {
-        return new StringBuilder(16).append(PARAM_DEF_FLD_ARR).append(accountId).toString();
+    public static String getParamDefaultFolderArray() {
+        return PARAM_DEF_FLD_ARR;
     }
 
     /**
@@ -130,11 +127,24 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for session mail cache.
      * 
-     * @param accountId The account ID
      * @return The parameter name for session mail cache
      */
-    public static String getParamMailCache(final int accountId) {
-        return new StringBuilder(16).append(PARAM_MAIL_CACHE).append(accountId).toString();
+    public static String getParamMailCache() {
+        return PARAM_MAIL_CACHE;
+    }
+
+    /**
+     * Session mail cache.
+     */
+    private static final String PARAM_MAIN_CACHE = "mail.maincache";
+
+    /**
+     * Gets the parameter name for session main cache.
+     * 
+     * @return The parameter name for session main cache
+     */
+    public static String getParamMainCache() {
+        return PARAM_MAIN_CACHE;
     }
 
     /**
@@ -145,17 +155,16 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for mail provider.
      * 
-     * @param accountId The account ID
      * @return The parameter name for mail provider
      */
-    public static String getParamMailProvider(final int accountId) {
-        return new StringBuilder(16).append(PARAM_MAIL_PROVIDER).append(accountId).toString();
+    public static String getParamMailProvider() {
+        return PARAM_MAIL_PROVIDER;
     }
 
     /**
      * Mail transport.
      */
-    public static final String PARAM_TRANSPORT_PROVIDER = "mail.tansport";
+    private static final String PARAM_TRANSPORT_PROVIDER = "mail.tansport";
 
     /**
      * Gets the parameter name for mail transport.
@@ -163,8 +172,8 @@ public final class MailSessionParameterNames {
      * @param accountId The account ID
      * @return The parameter name for mail transport
      */
-    public static String getParamTransportProvider(final int accountId) {
-        return new StringBuilder(16).append(PARAM_TRANSPORT_PROVIDER).append(accountId).toString();
+    public static String getParamTransportProvider() {
+        return PARAM_TRANSPORT_PROVIDER;
     }
 
     /**
@@ -180,11 +189,10 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for session's context.
      * 
-     * @param accountId The account ID
      * @return The parameter name for session's context
      */
-    public static String getParamSessionContext(final int accountId) {
-        return new StringBuilder(16).append(PARAM_CONTEXT).append(accountId).toString();
+    public static String getParamSessionContext() {
+        return PARAM_CONTEXT;
     }
 
     /**
@@ -195,11 +203,10 @@ public final class MailSessionParameterNames {
     /**
      * Gets the parameter name for spam handler.
      * 
-     * @param accountId The account ID
      * @return The parameter name for spam handler
      */
-    public static String getParamSpamHandler(final int accountId) {
-        return new StringBuilder(16).append(PARAM_SPAM_HANDLER).append(accountId).toString();
+    public static String getParamSpamHandler() {
+        return PARAM_SPAM_HANDLER;
     }
 
 }

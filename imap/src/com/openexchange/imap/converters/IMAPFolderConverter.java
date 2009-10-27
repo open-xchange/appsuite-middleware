@@ -77,6 +77,7 @@ import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
@@ -515,12 +516,14 @@ public final class IMAPFolderConverter {
     }
 
     private static boolean isDefaultFoldersChecked(final Session session, final int accountId) {
-        final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.getParamDefaultFolderChecked(accountId));
+        final Boolean b =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
         return (b != null) && b.booleanValue();
     }
 
     private static String getDefaultMailFolder(final int index, final Session session, final int accountId) {
-        final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.getParamDefaultFolderArray(accountId));
+        final String[] arr =
+            MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         return arr == null ? null : arr[index];
     }
 
@@ -620,8 +623,7 @@ public final class IMAPFolderConverter {
     private static boolean isUnknownEntityError(final AbstractOXException e) {
         final Component component = e.getComponent();
         final int detailNumber = e.getDetailNumber();
-        return (EnumComponent.ACL_ERROR.equals(component) && (Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == detailNumber))
-            || (EnumComponent.USER.equals(component) && (LdapException.Code.USER_NOT_FOUND.getDetailNumber() == detailNumber));
+        return (EnumComponent.ACL_ERROR.equals(component) && (Entity2ACLException.Code.RESOLVE_USER_FAILED.getNumber() == detailNumber)) || (EnumComponent.USER.equals(component) && (LdapException.Code.USER_NOT_FOUND.getDetailNumber() == detailNumber));
     }
 
     private static boolean checkForNamespaceFolder(final String fullname, final IMAPStore imapStore, final Session session, final int accountId) throws MessagingException {

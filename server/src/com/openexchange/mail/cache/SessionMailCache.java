@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.session.Session;
 
 /**
@@ -70,24 +71,23 @@ public final class SessionMailCache {
      * @return The session-bound mail cache.
      */
     public static SessionMailCache getInstance(final Session session, final int accountId) {
-        final String key = MailSessionParameterNames.getParamMailCache(accountId);
+        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        final String key = MailSessionParameterNames.getParamMailCache();
         SessionMailCache mailCache = null;
         try {
-            mailCache = (SessionMailCache) session.getParameter(key);
+            mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);
         } catch (final ClassCastException e) {
             /*
              * Class version does not match; just renew session cache.
              */
             mailCache = null;
-            session.setParameter(key, null);
+            mailSessionCache.removeParameter(accountId, key);
         }
         if (null == mailCache) {
-            synchronized (session) {
-                mailCache = (SessionMailCache) session.getParameter(key);
-                if (null == mailCache) {
-                    mailCache = new SessionMailCache();
-                    session.setParameter(key, mailCache);
-                }
+            final SessionMailCache newInst = new SessionMailCache();
+            mailCache = (SessionMailCache) mailSessionCache.putParameterIfAbsent(accountId, key, newInst);
+            if (null == mailCache) {
+                mailCache = newInst;
             }
         }
         return mailCache;
