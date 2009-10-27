@@ -42,6 +42,7 @@
         <filter token="oxprefix"          value="${prefix}"/>
         <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-scriptconf.sh"/>
+    	<filter token="oxcommonbundlelib" value="${bundlesdir}/${commonBundle}/lib"/>
     </filterset>
 	
 	<!-- Classpath -->
