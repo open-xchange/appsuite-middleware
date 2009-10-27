@@ -47,6 +47,9 @@ public abstract class CLIOption {
      */
     protected CLIOption(final String shortForm, final String longForm, final boolean wantsValue) {
         super();
+        if (null == longForm) {
+            throw new IllegalArgumentException("longForm must not be null");
+        }
         this.shortForm = shortForm;
         this.longForm = longForm;
         this.wantsValue = wantsValue;
