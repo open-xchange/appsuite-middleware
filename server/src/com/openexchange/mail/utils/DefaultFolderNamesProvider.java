@@ -214,20 +214,19 @@ public final class DefaultFolderNamesProvider {
      * @return The default folder fullnames as an array of {@link String}
      */
     public String[] getDefaultFolderFullnames(final MailAccount mailAccount, final boolean isSpamEnabled) {
-        final FullnameArgument trashFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getTrashFullname());
-        final FullnameArgument sentFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getSentFullname());
-        final FullnameArgument draftsFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getDraftsFullname());
-        final FullnameArgument spamFn = MailFolderUtility.prepareMailFolderParam(mailAccount.getSpamFullname());
-        final FullnameArgument csfn = MailFolderUtility.prepareMailFolderParam(mailAccount.getConfirmedSpamFullname());
-        final FullnameArgument chfn = MailFolderUtility.prepareMailFolderParam(mailAccount.getConfirmedHamFullname());
         return getDefaultFolderFullnames(
-            null == trashFn ? null : trashFn.getFullname(),
-            null == sentFn ? null : sentFn.getFullname(),
-            null == draftsFn ? null : draftsFn.getFullname(),
-            null == spamFn ? null : spamFn.getFullname(),
-            null == csfn ? null : csfn.getFullname(),
-            null == chfn ? null : chfn.getFullname(),
+            extractFullname(mailAccount.getTrashFullname()),
+            extractFullname(mailAccount.getSentFullname()),
+            extractFullname(mailAccount.getDraftsFullname()),
+            extractFullname(mailAccount.getSpamFullname()),
+            extractFullname(mailAccount.getConfirmedSpamFullname()),
+            extractFullname(mailAccount.getConfirmedHamFullname()),
             isSpamEnabled);
+    }
+
+    private static String extractFullname(final String fullnameParameter) {
+        final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(fullnameParameter);
+        return null == fa ? null : fa.getFullname();
     }
 
     /**
