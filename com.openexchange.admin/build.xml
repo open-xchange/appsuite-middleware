@@ -71,7 +71,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mysql-connector}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jdom}"/>
 	    <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonsclijar}"/>
+		<pathelement location="${bundlesdir}/${commonsclijar}"/>
         <pathelement location="${bundlesdir}/${osgibundle}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
         <pathelement location="${bundlesdir}/${globalbundle}"/>
