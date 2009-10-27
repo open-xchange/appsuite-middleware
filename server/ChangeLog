@@ -1,6 +1,7 @@
 * 2009-10-27 - thorben.betten@open-xchange.com
 
  - Bugfix #14716: More robust detection if a message contains file attachments
+ - Bugfix #14691: Fixed start-letter-search in collected contacts folder
 
 * 2009-10-27 - marcus.klein@open-xchange.com
 

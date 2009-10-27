@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -97,7 +98,8 @@ public class ContactMySql implements ContactSql {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private String select = "SELECT co.intfield01" + ",co.cid," + "co.timestampfield01," + "co.field03," + "co.field04," + "co.field06," + "co.field07," + "co.field09," + "co.field10," + "co.intfield03," + "co.field79 FROM prg_contacts AS co ";
+    private String select =
+        "SELECT co.intfield01" + ",co.cid," + "co.timestampfield01," + "co.field03," + "co.field04," + "co.field06," + "co.field07," + "co.field09," + "co.field10," + "co.intfield03," + "co.field79 FROM prg_contacts AS co ";
 
     private String[] where;
 
@@ -233,9 +235,10 @@ public class ContactMySql implements ContactSql {
         return ps;
     }
 
-    private static final Pattern PAT_ORDER_BY = Pattern.compile(
-        "( *ORDER +BY +)(?:([a-zA-Z0-9_.]+)(?: *ASC *| *DESC *)?)(?:, *[a-zA-Z0-9_.]+(?: *ASC *| *DESC *)?)?",
-        Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAT_ORDER_BY =
+        Pattern.compile(
+            "( *ORDER +BY +)(?:([a-zA-Z0-9_.]+)(?: *ASC *| *DESC *)?)(?:, *[a-zA-Z0-9_.]+(?: *ASC *| *DESC *)?)?",
+            Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PAT_FIELD = Pattern.compile("(?:([a-zA-Z0-9_.]+)(?: *ASC| *DESC)?)", Pattern.CASE_INSENSITIVE);
 
@@ -935,12 +938,13 @@ public class ContactMySql implements ContactSql {
 
     public String buildAllFolderSearchString(final int user, final int[] group, final Session so) throws OXException, SearchIteratorException {
         final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx);
-        final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-            user,
-            group,
-            config.getAccessibleModules(),
-            FolderObject.CONTACT,
-            ctx)).asList();
+        final List<FolderObject> list =
+            ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                user,
+                group,
+                config.getAccessibleModules(),
+                FolderObject.CONTACT,
+                ctx)).asList();
         final int size = list.size();
         final int[] folders = new int[size];
         for (int i = 0; i < size; i++) {
@@ -994,7 +998,8 @@ public class ContactMySql implements ContactSql {
 
     /*************************************************************************/
 
-    private static String rightsSelectString = "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";
+    private static String rightsSelectString =
+        "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";
 
     public String iFgetRightsSelectString() {
         return rightsSelectString;
@@ -1074,16 +1079,18 @@ public class ContactMySql implements ContactSql {
     }
 
     public StringBuilder iFperformContactStorageInsert(final StringBuilder insert_fields, final StringBuilder insert_values, final int user, final long lmd, final int cid, final int id) {
-        final StringBuilder insert = new StringBuilder("INSERT INTO prg_contacts (").append(insert_fields).append("created_from,").append(
-            "changed_from,").append("creating_date,").append("changing_date,").append("intfield01,").append("cid ").append(") VALUES ( ").append(
-            insert_values.toString()).append(user).append(',').append(user).append(',').append(lmd).append(',').append(lmd).append(',').append(
-            id).append(',').append(cid).append(") ");
+        final StringBuilder insert =
+            new StringBuilder("INSERT INTO prg_contacts (").append(insert_fields).append("created_from,").append("changed_from,").append(
+                "creating_date,").append("changing_date,").append("intfield01,").append("cid ").append(") VALUES ( ").append(
+                insert_values.toString()).append(user).append(',').append(user).append(',').append(lmd).append(',').append(lmd).append(',').append(
+                id).append(',').append(cid).append(") ");
         return insert;
     }
 
     public StringBuilder iFperformContactStorageUpdate(final StringBuilder update, final long lmd, final int id, final int cid) {
-        final StringBuilder updater = new StringBuilder("UPDATE prg_contacts SET ").append(update).append("changed_from = ").append(user).append(
-            ',').append("changing_date =  ").append(lmd).append(" WHERE intfield01 = ").append(id).append(" AND cid = ").append(cid);
+        final StringBuilder updater =
+            new StringBuilder("UPDATE prg_contacts SET ").append(update).append("changed_from = ").append(user).append(',').append(
+                "changing_date =  ").append(lmd).append(" WHERE intfield01 = ").append(id).append(" AND cid = ").append(cid);
         return updater;
     }
 
@@ -1098,7 +1105,8 @@ public class ContactMySql implements ContactSql {
             " AND cid = ").append(cid).toString();
     }
 
-    private static final String PREFIXED_FIELDS = "co.fid,co.cid,co.created_from,co.creating_date," + "co.changed_from,co.changing_date, co.intfield01";
+    private static final String PREFIXED_FIELDS =
+        "co.fid,co.cid,co.created_from,co.creating_date," + "co.changed_from,co.changing_date, co.intfield01";
 
     public StringBuilder iFgetColsStringFromDeleteTable(final int[] cols) {
         final String fields = buildContactSelectString(cols);
@@ -1248,8 +1256,9 @@ public class ContactMySql implements ContactSql {
     }
 
     public void iFtrashLinks(final boolean delete, final Statement smt, final int id, final int cid) throws SQLException {
-        final StringBuilder tmp = new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = ").append(id).append(
-            " OR intfield02 = ").append(id).append(") AND cid = ").append(cid);
+        final StringBuilder tmp =
+            new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = ").append(id).append(" OR intfield02 = ").append(id).append(
+                ") AND cid = ").append(cid);
         if (DEBUG) {
             LOG.debug(tmp.toString());
         }
@@ -1257,9 +1266,10 @@ public class ContactMySql implements ContactSql {
     }
 
     public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException {
-        final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(
-            ", created_from = ").append(ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(
-            ", fid = ").append(admin_fid).append(" WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
+        final StringBuilder tmp =
+            new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
+                ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid).append(
+                " WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
         if (DEBUG) {
             LOG.debug(tmp.toString());
         }
@@ -1268,8 +1278,8 @@ public class ContactMySql implements ContactSql {
 
     public void iFtrashImage(final boolean delete, final Statement smt, final int id, final int cid) throws SQLException {
         if (delete) {
-            final StringBuilder tmp = new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(id).append(
-                " AND cid = ").append(cid);
+            final StringBuilder tmp =
+                new StringBuilder("DELETE from prg_contacts_image where intfield01 = ").append(id).append(" AND cid = ").append(cid);
             if (DEBUG) {
                 LOG.debug(tmp.toString());
             }
@@ -1366,9 +1376,10 @@ public class ContactMySql implements ContactSql {
     }
 
     public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Context ct) throws SQLException {
-        final StringBuilder tmp = new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ctx.getMailadmin()).append(
-            ", created_from = ").append(ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(
-            " WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
+        final StringBuilder tmp =
+            new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
+                ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE created_from = ").append(
+                uid).append(" and cid = ").append(cid);
         if (DEBUG) {
             LOG.debug(tmp.toString());
         }
@@ -1376,8 +1387,8 @@ public class ContactMySql implements ContactSql {
     }
 
     public void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
-        final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(
-            cid);
+        final StringBuilder tmp =
+            new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
         if (DEBUG) {
             LOG.debug(tmp.toString());
         }
@@ -1385,8 +1396,8 @@ public class ContactMySql implements ContactSql {
     }
 
     public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException {
-        final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE intfield01 = ").append(uid).append(" and cid = ").append(
-            cid);
+        final StringBuilder tmp =
+            new StringBuilder("DELETE FROM del_contacts WHERE intfield01 = ").append(uid).append(" and cid = ").append(cid);
         if (DEBUG) {
             LOG.debug(tmp.toString());
         }
@@ -1424,6 +1435,14 @@ public class ContactMySql implements ContactSql {
 
         private final String value;
 
+        /**
+         * Initializes a new {@link StringSQLInjector} which injects NULL.
+         */
+        public StringSQLInjector() {
+            super();
+            this.value = null;
+        }
+
         public StringSQLInjector(final String value) {
             super();
             this.value = value;
@@ -1439,7 +1458,11 @@ public class ContactMySql implements ContactSql {
         }
 
         public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
-            ps.setString(parameterIndex, value);
+            if (null == value) {
+                ps.setNull(parameterIndex, Types.VARCHAR);
+            } else {
+                ps.setString(parameterIndex, value);
+            }
         }
 
     }
@@ -1448,13 +1471,25 @@ public class ContactMySql implements ContactSql {
 
         private final java.sql.Timestamp value;
 
+        /**
+         * Initializes a new {@link TimestampSQLInjector} which injects NULL.
+         */
+        public TimestampSQLInjector() {
+            super();
+            this.value = null;
+        }
+
         public TimestampSQLInjector(final Date value) {
             super();
             this.value = new java.sql.Timestamp(value.getTime());
         }
 
         public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
-            ps.setTimestamp(parameterIndex, value);
+            if (null == value) {
+                ps.setNull(parameterIndex, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(parameterIndex, value);
+            }
         }
 
     }
@@ -1481,7 +1516,8 @@ public class ContactMySql implements ContactSql {
                         final String field = ContactConfig.getInstance().getString(ContactConfig.Property.LETTER_FIELD);
                         final String p = cso.getPattern().trim();
 
-                        if (".".equals(p) || "#".equals(p)) {
+                        final String dot = ".";
+                        if (dot.equals(p) || "#".equals(p)) {
                             sb.append(" (");
                             sb.append(field);
                             sb.append(" < '0%' OR ");
@@ -1495,11 +1531,25 @@ public class ContactMySql implements ContactSql {
                             sb.append(" > '0%' AND ");
                             sb.append(field);
                             sb.append(" < 'a%' AND ");
-                        } else if (!".".equals(p) && !"all".equals(p)) {
+                        } else if (!dot.equals(p) && !"all".equals(p)) {
+                            final String fallbackField = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
                             sb.append(" ");
+
+                            sb.append('(').append(field).append(" IS NOT ? AND ").append(field).append(" LIKE ?)");
+                            sb.append(" OR (").append(field).append(" IS ? AND ").append(fallbackField).append(" LIKE ?)");
+                            sb.append(" AND ");
+
+                            /*-
+                             * 
                             sb.append(field);
                             sb.append(" LIKE ? AND ");
-                            instance.injectors.add(new StringSQLInjector(p, STR_PERCENT));
+                             */
+
+                            final List<SQLInjector> injectors = instance.injectors;
+                            injectors.add(new StringSQLInjector());
+                            injectors.add(new StringSQLInjector(p, STR_PERCENT));
+                            injectors.add(new StringSQLInjector());
+                            injectors.add(new StringSQLInjector(p, STR_PERCENT));
                         }
                     } else {
                         cso.setDisplayName(cso.getPattern());
@@ -2085,9 +2135,9 @@ public class ContactMySql implements ContactSql {
                 return Contact.COMPANY;
             }
 
-        });       
+        });
         searchFillers.add(new SearchFiller() {
-        	
+
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getDepartment() != null && cso.getDepartment().length() > 0) {
@@ -2110,9 +2160,9 @@ public class ContactMySql implements ContactSql {
                 }
                 return Contact.DEPARTMENT;
             }
-        }); 
+        });
         searchFillers.add(new SearchFiller() {
-        	
+
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getStreetBusiness() != null && cso.getStreetBusiness().length() > 0) {
@@ -2135,9 +2185,9 @@ public class ContactMySql implements ContactSql {
                 }
                 return Contact.STREET_BUSINESS;
             }
-        }); 
+        });
         searchFillers.add(new SearchFiller() {
-        	
+
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getCityBusiness() != null && cso.getCityBusiness().length() > 0) {
@@ -2160,9 +2210,7 @@ public class ContactMySql implements ContactSql {
                 }
                 return Contact.CITY_BUSINESS;
             }
-        });  
-        
-        
+        });
 
         SEARCH_FILLERS = new CopyOnWriteArrayList<SearchFiller>(searchFillers);
     }
