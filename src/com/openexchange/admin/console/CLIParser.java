@@ -190,7 +190,7 @@ public class CLIParser {
      */
     public Object getOptionValue(final CLIOption o, final Object def, final boolean remove) {
         if (null == cliCommandLine) {
-            throw new IllegalStateException("Command line has not been parsed, yet.");
+            return def;
         }
 
         final List<Object> vals = values.get(o.longForm());
@@ -316,11 +316,11 @@ public class CLIParser {
                 final Option parsedOption = iter.next();
                 final String parsedLongOpt = parsedOption.getLongOpt();
 
-                final CLIOption opt = options.get("--"+parsedLongOpt);
+                final CLIOption opt = options.get("--" + parsedLongOpt);
                 if (null == opt) {
                     throw new CLIUnknownOptionException(parsedLongOpt);
                 }
-                
+
                 final String shortForm = opt.shortForm();
                 if (null == shortForm) {
                     if (null == lp) {
@@ -338,7 +338,7 @@ public class CLIParser {
                     handleOption(opt, shortForm, locale, sp);
                 }
             }
-            
+
             /*-
              * TODO: Enable this to allow unknown options
              * 
@@ -360,7 +360,7 @@ public class CLIParser {
                     handleOption(opt, shortForm, locale, sp);
                 }
             }
-            */
+             */
         } catch (final ParseException e) {
             throw new CLIParseException(argv, e);
         }
