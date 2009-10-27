@@ -49,15 +49,17 @@ public class CLIParser {
      */
     public CLIOption addOption(final CLIOption opt) {
         final String shortForm = opt.shortForm();
+        final StringBuilder sb = new StringBuilder(16);
         final String sopt;
         if (shortForm == null) {
             sopt = " "; // Whitespace
         } else {
-            this.options.put("-" + shortForm, opt);
+            this.options.put(sb.append('-').append(shortForm).toString(), opt);
+            sb.setLength(0);
             sopt = shortForm;
         }
         final String longForm = opt.longForm();
-        this.options.put("--" + longForm, opt);
+        this.options.put(sb.append("--").append(longForm).toString(), opt);
 
         cliOptions.addOption(sopt, longForm, opt.wantsValue(), "");
 
@@ -242,10 +244,12 @@ public class CLIParser {
      */
     protected final void removeOption(final CLIOption option) {
         final String shortForm = option.shortForm();
+        final StringBuilder sb = new StringBuilder(16);
         if (null != shortForm) {
-            this.options.remove("-" + shortForm);
+            this.options.remove(sb.append('-').append(shortForm).toString());
+            sb.setLength(0);
         }
-        this.options.remove("--" + option.longForm());
+        this.options.remove(sb.append("--").append(option.longForm()).toString());
     }
 
     /**
@@ -335,14 +339,17 @@ public class CLIParser {
             LongOptionProvider lp = null;
             ShortOptionProvider sp = null;
 
+            final StringBuilder sb = new StringBuilder(16);
+
             for (@SuppressWarnings("unchecked") final Iterator<Option> iter = cliCommandLine.iterator(); iter.hasNext();) {
                 final Option parsedOption = iter.next();
                 final String parsedLongOpt = parsedOption.getLongOpt();
 
-                final CLIOption opt = options.get("--" + parsedLongOpt);
+                final CLIOption opt = options.get(sb.append("--").append(parsedLongOpt).toString());
                 if (null == opt) {
                     throw new CLIUnknownOptionException(parsedLongOpt);
                 }
+                sb.setLength(0);
 
                 final String shortForm = opt.shortForm();
                 if (null == shortForm) {
