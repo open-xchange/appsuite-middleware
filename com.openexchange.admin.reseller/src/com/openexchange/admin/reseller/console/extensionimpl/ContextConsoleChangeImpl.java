@@ -54,8 +54,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleChangeInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
@@ -74,10 +74,10 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class ContextConsoleChangeImpl implements ContextConsoleChangeInterface {
     
-    protected Option addRestrictionsOption = null;
-    protected Option editRestrictionsOption = null;
-    protected Option removeRestrictionsOption = null;
-    protected Option customidOption = null;
+    protected CLIOption addRestrictionsOption = null;
+    protected CLIOption editRestrictionsOption = null;
+    protected CLIOption removeRestrictionsOption = null;
+    protected CLIOption customidOption = null;
 
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
         addRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_ADD_RESTRICTION_SHORT, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", NeededQuadState.notneeded, true);

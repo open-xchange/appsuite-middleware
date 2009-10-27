@@ -46,12 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.console.extensionimpl;
 
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.reseller.console.ResellerAbstraction;
@@ -63,11 +64,10 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
-
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     
-    protected Option addRestrictionsOption = null;
-    protected Option customidOption = null;
+    protected CLIOption addRestrictionsOption = null;
+    protected CLIOption customidOption = null;
 
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
         parser.removeOption("c", "contextid");
