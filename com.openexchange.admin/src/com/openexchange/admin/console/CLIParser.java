@@ -367,7 +367,10 @@ public class CLIParser {
             throw new CLIUnknownOptionException(extractOption(e.getMessage()), e);
         } catch (final MissingArgumentException e) {
             final String optName = extractOption(e.getMessage());
-            throw new CLIUnknownOptionException(optName, "Missing argument for option '" + optName + "'", e);
+            throw new CLIUnknownOptionException(
+                optName,
+                new StringBuilder(32).append("Missing argument for option '").append(optName).append('\'').toString(),
+                e);
         } catch (final ParseException e) {
             throw new CLIParseException(argv, e);
         }
