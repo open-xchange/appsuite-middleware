@@ -55,21 +55,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.publish.PublicationTarget;
 
 /**
  * {@link PublicationTargetWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationTargetWriterTest extends TestCase {
 
     private PublicationTarget target;
 
+    @Override
     public void setUp() {
         target = new PublicationTarget();
-        
+
         target.setId("com.openexchange.publish.test1");
         target.setDisplayName("Test 1 PubTarget");
         target.setIcon("http://example.invalid/icon.png");
@@ -77,10 +79,10 @@ public class PublicationTargetWriterTest extends TestCase {
 
         target.setFormDescription(new DynamicFormDescription());
     }
-    
-    public void testWriteObject() throws JSONException, PublicationJSONException {
-        JSONObject object = new PublicationTargetWriter().write(target);
-        
+
+    public void testWriteObject() throws JSONException {
+        JSONObject object = new PublicationTargetWriter(Translator.EMPTY).write(target);
+
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.publish.test1")
             .hasKey("displayName").withValue("Test 1 PubTarget")
@@ -88,29 +90,25 @@ public class PublicationTargetWriterTest extends TestCase {
             .hasKey("module").withValue("contacts")
             .hasKey("formDescription").withValueArray()
        .hasNoMoreKeys();
-        
-        
+
+
         assertValidates(assertion, object);
     }
-    
+
     public void testWriteArray() throws JSONException, PublicationJSONException {
-        JSONArray array = new PublicationTargetWriter().writeArray(target, new String[]{"id", "displayName", "icon", "module"});
-    
+        JSONArray array = new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "displayName", "icon", "module"});
+
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(target.getId(), target.getDisplayName(), target.getIcon(), target.getModule());
-        
+
         assertValidates(assertion, array);
     }
-    
+
     public void testUnknownColumn() throws JSONException {
         try {
-            JSONArray array = new PublicationTargetWriter().writeArray(target, new String[]{"id", "unkownColumn"});
+            new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "unkownColumn"});
             fail("Expected exception");
-        } catch(PublicationJSONException x) {
+        } catch (PublicationJSONException e) {
             // Hooray!
         }
-    
     }
-    
-    
-
 }

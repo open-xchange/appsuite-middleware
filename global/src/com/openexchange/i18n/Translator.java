@@ -47,26 +47,21 @@
  *
  */
 
-package com.openexchange.publish.json.osgi;
-
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+package com.openexchange.i18n;
 
 /**
- * {@link Activator}
+ * Simple interface for passing translations.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public interface Translator {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator()
+    Translator EMPTY = new Translator() {
+        public String translate(String toTranslate) {
+            return toTranslate;
+        }
     };
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
-    }
+
+    String translate(String toTranslate);
+
 }

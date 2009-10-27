@@ -54,12 +54,16 @@ import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
@@ -67,26 +71,23 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
 import static com.openexchange.publish.json.MultipleHandlerTools.*;
 
-
 /**
  * {@link PublicationTargetMultipleHandler}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class PublicationTargetMultipleHandler implements MultipleHandler {
 
-    public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
+    static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
+
     private PublicationTargetDiscoveryService discoverer = null;
-    private PublicationTargetWriter writer = new PublicationTargetWriter();
 
     public PublicationTargetMultipleHandler(PublicationTargetDiscoveryService discoverer) {
+        super();
         this.discoverer = discoverer;
     }
-    
-    
-    public void close() {
 
+    public void close() {
     }
 
     public Date getTimestamp() {
@@ -104,10 +105,6 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             } else {
                 throw UNKNOWN_ACTION.create(action);
             }
-        } catch (AbstractOXException x) {
-            throw x;
-        } catch (JSONException x) {
-            throw x;
         } catch (Throwable t) {
             throw wrapThrowable(t);
         }
@@ -119,17 +116,23 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             throw MISSING_PARAMETER.create("id");
         }
         PublicationTarget target = discoverer.getTarget(identifier);
-        JSONObject data = writer.write(target);
+        JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target);
         return data;
+    }
+
+    private Translator createTranslator(ServerSession session) {
+        Locale locale = session.getUser().getLocale();
+        I18nService service = I18n.getInstance().get(locale);
+        return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
 
     private JSONValue listTargets(JSONObject request, ServerSession session) throws JSONException, PublicationJSONException, PublicationException {
         Collection<PublicationTarget> targets = discoverer.listTargets();
         String[] columns = getColumns(request);
-        JSONArray json = writer.writeJSONArray(targets, columns);
+        JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns);
         return json;
     }
-    
+
     private String[] getColumns(JSONObject req) {
         String columns = req.optString("columns");
         if (columns == null) {
@@ -137,5 +140,4 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         }
         return columns.split("\\s*,\\s*");
     }
-
 }

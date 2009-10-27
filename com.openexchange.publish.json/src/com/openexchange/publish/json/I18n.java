@@ -47,26 +47,53 @@
  *
  */
 
-package com.openexchange.publish.json.osgi;
+package com.openexchange.publish.json;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link Activator}
+ * Singleton for keeping references to {@link I18nService}s and for translating texts.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class I18n {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator()
-    };
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private static final I18n SINGLETON = new I18n();
+
+    private Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+
+    /**
+     * Initializes a new {@link I18n}.
+     */
+    private I18n() {
+        super();
+    }
+
+    public static final I18n getInstance() {
+        return SINGLETON;
+    }
+
+    public void addI18nService(I18nService service) {
+        services.put(service.getLocale(), service);
+    }
+
+    public void removeI18nService(I18nService service) {
+        services.remove(service.getLocale());
+    }
+
+    public I18nService get(Locale locale) {
+        return services.get(locale);
+    }
+
+    public String translate(Locale locale, String translateMe) {
+        String retval = translateMe;
+        I18nService service = services.get(locale);
+        if (null != service) {
+            retval = service.getLocalized(translateMe);
+        }
+        return retval;
     }
 }

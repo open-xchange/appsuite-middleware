@@ -3,6 +3,8 @@ package com.openexchange.publish.json.osgi;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
@@ -18,7 +20,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 
 public class ServletActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletActivator.class);
+    private static final Log LOG = LogFactory.getLog(ServletActivator.class);
 
     private static final String TARGET_ALIAS = "ajax/publicationTargets";
     private static final String PUB_ALIAS = "ajax/publications";

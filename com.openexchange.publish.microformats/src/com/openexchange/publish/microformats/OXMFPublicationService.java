@@ -49,6 +49,10 @@
 
 package com.openexchange.publish.microformats;
 
+import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_LINK;
+import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_PROTECTED;
+import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_TEMPLATE;
+import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_SITE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,7 +77,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OXMFPublicationService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXMFPublicationService extends AbstractPublicationService {
@@ -85,7 +89,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     private static final String SITE = "siteName";
 
     private static final String URL = "url";
-    
+
     private static final String TEMPLATE = "template";
 
     private Random random = new Random();
@@ -98,13 +102,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private String defaultTemplateName;
 
-
-    
     public OXMFPublicationService() {
         super();
         target = buildTarget();
     }
-    
+
     @Override
     public PublicationTarget getTarget() throws PublicationException {
         return target;
@@ -112,36 +114,38 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private PublicationTarget buildTarget() {
         PublicationTarget target = new PublicationTarget();
-        
+
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.input(SITE, "Site", true, null)).add(FormElement.input(TEMPLATE, "Template Name")).add(FormElement.checkbox(PROTECTED, "Add cipher code", true, true)).add(FormElement.link(URL, "URL", false, null));
-        
+        form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
+        form.add(FormElement.input(TEMPLATE, FORM_LABEL_TEMPLATE));
+        form.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
+        form.add(FormElement.link(URL, FORM_LABEL_LINK, false, null));
+
         target.setFormDescription(form);
         target.setPublicationService(this);
-        
+
         return target;
     }
 
     public void setRootURL(String string) {
         rootURL = string;
     }
-    
+
     public String getRootURL() {
         return rootURL;
     }
-    
+
     public void setFolderType(String string) {
         target.setModule(string);
     }
-    
+
     public void setTargetId(String targetId) {
         target.setId(targetId);
     }
-    
+
     public void setTargetDisplayName(String string) {
         target.setDisplayName(string);
     }
-
 
     @Override
     public void beforeCreate(Publication publication) throws PublicationException {
@@ -154,7 +158,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public OXTemplate loadTemplate(Publication publication) throws PublicationException {
         String templateName = (String) publication.getConfiguration().get(TEMPLATE);
         try {
-            if(templateName == null || "".equals(templateName)) {
+            if (templateName == null || "".equals(templateName)) {
                 return templateService.loadTemplate(defaultTemplateName);
             }
             ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
@@ -194,28 +198,28 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
         publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
     }
-    
+
     protected String normalizeSiteName(String siteName) {
         String[] path = siteName.split("/");
         List<String> normalized = new ArrayList<String>(path.length);
-        for(int i = 0; i < path.length; i++) {
-            if(!path[i].equals("")) {
+        for (int i = 0; i < path.length; i++) {
+            if (!path[i].equals("")) {
                 normalized.add(path[i]);
             }
         }
-        
+
         String site = Strings.join(normalized, "/");
         return site;
     }
-    
+
     @Override
     public void modifyIncoming(Publication publication) throws PublicationException {
         String siteName = (String) publication.getConfiguration().get(SITE);
-        
-        if(siteName != null) {
+
+        if (siteName != null) {
             siteName = normalizeSiteName(siteName);
             Publication oldPub = getPublication(publication.getContext(), siteName);
-            if(oldPub != null && oldPub.getId() != publication.getId()) {
+            if (oldPub != null && oldPub.getId() != publication.getId()) {
                 throw uniquenessConstraintViolation(SITE, siteName);
             }
             publication.getConfiguration().put(SITE, siteName);
@@ -224,7 +228,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private boolean needsSecret(Publication publication) {
         Map<String, Object> configuration = publication.getConfiguration();
-        return configuration.containsKey(PROTECTED) && (Boolean) configuration.get(PROTECTED);
+        return configuration.containsKey(PROTECTED) && ((Boolean) configuration.get(PROTECTED)).booleanValue();
     }
 
     private void removeSecretIfNeeded(Publication publication) {
@@ -235,14 +239,14 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private boolean mustRemoveSecret(Publication publication) {
         Map<String, Object> configuration = publication.getConfiguration();
-        return configuration.containsKey(PROTECTED) && !(Boolean) configuration.get(PROTECTED);
+        return configuration.containsKey(PROTECTED) && !((Boolean) configuration.get(PROTECTED)).booleanValue();
     }
 
     private void addSecretIfNeeded(Publication publication, Publication oldPublication) {
         if (needsSecret(publication)) {
 
             String secret = null;
-            if(oldPublication != null) {
+            if (oldPublication != null) {
                 secret = (String) oldPublication.getConfiguration().get(SECRET);
             }
             if (secret == null) {
@@ -260,21 +264,20 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public Publication getPublication(Context ctx, String site) throws PublicationException {
         Map<String,Object> query = new HashMap<String, Object>();
         query.put(SITE, site);
-        
+
         Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
-        if(result.isEmpty()) {
+        if (result.isEmpty()) {
             return null;
         }
-        
+
         return result.iterator().next();
     }
-    
-    
+
     public void setDefaultTemplateName(String defaultTemplateName) {
         this.defaultTemplateName = defaultTemplateName;
     }
-    
-    
+
+
     public void setTemplateService(TemplateService templateService) {
         this.templateService = templateService;
     }

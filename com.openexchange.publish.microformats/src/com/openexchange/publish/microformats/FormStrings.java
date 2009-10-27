@@ -47,26 +47,26 @@
  *
  */
 
-package com.openexchange.publish.json.osgi;
+package com.openexchange.publish.microformats;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Activator}
+ * Contains the strings for the forms that have to be translated.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class FormStrings implements LocalizableStrings {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator()
-    };
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    public static final String FORM_LABEL_SITE = "Site";
+
+    public static final String FORM_LABEL_TEMPLATE = "Template (optional)";
+
+    public static final String FORM_LABEL_PROTECTED = "Add cipher code";
+
+    public static final String FORM_LABEL_LINK = "URL";
+
+    public FormStrings() {
+        super();
     }
 }

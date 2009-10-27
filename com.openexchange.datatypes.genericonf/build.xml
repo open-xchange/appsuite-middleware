@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.datatypes.genericonf" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
 
-    <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
-
     <!-- Constants -->
-    <property name="tmp.dir" value="tmp"/>
+    <property name="tmpDir" value="tmp"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -18,33 +16,37 @@
     <property name="composite.name" value="open-xchange-genconf-${version}"/>
 
     <!-- Install Constants -->
-    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="bundlesDir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
     <!-- JAR names for classpath -->
     <property name="jsonjar" value="json.jar"/>
+    <property name="globalJar" value="com.openexchange.global.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
-        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+        <pathelement location="${bundlesDir}/${commonBundle}/lib/${jsonjar}"/>
+        <pathelement location="${bundlesDir}/${globalJar}"/>
     </path>
 
     <!-- Compile -->
     <target name="prepare">
         <mkdir dir="${output..}"/>
-        <mkdir dir="${tmp.dir}"/>
+        <mkdir dir="${tmpDir}"/>
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
-            <classpath refid="project.classpath" />
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath"/>
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
+        <jar jarfile="${tmpDir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -55,17 +57,15 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesDir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesDir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}">
-            <fileset dir="${tmp.dir}">
+        <mkdir dir="${destdir}/${bundlesDir}"/>
+        <copy todir="${destdir}/${bundlesDir}">
+            <fileset dir="${tmpDir}">
                 <include name="${bundle.name}"/>
             </fileset>
         </copy>
@@ -92,7 +92,7 @@
     </target>
 
     <target name="clean">
-        <delete dir="${tmp.dir}"/>
+        <delete dir="${tmpDir}"/>
         <delete dir="${output..}"/>
     </target>
 

@@ -55,17 +55,19 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PublicationTargetServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationTargetServlet extends MultipleAdapterServlet {
 
+    private static final long serialVersionUID = -6971877010377069092L;
 
     private static PublicationTargetMultipleHandlerFactory multipleFactory;
+
     public static void setFactory(PublicationTargetMultipleHandlerFactory factory) {
         multipleFactory = factory;
     }
-    
+
     @Override
     protected MultipleHandler createMultipleHandler() {
         return multipleFactory.createMultipleHandler();
@@ -75,11 +77,9 @@ public class PublicationTargetServlet extends MultipleAdapterServlet {
     protected boolean requiresBody(String action) {
         return PublicationTargetMultipleHandler.ACTIONS_REQUIRING_BODY.contains(action);
     }
+
     @Override
     protected boolean hasModulePermission(ServerSession session) {
         return session.getUserConfiguration().isPublication();
     }
-
-    
-
 }

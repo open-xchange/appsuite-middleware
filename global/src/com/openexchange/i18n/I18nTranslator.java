@@ -47,26 +47,26 @@
  *
  */
 
-package com.openexchange.publish.json.osgi;
-
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+package com.openexchange.i18n;
 
 /**
- * {@link Activator}
+ * Implementation of a {@link Translator} backed with an {@link I18nService}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class I18nTranslator implements Translator {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator()
-    };
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private final I18nService service;
+
+    /**
+     * Initializes a new {@link I18nTranslator}.
+     */
+    public I18nTranslator(I18nService service) {
+        super();
+        this.service = service;
+    }
+
+    public String translate(String toTranslate) {
+        return service.getLocalized(toTranslate);
     }
 }

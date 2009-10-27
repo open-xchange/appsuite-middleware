@@ -55,8 +55,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.i18n.Translator;
 import com.openexchange.publish.PublicationTarget;
-
 
 /**
  * {@link PublicationTargetWriter}
@@ -67,12 +67,23 @@ import com.openexchange.publish.PublicationTarget;
 public class PublicationTargetWriter {
 
     private static final String ID = "id";
+
     private static final String DISPLAY_NAME = "displayName";
+
     private static final String ICON = "icon";
+
     private static final String MODULE = "module";
+
     private static final String FORM_DESCRIPTION = "formDescription";
 
-    public JSONObject write(PublicationTarget target) throws JSONException, PublicationJSONException {
+    private final Translator translator;
+
+    public PublicationTargetWriter(Translator translator) {
+        super();
+        this.translator = translator;
+    }
+
+    public JSONObject write(PublicationTarget target) throws JSONException {
         JSONObject object = new JSONObject();
         object.put(ID, target.getId());
         object.put(DISPLAY_NAME, target.getDisplayName());
@@ -82,28 +93,27 @@ public class PublicationTargetWriter {
         return object;
     }
 
-    private JSONArray writeFormDescription(DynamicFormDescription form) throws JSONException, PublicationJSONException {
-        return new FormDescriptionWriter().write(form);
+    private JSONArray writeFormDescription(DynamicFormDescription form) throws JSONException {
+        return new FormDescriptionWriter(translator).write(form);
     }
 
     public JSONArray writeArray(PublicationTarget target, String[] columns) throws JSONException, PublicationJSONException {
         JSONArray array = new JSONArray();
-        for(String column : columns) {
-            if( column.equals(ID) ) {
+        for (String column : columns) {
+            if (column.equals(ID)) {
                 array.put(target.getId());
-            } else if ( column.equals(DISPLAY_NAME) ) {
-                array.put(target.getDisplayName());
-            } else if ( column.equals(ICON) ) {
+            } else if (column.equals(DISPLAY_NAME)) {
+                array.put(translator.translate(target.getDisplayName()));
+            } else if (column.equals(ICON)) {
                 array.put(target.getIcon());
-            } else if ( column.equals(MODULE) ) {
+            } else if (column.equals(MODULE)) {
                 array.put(target.getModule());
-            } else if ( column.equals(FORM_DESCRIPTION) ) {
+            } else if (column.equals(FORM_DESCRIPTION)) {
                 array.put(writeFormDescription(target.getFormDescription()));
             } else {
                 throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(column);
             }
         }
-        
         return array;
     }
 
@@ -112,8 +122,6 @@ public class PublicationTargetWriter {
         for (PublicationTarget publicationTarget : targets) {
             array.put(writeArray(publicationTarget, columns));
         }
-        
         return array;
     }
-
 }

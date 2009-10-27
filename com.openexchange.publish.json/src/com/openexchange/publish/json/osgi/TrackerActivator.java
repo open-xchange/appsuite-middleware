@@ -49,24 +49,35 @@
 
 package com.openexchange.publish.json.osgi;
 
+import java.util.Stack;
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.i18n.I18nService;
 
 /**
- * {@link Activator}
+ * Starts the service tracker for the dynamic services like {@link I18nService}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class TrackerActivator implements BundleActivator {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator()
-    };
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+
+    public TrackerActivator() {
+        super();
+    }
+
+    public void start(BundleContext context) throws Exception {
+        trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
+        for (ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
+        }
     }
 }

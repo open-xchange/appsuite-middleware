@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.i18n.Translator;
 
 /**
  * {@link FormDescriptionWriter}
@@ -73,7 +74,18 @@ public class FormDescriptionWriter {
     private static final String DEFAULT_VALUE = "defaultValue";
 
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
-    
+
+    private final Translator translator;
+
+    public FormDescriptionWriter(Translator translator) {
+        super();
+        this.translator = translator;
+    }
+
+    public FormDescriptionWriter() {
+        this(null);
+    }
+
     public JSONArray write(DynamicFormDescription form) throws JSONException {
         JSONArray formDescriptionArray = new JSONArray();
         for (FormElement formElement : form) {
@@ -87,7 +99,7 @@ public class FormDescriptionWriter {
         JSONObject object = new JSONObject();
         object.put(WIDGET, formElement.getWidget().getKeyword());
         object.put(NAME, formElement.getName());
-        object.put(DISPLAY_NAME, formElement.getDisplayName());
+        object.put(DISPLAY_NAME, translate(formElement.getDisplayName()));
         object.put(MANDATORY, formElement.isMandatory());
         if (null != formElement.getDefaultValue()) {
             object.put(DEFAULT_VALUE, formElement.getWidget().doSwitch(valueWrite, formElement.getDefaultValue()));
@@ -95,4 +107,7 @@ public class FormDescriptionWriter {
         return object;
     }
 
+    private String translate(String toTranslate) {
+        return null == translator ? toTranslate : translator.translate(toTranslate);
+    }
 }

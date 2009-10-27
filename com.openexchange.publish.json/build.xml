@@ -1,11 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.publish.json" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
     <property name="prefix" value="/opt/open-xchange"/>
-
-    <!-- Bundle dependencies -->
-    <property name="commonBundle" value="com.openexchange.common"/>
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
@@ -21,46 +19,33 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	
-	
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+    <property name="jsonjar" value="json.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="publishjar" value="com.openexchange.publish.jar"/>
 	<property name="publishbasicjar" value="com.openexchange.publish.basic.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="genconfjar" value="com.openexchange.datatypes.genericonf.jar"/>
-	
-	<property name="jsonjar" value="json.jar" />
-	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
-	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
-		
-	
 
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-		
+        <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
     	<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		
+        <pathelement location="${bundlesdir}/${servletjar}" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
-		
         <pathelement location="${bundlesdir}/${genconfjar}"/>
-
     	<pathelement location="${bundlesdir}/${publishjar}"/>
-		
         <pathelement location="${bundlesdir}/${publishbasicjar}"/>
-		
-    	<pathelement location="${bundlesdir}/${osgiservicesjar}"/>
-
     	<pathelement location="${bundlesdir}/${serverjar}"/>
-		
-    	<pathelement location="${bundlesdir}/${servletjar}" />
-	
-		<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-    	
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
     </path>
 
     <!-- Compile -->
@@ -70,15 +55,13 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
     </target>
@@ -88,8 +71,7 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
