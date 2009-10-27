@@ -56,10 +56,11 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.CLIIllegalOptionValueException;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.console.CLIParseException;
+import com.openexchange.admin.console.CLIUnknownOptionException;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -72,8 +73,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Restore extends BasicCommandlineOptions {
 	
-    Option filenameOption = null;
-    Option dryRun = null;
+    CLIOption filenameOption = null;
+    CLIOption dryRun = null;
     
     public static void main(final String[] args) {
         final Restore restore = new Restore();
@@ -116,11 +117,15 @@ public class Restore extends BasicCommandlineOptions {
             }
             
             sysexit(0);
-        } catch (final IllegalOptionValueException e) {
+        } catch (CLIParseException e) {
+            printError("Unable to parse the command line: " + e.getMessage(), parser);
+            parser.printUsage();
+            sysexit(SYSEXIT_UNABLE_TO_PARSE);
+        } catch (final CLIIllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
+        } catch (final CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
