@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.console;
 
+import java.text.MessageFormat;
+
 /**
  * {@link CLIUnknownOptionException} - Indicates an unknown option.
  * 
@@ -61,11 +63,19 @@ public class CLIUnknownOptionException extends CLIOptionException {
     private String optionName = null;
 
     CLIUnknownOptionException(final String optionName) {
-        this(optionName, "Unknown option '" + optionName + "'");
+        this(optionName, MessageFormat.format("Unknown option ''{0}''", optionName));
+    }
+
+    CLIUnknownOptionException(final String optionName, final Throwable cause) {
+        this(optionName, MessageFormat.format("Unknown option ''{0}''", optionName), cause);
     }
 
     CLIUnknownOptionException(final String optionName, final String msg) {
-        super(msg);
+        this(optionName, msg, null);
+    }
+
+    CLIUnknownOptionException(final String optionName, final String msg, final Throwable cause) {
+        super(msg, cause);
         this.optionName = optionName;
     }
 
