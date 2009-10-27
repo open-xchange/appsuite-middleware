@@ -39,7 +39,7 @@ public class CLIParser {
     }
 
     /**
-     * Adds the specified option to the list of options
+     * Adds the specified option to the list of options.
      * 
      * @param opt The option to add
      * @return The added option
