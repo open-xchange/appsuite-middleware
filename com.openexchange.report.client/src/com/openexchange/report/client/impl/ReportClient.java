@@ -63,8 +63,8 @@ import javax.management.ReflectionException;
 import org.json.JSONException;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.Total;
 import com.openexchange.tools.CSVWriter;
@@ -86,11 +86,11 @@ public class ReportClient extends AbstractJMXTools {
 
 	private static final String OPT_CSV_LONG = "csv";
 
-	private Option displayonly = null;
+	private CLIOption displayonly = null;
 
-	private Option sendonly = null;
+	private CLIOption sendonly = null;
 	
-	private Option csv = null;
+	private CLIOption csv = null;
 
 	public static void main(final String args[]) {
 		final AbstractJMXTools t = new ReportClient();
