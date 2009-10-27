@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 /**
  * {@link CLIParser} - The command-line parser.
@@ -361,9 +363,25 @@ public class CLIParser {
                 }
             }
              */
+        } catch (final UnrecognizedOptionException e) {
+            throw new CLIUnknownOptionException(extractOption(e.getMessage()), e);
+        } catch (final MissingArgumentException e) {
+            final String optName = extractOption(e.getMessage());
+            throw new CLIUnknownOptionException(optName, "Missing argument for option '" + optName + "'", e);
         } catch (final ParseException e) {
             throw new CLIParseException(argv, e);
         }
+    }
+
+    private static String extractOption(final String msg) {
+        if (null == msg) {
+            return null;
+        }
+        final int pos = msg.indexOf(':');
+        if (pos >= 0) {
+            return msg.substring(pos + 1);
+        }
+        return msg;
     }
 
     private void handleOption(final CLIOption opt, final String shortForm, final Locale locale, final OptionProvider provider) throws CLIIllegalOptionValueException {
