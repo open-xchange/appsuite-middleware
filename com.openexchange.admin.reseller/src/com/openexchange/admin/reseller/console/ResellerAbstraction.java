@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.console;
 
 import java.net.MalformedURLException;
@@ -55,16 +56,15 @@ import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Vector;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException.Code;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-
 
 /**
  * @author choeger
@@ -92,14 +92,14 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     public static final char OPT_CUSTOMID_SHORT = 'C';
     public static final String OPT_CUSTOMID_LONG = "customid";
 
-    protected Option idOption = null;
-    protected Option adminNameOption = null;
-    protected Option displayNameOption = null;
-    protected Option passwordOption = null;
-    protected Option passwordMechOption = null;
-    protected Option addRestrictionsOption = null;
-    protected Option editRestrictionsOption = null;
-    protected Option removeRestrictionsOption = null;
+    protected CLIOption idOption = null;
+    protected CLIOption adminNameOption = null;
+    protected CLIOption displayNameOption = null;
+    protected CLIOption passwordOption = null;
+    protected CLIOption passwordMechOption = null;
+    protected CLIOption addRestrictionsOption = null;
+    protected CLIOption editRestrictionsOption = null;
+    protected CLIOption removeRestrictionsOption = null;
     
     protected Integer adminid = null;
     protected String adminname = null;
@@ -201,7 +201,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    public static HashSet<String> getRestrictionsToRemove(final AdminParser parser, final Option option) throws InvalidDataException {
+    public static HashSet<String> getRestrictionsToRemove(final AdminParser parser, final CLIOption option) throws InvalidDataException {
         final Vector<Object> resopts = parser.getOptionValues(option);
         final HashSet<String> ret = new HashSet<String>();
         
@@ -215,18 +215,18 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         }
     }
     
-    public static HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser, final Option option) throws InvalidDataException {
+    public static HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser, final CLIOption option) throws InvalidDataException {
         return parseRestrictions(parser, option);
     }
     
-    protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final Option option) throws InvalidDataException {
+    protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final CLIOption option) throws InvalidDataException {
         HashSet<Restriction> res = parseRestrictions(parser, option);
         if( res.size() > 0 ) {
             adm.setRestrictions(res);
         }
     }
 
-    public static HashSet<Restriction> parseRestrictions(final AdminParser parser, final Option option) throws InvalidDataException {
+    public static HashSet<Restriction> parseRestrictions(final AdminParser parser, final CLIOption option) throws InvalidDataException {
         final Vector<Object> resopts = parser.getOptionValues(option);
         HashSet<Restriction> res = new HashSet<Restriction>();
         for (final Object obj : resopts) {
@@ -244,7 +244,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         return res;
     }
 
-    public static final String parseCustomId(final AdminParser parser, final Option customIdOption) {
+    public static final String parseCustomId(final AdminParser parser, final CLIOption customIdOption) {
         final String customid = (String) parser.getOptionValue(customIdOption);
         return customid;
     }
@@ -359,5 +359,4 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
             return "";
         }
     }
-
 }
