@@ -15,6 +15,7 @@
 	
     <property name="test.xml.dir" value="test-results" />
     <property name="client.jar" value="ox_admin_rmiclient.jar"/>
+	<property name="cli.jar" value="ox_admin_cli.jar"/>
     <property name="logdir"  value="/var/log/open-xchange"/>
     <property name="etcdir"  value="etc"/>
     <property name="distribution" value="debian"/>
@@ -263,7 +264,7 @@
          includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/,com/openexchange/admin/plugins/"
          excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
-    	<copy file="${bundlesdir}/${commonsclijar}" tofile="jar/ox_admin_cli.jar"/>
+    	<copy file="${bundlesdir}/${commonsclijar}" tofile="jar/${cli.jar}"/>
     </target>
 
 
@@ -390,7 +391,7 @@
         <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
-		<copy file="jar/ox_admin_cli.jar" todir="${destdir}/${prefix}/lib"/>
+		<copy file="jar/${cli.jar}" todir="${destdir}/${prefix}/lib"/>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
             <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
         </copy>
