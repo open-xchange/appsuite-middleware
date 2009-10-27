@@ -52,6 +52,7 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@oxprefix@
 OXBUNDLES=$OXPREFIX/bundles
+BUNDLELIBPATH=@oxcommonbundlelib@
 
 
 test -f $OXFUNCTIONS || {
