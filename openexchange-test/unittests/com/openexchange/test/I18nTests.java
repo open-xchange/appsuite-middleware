@@ -72,7 +72,8 @@ public final class I18nTests {
         com.openexchange.groupware.i18n.Groups.class,
         com.openexchange.groupware.i18n.MailStrings.class,
         com.openexchange.groupware.i18n.Notifications.class,
-        com.openexchange.publish.microformats.MicroformatStrings.class
+        com.openexchange.publish.microformats.MicroformatStrings.class,
+        com.openexchange.publish.microformats.FormStrings.class
     };
 
     /**
