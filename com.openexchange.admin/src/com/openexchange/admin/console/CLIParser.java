@@ -339,17 +339,17 @@ public class CLIParser {
             LongOptionProvider lp = null;
             ShortOptionProvider sp = null;
 
-            final StringBuilder sb = new StringBuilder(16);
+            final StringBuilder sb = new StringBuilder(16).append("--");
 
             for (@SuppressWarnings("unchecked") final Iterator<Option> iter = cliCommandLine.iterator(); iter.hasNext();) {
                 final Option parsedOption = iter.next();
                 final String parsedLongOpt = parsedOption.getLongOpt();
 
-                final CLIOption opt = options.get(sb.append("--").append(parsedLongOpt).toString());
+                final CLIOption opt = options.get(sb.append(parsedLongOpt).toString());
                 if (null == opt) {
                     throw new CLIUnknownOptionException(parsedLongOpt);
                 }
-                sb.setLength(0);
+                sb.setLength(2);
 
                 final String shortForm = opt.shortForm();
                 if (null == shortForm) {
