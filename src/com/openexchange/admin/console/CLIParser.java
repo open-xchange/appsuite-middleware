@@ -2,6 +2,7 @@
 package com.openexchange.admin.console;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -205,6 +206,26 @@ public class CLIParser {
         }
 
         return remove ? vals.remove(0) : vals.get(0);
+    }
+
+    /**
+     * Gets the parsed values of all occurrences of given option, or an empty collection if the option was not set.
+     * 
+     * @param option The option
+     * @return The parsed values of all occurrences of given option
+     */
+    public final Collection<Object> getOptionValues(final CLIOption option) {
+        final List<Object> result = new ArrayList<Object>();
+
+        while (true) {
+            final Object o = getOptionValue(option, null, true);
+
+            if (o == null) {
+                return result;
+            }
+
+            result.add(o);
+        }
     }
 
     /**
