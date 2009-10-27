@@ -1,3 +1,7 @@
+* 2009-10-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #14716: More robust detection if a message contains file attachments
+
 * 2009-10-27 - marcus.klein@open-xchange.com
 
  - Bugfix #14719: Adding commons.codec.digest export to common bundle for outlook updater bundle.

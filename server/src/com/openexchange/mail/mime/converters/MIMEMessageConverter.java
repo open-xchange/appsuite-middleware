@@ -112,20 +112,20 @@ public final class MIMEMessageConverter {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
-        MailField.BODY,
-        MailField.FULL,
-        MailField.ACCOUNT_NAME));
+    private static final EnumSet<MailField> ENUM_SET_FULL =
+        EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
 
     private static interface MailMessageFieldFiller {
 
-        public static final String[] NON_MATCHING_HEADERS = {
-            MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
-            MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY,
-            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD,
-            MessageHeaders.HDR_X_OX_NOTIFICATION };
+        public static final String[] NON_MATCHING_HEADERS =
+            {
+                MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC,
+                MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE,
+                MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
+                MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OX_NOTIFICATION };
 
-        public static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory.getLog(MailMessageFieldFiller.class);
+        public static final org.apache.commons.logging.Log LOG1 =
+            org.apache.commons.logging.LogFactory.getLog(MailMessageFieldFiller.class);
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.
@@ -247,8 +247,8 @@ public final class MIMEMessageConverter {
             } else {
                 final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
                 mail.writeTo(out);
-                mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(
-                    out.toByteArray()));
+                mimeMessage =
+                    new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
             }
             if (mail.containsFlags()) {
                 parseMimeFlags(mail.getFlags(), mimeMessage);
@@ -474,8 +474,8 @@ public final class MIMEMessageConverter {
         }
     }
 
-    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP_EXT = new EnumMap<MailField, MailMessageFieldFiller>(
-        MailField.class);
+    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP_EXT =
+        new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
 
     static {
         FILLER_MAP_EXT.put(MailField.HEADERS, new MailMessageFieldFiller() {
@@ -750,8 +750,8 @@ public final class MIMEMessageConverter {
         return fillers;
     }
 
-    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP = new EnumMap<MailField, MailMessageFieldFiller>(
-        MailField.class);
+    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP =
+        new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
 
     static {
         FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
@@ -908,6 +908,21 @@ public final class MIMEMessageConverter {
                         mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments(
                             (Multipart) msg.getContent(),
                             ct.getSubType())));
+                    } catch (final ClassCastException e) {
+                        // Cast to javax.mail.Multipart failed
+                        LOG1.warn(
+                            new StringBuilder(256).append(
+                                "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
+                                e.getMessage()).append(
+                                ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have no (file) attachments.").toString(),
+                            e);
+                        mailMessage.setHasAttachment(false);
+                    } catch (final MessagingException e) {
+                        // A messaging error occurred
+                        LOG1.warn(new StringBuilder(256).append(
+                            "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                            e.getMessage()).append(".\nGoing to mark message to have no (file) attachments.").toString(), e);
+                        mailMessage.setHasAttachment(false);
                     } catch (final IOException e) {
                         throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                     }
@@ -1170,6 +1185,12 @@ public final class MIMEMessageConverter {
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have no (file) attachments.").toString(),
                         e);
+                    mail.setHasAttachment(false);
+                } catch (final MessagingException e) {
+                    // A messaging error occurred
+                    LOG.warn(new StringBuilder(256).append(
+                        "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                        e.getMessage()).append(".\nGoing to mark message to have no (file) attachments.").toString(), e);
                     mail.setHasAttachment(false);
                 }
             }
