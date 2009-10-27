@@ -46,13 +46,17 @@ public class CLIParser {
      */
     public CLIOption addOption(final CLIOption opt) {
         final String shortForm = opt.shortForm();
-        if (shortForm != null) {
+        final String sopt;
+        if (shortForm == null) {
+            sopt = " "; // Whitespace
+        } else {
             this.options.put("-" + shortForm, opt);
+            sopt = shortForm;
         }
         final String longForm = opt.longForm();
         this.options.put("--" + longForm, opt);
 
-        cliOptions.addOption(shortForm, longForm, opt.wantsValue(), "");
+        cliOptions.addOption(sopt, longForm, opt.wantsValue(), "");
 
         return opt;
     }
