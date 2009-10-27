@@ -795,7 +795,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         return co;
     }
 
-    public Contact getUserById(final int userid, final Connection readCon) throws OXException {
+    public Contact getUserById(final int userid, final boolean performReadCheck, final Connection readCon) throws OXException {
         Contact co = null;
         final int fid = FolderObject.SYSTEM_LDAP_FOLDER_ID;
         try {
@@ -824,7 +824,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 // OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
             }
 
-            if (!performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
+            if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
                 throw EXCEPTIONS.createOXConflictException(
                     28,
                     Integer.valueOf(folderId),

@@ -52,7 +52,6 @@ package com.openexchange.image.internal;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.conversion.DataArguments;
@@ -81,18 +80,18 @@ public final class ImageRegistryDeleteListener implements DeleteListener {
     /**
      * Remove user image from registry.
      */
-    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
         if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
             final Session session = deleteEvent.getSession();
             final Contact contact;
             try {
                 final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(session);
-                contact = contactSql.getUserById(deleteEvent.getId(), writeCon);
-            } catch (ContextException e) {
+                contact = contactSql.getUserById(deleteEvent.getId(), false, writeCon);
+            } catch (final ContextException e) {
                 // Ignore removing image if user contact can not be loaded. Then already a lot is broken.
                 LOG.warn(e.getMessage(), e);
                 return;
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 throw new DeleteFailedException(e);
             }
             final String id;
