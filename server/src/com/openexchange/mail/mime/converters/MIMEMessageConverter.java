@@ -914,15 +914,16 @@ public final class MIMEMessageConverter {
                             new StringBuilder(256).append(
                                 "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                                 e.getMessage()).append(
-                                ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have no (file) attachments.").toString(),
+                                ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/*.").toString(),
                             e);
-                        mailMessage.setHasAttachment(false);
+                        mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
                         LOG1.warn(new StringBuilder(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                            e.getMessage()).append(".\nGoing to mark message to have no (file) attachments.").toString(), e);
-                        mailMessage.setHasAttachment(false);
+                            e.getMessage()).append(
+                            ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/*.").toString(), e);
+                        mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                     } catch (final IOException e) {
                         throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                     }
@@ -1172,8 +1173,8 @@ public final class MIMEMessageConverter {
                 }
             }
             {
+                final ContentType ct = mail.getContentType();
                 try {
-                    final ContentType ct = mail.getContentType();
                     mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
                         (Multipart) msg.getContent(),
                         ct.getSubType())));
@@ -1183,15 +1184,18 @@ public final class MIMEMessageConverter {
                         new StringBuilder(256).append(
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
-                            ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have no (file) attachments.").toString(),
+                            ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/*.").toString(),
                         e);
-                    mail.setHasAttachment(false);
+                    mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {
                     // A messaging error occurred
-                    LOG.warn(new StringBuilder(256).append(
-                        "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                        e.getMessage()).append(".\nGoing to mark message to have no (file) attachments.").toString(), e);
-                    mail.setHasAttachment(false);
+                    LOG.warn(
+                        new StringBuilder(256).append(
+                            "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                            e.getMessage()).append(
+                            ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/*.").toString(),
+                        e);
+                    mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 }
             }
             {
