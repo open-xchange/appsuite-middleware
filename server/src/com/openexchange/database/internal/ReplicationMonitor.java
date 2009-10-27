@@ -193,8 +193,6 @@ public final class ReplicationMonitor {
             poolId = assign.getWritePoolId();
             if (poolId != assign.getReadPoolId() && !usedAsRead) {
                 ReplicationMonitor.increaseTransactionCounter(assign, con);
-            } else {
-                LOG.info("Not updating transaction counter.");
             }
         } else {
             poolId = assign.getReadPoolId();
