@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -90,13 +91,13 @@ public final class MailAccountAddPersonalTask implements UpdateTask {
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         final Connection con;
         try {
-            con = Database.get(contextId, false);
+            con = Database.getNoTimeout(contextId, true);
         } catch (final DBPoolingException e) {
             throw new UpdateException(e);
         }
         PreparedStatement stmt = null;
         try {
-            if (!Tools.columnExists(con, "user_mail_account", "personal")) {
+            if (!columnExists(con, "user_mail_account", "personal")) {
                 stmt =
                     con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
                 stmt.executeUpdate();
@@ -114,7 +115,7 @@ public final class MailAccountAddPersonalTask implements UpdateTask {
             throw createSQLError(e);
         } finally {
             closeSQLStuff(stmt);
-            Database.back(contextId, false, con);
+            Database.backNoTimeout(contextId, true, con);
         }
     }
 
