@@ -109,8 +109,8 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1326,7 +1326,7 @@ public class Folder extends SessionServlet {
                     updatedQueue.add(fo);
                 } else {
                     checkVirtualListFolders |= (FolderObject.PUBLIC == fo.getType());
-                    if (deletedQueue != null) {
+                    if (!ignoreDeleted) {
                         deletedQueue.add(fo);
                     }
                 }
@@ -1334,7 +1334,7 @@ public class Folder extends SessionServlet {
             /*
              * Check virtual list folders
              */
-            if (checkVirtualListFolders && deletedQueue != null) {
+            if (checkVirtualListFolders && !ignoreDeleted) {
                 if (userConf.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
                     final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                     virtualTasks.setLastModified(DATE_0);
