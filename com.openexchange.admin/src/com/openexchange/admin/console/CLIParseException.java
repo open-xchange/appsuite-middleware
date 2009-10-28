@@ -76,7 +76,18 @@ public class CLIParseException extends CLIOptionException {
      * @param cause The cause
      */
     public CLIParseException(final String[] commandLine, final Throwable cause) {
-        super("Unable to parse command line: " + Arrays.toString(commandLine), cause);
+        super(getMessage(commandLine, cause), cause);
+    }
+
+    private static String getMessage(final String[] commandLine, final Throwable cause) {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append("Unable to parse command line: ");
+        if (null != cause) {
+            sb.append(cause.getMessage());
+            sb.append("\nCommand line: ");
+        }
+        sb.append(Arrays.toString(commandLine));
+        return sb.toString();
     }
 
 }
