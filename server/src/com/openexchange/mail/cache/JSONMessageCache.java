@@ -59,6 +59,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
@@ -279,13 +280,27 @@ public final class JSONMessageCache {
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
-     * @param remove <code>true</code> to remove on presence; otherwise <code>false</code>
      * @param session The session providing user and context information
      * @return The JSON mail object or <code>null</code>
      * @throws MailException If JSON mail object cannot be returned
      */
-    public JSONObject get(final int accountId, final String fullname, final String id, final boolean remove, final Session session) throws MailException {
-        return get(accountId, fullname, id, remove, session.getUserId(), session.getContextId());
+    public JSONObject get(final int accountId, final String fullname, final String id, final Session session) throws MailException {
+        return get(accountId, fullname, id, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
+     * 
+     * @param accountId The account ID
+     * @param fullname The folder fullname
+     * @param id The mail ID
+     * @param userId The user ID
+     * @param cid The context ID
+     * @return The <b>cloned</b> JSON mail object or <code>null</code>
+     * @throws MailException If JSON mail object cannot be returned
+     */
+    public JSONObject get(final int accountId, final String fullname, final String id, final int userId, final int cid) throws MailException {
+        return getInternal(accountId, fullname, id, false, userId, cid);
     }
 
     /**
@@ -300,7 +315,7 @@ public final class JSONMessageCache {
      * @return The <b>cloned</b> JSON mail object or <code>null</code>
      * @throws MailException If JSON mail object cannot be returned
      */
-    public JSONObject get(final int accountId, final String fullname, final String id, final boolean remove, final int userId, final int cid) throws MailException {
+    private JSONObject getInternal(final int accountId, final String fullname, final String id, final boolean remove, final int userId, final int cid) throws MailException {
         final UserKey userKey = new UserKey(userId, cid);
         final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap = superMap.get(userKey);
         if (null == timeoutConcurrentMap) {
@@ -315,10 +330,17 @@ public final class JSONMessageCache {
             return null;
         }
         /*
-         * Get from map
+         * Get/Remove from map
          */
-        final FutureTask<JSONObject> future = objectMap.get(id);
+        final FutureTask<JSONObject> future = remove ? objectMap.remove(id) : objectMap.get(id);
         if (null == future) {
+            if (remove && objectMap.isEmpty()) {
+                timeoutConcurrentMap.remove(key);
+                if (timeoutConcurrentMap.isEmpty()) {
+                    superMap.remove(userKey);
+                    timeoutConcurrentMap.dispose();
+                }
+            }
             return null;
         }
         /*-
@@ -333,7 +355,7 @@ public final class JSONMessageCache {
         try {
             final int waitTimeMillis = JSONMessageCacheConfiguration.getInstance().getMaxWaitTimeMillis();
             try {
-                retval = clone(getFromFuture(future, waitTimeMillis));
+                retval = remove ? getFromFuture(future, waitTimeMillis) : clone(getFromFuture(future, waitTimeMillis));
             } catch (final TimeoutException e) {
                 // Not yet available
                 if (DEBUG) {
@@ -354,19 +376,16 @@ public final class JSONMessageCache {
                 } else {
                     future.run();
                 }
-                retval = clone(getFromFuture(future));
+                retval = remove ? getFromFuture(future) : clone(getFromFuture(future));
             }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
-        if (remove && null != retval) {
-            objectMap.remove(id);
-            if (objectMap.isEmpty()) {
-                timeoutConcurrentMap.remove(key);
-                if (timeoutConcurrentMap.isEmpty()) {
-                    superMap.remove(userKey);
-                    timeoutConcurrentMap.dispose();
-                }
+        if (remove && objectMap.isEmpty()) {
+            timeoutConcurrentMap.remove(key);
+            if (timeoutConcurrentMap.isEmpty()) {
+                superMap.remove(userKey);
+                timeoutConcurrentMap.dispose();
             }
         }
         return retval;
@@ -610,9 +629,11 @@ public final class JSONMessageCache {
      * @param fullname The folder fullname
      * @param id The mail ID
      * @param session The session providing user and context information
+     * @return The removed JSON mail object or <code>null</code>
+     * @throws MailException If JSON mail object cannot be removed
      */
-    public void remove(final int accountId, final String fullname, final String id, final Session session) {
-        remove(accountId, fullname, id, session.getUserId(), session.getContextId());
+    public JSONObject remove(final int accountId, final String fullname, final String id, final Session session) throws MailException {
+        return remove(accountId, fullname, id, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -623,28 +644,11 @@ public final class JSONMessageCache {
      * @param id The mail ID
      * @param userId The user ID
      * @param cid The context ID
+     * @return The removed JSON mail object or <code>null</code>
+     * @throws MailException If JSON mail object cannot be removed
      */
-    public void remove(final int accountId, final String fullname, final String id, final int userId, final int cid) {
-        final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> timeoutConcurrentMap =
-            superMap.get(new UserKey(userId, cid));
-        if (null == timeoutConcurrentMap) {
-            return;
-        }
-        final FolderKey key = new FolderKey(accountId, fullname);
-        /*
-         * Get JSON object map
-         */
-        final ConcurrentMap<String, FutureTask<JSONObject>> objectMap = timeoutConcurrentMap.get(key);
-        if (null == objectMap) {
-            return;
-        }
-        /*
-         * Remove from map
-         */
-        final FutureTask<JSONObject> future = objectMap.remove(id);
-        if (null != future && objectMap.isEmpty()) {
-            timeoutConcurrentMap.remove(key);
-        }
+    public JSONObject remove(final int accountId, final String fullname, final String id, final int userId, final int cid) throws MailException {
+        return getInternal(accountId, fullname, id, true, userId, cid);
     }
 
     /**
@@ -962,12 +966,55 @@ public final class JSONMessageCache {
 
     }
 
+    /**
+     * Generates a deep-clone of specified JSONObject instance.
+     * 
+     * @param source The JSONObject instance to clone
+     * @return The deep-clone of specified JSONObject instance
+     * @throws JSONException If a JSON error occurs
+     */
     private static JSONObject clone(final JSONObject source) throws JSONException {
         final JSONObject clone = new JSONObject();
         for (final Entry<String, Object> entry : source.entrySet()) {
-            clone.put(entry.getKey(), entry.getValue());
+            clone.put(entry.getKey(), cloneObject(entry.getValue()));
         }
         return clone;
+    }
+
+    /**
+     * Generates a deep-clone of specified JSONArray instance.
+     * 
+     * @param source The JSONArray instance to clone
+     * @return The deep-clone of specified JSONArray instance
+     * @throws JSONException If a JSON error occurs
+     */
+    private static JSONArray clone(final JSONArray source) throws JSONException {
+        final JSONArray clone = new JSONArray();
+        final int length = source.length();
+        for (int i = 0; i < length; i++) {
+            clone.put(cloneObject(source.get(i)));
+        }
+        return clone;
+    }
+
+    /**
+     * Clones given object. If the object is an immutable instance of <code>Boolean</code>, <code>Double</code>, <code>Integer</code>,
+     * <code>Long</code>, <code>String</code>, or the {@link JSONObject#NULL} object, the object itself is returned. Otherwise the object is
+     * an instance of <code>JSONObject</code> or <code>JSONArray</code>, then a deep clone is returned.
+     * 
+     * @param source The object to clone
+     * @return The cloned object
+     * @throws JSONException If a JSON error occurs
+     */
+    private static Object cloneObject(final Object source) throws JSONException {
+        if (source instanceof JSONObject) {
+            return clone((JSONObject) source);
+        }
+        if (source instanceof JSONArray) {
+            return clone((JSONArray) source);
+        }
+        // Immutable object needs not to be cloned: Boolean, Double, Integer, Long, String, or the JSONObject.NULL object
+        return source;
     }
 
 }

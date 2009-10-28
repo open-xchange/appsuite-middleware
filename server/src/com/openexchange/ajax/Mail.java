@@ -1141,7 +1141,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final int accountId = fa.getAccountId();
                     final String fullname = fa.getFullname();
                     if (null != cache && cache.containsKey(accountId, fullname, uid, session)) {
-                        final JSONObject rawJSONMailObject = cache.get(accountId, fullname, uid, true, session);
+                        final JSONObject rawJSONMailObject = cache.remove(accountId, fullname, uid, session); // switch to get?
                         /*
                          * Check if message should be marked as seen
                          */
