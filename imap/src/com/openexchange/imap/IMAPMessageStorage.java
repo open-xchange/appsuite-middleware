@@ -785,12 +785,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Copy messages to folder "TRASH"
              */
             try {
-                final long start = System.currentTimeMillis();
-                new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
                 if (DEBUG) {
+                    final long start = System.currentTimeMillis();
+                    new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
+                    final long time = System.currentTimeMillis() - start;
                     sb.setLength(0);
                     LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
-                        trashFullname).append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                        trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                } else {
+                    new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
                 }
             } catch (final MessagingException e) {
                 if (e.getMessage().indexOf("Over quota") > -1) {
@@ -945,13 +948,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              */
             final long[] result = new long[mailIds.length];
             final int blockSize = getIMAPProperties().getBlockSize();
-            final StringBuilder debug;
-            if (DEBUG) {
-                debug = new StringBuilder(128);
-            } else {
-                debug = null;
-            }
-
+            final StringBuilder debug = DEBUG ? new StringBuilder(128) : null;
             int offset = 0;
             final long[] remain;
             if (blockSize > 0 && mailIds.length > blockSize) {
@@ -990,12 +987,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_WRITE);
                 try {
                     if (destFolder.getMessageCount() > 0) {
-                        final long start = System.currentTimeMillis();
-                        new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
                         if (DEBUG) {
+                            final long start = System.currentTimeMillis();
+                            new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
+                            final long time = System.currentTimeMillis() - start;
                             LOG.debug(new StringBuilder(128).append(
                                 "A copy/move to default drafts folder => All messages' \\Draft flag in ").append(destFullname).append(
-                                " set in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                                " set in ").append(time).append(STR_MSEC).toString());
+                        } else {
+                            new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
                         }
                     }
                 } finally {
@@ -1007,11 +1007,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  */
                 final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_WRITE);
                 try {
-                    final long start = System.currentTimeMillis();
-                    new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
                     if (DEBUG) {
+                        final long start = System.currentTimeMillis();
+                        new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
+                        final long time = System.currentTimeMillis() - start;
                         LOG.debug(new StringBuilder(128).append("A copy/move from default drafts folder => All messages' \\Draft flag in ").append(
-                            destFullname).append(" unset in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                            destFullname).append(" unset in ").append(time).append(STR_MSEC).toString());
+                    } else {
+                        new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
                     }
                 } finally {
                     destFolder.close(false);
@@ -1027,11 +1030,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
     }
 
     private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullname, final long[] tmp, final StringBuilder sb) throws MessagingException, MailException, IMAPException {
-        long start = System.currentTimeMillis();
-        long[] uids = new CopyIMAPCommand(imapFolder, tmp, destFullname, false, fast).doCommand();
+        long[] uids;
         if (DEBUG) {
+            final long start = System.currentTimeMillis();
+            uids = new CopyIMAPCommand(imapFolder, tmp, destFullname, false, fast).doCommand();
+            final long time = System.currentTimeMillis() - start;
             sb.setLength(0);
-            LOG.debug(sb.append(tmp.length).append(" messages copied in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            LOG.debug(sb.append(tmp.length).append(" messages copied in ").append(time).append(STR_MSEC).toString());
+        } else {
+            uids = new CopyIMAPCommand(imapFolder, tmp, destFullname, false, fast).doCommand();
         }
         if (!fast && ((uids == null) || noUIDsAssigned(uids, tmp.length))) {
             /*
@@ -1040,12 +1047,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             uids = getDestinationUIDs(tmp, destFullname);
         }
         if (move) {
-            start = System.currentTimeMillis();
-            new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
             if (DEBUG) {
+                final long start = System.currentTimeMillis();
+                new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
+                final long time = System.currentTimeMillis() - start;
                 sb.setLength(0);
-                LOG.debug(sb.append(tmp.length).append(" messages marked as expunged (through system flag \\DELETED) in ").append(
-                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                LOG.debug(sb.append(tmp.length).append(" messages marked as expunged (through system flag \\DELETED) in ").append(time).append(
+                    STR_MSEC).toString());
+            } else {
+                new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
             }
             try {
                 IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp, imapConfig.getImapCapabilities().hasUIDPlus());
@@ -1326,11 +1336,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 }
             }
             if (applyFlags) {
-                final long start = System.currentTimeMillis();
-                new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(" messages in ").append(
-                        (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                    final long start = System.currentTimeMillis();
+                    new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
+                    final long time = System.currentTimeMillis() - start;
+                    LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(" messages in ").append(time).append(
+                        STR_MSEC).toString());
+                } else {
+                    new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
                 }
             }
             /*
