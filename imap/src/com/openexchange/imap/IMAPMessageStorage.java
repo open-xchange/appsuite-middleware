@@ -798,9 +798,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         final long start = System.currentTimeMillis();
         new FlagsIMAPCommand(imapFolder, uids, FLAGS_DELETED, true, true, false).doCommand();
         if (DEBUG) {
+            final long dur = System.currentTimeMillis() - start;
             sb.setLength(0);
-            LOG.debug(sb.append(uids.length).append(" messages marked as deleted (through system flag \\DELETED) in ").append(
-                (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            LOG.debug(sb.append(uids.length).append(" messages marked as deleted (through system flag \\DELETED) in ").append(dur).append(
+                STR_MSEC).toString());
         }
         /*
          * ... and perform EXPUNGE
