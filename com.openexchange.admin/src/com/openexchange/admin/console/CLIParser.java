@@ -182,7 +182,10 @@ public class CLIParser {
     }
 
     /**
-     * Equivalent to {@link #getOptionValue(Option, Object) getOptionValue(o, null)}.
+     * Gets given option's value.
+     * 
+     * @param o The option whose value shall be returned
+     * @return The option's value or <code>null</code> if not present
      */
     public Object getOptionValue(final CLIOption o) {
         return getOptionValue(o, null, false);
@@ -191,7 +194,10 @@ public class CLIParser {
     /**
      * Gets given option's value.
      * 
-     * @return the parsed value of the given option, or <code>null</code> if the option was not set
+     * @param o The option whose value shall be returned
+     * @param def The default value to return if option is not present
+     * @param remove <code>true</code> to remove option's value from parser's known values; otherwise <code>false</code>
+     * @return The option's value or <tt>def</tt> if not present
      */
     public Object getOptionValue(final CLIOption o, final Object def, final boolean remove) {
         if (null == cliCommandLine) {
