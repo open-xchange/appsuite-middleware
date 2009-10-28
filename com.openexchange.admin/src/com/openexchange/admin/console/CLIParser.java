@@ -14,7 +14,6 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
 /**
@@ -341,14 +340,17 @@ public class CLIParser {
      */
     public void parse(final String[] argv, final Locale locale) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException {
         try {
+            cliCommandLine = new GnuParser().parse(cliOptions, argv);
+            /*-
+             * 
+             * 
             try {
                 cliCommandLine = new PosixParser().parse(cliOptions, argv);
             } catch (final UnrecognizedOptionException e) {
-                /*
-                 * Retry with another parser
-                 */
+                // Retry with another parser
                 cliCommandLine = new GnuParser().parse(cliOptions, argv);
             }
+             */
 
             LongOptionProvider lp = null;
             ShortOptionProvider sp = null;
