@@ -53,8 +53,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Vector;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
@@ -175,7 +175,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected void parseAndSetAdminId(final AdminParser parser, final ResellerAdmin adm) {
         final String optionValue = (String) parser.getOptionValue(this.idOption);
         if (null != optionValue) {
-            this.adminid = Integer.parseInt(optionValue);
+            this.adminid = new Integer(optionValue);
             adm.setId(adminid);
         }
     }
@@ -201,18 +201,17 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    public static HashSet<String> getRestrictionsToRemove(final AdminParser parser, final CLIOption option) throws InvalidDataException {
-        final Vector<Object> resopts = parser.getOptionValues(option);
-        final HashSet<String> ret = new HashSet<String>();
-        
-        for (final Object opt : resopts) {
-            ret.add((String) opt);
-        }
-        if( ret.size() > 0 ) {
-            return ret;
-        } else {
+    public static HashSet<String> getRestrictionsToRemove(final AdminParser parser, final CLIOption option) {
+        final Collection<Object> resopts = parser.getOptionValues(option);
+        if (0 == resopts.size()) {
             return null;
         }
+        final HashSet<String> ret = new HashSet<String>();
+        
+        for (Object opt : resopts) {
+            ret.add((String) opt);
+        }
+        return ret;
     }
     
     public static HashSet<Restriction> getRestrictionsToEdit(final AdminParser parser, final CLIOption option) throws InvalidDataException {
@@ -227,7 +226,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     public static HashSet<Restriction> parseRestrictions(final AdminParser parser, final CLIOption option) throws InvalidDataException {
-        final Vector<Object> resopts = parser.getOptionValues(option);
+        final Collection<Object> resopts = parser.getOptionValues(option);
         HashSet<Restriction> res = new HashSet<Restriction>();
         for (final Object obj : resopts) {
             final String opt = (String) obj;
