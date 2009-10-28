@@ -1171,12 +1171,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     if (backup) {
                         imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                     }
-                    final StringBuilder debug;
-                    if (DEBUG) {
-                        debug = new StringBuilder(128);
-                    } else {
-                        debug = null;
-                    }
+                    final StringBuilder debug = DEBUG ? new StringBuilder(128) : null;
                     final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
                     final long startClear = System.currentTimeMillis();
                     if (blockSize > 0) {
@@ -1189,13 +1184,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                              */
                             if (backup) {
                                 try {
-                                    final long startCopy = System.currentTimeMillis();
-                                    new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
                                     if (DEBUG) {
+                                        final long startCopy = System.currentTimeMillis();
+                                        new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
+                                        final long time = System.currentTimeMillis() - startCopy;
                                         debug.setLength(0);
                                         LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
-                                            trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(
-                                            STR_MSEC).toString());
+                                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                                    } else {
+                                        new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
                                     }
                                 } catch (final MessagingException e) {
                                     if (e.getMessage().indexOf("Over quota") > -1) {
