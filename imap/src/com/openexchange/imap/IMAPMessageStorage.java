@@ -290,14 +290,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         final long start = System.currentTimeMillis();
         final Message[] submessages;
         if (ignoreBodystructure) {
-            submessages = new FetchIMAPCommand(
-                imapFolder,
-                isRev1,
-                subarr,
-                FetchIMAPCommand.getSafeFetchProfile(fetchProfile),
-                false,
-                true,
-                body).setDetermineAttachmentyHeader(true).doCommand();
+            submessages =
+                new FetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentyHeader(
+                    true).doCommand();
         } else {
             submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
         }
@@ -440,10 +435,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                     msgs = new Message[retvalLength];
                     System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
                 }
-                mails = convert2Mails(
-                    msgs,
-                    usedFields.toArray(),
-                    usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
+                mails =
+                    convert2Mails(msgs, usedFields.toArray(), usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     setAccountInfo(mails);
                 }
@@ -456,16 +449,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                 final long start = System.currentTimeMillis();
                 if (filter == null) {
-                    msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                    msgs =
+                        new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
                 } else {
-                    msgs = new FetchIMAPCommand(
-                        imapFolder,
-                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                        filter,
-                        fetchProfile,
-                        false,
-                        false,
-                        body).doCommand();
+                    msgs =
+                        new FetchIMAPCommand(
+                            imapFolder,
+                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                            filter,
+                            fetchProfile,
+                            false,
+                            false,
+                            body).doCommand();
                 }
                 if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(
@@ -585,14 +580,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
             usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-            Message[] msgs = new FetchIMAPCommand(
-                imapFolder,
-                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                seqnums,
-                fetchProfile,
-                false,
-                true,
-                body).doCommand();
+            Message[] msgs =
+                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqnums, fetchProfile, false, true, body).doCommand();
             /*
              * Apply thread level
              */
@@ -668,11 +657,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                  * Get ( & fetch) new messages
                  */
                 final long start = System.currentTimeMillis();
-                final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(
-                    imapFolder,
-                    fields,
-                    sortField,
-                    getIMAPProperties().isFastFetch());
+                final Message[] msgs =
+                    IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, getIMAPProperties().isFastFetch());
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;
@@ -1561,8 +1547,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return retval;
     }
 
+    private static final MailFields FIELDS_ENV =
+        new MailFields(
+            new MailField[] { MailField.SENT_DATE, MailField.FROM, MailField.TO, MailField.CC, MailField.BCC, MailField.SUBJECT });
+
     private static LowCostItem[] getLowCostItems(final MailFields fields) {
-        final List<LowCostItem> l = new ArrayList<LowCostItem>(5);
+        final Set<LowCostItem> l = EnumSet.noneOf(LowCostItem.class);
         if (fields.contains(MailField.RECEIVED_DATE)) {
             l.add(LowCostItem.INTERNALDATE);
         }
@@ -1578,17 +1568,27 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         if (fields.contains(MailField.SIZE)) {
             l.add(LowCostItem.SIZE);
         }
+        if (fields.containsAny(FIELDS_ENV)) {
+            l.add(LowCostItem.ENVELOPE);
+        }
         return l.toArray(new LowCostItem[l.size()]);
     }
 
-    private static final EnumSet<MailField> LOW_COST = EnumSet.of(
-        MailField.ID,
-        MailField.FOLDER_ID,
-        MailField.RECEIVED_DATE,
-        MailField.FLAGS,
-        MailField.COLOR_LABEL,
-        MailField.SIZE,
-        MailField.CONTENT_TYPE);
+    private static final EnumSet<MailField> LOW_COST =
+        EnumSet.of(
+            MailField.ID,
+            MailField.FOLDER_ID,
+            MailField.RECEIVED_DATE,
+            MailField.FLAGS,
+            MailField.COLOR_LABEL,
+            MailField.SIZE,
+            MailField.CONTENT_TYPE,
+            MailField.SENT_DATE,
+            MailField.FROM,
+            MailField.TO,
+            MailField.CC,
+            MailField.BCC,
+            MailField.SUBJECT);
 
     private static boolean onlyLowCostFields(final MailFields fields) {
         final Set<MailField> set = fields.toSet();

@@ -57,6 +57,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import com.openexchange.imap.IMAPTracer.TracerState;
 import com.openexchange.imap.config.IMAPConfig;
@@ -74,6 +75,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -174,6 +176,74 @@ public final class AllFetch {
             public void handleItem(final Item item, final MailMessage m, final Log logger) {
                 m.setSize(((RFC822SIZE) item).size);
             }
+        }),
+        /**
+         * ENVELOPE
+         * <p>
+         * The fields of the envelope: date, subject, from, sender, reply-to, to, cc, bcc, in-reply-to, and message-id.
+         */
+        ENVELOPE("ENVELOPE", ENVELOPE.class, new FetchItemHandler() {
+
+            public void handleItem(final Item item, final MailMessage m, final Log logger) {
+                final com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
+                // Date
+                m.setSentDate(envelope.date);
+                // Bcc, Cc, To, and From
+                m.addBcc(envelope.bcc);
+                m.addCc(envelope.cc);
+                m.addTo(envelope.to);
+                m.addFrom(envelope.from);
+                // Sender and Reply-To
+                m.addHeader("Sender", addrs2String(envelope.sender));
+                m.addHeader("Reply-To", addrs2String(envelope.replyTo));
+                // In-Reply-To and Message-Id
+                m.addHeader("In-Reply-To", envelope.inReplyTo);
+                m.addHeader("Message-Id", envelope.messageId);
+                // Subject
+                /*-
+                 * Hmm... Why does ENVELOPE FETCH response omit CR?LFs in subject?!
+                 * 
+                 * Example:
+                 * Subject: =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?=
+                 *  =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
+                 *  
+                 * is transferred as:
+                 * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
+                 */
+                final String subject;
+                if (null == envelope.subject) {
+                    subject = "";
+                } else {
+                    final char[] chars = envelope.subject.toCharArray();
+                    final StringBuilder sb = new StringBuilder(chars.length);
+                    int i = 0;
+                    while (i < chars.length) {
+                        final char c = chars[i];
+                        if ('\t' != c && '\r' != c && '\n' != c) {
+                            if (' ' == c && (i + 1) < chars.length && ' ' == chars[i + 1]) {
+                                i++;
+                            }
+                            sb.append(c);
+                        }
+                        i++;
+                    }
+                    subject = MIMEMessageUtility.decodeMultiEncodedHeader(sb.toString());
+                }
+                m.setSubject(subject);
+            }
+
+            private String addrs2String(final InternetAddress[] addrs) {
+                if (null == addrs || addrs.length == 0) {
+                    return null;
+                }
+                final StringBuilder sb = new StringBuilder(addrs.length * 16);
+                sb.append(addrs[0].toString());
+                for (int i = 1; i < addrs.length; i++) {
+                    sb.append(", ").append(addrs[i].toString());
+                }
+                return sb.toString();
+            }
+            
         });
 
         private final String item;
@@ -274,7 +344,8 @@ public final class AllFetch {
                 final String command;
                 {
                     final String lowCostItems = getFetchCommand(items);
-                    command = new StringBuilder(12 + lowCostItems.length()).append("FETCH 1:* (").append(lowCostItems).append(')').toString();
+                    command =
+                        new StringBuilder(12 + lowCostItems.length()).append("FETCH 1:* (").append(lowCostItems).append(')').toString();
                 }
                 /*
                  * Enable tracer
@@ -306,12 +377,8 @@ public final class AllFetch {
                                     final FetchResponse fr = (FetchResponse) resp;
                                     final MailMessage m = new IDMailMessage(null, fullname);
                                     for (final LowCostItem lowCostItem : items) {
-                                        final Item item = getItemOf(
-                                            lowCostItem.getItemClass(),
-                                            fr,
-                                            lowCostItem.getItemString(),
-                                            config,
-                                            session);
+                                        final Item item =
+                                            getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                         try {
                                             lowCostItem.getItemHandler().handleItem(item, m, logger);
                                         } catch (final MailException e) {
