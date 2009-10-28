@@ -217,7 +217,7 @@ public class CLIParser {
      * @return The parsed values of all occurrences of given option
      */
     public final Collection<Object> getOptionValues(final CLIOption option) {
-        final List<Object> result = new ArrayList<Object>();
+        final List<Object> result = new ArrayList<Object>(2);
 
         while (true) {
             final Object o = getOptionValue(option, null, true);
