@@ -91,9 +91,9 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -580,7 +580,7 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             // A mail folder denoted by fullname
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
                 (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
