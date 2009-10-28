@@ -68,11 +68,13 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -183,7 +185,9 @@ public final class Updates extends AbstractUserizedFolderAction {
             }
 
             /*-
+             * ++++++++++++++++++++++++++++++++++++++++------------++++++++++++++++++++++++++++++++++++++++
              * ++++++++++++++++++++++++++++++++++++++++ HERE WE GO ++++++++++++++++++++++++++++++++++++++++
+             * ++++++++++++++++++++++++++++++++++++++++------------++++++++++++++++++++++++++++++++++++++++
              */
 
             final List<Folder> updatedList = new ArrayList<Folder>();
@@ -454,7 +458,8 @@ public final class Updates extends AbstractUserizedFolderAction {
     }
 
     private static boolean isShared(final Folder f, final int userId) {
-        return PrivateType.getInstance().equals(f.getType()) && f.getCreatedBy() != userId;
+        final Type type = f.getType();
+        return SharedType.getInstance().equals(type) || PrivateType.getInstance().equals(type) && f.getCreatedBy() != userId;
     }
 
     private static boolean isPublic(final Folder f) {

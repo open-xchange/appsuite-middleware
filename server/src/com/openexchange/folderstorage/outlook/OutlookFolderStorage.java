@@ -93,9 +93,20 @@ public final class OutlookFolderStorage implements FolderStorage {
      */
     public static final String OUTLOOK_TREE_ID = "1";
 
+    /**
+     * The real tree identifier.
+     */
     private final String realTreeId;
 
+    /**
+     * This storage's folder type.
+     */
     private final FolderType folderType;
+
+    /**
+     * The folder storage registry.
+     */
+    private final OutlookFolderStorageRegistry folderStorageRegistry;
 
     /**
      * Initializes a new {@link OutlookFolderStorage}.
@@ -104,13 +115,14 @@ public final class OutlookFolderStorage implements FolderStorage {
         super();
         realTreeId = FolderStorage.REAL_TREE_ID;
         folderType = new OutlookFolderType();
+        folderStorageRegistry = OutlookFolderStorageRegistry.getInstance();
     }
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         /*
          * Delegate clear invocation to real storage
          */
-        final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
@@ -136,12 +148,33 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        // TODO: Exclude unsupported folders like infostore folders
+
+        /*-
+         * 
+         * 
+        final Folder folder =
+            folderStorageRegistry.getDedicatedFolderStorage(FolderStorage.REAL_TREE_ID, folderId).getFolder(
+                FolderStorage.REAL_TREE_ID,
+                folderId,
+                storageType,
+                storageParameters);
+        if (InfostoreContentType.getInstance().equals(folder.getContentType())) {
+            return false;
+        }
+         */
+
+        return true;
+
+        /*-
+         * 
         return Select.containsFolder(
             storageParameters.getContext().getContextId(),
             Integer.parseInt(treeId),
             storageParameters.getUser().getId(),
             folderId,
             storageType);
+         */
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
@@ -151,7 +184,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final String folderId = folder.getID();
         final String realParentId;
         {
-            final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
             }
@@ -199,8 +232,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
         // Get default folder
-        final FolderStorage byContentType =
-            OutlookFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, contentType);
+        final FolderStorage byContentType = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
         if (null == byContentType) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
@@ -234,7 +266,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final Folder rootFolder;
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
                 }
@@ -263,7 +295,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final Folder privateFolder;
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
                 }
@@ -293,7 +325,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final Folder realFolder;
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
                 }
@@ -347,7 +379,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final SortableId[] ids;
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, parentId);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
                 }
@@ -407,8 +439,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final TreeMap<String, String> treeMap = new TreeMap<String, String>(new FolderNameComparator(locale));
             {
                 // Get real folder storage
-                final FolderStorage folderStorage =
-                    OutlookFolderStorageRegistry.getInstance().getDedicatedFolderStorage(realTreeId, parentId);
+                final FolderStorage folderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, parentId);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
                 }
@@ -432,7 +463,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             {
                 // Get real folder storage for primary mail folder
                 final String fullname = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, fullname);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, fullname);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, fullname);
                 }
@@ -469,7 +500,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         {
             {
                 // Get real folder storage
-                final FolderStorage folderStorage = OutlookFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, parentId);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
                 }

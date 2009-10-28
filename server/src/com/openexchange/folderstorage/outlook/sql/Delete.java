@@ -137,9 +137,10 @@ public final class Delete {
      * @param folderId The folder identifier
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @param con The connection to use
+     * @return <code>true</code> if a folder denoted by given identifier was deleted; otherwise <code>false</code>
      * @throws FolderException If delete fails
      */
-    public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws FolderException {
+    public static boolean deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
 
         if (backup) {
@@ -239,7 +240,7 @@ public final class Delete {
             stmt.setInt(pos++, tree);
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
-            stmt.executeUpdate();
+            return stmt.executeUpdate() > 0;
         } catch (final SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
