@@ -464,8 +464,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                                 false,
                                 body).doCommand();
                     }
-                    LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(
-                        (System.currentTimeMillis() - start)).append("msec").toString());
+                    final long time = System.currentTimeMillis() - start;
+                    LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append(
+                        "msec").toString());
                 } else {
                     if (filter == null) {
                         msgs =
