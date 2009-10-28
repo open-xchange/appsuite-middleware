@@ -1,3 +1,7 @@
+* 2009-10-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #14727: Fixed NPE on missing FETCH item
+
 * 2009-10-27 - thorben.betten@open-xchange.com
 
  - Bugfix #14716: More robust detection if a message contains file attachments

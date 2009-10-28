@@ -1837,6 +1837,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
      * @throws MailException If mail account cannot be obtained
      */
     private MailMessage setAccountInfo(final MailMessage mailMessage) throws MailException {
+        if (null == mailMessage) {
+            return null;
+        }
         final MailAccount account = getMailAccount();
         final String name = account.getName();
         final int id = account.getId();
@@ -1858,8 +1861,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         final int id = account.getId();
         for (int i = 0; i < mailMessages.length; i++) {
             final MailMessage mailMessage = mailMessages[i];
-            mailMessage.setAccountId(id);
-            mailMessage.setAccountName(name);
+            if (null != mailMessage) {
+                mailMessage.setAccountId(id);
+                mailMessage.setAccountName(name);
+            }
         }
         return mailMessages;
     }
