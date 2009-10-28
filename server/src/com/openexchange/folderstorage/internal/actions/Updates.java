@@ -146,8 +146,8 @@ public final class Updates extends AbstractUserizedFolderAction {
      * @throws FolderException If updates request fails
      */
     public UserizedFolder[][] doUpdates(final String treeId, final Date since, final boolean ignoreDeleted, final ContentType[] includeContentTypes) throws FolderException {
-        final List<FolderStorage> realFolderStorages = new ArrayList<FolderStorage>(
-            Arrays.asList(folderStorageDiscoverer.getTreeFolderStorages(FolderStorage.REAL_TREE_ID)));
+        final List<FolderStorage> realFolderStorages =
+            new ArrayList<FolderStorage>(Arrays.asList(folderStorageDiscoverer.getTreeFolderStorages(FolderStorage.REAL_TREE_ID)));
         for (final FolderStorage folderStorage : realFolderStorages) {
             folderStorage.startTransaction(storageParameters, false);
         }
@@ -161,9 +161,8 @@ public final class Updates extends AbstractUserizedFolderAction {
                 if (s instanceof ServerSession) {
                     userConfiguration = ((ServerSession) s).getUserConfiguration();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(
-                        user.getId(),
-                        storageParameters.getContext());
+                    userConfiguration =
+                        UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), storageParameters.getContext());
                 }
             }
             final boolean isReal = FolderStorage.REAL_TREE_ID.equals(treeId);
@@ -182,6 +181,11 @@ public final class Updates extends AbstractUserizedFolderAction {
                 checkOpenedStorage(treeStorage, false, openedStorages);
                 treeChecker = new TreeCheckerImpl(treeStorage, storageParameters);
             }
+
+            /*-
+             * ++++++++++++++++++++++++++++++++++++++++ HERE WE GO ++++++++++++++++++++++++++++++++++++++++
+             */
+
             final List<Folder> updatedList = new ArrayList<Folder>();
             final List<Folder> deletedList = ignoreDeleted ? null : new ArrayList<Folder>();
             boolean addSystemSharedFolder;
@@ -192,11 +196,8 @@ public final class Updates extends AbstractUserizedFolderAction {
                  */
                 final List<Folder> modifiedFolders = new ArrayList<Folder>();
                 for (final FolderStorage folderStorage : realFolderStorages) {
-                    final String[] modifiedFolderIDs = folderStorage.getModifiedFolderIDs(
-                        treeId,
-                        since,
-                        includeContentTypes,
-                        storageParameters);
+                    final String[] modifiedFolderIDs =
+                        folderStorage.getModifiedFolderIDs(treeId, since, includeContentTypes, storageParameters);
                     for (int i = 0; i < modifiedFolderIDs.length; i++) {
                         try {
                             modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderIDs[i], storageParameters));
@@ -344,14 +345,8 @@ public final class Updates extends AbstractUserizedFolderAction {
             final UserizedFolder[] modified = new UserizedFolder[updatedList.size()];
             for (int i = 0; i < modified.length; i++) {
                 final Folder folder = updatedList.get(i);
-                modified[i] = getUserizedFolder(
-                    folder,
-                    getEffectivePermission(folder),
-                    treeId,
-                    true,
-                    true,
-                    storageParameters,
-                    realFolderStorages);
+                modified[i] =
+                    getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, storageParameters, realFolderStorages);
             }
             /*
              * Generate array of deleted folders (if non-null)
@@ -363,14 +358,8 @@ public final class Updates extends AbstractUserizedFolderAction {
                 deleted = new UserizedFolder[deletedList.size()];
                 for (int i = 0; i < deleted.length; i++) {
                     final Folder folder = deletedList.get(i);
-                    deleted[i] = getUserizedFolder(
-                        folder,
-                        getEffectivePermission(folder),
-                        treeId,
-                        true,
-                        true,
-                        storageParameters,
-                        realFolderStorages);
+                    deleted[i] =
+                        getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, storageParameters, realFolderStorages);
                 }
             }
             /*
