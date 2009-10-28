@@ -1,6 +1,7 @@
 * 2009-10-28 - thorben.betten@open-xchange.com
 
  - Bugfix #14727: Fixed NPE on missing FETCH item
+ - Partial bugfix #14495: Using a writable connection when checking for contact collector folder
 
 * 2009-10-27 - thorben.betten@open-xchange.com
 

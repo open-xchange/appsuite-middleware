@@ -49,11 +49,15 @@
 
 package com.openexchange.contactcollector.folder;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.settings.SettingException;
@@ -61,6 +65,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.Login;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -84,41 +89,61 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
     }
 
     public void handleLogin(final Login login) throws LoginException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = ServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new LoginException(e);
+        }
         final Session session = login.getSession();
         final int cid = session.getContextId();
         final int userId = session.getUserId();
+        final Connection con;
         try {
-            final Integer folderId = ServerUserSetting.getContactCollectionFolder(cid, userId);
-            if (folderId != null && new OXFolderAccess(login.getContext()).exists(folderId.intValue())) {
+            con = databaseService.getWritable(cid);
+        } catch (final DBPoolingException e) {
+            throw new LoginException(e);
+        }
+        try {
+            final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
+
+            final Integer folderId = serverUserSetting.getIContactCollectionFolder(cid, userId);
+            final OXFolderAccess folderAccess = new OXFolderAccess(con, login.getContext());
+            if (folderId != null && folderAccess.exists(folderId.intValue())) {
                 /*
                  * Folder already exists
                  */
                 return;
             }
-            if(ServerUserSetting.isContactCollectionEnabled(cid, userId) == Boolean.FALSE) {
+            if (!serverUserSetting.isIContactCollectionEnabled(cid, userId).booleanValue()) {
                 /*
-                 * Explicitely turned off
+                 * Explicitly turned off
                  */
                 return;
             }
             /*
-             * Should collect, or not explicitely set, so create folder
+             * Should collect, or not explicitly set, so create folder
              */
-            
+
             /*
              * Create folder
              */
-            final String name = new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-            final int parent = new OXFolderAccess(login.getContext()).getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
-            final int collectFolderID = OXFolderManager.getInstance(session).createFolder(
-                createNewContactFolder(userId, name, parent),
-                true,
-                System.currentTimeMillis()).getObjectID();
+            final int collectFolderID;
+            {
+                final String name =
+                    new StringHelper(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                final int parent = folderAccess.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
+                collectFolderID =
+                    OXFolderManager.getInstance(session, folderAccess, con, con).createFolder(
+                        createNewContactFolder(userId, name, parent),
+                        true,
+                        System.currentTimeMillis()).getObjectID();
+            }
             /*
              * Remember folder ID
              */
-            ServerUserSetting.setContactCollectionFolder(cid, userId, collectFolderID);
-            ServerUserSetting.setContactColletion(cid, userId, true);
+            serverUserSetting.setIContactCollectionFolder(cid, userId, Integer.valueOf(collectFolderID));
+            serverUserSetting.setIContactColletion(cid, userId, true);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
                     ") successfully created for user ").append(userId).append(" in context ").append(cid));
@@ -127,6 +152,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             throw new LoginException(e);
         } catch (final SettingException e) {
             throw new LoginException(e);
+        } finally {
+            databaseService.backWritable(cid, con);
         }
     }
 
