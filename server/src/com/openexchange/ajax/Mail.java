@@ -1295,7 +1295,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setTimestamp(null);
         if (DEBUG) {
             final long d = System.currentTimeMillis() - s;
-            LOG.debug(new StringBuilder(64).append("/ajax/mail?action=get performed in ").append(d).append("msec"));
+            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=get performed in ").append(d).append("msec"));
         }
         return response;
     }
