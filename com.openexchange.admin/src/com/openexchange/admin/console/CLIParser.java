@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -340,7 +341,14 @@ public class CLIParser {
      */
     public void parse(final String[] argv, final Locale locale) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException {
         try {
-            cliCommandLine = new PosixParser().parse(cliOptions, argv);
+            try {
+                cliCommandLine = new PosixParser().parse(cliOptions, argv);
+            } catch (final UnrecognizedOptionException e) {
+                /*
+                 * Retry with another parser
+                 */
+                cliCommandLine = new GnuParser().parse(cliOptions, argv);
+            }
 
             LongOptionProvider lp = null;
             ShortOptionProvider sp = null;
