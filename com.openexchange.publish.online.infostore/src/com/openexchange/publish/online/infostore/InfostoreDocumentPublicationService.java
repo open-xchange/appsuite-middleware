@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.online.infostore;
 
+import static com.openexchange.publish.online.infostore.FormStrings.FORM_LABEL_URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +62,6 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
-
 
 /**
  * {@link InfostoreDocumentPublicationService}
@@ -78,23 +78,22 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     private static final String URL = "url";
 
     private Random random = new Random();
-    
+
     private PublicationTarget buildTarget() {
         PublicationTarget target = new PublicationTarget();
         target.setDisplayName("Publish Infostore Document");
         target.setId("com.openexchange.publish.online.infostore.document");
         target.setModule("infostore/object");
         target.setPublicationService(this);
-        
+
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(FormElement.link("url", "URL", false, null));
-        
+        form.add(FormElement.link("url", FORM_LABEL_URL, false, null));
+
         target.setFormDescription(form);
-        
+
         return target;
     }
-    
-    
+
     private PublicationTarget target;
 
     @Override
@@ -104,8 +103,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         }
         return target;
     }
-    
-    
+
     @Override
     public void beforeCreate(Publication publication) throws PublicationException {
         super.beforeCreate(publication);
@@ -125,14 +123,14 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         long l2 = random.nextLong();
         return Long.toHexString(l1)+Long.toHexString(l2);
     }
-    
+
     @Override
     public void modifyOutgoing(Publication publication) throws PublicationException {
         super.modifyOutgoing(publication);
         publication.getConfiguration().put(URL, PREFIX+"/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get(SECRET));
         publication.getConfiguration().remove(SECRET);
     }
-    
+
     public Publication getPublication(Context ctx, String secret) throws PublicationException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put(SECRET, secret);
@@ -142,7 +140,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         }
         return result.iterator().next();
     }
-    
+
     @Override
     protected SecurityStrategy getSecurityStrategy() {
         return ALLOW_ALL;

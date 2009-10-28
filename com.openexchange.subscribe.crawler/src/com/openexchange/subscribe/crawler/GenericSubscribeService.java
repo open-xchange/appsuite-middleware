@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.crawler;
 
+import static com.openexchange.subscribe.crawler.FormStrings.FORM_LABEL_LOGIN;
+import static com.openexchange.subscribe.crawler.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -79,7 +81,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     private String workflowString;
 
     public GenericSubscribeService(String displayName, String id, String workflowString, int priority) {
-        FORM.add(FormElement.input(LOGIN, "Login")).add(FormElement.password("password", "Password"));
+        FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
 
         SOURCE.setDisplayName(displayName);
         SOURCE.setId(id);
