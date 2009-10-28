@@ -296,10 +296,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         } else {
             submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
         }
-        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+        final long time = System.currentTimeMillis() - start;
+        mailInterfaceMonitor.addUseTime(time);
         if (DEBUG) {
-            LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(
-                (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(time).append(
+                STR_MSEC).toString());
         }
         System.arraycopy(submessages, 0, messages, lastPos, submessages.length);
     }
@@ -447,24 +448,39 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
                 final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-                final long start = System.currentTimeMillis();
-                if (filter == null) {
-                    msgs =
-                        new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
-                } else {
-                    msgs =
-                        new FetchIMAPCommand(
-                            imapFolder,
-                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                            filter,
-                            fetchProfile,
-                            false,
-                            false,
-                            body).doCommand();
-                }
                 if (DEBUG) {
+                    final long start = System.currentTimeMillis();
+                    if (filter == null) {
+                        msgs =
+                            new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                    } else {
+                        msgs =
+                            new FetchIMAPCommand(
+                                imapFolder,
+                                imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                                filter,
+                                fetchProfile,
+                                false,
+                                false,
+                                body).doCommand();
+                    }
                     LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
+                } else {
+                    if (filter == null) {
+                        msgs =
+                            new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                    } else {
+                        msgs =
+                            new FetchIMAPCommand(
+                                imapFolder,
+                                imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                                filter,
+                                fetchProfile,
+                                false,
+                                false,
+                                body).doCommand();
+                    }
                 }
                 if ((msgs == null) || (msgs.length == 0)) {
                     return new MailMessage[0];
