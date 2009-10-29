@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.authentication.LoginException;
-import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.container.FolderObject;
@@ -91,7 +91,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
     public void handleLogin(final Login login) throws LoginException {
         final DatabaseService databaseService;
         try {
-            databaseService = ServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class, true);
         } catch (final ServiceException e) {
             throw new LoginException(e);
         }

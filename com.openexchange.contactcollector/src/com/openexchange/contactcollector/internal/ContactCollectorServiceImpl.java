@@ -55,7 +55,7 @@ import java.util.concurrent.Future;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.ContactCollectorService;
-import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -83,7 +83,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         /*
          * Delegate to thread pool if available
          */
-        final ThreadPoolService threadPoolService = ServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = CCServiceRegistry.getInstance().getService(ThreadPoolService.class);
         if (null == threadPoolService) {
             // Run in calling thread
             new Memorizer(addresses, session, aliasesMap).run();

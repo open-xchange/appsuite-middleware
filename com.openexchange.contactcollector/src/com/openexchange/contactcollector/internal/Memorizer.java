@@ -68,7 +68,7 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
-import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -137,7 +137,7 @@ public class Memorizer implements Runnable {
         final Set<InternetAddress> aliases;
         final UserConfiguration userConfig;
         try {
-            final ServiceRegistry serviceRegistry = ServiceRegistry.getInstance();
+            final CCServiceRegistry serviceRegistry = CCServiceRegistry.getInstance();
             final ContextService contextService = serviceRegistry.getService(ContextService.class);
             if (null == contextService) {
                 LOG.warn("Contact collector run aborted: missing context service");
@@ -208,7 +208,7 @@ public class Memorizer implements Runnable {
             return -1;
         }
         final ContactInterface contactInterface =
-            ServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(
+            CCServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(
                 contact.getParentFolderID(),
                 ctx.getContextId()).newContactInterface(session);
         Contact foundContact = null;

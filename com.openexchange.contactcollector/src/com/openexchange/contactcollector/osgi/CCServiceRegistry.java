@@ -71,7 +71,7 @@ public final class CCServiceRegistry extends com.openexchange.server.osgiservice
      * Initializes a new {@link CCServiceRegistry}.
      */
     private CCServiceRegistry() {
-        super(2);
+        super(6);
     }
 
 }

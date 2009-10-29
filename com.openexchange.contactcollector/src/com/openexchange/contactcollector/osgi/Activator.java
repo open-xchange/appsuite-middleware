@@ -94,7 +94,7 @@ public class Activator extends DeferredActivator {
          * (Re-)Initialize service registry with available services
          */
         {
-            final ServiceRegistry registry = ServiceRegistry.getInstance();
+            final CCServiceRegistry registry = CCServiceRegistry.getInstance();
             registry.clearRegistry();
             final Class<?>[] classes = getNeededServices();
             for (int i = 0; i < classes.length; i++) {
@@ -141,7 +141,7 @@ public class Activator extends DeferredActivator {
         /*
          * Clear service registry
          */
-        ServiceRegistry.getInstance().clearRegistry();
+        CCServiceRegistry.getInstance().clearRegistry();
     }
 
     @Override
@@ -153,12 +153,12 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
+        CCServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        ServiceRegistry.getInstance().removeService(clazz);
+        CCServiceRegistry.getInstance().removeService(clazz);
     }
 
 }
