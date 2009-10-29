@@ -93,7 +93,7 @@ public final class LoginExceptionMessages implements LocalizableStrings {
 
     // This message is used if the password of the user expired and must be changed.
     // %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
-    public static final String PASSWORD_EXPIRED_MSG = "Your password has " + "expired. In order to change it, please log in to %1$s.";
+    public static final String PASSWORD_EXPIRED_MSG = "Your password has expired. In order to change it, please log in to %1$s.";
 
     // Indicates an unresolvable user
     // %1$s is replaced with the login name of the user.
