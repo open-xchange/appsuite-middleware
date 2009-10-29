@@ -50,7 +50,7 @@ public class CLIParser {
     public CLIParser(final boolean posix) {
         super();
         this.posix = posix;
-        cliOptions = new Options();
+        cliOptions = posix ? new Options() : null;
         options = new HashMap<String, CLIOption>(16);
         values = new HashMap<String, List<Object>>(16);
     }
