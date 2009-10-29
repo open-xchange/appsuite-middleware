@@ -1,3 +1,8 @@
+* 2009-10-29 - dennis.sieben@open-xchange.com
+
+ - Bugfix #14734: Reporting Tool needs to be available for 6.12
+   - Changed StatisticTool to use abstract JMX class
+
 * 2009-09-07 - marcus.klein@open-xchange.com
 
  - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
