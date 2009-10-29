@@ -453,13 +453,13 @@ public class CLIParser {
                      * Distinguish between "--arg=value" and "--arg value"
                      */
                     final int pos = argument.indexOf('=');
-                    if (pos != -1) {
-                        position = lookUpOption(argument.substring(0, pos), argument.substring(pos + 1), args, locale, position);
-                    } else {
+                    if (pos == -1) {
                         /*
                          * Deal with "--arg value"
                          */
                         position = lookUpOption(argument, null, args, locale, position);
+                    } else {
+                        position = lookUpOption(argument.substring(0, pos), argument.substring(pos + 1), args, locale, position);
                     }
                 } else if (len > 2) {
                     /*
