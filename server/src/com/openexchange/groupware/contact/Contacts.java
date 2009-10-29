@@ -2456,10 +2456,7 @@ public final class Contacts {
             st = readCon.createStatement();
             final ContactSql cs = new ContactMySql(null);
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
-            if (rs.next()) {
-                return true;
-            }
-            return false;
+            return (rs.next());
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final DBPoolingException se) {
@@ -2483,10 +2480,7 @@ public final class Contacts {
             st = readCon.createStatement();
             final ContactSql cs = new ContactMySql(null);
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
-            if (rs.next()) {
-                return true;
-            }
-            return false;
+            return (rs.next());
         } catch (final ContextException d) {
             throw new ContactException(d);
         } catch (final SQLException se) {
