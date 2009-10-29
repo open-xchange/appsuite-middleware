@@ -106,6 +106,12 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link ContactRequest} - Handles AJAX requests for contact module.
+ *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class ContactRequest {
 
     public static final String ACTION_GET_USER = "getuser";
