@@ -268,8 +268,7 @@ public final class MALPollPushListener implements PushListener {
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
         properties.put(PushEventConstants.PROPERTY_SESSION, session);
-        final String fullname = folder;
-        properties.put(PushEventConstants.PROPERTY_FOLDER, fullname);
+        properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
         /*
          * Create event with push topic
          */
@@ -279,7 +278,7 @@ public final class MALPollPushListener implements PushListener {
          */
         eventAdmin.postEvent(event);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(fullname).append("\" for user ").append(userId).append(
+            LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(userId).append(
                 " in context ").append(contextId).toString());
         }
     }
