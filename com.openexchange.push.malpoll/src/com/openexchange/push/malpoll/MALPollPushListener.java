@@ -82,9 +82,9 @@ public final class MALPollPushListener implements PushListener {
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
-    private static String folder;
+    private static volatile String folder;
 
-    private static long periodMillis;
+    private static volatile long periodMillis;
 
     /**
      * Sets static folder fullname.
@@ -127,7 +127,7 @@ public final class MALPollPushListener implements PushListener {
 
     private final boolean ignoreOnGlobal;
 
-    private ScheduledTimerTask timerTask;
+    private volatile ScheduledTimerTask timerTask;
 
     private volatile Set<String> uids;
 
@@ -177,11 +177,12 @@ public final class MALPollPushListener implements PushListener {
      * Closes this listener.
      */
     public void close() {
-        if (null != timerTask) {
+        final ScheduledTimerTask scheduledTimerTask = timerTask;
+        if (null != scheduledTimerTask) {
             /*
              * Release all timer task resources
              */
-            timerTask.cancel();
+            scheduledTimerTask.cancel();
             timerTask = null;
             /*
              * ... and purge from timer service
@@ -267,7 +268,8 @@ public final class MALPollPushListener implements PushListener {
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
         properties.put(PushEventConstants.PROPERTY_SESSION, session);
-        properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
+        final String fullname = folder;
+        properties.put(PushEventConstants.PROPERTY_FOLDER, fullname);
         /*
          * Create event with push topic
          */
@@ -277,7 +279,7 @@ public final class MALPollPushListener implements PushListener {
          */
         eventAdmin.postEvent(event);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(userId).append(
+            LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(fullname).append("\" for user ").append(userId).append(
                 " in context ").append(contextId).toString());
         }
     }
