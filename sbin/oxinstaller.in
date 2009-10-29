@@ -116,6 +116,10 @@ ISDOUBLELOGINPERMITTED_LONG=DoubleLoginPerm
 ISDOUBLELOGINPERMITTED_VALUES="true false"
 SESSIONDEFAULTLIFETIME=3600000
 SESSIONDEFAULTLIFETIME_LONG=sessionDefLifeTime
+ADD_LICENSE=
+ADD_LICENSE_LONG=add-license
+NO_LICENSE=
+NO_LICENSE_LONG=no-license
 
 #
 CONFIGDB_USER=openexchange
@@ -151,7 +155,7 @@ OLPORT=44335
 OLPORT_LONG=push-outlook-port
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXOBJECT_LINK_HOSTNAME"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$ADMIN_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$GWSCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$UDP_SESS_DISC_PORT_LONG'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$ADMIN_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$GWSCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$UDP_SESS_DISC_PORT_LONG:,$NO_LICENSE_LONG,$ADD_LICENSE_LONG:'
 
 usage() {
     echo
@@ -174,7 +178,7 @@ cat<<EOF
 
 Example:
 
-  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret
+  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --add-license=f-o-o-b-a-r
 
 use -D for Debug mode
 
@@ -385,6 +389,14 @@ while true; do
 	    OLPORT=$2
 	    shift 2
 	    ;;
+	--$ADD_LICENSE_LONG)
+	    ADD_LICENSE=$2
+	    shift 2
+	    ;;
+        --$NO_LICENSE_LONG)
+	    NO_LICENSE=true
+	    shift
+	    ;;
 	-h|--help)
 	    usage
 	    exit
@@ -409,6 +421,9 @@ if [ "$USER" != "root" ]; then
     die "need to be root in order to setup the system"
 fi
 
+if [ -z "$NO_LICENSE" ]; then
+    MUSTOPTS="$MUSTOPTS ADD_LICENSE"
+fi
 
 # generic parameter checking
 for opt in $MUSTOPTS; do
@@ -416,7 +431,7 @@ for opt in $MUSTOPTS; do
     opt_var_long=$(eval echo \$${opt}_LONG)
     if [ -z "$opt_var" ]; then
         usage;
-	    die "missing required option --$opt_var_long"
+	die "missing required option --$opt_var_long"
     fi
 done
 
@@ -442,6 +457,8 @@ done
 SQL_URL="jdbc:mysql://\$SQLHOST:\$SQLPORT/\$SQLDB"
 SQLDB=$CONFIGDB_DBNAME
 SQLOPTS=$SQLOPTS
+LICENSEFILE="/opt/open-xchange/etc/common/licensekeys.properties"
+
 
 # groupware
 setup_groupware() 
@@ -578,6 +595,34 @@ setup_admin()
 	echo "*** RMI authentication is disabled"
     fi
 }
+
+addLicense() {
+    local lic=$1
+    local nr=$2
+    echo "adding $lic"
+    echo "com.openexchange.licensekey.${nr}=$lic" >> $LICENSEFILE
+}
+
+# license file ops
+if [ -n "$ADD_LICENSE" ]; then
+    if [ ! -e $LICENSEFILE ]; then
+	addLicense "$ADD_LICENSE" 1
+    else
+	if ! grep "$ADD_LICENSE" $LICENSEFILE >/dev/null; then
+	    cnt=1
+	    while [ true ]; do
+		lstr="com.openexchange.licensekey.${cnt}"
+		if ! grep -E "^$lstr" $LICENSEFILE > /dev/null; then
+		    addLicense "$ADD_LICENSE" $cnt
+		    break
+		fi
+		cnt=$(( $cnt + 1 ))
+	    done
+	else
+	    echo "skipping license $ADD_LICENSE, it's already in $LICENSEFILE"
+	fi
+    fi
+fi
 
 if [ -d ${SERVERCONF} ]; then
     setup_groupware
