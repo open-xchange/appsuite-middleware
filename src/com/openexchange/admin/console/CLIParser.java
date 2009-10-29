@@ -36,7 +36,7 @@ public class CLIParser {
     private final Options cliOptions;
 
     /**
-     * Initializes a new {@link CLIParser}.
+     * Initializes a new non-strict {@link CLIParser}.
      */
     public CLIParser() {
         this(false);
