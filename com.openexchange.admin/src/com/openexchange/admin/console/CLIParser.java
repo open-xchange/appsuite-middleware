@@ -438,7 +438,7 @@ public class CLIParser {
         final List<String> otherArgs = new ArrayList<String>(2);
         int position = 0;
         while (position < args.length) {
-            String argument = args[position];
+            final String argument = args[position];
             if ('-' == argument.charAt(0)) {
                 if (OPT_START.equals(argument)) {
                     /*
@@ -448,24 +448,18 @@ public class CLIParser {
                     break;
                 }
                 final int len = argument.length();
-                String valueArg = null;
                 if (len > 1 && '-' == argument.charAt(1)) {
                     /*
                      * Distinguish between "--arg=value" and "--arg value"
                      */
                     final int pos = argument.indexOf('=');
                     if (pos != -1) {
-                        /*
-                         * Deal with "--arg=value"
-                         */
-                        valueArg = argument.substring(pos + 1);
-                        argument = argument.substring(0, pos);
-                        position = lookUpOption(argument, valueArg, args, locale, position);
+                        position = lookUpOption(argument.substring(0, pos), argument.substring(pos + 1), args, locale, position);
                     } else {
                         /*
                          * Deal with "--arg value"
                          */
-                        position = lookUpOption(argument, valueArg, args, locale, position);
+                        position = lookUpOption(argument, null, args, locale, position);
                     }
                 } else if (len > 2) {
                     /*
@@ -473,9 +467,10 @@ public class CLIParser {
                      */
                     final StringBuilder sb = new StringBuilder(2).append('-');
                     for (int i = 1; i < len; i++) {
-                        final CLIOption opt = this.options.get(sb.append(argument.charAt(i)).toString());
+                        final char c = argument.charAt(i);
+                        final CLIOption opt = this.options.get(sb.append(c).toString());
                         if (opt == null) {
-                            throw new CLIUnknownSuboptionException(argument, argument.charAt(i));
+                            throw new CLIUnknownSuboptionException(argument, c);
                         }
                         if (opt.wantsValue()) {
                             throw new CLIUnknownOptionException(
@@ -490,7 +485,7 @@ public class CLIParser {
                     /*
                      * Deal with "-arg value"
                      */
-                    position = lookUpOption(argument, valueArg, args, locale, position);
+                    position = lookUpOption(argument, null, args, locale, position);
                 }
             } else {
                 otherArgs.add(argument);
@@ -513,7 +508,7 @@ public class CLIParser {
         final Object value;
         if (opt.wantsValue()) {
             String val = valueArg;
-            if (val == null) {
+            if (null == val) {
                 if (++pos < args.length) {
                     val = args[pos];
                 }
