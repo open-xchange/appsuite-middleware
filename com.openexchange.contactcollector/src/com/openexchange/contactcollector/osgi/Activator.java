@@ -61,6 +61,7 @@ import com.openexchange.contactcollector.preferences.ContactCollectFolder;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailAccess;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailTransport;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
@@ -147,7 +148,7 @@ public class Activator extends DeferredActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ContextService.class, UserService.class, UserConfigurationService.class, ContactInterfaceDiscoveryService.class,
-            ThreadPoolService.class };
+            ThreadPoolService.class, DatabaseService.class };
     }
 
     @Override
