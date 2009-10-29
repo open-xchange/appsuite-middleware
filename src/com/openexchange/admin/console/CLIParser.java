@@ -23,22 +23,36 @@ import org.apache.commons.cli.UnrecognizedOptionException;
  */
 public class CLIParser {
 
+    private static final String OPT_START = "--";
+
+    private final boolean posix;
+
     private String[] remainingArgs;
 
-    private final Map<String, CLIOption> options = new HashMap<String, CLIOption>(16);
+    private final Map<String, CLIOption> options;
 
-    private final Map<String, List<Object>> values = new HashMap<String, List<Object>>(16);
+    private final Map<String, List<Object>> values;
 
     private final Options cliOptions;
-
-    private CommandLine cliCommandLine;
 
     /**
      * Initializes a new {@link CLIParser}.
      */
     public CLIParser() {
+        this(false);
+    }
+
+    /**
+     * Initializes a new {@link CLIParser}.
+     * 
+     * @param posix <code>true</code> to strictly parse command line in POSIX notation; otherwise <code>false</code>
+     */
+    public CLIParser(final boolean posix) {
         super();
+        this.posix = posix;
         cliOptions = new Options();
+        options = new HashMap<String, CLIOption>(16);
+        values = new HashMap<String, List<Object>>(16);
     }
 
     /**
@@ -50,18 +64,16 @@ public class CLIParser {
     public CLIOption addOption(final CLIOption opt) {
         final String shortForm = opt.shortForm();
         final StringBuilder sb = new StringBuilder(16);
-        final String sopt;
-        if (shortForm == null) {
-            sopt = " "; // Whitespace
-        } else {
+        if (shortForm != null) {
             this.options.put(sb.append('-').append(shortForm).toString(), opt);
             sb.setLength(0);
-            sopt = shortForm;
         }
         final String longForm = opt.longForm();
-        this.options.put(sb.append("--").append(longForm).toString(), opt);
+        this.options.put(sb.append(OPT_START).append(longForm).toString(), opt);
 
-        cliOptions.addOption(sopt, longForm, opt.wantsValue(), "");
+        if (posix) {
+            cliOptions.addOption(shortForm == null ? " " : shortForm, longForm, opt.wantsValue(), "");
+        }
 
         return opt;
     }
@@ -200,10 +212,6 @@ public class CLIParser {
      * @return The option's value or <tt>def</tt> if not present
      */
     public Object getOptionValue(final CLIOption o, final Object def, final boolean remove) {
-        if (null == cliCommandLine) {
-            return def;
-        }
-
         final List<Object> vals = values.get(o.longForm());
         if (null == vals) {
             return def;
@@ -255,7 +263,7 @@ public class CLIParser {
             this.options.remove(sb.append('-').append(shortForm).toString());
             sb.setLength(0);
         }
-        this.options.remove(sb.append("--").append(option.longForm()).toString());
+        this.options.remove(sb.append(OPT_START).append(option.longForm()).toString());
     }
 
     /**
@@ -339,23 +347,20 @@ public class CLIParser {
      * @throws CLIUnknownOptionException If an unknown option occurs
      */
     public void parse(final String[] argv, final Locale locale) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException {
+        if (!posix) {
+            manualParse(argv, locale);
+            return;
+        }
+        /*
+         * Parse in strict POSIX notation
+         */
         try {
-            cliCommandLine = new PosixParser().parse(cliOptions, argv);
-            /*-
-             * 
-             * 
-            try {
-                cliCommandLine = new PosixParser().parse(cliOptions, argv);
-            } catch (final UnrecognizedOptionException e) {
-                // Retry with another parser
-                cliCommandLine = new GnuParser().parse(cliOptions, argv);
-            }
-             */
+            final CommandLine cliCommandLine = new PosixParser().parse(cliOptions, argv);
 
             LongOptionProvider lp = null;
             ShortOptionProvider sp = null;
 
-            final StringBuilder sb = new StringBuilder(16).append("--");
+            final StringBuilder sb = new StringBuilder(16).append(OPT_START);
 
             for (@SuppressWarnings("unchecked") final Iterator<Option> iter = cliCommandLine.iterator(); iter.hasNext();) {
                 final Option parsedOption = iter.next();
@@ -384,29 +389,6 @@ public class CLIParser {
                     handleOption(opt, shortForm, locale, sp);
                 }
             }
-
-            /*-
-             * TODO: Enable this to allow unknown options
-             * 
-            for (final CLIOption opt : new HashSet<CLIOption>(options.values())) {
-                final String shortForm = opt.shortForm();
-                if (null == shortForm) {
-                    if (null == lp) {
-                        lp = new LongOptionProvider(opt.longForm(), cliCommandLine);
-                    } else {
-                        lp.set(opt.longForm());
-                    }
-                    handleOption(opt, shortForm, locale, lp);
-                } else {
-                    if (null == sp) {
-                        sp = new ShortOptionProvider(shortForm.charAt(0), cliCommandLine);
-                    } else {
-                        sp.set(shortForm.charAt(0));
-                    }
-                    handleOption(opt, shortForm, locale, sp);
-                }
-            }
-             */
         } catch (final UnrecognizedOptionException e) {
             throw new CLIUnknownOptionException(extractOption(e.getMessage()), e);
         } catch (final MissingArgumentException e) {
@@ -452,4 +434,111 @@ public class CLIParser {
         }
     }
 
+    private final void manualParse(final String[] args, final Locale locale) throws CLIIllegalOptionValueException, CLIUnknownOptionException {
+        final List<String> otherArgs = new ArrayList<String>(2);
+        int position = 0;
+        while (position < args.length) {
+            String argument = args[position];
+            if ('-' == argument.charAt(0)) {
+                if (OPT_START.equals(argument)) {
+                    /*
+                     * End of options
+                     */
+                    position++;
+                    break;
+                }
+                final int len = argument.length();
+                String valueArg = null;
+                if (len > 1 && '-' == argument.charAt(1)) {
+                    /*
+                     * Distinguish between "--arg=value" and "--arg value"
+                     */
+                    final int pos = argument.indexOf('=');
+                    if (pos != -1) {
+                        /*
+                         * Deal with "--arg=value"
+                         */
+                        valueArg = argument.substring(pos + 1);
+                        argument = argument.substring(0, pos);
+                        position = lookUpOption(argument, valueArg, args, locale, position);
+                    } else {
+                        /*
+                         * Deal with "--arg value"
+                         */
+                        position = lookUpOption(argument, valueArg, args, locale, position);
+                    }
+                } else if (len > 2) {
+                    /*
+                     * Deal with "-xyz"
+                     */
+                    final StringBuilder sb = new StringBuilder(2).append('-');
+                    for (int i = 1; i < len; i++) {
+                        final CLIOption opt = this.options.get(sb.append(argument.charAt(i)).toString());
+                        if (opt == null) {
+                            throw new CLIUnknownSuboptionException(argument, argument.charAt(i));
+                        }
+                        if (opt.wantsValue()) {
+                            throw new CLIUnknownOptionException(
+                                argument,
+                                new StringBuilder(32).append("Missing argument for option '").append(argument).append('\'').toString());
+                        }
+                        sb.setLength(1);
+                        addValue(opt, opt.parseValue(null, locale));
+                    }
+                    position++;
+                } else {
+                    /*
+                     * Deal with "-arg value"
+                     */
+                    position = lookUpOption(argument, valueArg, args, locale, position);
+                }
+            } else {
+                otherArgs.add(argument);
+                position++;
+            }
+        }
+        for (; position < args.length; ++position) {
+            otherArgs.add(args[position]);
+        }
+
+        remainingArgs = otherArgs.toArray(new String[otherArgs.size()]);
+    }
+
+    private int lookUpOption(final String argument, final String valueArg, final String[] args, final Locale locale, final int position) throws CLIIllegalOptionValueException, CLIUnknownOptionException {
+        final CLIOption opt = options.get(argument);
+        if (null == opt) {
+            throw new CLIUnknownOptionException(argument);
+        }
+        int pos = position;
+        final Object value;
+        if (opt.wantsValue()) {
+            String val = valueArg;
+            if (val == null) {
+                if (++pos < args.length) {
+                    val = args[pos];
+                }
+            }
+            value = opt.parseValue(val, locale);
+        } else {
+            value = opt.parseValue(null, locale);
+        }
+        addValue(opt, value);
+        return ++pos;
+    }
+
+    private void addValue(final CLIOption opt, final Object value) {
+        final String longForm = opt.longForm();
+
+        List<Object> vals = values.get(longForm);
+        if (null == vals) {
+            vals = new ArrayList<Object>(2);
+            values.put(longForm, vals);
+            final String shortForm = opt.shortForm();
+            if (null != shortForm) {
+                values.put(shortForm, vals);
+            }
+        }
+
+        vals.add(value);
+    }
 }
