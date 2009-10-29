@@ -114,9 +114,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactRequest {
 
+    private static final Log LOG = LogFactory.getLog(ContactRequest.class);
+
     public static final String ACTION_GET_USER = "getuser";
 
     public static final String ACTION_LIST_USER = "listuser";
+
+    /*-
+     * ++++++++++++++++++++++++++++++ Member section ++++++++++++++++++++++++++++++
+     */
 
     final ServerSession session;
 
@@ -124,10 +130,13 @@ public class ContactRequest {
 
     private Date timestamp;
 
-    private static final Log LOG = LogFactory.getLog(ContactRequest.class);
-
+    /**
+     * Gets the time stamp.
+     * 
+     * @return The time stamp
+     */
     public Date getTimestamp() {
-        return timestamp;
+        return timestamp == null ? null : new Date(timestamp.getTime());
     }
 
     /**
