@@ -195,7 +195,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             registry.addUpdateTask(new com.openexchange.groupware.calendar.update.UpdateFolderIdInReminder());
             // Version 11
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask());
-            // SP4 starts here.
+
+            // +++++++++++++++++++++++++++++++++ SP4 starts here. +++++++++++++++++++++++++++++++++
+
             // Version 12
             // Searches for duplicate infostore folder names and changes them.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.InfostoreResolveFolderNameCollisions());
@@ -255,7 +257,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // viewable anymore in the calendar. This update task tries to replace the wrong
             // folder identifier with the correct one.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CorrectWrongAppointmentFolder());
-            // SP5 starts from here.
+
+            // +++++++++++++++++++++++++++++++++ SP5 starts from here. +++++++++++++++++++++++++++++++++
+
             // Version 26
             // Introduces foreign key constraints on infostore_document and del_infostore_document.
             // Assures these constraints are met.
@@ -287,7 +291,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 34
             // Adds an index on prg_dates_members to improve performance in large contexts.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AddAppointmentParticipantsIndexTask());
-            // Version 6.10 starts here.
+
+            // +++++++++++++++++++++++++++++++++ Version 6.10 starts here. +++++++++++++++++++++++++++++++++
+
             // Version 40
             // Adds necessary tables for multiple mail accounts and migrates mail account data
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask());
@@ -328,7 +334,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 62
             // Runs the task AlterUidCollation again. The schema creating scripts did not contain the fix for v6.10.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.AlterUidCollation2());
-            // Version 6.12 starts here.
+
+            // +++++++++++++++++++++++++++++++++ Version 6.12 starts here. +++++++++++++++++++++++++++++++++
+
             // Version 70
             // New config parameters to set the default confirmation status of newly created appointments
             // for participants in private an public folders
@@ -342,7 +350,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 76
             // Drops incorrect admin permission on top level infostore folder
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.RemoveAdminPermissionOnInfostoreTask());
-            // Version 6.14 starts here.
+
+            // +++++++++++++++++++++++++++++++++ Version 6.14 starts here. +++++++++++++++++++++++++++++++++
+
             // Version 90
             // Creates the table replicationMonitor for monitoring if slaves are completely replicated.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateReplicationTableTask());
@@ -355,6 +365,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 96
             // Adds "personal" column to to mail/transport account table.
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask());
+            // Version 98
+            // Removes duplicate contact collector folders
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DuplicateContactCollectFolderRemoverTask());
 
             // TODO: Enable virtual folder tree update task when needed
             // Version XY
