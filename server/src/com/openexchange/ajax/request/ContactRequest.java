@@ -124,9 +124,9 @@ public class ContactRequest {
      * ++++++++++++++++++++++++++++++ Member section ++++++++++++++++++++++++++++++
      */
 
-    final ServerSession session;
+    private final ServerSession session;
 
-    final TimeZone timeZone;
+    private final TimeZone timeZone;
 
     private Date timestamp;
 
