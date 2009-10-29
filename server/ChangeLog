@@ -1,3 +1,7 @@
+* 2009-10-29 - marcus.klein@open-xchange.com
+
+ - Bugfix 14724: Fixed null value returned when requesting Outlook updater the first time.
+
 * 2009-10-29 - thorben.betten@open-xchange.com
 
  - Bugfix #14495: Added update task to remove duplicate contact collector folders

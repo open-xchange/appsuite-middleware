@@ -53,47 +53,37 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-
 /**
  * {@link DeferredRegistryRegistration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public abstract class DeferredRegistryRegistration<R,P> extends ServiceTracker {
-    
+
     private P item;
-    
+
     public DeferredRegistryRegistration(BundleContext context, Class<R> registryClass, P item) {
         super(context, registryClass.getName(), null);
         this.item = item;
     }
-    
+
     public abstract void register(R registry, P item);
+
     public abstract void unregister(R registry, P item);
-    
-    public void close() {
-        R service = (R) getService();
-        if(service != null) {
-            unregister(service, item);
-        }
-        super.close();
-    }
-    
+
     public void remove() {
         close();
     }
-    
+
     @Override
     public Object addingService(ServiceReference reference) {
         R registry = (R) context.getService(reference);
         register(registry, item);
         return registry;
     }
-    
+
     @Override
     public void removedService(ServiceReference reference, Object service) {
         unregister((R) service, item);
     }
-    
 }
