@@ -59,6 +59,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import org.json.JSONObject;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -179,7 +180,13 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                             public Object call() throws Exception {
                                 for (final SetableFutureTask<JSONObject> f : futures) {
                                     try {
-                                        q.offer(mailAccess.getMessageStorage().getMessage(fullname, f.mailId, false));
+                                        final MailMessage mailMessage =
+                                            mailAccess.getMessageStorage().getMessage(fullname, f.mailId, false);
+                                        if (null == mailMessage) {
+                                            f.setException(new MailException(MailException.Code.MAIL_NOT_FOUND, f.mailId, fullname));
+                                        } else {
+                                            q.offer(mailMessage);
+                                        }
                                     } catch (final Exception e) {
                                         // LOG1.error(e.getMessage(), e);
                                         f.setException(e);
@@ -200,16 +207,18 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                      */
                     final List<String> markUnseen = new ArrayList<String>(size);
                     for (final SetableFutureTask<JSONObject> f : futures) {
-                        final MailMessage mm = q.take();
-                        try {
-                            if (!mm.isSeen()) {
-                                // Mail is unseen
-                                markUnseen.add(mm.getMailId());
+                        if (!f.hasException()) {
+                            final MailMessage m = q.take();
+                            try {
+                                if (!m.isSeen()) {
+                                    // Mail is unseen
+                                    markUnseen.add(m.getMailId());
+                                }
+                                f.set(MessageWriter.writeRawMailMessage(accountId, m));
+                            } catch (final Exception e) {
+                                // LOG1.error(e.getMessage(), e);
+                                f.setException(e);
                             }
-                            f.set(MessageWriter.writeRawMailMessage(accountId, mm));
-                        } catch (final Exception e) {
-                            // LOG1.error(e.getMessage(), e);
-                            f.setException(e);
                         }
                     }
                     if (!markUnseen.isEmpty()) {
@@ -321,6 +330,8 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
         final String mailId;
 
+        boolean exceptionSet;
+
         SetableFutureTask(final Callable<V> callable, final String mailId) {
             super(callable);
             this.mailId = mailId;
@@ -346,7 +357,18 @@ public final class MailPrefetcherCallable implements Callable<Object> {
         @Override
         public void setException(final Throwable t) {
             super.setException(t);
+            exceptionSet = true;
         }
+
+        /**
+         * Checks whether an exception instance was previously set by {@link #setException(Throwable)}.
+         * 
+         * @return <code>true</code> if an exception instance was set; otherwise <code>false</code>
+         */
+        public boolean hasException() {
+            return exceptionSet;
+        }
+
     } // End of SetableFutureTask
 
 }
