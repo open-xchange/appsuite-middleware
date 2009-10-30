@@ -166,7 +166,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws MailException {
-        return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
+        try {
+            return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
+        } catch (final NumberFormatException e) {
+            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            return null;
+        }
     }
 
     /**
@@ -191,7 +196,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws MailException {
-        return getImageAttachmentLong(folder, Long.parseLong(mailId), contentId);
+        try {
+            return getImageAttachmentLong(folder, Long.parseLong(mailId), contentId);
+        } catch (final NumberFormatException e) {
+            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            return null;
+        }
     }
 
     /**
@@ -217,7 +227,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws MailException {
-        return getMessageLong(folder, Long.parseLong(mailId), markSeen);
+        try {
+            return getMessageLong(folder, Long.parseLong(mailId), markSeen);
+        } catch (final NumberFormatException e) {
+            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            return null;
+        }
     }
 
     /**
