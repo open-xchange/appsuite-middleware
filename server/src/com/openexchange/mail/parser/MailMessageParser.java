@@ -73,6 +73,7 @@ import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -91,7 +92,6 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -233,17 +233,15 @@ public final class MailMessageParser {
          */
         final MailPart mailPart = MailConfig.usePartModifier() ? MailConfig.getPartModifier().modifyPart(mailPartArg) : mailPartArg;
         /*
-         * Set part infos
+         * Set part information
          */
         int partCount = partCountArg;
         final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
         final long size = mailPart.getSize();
-        final String filename = getFileName(
-            mailPart.getFileName(),
-            getSequenceId(prefix, partCount),
-            mailPart.getContentType().getBaseType());
-        final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
-            MIMETypes.MIME_APPL_OCTET);
+        final String filename =
+            getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), mailPart.getContentType().getBaseType());
+        final ContentType contentType =
+            mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MIMETypes.MIME_APPL_OCTET);
         /*
          * Parse part dependent on its MIME type
          */
@@ -253,7 +251,8 @@ public final class MailMessageParser {
          * final boolean isInline = ((disposition == null
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
-        if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN) || contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED) || contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT) || contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
+        final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
+        if (isText(lcct)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
                 final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -309,7 +308,7 @@ public final class MailMessageParser {
                     return;
                 }
             }
-        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+        } else if (isHtml(lcct)) {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -324,7 +323,7 @@ public final class MailMessageParser {
                     return;
                 }
             }
-        } else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+        } else if (isMultipart(lcct)) {
             final int count = mailPart.getEnclosedCount();
             if (count == -1) {
                 throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
@@ -348,7 +347,7 @@ public final class MailMessageParser {
                 final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
                 parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
             }
-        } else if (contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
+        } else if (isImage(lcct)) {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -362,7 +361,7 @@ public final class MailMessageParser {
                 stop = true;
                 return;
             }
-        } else if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+        } else if (isMessage(lcct)) {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -377,7 +376,7 @@ public final class MailMessageParser {
                     return;
                 }
             }
-        } else if (TNEFUtils.isTNEFMimeType(mailPart.getContentType().toString())) {
+        } else if (TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*
                  * Here go with TNEF encoded messages. Since TNEF library is based on JavaMail API we are forced to use JavaMail-specific
@@ -450,8 +449,9 @@ public final class MailMessageParser {
                 final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
                 if (attrBody != null) {
                     final TNEFBodyPart bodyPart = new TNEFBodyPart();
-                    bodyPart.setText((String) attrBody.getValue());
-                    bodyPart.setSize(((String) attrBody.getValue()).length());
+                    final String value = (String) attrBody.getValue();
+                    bodyPart.setText(value);
+                    bodyPart.setSize(value.length());
                     parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }
                 final MAPIProps mapiProps = message.getMAPIProps();
@@ -465,12 +465,12 @@ public final class MailMessageParser {
                         final byte[] decompressedBytes = TNEFUtils.decompressRTF(ris.toByteArray());
                         final String contentTypeStr;
                         {
-                            final String charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(decompressedBytes));
-                            contentTypeStr = new StringBuilder(MIMETypes.MIME_TEXT_RTF).append("; charset=").append(charset).toString();
+                            // final String charset = CharsetDetector.detectCharset(new
+                            // UnsynchronizedByteArrayInputStream(decompressedBytes));
+                            contentTypeStr = "application/rtf";
                         }
                         /*
                          * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
-                         * for MIME type "text/rtf" when set by setContent() method
                          */
                         bodyPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
                         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
@@ -525,9 +525,8 @@ public final class MailMessageParser {
                             /*
                              * Nested message
                              */
-                            final MimeMessage nestedMessage = TNEFMime.convert(
-                                MIMEDefaultSession.getDefaultSession(),
-                                attachment.getNestedMessage());
+                            final MimeMessage nestedMessage =
+                                TNEFMime.convert(MIMEDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
@@ -592,7 +591,7 @@ public final class MailMessageParser {
                     return;
                 }
             }
-        } else if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_DELIVERY_STATUS) || contentType.isMimeType(MIMETypes.MIME_MESSAGE_DISP_NOTIFICATION) || contentType.isMimeType(MIMETypes.MIME_TEXT_RFC822_HDRS) || contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CARD) || contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CALENDAR)) {
+        } else if (isSpecial(lcct)) {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -692,8 +691,8 @@ public final class MailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder(PREFIX.length() + sequenceId.length() + 5).append(PREFIX).append(sequenceId).append(
-                '.');
+            final StringBuilder sb =
+                new StringBuilder(PREFIX.length() + sequenceId.length() + 5).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -787,6 +786,122 @@ public final class MailMessageParser {
             }
         }
         return charset;
+    }
+
+    private static final String PRIMARY_TEXT = "text/";
+
+    private static final String[] SUB_TEXT = { "plain", "enriched", "richtext", "rtf" };
+
+    /**
+     * Checks if content type matches one of text content types:
+     * <ul>
+     * <li><code>text/plain</code></li>
+     * <li><code>text/enriched</code></li>
+     * <li><code>text/richtext</code></li>
+     * <li><code>text/rtf</code></li>
+     * </ul>
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches text; otherwise <code>false</code>
+     */
+    private static boolean isText(final String contentType) {
+        if (contentType.startsWith(PRIMARY_TEXT, 0)) {
+            final int off = PRIMARY_TEXT.length();
+            for (final String subtype : SUB_TEXT) {
+                if (contentType.startsWith(subtype, off)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static final String PRIMARY_HTML = "text/htm";
+
+    /**
+     * Checks if content type matches <code>text/htm*</code> content type.
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches <code>text/htm*</code>; otherwise <code>false</code>
+     */
+    private static boolean isHtml(final String contentType) {
+        return contentType.startsWith(PRIMARY_HTML, 0);
+    }
+
+    private static final String PRIMARY_MULTI = "multipart/";
+
+    /**
+     * Checks if content type matches <code>multipart/*</code> content type.
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches <code>multipart/*</code>; otherwise <code>false</code>
+     */
+    private static boolean isMultipart(final String contentType) {
+        return contentType.startsWith(PRIMARY_MULTI, 0);
+    }
+
+    private static final String PRIMARY_IMAGE = "image/";
+
+    /**
+     * Checks if content type matches <code>image/*</code> content type.
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches <code>image/*</code>; otherwise <code>false</code>
+     */
+    private static boolean isImage(final String contentType) {
+        return contentType.startsWith(PRIMARY_IMAGE, 0);
+    }
+
+    private static final String PRIMARY_RFC822 = "message/rfc822";
+
+    /**
+     * Checks if content type matches <code>message/rfc822</code> content type.
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
+     */
+    private static boolean isMessage(final String contentType) {
+        return contentType.startsWith(PRIMARY_RFC822, 0);
+    }
+
+    private static final String PRIMARY_MESSAGE = "message/";
+
+    private static final String[] SUB_SPECIAL1 = { "delivery-status", "disposition-notification" };
+
+    private static final String[] SUB_SPECIAL2 = { "rfc822-headers", "vcard", "x-vcard", "calendar", "x-vcalendar" };
+
+    /**
+     * Checks if content type matches one of special content types:
+     * <ul>
+     * <li><code>message/delivery-status</code></li>
+     * <li><code>message/disposition-notification</code></li>
+     * <li><code>text/rfc822-headers</code></li>
+     * <li><code>text/vcard</code></li>
+     * <li><code>text/x-vcard</code></li>
+     * <li><code>text/calendar</code></li>
+     * <li><code>text/x-vcalendar</code></li>
+     * </ul>
+     * 
+     * @param contentType The content type
+     * @return <code>true</code> if content type matches special; otherwise <code>false</code>
+     */
+    private static boolean isSpecial(final String contentType) {
+        if (contentType.startsWith(PRIMARY_TEXT, 0)) {
+            final int off = PRIMARY_TEXT.length();
+            for (final String subtype : SUB_SPECIAL1) {
+                if (contentType.startsWith(subtype, off)) {
+                    return true;
+                }
+            }
+        } else if (contentType.startsWith(PRIMARY_MESSAGE, 0)) {
+            final int off = PRIMARY_MESSAGE.length();
+            for (final String subtype : SUB_SPECIAL2) {
+                if (contentType.startsWith(subtype, off)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
