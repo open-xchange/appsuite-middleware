@@ -1140,105 +1140,115 @@ public class Mail extends PermissionServlet implements UploadListener {
                      */
                     final int accountId = fa.getAccountId();
                     final String fullname = fa.getFullname();
-                    if (null != cache && cache.containsKey(accountId, fullname, uid, session)) {
+                    boolean fetchFromStorage = true;
+                    if (null != cache) {
                         final JSONObject rawJSONMailObject = cache.remove(accountId, fullname, uid, session); // switch to get?
-                        /*
-                         * Check if message should be marked as seen
-                         */
-                        final String flagsKey = MailJSONField.FLAGS.getKey();
-                        final int flags = rawJSONMailObject.getInt(flagsKey);
-                        final boolean wasUnseen = (flags & MailMessage.FLAG_SEEN) == 0;
-                        final boolean doUnseen = (unseen && wasUnseen);
-                        if (!doUnseen && wasUnseen) {
+                        if (null != rawJSONMailObject) {
+                            fetchFromStorage = false;
                             /*
-                             * Mark message as seen
+                             * Check if message should be marked as seen
                              */
-                            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-                            if (null == threadPool) {
-                                // In this thread
-                                mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);
-                            } else {
-                                // In another thread
-                                final org.apache.commons.logging.Log logger = LOG;
-                                final Callable<Object> seenCallable = new Callable<Object>() {
+                            final String flagsKey = MailJSONField.FLAGS.getKey();
+                            final int flags = rawJSONMailObject.getInt(flagsKey);
+                            final boolean wasUnseen = (flags & MailMessage.FLAG_SEEN) == 0;
+                            final boolean doUnseen = (unseen && wasUnseen);
+                            if (!doUnseen && wasUnseen) {
+                                /*
+                                 * Mark message as seen
+                                 */
+                                final ThreadPoolService threadPool =
+                                    ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                                if (null == threadPool) {
+                                    // In this thread
+                                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);
+                                } else {
+                                    // In another thread
+                                    final org.apache.commons.logging.Log logger = LOG;
+                                    final Callable<Object> seenCallable = new Callable<Object>() {
 
-                                    public Object call() throws Exception {
-                                        try {
-                                            final String[] ids = new String[] { uid };
-                                            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                                            mailAccess.connect(false);
-                                            final int unread;
+                                        public Object call() throws Exception {
                                             try {
-                                                mailAccess.getMessageStorage().updateMessageFlags(
-                                                    fullname,
-                                                    ids,
-                                                    MailMessage.FLAG_SEEN,
-                                                    true);
-                                                unread = mailAccess.getUnreadMessagesCount(fullname);
-                                            } finally {
-                                                mailAccess.close(true);
-                                            }
-                                            /*
-                                             * Update caches
-                                             */
-                                            cache.switchSeenFlag(accountId, fullname, ids, true, unread, session);
-                                            try {
-                                                final int userId = session.getUserId();
-                                                final int cid = session.getContextId();
-                                                if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, userId, cid)) {
-                                                    /*
-                                                     * Update cache entries
-                                                     */
-                                                    MailMessageCache.getInstance().updateCachedMessages(
+                                                final String[] ids = new String[] { uid };
+                                                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+                                                mailAccess.connect(false);
+                                                final int unread;
+                                                try {
+                                                    mailAccess.getMessageStorage().updateMessageFlags(
+                                                        fullname,
                                                         ids,
+                                                        MailMessage.FLAG_SEEN,
+                                                        true);
+                                                    unread = mailAccess.getUnreadMessagesCount(fullname);
+                                                } finally {
+                                                    mailAccess.close(true);
+                                                }
+                                                /*
+                                                 * Update caches
+                                                 */
+                                                cache.switchSeenFlag(accountId, fullname, ids, true, unread, session);
+                                                try {
+                                                    final int userId = session.getUserId();
+                                                    final int cid = session.getContextId();
+                                                    if (MailMessageCache.getInstance().containsFolderMessages(
                                                         accountId,
                                                         fullname,
                                                         userId,
-                                                        cid,
-                                                        new MailListField[] { MailListField.FLAGS },
-                                                        new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
+                                                        cid)) {
+                                                        /*
+                                                         * Update cache entries
+                                                         */
+                                                        MailMessageCache.getInstance().updateCachedMessages(
+                                                            ids,
+                                                            accountId,
+                                                            fullname,
+                                                            userId,
+                                                            cid,
+                                                            new MailListField[] { MailListField.FLAGS },
+                                                            new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
+                                                    }
+                                                } catch (final OXCachingException e) {
+                                                    logger.error(e.getMessage(), e);
                                                 }
-                                            } catch (final OXCachingException e) {
+                                                return null;
+                                            } catch (final Exception e) {
                                                 logger.error(e.getMessage(), e);
+                                                throw e;
                                             }
-                                            return null;
-                                        } catch (final Exception e) {
-                                            logger.error(e.getMessage(), e);
-                                            throw e;
                                         }
-                                    }
-                                };
-                                threadPool.submit(ThreadPools.task(seenCallable));
-                            }
-                            /*
-                             * Switch \Seen flag in JSON mail object
-                             */
-                            rawJSONMailObject.put(flagsKey, (flags | MailMessage.FLAG_SEEN));
-                            /*
-                             * Decrement UNREAD count
-                             */
-                            final String unreadKey = MailJSONField.UNREAD.getKey();
-                            final int unread = rawJSONMailObject.optInt(unreadKey);
-                            rawJSONMailObject.put(unreadKey, unread > 0 ? unread - 1 : unread);
-                        }
-                        /*
-                         * Turn to request-specific JSON mail object
-                         */
-                        final JSONObject mailObject =
-                            new JSONObjectConverter(rawJSONMailObject, displayMode, session, usmNoSave, session.getContext()).raw2Json();
-                        if (wasUnseen) {
-                            try {
-                                if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
-                                    session.getContextId(),
-                                    session.getUserId()).booleanValue()) {
-                                    triggerContactCollector(session, mailObject);
+                                    };
+                                    threadPool.submit(ThreadPools.task(seenCallable));
                                 }
-                            } catch (final SettingException e) {
-                                LOG.warn("Contact collector could not be triggered.", e);
+                                /*
+                                 * Switch \Seen flag in JSON mail object
+                                 */
+                                rawJSONMailObject.put(flagsKey, (flags | MailMessage.FLAG_SEEN));
+                                /*
+                                 * Decrement UNREAD count
+                                 */
+                                final String unreadKey = MailJSONField.UNREAD.getKey();
+                                final int unread = rawJSONMailObject.optInt(unreadKey);
+                                rawJSONMailObject.put(unreadKey, unread > 0 ? unread - 1 : unread);
                             }
+                            /*
+                             * Turn to request-specific JSON mail object
+                             */
+                            final JSONObject mailObject =
+                                new JSONObjectConverter(rawJSONMailObject, displayMode, session, usmNoSave, session.getContext()).raw2Json();
+                            if (wasUnseen) {
+                                try {
+                                    if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
+                                        session.getContextId(),
+                                        session.getUserId()).booleanValue()) {
+                                        triggerContactCollector(session, mailObject);
+                                    }
+                                } catch (final SettingException e) {
+                                    LOG.warn("Contact collector could not be triggered.", e);
+                                }
+                            }
+                            data = mailObject;
                         }
-                        data = mailObject;
-                    } else {
+                    }
+                    if (fetchFromStorage) {
                         /*
                          * Get message
                          */
