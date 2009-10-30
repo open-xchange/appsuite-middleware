@@ -118,7 +118,7 @@ public class RdbUserStorage extends UserStorage {
         int userId = -1;
         try {
             stmt = con.prepareStatement(SELECT_ID);
-            stmt.setLong(1, context.getContextId());
+            stmt.setInt(1, context.getContextId());
             stmt.setString(2, uid);
             result = stmt.executeQuery();
             if (result.next()) {
@@ -168,7 +168,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             stmt = con.prepareStatement(getIN(SELECT_USER, userIds.length));
             int pos = 1;
-            stmt.setLong(pos++, ctx.getContextId());
+            stmt.setInt(pos++, ctx.getContextId());
             for (int userId : userIds) {
                 stmt.setInt(pos++, userId);
             }
@@ -306,7 +306,7 @@ public class RdbUserStorage extends UserStorage {
             String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", users.size());
             stmt = con.prepareStatement(sql);
             int pos = 1;
-            stmt.setLong(pos++, context.getContextId());
+            stmt.setInt(pos++, context.getContextId());
             for (User user : users.values()) {
                 stmt.setInt(pos++, user.getId());
             }
