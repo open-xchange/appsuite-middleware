@@ -243,7 +243,13 @@ public final class JSONObjectConverter {
                 final JSONObject htmlObject = extractObject(bodyArr, "text/htm");
                 if (null == htmlObject) {
                     // No HTML found
-                    final JSONObject jo = bodyLen == 0 ? dummyObject() : bodyArr.getJSONObject(0);
+                    final JSONObject jo;
+                    if (0 == bodyLen) {
+                        jo = dummyObject();
+                    } else {
+                        jo = bodyArr.getJSONObject(0);
+                        bodyArr.put(0, JSONObject.NULL);
+                    }
                     handleTextPart(jo, attachmentsArr);
                 } else {
                     // HTML part found
@@ -261,6 +267,7 @@ public final class JSONObjectConverter {
                     } else {
                         // HTML part found
                         final JSONObject jo = bodyArr.getJSONObject(0);
+                        bodyArr.put(0, JSONObject.NULL);
                         if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
                             asDisplayText(
                                 jo,
@@ -283,7 +290,16 @@ public final class JSONObjectConverter {
                     handleTextPart(textObject, attachmentsArr);
                 }
             }
-
+            /*
+             * Add remaining body parts as attachments
+             */
+            if (bodyLen > 1) {
+                for (int i = 0; i < bodyLen; i++) {
+                    if (!bodyArr.isNull(i)) {
+                        asAttachment(bodyArr.optJSONObject(i), attachmentsArr);
+                    }
+                }
+            }
             /*
              * Add attachments
              */
@@ -356,6 +372,21 @@ public final class JSONObjectConverter {
         } else {
             // As-is
             attachmentsArr.put(htmlObject);
+        }
+    }
+
+    private void asAttachment(final JSONObject bodyObject, final JSONArray attachmentsArr) throws MailException {
+        try {
+            final JSONObject jsonObject = new JSONObject();
+            copyValue(MailListField.ID.getKey(), bodyObject, jsonObject);
+            copyValue(MailJSONField.CONTENT_TYPE.getKey(), bodyObject, jsonObject);
+            copyValue(MailJSONField.DISPOSITION.getKey(), bodyObject, jsonObject);
+            copyValue(MailJSONField.SIZE.getKey(), bodyObject, jsonObject);
+            copyValue(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), bodyObject, jsonObject);
+            jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            attachmentsArr.put(jsonObject);
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
     }
 
@@ -480,6 +511,8 @@ public final class JSONObjectConverter {
             final String ct = jsonObject.optString(MailJSONField.CONTENT_TYPE.getKey());
             if (null != ct && ct.startsWith(contentType)) {
                 retval = jsonObject;
+                // Remove from body array
+                bodyArr.put(i, JSONObject.NULL);
             }
         }
         return retval;
@@ -493,6 +526,8 @@ public final class JSONObjectConverter {
             final String ct = jsonObject.optString(MailJSONField.CONTENT_TYPE.getKey());
             if (null != ct && startsWithEither(ct, contentTypes)) {
                 retval = jsonObject;
+                // Remove from body array
+                bodyArr.put(i, JSONObject.NULL);
             }
         }
         return retval;
