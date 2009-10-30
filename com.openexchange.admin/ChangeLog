@@ -1,3 +1,7 @@
+* 2009-10-30 - marcus.klein@open-xchange.com
+ 
+ - Bugfix #14730: Fixed command-line parsing
+
 * 2009-10-20 - marcus.klein@open-xchange.com
 
  - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.
