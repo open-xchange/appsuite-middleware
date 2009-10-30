@@ -73,6 +73,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.ConversionService;
@@ -469,7 +470,7 @@ public final class Init {
     }
 
     private static void startAndInjectContactCollector() throws Exception {
-        final com.openexchange.contactcollector.osgi.ServiceRegistry reg = com.openexchange.contactcollector.osgi.ServiceRegistry.getInstance();
+        final CCServiceRegistry reg = CCServiceRegistry.getInstance();
         reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
         reg.addService(ContextService.class, services.get(ContextService.class));
         reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));

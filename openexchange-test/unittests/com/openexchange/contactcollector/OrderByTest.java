@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
-import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -113,7 +113,7 @@ public class OrderByTest extends TestCase {
     }
 
     public void testOrderByUserfield20() throws Throwable {
-        final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
+        final ContactInterface contactInterface = CCServiceRegistry.getInstance().getService(
             ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
             session);
 

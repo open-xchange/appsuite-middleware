@@ -55,7 +55,7 @@ import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
-import com.openexchange.contactcollector.osgi.ServiceRegistry;
+import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -173,7 +173,7 @@ public class ContactCollectorTest extends TestCase {
     }
 
     private List<Contact> searchContact(final String pattern) throws Exception {
-        final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
+        final ContactInterface contactInterface = CCServiceRegistry.getInstance().getService(
             ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
             session);
 
@@ -206,7 +206,7 @@ public class ContactCollectorTest extends TestCase {
         final List<Contact> contacts = searchContact(pattern);
 
         for (final Contact contact : contacts) {
-            final ContactInterface contactInterface = ServiceRegistry.getInstance().getService(
+            final ContactInterface contactInterface = CCServiceRegistry.getInstance().getService(
                 ContactInterfaceDiscoveryService.class).getContactInterfaceProvider(contactFolder.getObjectID(), ctx.getContextId()).newContactInterface(
                 session);
             contactInterface.deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
