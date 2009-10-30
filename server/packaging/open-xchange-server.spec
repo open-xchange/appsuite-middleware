@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Oct 30 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14734: Added information about user module access permission to detail method of reporting JMX interface.
 * Fri Oct 16 2009 - martin.herfurth@open-xchange.com
  - Bugfix #14653: No notification mails for pseudo changes.
 * Tue Oct 13 2009 - marcus.klein@open-xchange.com
