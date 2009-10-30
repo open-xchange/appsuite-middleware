@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,9 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Oct 29 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #14734: Reporting Tool needs to be available for 6.12
+   - Changed StatisticTool to use abstract JMX class
 * Mon Sep 07 2009 - marcus.klein@open-xchange.com
  - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
 * Fri Sep 04 2009 - marcus.klein@open-xchange.com
