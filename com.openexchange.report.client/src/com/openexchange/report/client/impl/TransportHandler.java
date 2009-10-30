@@ -144,11 +144,11 @@ public class TransportHandler {
     		JSONObject moduleAccessCombinations = new JSONObject();
     		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
     			JSONObject moduleAccessCombinationJSON = new JSONObject();
-    			moduleAccessCombinationJSON.put("module access combination", moduleAccessCombination.getUserAccessCombination());
+    			moduleAccessCombinationJSON.put("mac", moduleAccessCombination.getUserAccessCombination());
     			moduleAccessCombinationJSON.put("users", moduleAccessCombination.getUserCount());
     			moduleAccessCombinations.put(moduleAccessCombination.getUserAccessCombination(), moduleAccessCombinationJSON);
     		}
-    		contextDetailObjectJSON.put("module access combinations", moduleAccessCombinations);
+    		contextDetailObjectJSON.put("macs", moduleAccessCombinations);
     		detail.put(tmp.getId(), contextDetailObjectJSON);
     	}
     	
