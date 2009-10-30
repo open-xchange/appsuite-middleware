@@ -50,54 +50,68 @@
 package com.openexchange.calendar.printing.osgi;
 
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.calendar.printing.CPServlet;
+import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 
 /**
+ * {@link Activator} - The activator for calendar printing.
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator extends DeferredActivator implements BundleActivator {
 
+    /**
+     * The servlet path.
+     */
     public static final String ALIAS = "/ajax/printCalendar";
-
-    private static Class[] services = new Class[] {
-        TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
 
     private HTTPServletRegistration registration;
 
+    private ServiceRegistration preferenceItemRegistration;
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return services;
+        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         register();
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         unregister();
     }
 
     @Override
     protected void startBundle() throws Exception {
         register();
+        preferenceItemRegistration = context.registerService(PreferencesItemService.class.getName(), new CalendarPrintingEnabled(), null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        if (null != preferenceItemRegistration) {
+            preferenceItemRegistration.unregister();
+            preferenceItemRegistration = null;
+        }
+
         unregister();
     }
 
     private void register() {
-        TemplateService templates = getService(TemplateService.class);
-        AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
+        final TemplateService templates = getService(TemplateService.class);
+        final AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
+        final CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
 
         if (templates == null || appointmentSqlFactory == null || collectionService == null) {
             unregister();
