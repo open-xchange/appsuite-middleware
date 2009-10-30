@@ -2718,12 +2718,15 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static final void fillMapByArray(final Map<String, List<String>> idMap, final JSONArray idArray, final int length) throws JSONException {
+    private static final void fillMapByArray(final Map<String, List<String>> idMap, final JSONArray idArray, final int length) throws JSONException, MailException {
         String folder = null;
         List<String> list = null;
         for (int i = 0; i < length; i++) {
             final JSONObject idObject = idArray.getJSONObject(i);
-            final String fld = idObject.getString(PARAMETER_FOLDERID);
+            final String fld = idObject.optString(PARAMETER_FOLDERID);
+            if (null == fld) {
+                throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_FOLDERID);
+            }
             if (folder == null || !folder.equals(fld)) {
                 folder = fld;
                 final List<String> tmp = idMap.get(folder);
