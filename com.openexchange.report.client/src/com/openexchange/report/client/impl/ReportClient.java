@@ -93,6 +93,8 @@ public class ReportClient extends AbstractJMXTools {
 	private Option csv = null;
 
 	public static void main(final String args[]) {
+		System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
+		
 		final AbstractJMXTools t = new ReportClient();
 		t.start(args, "report");
 	}
@@ -115,6 +117,7 @@ public class ReportClient extends AbstractJMXTools {
                 int count = 0;
                 if (null != parser.getOptionValue(this.sendonly)) {
                 	new TransportHandler().sendReport(totals, contextDetails, versions);
+                	count++;
                 }
                 if (null != parser.getOptionValue(this.displayonly)) {
                     if (0 == count) {
