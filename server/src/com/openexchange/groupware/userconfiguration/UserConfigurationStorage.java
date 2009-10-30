@@ -51,6 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UserConfigurationStorage} - Storage for instances of
@@ -200,6 +201,8 @@ public abstract class UserConfigurationStorage {
      */
     public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
             throws UserConfigurationException;
+
+    public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException;
 
     /**
      * <p>

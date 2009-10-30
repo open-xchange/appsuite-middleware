@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.ldap;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,7 +64,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,51 +81,20 @@ import com.openexchange.tools.Collections.SmartIntArray;
  */
 public class RdbUserStorage extends UserStorage {
 
-    /**
-     * SQL statement for loading a user.
-     */
-    private static final String SELECT_USER = "SELECT " + USERPASSWORD + ','
-        + MAILENABLED + ',' + IMAPSERVER + ",imapLogin," + SMTPSERVER + ','
-        + MAILDOMAIN + ',' + SHADOWLASTCHANGE + ',' + MAIL + ',' +  TIMEZONE
-        + ',' + LANGUAGE + ",passwordMech,contactId FROM user WHERE user.cid=? "
-        + "AND " + IDENTIFIER + "=?";
+    private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
+        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";
 
-    /**
-     * SQL statement for selecting aliases for a user.
-     */
-    //private static final String SELECT_ALIAS = "SELECT value FROM "
-    //    + "user_attribute WHERE cid=? AND " + IDENTIFIER + "=? AND name=?";
+    private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
 
-    /**
-     * SQL statement for selecting attributes for a user.
-     */
-    private static final String SELECT_ATTRS = "SELECT name, value FROM "
-        + "user_attribute WHERE cid=? AND " + IDENTIFIER + "=?";
+    private static final String SELECT_ATTRS = "SELECT id,name,value FROM user_attribute WHERE cid=? AND id IN (";
 
-    /**
-     * SQL statement for loading the contact data of a user.
-     */
-    private static final String SELECT_CONTACT = "SELECT " + GIVENNAME + ','
-        + SURENAME + ',' + DISPLAYNAME + " FROM prg_contacts WHERE cid=? "
-        + "AND intfield01=?";
+    private static final String SELECT_CONTACT = "SELECT intfield01,field03,field02,field01 FROM prg_contacts WHERE cid=? AND intfield01 IN (";
 
-    /**
-     * SQL statement for resolving the identifier of a user.
-     */
-    private static final String SELECT_ID = "SELECT " + IDENTIFIER
-        + " FROM login2user WHERE cid=? AND " + UID + "=?";
+    private static final String SELECT_ID = "SELECT id FROM login2user WHERE cid=? AND uid=?";
 
-    /**
-     * SQL statement for reading the login info for a user.
-     */
-    private static final String SELECT_LOGIN = "SELECT " + UID
-        + " FROM login2user where cid=? AND " + IDENTIFIER + "=?";
+    private static final String SELECT_LOGIN = "SELECT id,uid FROM login2user where cid=? AND id IN (";
 
-    /**
-     * SQL statement for resolving an imap login to a user.
-     */
-    private static final String SELECT_IMAPLOGIN = "SELECT " + IDENTIFIER
-        + " FROM user WHERE cid=? AND imapLogin=?";
+    private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
     /**
      * Default constructor.
@@ -183,7 +154,7 @@ public class RdbUserStorage extends UserStorage {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
-            return getUser(context, con, userId);
+            return getUser(context, con, new int[] { userId })[0];
         } catch (final UserException e) {
             throw new LdapException(e);
         } finally {
@@ -191,69 +162,106 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private User getUser(final Context ctx, final Connection con,
-        final int userId) throws UserException {
-        UserImpl retval = null;
+    private User[] getUser(Context ctx, Connection con, int[] userIds) throws UserException {
+        if (0 == userIds.length) {
+            return new User[0];
+        }
+        Map<Integer, UserImpl> users = new HashMap<Integer, UserImpl>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_USER);
-            stmt.setLong(1, ctx.getContextId());
-            stmt.setInt(2, userId);
+            stmt = con.prepareStatement(getIN(SELECT_USER, userIds.length));
+            int pos = 1;
+            stmt.setLong(pos++, ctx.getContextId());
+            for (int userId : userIds) {
+                stmt.setInt(pos++, userId);
+            }
             result = stmt.executeQuery();
-            if (result.next()) {
-                retval = new UserImpl();
-                int pos = 1;
-                retval.setId(userId);
-                retval.setUserPassword(result.getString(pos++));
-                retval.setMailEnabled(result.getBoolean(pos++));
-                retval.setImapServer(result.getString(pos++));
-                retval.setImapLogin(result.getString(pos++));
-                retval.setSmtpServer(result.getString(pos++));
-                retval.setMailDomain(result.getString(pos++));
-                retval.setShadowLastChange(result.getInt(pos++));
+            while (result.next()) {
+                UserImpl user = new UserImpl();
+                pos = 1;
+                user.setId(result.getInt(pos++));
+                user.setUserPassword(result.getString(pos++));
+                user.setMailEnabled(result.getBoolean(pos++));
+                user.setImapServer(result.getString(pos++));
+                user.setImapLogin(result.getString(pos++));
+                user.setSmtpServer(result.getString(pos++));
+                user.setMailDomain(result.getString(pos++));
+                user.setShadowLastChange(result.getInt(pos++));
                 if (result.wasNull()) {
-                    retval.setShadowLastChange(-1);
+                    user.setShadowLastChange(-1);
                 }
-                retval.setMail(result.getString(pos++));
-                retval.setTimeZone(result.getString(pos++));
-                retval.setPreferredLanguage(result.getString(pos++));
-                retval.setPasswordMech(result.getString(pos++));
-                retval.setContactId(result.getInt(pos++));
-            } else {
-                throw new UserException(UserException.Code.USER_NOT_FOUND,
-                    Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+                user.setMail(result.getString(pos++));
+                user.setTimeZone(result.getString(pos++));
+                user.setPreferredLanguage(result.getString(pos++));
+                user.setPasswordMech(result.getString(pos++));
+                user.setContactId(result.getInt(pos++));
+                users.put(I(user.getId()), user);
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        loadLoginInfo(ctx, con, retval);
-        loadContact(ctx, con, retval);
-        loadGroups(ctx, con, retval);
-        loadAliases(ctx, con, retval);
-        return retval;
+        for (int userId : userIds) {
+            if (!users.containsKey(I(userId))) {
+                throw new UserException(UserException.Code.USER_NOT_FOUND, I(userId), I(ctx.getContextId()));
+            }
+        }
+        loadLoginInfo(ctx, con, users);
+        loadContact(ctx, con, users);
+        loadGroups(ctx, con, users);
+        loadAttributes(ctx, con, users);
+        return users.values().toArray(new UserImpl[users.size()]);
     }
-    
-    /**
-     * Reads the login information for a user.
-     * @param context context.
-     * @param con readable database connection.
-     * @param user User object.
-     * @throws UserException if some problem occurs.
-     */
-    private void loadLoginInfo(final Context context, Connection con,
-        final UserImpl user) throws UserException {
+
+    @Override
+    public User[] getUser(Context ctx) throws UserException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new UserException(e);
+        }
+        try {
+            return getUser(ctx, con, listAllUser(ctx, con));
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    @Override
+    public User[] getUser(Context ctx, int[] userIds) throws UserException {
+        if (0 == userIds.length) {
+            return new User[0];
+        }
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new UserException(e);
+        }
+        try {
+            return getUser(ctx, con, userIds);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    private void loadLoginInfo(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_LOGIN);
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, user.getId());
+            String sql = getIN(SELECT_LOGIN, users.size());
+            stmt = con.prepareStatement(sql);
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            for (Integer userId : users.keySet()) {
+                stmt.setInt(pos++, userId.intValue());
+            }
             result = stmt.executeQuery();
-            if (result.next()) {
-                user.setLoginInfo(result.getString(1));
+            while (result.next()) {
+                users.get(I(result.getInt(1))).setLoginInfo(result.getString(2));
             }
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e,
@@ -270,17 +278,22 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws UserException if reading contact fails.
      */
-    private void loadContact(final Context context, final Connection con,
-        final UserImpl user) throws UserException {
+    private void loadContact(Context ctx, Connection con, Map<Integer, UserImpl> users) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_CONTACT);
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, user.getContactId());
+            stmt = con.prepareStatement(getIN(SELECT_CONTACT, users.size()));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(users.size(), 1);
+            for (UserImpl user : users.values()) {
+                stmt.setInt(pos++, user.getContactId());
+                userByContactId.put(I(user.getContactId()), user);
+            }
             result = stmt.executeQuery();
-            if (result.next()) {
-                int pos = 1;
+            while (result.next()) {
+                pos = 1;
+                UserImpl user = userByContactId.get(I(result.getInt(pos++)));
                 user.setGivenName(result.getString(pos++));
                 user.setSurname(result.getString(pos++));
                 user.setDisplayName(result.getString(pos++));
@@ -300,31 +313,35 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws UserException if loading groups failed.
      */
-    private void loadGroups(final Context context, final Connection con,
-        final UserImpl user) throws UserException {
+    private void loadGroups(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
+        Map<Integer, List<Integer>> tmp = new HashMap<Integer, List<Integer>>(users.size(), 1);
+        for (User user : users.values()) {
+            List<Integer> userGroups = new ArrayList<Integer>();
+            userGroups.add(I(0));
+            tmp.put(I(user.getId()), userGroups);
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            final String sql = "SELECT id FROM groups_member WHERE cid=? AND "
-                + "member=?";
+            String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", users.size());
             stmt = con.prepareStatement(sql);
-            stmt.setLong(1, context.getContextId());
-            stmt.setInt(2, user.getId());
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            for (User user : users.values()) {
+                stmt.setInt(pos++, user.getId());
+            }
             result = stmt.executeQuery();
-            final List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
-                tmp.add(Integer.valueOf(result.getInt(1)));
+                tmp.get(I(result.getInt(1))).add(I(result.getInt(2)));
             }
-            final int[] groups = new int[tmp.size()];
-            for (int i = 0; i < groups.length; i++) {
-                groups[i] = tmp.get(i).intValue();
-            }
-            user.setGroups(groups);
         } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
+        }
+        for (UserImpl user : users.values()) {
+            user.setGroups(I2i(tmp.get(I(user.getId()))));
         }
     }
     
@@ -337,35 +354,44 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws UserException if loading the aliases fails.
      */
-    private void loadAliases(final Context context, final Connection con,
-        final UserImpl user) throws UserException {
+    private void loadAttributes(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
+        Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT_ATTRS);
+            stmt = con.prepareStatement(getIN(SELECT_ATTRS, users.size()));
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos++, user.getId());
+            for (User user : users.values()) {
+                stmt.setInt(pos++, user.getId());
+                usersAttrs.put(I(user.getId()), new HashMap<String, Set<String>>());
+            }
             result = stmt.executeQuery();
-            final Map<String, Set<String>> attrs = new HashMap<String, Set<String>>();
             /*
              * Gather attributes
              */
             while (result.next()) {
-                final String name = result.getString(1);
+                Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
+                final String name = result.getString(2);
                 Set<String> set = attrs.get(name);
                 if (null == set) {
                     set = new HashSet<String>();
                     attrs.put(name, set);
                 }
-                final String value = result.getString(2);
-                set.add(value);
+                set.add(result.getString(3));
             }
+        } catch (SQLException e) {
+            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        for (UserImpl user : users.values()) {
+            Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
             /*
              * Check for aliases
              */
             {
-                final Set<String> aliases = attrs.get(STR_ALIAS);
+            	final Set<String> aliases = attrs.get(STR_ALIAS);
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
@@ -375,24 +401,13 @@ public class RdbUserStorage extends UserStorage {
             /*
              * Apply attributes
              */
-            final Iterator<Map.Entry<String, Set<String>>> iter = attrs.entrySet().iterator();
-            final int size = attrs.size();
-            for (int i = 0; i < size; i++) {
-                final Map.Entry<String, Set<String>> e = iter.next();
-                e.setValue(Collections.unmodifiableSet(e.getValue()));
+            for (Map.Entry<String, Set<String>> entry : attrs.entrySet()) {
+                entry.setValue(Collections.unmodifiableSet(entry.getValue()));
             }
             user.setAttributes(Collections.unmodifiableMap(attrs));
-        } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e,
-                e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateUser(final User user, final Context context) throws LdapException {
         Connection con = null;
@@ -425,7 +440,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public User searchUser(final String email, final Context context) throws LdapException {
+    public User searchUser(String email, Context context) throws LdapException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail=?";
         Connection con;
         try {
@@ -453,8 +468,7 @@ public class RdbUserStorage extends UserStorage {
             }
             try {
                 if (userId == -1) {
-                    sql = "SELECT id FROM user_attribute WHERE cid=? "
-                        + "AND name=?  AND value=?";
+                    sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value=?";
                     stmt = con.prepareStatement(sql);
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());
@@ -469,14 +483,13 @@ public class RdbUserStorage extends UserStorage {
                     throw new LdapException(EnumComponent.USER,
                         Code.NO_USER_BY_MAIL, email);
                 }
-                return getUser(context, con, userId);
-            } catch (final SQLException e) {
-                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                    e.getMessage());
+                return getUser(context, con, new int[] { userId })[0];
+            } catch (SQLException e) {
+                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
-        } catch (final UserException e) {
+        } catch (UserException e) {
             throw new LdapException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
@@ -530,34 +543,39 @@ public class RdbUserStorage extends UserStorage {
      */
     @Override
     public int[] listAllUser(Context context) throws UserException {
-        final String sql = "SELECT " + IDENTIFIER + " FROM user WHERE user.cid=?";
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
             throw new UserException(UserException.Code.NO_CONNECTION, e);
         }
+        try {
+            return listAllUser(context, con);
+        } finally {
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    private int[] listAllUser(Context ctx, Connection con) throws UserException {
         final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(sql);
-            stmt.setInt(1, context.getContextId());
+            stmt = con.prepareStatement("SELECT id FROM user WHERE cid=?");
+            stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            final List<Integer> tmp = new ArrayList<Integer>();
+            List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
-                tmp.add(Integer.valueOf(result.getInt(1)));
+                tmp.add(I(result.getInt(1)));
             }
             users = new int[tmp.size()];
             for (int i = 0; i < users.length; i++) {
                 users[i] = tmp.get(i).intValue();
             }
-        } catch (final SQLException e) {
-            throw new UserException(UserException.Code.SQL_ERROR, e, e
-                .getMessage());
+        } catch (SQLException e) {
+            throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(context, con);
         }
         return users;
     }

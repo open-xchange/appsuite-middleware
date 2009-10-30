@@ -461,7 +461,11 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(UserService.class.getName(), ServerServiceRegistry.getInstance().getService(
             UserService.class,
             true), null));
-        registrationList.add(context.registerService(UserConfigurationService.class.getName(), new UserConfigurationServiceImpl(), null));
+        ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
+        registrationList.add(context.registerService(
+            UserConfigurationService.class.getName(),
+            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class),
+            null));
         registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
             ContextService.class,
             true), null));

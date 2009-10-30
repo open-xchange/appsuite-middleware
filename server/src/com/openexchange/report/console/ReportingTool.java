@@ -61,6 +61,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -155,7 +156,7 @@ public final class ReportingTool {
     private static void writeDetail(MBeanServerConnection mbsc, boolean csv) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         TabularDataSupport data = (TabularDataSupport) mbsc.getAttribute(Constants.REPORTING_NAME, "Detail");
         List<List<Object>> data2 = new ArrayList<List<Object>>();
-        data2.add(Arrays.asList((Object) "id", "users", "age", "created", "mappings"));
+        data2.add(Arrays.asList((Object) "id", "users", "age", "created", "mappings" ));
         TreeSet<List<Object>> sorted = new TreeSet<List<Object>>(new Comparator<List<Object>>() {
             public int compare(List<Object> o1, List<Object> o2) {
                 Integer contextId1 = (Integer) o1.get(0);
@@ -163,8 +164,12 @@ public final class ReportingTool {
                 return contextId1.compareTo(contextId2);
             }
         });
-        for (Object tmp : data.keySet()) {
-            List<Object> list = (List<Object>) tmp;
+        for (Object tmp : data.values()) {
+            CompositeDataSupport comp = (CompositeDataSupport) tmp;
+            List<Object> list = new ArrayList<Object>(6);
+            for (String key : new String[] { "identifier", "users", "age", "created", "mappings" }) {
+                list.add(comp.get(key));
+            }
             sorted.add(list);
         }
         for (List<Object> tmp : sorted) {

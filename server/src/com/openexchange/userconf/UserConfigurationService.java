@@ -2,6 +2,7 @@
 package com.openexchange.userconf;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 
@@ -56,6 +57,16 @@ public interface UserConfigurationService {
      * @throws UserConfigurationException If user's configuration could not be determined
      */
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws UserConfigurationException;
+
+    /**
+     * This method reads several user module access permissions. This method is faster than reading separately the {@link UserConfiguration}
+     * for every given user.
+     * @param ctx the context
+     * @param users user objects that module access permission should be loaded.
+     * @return an array with the module access permissions of the given users.
+     * @throws UserConfigurationException if users configuration could not be loaded.
+     */
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException;
 
     /**
      * <p>

@@ -194,6 +194,17 @@ public abstract class UserStorage {
      */
     public abstract User getUser(int uid, Context context) throws LdapException;
 
+    public abstract User[] getUser(Context ctx, int[] userIds) throws UserException;
+
+    /**
+     * Reads the data of all user from the persistent data storage. This method is faster than getting each user information with the
+     * {@link #getUser(int, Context)} method if nearly all users are needed from a context.
+     * @param ctx the context.
+     * @return an array with all user objects from a context.
+     * @throws UserException if all user objects can not be loaded from the persistent storage.
+     */
+    public abstract User[] getUser(Context ctx) throws UserException;
+
     /**
      * This method updates some values of a user.
      * @param user user object with the updated values.

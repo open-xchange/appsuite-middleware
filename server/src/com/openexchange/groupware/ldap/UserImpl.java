@@ -53,7 +53,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.openexchange.group.GroupStorage;
 import com.openexchange.i18n.LocaleTools;
 
 /**
@@ -433,28 +432,7 @@ public class UserImpl implements User, Cloneable {
      * @param groups the groups this user is member of.
      */
     void setGroups(final int[] groups) {
-        this.groups = addAllGroupsAndUsersGroup(groups);
-    }
-
-    /**
-     * Adds the group identifier for all groups and users.
-     * @param groups groups of the user.
-     * @return groups of the user and 0 will be added if it is missing.
-     */
-    private static int[] addAllGroupsAndUsersGroup(final int[] groups) {
-        boolean contained = false;
-        for (final int group : groups) {
-            contained = group == GroupStorage.GROUP_ZERO_IDENTIFIER;
-        }
-        final int[] retval;
-        if (contained) {
-            retval = groups;
-        } else {
-            retval = new int[groups.length + 1];
-            retval[0] = GroupStorage.GROUP_ZERO_IDENTIFIER;
-            System.arraycopy(groups, 0, retval, 1, groups.length);
-        }
-        return retval;
+        this.groups = groups;
     }
 
     /**

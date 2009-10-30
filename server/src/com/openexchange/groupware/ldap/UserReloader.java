@@ -55,6 +55,7 @@ import java.util.Set;
 
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
+import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -84,6 +85,12 @@ final class UserReloader extends Refresher<User> implements User {
         final String regionName) throws AbstractOXException {
         super(factory, regionName);
         this.delegate = refresh();
+    }
+
+    public UserReloader(OXObjectFactory<User> factory, User user, String regionName) throws CacheException {
+        super(factory, regionName);
+        delegate = user;
+        cache(user);
     }
 
     /**
