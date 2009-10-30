@@ -237,13 +237,13 @@ public final class MIMEMessageUtility {
         return isWhitespace;
     }
 
-    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
-        "(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG =
+        Pattern.compile("(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
-        "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG_ALT =
+        Pattern.compile(
+            "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains inlined images
@@ -290,16 +290,19 @@ public final class MIMEMessageUtility {
      */
     public static boolean equalsCID(final String contentId1, final String contentId2) {
         if (null != contentId1 && null != contentId2) {
-            final String cid1 = contentId1.length() > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, contentId1.length() - 1) : contentId1;
-            final String cid2 = contentId2.length() > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, contentId2.length() - 1) : contentId2;
+            final String cid1 =
+                contentId1.length() > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, contentId1.length() - 1) : contentId1;
+            final String cid2 =
+                contentId2.length() > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, contentId2.length() - 1) : contentId2;
             return cid1.equalsIgnoreCase(cid2);
         }
         return false;
     }
 
-    public static final Pattern PATTERN_REF_IMG = Pattern.compile(
-        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    public static final Pattern PATTERN_REF_IMG =
+        Pattern.compile(
+            "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains references to local image files
@@ -482,6 +485,34 @@ public final class MIMEMessageUtility {
         return found;
     }
 
+    /**
+     * The max. length of a RFC 2047 style encoded word.
+     */
+    private static final int ENCODED_WORD_LEN = 75;
+
+    /**
+     * Decodes a string header obtained from ENVELOPE fetch item.
+     * 
+     * @param headerValue The header value
+     * @return The decoded header value
+     */
+    public static String decodeEnvelopeHeader(final String headerValue) {
+        final int length = headerValue.length();
+        /*
+         * Passes possibly encoded-word is greater than 75 characters and contains no CR?LF
+         */
+        if ((length > ENCODED_WORD_LEN) && (headerValue.indexOf('\r') < 0) && (headerValue.indexOf('\n') < 0)) {
+            final StringBuilder sb = new StringBuilder(length).append(headerValue);
+            final String pattern = "?= =?";
+            int i;
+            while ((i = sb.indexOf(pattern)) >= 0) {
+                sb.deleteCharAt(i + 2);
+            }
+            return decodeMultiEncodedHeader0(sb.toString(), false);
+        }
+        return decodeMultiEncodedHeader0(headerValue, true);
+    }
+
     private static final Pattern ENC_PATTERN = Pattern.compile("=\\?(\\S+?)\\?(\\S+?)\\?(.+?)\\?=");
 
     /**
@@ -495,10 +526,14 @@ public final class MIMEMessageUtility {
      * @return The possibly decoded header value
      */
     public static String decodeMultiEncodedHeader(final String headerValue) {
+        return decodeMultiEncodedHeader0(headerValue, true);
+    }
+
+    private static String decodeMultiEncodedHeader0(final String headerValue, final boolean unfold) {
         if (headerValue == null) {
             return null;
         }
-        final String hdrVal = MIMEMessageUtility.unfold(headerValue);
+        final String hdrVal = unfold ? MIMEMessageUtility.unfold(headerValue) : headerValue;
         /*
          * Whether the sequence "=?" exists at all
          */
@@ -843,7 +878,8 @@ public final class MIMEMessageUtility {
         boolean needQuoting = false;
         for (int i = 0; !needQuoting && i < len; i++) {
             final char c = chars[i];
-            needQuoting = (c == '"' || c == '\\' || (c < 040 && c != '\r' && c != '\n' && c != '\t') || c >= 0177 || RFC822.indexOf(c) >= 0);
+            needQuoting =
+                (c == '"' || c == '\\' || (c < 040 && c != '\r' && c != '\n' && c != '\t') || c >= 0177 || RFC822.indexOf(c) >= 0);
         }
         try {
             if (!needQuoting) {
@@ -943,76 +979,79 @@ public final class MIMEMessageUtility {
         }
         StringBuilder sb = null;
         int i;
-        /*-
-         * Check folded encoded-words as per RFC 2047:
-         * 
-         * An 'encoded-word' may not be more than 75 characters long, including
-         * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
-         * desirable to encode more text than will fit in an 'encoded-word' of
-         * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
-         * be used.
-         * 
-         * In this case the SPACE character is not part of the header and should
-         * be discarded.
-         */
-        String s;
-        if (headerLine.indexOf("=?") == -1) {
-            s = headerLine;
-        } else {
-            s = unfoldEncodedWords(headerLine);
-        }
-        while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0) {
-            final int start = i;
-            final int len = s.length();
-            i++; // skip CR or NL
-            if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
-                i++; // skip LF
+        if ((i = headerLine.indexOf('\r')) >= 0 || (i = headerLine.indexOf('\n')) >= 0) {
+            /*-
+             * Check folded encoded-words as per RFC 2047:
+             * 
+             * An 'encoded-word' may not be more than 75 characters long, including
+             * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
+             * desirable to encode more text than will fit in an 'encoded-word' of
+             * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
+             * be used.
+             * 
+             * In this case the SPACE character is not part of the header and should
+             * be discarded.
+             */
+            String s;
+            if (headerLine.indexOf("=?") == -1) {
+                s = headerLine;
+            } else {
+                s = unfoldEncodedWords(headerLine);
+                if ((i = s.indexOf('\r')) < 0 && (i = s.indexOf('\n')) < 0) {
+                    return s;
+                }
             }
-            if (start == 0 || s.charAt(start - 1) != '\\') {
-                char c;
-                /*
-                 * If next line starts with whitespace, skip all of it
-                 */
-                if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
-                    i++; // skip whitespace
-                    while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
-                        i++;
+            do {
+                final int start = i;
+                final int len = s.length();
+                i++; // skip CR or NL
+                if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
+                    i++; // skip LF
+                }
+                if (start == 0 || s.charAt(start - 1) != '\\') {
+                    char c;
+                    /*
+                     * If next line starts with whitespace, skip all of it
+                     */
+                    if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
+                        i++; // skip whitespace
+                        while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
+                            i++;
+                        }
+                        if (sb == null) {
+                            sb = new StringBuilder(s.length());
+                        }
+                        if (start != 0) {
+                            sb.append(s.substring(0, start));
+                            sb.append(' ');
+                        }
+                        s = s.substring(i);
+                    } else {
+                        /*
+                         * It's not a continuation line, just leave it in
+                         */
+                        if (sb == null) {
+                            sb = new StringBuilder(s.length());
+                        }
+                        sb.append(s.substring(0, i));
+                        s = s.substring(i);
                     }
-                    if (sb == null) {
-                        sb = new StringBuilder(s.length());
-                    }
-                    if (start != 0) {
-                        sb.append(s.substring(0, start));
-                        sb.append(' ');
-                    }
-                    s = s.substring(i);
                 } else {
                     /*
-                     * It's not a continuation line, just leave it in
+                     * There's a backslash at "start - 1", strip it out, but leave in the line break
                      */
                     if (sb == null) {
                         sb = new StringBuilder(s.length());
                     }
-                    sb.append(s.substring(0, i));
+                    sb.append(s.substring(0, start - 1));
+                    sb.append(s.substring(start, i));
                     s = s.substring(i);
                 }
-            } else {
-                /*
-                 * There's a backslash at "start - 1", strip it out, but leave in the line break
-                 */
-                if (sb == null) {
-                    sb = new StringBuilder(s.length());
-                }
-                sb.append(s.substring(0, start - 1));
-                sb.append(s.substring(start, i));
-                s = s.substring(i);
-            }
-        }
-        if (sb != null) {
+            } while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0);
             sb.append(s);
             return sb.toString();
         }
-        return s;
+        return headerLine;
     }
 
     private static final Pattern PAT_ENC_WORDS = Pattern.compile("(\r?\n(?:\t| ))(=\\?\\S+?\\?\\S+?\\?.+?\\?=)");

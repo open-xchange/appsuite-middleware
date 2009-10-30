@@ -737,7 +737,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     }
                     i++;
                 }
-                subject = MIMEMessageUtility.decodeMultiEncodedHeader(sb.toString());
+                subject = MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
             }
             msg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
 

@@ -227,7 +227,7 @@ public final class AllFetch {
                         }
                         i++;
                     }
-                    subject = MIMEMessageUtility.decodeMultiEncodedHeader(sb.toString());
+                    subject = MIMEMessageUtility.decodeEnvelopeHeader(sb.toString());
                 }
                 m.setSubject(subject);
             }
