@@ -2737,7 +2737,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                     list = tmp;
                 }
             }
-            list.add(idObject.getString(PARAMETER_ID));
+            final String id = idObject.optString(PARAMETER_ID);
+            if (null == id) {
+                throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_ID);
+            }
+            list.add(id);
         }
     }
 
