@@ -86,6 +86,8 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private final AJPv13SocketHandler executorPool;
 
+    private AJPv13TimerTaskStarter timerTaskStarter;
+
     /**
      * Initializes a new {@link AJPv13ServerImpl}
      */
@@ -137,7 +139,8 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             /*
              * Start timer task(s)
              */
-            AJPv13TimerTaskStarter.getInstance().start();
+            timerTaskStarter = new AJPv13TimerTaskStarter();
+            timerTaskStarter.start();
         } else {
             if (LOG.isInfoEnabled()) {
                 LOG.info("AJPv13Server is already running...");
@@ -154,8 +157,10 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             /*
              * Stop timer task(s)
              */
-            AJPv13TimerTaskStarter.getInstance().stop();
-            AJPv13TimerTaskStarter.releaseInstance();
+            if (null != timerTaskStarter) {
+                timerTaskStarter.stop();
+                timerTaskStarter = null;
+            }
             /*
              * Stop tasks
              */

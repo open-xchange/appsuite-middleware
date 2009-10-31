@@ -63,50 +63,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class AJPv13TimerTaskStarter implements Initialization {
 
-    private static volatile AJPv13TimerTaskStarter instance;
-
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13TimerTaskStarter.class);
-
-    /**
-     * Gets the singleton instance of {@link AJPv13TimerTaskStarter}
-     * 
-     * @return The singleton instance of {@link AJPv13TimerTaskStarter}
-     */
-    public static AJPv13TimerTaskStarter getInstance() {
-        AJPv13TimerTaskStarter tmp = instance;
-        if (tmp == null) {
-            synchronized (AJPv13TimerTaskStarter.class) {
-                tmp = instance;
-                if (tmp == null) {
-                    tmp = instance = new AJPv13TimerTaskStarter();
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Releases the singleton instance of {@link AJPv13TimerTaskStarter}
-     */
-    public static void releaseInstance() {
-        if (instance != null) {
-            synchronized (AJPv13TimerTaskStarter.class) {
-                if (instance != null) {
-                    final AJPv13TimerTaskStarter tmp = instance;
-                    if (tmp.task != null && tmp.started.compareAndSet(false, true)) {
-                        tmp.task.cancel(false);
-                        tmp.task = null;
-                        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        if (null != timer) {
-                            timer.purge();
-                        }
-                        LOG.info(AJPv13TimerTaskStarter.class.getName() + " successfully stopped due to singleton release");
-                    }
-                    instance = null;
-                }
-            }
-        }
-    }
 
     private final AtomicBoolean started;
 
@@ -115,7 +72,7 @@ public final class AJPv13TimerTaskStarter implements Initialization {
     /**
      * Initializes a new {@link AJPv13TimerTaskStarter}
      */
-    private AJPv13TimerTaskStarter() {
+    public AJPv13TimerTaskStarter() {
         super();
         started = new AtomicBoolean();
     }
