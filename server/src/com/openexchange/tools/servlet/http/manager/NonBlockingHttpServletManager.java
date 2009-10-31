@@ -122,20 +122,28 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                  */
                 path2Append = null;
                 try {
-                    boolean b = true;
-                    for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); b && iter.hasNext();) {
+                    ServletQueue queue = null;
+                    String longestImplier = null;
+                    for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); iter.hasNext();) {
                         final Map.Entry<String, ServletQueue> e = iter.next();
                         final String currentPath = e.getKey();
-                        if (implies(currentPath, path)) {
-                            final ServletQueue queue = e.getValue();
-                            if (null != retval) {
-                                // Previously obtained
-                                releaseServletInternal(queue, retval);
+                        if (implies(currentPath, path, false)) {
+                            if (null == longestImplier ) {
+                                longestImplier = currentPath;
+                                queue = e.getValue();
+                            } else if (currentPath.length() > longestImplier.length()) {
+                                longestImplier = currentPath;
+                                queue = e.getValue();
                             }
-                            path2Append = currentPath;
-                            retval = getServletInternal(queue, currentPath);
-                            b = false;
                         }
+                    }
+                    if (null != longestImplier) {
+                        if (null != retval) {
+                            // Previously obtained
+                            releaseServletInternal(queue, retval);
+                        }
+                        path2Append = longestImplier;
+                        retval = getServletInternal(queue, longestImplier);
                     }
                 } catch (final ConcurrentModificationException e) {
                     LOG.warn("Resolving servlet path failed. Trying again...", e);

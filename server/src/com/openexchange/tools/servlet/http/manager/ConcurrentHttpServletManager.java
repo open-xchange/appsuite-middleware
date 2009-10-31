@@ -127,15 +127,24 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
              * Try through resolving
              */
             try {
+                ServletQueue queue = null;
+                String longestImplier = null;
                 for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); iter.hasNext();) {
                     final Map.Entry<String, ServletQueue> e = iter.next();
                     final String currentPath = e.getKey();
-                    if (implies(currentPath, path)) {
-                        if (currentPath != null) {
-                            pathStorage.append(currentPath);
+                    if (implies(currentPath, path, false)) {
+                        if (null == longestImplier) {
+                            longestImplier = currentPath;
+                            queue = e.getValue();
+                        } else if (currentPath.length() > longestImplier.length()) {
+                            longestImplier = currentPath;
+                            queue = e.getValue();
                         }
-                        return getServletInternal(e.getValue(), currentPath);
                     }
+                }
+                if (null != longestImplier) {
+                    pathStorage.append(longestImplier);
+                    return getServletInternal(queue, longestImplier);
                 }
             } catch (final ConcurrentModificationException e) {
                 LOG.warn("Resolving servlet path failed. Trying again...", e);
