@@ -209,7 +209,6 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 servletRequest.setRequestedSessionIdFromCookie(false);
             }
             servletRequest.setRequestURI(requestURI);
-            servletRequest.setPathInfo(requestURI);
         } catch (final AJPv13Exception e) {
             throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "req_uri");
         }
@@ -327,27 +326,42 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
          * Create servlet instance dependent on requested URI
          */
         ajpRequestHandler.setServletInstance(requestURI);
-        if (null != ajpRequestHandler.getServletPath()) {
+        /*
+         * Set servlet path and path info
+         */
+        final String servletPath = ajpRequestHandler.getServletPath();
+        if (null != servletPath) {
             /*
              * Apply the servlet path with leading "/" to the request
              */
-            if (allPath(ajpRequestHandler.getServletPath())) {
+            final int servletPathLen = servletPath.length();
+            if ((1 == servletPathLen) && ('*' == servletPath.charAt(0))) {
                 /*
                  * Set an empty string ("") if the servlet used to process this request was matched using the "/*" pattern.
                  */
                 servletRequest.setServletPath(STR_EMPTY);
+                /*
+                 * Set complete request URI as path info
+                 */
+                servletRequest.setPathInfo(requestURI);
             } else {
                 /*
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
                  * any extra path information or a query string.
                  */
-                servletRequest.setServletPath(new StringBuilder().append('/').append(ajpRequestHandler.getServletPath()).toString());
+                servletRequest.setServletPath(new StringBuilder(servletPathLen + 1).append('/').append(servletPath).toString());
+                /*
+                 * Set path info
+                 */
+                if ((requestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
+                    final String pathInfo = requestURI.substring(servletPathLen);
+                    servletRequest.setPathInfo('/' == pathInfo.charAt(0) ? pathInfo : new StringBuilder(pathInfo.length() + 1).append('/').append(
+                        pathInfo).toString());
+                } else {
+                    servletRequest.setPathInfo(null);
+                }
             }
         }
-    }
-
-    private static boolean allPath(final String servletPath) {
-        return (servletPath.length() == 1) && (servletPath.charAt(0) == '*');
     }
 
     private static final java.util.regex.Pattern PATTERN_SPLIT = java.util.regex.Pattern.compile("&");
