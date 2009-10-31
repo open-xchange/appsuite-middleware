@@ -416,7 +416,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private static String preparePath(final String path) {
         final int start = path.charAt(0) == '/' ? 1 : 0;
-        final int end = path.charAt(path.length() - 1) == '/' ? path.length() - 1 : path.length();
+        final int len = path.length();
+        final int end = path.charAt(len - 1) == '/' ? len - 1 : len;
         return path.substring(start, end);
     }
 
