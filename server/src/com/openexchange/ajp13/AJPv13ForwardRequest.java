@@ -349,14 +349,20 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
                  * any extra path information or a query string.
                  */
-                servletRequest.setServletPath(new StringBuilder(servletPathLen + 1).append('/').append(servletPath).toString());
+                final StringBuilder sb = new StringBuilder(servletPathLen + 1);
+                servletRequest.setServletPath(sb.append('/').append(servletPath).toString());
                 /*
-                 * Set path info
+                 * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
+                 * "/" character.
                  */
                 if ((requestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
                     final String pathInfo = requestURI.substring(servletPathLen);
-                    servletRequest.setPathInfo('/' == pathInfo.charAt(0) ? pathInfo : new StringBuilder(pathInfo.length() + 1).append('/').append(
-                        pathInfo).toString());
+                    if ('/' == pathInfo.charAt(0)) {
+                        servletRequest.setPathInfo(pathInfo);
+                    } else {
+                        sb.setLength(1); // Reset to "/" character
+                        servletRequest.setPathInfo(sb.append(pathInfo).toString());
+                    }
                 } else {
                     servletRequest.setPathInfo(null);
                 }
@@ -395,7 +401,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             if (paramsNVP.length() > 0) {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');
-                if (pos > -1) {
+                if (pos >= 0) {
                     servletRequest.setParameter(paramsNVP.substring(0, pos), decodeQueryStringValue(
                         servletRequest.getCharacterEncoding(),
                         paramsNVP.substring(pos + 1)));
