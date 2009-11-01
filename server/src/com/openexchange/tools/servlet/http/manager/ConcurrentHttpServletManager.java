@@ -160,20 +160,21 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
     private final static Class<?>[] CLASS_ARR = new Class[] {};
 
     public void putServlet(final String path, final HttpServlet servletObj) {
-        if (servletPool.containsKey(path) && !(servletObj instanceof SingleThreadModel)) {
+        ServletQueue servletQueue = servletPool.get(path);
+        if (null != servletQueue && servletQueue.isSingleton()) {
             return;
         }
         writeLock.lock();
         try {
-            if (servletPool.containsKey(path)) {
+            // servletQueue = servletPool.get(path);
+            if (null != servletQueue) {
                 /*
                  * Since heading condition failed the servlet must be an instance of SingleThreadModel
                  */
-                servletPool.get(path).enqueue(servletObj);
+                servletQueue.enqueue(servletObj);
             } else {
-                final ServletQueue servlets;
                 try {
-                    servlets = new ServletQueue(1, servletObj.getClass().getConstructor(CLASS_ARR));
+                    servletQueue = new ServletQueue(1, servletObj.getClass().getConstructor(CLASS_ARR), !(servletObj instanceof SingleThreadModel));
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servletObj.getClass().getName(), e);
                     return;
@@ -190,8 +191,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                     LOG.error("Servlet could not be put into pool", e);
                     return;
                 }
-                servlets.enqueue(servletObj);
-                servletPool.put(path, servlets);
+                servletQueue.enqueue(servletObj);
+                servletPool.put(path, servletQueue);
             }
         } finally {
             writeLock.unlock();
@@ -220,7 +221,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
              */
             final ServletQueue servletQueue;
             try {
-                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR));
+                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
             } catch (final SecurityException e) {
                 final ServletException se = new ServletException(
                     "Default constructor could not be found for servlet class: " + servlet.getClass().getName(),

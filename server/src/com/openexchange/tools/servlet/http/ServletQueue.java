@@ -67,14 +67,17 @@ public final class ServletQueue extends FIFOQueue<HttpServlet> {
 
     private final Constructor<?> servletConstructor;
 
+    private final boolean singleton;
+
     /**
      * Initializes a new concurrent {@link ServletQueue}
      * 
      * @param maxsize The max. size
      * @param servletConstructor The servlet constructor to create new servlet instances on demand
+     * @param singleton <code>true</code> to mark passed servlet instance as a singleton; otherwise <code>false</code>
      */
-    public ServletQueue(final int maxsize, final Constructor<?> servletConstructor) {
-        this(maxsize, true, servletConstructor);
+    public ServletQueue(final int maxsize, final Constructor<?> servletConstructor, final boolean singleton) {
+        this(maxsize, true, servletConstructor, singleton);
     }
 
     /**
@@ -83,10 +86,23 @@ public final class ServletQueue extends FIFOQueue<HttpServlet> {
      * @param maxsize The max. size
      * @param isSynchronized <code>true</code> for a concurrent queue; otherwise <code>false</code>
      * @param servletConstructor The servlet constructor to create new servlet instances on demand
+     * @param singleton <code>true</code> to mark passed servlet instance as a singleton; otherwise <code>false</code>
      */
-    public ServletQueue(final int maxsize, final boolean isSynchronized, final Constructor<?> servletConstructor) {
+    public ServletQueue(final int maxsize, final boolean isSynchronized, final Constructor<?> servletConstructor, final boolean singleton) {
         super(maxsize, isSynchronized);
         this.servletConstructor = servletConstructor;
+        this.singleton = singleton;
+    }
+
+    /**
+     * Checks whether passed servlet instance is a singleton; meaning it does not implement marker interface
+     * <code>javax.servlet.SingleThreadModel</code>.
+     * 
+     * @return <code>true</code> if servlet instance does not implement <code>javax.servlet.SingleThreadModel</code>; otherwise
+     *         <code>false</code>
+     */
+    public boolean isSingleton() {
+        return singleton;
     }
 
     /**

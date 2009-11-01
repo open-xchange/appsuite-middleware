@@ -117,14 +117,14 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
              */
             final Constructor<?> servletConstructor = entry.getValue();
             if (servletConstructor == null) {
-                servletQueue = new ServletQueue(1, null);
+                servletQueue = new ServletQueue(1, null, true);
                 servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + path));
             } else {
                 try {
                     HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
                     if (servletInstance instanceof SingleThreadModel) {
                         final int servletPoolSize = AJPv13Config.getServletPoolSize();
-                        servletQueue = new ServletQueue(servletPoolSize, servletConstructor);
+                        servletQueue = new ServletQueue(servletPoolSize, servletConstructor, false);
                         if (servletPoolSize > 0) {
                             final ServletConfig conf = configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path);
                             servletInstance.init(conf);
@@ -139,7 +139,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                             }
                         }
                     } else {
-                        servletQueue = new ServletQueue(1, servletConstructor);
+                        servletQueue = new ServletQueue(1, servletConstructor, true);
                         servletInstance.init(configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path));
                         servletQueue.enqueue(servletInstance);
                     }
@@ -203,7 +203,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     }
 
     /**
-     * Gets the servlet instance bound to given path
+     * Gets the servlet instance bound to given path.
      * 
      * @param servletQueue The servlet queue
      * @param path The servlet path
@@ -222,7 +222,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             return servletInst;
         }
         final HttpServlet servletInstance = servletQueue.get();
-        if (servletInstance instanceof SingleThreadModel) {
+        if (!servletQueue.isSingleton()) {
             /*
              * If servlet class implements SingleThreadModel the same instance MUST NOT be used concurrently by multiple threads. So remove
              * from queue.

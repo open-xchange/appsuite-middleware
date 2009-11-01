@@ -160,39 +160,40 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
 
     private final static Class<?>[] CLASS_ARR = new Class[] {};
 
-    public void putServlet(final String path, final HttpServlet servletObj) {
-        if (servletPool.containsKey(path) && !(servletObj instanceof SingleThreadModel)) {
+    public void putServlet(final String path, final HttpServlet servlet) {
+        ServletQueue servletQueue = servletPool.get(path);
+        if (null != servletQueue && servletQueue.isSingleton()) {
             return;
         }
         readWriteLock.acquireWrite();
         try {
-            if (servletPool.containsKey(path)) {
+            // servletQueue = servletPool.get(path);
+            if (null != servletQueue) {
                 /*
                  * Since heading condition failed the servlet must be an instance of SingleThreadModel
                  */
-                servletPool.get(path).enqueue(servletObj);
+                servletQueue.enqueue(servlet);
             } else {
-                final ServletQueue servlets;
                 try {
-                    servlets = new ServletQueue(1, servletObj.getClass().getConstructor(CLASS_ARR));
+                    servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
                 } catch (final SecurityException e) {
-                    LOG.error("Default constructor could not be found for servlet class: " + servletObj.getClass().getName(), e);
+                    LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
                 } catch (final NoSuchMethodException e) {
-                    LOG.error("Default constructor could not be found for servlet class: " + servletObj.getClass().getName(), e);
+                    LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
                 }
                 final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
-                    servletObj.getClass().getCanonicalName(),
+                    servlet.getClass().getCanonicalName(),
                     path);
                 try {
-                    servletObj.init(conf);
+                    servlet.init(conf);
                 } catch (final ServletException e) {
                     LOG.error("Servlet could not be put into pool", e);
                     return;
                 }
-                servlets.enqueue(servletObj);
-                servletPool.put(path, servlets);
+                servletQueue.enqueue(servlet);
+                servletPool.put(path, servletQueue);
             }
         } finally {
             readWriteLock.releaseWrite();
@@ -221,7 +222,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
              */
             final ServletQueue servletQueue;
             try {
-                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR));
+                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
             } catch (final SecurityException e) {
                 final ServletException se = new ServletException(
                     "Default constructor could not be found for servlet class: " + servlet.getClass().getName(),
