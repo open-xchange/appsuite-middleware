@@ -124,8 +124,7 @@ public final class AJPv13SocketHandler {
     }
 
     /**
-     * Attempts to stop all actively executing tasks, halts the processing of waiting tasks, and returns a list of the tasks that were
-     * awaiting execution.
+     * Attempts to stop all actively executing tasks and halts the processing of waiting tasks.
      */
     public void shutDownNow() {
         if (started) {
