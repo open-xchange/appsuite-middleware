@@ -61,8 +61,6 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
  */
 public final class ServletQueue extends FIFOQueue<HttpServlet> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletQueue.class);
-
     private static final Object[] INIT_ARGS = new Object[] {};
 
     private final Constructor<?> servletConstructor;
@@ -124,7 +122,7 @@ public final class ServletQueue extends FIFOQueue<HttpServlet> {
                 servletKey));
             return servletInstance;
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            org.apache.commons.logging.LogFactory.getLog(ServletQueue.class).error(t.getMessage(), t);
         }
         return null;
     }
