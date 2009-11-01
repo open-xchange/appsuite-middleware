@@ -144,10 +144,17 @@ public class FIFOQueue<T> {
     public boolean isEmpty() {
         acquireReadLock();
         try {
-            return ((start == end) && !full);
+            return isEmpty0();
         } finally {
             releaseReadLock();
         }
+    }
+
+    /**
+     * This method is only entered when holding a lock.
+     */
+    private boolean isEmpty0() {
+        return ((start == end) && !full);
     }
 
     /**
@@ -174,7 +181,7 @@ public class FIFOQueue<T> {
         try {
             if (full) {
                 return array.length;
-            } else if (isEmpty()) {
+            } else if (isEmpty0()) {
                 return 0;
             } else {
                 return start - end;
@@ -213,7 +220,7 @@ public class FIFOQueue<T> {
         try {
             if (full) {
                 full = false;
-            } else if (isEmpty()) {
+            } else if (isEmpty0()) {
                 return null;
             }
             final T retval = array[end = (++end % array.length)];
@@ -235,7 +242,7 @@ public class FIFOQueue<T> {
     public T get() {
         acquireReadLock();
         try {
-            if (isEmpty()) {
+            if (isEmpty0()) {
                 return null;
             }
             final int tmp = end;
