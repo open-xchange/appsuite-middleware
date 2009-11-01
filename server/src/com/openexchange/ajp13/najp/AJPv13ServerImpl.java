@@ -84,7 +84,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private final AtomicBoolean running;
 
-    private final AJPv13SocketHandler executorPool;
+    private final AJPv13SocketHandler socketHandler;
 
     private AJPv13TimerTaskStarter timerTaskStarter;
 
@@ -94,7 +94,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     public AJPv13ServerImpl() {
         super();
         running = new AtomicBoolean();
-        executorPool = new AJPv13SocketHandler();
+        socketHandler = new AJPv13SocketHandler();
     }
 
     /**
@@ -164,7 +164,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             /*
              * Stop tasks
              */
-            executorPool.shutDownNow();
+            socketHandler.shutDownNow();
             /*
              * Reset pools
              */
@@ -211,7 +211,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
      */
     private void initializePools() {
         resetPools();
-        executorPool.startUp();
+        socketHandler.startUp();
         if (LOG.isInfoEnabled()) {
             LOG.info("All pools initialized...");
         }
@@ -222,8 +222,8 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
      */
     private void resetPools() {
         if (running.get()) {
-            if (!executorPool.isShutdown()) {
-                executorPool.shutDownNow();
+            if (!socketHandler.isShutdown()) {
+                socketHandler.shutDownNow();
             }
         }
     }
@@ -250,7 +250,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 final long start = System.currentTimeMillis();
                 client.setTcpNoDelay(true);
                 incrementNumberOfOpenAJPSockets();
-                executorPool.handleSocket(client);
+                socketHandler.handleSocket(client);
                 AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
             } catch (final java.net.SocketException e) {
                 /*
