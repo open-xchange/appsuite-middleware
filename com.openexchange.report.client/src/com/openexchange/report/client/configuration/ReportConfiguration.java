@@ -71,14 +71,14 @@ public class ReportConfiguration {
             if (null == propDir) {
             	throw new IOException("Missing property \"openexchange.propdir2\"");
             }
-            final File licensePropFile = new File(propDir, "license.properties");
+            final File licensePropFile = new File(propDir, "licensekeys.properties");
             if (!licensePropFile.exists() || !licensePropFile.isFile()) {
-            	throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append("license.properties").append("\" couldn't be found").toString());
+            	throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append("licensekeys.properties").append("\" couldn't be found").toString());
             }
             try {
                 in = new FileInputStream(licensePropFile);
             } catch (final FileNotFoundException e) {
-            	throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append("license.properties").append("\" couldn't be found").toString());
+            	throw new IOException(new StringBuilder("Property file \"").append(propDir).append("/").append("licensekeys.properties").append("\" couldn't be found").toString());
             }
         }
 
