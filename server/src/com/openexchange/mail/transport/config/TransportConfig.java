@@ -135,7 +135,7 @@ public abstract class TransportConfig extends MailConfig {
     }
 
     /**
-     * Gets the transport server URL appropriate to to configured transport server source.
+     * Gets the transport server URL appropriate to configured transport server source.
      * 
      * @param mailAccount The mail account
      * @return The appropriate transport server URL or <code>null</code>
