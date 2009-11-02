@@ -1,3 +1,7 @@
+* 2009-11-02 - dennis.sieben@open-xchange.com
+
+ - Added ability to disable PagedResults (e.g. for Fedora DS) by setting pagesize to 0
+
 * 2009-07-27 - marcus.klein@open-xchange.com
 
  - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.

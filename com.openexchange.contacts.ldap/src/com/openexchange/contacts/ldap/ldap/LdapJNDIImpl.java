@@ -198,8 +198,11 @@ public class LdapJNDIImpl implements LdapInterface {
                         }
                     }
                 }
-                // Re-activate paged results
-                context.setRequestControls(new Control[] { new PagedResultsControl(this.folderprop.getPagesize(), cookie, Control.CRITICAL) });
+                final int pagesize = this.folderprop.getPagesize();
+                if (0 != pagesize) {
+                    // Re-activate paged results
+                    context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
+                }
             } while (null != cookie);
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
@@ -213,14 +216,26 @@ public class LdapJNDIImpl implements LdapInterface {
     
     private Control[] getControls(final SortInfo sortField, final boolean distributionlist, final int pagesize) throws IOException, NamingException {
         if (this.deleted) {
-            return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL), new DeletedControl() };
+            if (0 == pagesize) {
+                return new Control[] { new DeletedControl() };
+            } else {
+                return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL), new DeletedControl() };
+            }
         } else {
             if (null != sortField && folderprop.getSorting().equals(Sorting.server)) {
                 final SortKey sortKey = new SortKey(getFieldFromColumn(sortField.getField(), distributionlist), sortField.getSort().equals(Order.asc), null);
                 final SortKey[] sortKeyArray = new SortKey[] { sortKey };
-                return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
+                if (0 == pagesize) {
+                    return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL) };
+                } else {
+                    return new Control[] { new SortControl(sortKeyArray, Control.CRITICAL), new PagedResultsControl(pagesize, Control.CRITICAL) };
+                }
             } else {
-                return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
+                if (0 == pagesize) {
+                    return null;
+                } else {
+                    return new Control[] { new PagedResultsControl(pagesize, Control.CRITICAL) };
+                }
             }
         }
     }

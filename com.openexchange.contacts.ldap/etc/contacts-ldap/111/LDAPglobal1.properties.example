@@ -62,6 +62,7 @@ com.openexchange.contacts.ldap.context111.LDAPglobal1.memorymapping=true
 
 # Specify the pagesize for paged results here. e.g. active directory only allows a max page size
 # of 1000
+# Setting this value to 0 disables paged results
 com.openexchange.contacts.ldap.context111.LDAPglobal1.pagesize=500
 
 # This properties defines which file contains the mapping for the attributes
