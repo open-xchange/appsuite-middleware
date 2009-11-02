@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.AccessException;
@@ -64,6 +65,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
@@ -78,23 +80,16 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Activator implements BundleActivator {
 
+    private static final Log LOG = LogFactory.getLog(Activator.class);
+
     private static Registry registry = null;
-    
-    private static Log log = LogFactory.getLog(Activator.class);
-    
+
     private static OXReseller reseller = null;
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
-     * )
-     */
+
     public void start(BundleContext context) throws Exception {
         try {
             initCache();
-            
+
             registry = AdminDaemon.getRegistry();
 
             reseller = new OXReseller();
@@ -102,78 +97,75 @@ public class Activator implements BundleActivator {
 
             // bind all NEW Objects to registry
             registry.bind(OXResellerInterface.RMI_NAME, oxresell_stub);
-            log.info("RMI Interface for reseller bundle bound to RMI registry");
-            
+            LOG.info("RMI Interface for reseller bundle bound to RMI registry");
+
             Hashtable<String, String> props = new Hashtable<String, String>();
             props.put("name", "BasicAuthenticator");
-            log.info(BasicAuthenticatorPluginInterface.class.getName());
+            LOG.info(BasicAuthenticatorPluginInterface.class.getName());
             ServiceRegistration reg = context.registerService(BasicAuthenticatorPluginInterface.class.getName(), new ResellerAuth(), props);
-            if (log.isDebugEnabled()) {
-                log.debug(reg.toString());
-                log.debug("Service registered");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(reg.toString());
+                LOG.debug("Service registered");
             }
 
             props.clear();
             props.put("name", "OXContext");
-            log.info(OXContextPluginInterface.class.getName());
+            LOG.info(OXContextPluginInterface.class.getName());
             reg = context.registerService(OXContextPluginInterface.class.getName(), new OXResellerContextImpl(), props);
-            if (log.isDebugEnabled()) {
-                log.debug(reg.toString());
-                log.debug("Service registered");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(reg.toString());
+                LOG.debug("Service registered");
             }
-        
+
             props.clear();
             props.put("name", "OXUser");
-            log.info(OXUserPluginInterface.class.getName());
+            LOG.info(OXUserPluginInterface.class.getName());
             reg = context.registerService(OXUserPluginInterface.class.getName(), new OXResellerUserImpl(), props);
-            if (log.isDebugEnabled()) {
-                log.debug(reg.toString());
-                log.debug("Service registered");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(reg.toString());
+                LOG.debug("Service registered");
             }
 
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final AlreadyBoundException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
-            log.fatal("Error while creating one instance for RMI interface", e);
+            LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
         } catch (SQLException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (OXGenericException e) {
+            LOG.fatal(e.getMessage(), e);
             throw e;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(BundleContext context) throws Exception {
         try {
             if (null != registry) {
                 registry.unbind(OXResellerInterface.RMI_NAME);
             }
         } catch (final AccessException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final NotBoundException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
 
-    private void initCache() throws SQLException {
+    private void initCache() throws SQLException, OXGenericException {
         AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         cache.initIDGenerator();
         ClientAdminThreadExtended.cache = cache;
-        log.info("ResellerBundle: Cache and Pools initialized!");
+        LOG.info("ResellerBundle: Cache and Pools initialized!");
     }
 }

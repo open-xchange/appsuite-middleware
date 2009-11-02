@@ -1,0 +1,4 @@
+* 2009-11-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
+
