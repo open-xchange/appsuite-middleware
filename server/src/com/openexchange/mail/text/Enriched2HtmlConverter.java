@@ -103,10 +103,19 @@ public class Enriched2HtmlConverter {
 
     private boolean paraParam;
 
+    /**
+     * Initializes a new {@link Enriched2HtmlConverter}.
+     */
     public Enriched2HtmlConverter() {
         super();
     }
 
+    /**
+     * Converts specified enriched text ("text/enriched" or its predecessor "text/richtext") to HTML.
+     * 
+     * @param enrichedText The enriched text
+     * @return The HTML content
+     */
     public static final String convertEnriched2Html(final String enrichedText) {
         return new Enriched2HtmlConverter().convert(enrichedText);
     }
