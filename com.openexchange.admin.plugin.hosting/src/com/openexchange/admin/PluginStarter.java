@@ -139,6 +139,7 @@ public class PluginStarter {
     private void initCache() throws OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
+        cache.initCacheExtended();
         ClientAdminThreadExtended.cache = cache;
         prop = cache.getProperties();
         LOG.info("Cache and Pools initialized!");

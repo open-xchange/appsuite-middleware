@@ -120,7 +120,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }
-        final AdminCache cache = new AdminCache();
+        final AdminCache cache = ClientAdminThreadExtended.cache;
         prop = cache.getProperties();
     }
 
