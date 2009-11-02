@@ -1386,7 +1386,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         if (origMail != null) {
             if (origMail.isDraft()) {
-                deleteMessages(origMail.getFolder(), new String[] { origMail.getMailId() }, true);
+                deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             }
             draftMail.setMsgref(null);
         }

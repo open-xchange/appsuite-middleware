@@ -2277,6 +2277,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 " has no drafts folder. Saving draft to default account's draft folder."));
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
+                            composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
                         }
                         msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
                     } else {
