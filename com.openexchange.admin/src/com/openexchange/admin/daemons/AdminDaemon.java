@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.daemons;
 
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -88,7 +89,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 
 public class AdminDaemon {
 
-    private static final Log log = LogFactory.getLog(AdminDaemon.class);
+    private static final Log LOG = LogFactory.getLog(AdminDaemon.class);
 
     private static PropertyHandler prop = null;
     private AdminCache cache = null;
@@ -112,13 +113,13 @@ public class AdminDaemon {
         public ServerSocket createServerSocket(final int port) throws IOException {
             final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
             if (hostname_property.equalsIgnoreCase("0")) {
-                if(log.isInfoEnabled()){
-                    log.info("Admindaemon will listen on all network devices!");
+                if(LOG.isInfoEnabled()){
+                    LOG.info("Admindaemon will listen on all network devices!");
                 }
                 return new ServerSocket(port, 0, null);
             } else {
-                if(log.isInfoEnabled()){
-                    log.info("Admindaemon will listen on "+hostname_property+"!");
+                if(LOG.isInfoEnabled()){
+                    LOG.info("Admindaemon will listen on "+hostname_property+"!");
                 }
                 return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
             }
@@ -137,13 +138,13 @@ public class AdminDaemon {
         for (final Bundle bundle : context.getBundles()) {
             if (bundle.getState() == Bundle.ACTIVE) {
                 bundlelist.add(bundle);
-                if (log.isInfoEnabled()) {
-                    log.info(bundle.getSymbolicName() + " already started before admin.");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(bundle.getSymbolicName() + " already started before admin.");
                 }
             } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
                 bundlelist.add(bundle);
-                if (log.isInfoEnabled()) {
-                    log.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("fragment " + bundle.getSymbolicName() + " already started before admin.");
                 }
             }
         }
@@ -157,19 +158,19 @@ public class AdminDaemon {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                log.debug(event.getBundle().getSymbolicName() + " changed to " + event.getType());
+                LOG.debug(event.getBundle().getSymbolicName() + " changed to " + event.getType());
             }
         };
         context.addBundleListener(bl);
     }
 
-    public void initCache(final BundleContext context) throws ClassNotFoundException, OXGenericException {
+    public void initCache() throws OXGenericException {
         this.cache = new AdminCache();
 
         this.cache.initCache();
         ClientAdminThread.cache = this.cache;
         prop = this.cache.getProperties();
-        log.info("Cache and Pools initialized!");
+        LOG.info("Cache and Pools initialized!");
     }
 
     public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException{
@@ -218,13 +219,13 @@ public class AdminDaemon {
             registry.bind(OXAdminCoreInterface.RMI_NAME, oxadmincore_stub);
             registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
         } catch (final RemoteException e) {
-            log.fatal("Error creating RMI registry!",e);
+            LOG.fatal("Error creating RMI registry!",e);
             System.exit(1);
         } catch (final AlreadyBoundException e) {
-            log.fatal("One RMI name is already bound!", e);
+            LOG.fatal("One RMI name is already bound!", e);
             System.exit(1);
         } catch (final StorageException e) {
-            log.fatal("Error while creating one instance for RMI interface", e);
+            LOG.fatal("Error while creating one instance for RMI interface", e);
         }
     }
 
@@ -237,11 +238,11 @@ public class AdminDaemon {
             registry.unbind(OXAdminCoreInterface.RMI_NAME);
             registry.unbind(OXTaskMgmtInterface.RMI_NAME);
         } catch (final AccessException e) {
-            log.error("Error unregistering RMI", e);
+            LOG.error("Error unregistering RMI", e);
         } catch (final RemoteException e) {
-            log.error("Error unregistering RMI", e);
+            LOG.error("Error unregistering RMI", e);
         } catch (final NotBoundException e) {
-            log.error("Error unregistering RMI", e);
+            LOG.error("Error unregistering RMI", e);
         }
     }
 
@@ -285,12 +286,12 @@ public class AdminDaemon {
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
                             final Object obj = context.getService(servicereference);
                             if (null == obj) {
-                                log.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
+                                LOG.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
                             }
                             try {
                                 return clazz.cast(obj);
                             } catch (final ClassCastException e) {
-                                log.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle "
+                                LOG.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle "
                                         + bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
                                 return null;
                             }
@@ -331,6 +332,4 @@ public class AdminDaemon {
             }
         }
     }
-
-
 }

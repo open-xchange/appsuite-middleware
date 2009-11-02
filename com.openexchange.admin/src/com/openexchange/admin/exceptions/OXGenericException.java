@@ -52,40 +52,40 @@ package com.openexchange.admin.exceptions;
 /**
  * Class containing generic Exceptions
  *
- * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a> , 
- * <a href="mailto:sebastian.kotyrba@open-xchange.com">Sebastian Kotyrba</a> , 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a> ,
+ * <a href="mailto:sebastian.kotyrba@open-xchange.com">Sebastian Kotyrba</a> ,
  * <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
- *
  */
 public class OXGenericException extends Exception {
-    
-    
+
     private static final long serialVersionUID = 8013716815582743724L;
 
     /**
      * Value is null or empty
      */
     public static final String NULL_EMPTY   = "Value is null or empty";
-    
+
     /**
-     * General ERROR 
+     * General ERROR
      */
     public static final String GENERAL_ERROR   = "ERROR";
-    
+
     /**
      * Key is missing
      */
     public static final String KEY_MISSING   = "Key is missing";
-    
-    
-    
+
     /**
      * OX generic exceptions with various messages
      *
      * @see #NULL_EMPTY
      * @see #KEY_MISSING
      */
-    public OXGenericException( String s ) {
-        super( s );
+    public OXGenericException(String s) {
+        super(s);
+    }
+
+    public OXGenericException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

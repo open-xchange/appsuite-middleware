@@ -145,18 +145,13 @@ public class AdminCache {
         super();
     }
 
-    /**
-     * @throws ClassNotFoundException
-     * @throws OXGenericException
-     *
-     *
-     */
-    public void initCache() {
-
+    public void initCache() throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
         cacheSqlScripts();
-        readMasterCredentials();
         configureAuthentication(); // disabling authentication mechs
+        if (!masterAuthenticationDisabled) {
+            readMasterCredentials();
+        }
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
@@ -193,14 +188,14 @@ public class AdminCache {
             Iterator<String> names = named_access_combinations.keySet().iterator();
             String retval = null;
             while(names.hasNext()){
-                String combi_name = (String)names.next();
+                String combi_name = (String) names.next();
                 if(named_access_combinations.get(combi_name).equals(access_combination)){
                     retval =  combi_name;
                     break;
                 }
             }
             return retval;
-        }else{
+        } else {
             return null;
         }
     }
@@ -339,9 +334,6 @@ public class AdminCache {
     }
 
     public PropertyHandler getProperties() {
-        if (this.prop == null) {
-            initCache();
-        }
         return this.prop;
     }
 
@@ -354,7 +346,7 @@ public class AdminCache {
         checkDatabaseLocked();
         return this.pool.getConnectionForContextNoTimeout(contextId);
     }
-    
+
     public boolean pushConnectionForContext(final int context_id, final Connection con) throws PoolException {
         return this.pool.pushConnectionForContext(context_id, con);
     }
@@ -574,7 +566,6 @@ public class AdminCache {
     }
 
     private void configureAuthentication() {
-
         log.debug("Configuring authentication mechanisms ...");
 
         final String master_auth_disabled = this.prop.getProp("MASTER_AUTHENTICATION_DISABLED", "false"); // fallback is auth
@@ -587,18 +578,22 @@ public class AdminCache {
         log.debug("ContextAuthentication mechanism disabled: " + contextAuthenticationDisabled);
     }
 
-    private void readMasterCredentials() {
+    private void readMasterCredentials() throws OXGenericException {
         final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/admindaemon/etc/mpasswd");
         final File tmp = new File(masterfile);
         if (!tmp.exists()) {
-            this.log.fatal("Fatal! Master auth file does not exists:\n" + masterfile);
+            throw new OXGenericException("Fatal! Master auth file does not exists: " + masterfile);
         }
         if (!tmp.canRead()) {
-            this.log.fatal("Cannot read master auth file " + masterfile + "!");
+            throw new OXGenericException("Cannot read master auth file " + masterfile + "!");
         }
-        BufferedReader bf = null;
+        final BufferedReader bf;
         try {
             bf = new BufferedReader(new FileReader(tmp));
+        } catch (FileNotFoundException e) {
+            throw new OXGenericException("File with master credentials ca not be read: " + masterfile, e);
+        }
+        try {
             String line = null;
             while ((line = bf.readLine()) != null) {
                 if (!line.startsWith("#")) {
@@ -612,19 +607,18 @@ public class AdminCache {
                     }
                 }
             }
-        } catch (final IOException e) {
-            this.log.fatal("Error processing master auth file:\n" + masterfile, e);
+        } catch (IOException e) {
+            throw new OXGenericException("Error processing master auth file: " + masterfile, e);
         } finally {
             try {
-                if (bf != null) {
-                    bf.close();
-                }
-            } catch (final IOException e) {
-                e.printStackTrace();
+                bf.close();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
             }
-
         }
-
+        if (masterCredentials == null) {
+            throw new OXGenericException("No master credentials defined!");
+        }
     }
 
     private final void checkDatabaseLocked() throws PoolException {

@@ -62,6 +62,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
@@ -77,9 +78,6 @@ public class Activator implements BundleActivator {
 
     private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
-    /**
-     * {@inheritDoc}
-     */
     public void start(BundleContext context) throws Exception {
         trackers.push(new ServiceTracker(context, ContextService.class.getName(), new RegistryServiceTrackerCustomizer<ContextService>(
             context,
@@ -101,9 +99,16 @@ public class Activator implements BundleActivator {
         this.daemon = new AdminDaemon();
         this.daemon.getCurrentBundleStatus(context);
         this.daemon.registerBundleListener(context);
-        this.daemon.initCache(context);
-        // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
-        this.daemon.initAccessCombinationsInCache();
+        try {
+            this.daemon.initCache();
+            this.daemon.initAccessCombinationsInCache();
+        } catch (OXGenericException e) {
+            log.fatal(e.getMessage(), e);
+            throw e;
+        } catch (ClassNotFoundException e) {
+            log.fatal(e.getMessage(), e);
+            throw e;
+        }
         this.daemon.initRMI(context);
 
         if (log.isInfoEnabled()) {
@@ -137,7 +142,6 @@ public class Activator implements BundleActivator {
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
