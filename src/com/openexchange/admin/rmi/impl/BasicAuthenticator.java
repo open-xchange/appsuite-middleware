@@ -75,7 +75,7 @@ import com.openexchange.admin.tools.AdminCache;
  */
 public class BasicAuthenticator extends OXCommonImpl {
 
-    private final static Log log = LogFactory.getLog (BasicAuthenticator.class);
+    private final static Log LOG = LogFactory.getLog (BasicAuthenticator.class);
 
     private OXAuthStorageInterface sqlAuth = null;
     private OXAuthStorageInterface fileAuth = null;
@@ -107,20 +107,19 @@ public class BasicAuthenticator extends OXCommonImpl {
     /**
      * Authenticates the master admin. Other bundles can register an OSGi
      * service here and take care about authentication themself
-     * 
+     *
      * @param authdata
      * @throws InvalidCredentialsException
      */
-    public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException{        
+    public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException{
         final Credentials master = ClientAdminThread.cache.getMasterCredentials();
 
         boolean doPluginAuth = false;
-        if(cache.masterAuthenticationDisabled() || 
-                ( authdata != null && !master.getLogin().equals(authdata.getLogin()) ) ) {
+        if (cache.masterAuthenticationDisabled() || (authdata != null && !master.getLogin().equals(authdata.getLogin()))) {
             doPluginAuth = true;
         }
         // only let other plugins authenticate, when we have the BundleContext
-        // AND when 
+        // AND when
         if( this.context != null && doPluginAuth) {
             final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
             for (final Bundle bundle : bundles) {
@@ -132,8 +131,8 @@ public class BasicAuthenticator extends OXCommonImpl {
                             final Object property = servicereference.getProperty("name");
                             if (null != property && property.toString().equalsIgnoreCase("BasicAuthenticator")) {
                                 final BasicAuthenticatorPluginInterface authplug = (BasicAuthenticatorPluginInterface) this.context.getService(servicereference);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling doAuthentication for plugin: " + bundlename);
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Calling doAuthentication for plugin: " + bundlename);
                                 }
                                 authplug.doAuthentication(authdata);
                                 // leave
@@ -151,7 +150,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             }
             if(!fileAuth.authenticate(authdata)){
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
-                log.error("Master authentication for user: " + authdata.getLogin(), invalidCredentialsException);
+                LOG.error("Master authentication for user: " + authdata.getLogin(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -159,26 +158,24 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     /**
      * Remove cached admin authdata from auth cache
-     * 
+     *
      * @param ctx
      */
     public void removeFromAuthCache(final Context ctx) {
-       ClientAdminThread.cache.removeAdminCredentials(ctx); 
+       ClientAdminThread.cache.removeAdminCredentials(ctx);
     }
-    
+
     /**
-     * 
      * Authenticates ONLY the context admin!
      * This method also validates the Context object data!
      * @param authdata
      * @param ctx
      * @throws InvalidCredentialsException
      * @throws StorageException
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     public void doAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
-
 
         // only do context check, if we have not already admin creds in our cache for given context
         // ATTENTION: It is correct that we don't throw a now such context exception here because we won't
@@ -187,18 +184,18 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                log.error("Requested context " + ctx.getId()
+                LOG.error("Requested context " + ctx.getId()
                         + " does not exist!", invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
-        
+
         // first check if whole authentication mechanism is disabled
         if (!cache.contextAuthenticationDisabled()) {
             if (!sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                log.error("Admin authentication for user " + authdata.getLogin(),invalidCredentialsException);
+                LOG.error("Admin authentication for user " + authdata.getLogin(),invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -211,7 +208,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @param ctx
      * @throws InvalidCredentialsException
      * @throws StorageException
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     public void doUserAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
@@ -219,7 +216,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                     "Authentication failed for user " + authdata.getLogin());
-            log.error("Requested context " + ctx.getId()
+            LOG.error("Requested context " + ctx.getId()
                     + " does not exist!", invalidCredentialsException);
             throw invalidCredentialsException;
         }
@@ -229,11 +226,9 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!sqlAuth.authenticateUser(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed for user " + authdata.getLogin());
-                log.error("User authentication: ", invalidCredentialsException);
+                LOG.error("User authentication: ", invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
     }
-
-
 }
