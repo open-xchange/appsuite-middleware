@@ -183,7 +183,9 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                         implierCache.put(path, errServletQueue);
                     } else {
                         pathStorage.append(longestImplier);
-                        implierCache.put(path, queue);
+                        if (queue.isSingleton()) {
+                            implierCache.put(path, queue);
+                        }
                         return getServletFromQueue(queue, longestImplier);
                     }
                 } finally {
@@ -210,6 +212,9 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
     private final static Class<?>[] CLASS_ARR = new Class[] {};
 
     public void putServlet(final String path, final HttpServlet servlet) {
+        if (implierCache.containsKey(path)) {
+            return;
+        }
         ServletQueue servletQueue = servletPool.get(path);
         if (null != servletQueue && servletQueue.isSingleton()) {
             return;
