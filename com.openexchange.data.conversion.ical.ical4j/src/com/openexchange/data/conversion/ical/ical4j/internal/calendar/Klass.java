@@ -53,13 +53,10 @@ import static net.fortuna.ical4j.model.Property.CLASS;
 import static net.fortuna.ical4j.model.property.Clazz.CONFIDENTIAL;
 import static net.fortuna.ical4j.model.property.Clazz.PRIVATE;
 import static net.fortuna.ical4j.model.property.Clazz.PUBLIC;
-
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Clazz;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -68,9 +65,11 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
+ * {@link Klass} - Represents the attribute converter for <code>"CLASS"</code> element.
+ * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Klass<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+public class Klass<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
     /**
      * Default constructor.
@@ -89,9 +88,8 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final U cObj, final T component,
-        final List<ConversionWarning> warnings, final Context ctx)
-        throws ConversionError {
+    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings,
+            final Context ctx) throws ConversionError {
         if (cObj.getPrivateFlag()) {
             component.getProperties().add(PRIVATE);
         } else {
@@ -106,16 +104,35 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         return component.getProperty(CLASS) != null;
     }
 
-   public void parse(final int index, final T component, final U cObj,
-        final TimeZone timeZone, final Context ctx,
-        final List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx,
+            final List<ConversionWarning> warnings) throws ConversionError {
         final Clazz clazz = (Clazz) component.getProperty(CLASS);
+        final String value = clazz.getValue();
+        if (isEmpty(value)) {
+            return;
+        }
+        /*
+         * Parse non-empty value
+         */
         if (PRIVATE.equals(clazz) || CONFIDENTIAL.equals(clazz)) {
             cObj.setPrivateFlag(true);
         } else if (PUBLIC.equals(clazz)) {
             cObj.setPrivateFlag(false);
         } else {
-            warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, clazz.getValue()));
+            warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, value));
         }
     }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str) {
+            return true;
+        }
+        final char[] chars = str.toCharArray();
+        boolean empty = true;
+        for (int i = 0; empty && i < chars.length; i++) {
+            empty = Character.isWhitespace(chars[i]);
+        }
+        return empty;
+    }
+
 }
