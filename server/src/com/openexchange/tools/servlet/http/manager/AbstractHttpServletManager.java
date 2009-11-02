@@ -157,6 +157,16 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      */
 
     /**
+     * Ensures specified path starts with "/" character.
+     * 
+     * @param path The path
+     * @return The path starting with "/" character
+     */
+    protected static String prependSlash(final String path) {
+        return path.charAt(0) == '/' ? path : new StringBuilder(path.length() + 1).append('/').append(path).toString();
+    }
+
+    /**
      * Checks if given <code>implier</code> implies given <code>path</code>.
      * <p>
      * Parameter <code>forceWhitespaceNotation</code> controls if a whitespace character needs to be present in order to let

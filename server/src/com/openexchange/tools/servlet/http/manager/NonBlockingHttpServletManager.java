@@ -204,8 +204,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
     public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         readWriteLock.acquireWrite();
         try {
-            final String path =
-                new URI(id.charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
+            final String path = new URI(prependSlash(id)).normalize().toString();
             if (servletPool.containsKey(path)) {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
@@ -261,8 +260,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
     public void unregisterServlet(final String id) {
         readWriteLock.acquireWrite();
         try {
-            final String path =
-                new URI(id.charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
+            final String path = new URI(prependSlash(id)).normalize().toString();
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
             if (null == configLoader) {
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
