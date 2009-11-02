@@ -101,12 +101,12 @@ public final class FolderAddIndex4SharedFolderSearch implements UpdateTask {
             final Log log = LogFactory.getLog(FolderAddIndex4SharedFolderSearch.class);
 
             String[] tables = { "oxfolder_tree", "del_oxfolder_tree" };
-            createIndexes(con, tables, new String[] { "parent" }, "parentIndex", log);
-            createIndexes(con, tables, new String[] { "type" }, "typeIndex", log);
-            createIndexes(con, tables, new String[] { "module" }, "moduleIndex", log);
+            createIndexes(con, tables, new String[] { "cid", "parent" }, "parentIndex", log);
+            createIndexes(con, tables, new String[] { "cid", "type" }, "typeIndex", log);
+            createIndexes(con, tables, new String[] { "cid", "module" }, "moduleIndex", log);
 
             tables = new String[] { "oxfolder_permissions", "del_oxfolder_permissions" };
-            createIndexes(con, tables, new String[] { "permission_id", "fuid" }, "principal", log);
+            createIndexes(con, tables, new String[] { "cid", "permission_id", "fuid" }, "principal", log);
 
             con.commit();
         } catch (final SQLException e) {
@@ -119,20 +119,16 @@ public final class FolderAddIndex4SharedFolderSearch implements UpdateTask {
     }
 
     private void createIndexes(final Connection con, final String[] tables, final String[] fieldNames, final String name, final Log log) {
-        final String[] columns = new String[fieldNames.length + 1];
-        columns[0] = "cid";
-        System.arraycopy(fieldNames, 0, columns, 1, fieldNames.length);
-
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {
-                final String indexName = existsIndex(con, table, columns);
+                final String indexName = existsIndex(con, table, fieldNames);
                 if (null == indexName) {
                     if (log.isInfoEnabled()) {
                         sb.setLength(0);
                         sb.append("Creating new index named \"");
                         sb.append(name);
-                        sb.append("\" with columns (cid,");
+                        sb.append("\" with columns (");
                         sb.append(fieldNames[0]);
                         for (int i = 1; i < fieldNames.length; i++) {
                             sb.append(',').append(fieldNames[i]);
@@ -142,13 +138,13 @@ public final class FolderAddIndex4SharedFolderSearch implements UpdateTask {
                         sb.append('.');
                         log.info(sb.toString());
                     }
-                    createIndex(con, table, name, columns, false);
+                    createIndex(con, table, name, fieldNames, false);
                 } else {
                     if (log.isInfoEnabled()) {
                         sb.setLength(0);
                         sb.append("New index named \"");
                         sb.append(indexName);
-                        sb.append("\" with columns (cid,");
+                        sb.append("\" with columns (");
                         sb.append(fieldNames[0]);
                         for (int i = 1; i < fieldNames.length; i++) {
                             sb.append(',').append(fieldNames[i]);
