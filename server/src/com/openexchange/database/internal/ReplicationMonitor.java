@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.internal.wrapping.JDBC3ConnectionReturner;
+import com.openexchange.database.internal.wrapping.ConnectionReturnerFactory;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -110,7 +110,7 @@ public final class ReplicationMonitor {
                 }
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
-            return new JDBC3ConnectionReturner(pools, assign, retval, false, write, usedAsRead);
+            return ConnectionReturnerFactory.createConnection(pools, assign, retval, false, write, usedAsRead);
         }
     };
 
@@ -133,7 +133,7 @@ public final class ReplicationMonitor {
                 pool.backWithoutTimeout(retval);
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
             }
-            return new JDBC3ConnectionReturner(pools, assign, retval, true, write, usedAsRead);
+            return ConnectionReturnerFactory.createConnection(pools, assign, retval, true, write, usedAsRead);
         }
     };
 

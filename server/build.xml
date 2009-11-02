@@ -13,6 +13,9 @@
     <property name="distribution" value="debian"/>
 
     <!-- Constants -->
+    <property name="srcDir" value="src"/>
+    <property name="src5Dir" value="src5"/>
+    <property name="src6Dir" value="src6"/>
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf/groupware"/>
     <property name="commonConfDir" value="conf/common"/>
@@ -135,24 +138,36 @@
         <include name="ox_languages.jar"/>
     </fileset>
 
-    <!-- I18N Properties -->
-    <property name="xgettext" value="xgettext"/>
-    <fileset id="i18n.sources" dir="${source..}">
-        <include name="com/openexchange/groupware/i18n/*.java"/>
-    </fileset>
-    <property name="msgfmt" value="msgfmt"/>
-    <property name="java_apt" value="apt"/>
-    <property name="msgcmp" value="msgcmp"/>
-
     <!-- Compile -->
     <target name="prepare">
         <mkdir dir="${output..}"/>
         <mkdir dir="${tmp.dir}"/>
+        <condition property="isJava5">
+            <equals arg1="1.5" arg2="${ant.java.version}"/>
+        </condition>
+        <condition property="isJava6">
+            <available classname="java.sql.NClob"/>
+        </condition>
     </target>
 
-    <target name="compile" depends="prepare">
-        <javac memoryMaximumSize="192M" fork="yes" srcdir="${source..}" destdir="${output..}" debug="true" debuglevel="lines,vars,source"
+    <target name="java5" if="isJava5">
+        <path id="source">
+            <pathelement location="${srcDir}"/>
+            <pathelement location="${src5Dir}"/>
+        </path>
+    </target>
+
+    <target name="java6" if="isJava6">
+        <path id="source">
+            <pathelement location="${srcDir}"/>
+            <pathelement location="${src6Dir}"/>
+        </path>
+    </target>
+
+    <target name="compile" depends="prepare,java5,java6">
+        <javac memoryMaximumSize="192M" fork="yes" destdir="${output..}" debug="true" debuglevel="lines,vars,source"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <src refid="source"/>
             <classpath refid="project.classpath"/>
         </javac>
     </target>

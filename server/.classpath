@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src5"/>
 	<classpathentry kind="src" path="sim"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="lib/xSocket-2.6.6.jar" sourcepath="lib/xSocket-2.6.6-sources.jar"/>
