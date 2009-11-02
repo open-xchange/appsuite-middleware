@@ -157,47 +157,47 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      */
 
     /**
-     * Checks if given <code>currentPath</code> implies given <code>path</code>.
+     * Checks if given <code>implier</code> implies given <code>path</code>.
      * <p>
      * Parameter <code>forceWhitespaceNotation</code> controls if a whitespace character needs to be present in order to let
-     * <code>currentPath</code> imply <code>path</code>.<br>
+     * <code>implier</code> imply <code>path</code>.<br>
      * If <code>true</code>:<br>
      * <code>"path/sub*"</code> implies <code>"path/sub/anysub"</code><br>
      * If <code>false</code> the whitespace character is not necessary.
      * 
-     * @param currentPath The path which might imply
+     * @param implier The path which might imply
      * @param path The path which might be implied
      * @param forceWhitespaceNotation <code>true</code> to enforce whitespace notation for implication; otherwise <code>false</code>
-     * @return <code>true</code> if given <code>currentPath</code> implies given <code>path</code>; otherwise <code>false</code>
+     * @return <code>true</code> if given <code>implier</code> implies given <code>path</code>; otherwise <code>false</code>
      */
-    protected static final boolean implies(final String currentPath, final String path, final boolean forceWhitespaceNotation) {
-        final int len = currentPath.length();
+    protected static final boolean implies(final String implier, final String path, final boolean forceWhitespaceNotation) {
+        final int len = implier.length();
         if (!forceWhitespaceNotation) {
             /*
              * A wildcard path
              */
-            final String _currentPath;
-            if ('*' == currentPath.charAt(len - 1)) {
-                _currentPath = len == 1 ? "" : currentPath.substring(0, len - 1);
+            final String sImplier;
+            if ('*' == implier.charAt(len - 1)) {
+                sImplier = len == 1 ? "" : implier.substring(0, len - 1);
             } else {
-                _currentPath = currentPath;
+                sImplier = implier;
             }
             /*
              * Make sure ap.path is longer or equal length so a/b/ does imply a/b
              */
-            return (path.length() >= _currentPath.length()) && path.startsWith(_currentPath);
+            return (path.length() >= sImplier.length()) && path.startsWith(sImplier);
         }
-        if ('*' == currentPath.charAt(len - 1)) {
+        if ('*' == implier.charAt(len - 1)) {
             /*
              * A wildcard path
              */
-            final String _currentPath = len == 1 ? "" : currentPath.substring(0, len - 1);
+            final String _currentPath = len == 1 ? "" : implier.substring(0, len - 1);
             /*
              * Make sure ap.path is longer or equal length so a/b/ does imply a/b
              */
             return (path.length() >= _currentPath.length()) && path.startsWith(_currentPath);
         }
-        return currentPath.equals(path);
+        return implier.equals(path);
     }
 
     /**
