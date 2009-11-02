@@ -115,14 +115,14 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
              */
             final Constructor<?> servletConstructor = entry.getValue();
             if (servletConstructor == null) {
-                servletQueue = new ServletQueue(1, null, true);
+                servletQueue = new ServletQueue(1, null, true, path);
                 servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + path));
             } else {
                 try {
                     HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
                     if (servletInstance instanceof SingleThreadModel) {
                         final int servletPoolSize = AJPv13Config.getServletPoolSize();
-                        servletQueue = new ServletQueue(servletPoolSize, servletConstructor, false);
+                        servletQueue = new ServletQueue(servletPoolSize, servletConstructor, false, path);
                         if (servletPoolSize > 0) {
                             final ServletConfig conf = configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path);
                             servletInstance.init(conf);
@@ -137,7 +137,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                             }
                         }
                     } else {
-                        servletQueue = new ServletQueue(1, servletConstructor, true);
+                        servletQueue = new ServletQueue(1, servletConstructor, true, path);
                         servletInstance.init(configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path));
                         servletQueue.enqueue(servletInstance);
                     }
@@ -217,7 +217,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * @param path The servlet path
      * @return The servlet instance dequeued from pool or newly created
      */
-    protected static final HttpServlet getServletInternal(final ServletQueue servletQueue, final String path) {
+    protected static final HttpServlet getServletFromQueue(final ServletQueue servletQueue, final String path) {
         if (servletQueue.isEmpty()) {
             /*
              * Empty queue: create & return a new servlet instance

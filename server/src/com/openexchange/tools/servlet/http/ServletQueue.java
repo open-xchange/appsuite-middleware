@@ -67,15 +67,18 @@ public final class ServletQueue extends FIFOQueue<HttpServlet> {
 
     private final boolean singleton;
 
+    private final String servletPath;
+
     /**
      * Initializes a new concurrent {@link ServletQueue}
      * 
      * @param maxsize The max. size
      * @param servletConstructor The servlet constructor to create new servlet instances on demand
      * @param singleton <code>true</code> to mark passed servlet instance as a singleton; otherwise <code>false</code>
+     * @param servletPath The servlet path
      */
-    public ServletQueue(final int maxsize, final Constructor<?> servletConstructor, final boolean singleton) {
-        this(maxsize, true, servletConstructor, singleton);
+    public ServletQueue(final int maxsize, final Constructor<?> servletConstructor, final boolean singleton, final String servletPath) {
+        this(maxsize, true, servletConstructor, singleton, servletPath);
     }
 
     /**
@@ -85,11 +88,13 @@ public final class ServletQueue extends FIFOQueue<HttpServlet> {
      * @param isSynchronized <code>true</code> for a concurrent queue; otherwise <code>false</code>
      * @param servletConstructor The servlet constructor to create new servlet instances on demand
      * @param singleton <code>true</code> to mark passed servlet instance as a singleton; otherwise <code>false</code>
+     * @param servletPath The servlet path
      */
-    public ServletQueue(final int maxsize, final boolean isSynchronized, final Constructor<?> servletConstructor, final boolean singleton) {
+    public ServletQueue(final int maxsize, final boolean isSynchronized, final Constructor<?> servletConstructor, final boolean singleton, final String servletPath) {
         super(maxsize, isSynchronized);
         this.servletConstructor = servletConstructor;
         this.singleton = singleton;
+        this.servletPath = servletPath;
     }
 
     /**
@@ -101,6 +106,15 @@ public final class ServletQueue extends FIFOQueue<HttpServlet> {
      */
     public boolean isSingleton() {
         return singleton;
+    }
+
+    /**
+     * Gets the servlet path.
+     * 
+     * @return The servlet path
+     */
+    public String getServletPath() {
+        return servletPath;
     }
 
     /**

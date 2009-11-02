@@ -57,6 +57,8 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -65,6 +67,7 @@ import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.tools.servlet.ServletConfigLoader;
+import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.ServletQueue;
 
 /**
@@ -83,6 +86,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
 
     private final Lock writeLock;
 
+    private final ConcurrentMap<String, ServletQueue> implierCache;
+
     /**
      * Initializes a new {@link ConcurrentHttpServletManager}.
      * 
@@ -93,6 +98,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
         writeLock = readWriteLock.writeLock();
+        implierCache = new ConcurrentHashMap<String, ServletQueue>();
     }
 
     public void destroyServlet(final String id, final HttpServlet servletObj) {
@@ -106,6 +112,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                 return;
             }
             servletPool.remove(id);
+            implierCache.clear();
         } finally {
             writeLock.unlock();
         }
@@ -122,30 +129,72 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                 if (path != null) {
                     pathStorage.append(path);
                 }
-                return getServletInternal(servletQueue, path);
+                return getServletFromQueue(servletQueue, path);
             }
             /*
              * Try through resolving
              */
             try {
-                ServletQueue queue = null;
-                String longestImplier = null;
-                for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); iter.hasNext();) {
-                    final Map.Entry<String, ServletQueue> e = iter.next();
-                    final String currentPath = e.getKey();
-                    if (implies(currentPath, path, false)) {
-                        if (null == longestImplier) {
-                            longestImplier = currentPath;
-                            queue = e.getValue();
-                        } else if (currentPath.length() > longestImplier.length()) {
-                            longestImplier = currentPath;
-                            queue = e.getValue();
+                /*
+                 * Check implier cache
+                 */
+                ServletQueue cachedQueue = implierCache.get(path);
+                if (null != cachedQueue) {
+                    final String implier = cachedQueue.getServletPath();
+                    pathStorage.append(implier);
+                    return getServletFromQueue(cachedQueue, implier);
+                }
+                /*
+                 * Upgrade lock: unlock read first to acquire write lock
+                 */
+                readLock.unlock();
+                writeLock.lock();
+                try {
+                    /*
+                     * Re-Check implier cache
+                     */
+                    cachedQueue = implierCache.get(path);
+                    if (null != cachedQueue) {
+                        final String implier = cachedQueue.getServletPath();
+                        pathStorage.append(implier);
+                        return getServletFromQueue(cachedQueue, implier);
+                    }
+                    /*
+                     * Not available in implier cache
+                     */
+                    ServletQueue queue = null;
+                    String longestImplier = null;
+                    for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); iter.hasNext();) {
+                        final Map.Entry<String, ServletQueue> e = iter.next();
+                        final String currentPath = e.getKey();
+                        if (implies(currentPath, path, false)) {
+                            if (null == longestImplier) {
+                                longestImplier = currentPath;
+                                queue = e.getValue();
+                            } else if (currentPath.length() > longestImplier.length()) {
+                                longestImplier = currentPath;
+                                queue = e.getValue();
+                            }
                         }
                     }
-                }
-                if (null != longestImplier) {
-                    pathStorage.append(longestImplier);
-                    return getServletInternal(queue, longestImplier);
+                    if (null == longestImplier) {
+                        final ServletQueue errServletQueue = new ServletQueue(1, null, true, path);
+                        errServletQueue.enqueue(new HttpErrorServlet("No servlet bound to path/alias: " + path));
+                        implierCache.put(path, errServletQueue);
+                    } else {
+                        pathStorage.append(longestImplier);
+                        implierCache.put(path, queue);
+                        return getServletFromQueue(queue, longestImplier);
+                    }
+                } finally {
+                    /*
+                     * Downgrade lock: reacquire read without giving up write lock and...
+                     */
+                    readLock.lock();
+                    /*
+                     * ... unlock write.
+                     */
+                    writeLock.unlock();
                 }
             } catch (final ConcurrentModificationException e) {
                 LOG.warn("Resolving servlet path failed. Trying again...", e);
@@ -176,7 +225,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
             } else {
                 try {
                     servletQueue =
-                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
+                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
@@ -221,7 +270,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
              */
             final ServletQueue servletQueue;
             try {
-                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
+                servletQueue =
+                    new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
             } catch (final SecurityException e) {
                 final ServletException se =
                     new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
@@ -243,6 +293,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
+            implierCache.clear();
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(64).append("New servlet \"").append(servlet.getClass().getCanonicalName()).append(
                     "\" successfully registered to \"").append(path).append('"'));
@@ -267,6 +318,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
             }
             configLoader.removeConfig(servletPool.get(path).dequeue().getClass().getCanonicalName());
             servletPool.remove(path);
+            implierCache.clear();
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);

@@ -116,7 +116,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                     releaseServletInternal(servletQueue, retval);
                 }
                 path2Append = path;
-                retval = getServletInternal(servletQueue, path);
+                retval = getServletFromQueue(servletQueue, path);
             } else {
                 /*
                  * Try through resolving
@@ -144,7 +144,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                             releaseServletInternal(queue, retval);
                         }
                         path2Append = longestImplier;
-                        retval = getServletInternal(queue, longestImplier);
+                        retval = getServletFromQueue(queue, longestImplier);
                     }
                 } catch (final ConcurrentModificationException e) {
                     LOG.warn("Resolving servlet path failed. Trying again...", e);
@@ -177,7 +177,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
             } else {
                 try {
                     servletQueue =
-                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
+                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
@@ -222,7 +222,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
              */
             final ServletQueue servletQueue;
             try {
-                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
+                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
             } catch (final SecurityException e) {
                 final ServletException se =
                     new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
