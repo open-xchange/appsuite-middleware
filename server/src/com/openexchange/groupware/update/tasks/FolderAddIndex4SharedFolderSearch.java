@@ -101,6 +101,7 @@ public final class FolderAddIndex4SharedFolderSearch implements UpdateTask {
             final Log log = LogFactory.getLog(FolderAddIndex4SharedFolderSearch.class);
 
             String[] tables = { "oxfolder_tree", "del_oxfolder_tree" };
+            createIndexes(con, tables, new String[] { "parent" }, "parentIndex", log);
             createIndexes(con, tables, new String[] { "type" }, "typeIndex", log);
             createIndexes(con, tables, new String[] { "module" }, "moduleIndex", log);
 
