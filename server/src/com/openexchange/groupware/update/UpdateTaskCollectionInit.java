@@ -368,6 +368,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 98
             // Removes duplicate contact collector folders
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.DuplicateContactCollectFolderRemoverTask());
+            // Version 100
+            // Adds necessary indexes to improve shared folder search for a user
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch());
 
             // TODO: Enable virtual folder tree update task when needed
             // Version XY

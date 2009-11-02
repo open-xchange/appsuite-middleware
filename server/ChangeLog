@@ -1,3 +1,7 @@
+* 2009-11-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #14677: Fixed performance issue when searching for a user's shared folders
+
 * 2009-10-31 - thorben.betten@open-xchange.com
 
  - Bugfix #14742: Fixed setting path info in servlet's request
