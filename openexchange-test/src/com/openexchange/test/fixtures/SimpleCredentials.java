@@ -114,6 +114,10 @@ public class SimpleCredentials implements Cloneable {
     public int getUserId() {
     	return getConfig().getInt(Tree.Identifier);
     }
+    
+    public boolean hasFullGroupware(){
+        return getConfig().getBool(Tree.InfostoreEnabled);
+    }
 
     public TimeZone getTimeZone() {
     	return TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
