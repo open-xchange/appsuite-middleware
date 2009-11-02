@@ -612,7 +612,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
-        if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED) || contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
+        final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
+        if (baseType.startsWith(MIMETypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MIMETypes.MIME_TEXT_RICHTEXT)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 ENRCONV.convert(src),
                 contentType.getCharsetParameter(),
@@ -621,7 +622,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 usm,
                 modified,
                 displayMode);
-        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
+        } else if (baseType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 RTF2HTMLConverter.convertRTFToHTML(src),
                 contentType.getCharsetParameter(),

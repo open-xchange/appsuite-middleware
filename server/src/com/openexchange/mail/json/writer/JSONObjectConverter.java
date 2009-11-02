@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.writer;
 
+import java.util.Locale;
 import java.util.TimeZone;
 import javax.mail.Part;
 import org.json.JSONArray;
@@ -481,7 +482,8 @@ public final class JSONObjectConverter {
     private static final Enriched2HtmlConverter ENRCONV = new Enriched2HtmlConverter();
 
     private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
-        if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED) || contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
+        final String baseType = contentType.getBaseType().toLowerCase(Locale.ENGLISH);
+        if (baseType.startsWith(MIMETypes.MIME_TEXT_ENRICHED) || baseType.startsWith(MIMETypes.MIME_TEXT_RICHTEXT)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 ENRCONV.convert(src),
                 contentType.getCharsetParameter(),
@@ -490,7 +492,7 @@ public final class JSONObjectConverter {
                 usm,
                 modified,
                 displayMode);
-        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
+        } else if (baseType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
             return HTMLProcessing.formatHTMLForDisplay(
                 RTF2HTMLConverter.convertRTFToHTML(src),
                 contentType.getCharsetParameter(),
