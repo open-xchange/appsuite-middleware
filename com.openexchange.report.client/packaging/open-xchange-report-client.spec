@@ -4,7 +4,7 @@
 Name:           open-xchange-report-client
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@, open-xchange-server >= @OXVERSION@, open-xchange-admin >= @OXVERSION@, open-xchange-admin-plugin-hosting >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@, open-xchange-server >= @OXVERSION@, open-xchange-admin-client >= @OXVERSION@, open-xchange-admin-plugin-hosting-client >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
