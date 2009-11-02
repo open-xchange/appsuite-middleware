@@ -261,7 +261,8 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
     public void unregisterServlet(final String id) {
         readWriteLock.acquireWrite();
         try {
-            final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
+            final String path =
+                new URI(id.charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
             if (null == configLoader) {
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");

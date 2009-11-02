@@ -77,7 +77,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
     private static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(ConcurrentHttpServletManager.class);
 
-    //private final ReadWriteLock readWriteLock;
+    // private final ReadWriteLock readWriteLock;
 
     private final Lock readLock;
 
@@ -260,7 +260,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
     public void unregisterServlet(final String id) {
         writeLock.lock();
         try {
-            final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
+            final String path =
+                new URI(id.charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
             if (null == configLoader) {
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
