@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -135,28 +136,40 @@ public class ObjectHandler {
     	List<List<Object>> retval = new ArrayList<List<Object>>();
     	retval.add(Arrays.asList((Object) "id", "age", "created", "module access combination", "users" ));
 
-    	TreeSet<List<Object>> sorted = new TreeSet<List<Object>>(new Comparator<List<Object>>() {
-    		public int compare(List<Object> o1, List<Object> o2) {
-    			Integer contextId1 = (Integer) o1.get(0);
-    			Integer contextId2 = (Integer) o2.get(0);
-    			return contextId1.compareTo(contextId2);
-    		}
+    	TreeSet<Integer> sorted = new TreeSet<Integer>(new Comparator<Integer>() {
+			public int compare(Integer o1, Integer o2) {
+				return o1.compareTo(o2);
+			}
     	});
+    	
+    	HashMap<String, List<List<Object>>> sortDetails = new HashMap<String, List<List<Object>>>();
 
     	for (ContextDetail tmp : contextDetails) {         
-    		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {             
-    			sorted.add(Arrays.asList((Object) 
+    		for (ContextModuleAccessCombination moduleAccessCombination : tmp.getModuleAccessCombinations()) {
+    			
+    			sorted.add(new Integer(tmp.getId()));
+    			
+    			List<List<Object>> tmpList;
+    			if (!sortDetails.containsKey(tmp.getId())) {
+    				tmpList = new ArrayList<List<Object>>();
+    			} else {
+    				tmpList = sortDetails.get(tmp.getId());
+    			}
+				tmpList.add(Arrays.asList((Object) 
     					new Integer(tmp.getId()),
     					tmp.getAge(),
     					tmp.getCreated(),
     					moduleAccessCombination.getUserAccessCombination(),
     					moduleAccessCombination.getUserCount()
-    			));
+    				));
+				sortDetails.put(tmp.getId(), tmpList);
     		}
     	}
 
-    	for (List<Object> tmp : sorted) {
-    		retval.add(tmp);
+    	for (Integer tmp : sorted) {
+    		for (List<Object> tmpList : sortDetails.get(String.valueOf(tmp))) {
+    			retval.add(tmpList);
+    		}
     	}
 
     	return retval;
