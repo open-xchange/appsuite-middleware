@@ -28,7 +28,8 @@
 * 2009-10-27 - marcus.klein@open-xchange.com
 
  - Bugfix #14719: Adding commons.codec.digest export to common bundle for outlook updater bundle.
- - Bugfix #14392: Marked subscription form labels as texts to translate and change a label.
+ - Bugfix #14392: Changed a label.
+ - Bugfix #14507: Marked subscription form labels as texts to translate.
 
 * 2009-10-26 - thorben.betten@open-xchange.com
 
