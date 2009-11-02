@@ -22,8 +22,7 @@ BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %if 0%{?sles_version} >= 11
 # SLES11 or higher
-BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9, java-1_5_0-ibm-devel >= 1.5.0_sr9, java-1_5_0-ibm-alsa >= 1.5.0_sr9
-
+BuildRequires:  java-1_6_0-ibm-devel
 %endif
 
 %if 0%{?rhel_version}
