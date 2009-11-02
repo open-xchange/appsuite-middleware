@@ -4,7 +4,7 @@
 Name:           open-xchange-report-client
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@, open-xchange-server >= @OXVERSION@, open-xchange-admin-client >= @OXVERSION@, open-xchange-admin-plugin-hosting-client >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@, open-xchange-server >= @OXVERSION@, open-xchange-admin-lib >= @OXVERSION@, open-xchange-admin-plugin-hosting-lib >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -22,8 +22,7 @@ BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %if 0%{?sles_version} >= 11
 # SLES11 or higher
-BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9, java-1_5_0-ibm-devel >= 1.5.0_sr9, java-1_5_0-ibm-alsa >= 1.5.0_sr9
-
+BuildRequires:  java-1_6_0-ibm-devel
 %endif
 
 %if 0%{?rhel_version}
