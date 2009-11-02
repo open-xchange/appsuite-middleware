@@ -1349,55 +1349,72 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
         }
         final MailPath msgref = draftMail.getMsgref();
-        final MailMessage origMail;
-        if (null == msgref || !draftFullname.equals(msgref.getFolder())) {
-            origMail = null;
-        } else {
-            origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
-            if (origMail != null) {
-                /*
-                 * Check for attachments and add them
-                 */
-                final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-                new MailMessageParser().parseMailMessage(origMail, handler);
-                final List<MailPart> parts = handler.getNonInlineParts();
-                if (!parts.isEmpty()) {
-                    final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
-                    for (final MailPart mailPart : parts) {
-                        /*
-                         * Create and add a referenced part from original draft mail
-                         */
-                        draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart, session));
+        MailAccess<?, ?> otherAccess = null;
+        try {
+            final MailMessage origMail;
+            if (null == msgref || !draftFullname.equals(msgref.getFolder())) {
+                origMail = null;
+            } else {
+                if (msgref.getAccountId() == accountId) {
+                    origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
+                } else {
+                    otherAccess = MailAccess.getInstance(session, msgref.getAccountId());
+                    otherAccess.connect(true);
+                    origMail = otherAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false);
+                }
+                if (origMail != null) {
+                    /*
+                     * Check for attachments and add them
+                     */
+                    final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+                    new MailMessageParser().parseMailMessage(origMail, handler);
+                    final List<MailPart> parts = handler.getNonInlineParts();
+                    if (!parts.isEmpty()) {
+                        final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
+                        for (final MailPart mailPart : parts) {
+                            /*
+                             * Create and add a referenced part from original draft mail
+                             */
+                            draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart, session));
+                        }
                     }
                 }
             }
-        }
-        final String uid;
-        {
-            final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
-            filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
-            /*
-             * Append message to draft folder without invoking draftMail.cleanUp() afterwards to avoid loss of possibly uploaded images
-             */
-            uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
-        }
-        /*
-         * Check for draft-edit operation: Delete old version
-         */
-        if (origMail != null) {
-            if (origMail.isDraft()) {
-                deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
+            final String uid;
+            {
+                final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+                filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
+                /*
+                 * Append message to draft folder without invoking draftMail.cleanUp() afterwards to avoid loss of possibly uploaded images
+                 */
+                uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
             }
-            draftMail.setMsgref(null);
+            /*
+             * Check for draft-edit operation: Delete old version
+             */
+            if (origMail != null) {
+                if (origMail.isDraft() && null != msgref) {
+                    if (msgref.getAccountId() == accountId) {
+                        mailAccess.getMessageStorage().deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID()} , true);
+                    } else if (null != otherAccess) {
+                        otherAccess.getMessageStorage().deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID()} , true);
+                    }
+                }
+                draftMail.setMsgref(null);
+            }
+            /*
+             * Return draft mail
+             */
+            final MailMessage m = mailAccess.getMessageStorage().getMessage(draftFullname, uid, true);
+            if (null == m) {
+                throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), draftFullname);
+            }
+            return m.getMailPath().toString();
+        } finally {
+            if (null != otherAccess) {
+                otherAccess.close(true);
+            }
         }
-        /*
-         * Return draft mail
-         */
-        final MailMessage m = mailAccess.getMessageStorage().getMessage(draftFullname, uid, true);
-        if (null == m) {
-            throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(uid), draftFullname);
-        }
-        return m.getMailPath().toString();
     }
 
     @Override
