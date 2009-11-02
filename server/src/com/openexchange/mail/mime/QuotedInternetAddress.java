@@ -63,13 +63,13 @@ import javax.mail.internet.MimeUtility;
  * Quotes are added to encoded personal names to maintain them when converting to mail-safe version. Parental {@link InternetAddress} class
  * ignores quotes when when converting to mail-safe version:
  * <p>
- * <code>``"Müller,&nbsp;Jan"&nbsp;&lt;mj@foo.de&gt;''</code><br>
+ * <code>``"M&uuml;ller,&nbsp;Jan"&nbsp;&lt;mj@foo.de&gt;''</code><br>
  * is converted to<br>
  * <code>``=?UTF-8?Q?M=C3=BCller=2C_Jan?=&nbsp;&lt;mj@foo.de&gt;''</code>
  * <p>
  * This class maintains the quotes in mail-safe version:
  * <p>
- * <code>``"Müller,&nbsp;Jan"&nbsp;&lt;mj@foo.de&gt;''</code><br>
+ * <code>``"M&uuml;ller,&nbsp;Jan"&nbsp;&lt;mj@foo.de&gt;''</code><br>
  * is converted to<br>
  * <code>``=?UTF-8?Q?=22M=C3=BCller=2C_Jan=22?=&nbsp;&lt;mj@foo.de&gt;''</code>
  * 

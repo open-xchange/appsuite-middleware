@@ -75,7 +75,7 @@ public interface ManagedFileManagement {
      * </ol>
      * 
      * @return A new temporary file
-     * @throws ManagedFileException If a temporary filöe could not be created
+     * @throws ManagedFileException If a temporary file could not be created
      */
     public File newTempFile() throws ManagedFileException;
 
