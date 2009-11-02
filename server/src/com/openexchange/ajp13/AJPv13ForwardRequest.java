@@ -88,10 +88,11 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final String methods[] = {
-        "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK",
-        "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE",
-        "BASELINE_CONTROL", "MKACTIVITY" };
+    private static final String methods[] =
+        {
+            "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK",
+            "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE",
+            "BASELINE_CONTROL", "MKACTIVITY" };
 
     private static final Map<Integer, String> httpHeaderMapping;
 
@@ -332,7 +333,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         final String servletPath = ajpRequestHandler.getServletPath();
         if (null != servletPath) {
             /*
-             * Apply the servlet path with leading "/" to the request
+             * Apply the servlet path with leading "/" character
              */
             final int servletPathLen = servletPath.length();
             if ((1 == servletPathLen) && ('*' == servletPath.charAt(0))) {
@@ -349,20 +350,14 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
                  * any extra path information or a query string.
                  */
-                final StringBuilder sb = new StringBuilder(servletPathLen + 1);
-                servletRequest.setServletPath(sb.append('/').append(servletPath).toString());
+                final int ilen = servletPathLen + 1;
+                servletRequest.setServletPath(new StringBuilder(ilen).append('/').append(servletPath).toString());
                 /*
                  * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
                  * "/" character.
                  */
-                if ((requestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
-                    final String pathInfo = requestURI.substring(servletPathLen);
-                    if ('/' == pathInfo.charAt(0)) {
-                        servletRequest.setPathInfo(pathInfo);
-                    } else {
-                        sb.setLength(1); // Reset to "/" character
-                        servletRequest.setPathInfo(sb.append(pathInfo).toString());
-                    }
+                if ((requestURI.length() > ilen) /* && requestURI.startsWith(servletPath) */) {
+                    servletRequest.setPathInfo(requestURI.substring(ilen));
                 } else {
                     servletRequest.setPathInfo(null);
                 }
