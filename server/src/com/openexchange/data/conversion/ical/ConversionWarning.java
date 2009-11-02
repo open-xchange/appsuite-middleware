@@ -159,10 +159,13 @@ public class ConversionWarning extends AbstractOXException {
          */
         BYMONTH_NOT_SUPPORTED("Not supported recurrence pattern: BYMONTH", Category.USER_INPUT, 15),
         /**
-         *
+         * This does not look like an iCal file. Please check the file.
          */
-        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Please check the file.", Category.USER_INPUT,16);
-        ;
+        DOES_NOT_LOOK_LIKE_ICAL_FILE("This does not look like an iCal file. Please check the file.", Category.USER_INPUT,16),
+        /**
+         * Empty "CLASS" element.
+         */
+        EMPTY_CLASS("Empty \"CLASS\" element.", Category.USER_INPUT, 17);
 
         /**
          * Message of the exception.
