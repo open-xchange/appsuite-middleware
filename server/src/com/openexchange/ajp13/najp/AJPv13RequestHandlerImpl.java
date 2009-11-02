@@ -389,13 +389,13 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * Sets this request hander's servlet reference to the one bound to given path argument
      * 
-     * @param pathArg The request path
+     * @param requestURI The request URI
      */
-    public void setServletInstance(final String pathArg) {
+    public void setServletInstance(final String requestURI) {
         /*
          * Remove leading slash character
          */
-        final String path = preparePath(pathArg);
+        final String path = preparePath(requestURI);
         /*
          * Lookup path in available servlet paths
          */
