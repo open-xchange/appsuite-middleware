@@ -107,10 +107,6 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx,
             final List<ConversionWarning> warnings) throws ConversionError {
         final Clazz clazz = (Clazz) component.getProperty(CLASS);
-        final String value = clazz.getValue();
-        if (isEmpty(value)) {
-            return;
-        }
         /*
          * Parse non-empty value
          */
@@ -119,7 +115,12 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
         } else if (PUBLIC.equals(clazz)) {
             cObj.setPrivateFlag(false);
         } else {
-            warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, value));
+            final String value = clazz.getValue();
+            if (isEmpty(value)) {
+                warnings.add(new ConversionWarning(index, Code.EMPTY_CLASS, new Object[0]));
+            } else {
+                warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, value));
+            }
         }
     }
 
