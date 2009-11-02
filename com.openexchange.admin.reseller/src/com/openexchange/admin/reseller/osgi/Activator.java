@@ -164,6 +164,7 @@ public class Activator implements BundleActivator {
     private void initCache() throws SQLException, OXGenericException {
         AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
+        cache.initCacheExtended();
         cache.initIDGenerator();
         ClientAdminThreadExtended.cache = cache;
         LOG.info("ResellerBundle: Cache and Pools initialized!");

@@ -54,13 +54,17 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.impl.IDGenerator.Implementations;
 
 public class AdminCacheExtended extends AdminCache {
-    
+
     private PropertyHandlerExtended prop = null;
-    
+
+    public AdminCacheExtended() {
+        super();
+    }
+
     public void initCacheExtended() {
         prop = new PropertyHandlerExtended(System.getProperties());
     }
-    
+
     public void initIDGenerator() throws SQLException {
         Implementations.NODBFUNCTION.getImpl().registerType("reseller_context_sequence", -2);
         Implementations.PREPAREDSTATEMENT.getImpl().registerType("CALL get_reseller_context_id()", -2);
@@ -69,10 +73,6 @@ public class AdminCacheExtended extends AdminCache {
 
     @Override
     public PropertyHandlerExtended getProperties() {
-        if (prop == null) {
-            initCacheExtended();
-        }
         return prop;
     }
-    
 }
