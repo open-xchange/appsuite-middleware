@@ -121,7 +121,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.debug("Class loaded: " + this.getClass().getName());
         }
         final AdminCache cache = new AdminCache();
-        cache.initCache();
         prop = cache.getProperties();
     }
 
@@ -258,7 +257,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
                 }
             } catch (StorageException e) {
-                // Context deletion should be a robust process. Therefore not failing if the schema is not up 
+                // Context deletion should be a robust process. Therefore not failing if the schema is not up
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
@@ -1094,5 +1093,4 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
         }
     }
-
 }

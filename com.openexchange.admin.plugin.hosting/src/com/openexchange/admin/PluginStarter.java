@@ -62,6 +62,7 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -69,8 +70,9 @@ import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 
 public class PluginStarter {
+
     private static Registry registry = null;
-    private static Log log = LogFactory.getLog(PluginStarter.class);
+    private static Log LOG = LogFactory.getLog(PluginStarter.class);
 
     private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
@@ -81,7 +83,7 @@ public class PluginStarter {
         super();
     }
 
-    public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException {
+    public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException, OXGenericException {
         try {
             initCache();
             registry = AdminDaemon.getRegistry();
@@ -98,19 +100,19 @@ public class PluginStarter {
             registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
 
 //            startJMX();
-            
-            if (log.isDebugEnabled()) {
-                log.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
-                log.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
-            }            
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+                LOG.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
+            }
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final AlreadyBoundException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
-            log.fatal("Error while creating one instance for RMI interface", e);
+            LOG.fatal("Error while creating one instance for RMI interface", e);
             throw e;
         }
     }
@@ -122,25 +124,23 @@ public class PluginStarter {
                 registry.unbind(OXUtilInterface.RMI_NAME);
             }
         } catch (final AccessException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         } catch (final NotBoundException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
 
     }
 
-    private void initCache() {
+    private void initCache() throws OXGenericException {
         final AdminCacheExtended cache = new AdminCacheExtended();
         cache.initCache();
         ClientAdminThreadExtended.cache = cache;
-        prop = cache.getProperties();        
-        log.info("Cache and Pools initialized!");
+        prop = cache.getProperties();
+        LOG.info("Cache and Pools initialized!");
     }
-
-
 }

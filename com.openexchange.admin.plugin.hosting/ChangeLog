@@ -1,3 +1,7 @@
+* 2009-11-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
+
 * 2009-10-20 - marcus.klein@open-xchange.com
 
  - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.

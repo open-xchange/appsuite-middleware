@@ -50,15 +50,20 @@
 package com.openexchange.admin.osgi;
 
 import java.util.Stack;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.PluginStarter;
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
 
 public class Activator implements BundleActivator {
+
+    private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private PluginStarter starter = null;
 
@@ -72,7 +77,11 @@ public class Activator implements BundleActivator {
             tracker.open();
         }
         this.starter = new PluginStarter();
-        this.starter.start(context);
+        try {
+            this.starter.start(context);
+        } catch (OXGenericException e) {
+            LOG.fatal(e.getMessage(), e);
+        }
     }
 
     public void stop(BundleContext context) throws Exception {
