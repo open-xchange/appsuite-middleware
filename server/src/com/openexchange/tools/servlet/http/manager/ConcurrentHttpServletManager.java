@@ -74,9 +74,10 @@ import com.openexchange.tools.servlet.http.ServletQueue;
  */
 public final class ConcurrentHttpServletManager extends AbstractHttpServletManager {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConcurrentHttpServletManager.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(ConcurrentHttpServletManager.class);
 
-    private final ReadWriteLock readWriteLock;
+    //private final ReadWriteLock readWriteLock;
 
     private final Lock readLock;
 
@@ -89,7 +90,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
      */
     public ConcurrentHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
         super(servletConstructorMap);
-        readWriteLock = new ReentrantReadWriteLock();
+        final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
         writeLock = readWriteLock.writeLock();
     }
@@ -174,7 +175,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                 servletQueue.enqueue(servlet);
             } else {
                 try {
-                    servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
+                    servletQueue =
+                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
@@ -182,9 +184,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
                 }
-                final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
-                    servlet.getClass().getCanonicalName(),
-                    path);
+                final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(servlet.getClass().getCanonicalName(), path);
                 try {
                     servlet.init(conf);
                 } catch (final ServletException e) {
@@ -203,9 +203,10 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
     public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         writeLock.lock();
         try {
-            final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
+            final String path =
+                new URI(id.charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             if (servletPool.containsKey(path)) {
-                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
+                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
@@ -223,15 +224,13 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
             try {
                 servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
             } catch (final SecurityException e) {
-                final ServletException se = new ServletException(
-                    "Default constructor could not be found for servlet class: " + servlet.getClass().getName(),
-                    e);
+                final ServletException se =
+                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                 se.initCause(e);
                 throw se;
             } catch (final NoSuchMethodException e) {
-                final ServletException se = new ServletException(
-                    "Default constructor could not be found for servlet class: " + servlet.getClass().getName(),
-                    e);
+                final ServletException se =
+                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                 se.initCause(e);
                 throw se;
             }
@@ -242,7 +241,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
              * Put into servlet pool for being accessible
              */
             if (servletPool.putIfAbsent(path, servletQueue) != null) {
-                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
+                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
             if (LOG.isInfoEnabled()) {

@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import com.openexchange.configuration.SystemConfig;
@@ -149,10 +150,14 @@ public final class HttpManagersInit implements Initialization {
                 /*
                  * Initialize servlets' default constructors
                  */
-                final int size = properties.keySet().size();
-                final Iterator<Object> iter = properties.keySet().iterator();
+                final int size = properties.size();
+                final Iterator<Entry<Object, Object>> iterator = properties.entrySet().iterator();
                 for (int k = 0; k < size; k++) {
-                    addServletClass(iter.next().toString().trim(), properties, servletConstructorMap);
+                    final Entry<Object, Object> entry = iterator.next();
+                    addServletClass(
+                        prepareServletPath(entry.getKey().toString().trim()),
+                        entry.getValue().toString().trim(),
+                        servletConstructorMap);
                 }
             }
             /*
@@ -162,7 +167,19 @@ public final class HttpManagersInit implements Initialization {
         } catch (final IOException exc) {
             throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc.getMessage());
         }
+    }
 
+    /**
+     * Ensures that servlet path starts with "/" character.
+     * 
+     * @param servletPath The servlet path
+     * @return The prepared servlet path
+     */
+    private static String prepareServletPath(final String servletPath) {
+        if ('/' == servletPath.charAt(0)) {
+            return servletPath;
+        }
+        return new StringBuilder(servletPath.length() + 1).append('/').append(servletPath).toString();
     }
 
     private static Properties getPropertiesFromFile(final File f) throws IOException {
@@ -186,48 +203,35 @@ public final class HttpManagersInit implements Initialization {
 
     private final static Class<?>[] CLASS_ARR = new Class[] {};
 
-    private static void addServletClass(final String name, final Properties properties, final Map<String, Constructor<?>> servletConstructorMap) {
-        String value = null;
+    private static void addServletClass(final String name, final String className, final Map<String, Constructor<?>> servletConstructorMap) {
         try {
             if (!checkServletPath(name)) {
                 LOG.error(new StringBuilder("Invalid servlet path: ").append(name).toString());
                 return;
             }
-            Object tmp = properties.get(name);
-            if ((null == tmp) || ((value = tmp.toString().trim()).length() == 0)) {
-                if (LOG.isWarnEnabled()) {
-                    final OXServletException e = new OXServletException(OXServletException.Code.NO_CLASS_NAME_FOUND, name);
-                    LOG.warn(e.getMessage(), e);
-                }
-                return;
-            }
-            tmp = null;
             if (servletConstructorMap.containsKey(name)) {
-                final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(value) != -1;
+                final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(className) != -1;
                 if (!isEqual && LOG.isWarnEnabled()) {
-                    final OXServletException e = new OXServletException(
-                        OXServletException.Code.ALREADY_PRESENT,
-                        name,
-                        servletConstructorMap.get(name),
-                        value);
+                    final OXServletException e =
+                        new OXServletException(OXServletException.Code.ALREADY_PRESENT, name, servletConstructorMap.get(name), className);
                     LOG.warn(e.getMessage(), e);
                 }
             } else {
-                servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
+                servletConstructorMap.put(name, Class.forName(className).getConstructor(CLASS_ARR));
             }
         } catch (final SecurityException e) {
             if (LOG.isWarnEnabled()) {
-                final OXServletException se = new OXServletException(OXServletException.Code.SECURITY_ERR, e, value);
+                final OXServletException se = new OXServletException(OXServletException.Code.SECURITY_ERR, e, className);
                 LOG.warn(se.getMessage(), se);
             }
         } catch (final ClassNotFoundException e) {
             if (LOG.isWarnEnabled()) {
-                final OXServletException se = new OXServletException(OXServletException.Code.CLASS_NOT_FOUND, e, value);
+                final OXServletException se = new OXServletException(OXServletException.Code.CLASS_NOT_FOUND, e, className);
                 LOG.warn(se.getMessage(), se);
             }
         } catch (final NoSuchMethodException e) {
             if (LOG.isWarnEnabled()) {
-                final OXServletException se = new OXServletException(OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, value);
+                final OXServletException se = new OXServletException(OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, className);
                 LOG.warn(se.getMessage(), se);
             }
         }

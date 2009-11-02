@@ -72,7 +72,8 @@ import com.openexchange.tools.servlet.http.ServletQueue;
  */
 public final class NonBlockingHttpServletManager extends AbstractHttpServletManager {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NonBlockingHttpServletManager.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(NonBlockingHttpServletManager.class);
 
     private final NonBlockingRWLock readWriteLock;
 
@@ -128,7 +129,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                         final Map.Entry<String, ServletQueue> e = iter.next();
                         final String currentPath = e.getKey();
                         if (implies(currentPath, path, false)) {
-                            if (null == longestImplier ) {
+                            if (null == longestImplier) {
                                 longestImplier = currentPath;
                                 queue = e.getValue();
                             } else if (currentPath.length() > longestImplier.length()) {
@@ -175,7 +176,8 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                 servletQueue.enqueue(servlet);
             } else {
                 try {
-                    servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
+                    servletQueue =
+                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
@@ -183,9 +185,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
                 }
-                final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
-                    servlet.getClass().getCanonicalName(),
-                    path);
+                final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(servlet.getClass().getCanonicalName(), path);
                 try {
                     servlet.init(conf);
                 } catch (final ServletException e) {
@@ -204,9 +204,10 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
     public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         readWriteLock.acquireWrite();
         try {
-            final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
+            final String path =
+                new URI(id.charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             if (servletPool.containsKey(path)) {
-                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
+                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
             final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
@@ -224,15 +225,13 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
             try {
                 servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel));
             } catch (final SecurityException e) {
-                final ServletException se = new ServletException(
-                    "Default constructor could not be found for servlet class: " + servlet.getClass().getName(),
-                    e);
+                final ServletException se =
+                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                 se.initCause(e);
                 throw se;
             } catch (final NoSuchMethodException e) {
-                final ServletException se = new ServletException(
-                    "Default constructor could not be found for servlet class: " + servlet.getClass().getName(),
-                    e);
+                final ServletException se =
+                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                 se.initCause(e);
                 throw se;
             }
@@ -243,7 +242,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
              * Put into servlet pool for being accessible
              */
             if (servletPool.putIfAbsent(path, servletQueue) != null) {
-                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
+                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
             if (LOG.isInfoEnabled()) {

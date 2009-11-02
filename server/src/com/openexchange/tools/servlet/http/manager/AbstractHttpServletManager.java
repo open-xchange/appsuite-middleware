@@ -71,11 +71,7 @@ import com.openexchange.tools.servlet.http.ServletQueue;
  */
 public abstract class AbstractHttpServletManager implements IHttpServletManager {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class);
-
     protected final ConcurrentMap<String, ServletQueue> servletPool;
-
-    protected final Map<String, Constructor<?>> servletConstructorMap;
 
     /**
      * Creates a new {@link AbstractHttpServletManager}.
@@ -86,9 +82,8 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      */
     protected AbstractHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
         super();
-        this.servletConstructorMap = servletConstructorMap;
         servletPool = new ConcurrentHashMap<String, ServletQueue>();
-        createServlets();
+        createServlets(servletConstructorMap);
     }
 
     private static final Object[] INIT_ARGS = new Object[] {};
@@ -96,19 +91,22 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     /**
      * Creates the static servlets identified by servlet constructor map.
      */
-    private final void createServlets() {
+    private final void createServlets(final Map<String, Constructor<?>> servletConstructorMap) {
+        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class);
         final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
         if (null == configLoader) {
-            LOG.error("Aborting servlets' initialization: HTTP service has not been initialized since default servlet configuration loader is null.");
+            log.error("Aborting servlets' initialization: HTTP service has not been initialized since default servlet configuration loader is null.");
             return;
         }
         for (final Iterator<Map.Entry<String, Constructor<?>>> iter = servletConstructorMap.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<String, Constructor<?>> entry = iter.next();
             String path;
             try {
-                path = new URI(entry.getKey().charAt(0) == '/' ? entry.getKey().substring(1) : entry.getKey()).normalize().toString();
+                final String id = entry.getKey();
+                path =
+                    new URI(entry.getKey().charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             } catch (final URISyntaxException e) {
-                LOG.error("Invalid servlet path skipped: " + entry.getKey());
+                log.error("Invalid servlet path skipped: " + entry.getKey());
                 continue;
             }
             ServletQueue servletQueue = null;
@@ -144,13 +142,13 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                         servletQueue.enqueue(servletInstance);
                     }
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    log.error(t.getMessage(), t);
                 }
             }
             servletPool.put(path, servletQueue);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("All Servlet Instances created & initialized");
+        if (log.isInfoEnabled()) {
+            log.info("All Servlet Instances created & initialized");
         }
     }
 

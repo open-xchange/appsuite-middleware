@@ -395,30 +395,39 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         /*
          * Remove leading slash character
          */
-        final String path = preparePath(requestURI);
+        final String path = removeFromPath(requestURI, '/');
         /*
          * Lookup path in available servlet paths
          */
         if (servletId.length() > 0) {
             servletId.setLength(0);
         }
-        HttpServlet servletInst = HttpServletManager.getServlet(path, servletId);
-        if (servletInst == null) {
-            servletInst = new HttpErrorServlet("No servlet bound to path/alias: " + path);
+        HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
+        if (servlet == null) {
+            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + requestURI);
         }
-        servlet = servletInst;
+        this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
         if (servletId.length() > 0) {
-            servletPath = servletId.toString().replaceFirst("\\*", ""); // path;
+            servletPath = removeFromPath(servletId.toString(), '*');
         }
         supplyRequestWrapperWithServlet();
     }
 
-    private static String preparePath(final String path) {
-        final int start = path.charAt(0) == '/' ? 1 : 0;
+    /**
+     * Removes specified character if given path ends with such a character.
+     * 
+     * @param path The path to prepare
+     * @param c The (trailing) character to remove
+     * @return The path possibly with ending character removed
+     */
+    private static String removeFromPath(final String path, final char c) {
         final int len = path.length();
-        final int end = path.charAt(len - 1) == '/' ? len - 1 : len;
-        return path.substring(start, end);
+        if (c == path.charAt(len - 1)) {
+            // Ends with "/"
+            return path.substring(0, len - 1);
+        }
+        return path;
     }
 
     /**

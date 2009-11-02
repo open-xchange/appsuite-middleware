@@ -350,14 +350,13 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
                  * any extra path information or a query string.
                  */
-                final int ilen = servletPathLen + 1;
-                servletRequest.setServletPath(new StringBuilder(ilen).append('/').append(servletPath).toString());
+                servletRequest.setServletPath(servletPath);
                 /*
                  * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
                  * "/" character.
                  */
-                if ((requestURI.length() > ilen) /* && requestURI.startsWith(servletPath) */) {
-                    servletRequest.setPathInfo(requestURI.substring(ilen));
+                if ((requestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
+                    servletRequest.setPathInfo(requestURI.substring(servletPathLen));
                 } else {
                     servletRequest.setPathInfo(null);
                 }
