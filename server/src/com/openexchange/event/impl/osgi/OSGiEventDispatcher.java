@@ -196,32 +196,34 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
             final Object oldObj = commonEvent.getOldObj();
             final Session session = commonEvent.getSession();
 
-            if (commonEvent.getModule() == Types.APPOINTMENT) {
-                if (commonEvent.getAction() == CommonEvent.INSERT) {
+            final int module = commonEvent.getModule();
+            final int action = commonEvent.getAction();
+            if (Types.APPOINTMENT == module) {
+                if (CommonEvent.INSERT == action) {
                     created((Appointment) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.UPDATE || commonEvent.getAction() == CommonEvent.MOVE) {
+                } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
                     modified((Appointment) oldObj, (Appointment) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.DELETE) {
+                } else if (CommonEvent.DELETE == action) {
                     deleted((Appointment) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.CONFIRM_ACCEPTED) {
+                } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
                     accepted((Appointment) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.CONFIRM_DECLINED) {
+                } else if (CommonEvent.CONFIRM_DECLINED == action) {
                     declined((Appointment) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.CONFIRM_TENTATIVE) {
+                } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
                     tentativelyAccepted((Appointment) actionObj, session);
                 }
-            } else if (commonEvent.getModule() == Types.TASK) {
-                if (commonEvent.getAction() == CommonEvent.INSERT) {
+            } else if (Types.TASK == module) {
+                if (CommonEvent.INSERT == action) {
                     created((Task) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.UPDATE || commonEvent.getAction() == CommonEvent.MOVE) {
+                } else if (CommonEvent.UPDATE == action || CommonEvent.MOVE == action) {
                     modified((Task) oldObj, (Task) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.DELETE) {
+                } else if (CommonEvent.DELETE == action) {
                     deleted((Task) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.CONFIRM_ACCEPTED) {
+                } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
                     accepted((Task) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.CONFIRM_DECLINED) {
+                } else if (CommonEvent.CONFIRM_DECLINED == action) {
                     declined((Task) actionObj, session);
-                } else if (commonEvent.getAction() == CommonEvent.CONFIRM_TENTATIVE) {
+                } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
                     tentativelyAccepted((Task) actionObj, session);
                 }
             }
