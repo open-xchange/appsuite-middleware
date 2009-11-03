@@ -67,8 +67,10 @@ import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.tools.servlet.ServletConfigLoader;
+import com.openexchange.tools.servlet.http.FiFoServletQueue;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.ServletQueue;
+import com.openexchange.tools.servlet.http.SingletonServletQueue;
 
 /**
  * {@link ConcurrentHttpServletManager} - A HTTP servlet manager using a {@link ReadWriteLock concurrent read-write lock}.
@@ -178,8 +180,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                         }
                     }
                     if (null == longestImplier) {
-                        final ServletQueue errServletQueue = new ServletQueue(1, null, true, path);
-                        errServletQueue.enqueue(new HttpErrorServlet("No servlet bound to path/alias: " + path));
+                        final ServletQueue errServletQueue =
+                            new SingletonServletQueue(new HttpErrorServlet("No servlet bound to path/alias: " + path), null, path);
                         implierCache.put(path, errServletQueue);
                     } else {
                         pathStorage.append(longestImplier);
@@ -213,6 +215,9 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
 
     public void putServlet(final String path, final HttpServlet servlet) {
         if (implierCache.containsKey(path)) {
+            /*
+             * Implier cache contains only singletons
+             */
             return;
         }
         ServletQueue servletQueue = servletPool.get(path);
@@ -230,7 +235,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
             } else {
                 try {
                     servletQueue =
-                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
+                        new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
@@ -273,10 +278,10 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
             /*
              * Try to determine default constructor for later instantiations
              */
-            final ServletQueue servletQueue;
+            final FiFoServletQueue servletQueue;
             try {
                 servletQueue =
-                    new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
+                    new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
             } catch (final SecurityException e) {
                 final ServletException se =
                     new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);

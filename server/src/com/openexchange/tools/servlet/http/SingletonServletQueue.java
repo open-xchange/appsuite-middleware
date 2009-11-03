@@ -49,81 +49,85 @@
 
 package com.openexchange.tools.servlet.http;
 
+import java.lang.reflect.Constructor;
 import javax.servlet.http.HttpServlet;
+import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
- * {@link ServletQueue} - A servlet queue.
+ * {@link SingletonServletQueue} - A singleton servlet queue.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServletQueue {
+public final class SingletonServletQueue implements ServletQueue {
+
+    private static final Object[] INIT_ARGS = new Object[] {};
+
+    private final Constructor<?> servletConstructor;
+
+    private final String servletPath;
+
+    private final HttpServlet singleton;
 
     /**
-     * Checks whether passed servlet instance is a singleton; meaning it does not implement marker interface
-     * <code>javax.servlet.SingleThreadModel</code>.
+     * Initializes a new {@link SingletonServletQueue}.
      * 
-     * @return <code>true</code> if servlet instance does not implement <code>javax.servlet.SingleThreadModel</code>; otherwise
-     *         <code>false</code>
+     * @param singleton The singleton HTTP servlet
+     * @param servletConstructor The servlet constructor to create new servlet instances on demand
+     * @param servletPath The servlet path
      */
-    boolean isSingleton();
+    public SingletonServletQueue(final HttpServlet singleton, final Constructor<?> servletConstructor, final String servletPath) {
+        super();
+        this.singleton = singleton;
+        this.servletConstructor = servletConstructor;
+        this.servletPath = servletPath;
+    }
 
-    /**
-     * Gets the servlet path.
-     * 
-     * @return The servlet path
-     */
-    String getServletPath();
+    public HttpServlet createServletInstance(final String servletKey) {
+        if (servletConstructor == null) {
+            return null;
+        }
+        try {
+            final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
+            servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
+                servletInstance.getClass().getCanonicalName(),
+                servletKey));
+            return servletInstance;
+        } catch (final Throwable t) {
+            org.apache.commons.logging.LogFactory.getLog(FiFoServletQueue.class).error(t.getMessage(), t);
+        }
+        return null;
+    }
 
-    /**
-     * Creates a new instance of <code>javax.servlet.http.HttpServlet</code> initialized with servlet config obtained by given
-     * <code>servletKey</code> argument.
-     * 
-     * @param servletKey The servlet key
-     * @return A new instance of <code>javax.servlet.http.HttpServlet</code> initialized with servlet config obtained by given
-     *         <code>servletKey</code> argument; or <code>null</code> if no servlet is bound to given servlet key or initialization fails
-     */
-    HttpServlet createServletInstance(final String servletKey);
+    public HttpServlet dequeue() {
+        throw new UnsupportedOperationException("SingletonServletQueue.dequeue()");
+    }
 
-    /**
-     * Checks if this queue is empty.
-     * 
-     * @return <code>true</code> if queue is empty; otherwise <code>false</code>
-     */
-    boolean isEmpty();
+    public void enqueue(final HttpServlet servlet) {
+        // Nothing to do
+    }
 
-    /**
-     * Checks if this queue is full.
-     * 
-     * @return <code>true</code> if queue is full; otherwise <code>false</code>
-     */
-    boolean isFull();
+    public HttpServlet get() {
+        return singleton;
+    }
 
-    /**
-     * Gets the number of contained objects in queue.
-     * 
-     * @return The number of contained objects
-     */
-    int size();
+    public String getServletPath() {
+        return servletPath;
+    }
 
-    /**
-     * Enqueues given servlet to queue's tail.
-     * 
-     * @param servlet The servlet to enqueue
-     */
-    void enqueue(final HttpServlet servlet);
+    public boolean isEmpty() {
+        return false;
+    }
 
-    /**
-     * Dequeues the first servlet (head) in queue.
-     * 
-     * @return The dequeued object
-     */
-    public HttpServlet dequeue();
+    public boolean isFull() {
+        return true;
+    }
 
-    /**
-     * Peeks (and does not remove) the first servlet (head) in queue
-     * 
-     * @return The first servlet
-     */
-    public HttpServlet get();
+    public boolean isSingleton() {
+        return true;
+    }
+
+    public int size() {
+        return 1;
+    }
 
 }

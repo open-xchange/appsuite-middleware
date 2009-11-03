@@ -61,8 +61,10 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.tools.servlet.ServletConfigLoader;
+import com.openexchange.tools.servlet.http.FiFoServletQueue;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.ServletQueue;
+import com.openexchange.tools.servlet.http.SingletonServletQueue;
 
 /**
  * {@link AbstractHttpServletManager} - Abstract {@link IHttpServletManager}.
@@ -115,14 +117,14 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
              */
             final Constructor<?> servletConstructor = entry.getValue();
             if (servletConstructor == null) {
-                servletQueue = new ServletQueue(1, null, true, path);
+                servletQueue = new SingletonServletQueue(new HttpErrorServlet("No Servlet Constructor found for " + path), null, path);
                 servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + path));
             } else {
                 try {
                     HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
                     if (servletInstance instanceof SingleThreadModel) {
                         final int servletPoolSize = AJPv13Config.getServletPoolSize();
-                        servletQueue = new ServletQueue(servletPoolSize, servletConstructor, false, path);
+                        servletQueue = new FiFoServletQueue(servletPoolSize, servletConstructor, false, path);
                         if (servletPoolSize > 0) {
                             final ServletConfig conf = configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path);
                             servletInstance.init(conf);
@@ -137,7 +139,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                             }
                         }
                     } else {
-                        servletQueue = new ServletQueue(1, servletConstructor, true, path);
+                        servletQueue = new SingletonServletQueue(servletInstance, servletConstructor, path);
                         servletInstance.init(configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path));
                         servletQueue.enqueue(servletInstance);
                     }

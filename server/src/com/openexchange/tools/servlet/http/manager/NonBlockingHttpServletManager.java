@@ -63,6 +63,7 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.tools.NonBlockingRWLock;
 import com.openexchange.tools.servlet.ServletConfigLoader;
+import com.openexchange.tools.servlet.http.FiFoServletQueue;
 import com.openexchange.tools.servlet.http.ServletQueue;
 
 /**
@@ -177,7 +178,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
             } else {
                 try {
                     servletQueue =
-                        new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
+                        new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
                 } catch (final SecurityException e) {
                     LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
                     return;
@@ -220,9 +221,9 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
             /*
              * Try to determine default constructor for later instantiations
              */
-            final ServletQueue servletQueue;
+            final FiFoServletQueue servletQueue;
             try {
-                servletQueue = new ServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
+                servletQueue = new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
             } catch (final SecurityException e) {
                 final ServletException se =
                     new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
@@ -282,7 +283,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
      */
 
     private static final void releaseServletInternal(final ServletQueue servletQueue, final HttpServlet servletInstance) {
-        if (servletInstance instanceof SingleThreadModel) {
+        if (!servletQueue.isSingleton()) {
             servletQueue.enqueue(servletInstance);
         }
     }
