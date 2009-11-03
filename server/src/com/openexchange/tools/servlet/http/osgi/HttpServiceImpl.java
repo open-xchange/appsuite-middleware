@@ -84,10 +84,10 @@ public final class HttpServiceImpl implements HttpService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams, final HttpContext context) throws ServletException, NamespaceException {
+    public void registerServlet(final String alias, final Servlet servlet, @SuppressWarnings("unchecked") final Dictionary initparams, final HttpContext context) throws ServletException, NamespaceException {
         try {
-            HttpServletManager.registerServlet(alias, (HttpServlet) servlet, initparams);
+            @SuppressWarnings("unchecked") final Dictionary<String, String> dic = initparams;
+            HttpServletManager.registerServlet(alias, (HttpServlet) servlet, dic);
         } catch (final ClassCastException e) {
             final ServletException se = new ServletException("Only http servlets are supported", e);
             se.initCause(e);
