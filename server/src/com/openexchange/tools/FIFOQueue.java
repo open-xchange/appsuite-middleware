@@ -72,8 +72,6 @@ public class FIFOQueue<T> {
 
     private boolean full;
 
-    private final ReadWriteLock rwLock;
-
     private final Lock r, w;
 
     private final boolean isSynchronized;
@@ -102,11 +100,10 @@ public class FIFOQueue<T> {
         full = false;
         this.isSynchronized = isSynchronized;
         if (isSynchronized) {
-            rwLock = new ReentrantReadWriteLock();
+            final ReadWriteLock rwLock = new ReentrantReadWriteLock();
             r = rwLock.readLock();
             w = rwLock.writeLock();
         } else {
-            rwLock = null;
             r = null;
             w = null;
         }
