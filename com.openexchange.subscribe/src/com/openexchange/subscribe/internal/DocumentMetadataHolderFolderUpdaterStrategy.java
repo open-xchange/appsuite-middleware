@@ -49,17 +49,11 @@
 
 package com.openexchange.subscribe.internal;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
@@ -109,16 +103,20 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         int score = 0;
         DocumentMetadata dm1 = original.documentMetadata;
         DocumentMetadata dm2 = candidate.documentMetadata;
-    
-        if(dm1.getTitle().equals(dm2.getTitle())) {
+        if (isSame(dm1.getTitle(), dm2.getTitle())) {
             score += 3;
         }
-        
-        if(dm1.getFileName().equals(dm2.getFileName())) {
+        if (isSame(dm1.getFileName(), dm2.getFileName())) {
             score += 3;
         }
-        
         return score;
+    }
+
+    private boolean isSame(String s1, String s2) {
+        if (null == s1) {
+            return null == s2;
+        }
+        return s1.equals(s2);
     }
 
     public void closeSession(Object session) throws AbstractOXException {
@@ -129,10 +127,10 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         List<DocumentMetadataHolder> list = new ArrayList<DocumentMetadataHolder>();
         InfostoreSession sess = (InfostoreSession) session;
         
-        SearchIterator documents = infostore.getDocuments(subscription.getFolderIdAsInt(), subscription.getContext(), sess.user, sess.userConfig).results();
+        SearchIterator<DocumentMetadata> documents = infostore.getDocuments(subscription.getFolderIdAsInt(), subscription.getContext(), sess.user, sess.userConfig).results();
         try {
             while(documents.hasNext()) {
-                list.add(new DocumentMetadataHolder(null, (DocumentMetadata) documents.next()));
+                list.add(new DocumentMetadataHolder(null, documents.next()));
             }
         } finally {
             documents.close();

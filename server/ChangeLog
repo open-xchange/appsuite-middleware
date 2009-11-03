@@ -1,3 +1,7 @@
+* 2009-11-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #14505: Correctly handling null values when comparing InfoStore objects.
+
 * 2009-11-02 - marcus.klein@open-xchange.com
 
  - Bugfix #14701: Wrote JDBC4 wrapper for java.sql.Connection to be compatible with Java6.
