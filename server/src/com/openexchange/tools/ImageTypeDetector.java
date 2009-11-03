@@ -129,8 +129,8 @@ public final class ImageTypeDetector {
     /**
      * 67 69 6d 70 20 78 63 66 20 76
      */
-    private static final byte[] PREFIX_XCF_GIMP = {
-        (byte) 0x67, (byte) 0x69, (byte) 0x6D, (byte) 0x70, (byte) 0x20, (byte) 0x78, (byte) 0x63, (byte) 0x66, (byte) 0x20, (byte) 0x76 };
+    private static final byte[] PREFIX_XCF_GIMP =
+        { (byte) 0x67, (byte) 0x69, (byte) 0x6D, (byte) 0x70, (byte) 0x20, (byte) 0x78, (byte) 0x63, (byte) 0x66, (byte) 0x20, (byte) 0x76 };
 
     /**
      * 23 46 49 47
@@ -140,8 +140,8 @@ public final class ImageTypeDetector {
     /**
      * 2f 2a 20 58 50 4d 20 2a 2f
      */
-    private static final byte[] PREFIX_XPM = {
-        (byte) 0x2F, (byte) 0x2A, (byte) 0x20, (byte) 0x58, (byte) 0x50, (byte) 0x4D, (byte) 0x20, (byte) 0x2A, (byte) 0x2F };
+    private static final byte[] PREFIX_XPM =
+        { (byte) 0x2F, (byte) 0x2A, (byte) 0x20, (byte) 0x58, (byte) 0x50, (byte) 0x4D, (byte) 0x20, (byte) 0x2A, (byte) 0x2F };
 
     /**
      * Initializes a new {@link ImageTypeDetector}.
@@ -342,13 +342,12 @@ public final class ImageTypeDetector {
     }
 
     private static boolean startsWith(final byte[] prefix, final byte[] bytes) {
-        if (bytes.length < prefix.length) {
+        int pc = prefix.length;
+        if (bytes.length < pc) {
             return false;
         }
-        int pc = prefix.length;
-        int pos = 0;
         while (--pc >= 0) {
-            if (bytes[pos] != prefix[pos++]) {
+            if (bytes[pc] != prefix[pc]) {
                 return false;
             }
         }
