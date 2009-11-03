@@ -183,20 +183,16 @@ public final class HttpManagersInit implements Initialization {
     }
 
     private static Properties getPropertiesFromFile(final File f) throws IOException {
-        FileInputStream fis = null;
+        final FileInputStream fis = new FileInputStream(f);
         try {
-            fis = new FileInputStream(f);
             final Properties properties = new Properties();
             properties.load(fis);
             return properties;
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                fis = null;
+            try {
+                fis.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }
