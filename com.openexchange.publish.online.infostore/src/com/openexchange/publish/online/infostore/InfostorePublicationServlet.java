@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -148,9 +149,11 @@ public class InfostorePublicationServlet extends HttpServlet {
         handle(req, resp);
     }
 
+    private static final Pattern SPLIT = Pattern.compile("/");
+
     private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
-            final String[] path = req.getRequestURI().split("/");
+            final String[] path = SPLIT.split(req.getRequestURI(), 0);
             final Context ctx = getContext(path);
             final String secret = getSecret(path);
             final Publication publication = getPublication(secret, ctx);

@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -205,10 +206,12 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
     }
 
+    private static final Pattern SPLIT = Pattern.compile("/");
+
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
         // URL format is: /publications/files/[cid]/[siteName]/[infostoreID]/[version]?secret=[secret]
         
-        final String[] path = req.getPathInfo().split("/");
+        final String[] path = SPLIT.split(req.getPathInfo(), 0);
         final List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
