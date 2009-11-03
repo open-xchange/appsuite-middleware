@@ -66,8 +66,6 @@ import com.openexchange.tools.servlet.http.HttpServletManager;
  */
 public final class HttpServiceImpl implements HttpService {
 
-    private static final HttpContext standardContext = new HttpContextImpl();
-
     /**
      * Default constructor.
      */
@@ -76,7 +74,7 @@ public final class HttpServiceImpl implements HttpService {
     }
 
     public HttpContext createDefaultHttpContext() {
-        return standardContext;
+        return new HttpContextImpl();
     }
 
     public void registerResources(final String alias, final String name, final HttpContext context) throws NamespaceException {
