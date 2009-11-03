@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
-<provider id="org.eclipse.team.cvs.core.cvsnature">
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/dynamic-net,com.openexchange.authentication.fhtwberlin"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.configjump.netsol,com.openexchange.configjump.netsol"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.mail.netsol,com.openexchange.mail.netsol"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/1und1/server/com.openexchange.mail.oneandone,com.openexchange.mail.oneandone2"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/netsol/com.openexchange.spamhandler.netsol,com.openexchange.spamhandler.netsol"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/o3sis,com.openexchange.custom.o3sis"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/versatel,com.openexchange.custom.versatel"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/univention,com.openexchange.authentication.ucs"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/parallels,com.openexchange.custom.parallels"/>
-<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange-addons/hostpoint,com.openexchange.configjump.hostpoint"/>
+<provider id="org.tigris.subversion.subclipse.core.svnnature">
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/oxio/com.openexchange.authentication.oxio/trunk,com.openexchange.authentication.oxio"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/dynamic-net/com.openexchange.custom.dynamicnet/trunk,com.openexchange.custom.dynamicnet"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/netsol/com.openexchange.configjump.netsol/trunk,com.openexchange.configjump.netsol"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/netsol/com.openexchange.mail.netsol/trunk,com.openexchange.mail.netsol"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/netsol/com.openexchange.spamhandler.netsol/trunk,com.openexchange.spamhandler.netsol"/>
+<!-- <project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/1und1/com.openexchange.mail.oneandone/trunk,com.openexchange.mail.oneandone"/> -->
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/1und1/com.openexchange.spamhandler.oneandone/trunk,com.openexchange.spamhandler.oneandone"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/1und1/com.openexchange.upsell.oneandone/trunk,com.openexchange.upsell.oneandone"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/o3sis/com.openexchange.custom.o3sis/trunk,com.openexchange.custom.o3sis"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/versatel/com.openexchange.custom.versatel/trunk,com.openexchange.custom.versatel"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/univention/com.openexchange.authentication.ucs/trunk,com.openexchange.authentication.ucs"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/parallels/com.openexchange.custom.parallels/trunk,com.openexchange.custom.parallels"/>
+<project reference="0.9.3,https://svn.open-xchange.com/open-xchange-custom/hostpoint/com.openexchange.configjump.hostpoint/trunk,com.openexchange.configjump.hostpoint"/>
 </provider>
 </psf>
