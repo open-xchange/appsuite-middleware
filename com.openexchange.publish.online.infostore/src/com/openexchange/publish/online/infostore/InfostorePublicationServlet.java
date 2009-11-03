@@ -92,6 +92,8 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class InfostorePublicationServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 8929899129435791832L;
+
     private static final Log LOG = LogFactory.getLog(InfostorePublicationServlet.class);
 
     private static final String SELF_DESTRUCT = "selfDestruct";
@@ -195,15 +197,15 @@ public class InfostorePublicationServlet extends HttpServlet {
         return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
     }
     
-    private final boolean isIE(final HttpServletRequest req) {
-        return req.getHeader("User-Agent").contains("MSIE");
+    private static final boolean isIE(final HttpServletRequest req) {
+        final String userAgent = req.getHeader("User-Agent");
+        return null != userAgent && userAgent.contains("MSIE");
     }
 
 
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        final boolean ie = isIE(req);
         resp.setHeader("Content-Disposition", "attachment; filename=\""
-             + Helper.encodeFilename(document.getFileName(), "UTF-8", ie) + "\"");
+             + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
     }
 
     private DocumentMetadata loadDocumentMetadata(final Publication publication) throws Exception {

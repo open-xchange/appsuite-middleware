@@ -196,7 +196,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
              + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
     }
 
-    private final boolean isIE(final HttpServletRequest req) {
+    private static final boolean isIE(final HttpServletRequest req) {
         final String userAgent = req.getHeader("User-Agent");
         return null != userAgent && userAgent.contains("MSIE");
     }
