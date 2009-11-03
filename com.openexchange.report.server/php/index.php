@@ -46,39 +46,73 @@
 			&& strlen($client_information) > 0) {
 			
 			if ($authenticationstring == $clientauthenticationstring) {
-				$search_existing_report_id = mysql_query(
-					sprintf("SELECT id from reports where license_keys = '%s'",
+				$reporter_id = null;
+				$reporter_id_result = mysql_query(
+					sprintf("SELECT id from report_list where license_keys = '%s'",
 						mysql_real_escape_string($license_keys))
 				);
+				if ($row = mysql_fetch_row($reporter_id_result)) {
+					$reporter_id = $row[0];
+				}
 	
-				if (mysql_num_rows($search_existing_report_id) > 0) {
-					if (!mysql_query(sprintf("UPDATE reports set ".
-						"connection_information = '%s', ".
+				if ($reporter_id == null) {
+					if (mysql_query(sprintf("INSERT into report_list set ".
+						"license_keys = '%s', ".
 						"last_syncdate = NOW(), ".
-						"client_information = '%s' ".
-						" WHERE license_keys = '%s'",
-						mysql_real_escape_string($connection_information),
-						mysql_real_escape_string($client_information),
+						"current_revision = '0'",
 						mysql_real_escape_string($license_keys)
 					))) {
-						echo 'could not update report';
+						$reporter_id_result = mysql_query(
+							sprintf("SELECT id from report_list where license_keys = '%s'",
+								mysql_real_escape_string($license_keys))
+						);
+						if ($row = mysql_fetch_row($reporter_id_result)) {
+							$reporter_id = $row[0];
+						} else {
+							echo 'could not find yet created reporter id';
+						}
 					} else {
-						echo 'report successfully updated';
+						echo 'could not create reporter id';
 					}
-				} else {
-					if (!mysql_query(sprintf("INSERT into reports set ".
-						"license_keys = '%s', ".
-						"connection_information = '%s', ".
-						"last_syncdate = NOW(), ".
-						"client_information = '%s'",
-						mysql_real_escape_string($license_keys),
-						mysql_real_escape_string($connection_information),
-						mysql_real_escape_string($client_information)
-					))) {
-						echo 'could not create report';
-					} else {
-						echo 'report successfully created';
-					}
+				}
+	
+				if ($reporter_id != null) {
+					$next_revision_number = null;
+					$next_revision_number_result = mysql_query(
+						sprintf("SELECT current_revision+1 from report_list where license_keys = '%s'",
+							mysql_real_escape_string($license_keys))
+					);
+					if ($row = mysql_fetch_row($next_revision_number_result)) {
+  						$next_revision_number = $row[0];
+  					}
+  					
+  					if ($next_revision_number != null) {
+						if (!mysql_query(sprintf("INSERT into report_revisions set ".
+							"report_revision = '%s', ".
+							"reporter_id = '%s', ".
+							"connection_information = '%s', ".
+							"syncdate = NOW(), ".
+							"report = '%s'",
+							$next_revision_number,
+							$reporter_id,
+							mysql_real_escape_string($connection_information),
+							mysql_real_escape_string($client_information)
+						))) {
+							echo 'could not create report revision';
+						} else {
+							if (!mysql_query(sprintf("UPDATE report_list set ".
+								"last_syncdate = NOW(), ".
+								"current_revision = '%s' ".
+								" WHERE id = '%s'",
+								$next_revision_number,
+								$reporter_id
+							))) {
+								echo 'could not update reporter table';
+							} else {
+								echo 'report successfully created';
+							}
+						}
+  					}
 				}
 			} else {
 				echo 'wrong client authentication string';
