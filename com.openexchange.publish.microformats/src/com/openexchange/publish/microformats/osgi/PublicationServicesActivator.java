@@ -3,7 +3,6 @@ package com.openexchange.publish.microformats.osgi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleActivator;
@@ -24,12 +23,9 @@ public class PublicationServicesActivator implements BundleActivator {
 
     private OXMFPublicationService contactPublisher;
 
-    private List<String> aliases = new LinkedList<String>();
-
     private OXMFPublicationService infostorePublisher;
 
     public void start(BundleContext context) throws Exception {
-        aliases.clear();
         contactPublisher = new OXMFPublicationService();
         contactPublisher.setFolderType("contacts");
         contactPublisher.setRootURL("/publications/contacts");
@@ -42,8 +38,6 @@ public class PublicationServicesActivator implements BundleActivator {
         
         MicroformatServlet.registerType("contacts", contactPublisher,additionalVars);
         ContactPictureServlet.setContactPublisher(contactPublisher);
-
-        aliases.add("/publications/contacts");
 
         serviceRegistrations.add(context.registerService(PublicationService.class.getName(), contactPublisher, null));
 
@@ -60,8 +54,6 @@ public class PublicationServicesActivator implements BundleActivator {
 
         MicroformatServlet.registerType("infostore", infostorePublisher, infoAdditionalVars);
 
-        aliases.add("/publications/infostore");
-
         serviceRegistrations.add(context.registerService(PublicationService.class.getName(), infostorePublisher, null));
 
     }
@@ -70,10 +62,6 @@ public class PublicationServicesActivator implements BundleActivator {
         for (ServiceRegistration registration : serviceRegistrations) {
             registration.unregister();
         }
-    }
-
-    public List<String> getAliases() {
-        return aliases;
     }
     
     public void setTemplateService(TemplateService templateService) {

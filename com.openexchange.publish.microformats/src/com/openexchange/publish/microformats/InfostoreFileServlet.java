@@ -86,7 +86,9 @@ import com.openexchange.userconf.UserConfigurationService;
  *
  */
 public class InfostoreFileServlet extends OnlinePublicationServlet {
-    
+
+    private static final long serialVersionUID = -7725853828283398968L;
+
     private static final String CONTEXTID = "contextId";
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
@@ -97,35 +99,35 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static OXMFPublicationService infostorePublisher = null;
     
     
-    public static void setInfostorePublisher(final OXMFPublicationService service) {
+    public static void setInfostorePublisher(OXMFPublicationService service) {
         infostorePublisher = service;
     }
     
     private static InfostoreFacade infostore;
     
-    public static void setInfostore(final InfostoreFacade service) {
+    public static void setInfostore(InfostoreFacade service) {
         infostore = service;
     }
     
     private static UserService users  = null;
     
-    public static void setUsers(final UserService service) {
+    public static void setUsers(UserService service) {
         users = service;
     }
     
     private static UserConfigurationService userConfigs = null;
     
-    public static void setUserConfigs(final UserConfigurationService service) {
+    public static void setUserConfigs(UserConfigurationService service) {
         userConfigs = service;
     }
    
     
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final Map<String, String> args = getPublicationArguments(req);
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String, String> args = getPublicationArguments(req);
         try {
-            final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
-            final Publication publication = infostorePublisher.getPublication(ctx, args.get(SITE));
+            Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
+            Publication publication = infostorePublisher.getPublication(ctx, args.get(SITE));
             if (publication == null) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site " + args.get(SITE));
@@ -135,17 +137,17 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
                 return;
             }
             
-            final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
+            int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
      
-            final User user = getUser(publication);
-            final UserConfiguration userConfig = getUserConfiguration(publication);
+            User user = getUser(publication);
+            UserConfiguration userConfig = getUserConfiguration(publication);
             
-            final DocumentMetadata metadata = loadMetadata(publication, infoId, user, userConfig);
-            final InputStream fileData = loadFile(publication, infoId, user, userConfig);
+            DocumentMetadata metadata = loadMetadata(publication, infoId, user, userConfig);
+            InputStream fileData = loadFile(publication, infoId, user, userConfig);
             
             writeFile(metadata, fileData, req, resp);
             
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             t.printStackTrace(resp.getWriter());
             LOG.error(t.getMessage(), t);
@@ -153,25 +155,25 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     }
 
-    private User getUser(final Publication publication) throws UserException {
+    private User getUser(Publication publication) throws UserException {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 
-    private UserConfiguration getUserConfiguration(final Publication publication) throws UserException, UserConfigurationException {
+    private UserConfiguration getUserConfiguration(Publication publication) throws UserException, UserConfigurationException {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 
     
-    private DocumentMetadata loadMetadata(final Publication publication, final int infoId, final User user, final UserConfiguration userConfig) throws OXException {
+    private DocumentMetadata loadMetadata(Publication publication, int infoId, User user, UserConfiguration userConfig) throws OXException {
         return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
     }
 
-    private void writeFile(final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    private void writeFile(DocumentMetadata metadata, InputStream fileData, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         configureHeaders(metadata, req, resp);
         write(fileData, resp);
     }
     
-    private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
+    private void write(InputStream is, HttpServletResponse resp) throws IOException {
         BufferedInputStream bis = null;
         OutputStream output = null;
         try {
@@ -189,8 +191,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         }
     }
     
-    private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        final boolean ie = isIE(req);
+    private void configureHeaders(DocumentMetadata document, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException {
+        boolean ie = isIE(req);
         resp.setHeader("Content-Disposition", "attachment; filename=\""
              + Helper.encodeFilename(document.getFileName(), "UTF-8", ie) + "\"");
     }
@@ -199,28 +201,24 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return req.getHeader("User-Agent").contains("MSIE");
     }
 
-    private InputStream loadFile(final Publication publication, final int infoId, final User user, final UserConfiguration userConfig) throws OXException {
+    private InputStream loadFile(Publication publication, int infoId, User user, UserConfiguration userConfig) throws OXException {
         return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
     }
 
-    private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
+    private Map<String, String> getPublicationArguments(HttpServletRequest req) throws UnsupportedEncodingException {
         // URL format is: /publications/files/[cid]/[siteName]/[infostoreID]/[version]?secret=[secret]
         
-        final String[] path = req.getRequestURI().split("/");
-        final List<String> normalized = new ArrayList<String>(path.length);
+        String[] path = req.getPathInfo().split("/");
+        List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
                 normalized.add(path[i]);
             }
         }
 
-        final int startIndex = normalized.indexOf("publications");
-        if (startIndex == -1) {
-            throw new IllegalArgumentException("This does not look like a valid path: " + req.getRequestURI());
-        }
-        final String site = Strings.join(decode(normalized.subList(startIndex + 3, normalized.size()-2), req), "/");
-        final Map<String, String> args = new HashMap<String, String>();
-        args.put(CONTEXTID, normalized.get(startIndex + 2));
+        String site = Strings.join(decode(normalized.subList(1, normalized.size()-2), req), "/");
+        Map<String, String> args = new HashMap<String, String>();
+        args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
         args.put(INFOSTORE_ID, normalized.get(normalized.size()-2));

@@ -158,18 +158,16 @@ public class ServletActivator extends DeferredActivator {
         InfostoreFileServlet.setInfostore(infostore);
 
         registered = true;
-        for (final String alias : activator.getAliases()) {
-            try {
-                httpService.registerServlet(alias + "/*", microformatServlet, null, null);
-            } catch (final ServletException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final NamespaceException e) {
-                LOG.error(e.getMessage(), e);
-            }
+        try {
+            httpService.registerServlet("/publications", microformatServlet, null, null);
+        } catch (final ServletException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final NamespaceException e) {
+            LOG.error(e.getMessage(), e);
         }
         try {
-            httpService.registerServlet("/publications/contactPictures/*", new ContactPictureServlet(), null, null);
-            httpService.registerServlet("/publications/files/*", new InfostoreFileServlet(), null, null);
+            httpService.registerServlet("/publications/contactPictures", new ContactPictureServlet(), null, null);
+            httpService.registerServlet("/publications/files", new InfostoreFileServlet(), null, null);
         } catch (final ServletException e) {
             LOG.error(e.getMessage(), e);
         } catch (final NamespaceException e) {
@@ -184,10 +182,8 @@ public class ServletActivator extends DeferredActivator {
         registered = false;
 
         final HttpService httpService = getService(HttpService.class);
-
-        for (final String alias : activator.getAliases()) {
-            httpService.unregister(alias + "/*");
-        }
+        httpService.unregister("/publications/files");
+        httpService.unregister("/publications/contactPictures");
+        httpService.unregister("/publications");
     }
-
 }

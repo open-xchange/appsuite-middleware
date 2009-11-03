@@ -78,7 +78,9 @@ import com.openexchange.publish.tools.PublicationSession;
  *
  */
 public class ContactPictureServlet extends OnlinePublicationServlet {
-    
+
+    private static final long serialVersionUID = -2401315328817932765L;
+
     private static final String CONTEXTID = "contextId";
     private static final String SITE = "site";
     private static final String CONTACT_ID = "contactId";
@@ -87,22 +89,22 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     
     private static OXMFPublicationService contactPublisher = null;
     
-    public static void setContactPublisher(final OXMFPublicationService service) {
+    public static void setContactPublisher(OXMFPublicationService service) {
         contactPublisher = service;
     }
     
     private static ContactInterfaceDiscoveryService contacts;
     
-    public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
+    public static void setContactInterfaceDiscoveryService(ContactInterfaceDiscoveryService service) {
         contacts = service;
     }
     
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final Map<String, String> args = getPublicationArguments(req);
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String, String> args = getPublicationArguments(req);
         try {
-            final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
-            final Publication publication = contactPublisher.getPublication(ctx, args.get(SITE));
+            Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
+            Publication publication = contactPublisher.getPublication(ctx, args.get(SITE));
             if (publication == null) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site " + args.get(SITE));
@@ -112,14 +114,14 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
                 return;
             }
             
-            final int folderId = Integer.parseInt(publication.getEntityId());
-            final int contactId = Integer.parseInt(args.get(CONTACT_ID));
+            int folderId = Integer.parseInt(publication.getEntityId());
+            int contactId = Integer.parseInt(args.get(CONTACT_ID));
             
-            final Contact contact = loadContact(publication, folderId, contactId);
+            Contact contact = loadContact(publication, folderId, contactId);
             
             writeImage(contact, resp);
             
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             t.printStackTrace(resp.getWriter());
             LOG.error(t.getMessage(), t);
@@ -127,37 +129,33 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
 
     }
 
-    private void writeImage(final Contact contact, final HttpServletResponse resp) throws IOException {
+    private void writeImage(Contact contact, HttpServletResponse resp) throws IOException {
         resp.setContentType(contact.getImageContentType());
-        final ServletOutputStream outputStream = resp.getOutputStream();
+        ServletOutputStream outputStream = resp.getOutputStream();
         outputStream.write(contact.getImage1());
         outputStream.flush();
     }
 
-    private Contact loadContact(final Publication publication, final int folderId, final int contactId) throws OXException {
-        final ContactInterface contactInterface = contacts.newContactInterface(folderId, new PublicationSession(publication));
+    private Contact loadContact(Publication publication, int folderId, int contactId) throws OXException {
+        ContactInterface contactInterface = contacts.newContactInterface(folderId, new PublicationSession(publication));
         contactInterface.getObjectsById(new int[][]{{contactId, folderId}}, new int[]{Contact.IMAGE1, Contact.IMAGE1_CONTENT_TYPE});
         return contactInterface.getObjectById(contactId, folderId);
     }
 
-    private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
+    private Map<String, String> getPublicationArguments(HttpServletRequest req) throws UnsupportedEncodingException {
         // URL format is: /publications/contactPictures/[cid]/[siteName]/[contactID]/[displayName]?secret=[secret]
         
-        final String[] path = req.getRequestURI().split("/");
-        final List<String> normalized = new ArrayList<String>(path.length);
+        String[] path = req.getPathInfo().split("/");
+        List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
                 normalized.add(path[i]);
             }
         }
 
-        final int startIndex = normalized.indexOf("publications");
-        if (startIndex == -1) {
-            throw new IllegalArgumentException("This does not look like a valid path: " + req.getRequestURI());
-        }
-        final String site = Strings.join(decode(normalized.subList(startIndex + 3, normalized.size()-2), req), "/");
-        final Map<String, String> args = new HashMap<String, String>();
-        args.put(CONTEXTID, normalized.get(startIndex + 2));
+        String site = Strings.join(decode(normalized.subList(1, normalized.size()-2), req), "/");
+        Map<String, String> args = new HashMap<String, String>();
+        args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
         args.put(CONTACT_ID, normalized.get(normalized.size()-2));
