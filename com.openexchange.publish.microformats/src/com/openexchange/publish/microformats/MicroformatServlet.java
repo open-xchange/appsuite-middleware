@@ -125,47 +125,47 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static void setPublicationDataLoaderService(PublicationDataLoaderService service) {
+    public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
         dataLoader = service;
     }
 
 
-    public static void setUserService(UserService service) {
+    public static void setUserService(final UserService service) {
         userService = service;
     }
 
-    public static void setStringTranslator(StringTranslator trans) {
+    public static void setStringTranslator(final StringTranslator trans) {
         translator = trans;
     }
     
-    public static void setConfigService(ConfigurationService confService) {
+    public static void setConfigService(final ConfigurationService confService) {
         configService = confService;
     }
 
-    public static void registerType(String module, OXMFPublicationService publisher, Map<String, Object> additionalVars) {
+    public static void registerType(final String module, final OXMFPublicationService publisher, final Map<String, Object> additionalVars) {
         publishers.put(module, publisher);
         additionalTemplateVariables.put(module, additionalVars);
     }
 
-    public static void setContactInterfaceDiscoveryService(ContactInterfaceDiscoveryService service) {
+    public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
         contacts = service;
     }
 
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         try {
             resp.setContentType("text/html; charset=UTF-8");
-            Map<String, String> args = getPublicationArguments(req);
-            String module = args.get(MODULE);
+            final Map<String, String> args = getPublicationArguments(req);
+            final String module = args.get(MODULE);
 
-            OXMFPublicationService publisher = publishers.get(module);
+            final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
                 resp.getWriter().println("Don't know how to handle module " + module);
                 return;
             }
-            Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
-            Publication publication = publisher.getPublication(ctx, args.get(SITE));
+            final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
+            final Publication publication = publisher.getPublication(ctx, args.get(SITE));
             if (publication == null) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site " + args.get(SITE));
@@ -176,11 +176,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 return;
             }
 
-            Collection<? extends Object> loaded = dataLoader.load(publication);
+            final Collection<? extends Object> loaded = dataLoader.load(publication);
 
-            HashMap<String, Object> variables = new HashMap<String, Object>();
-            User user = getUser(publication);
-            Contact userContact = getContact(new PublicationSession(publication), publication.getContext(), user.getContactId());
+            final HashMap<String, Object> variables = new HashMap<String, Object>();
+            final User user = getUser(publication);
+            final Contact userContact = getContact(new PublicationSession(publication), publication.getContext(), user.getContactId());
             
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
@@ -188,9 +188,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             variables.put("dateFormat", DATE_FORMAT);
             variables.put("timeFormat", TIME_FORMAT);
             String admin = configService.getProperty("PUBLISH_REVOKE");
-            if(admin == null || admin.equals(""))
+            if(admin == null || admin.equals("")) {
                 admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
-            String privacyText = formatPrivacyText(
+            }
+            final String privacyText = formatPrivacyText(
                 getPrivacyText(user),
                 admin,
                 user,
@@ -202,48 +203,48 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 variables.putAll(additionalTemplateVariables.get(module));
             }
             
-            OXTemplate template = publisher.loadTemplate(publication);
+            final OXTemplate template = publisher.loadTemplate(publication);
             template.process(variables, new UncloseableWriter(resp.getWriter()));
 
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             resp.getWriter().println("An exception occurred: ");
             t.printStackTrace(resp.getWriter());
         }
     }
 
-    private Contact getContact(PublicationSession publicationSession, Context context, int contactId) throws OXException {
-        ContactInterface contactInterface = contacts.getContactInterfaceProvider(FolderObject.SYSTEM_LDAP_FOLDER_ID, context.getContextId()).newContactInterface(publicationSession);
-        Contact contact = contactInterface.getObjectById(contactId, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+    private Contact getContact(final PublicationSession publicationSession, final Context context, final int contactId) throws OXException {
+        final ContactInterface contactInterface = contacts.getContactInterfaceProvider(FolderObject.SYSTEM_LDAP_FOLDER_ID, context.getContextId()).newContactInterface(publicationSession);
+        final Contact contact = contactInterface.getObjectById(contactId, FolderObject.SYSTEM_LDAP_FOLDER_ID);
         return contact;
     }
 
 
-    private String formatPrivacyText(String privacyText, String adminAddress, User user, Date creationDate) {
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
-        String retVal = String.format(privacyText, adminAddress, user.getMail(), date);
+    private String formatPrivacyText(final String privacyText, final String adminAddress, final User user, final Date creationDate) {
+        final String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
+        final String retVal = String.format(privacyText, adminAddress, user.getMail(), date);
         return "<p>" +retVal.replaceAll("\n", "</p><p>") + "</p>";
     }
 
-    private String getCollectionName(String module) {
+    private String getCollectionName(final String module) {
         return module;
     }
 
-    private Map<String, String> getPublicationArguments(HttpServletRequest req) throws UnsupportedEncodingException {
-        String[] path = req.getPathInfo().split("/");
-        List<String> normalized = new ArrayList<String>(path.length);
+    private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
+        final String[] path = req.getRequestURI().split("/");
+        final List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
                 normalized.add(path[i]);
             }
         }
 
-        int startIndex = normalized.indexOf("publications");
+        final int startIndex = normalized.indexOf("publications");
         if (startIndex == -1) {
-            throw new IllegalArgumentException("This does not look like a valid path: " + req.getPathInfo());
+            throw new IllegalArgumentException("This does not look like a valid path: " + req.getRequestURI());
         }
-        String site = Strings.join(decode(normalized.subList(startIndex + 3, normalized.size()), req), "/");
-        Map<String, String> args = new HashMap<String, String>();
+        final String site = Strings.join(decode(normalized.subList(startIndex + 3, normalized.size()), req), "/");
+        final Map<String, String> args = new HashMap<String, String>();
         args.put(MODULE, normalized.get(startIndex + 1));
         args.put(CONTEXTID, normalized.get(startIndex + 2));
         args.put(SITE, site);
@@ -251,14 +252,14 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         return args;
     }
 
-    private User getUser(Publication publication) throws UserException {
-        Context context = publication.getContext();
-        int uid = publication.getUserId();
-        User user = userService.getUser(uid, context);
+    private User getUser(final Publication publication) throws UserException {
+        final Context context = publication.getContext();
+        final int uid = publication.getUserId();
+        final User user = userService.getUser(uid, context);
         return user;
     }
     
-    private String getPrivacyText(User user){
+    private String getPrivacyText(final User user){
         return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
     }
 
