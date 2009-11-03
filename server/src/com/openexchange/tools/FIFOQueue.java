@@ -82,7 +82,7 @@ public class FIFOQueue<T> {
      * Constructor which invokes {@link #FIFOQueue(int, boolean)} with last <code>boolean</code> parameter (<code>isSynchronized</code>) set
      * to <code>true</code>
      * 
-     * @param maxsize - the max. size of this queue
+     * @param maxsize The max. size of this queue
      * @see #FIFOQueue(Class, int, boolean)
      */
     public FIFOQueue(final int maxsize) {
@@ -92,8 +92,8 @@ public class FIFOQueue<T> {
     /**
      * Constructor
      * 
-     * @param maxsize - the max. size of this queue
-     * @param isSynchronized - whether this queue is synchronized (mutually exclusive) for multiple threads accessing this queue
+     * @param maxsize The max. size of this queue
+     * @param isSynchronized Whether this queue is synchronized (mutually exclusive) for multiple threads accessing this queue
      */
     public FIFOQueue(final int maxsize, final boolean isSynchronized) {
         final @SuppressWarnings("unchecked") T[] ts = (T[]) new Object[maxsize];
@@ -174,7 +174,7 @@ public class FIFOQueue<T> {
     /**
      * Gets the number of contained objects in queue
      * 
-     * @return the number of contained objects
+     * @return The number of contained objects
      */
     public int size() {
         acquireReadLock();
@@ -194,7 +194,7 @@ public class FIFOQueue<T> {
     /**
      * Enqueues given object to queue's tail
      * 
-     * @param obj - the object to enqueue
+     * @param obj The object to enqueue
      */
     public void enqueue(final T obj) {
         acquireWriteLock();
@@ -213,7 +213,7 @@ public class FIFOQueue<T> {
     /**
      * Dequeues the first object (head) in queue
      * 
-     * @return the dequeued object
+     * @return The dequeued object
      */
     public T dequeue() {
         acquireWriteLock();
@@ -237,7 +237,7 @@ public class FIFOQueue<T> {
     /**
      * Peeks (and does not remove) the first object (head) in queue
      * 
-     * @return the first object
+     * @return The first object
      */
     public T get() {
         acquireReadLock();
