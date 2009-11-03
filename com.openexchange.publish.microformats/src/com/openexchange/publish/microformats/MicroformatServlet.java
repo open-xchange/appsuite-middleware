@@ -60,7 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -234,8 +233,6 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     private String getCollectionName(final String module) {
         return module;
     }
-
-    private static final Pattern SPLIT = Pattern.compile("/");
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
         final String[] path = SPLIT.split(req.getPathInfo(), 0);

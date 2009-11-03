@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -142,8 +141,6 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
         contactInterface.getObjectsById(new int[][]{{contactId, folderId}}, new int[]{Contact.IMAGE1, Contact.IMAGE1_CONTENT_TYPE});
         return contactInterface.getObjectById(contactId, folderId);
     }
-
-    private static final Pattern SPLIT = Pattern.compile("/");
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
         // URL format is: /publications/contactPictures/[cid]/[siteName]/[contactID]/[displayName]?secret=[secret]

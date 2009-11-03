@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,22 +71,28 @@ import com.openexchange.publish.Publication;
  *
  */
 public class OnlinePublicationServlet extends HttpServlet {
-    
+
+    private static final long serialVersionUID = 6966967169899449051L;
+
     protected static final String SECRET = "secret";
 
     protected static final String PROTECTED = "protected";
 
+    /**
+     * The pattern to split by <code>"/"</code> character.
+     */
+    protected static final Pattern SPLIT = Pattern.compile("/");
     
     protected static ContextService contexts = null;
 
-    public static void setContextService(ContextService service) {
+    public static void setContextService(final ContextService service) {
         contexts = service;
     }
 
-    protected boolean checkProtected(Publication publication, Map<String, String> args, HttpServletResponse resp) throws IOException {
-        Map<String, Object> configuration = publication.getConfiguration();
+    protected boolean checkProtected(final Publication publication, final Map<String, String> args, final HttpServletResponse resp) throws IOException {
+        final Map<String, Object> configuration = publication.getConfiguration();
         if (configuration.containsKey(PROTECTED) && (Boolean) configuration.get("protected")) {
-            String secret = (String) configuration.get(SECRET);
+            final String secret = (String) configuration.get(SECRET);
             if (!secret.equals(args.get(SECRET))) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().println("Don't know site this publication");
@@ -96,23 +103,23 @@ public class OnlinePublicationServlet extends HttpServlet {
     }
     
     // FIXME: Get Default Encoding from config service
-    protected Collection<String> decode(List<String> subList, HttpServletRequest req) throws UnsupportedEncodingException {
-        String encoding = req.getCharacterEncoding() == null ? "UTF-8" : req.getCharacterEncoding();
-        List<String> decoded = new ArrayList<String>();
-        for(String component : subList) {
-            String decodedComponent = decode(component, encoding);
+    protected Collection<String> decode(final List<String> subList, final HttpServletRequest req) throws UnsupportedEncodingException {
+        final String encoding = req.getCharacterEncoding() == null ? "UTF-8" : req.getCharacterEncoding();
+        final List<String> decoded = new ArrayList<String>();
+        for(final String component : subList) {
+            final String decodedComponent = decode(component, encoding);
             decoded.add(decodedComponent);
         }
         return decoded;
     }
     
     // FIXME use server service for this
-    private String decode(String string, String encoding) throws UnsupportedEncodingException {
-        String[] chunks = string.split("\\+");
-        StringBuilder decoded = new StringBuilder(string.length());
-        boolean endsWithPlus = string.endsWith("+");
+    private String decode(final String string, final String encoding) throws UnsupportedEncodingException {
+        final String[] chunks = string.split("\\+");
+        final StringBuilder decoded = new StringBuilder(string.length());
+        final boolean endsWithPlus = string.endsWith("+");
         for (int i = 0; i < chunks.length; i++) {
-            String chunk = chunks[i];
+            final String chunk = chunks[i];
             decoded.append(URLDecoder.decode(chunk, encoding));
             if(i != chunks.length - 1 || endsWithPlus) {
                 decoded.append('+');
