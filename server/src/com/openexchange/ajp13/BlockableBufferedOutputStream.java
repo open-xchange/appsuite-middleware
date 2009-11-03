@@ -69,10 +69,11 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      * Initializes a new {@link BlockableBufferedOutputStream}.
      * 
      * @param out The underlying output stream.
+     * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
      */
-    public BlockableBufferedOutputStream(final OutputStream out) {
+    public BlockableBufferedOutputStream(final OutputStream out, final boolean nonBlocking) {
         super(out);
-        blocker = new NonBlockingBlocker();
+        blocker = nonBlocking ? new NonBlockingBlocker() : new ConcurrentBlocker();
     }
 
     /**
@@ -80,10 +81,11 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      * 
      * @param out The underlying output stream.
      * @param size The buffer size.
+     * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
      */
-    public BlockableBufferedOutputStream(final OutputStream out, final int size) {
+    public BlockableBufferedOutputStream(final OutputStream out, final int size, final boolean nonBlocking) {
         super(out, size);
-        blocker = new NonBlockingBlocker();
+        blocker = nonBlocking ? new NonBlockingBlocker() : new ConcurrentBlocker();
     }
 
     public void block() {

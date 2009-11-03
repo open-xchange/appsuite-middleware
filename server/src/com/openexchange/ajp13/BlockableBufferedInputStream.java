@@ -85,11 +85,12 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
      * Initializes a new {@link BlockableBufferedInputStream}.
      * 
      * @param in The underlying input stream.
+     * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
      */
-    public BlockableBufferedInputStream(final InputStream in) {
+    public BlockableBufferedInputStream(final InputStream in, final boolean nonBlocking) {
         super(in);
         initBufUpdater();
-        blocker = new NonBlockingBlocker();
+        blocker = nonBlocking ? new NonBlockingBlocker() : new ConcurrentBlocker();
     }
 
     /**
@@ -97,10 +98,11 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
      * 
      * @param in The underlying input stream.
      * @param size The buffer size.
+     * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
      */
-    public BlockableBufferedInputStream(final InputStream in, final int size) {
+    public BlockableBufferedInputStream(final InputStream in, final int size, final boolean nonBlocking) {
         super(in, size);
-        blocker = new NonBlockingBlocker();
+        blocker = nonBlocking ? new NonBlockingBlocker() : new ConcurrentBlocker();
     }
 
     public void block() {

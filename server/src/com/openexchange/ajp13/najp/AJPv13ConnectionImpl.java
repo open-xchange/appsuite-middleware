@@ -107,8 +107,8 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         this.task = task;
         try {
             final Socket client = task.getSocket();
-            inputStream = new BlockableBufferedInputStream(client.getInputStream());
-            outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+            inputStream = new BlockableBufferedInputStream(client.getInputStream(), true);
+            outputStream = new BlockableBufferedOutputStream(client.getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE, true);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
