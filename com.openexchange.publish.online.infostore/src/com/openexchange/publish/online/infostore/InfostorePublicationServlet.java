@@ -197,20 +197,20 @@ public class InfostorePublicationServlet extends HttpServlet {
         return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
     }
     
-    private final boolean isIE(final HttpServletRequest req) {
-        return req.getHeader("User-Agent").contains("MSIE");
+    private static final boolean isIE(final HttpServletRequest req) {
+        final String userAgent = req.getHeader("User-Agent");
+        return null != userAgent && userAgent.contains("MSIE");
     }
 
 
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        final boolean ie = isIE(req);
         resp.setHeader("Content-Disposition", "attachment; filename=\""
-             + Helper.encodeFilename(document.getFileName(), "UTF-8", ie) + "\"");
+             + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
     }
 
     private DocumentMetadata loadDocumentMetadata(final Publication publication) throws Exception {
         
-        final int id = Integer.valueOf(publication.getEntityId());
+        final int id = Integer.parseInt(publication.getEntityId());
         final int version = InfostoreFacade.CURRENT_VERSION;
         final Context ctx = publication.getContext();
         final User user = loadUser(publication);
