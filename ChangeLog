@@ -1,3 +1,7 @@
+* 2009-11-04 - marcus.klein@open-xchange.com
+
+ - Bugfix #14773: Corrected SQL statement to find matching user.
+
 * 2009-11-02 - marcus.klein@open-xchange.com
 
  - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
