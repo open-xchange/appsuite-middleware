@@ -73,25 +73,26 @@ public class PagePartSequence {
 
     }
 
-    public PagePartSequence(ArrayList<PagePart> pageParts, String page) {
+    public PagePartSequence(final ArrayList<PagePart> pageParts, final String page) {
         this.pageParts = pageParts;
         this.page = page;
     }
 
     public HashMap<String, String> retrieveInformation() {
-        HashMap<String, String> retrievedInformation = new HashMap<String, String>();
+        final HashMap<String, String> retrievedInformation = new HashMap<String, String>();
 
-        for (PagePart pagePart : pageParts) {
-            Pattern pattern = Pattern.compile(pagePart.getRegex());
-            Matcher matcher = pattern.matcher(page);
+        for (final PagePart pagePart : pageParts) {
+            final Pattern pattern = Pattern.compile(pagePart.getRegex());
+            final Matcher matcher = pattern.matcher(page);
             // find out if the part matches the remaining page
             if (matcher.find()) {
-                int indexOfPageRest = matcher.end();
+                final int indexOfPageRest = matcher.end();
                 // if it is an info-part and its info is not empty get its info and put it into the map
                 if (pagePart.getType() == PagePart.INFO && matcher.groupCount() == 3) {
-                    String info = matcher.group(2);
-                    if (!info.equals(""))
+                    final String info = matcher.group(2);
+                    if (!info.equals("")) {
                         retrievedInformation.put(pagePart.getTypeOfInfo(), info);
+                    }
                 }
                 // set the page to the rest (after this part)
                 page = page.substring(indexOfPageRest);
@@ -105,7 +106,7 @@ public class PagePartSequence {
         return pageParts;
     }
 
-    public void setPageParts(ArrayList<PagePart> pageParts) {
+    public void setPageParts(final ArrayList<PagePart> pageParts) {
         this.pageParts = pageParts;
     }
 
@@ -113,7 +114,7 @@ public class PagePartSequence {
         return page;
     }
 
-    public void setPage(String page) {
+    public void setPage(final String page) {
         this.page = page;
     }
 

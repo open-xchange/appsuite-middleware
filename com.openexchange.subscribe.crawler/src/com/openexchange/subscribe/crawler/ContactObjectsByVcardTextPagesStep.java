@@ -77,27 +77,28 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], 
 
     }
 
-    public void execute(WebClient webClient) {
-        Vector<Contact> contactObjects = new Vector<Contact>();
+    @Override
+    public void execute(final WebClient webClient) {
+        final Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
-        for (TextPage page : input) {
-            byte[] vcard = page.getWebResponse().getContentAsBytes();
+        for (final TextPage page : input) {
+            final byte[] vcard = page.getWebResponse().getContentAsBytes();
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
             VersitDefinition.Reader versitReader;
 
             try {
                 versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
-                VersitObject versitObject = def.parse(versitReader);
-                Contact contactObject = oxContainerConverter.convertContact(versitObject);
+                final VersitObject versitObject = def.parse(versitReader);
+                final Contact contactObject = oxContainerConverter.convertContact(versitObject);
                 SANITIZER.sanitize(contactObject);
                 contactObjects.add(contactObject);
             } catch (final VersitException e) {
-                this.exception = e;
-            } catch (ConverterException e) {
-                this.exception = e;
-            } catch (IOException e) {
-                this.exception = e;
+                exception = e;
+            } catch (final ConverterException e) {
+                exception = e;
+            } catch (final IOException e) {
+                exception = e;
             }
             executedSuccessfully = true;
         }

@@ -78,23 +78,24 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], UnexpectedPag
         
     }
     
-    public ContactsByCsvFileStep(String description, boolean ignoreFirstLine, Map<Integer, String> fieldMapping) {
+    public ContactsByCsvFileStep(final String description, final boolean ignoreFirstLine, final Map<Integer, String> fieldMapping) {
         this.description = description;
         this.ignoreFirstLine = ignoreFirstLine;
         this.fieldMapping = fieldMapping;
     }
     
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         final Vector<Contact> contactObjects = new Vector<Contact>();
         String page = input.getWebResponse().getContentAsString();
         int counter = 0;
         while (page.contains("\n")) {
-            int endOfLine = page.indexOf("\n");
+            final int endOfLine = page.indexOf("\n");
             Contact contact = null;                         
             if (!(ignoreFirstLine && counter == 0)){
-                HashMap<String,String> resultMap = new HashMap<String,String>();
-                String line = page.substring(0, endOfLine);
-                String[] fields = line.split("\",\"");
+                final HashMap<String,String> resultMap = new HashMap<String,String>();
+                final String line = page.substring(0, endOfLine);
+                final String[] fields = line.split("\",\"");
                 
                 int fieldCounter = 0;
                 for (String field : fields){
@@ -139,7 +140,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], UnexpectedPag
     }
 
     
-    public void setIgnoreFirstLine(boolean ignoreFirstLine) {
+    public void setIgnoreFirstLine(final boolean ignoreFirstLine) {
         this.ignoreFirstLine = ignoreFirstLine;
     }
 
@@ -149,8 +150,8 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], UnexpectedPag
     }
 
     
-    public void setFields(Map<Integer, String> fields) {
-        this.fieldMapping = fields;
+    public void setFields(final Map<Integer, String> fields) {
+        fieldMapping = fields;
     }
 
     

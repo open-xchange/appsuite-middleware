@@ -75,14 +75,15 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
 
     }
 
-    public PageByLinkRegexStep(String description, String linkRegex) {
+    public PageByLinkRegexStep(final String description, final String linkRegex) {
         this.description = description;
         this.linkRegex = linkRegex;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         try {
-            for (HtmlAnchor link : input.getAnchors()) {
+            for (final HtmlAnchor link : input.getAnchors()) {
                 if (link.getHrefAttribute().matches(linkRegex)) {
                     output = link.click();                 
                     break;
@@ -90,40 +91,42 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
             }
                        
             executedSuccessfully = true;
-        } catch (FailingHttpStatusCodeException e) {
+        } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
 
+    @Override
     public boolean executedSuccessfully() {
-        return this.executedSuccessfully;
+        return executedSuccessfully;
     }
 
+    @Override
     public Exception getException() {
-        return this.exception;
+        return exception;
     }
 
     public String getUrl() {
         return linkRegex;
     }
 
-    public void setUrl(String url) {
-        this.linkRegex = url;
+    public void setUrl(final String url) {
+        linkRegex = url;
     }
 
     public boolean isExecutedSuccessfully() {
         return executedSuccessfully;
     }
 
-    public void setExecutedSuccessfully(boolean executedSuccessfully) {
+    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
         this.executedSuccessfully = executedSuccessfully;
     }
 
-    public void setException(Exception exception) {
+    public void setException(final Exception exception) {
         this.exception = exception;
     }
 

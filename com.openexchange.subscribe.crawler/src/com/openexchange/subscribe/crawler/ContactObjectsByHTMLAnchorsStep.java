@@ -77,7 +77,7 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], Lis
 
     private String vcardUrl, pictureUrl;
 
-    public ContactObjectsByHTMLAnchorsStep(String description, String vcardUrl, String pictureUrl) {
+    public ContactObjectsByHTMLAnchorsStep(final String description, final String vcardUrl, final String pictureUrl) {
         this.description = description;
         this.vcardUrl = vcardUrl;
         this.pictureUrl = pictureUrl;
@@ -87,21 +87,22 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], Lis
 
     }
 
-    public void execute(WebClient webClient) {
-        Vector<Contact> contactObjects = new Vector<Contact>();
+    @Override
+    public void execute(final WebClient webClient) {
+        final Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
         final VersitDefinition def = Versit.getDefinition("text/x-vcard");
         VersitDefinition.Reader versitReader;
-        String encoding = "ISO-8859-1";
+        final String encoding = "ISO-8859-1";
         // int counter=0;
-        for (HtmlAnchor anchor : input) {
+        for (final HtmlAnchor anchor : input) {
             try {
-                HtmlPage page = anchor.click();
+                final HtmlPage page = anchor.click();
                 Contact contact = new Contact();
                 TextPage vcardPage = null;
                 String imageUrl = "";
 
-                for (HtmlAnchor link : page.getAnchors()) {
+                for (final HtmlAnchor link : page.getAnchors()) {
                     // if there is a vcard linked
                     if (link.getHrefAttribute().startsWith(vcardUrl)) {
                         vcardPage = link.click();
@@ -110,16 +111,16 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], Lis
 
                 // if there is a contact picture in an <img>-tag get its Url
                 if (page.getWebResponse().getContentAsString().contains(pictureUrl)) {
-                    int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
-                    String substring = page.getWebResponse().getContentAsString().substring(startIndex);
+                    final int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
+                    final String substring = page.getWebResponse().getContentAsString().substring(startIndex);
                     imageUrl = substring.substring(0, substring.indexOf("\""));
                 }
 
                 if (vcardPage != null) {
-                    byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
+                    final byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 
                     versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
-                    VersitObject versitObject = def.parse(versitReader);
+                    final VersitObject versitObject = def.parse(versitReader);
                     contact = oxContainerConverter.convertContact(versitObject);
                 }
 
@@ -132,11 +133,11 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], Lis
                 contactObjects.add(contact);
 
             } catch (final VersitException e) {
-                this.exception = e;
-            } catch (ConverterException e) {
-                this.exception = e;
-            } catch (IOException e) {
-                this.exception = e;
+                exception = e;
+            } catch (final ConverterException e) {
+                exception = e;
+            } catch (final IOException e) {
+                exception = e;
             }
             executedSuccessfully = true;
         }
@@ -152,7 +153,7 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], Lis
         return vcardUrl;
     }
 
-    public void setVcardUrl(String vcardUrl) {
+    public void setVcardUrl(final String vcardUrl) {
         this.vcardUrl = vcardUrl;
     }
 
@@ -160,7 +161,7 @@ public class ContactObjectsByHTMLAnchorsStep extends AbstractStep<Contact[], Lis
         return pictureUrl;
     }
 
-    public void setPictureUrl(String pictureUrl) {
+    public void setPictureUrl(final String pictureUrl) {
         this.pictureUrl = pictureUrl;
     }
 

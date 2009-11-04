@@ -78,9 +78,9 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
-    private String workflowString;
+    private final String workflowString;
 
-    public GenericSubscribeService(String displayName, String id, String workflowString, int priority) {
+    public GenericSubscribeService(final String displayName, final String id, final String workflowString, final int priority) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
 
         SOURCE.setDisplayName(displayName);
@@ -96,15 +96,15 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         return SOURCE;
     }
 
-    public boolean handles(int folderModule) {
+    public boolean handles(final int folderModule) {
         return folderModule == FolderObject.CONTACT;
     }
 
-    public Collection<Contact> getContent(Subscription subscription) throws SubscriptionException {
+    public Collection<Contact> getContent(final Subscription subscription) throws SubscriptionException {
 
-        Workflow workflow = getWorkflow();
+        final Workflow workflow = getWorkflow();
         workflow.setSubscription(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
+        final Map<String, Object> configuration = subscription.getConfiguration();
         return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
     }
 
@@ -112,23 +112,23 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         Workflow workflow = new Workflow();
         try {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);
-        } catch (SubscriptionException e) {
+        } catch (final SubscriptionException e) {
         }
 
         return workflow;
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws SubscriptionException {
+    public void modifyIncoming(final Subscription subscription) throws SubscriptionException {
         super.modifyIncoming(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
+        final Map<String, Object> configuration = subscription.getConfiguration();
         encrypt(configuration, PASSWORD);
     }
 
     @Override
-    public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
+    public void modifyOutgoing(final Subscription subscription) throws SubscriptionException {
         super.modifyOutgoing(subscription);
-        Map<String, Object> configuration = subscription.getConfiguration();
+        final Map<String, Object> configuration = subscription.getConfiguration();
         decrypt(configuration, PASSWORD);
         subscription.setDisplayName((String) subscription.getConfiguration().get(LOGIN));
     }

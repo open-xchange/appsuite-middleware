@@ -66,7 +66,7 @@ public class CrawlerDescription {
         return displayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -74,7 +74,7 @@ public class CrawlerDescription {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -82,7 +82,7 @@ public class CrawlerDescription {
         return workflowString;
     }
 
-    public void setWorkflowString(String workflowString) {
+    public void setWorkflowString(final String workflowString) {
         this.workflowString = workflowString;
     }
 
@@ -92,7 +92,7 @@ public class CrawlerDescription {
     }
 
     
-    public void setPriority(int priority) {
+    public void setPriority(final int priority) {
         this.priority = priority;
     }
 

@@ -61,13 +61,13 @@ public class ContactSanitizer {
     /**
      * @param contact
      */
-    public void sanitize(Contact contact) {
-        for (int field : Contact.ALL_COLUMNS) {
+    public void sanitize(final Contact contact) {
+        for (final int field : Contact.ALL_COLUMNS) {
             if (field == Contact.LAST_MODIFIED_UTC) {
                 continue;
             }
             if (contact.contains(field)) {
-                Object value = contact.get(field);
+                final Object value = contact.get(field);
                 if (value != null && "".equals(value)) {
                     contact.remove(field);
                 }

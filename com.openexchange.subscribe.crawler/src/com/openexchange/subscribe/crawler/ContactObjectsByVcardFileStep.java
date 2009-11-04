@@ -84,37 +84,38 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
 
     }
 
-    public ContactObjectsByVcardFileStep(String description, List<String> unwantedLines) {
+    public ContactObjectsByVcardFileStep(final String description, final List<String> unwantedLines) {
         this.description = description;
         this.unwantedLines = unwantedLines;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
-        Vector<Contact> contactObjects = new Vector<Contact>();
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
+        final Vector<Contact> contactObjects = new Vector<Contact>();
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
         String pageString = input.getWebResponse().getContentAsString();
 
         while (pageString.contains("BEGIN:VCARD")) {
-            int beginIndex = pageString.indexOf("BEGIN:VCARD");
-            int endIndex = pageString.indexOf("END:VCARD") + 9;
+            final int beginIndex = pageString.indexOf("BEGIN:VCARD");
+            final int endIndex = pageString.indexOf("END:VCARD") + 9;
             String vcardString = pageString.substring(beginIndex, endIndex) + "\n";
             vcardString = deleteUnwantedLines(vcardString, unwantedLines);
             pageString = pageString.substring(endIndex);
             try {
-                byte[] vcard = vcardString.getBytes("UTF-8");
-                VersitDefinition def = Versit.getDefinition("text/x-vcard");
+                final byte[] vcard = vcardString.getBytes("UTF-8");
+                final VersitDefinition def = Versit.getDefinition("text/x-vcard");
                 VersitDefinition.Reader versitReader;
                 versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
-                VersitObject versitObject = def.parse(versitReader);
-                Contact contactObject = oxContainerConverter.convertContact(versitObject);
+                final VersitObject versitObject = def.parse(versitReader);
+                final Contact contactObject = oxContainerConverter.convertContact(versitObject);
                 SANITIZER.sanitize(contactObject);
                 contactObjects.add(contactObject);
             } catch (final VersitException e) {
                 LOG.error(e);
-            } catch (ConverterException e) {
+            } catch (final ConverterException e) {
                 LOG.error(e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
             }
 
@@ -129,8 +130,8 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
 
     }
 
-    private String deleteUnwantedLines(String vcardString, List<String> unwantedLines) {
-        for (String regexToReplace : unwantedLines) {
+    private String deleteUnwantedLines(String vcardString, final List<String> unwantedLines) {
+        for (final String regexToReplace : unwantedLines) {
             vcardString = vcardString.replaceAll(regexToReplace, "");
         }
         return vcardString;
@@ -140,7 +141,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
         return unwantedLines;
     }
 
-    public void setUnwantedLines(List<String> unwantedLines) {
+    public void setUnwantedLines(final List<String> unwantedLines) {
         this.unwantedLines = unwantedLines;
     }
 

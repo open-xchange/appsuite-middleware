@@ -57,7 +57,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.openexchange.groupware.container.Contact; //import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 
 /**
@@ -68,17 +68,17 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public class ParallelExecutor {
 
-    private ArrayList<Contact> results;
+    private final ArrayList<Contact> results;
 
     public ParallelExecutor() {
         results = new ArrayList<Contact>();
     }
 
-    public List<List<HtmlAnchor>> splitIntoTasks(List<HtmlAnchor> list) {
-        List<List<HtmlAnchor>> sublists = new ArrayList<List<HtmlAnchor>>();
+    public List<List<HtmlAnchor>> splitIntoTasks(final List<HtmlAnchor> list) {
+        final List<List<HtmlAnchor>> sublists = new ArrayList<List<HtmlAnchor>>();
         List<HtmlAnchor> sublist = new ArrayList<HtmlAnchor>();
         int index = 1;
-        for (HtmlAnchor anchor : list) {
+        for (final HtmlAnchor anchor : list) {
             sublist.add(anchor);
 
             if (index % 10 == 1) {
@@ -96,7 +96,7 @@ public class ParallelExecutor {
         return sublists;
     }
 
-    public ArrayList<Contact> execute(List<Callable<ArrayList<Contact>>> callables) throws SubscriptionException {
+    public ArrayList<Contact> execute(final List<Callable<ArrayList<Contact>>> callables) throws SubscriptionException {
         final CompletionService<ArrayList<Contact>> completionService = null;/*
                                                                               * new ExecutorCompletionService<ArrayList<Contact>>(
                                                                               * ServerServiceRegistry
@@ -104,7 +104,7 @@ public class ParallelExecutor {
                                                                               * ).getExecutor());
                                                                               */
 
-        for (Callable callable : callables) {
+        for (final Callable callable : callables) {
             completionService.submit(callable);
         }
         /*
@@ -115,7 +115,7 @@ public class ParallelExecutor {
             for (int i = 0; i < callables.size(); i++) {
                 final Future<ArrayList<Contact>> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
                 if (null != f) {
-                    results.addAll((ArrayList<Contact>) f.get());
+                    results.addAll(f.get());
                 }
             }
         } catch (final InterruptedException e) {

@@ -75,14 +75,14 @@ public class PagePart {
 
     }
 
-    public PagePart(String regex, String typeOfInfo) {
-        this.type = INFO;
+    public PagePart(final String regex, final String typeOfInfo) {
+        type = INFO;
         this.regex = regex;
         this.typeOfInfo = typeOfInfo;
     }
 
-    public PagePart(String regex) {
-        this.type = FILLER;
+    public PagePart(final String regex) {
+        type = FILLER;
         this.regex = regex;
     }
 
@@ -90,7 +90,7 @@ public class PagePart {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(final int type) {
         this.type = type;
     }
 
@@ -98,7 +98,7 @@ public class PagePart {
         return regex;
     }
 
-    public void setRegex(String regex) {
+    public void setRegex(final String regex) {
         this.regex = regex;
     }
 
@@ -106,7 +106,7 @@ public class PagePart {
         return typeOfInfo;
     }
 
-    public void setTypeOfInfo(String typeOfInfo) {
+    public void setTypeOfInfo(final String typeOfInfo) {
         this.typeOfInfo = typeOfInfo;
     }
 

@@ -90,26 +90,25 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
 
     }
 
+    @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
         List<Contact> contacts = new ArrayList<Contact>();
 
-        ParallelExecutor parallelExecutor = new ParallelExecutor();
-        List<List<HtmlAnchor>> subsetsOfLinks = parallelExecutor.splitIntoTasks(input);
-        List<Callable<ArrayList<Contact>>> callables = new ArrayList<Callable<ArrayList<Contact>>>();
-        for (List<HtmlAnchor> subset : subsetsOfLinks) {
-            Callable callable = new ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(
+        final ParallelExecutor parallelExecutor = new ParallelExecutor();
+        final List<List<HtmlAnchor>> subsetsOfLinks = parallelExecutor.splitIntoTasks(input);
+        final List<Callable<ArrayList<Contact>>> callables = new ArrayList<Callable<ArrayList<Contact>>>();
+        for (final List<HtmlAnchor> subset : subsetsOfLinks) {
+            final Callable callable = new ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(
                 subset,
                 Yaml.dump(pageParts),
                 loginStepString);
             callables.add(callable);
         }
         contacts = parallelExecutor.execute(callables);
-        output = new Contact[contacts.size()];
-        for (int i = 0; i < output.length && i < contacts.size(); i++) {
-            output[i] = contacts.get(i);
-        }
 
-        this.executedSuccessfully = true;
+        output = contacts.toArray(new Contact[contacts.size()]);
+
+        executedSuccessfully = true;
 
     }
 
@@ -129,41 +128,41 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
         return loginStepString;
     }
 
-    public void setLoginStepString(String loginStep) {
-        this.loginStepString = loginStep;
+    public void setLoginStepString(final String loginStep) {
+        loginStepString = loginStep;
     }
 
     private class ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable implements Callable<List<Contact>> {
 
-        private List<Contact> contacts;
+        private final List<Contact> contacts;
 
-        private List<HtmlAnchor> anchors;
+        private final List<HtmlAnchor> anchors;
 
-        private PagePartSequence pageParts;
+        private final PagePartSequence pageParts;
 
-        private String loginStepString;
+        private final String loginStepString;
 
-        public ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(List<HtmlAnchor> anchors, String pagePartSequence, String loginStepString) {
+        public ContactObjectsByHTMLAnchorsAndPagePartSequenceStepCallable(final List<HtmlAnchor> anchors, final String pagePartSequence, final String loginStepString) {
             contacts = new ArrayList<Contact>();
             this.anchors = anchors;
-            this.pageParts = (PagePartSequence) Yaml.load(pagePartSequence);
+            pageParts = (PagePartSequence) Yaml.load(pagePartSequence);
             this.loginStepString = loginStepString;
         }
 
         public List<Contact> call() throws Exception {
-            WebClientCloser closer = new WebClientCloser();
+            final WebClientCloser closer = new WebClientCloser();
             // emulate a known client, hopefully keeping our profile low
             final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
             // Javascript needs to be disabled for security reasons
             webClient.setJavaScriptEnabled(false);
             // log in again as it is a separate instance
-            LoginStep loginStep = (LoginStep) Yaml.load(loginStepString);
+            final LoginStep loginStep = (LoginStep) Yaml.load(loginStepString);
             loginStep.execute(webClient);
 
             try {
-                for (HtmlAnchor anchor : anchors) {
-                    String string = loginStep.getBaseUrl() + anchor.getHrefAttribute();
-                    Page page = webClient.getPage(string);
+                for (final HtmlAnchor anchor : anchors) {
+                    final String string = loginStep.getBaseUrl() + anchor.getHrefAttribute();
+                    final Page page = webClient.getPage(string);
                     final Contact contact = new Contact();
                     if (null != page) {
                         if (page instanceof HtmlPage) {
@@ -289,9 +288,9 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
                 }
             } catch (final VersitException e) {
 
-            } catch (ConverterException e) {
+            } catch (final ConverterException e) {
 
-            } catch (IOException e) {
+            } catch (final IOException e) {
 
             } finally {
                 webClient.closeAllWindows();

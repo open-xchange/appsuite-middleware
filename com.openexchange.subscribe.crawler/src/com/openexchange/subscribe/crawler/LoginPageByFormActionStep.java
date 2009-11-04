@@ -76,7 +76,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
 
     }
 
-    public LoginPageByFormActionStep(String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin, int numberOfForm, String baseUrl) {
+    public LoginPageByFormActionStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl) {
         this.description = description;
         this.url = url;
         this.username = username;
@@ -89,29 +89,30 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         this.baseUrl = baseUrl;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         HtmlPage loginPage;
         try {
             // Get the page, fill in the credentials and submit the login form identified by its action
-            loginPage = webClient.getPage(this.url);
+            loginPage = webClient.getPage(url);
             HtmlForm loginForm = null;
             int numberOfFormCounter = 1;
-            for (HtmlForm form : loginPage.getForms()) {
+            for (final HtmlForm form : loginPage.getForms()) {
                 if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter & form.getInputsByName(nameOfUserField) != null) {
                     loginForm = form;
                 }
                 numberOfFormCounter++;
             }
             if (loginForm != null) {
-                HtmlTextInput userfield = loginForm.getInputByName(this.nameOfUserField);
-                userfield.setValueAttribute(this.username);
-                HtmlPasswordInput passwordfield = loginForm.getInputByName(this.nameOfPasswordField);
-                passwordfield.setValueAttribute(this.password);
+                final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
+                userfield.setValueAttribute(username);
+                final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
+                passwordfield.setValueAttribute(password);
                 final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-                this.output = pageAfterLogin;
+                output = pageAfterLogin;
 
                 boolean linkAvailable = false;
-                for (HtmlAnchor link : pageAfterLogin.getAnchors()) {
+                for (final HtmlAnchor link : pageAfterLogin.getAnchors()) {
                     if (link.getHrefAttribute().matches(linkAvailableAfterLogin)) {
                         linkAvailable = true;
                     }
@@ -121,16 +122,17 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                 }
                 executedSuccessfully = true;
             }
-        } catch (FailingHttpStatusCodeException e) {
+        } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
 
-    public void setInput(Object input) {
+    @Override
+    public void setInput(final Object input) {
         // this does nothing
     }
 
@@ -138,7 +140,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
     }
 
@@ -146,7 +148,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -154,7 +156,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -162,15 +164,15 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return actionOfLoginForm;
     }
 
-    public void setActionOfLoginForm(String nameOfLoginForm) {
-        this.actionOfLoginForm = nameOfLoginForm;
+    public void setActionOfLoginForm(final String nameOfLoginForm) {
+        actionOfLoginForm = nameOfLoginForm;
     }
 
     public String getNameOfUserField() {
         return nameOfUserField;
     }
 
-    public void setNameOfUserField(String nameOfUserField) {
+    public void setNameOfUserField(final String nameOfUserField) {
         this.nameOfUserField = nameOfUserField;
     }
 
@@ -178,7 +180,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return nameOfPasswordField;
     }
 
-    public void setNameOfPasswordField(String nameOfPasswordField) {
+    public void setNameOfPasswordField(final String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
     }
 
@@ -186,15 +188,15 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return linkAvailableAfterLogin;
     }
 
-    public void setPageTitleAfterLogin(String pageTitleAfterLogin) {
-        this.linkAvailableAfterLogin = pageTitleAfterLogin;
+    public void setPageTitleAfterLogin(final String pageTitleAfterLogin) {
+        linkAvailableAfterLogin = pageTitleAfterLogin;
     }
 
     public String getLinkAvailableAfterLogin() {
         return linkAvailableAfterLogin;
     }
 
-    public void setLinkAvailableAfterLogin(String linkAvailableAfterLogin) {
+    public void setLinkAvailableAfterLogin(final String linkAvailableAfterLogin) {
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
@@ -202,7 +204,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return numberOfForm;
     }
 
-    public void setNumberOfForm(int numberOfForm) {
+    public void setNumberOfForm(final int numberOfForm) {
         this.numberOfForm = numberOfForm;
     }
 
@@ -210,7 +212,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         return baseUrl;
     }
 
-    public void setBaseUrl(String baseUrl) {
+    public void setBaseUrl(final String baseUrl) {
         this.baseUrl = baseUrl;
     }
 

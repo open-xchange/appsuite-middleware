@@ -88,11 +88,11 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
     
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-    private String vcardUrl, pictureUrl;
+    private final String vcardUrl, pictureUrl;
 
     List<Contact> synchronizedContacts;
 
-    public ContactObjectsByHTMLAnchorsMultithreadedStep(String description, String vcardUrl, String pictureUrl) {
+    public ContactObjectsByHTMLAnchorsMultithreadedStep(final String description, final String vcardUrl, final String pictureUrl) {
         this.description = description;
         this.vcardUrl = vcardUrl;
         this.pictureUrl = pictureUrl;
@@ -101,7 +101,8 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
 
     }
 
-    public void execute(WebClient webClient) {
+    @Override
+    public void execute(final WebClient webClient) {
         //List<Contact> contactObjects = new ArrayList<Contact>();
 
         // create a threadpool that works through all links with 1 thread for every 10 contacts
@@ -118,20 +119,20 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
 
     }
 
-    public void getOneResult(HtmlAnchor anchor, WebClient webClient) {
+    public void getOneResult(final HtmlAnchor anchor, final WebClient webClient) {
         Contact contact = new Contact();
         try {
 
             VersitDefinition.Reader versitReader;
-            OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-            VersitDefinition def = Versit.getDefinition("text/x-vcard");
+            final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+            final VersitDefinition def = Versit.getDefinition("text/x-vcard");
 
-            String encoding = "ISO-8859-1";
-            HtmlPage page = webClient.getPage("https://www.linkedin.com" + anchor.getHrefAttribute());
+            final String encoding = "ISO-8859-1";
+            final HtmlPage page = webClient.getPage("https://www.linkedin.com" + anchor.getHrefAttribute());
 
             TextPage vcardPage = null;
             String imageUrl = "";
-            for (HtmlAnchor link : page.getAnchors()) {
+            for (final HtmlAnchor link : page.getAnchors()) {
                 // if there is a vcard linked
                 if (link.getHrefAttribute().contains(vcardUrl)) {
                     vcardPage = link.click();
@@ -140,16 +141,16 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
 
             // if there is a contact picture in an <img>-tag get its Url
             if (page.getWebResponse().getContentAsString().contains(pictureUrl)) {
-                int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
-                String substring = page.getWebResponse().getContentAsString().substring(startIndex);
+                final int startIndex = page.getWebResponse().getContentAsString().indexOf(pictureUrl);
+                final String substring = page.getWebResponse().getContentAsString().substring(startIndex);
                 imageUrl = substring.substring(0, substring.indexOf("\""));
             }
 
             if (vcardPage != null) {
-                byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
+                final byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
 
                 versitReader = def.getReader(new ByteArrayInputStream(vcard), encoding);
-                VersitObject versitObject = def.parse(versitReader);
+                final VersitObject versitObject = def.parse(versitReader);
                 contact = oxContainerConverter.convertContact(versitObject);
             }
 
@@ -169,11 +170,11 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
             }
 
         } catch (final VersitException e) {
-            this.exception = e;
-        } catch (ConverterException e) {
-            this.exception = e;
-        } catch (IOException e) {
-            this.exception = e;
+            exception = e;
+        } catch (final ConverterException e) {
+            exception = e;
+        } catch (final IOException e) {
+            exception = e;
         }
     }
 
@@ -181,42 +182,43 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
 
     public class WorkerThread extends Thread {
 
-        private ThreadPool pool;
+        private final ThreadPool pool;
 
         private final WebClient webClient;
 
-        public WorkerThread(ThreadPool thePool) {
+        public WorkerThread(final ThreadPool thePool) {
             pool = thePool;
-            this.webClient = new WebClient(BrowserVersion.FIREFOX_2);
+            webClient = new WebClient(BrowserVersion.FIREFOX_2);
             // Javascript needs to be disabled for security reasons
             webClient.setJavaScriptEnabled(false);
             // simple login
             HtmlPage loginPage;
             try {
                 loginPage = webClient.getPage("https://www.linkedin.com/secure/login");
-                HtmlForm loginForm = loginPage.getFormByName("login");
-                HtmlTextInput userfield = loginForm.getInputByName("session_key");
+                final HtmlForm loginForm = loginPage.getFormByName("login");
+                final HtmlTextInput userfield = loginForm.getInputByName("session_key");
                 userfield.setValueAttribute("");
-                HtmlPasswordInput passwordfield = loginForm.getInputByName("session_password");
+                final HtmlPasswordInput passwordfield = loginForm.getInputByName("session_password");
                 passwordfield.setValueAttribute("");
                 final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-            } catch (FailingHttpStatusCodeException e) {
+            } catch (final FailingHttpStatusCodeException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 LOG.error(e.getMessage(), e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
 
+        @Override
         public void run() {
 
             while (true) {
                 // blocks until job
-                HtmlAnchor link = pool.getNext();
+                final HtmlAnchor link = pool.getNext();
                 try {
                     getOneResult(link, webClient);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // Ignore exceptions thrown from jobs
                 }
             }
@@ -225,15 +227,15 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
 
     public class ThreadPool {
 
-        private LinkedList<HtmlAnchor> tasks = new LinkedList<HtmlAnchor>();
+        private final LinkedList<HtmlAnchor> tasks = new LinkedList<HtmlAnchor>();
 
-        public ThreadPool(List<HtmlAnchor> links) {
-            for (HtmlAnchor link : links) {
+        public ThreadPool(final List<HtmlAnchor> links) {
+            for (final HtmlAnchor link : links) {
                 tasks.addLast(link);
             }
-            int maxNumberOfWorkers = links.size() / 10;
+            final int maxNumberOfWorkers = links.size() / 10;
             for (int i = 0; i < maxNumberOfWorkers; i++) {
-                Thread thread = new WorkerThread(this);
+                final Thread thread = new WorkerThread(this);
                 thread.start();
             }
         }
@@ -244,7 +246,7 @@ public class ContactObjectsByHTMLAnchorsMultithreadedStep extends AbstractStep<C
                 while (tasks.isEmpty()) {
                     try {
                         tasks.wait();
-                    } catch (InterruptedException ex) {
+                    } catch (final InterruptedException ex) {
                     }
                 }
                 returnVal = tasks.removeFirst();

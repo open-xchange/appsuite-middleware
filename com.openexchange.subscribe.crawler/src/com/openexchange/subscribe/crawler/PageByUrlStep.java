@@ -74,34 +74,38 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
 
     }
 
-    public PageByUrlStep(String description, String url) {
+    public PageByUrlStep(final String description, final String url) {
         this.description = description;
         this.url = url;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         try {
-            HtmlPage pageByUrl = webClient.getPage(this.url);
+            final HtmlPage pageByUrl = webClient.getPage(url);
             output = pageByUrl;
             executedSuccessfully = true;
-        } catch (FailingHttpStatusCodeException e) {
+        } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
 
+    @Override
     public boolean executedSuccessfully() {
-        return this.executedSuccessfully;
+        return executedSuccessfully;
     }
 
+    @Override
     public Exception getException() {
-        return this.exception;
+        return exception;
     }
 
-    public void setInput(Object input) {
+    @Override
+    public void setInput(final Object input) {
         // this needs to do nothing
     }
 
@@ -109,7 +113,7 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
     }
 
@@ -117,11 +121,11 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
         return executedSuccessfully;
     }
 
-    public void setExecutedSuccessfully(boolean executedSuccessfully) {
+    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
         this.executedSuccessfully = executedSuccessfully;
     }
 
-    public void setException(Exception exception) {
+    public void setException(final Exception exception) {
         this.exception = exception;
     }
 

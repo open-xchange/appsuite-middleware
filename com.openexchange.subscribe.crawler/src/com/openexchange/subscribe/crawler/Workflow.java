@@ -81,14 +81,14 @@ public class Workflow {
 
     }
 
-    public Workflow(List<Step> steps) {
+    public Workflow(final List<Step> steps) {
         this.steps = steps;
         useThreadedRefreshHandler = false;
     }
 
     // Convenience method for setting username and password after the workflow was created
-    public Contact[] execute(String username, String password) throws SubscriptionException {
-        for (Step currentStep : steps) {
+    public Contact[] execute(final String username, final String password) throws SubscriptionException {
+        for (final Step currentStep : steps) {
             if (currentStep instanceof LoginStep) {
                 ((LoginStep) currentStep).setUsername(username);
                 ((LoginStep) currentStep).setPassword(password);
@@ -115,7 +115,7 @@ public class Workflow {
             Step previousStep = null;
             Object result = null;
 
-            for (Step currentStep : steps) {
+            for (final Step currentStep : steps) {
                 if (previousStep != null) {
                     currentStep.setInput(previousStep.getOutput());
                 }
@@ -141,7 +141,7 @@ public class Workflow {
         return steps;
     }
 
-    public void setSteps(List<Step> steps) {
+    public void setSteps(final List<Step> steps) {
         this.steps = steps;
     }
 
@@ -149,7 +149,7 @@ public class Workflow {
         return subscription;
     }
 
-    public void setSubscription(Subscription subscription) {
+    public void setSubscription(final Subscription subscription) {
         this.subscription = subscription;
     }
 
@@ -157,7 +157,7 @@ public class Workflow {
         return loginStepString;
     }
 
-    public void setLoginStepString(String loginStepString) {
+    public void setLoginStepString(final String loginStepString) {
         this.loginStepString = loginStepString;
     }
 
@@ -165,7 +165,7 @@ public class Workflow {
         return useThreadedRefreshHandler;
     }
 
-    public void setUseThreadedRefreshHandler(boolean useThreadedRefreshHandler) {
+    public void setUseThreadedRefreshHandler(final boolean useThreadedRefreshHandler) {
         this.useThreadedRefreshHandler = useThreadedRefreshHandler;
     }
 

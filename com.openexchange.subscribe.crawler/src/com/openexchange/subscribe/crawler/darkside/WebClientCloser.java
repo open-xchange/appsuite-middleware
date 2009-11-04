@@ -81,29 +81,29 @@ public class WebClientCloser {
             CONNECTION_MANAGER_FIELD = HttpClient.class.getDeclaredField("httpConnectionManager");
             CONNECTION_MANAGER_FIELD.setAccessible(true);
             active = true;
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             LOG.fatal(e.getMessage(), e);
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             LOG.fatal(e.getMessage(), e);
         }
     }
 
-    public void close(WebClient client) {
+    public void close(final WebClient client) {
 
         if (!active) {
             LOG.error("Cannot close webclient");
         }
 
-        MultiThreadedHttpConnectionManager manager = getManager(client);
+        final MultiThreadedHttpConnectionManager manager = getManager(client);
         if (manager != null) {
             manager.shutdown();
         }
 
     }
 
-    private MultiThreadedHttpConnectionManager getManager(WebClient client) {
+    private MultiThreadedHttpConnectionManager getManager(final WebClient client) {
         try {
-            WebConnection webConnection = client.getWebConnection();
+            final WebConnection webConnection = client.getWebConnection();
             if (webConnection == null) {
                 return null;
             }
@@ -111,7 +111,7 @@ public class WebClientCloser {
                 LOG.error("Cannot close webclient: webConnection is not of class " + HttpWebConnection.class.getName() + " but of class " + webConnection.getClass().getName());
                 return null;
             }
-            Object httpClient = HTTP_CLIENT_FIELD.get(webConnection);
+            final Object httpClient = HTTP_CLIENT_FIELD.get(webConnection);
             if (httpClient == null) {
                 return null;
             }
@@ -119,7 +119,7 @@ public class WebClientCloser {
                 LOG.error("Cannot close webclient: httpClient_ is not of class " + HttpClient.class.getName() + " but of class " + httpClient.getClass().getName());
                 return null;
             }
-            Object manager = CONNECTION_MANAGER_FIELD.get(httpClient);
+            final Object manager = CONNECTION_MANAGER_FIELD.get(httpClient);
             if (manager == null) {
                 return null;
             }
@@ -131,9 +131,9 @@ public class WebClientCloser {
 
             return (MultiThreadedHttpConnectionManager) manager;
 
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             LOG.error(e.getMessage(), e);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             LOG.error(e.getMessage(), e);
         }
         return null;

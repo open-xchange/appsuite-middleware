@@ -60,7 +60,7 @@ public class LogoutPageByLinkRegexStep extends PageByLinkRegexStep implements Lo
         
     }
     
-public LogoutPageByLinkRegexStep(String description, String linkRegex){
+public LogoutPageByLinkRegexStep(final String description, final String linkRegex){
         super(description, linkRegex);
     }
 }

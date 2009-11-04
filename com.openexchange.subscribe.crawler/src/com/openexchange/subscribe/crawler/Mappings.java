@@ -65,7 +65,7 @@ public class Mappings {
     
 public static Contact translateMapToContact(final HashMap<String, String> map) throws ConverterException {
         
-        Contact contact = new Contact();
+        final Contact contact = new Contact();
     
         if (map.containsKey("first_name")) {
             contact.setGivenName(map.get("first_name"));
@@ -174,8 +174,8 @@ public static Contact translateMapToContact(final HashMap<String, String> map) t
         }
         // a special kind of note containing the address of the contact (used if the address is only available as one String)
         if (map.containsKey("address_note")) {
-            String htmlString  = map.get("address_note");
-            String noHTMLString = htmlString.replaceAll("\\<.*?\\>", "");
+            final String htmlString  = map.get("address_note");
+            final String noHTMLString = htmlString.replaceAll("\\<.*?\\>", "");
             contact.setNote(noHTMLString);
         }
         if (map.containsKey("profession")) {
@@ -194,8 +194,8 @@ public static Contact translateMapToContact(final HashMap<String, String> map) t
         Calendar cal = null;
         if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
             cal = Calendar.getInstance();
-            int date = Integer.valueOf(map.get("birthday_day"));
-            int month = Integer.valueOf(map.get("birthday_month"));
+            final int date = Integer.valueOf(map.get("birthday_day"));
+            final int month = Integer.valueOf(map.get("birthday_month"));
             int year = 2009;
             if (map.containsKey("birthday_year")) {
                 year = Integer.valueOf(map.get("birthday_year"));

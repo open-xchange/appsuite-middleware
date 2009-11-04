@@ -76,14 +76,15 @@ public class ConditionalPageByLinkRegexStep extends PageByLinkRegexStep {
     /**
      * Initializes a new {@link ConditionalPageByLinkRegexStep}.
      */
-    public ConditionalPageByLinkRegexStep(String description, String linkRegex) {
+    public ConditionalPageByLinkRegexStep(final String description, final String linkRegex) {
         super(description, linkRegex);
     }
     
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         try {
             boolean found = false;
-            for (HtmlAnchor link : input.getAnchors()) {
+            for (final HtmlAnchor link : input.getAnchors()) {
                 if (link.getHrefAttribute().matches(linkRegex)) {
                     output = link.click();
                     found = true;
@@ -96,11 +97,11 @@ public class ConditionalPageByLinkRegexStep extends PageByLinkRegexStep {
             }
                        
             executedSuccessfully = true;
-        } catch (FailingHttpStatusCodeException e) {
+        } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }

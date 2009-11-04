@@ -53,11 +53,12 @@ public class WorkflowException extends Exception {
 
     String message;
 
-    public WorkflowException(String message) {
+    public WorkflowException(final String message) {
         super();
         this.message = message;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }

@@ -81,18 +81,19 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
         
     }
     
-    public PageByNamedHtmlElementStep(String description, int formNumber, String buttonName){
+    public PageByNamedHtmlElementStep(final String description, final int formNumber, final String buttonName){
         this.description = description;
         this.formNumber = formNumber;
         this.buttonName = buttonName;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
-        List<HtmlElement> list = input.getHtmlElementsByName(buttonName);
-        for (HtmlElement el : list){
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
+        final List<HtmlElement> list = input.getHtmlElementsByName(buttonName);
+        for (final HtmlElement el : list){
             try {
                 output = el.click();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
             }
         }
@@ -104,7 +105,7 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
     }
 
     
-    public void setButtonName(String buttonName) {
+    public void setButtonName(final String buttonName) {
         this.buttonName = buttonName;
     }
 
@@ -114,7 +115,7 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
     }
 
     
-    public void setFormNumber(int formNumber) {
+    public void setFormNumber(final int formNumber) {
         this.formNumber = formNumber;
     }
     

@@ -62,19 +62,19 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public class WorkflowFactory {
 
-    public static Workflow createWorkflow(String filename) throws SubscriptionException {
+    public static Workflow createWorkflow(final String filename) throws SubscriptionException {
 
         Workflow workflow = null;
         try {
             workflow = (Workflow) Yaml.load(new File(filename));
             checkSanity(workflow);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
         }
 
         return workflow;
     }
 
-    public static Workflow createWorkflowByString(String string) throws SubscriptionException {
+    public static Workflow createWorkflowByString(final String string) throws SubscriptionException {
 
         Workflow workflow = null;
 
@@ -84,9 +84,9 @@ public class WorkflowFactory {
         return workflow;
     }
 
-    private static void checkSanity(Workflow workflow) throws SubscriptionException {
+    private static void checkSanity(final Workflow workflow) throws SubscriptionException {
         Step previousStep = null;
-        for (Step currentStep : workflow.getSteps()) {
+        for (final Step currentStep : workflow.getSteps()) {
             if (previousStep != null) {
                 if (!previousStep.outputType().equals(currentStep.inputType())) {
                     throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();

@@ -68,9 +68,9 @@ import com.google.gdata.data.Link;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.contacts.ContactFeed;
 import com.google.gdata.data.extensions.Email;
+import com.google.gdata.data.extensions.Im;
 import com.google.gdata.data.extensions.Organization;
 import com.google.gdata.data.extensions.PhoneNumber;
-import com.google.gdata.data.extensions.Im;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.groupware.container.Contact;
@@ -90,28 +90,29 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
     public GoogleAPIStep() {
     }
 
-    public GoogleAPIStep(String username, String password) {
+    public GoogleAPIStep(final String username, final String password) {
         this.username = username;
         this.password = password;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
 
-        List<Contact> contacts = new ArrayList<Contact>();
+        final List<Contact> contacts = new ArrayList<Contact>();
 
         // Request the feed
         URL feedUrl;
         try {
-            ContactsService myService = new ContactsService("com.openexchange");
+            final ContactsService myService = new ContactsService("com.openexchange");
             myService.setUserCredentials(username, password);
             feedUrl = new URL("http://www.google.com/m8/feeds/contacts/" + username + "/full");
-            ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);
+            final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);
 
             for (int i = 0; i < resultFeed.getEntries().size(); i++) {
-                Contact contact = new Contact();
-                ContactEntry entry = resultFeed.getEntries().get(i);
+                final Contact contact = new Contact();
+                final ContactEntry entry = resultFeed.getEntries().get(i);
                 if (entry.hasName()) {
-                    com.google.gdata.data.extensions.Name name = entry.getName();
+                    final com.google.gdata.data.extensions.Name name = entry.getName();
                     if (name.hasFullName()) {
                         contact.setDisplayName(name.getFullName().getValue());
                     }
@@ -132,11 +133,11 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     }
                 }
                 
-                for (Organization o : entry.getOrganizations()) {
+                for (final Organization o : entry.getOrganizations()) {
                     contact.setCompany(o.getOrgName().getValue());
                 }
 
-                for (Email email : entry.getEmailAddresses()) {
+                for (final Email email : entry.getEmailAddresses()) {
                     if (email.getRel() != null) {
                         if (email.getRel().endsWith("work")) {
                             contact.setEmail1(email.getAddress());
@@ -148,7 +149,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     }
                 }
 
-                for (PhoneNumber pn : entry.getPhoneNumbers()) {
+                for (final PhoneNumber pn : entry.getPhoneNumbers()) {
                     if (pn.getRel() != null) {
                         if (pn.getRel().endsWith("work")) {
                             contact.setTelephoneBusiness1(pn.getPhoneNumber());
@@ -167,51 +168,75 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                 }
                 
                 if (entry.getBirthday() != null){
-                    String birthday = entry.getBirthday().getValue();
-                    String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";        
+                    final String birthday = entry.getBirthday().getValue();
+                    final String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";        
                     if (birthday.matches(regex)){
-                        Pattern pattern = Pattern.compile(regex);
-                        Matcher matcher = pattern.matcher(birthday);
+                        final Pattern pattern = Pattern.compile(regex);
+                        final Matcher matcher = pattern.matcher(birthday);
                         if (matcher.matches() && matcher.groupCount() == 3){
-                            int year = Integer.valueOf(matcher.group(1));
-                            int month = Integer.valueOf(matcher.group(2));
-                            int day = Integer.valueOf(matcher.group(3));
-                            Calendar cal = Calendar.getInstance();
+                            final int year = Integer.valueOf(matcher.group(1));
+                            final int month = Integer.valueOf(matcher.group(2));
+                            final int day = Integer.valueOf(matcher.group(3));
+                            final Calendar cal = Calendar.getInstance();
                             cal.clear();
                             cal.set(year, month, day);
                             contact.setBirthday(cal.getTime());
                         }
                     }
                 }
-                for (StructuredPostalAddress pa :entry.getStructuredPostalAddresses()){
+                for (final StructuredPostalAddress pa :entry.getStructuredPostalAddresses()){
                     if (pa.getRel() != null){
                         if (pa.getRel().endsWith("work")){                            
-                            if (pa.getStreet() != null) contact.setStreetBusiness(pa.getStreet().getValue());
-                            if (pa.getPostcode() != null) contact.setPostalCodeBusiness(pa.getPostcode().getValue());
-                            if (pa.getCity() != null) contact.setCityBusiness(pa.getCity().getValue());
-                            if (pa.getCountry() != null) contact.setCountryBusiness(pa.getCountry().getValue());
-                            //TODO: This will be used to write the address to the contacts note-field if the data is not structured
-                            //System.out.println("***** "+"Work:\n"+pa.getFormattedAddress().getValue()+"\n");
+                            if (pa.getStreet() != null) {
+                                contact.setStreetBusiness(pa.getStreet().getValue());
+                            }
+                            if (pa.getPostcode() != null) {
+                                contact.setPostalCodeBusiness(pa.getPostcode().getValue());
+                            }
+                            if (pa.getCity() != null) {
+                                contact.setCityBusiness(pa.getCity().getValue());
+                            }
+                            if (pa.getCountry() != null) {
+                                contact.setCountryBusiness(pa.getCountry().getValue());
+                                //TODO: This will be used to write the address to the contacts note-field if the data is not structured
+                                //System.out.println("***** "+"Work:\n"+pa.getFormattedAddress().getValue()+"\n");
+                            }
                         }
                         if (pa.getRel().endsWith("home")){
-                            if (pa.getStreet() != null) contact.setStreetHome(pa.getStreet().getValue());
-                            if (pa.getPostcode() != null) contact.setPostalCodeHome(pa.getPostcode().getValue());
-                            if (pa.getCity() != null) contact.setCityHome(pa.getCity().getValue());
-                            if (pa.getCountry() != null) contact.setCountryHome(pa.getCountry().getValue());
+                            if (pa.getStreet() != null) {
+                                contact.setStreetHome(pa.getStreet().getValue());
+                            }
+                            if (pa.getPostcode() != null) {
+                                contact.setPostalCodeHome(pa.getPostcode().getValue());
+                            }
+                            if (pa.getCity() != null) {
+                                contact.setCityHome(pa.getCity().getValue());
+                            }
+                            if (pa.getCountry() != null) {
+                                contact.setCountryHome(pa.getCountry().getValue());
+                            }
                         }
                         if (pa.getRel().endsWith("other")){
-                            if (pa.getStreet() != null) contact.setStreetOther(pa.getStreet().getValue());
-                            if (pa.getPostcode() != null) contact.setPostalCodeOther(pa.getPostcode().getValue());
-                            if (pa.getCity() != null) contact.setCityOther(pa.getCity().getValue());
-                            if (pa.getCountry() != null) contact.setCountryOther(pa.getCountry().getValue());
+                            if (pa.getStreet() != null) {
+                                contact.setStreetOther(pa.getStreet().getValue());
+                            }
+                            if (pa.getPostcode() != null) {
+                                contact.setPostalCodeOther(pa.getPostcode().getValue());
+                            }
+                            if (pa.getCity() != null) {
+                                contact.setCityOther(pa.getCity().getValue());
+                            }
+                            if (pa.getCountry() != null) {
+                                contact.setCountryOther(pa.getCountry().getValue());
+                            }
                         }
                     }
                 }   
-                for (Im im : entry.getImAddresses()) {
+                for (final Im im : entry.getImAddresses()) {
                     if (im.getProtocol() != null) {
-                        String regex = "[^#]*#([a-zA-ZŠšŸ€…†]*)";
-                        Pattern pattern = Pattern.compile(regex);
-                        Matcher matcher = pattern.matcher(im.getProtocol());
+                        final String regex = "[^#]*#([a-zA-Zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½]*)";
+                        final Pattern pattern = Pattern.compile(regex);
+                        final Matcher matcher = pattern.matcher(im.getProtocol());
                         if (matcher.matches()){
                             contact.setInstantMessenger1(im.getAddress()+" ("+matcher.group(1)+")");
                         }
@@ -221,12 +246,12 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                 }
 
                 if (entry.getContactPhotoLink() != null && entry.getContactPhotoLink().getEtag() != null){
-                    Link photoLink = entry.getContactPhotoLink();
-                    Service.GDataRequest request = myService.createLinkQueryRequest(photoLink);
+                    final Link photoLink = entry.getContactPhotoLink();
+                    final Service.GDataRequest request = myService.createLinkQueryRequest(photoLink);
                     request.execute();
-                    InputStream in = request.getResponseStream();
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[4096];
+                    final InputStream in = request.getResponseStream();
+                    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    final byte[] buffer = new byte[4096];
                     for (int read = 0; (read = in.read(buffer)) != -1; 
                         out.write(buffer, 0, read)) {}
                     contact.setImage1(out.toByteArray());
@@ -235,11 +260,11 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
                 contacts.add(contact);
             }
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             LOG.error(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e);
-        } catch (ServiceException e) {
+        } catch (final ServiceException e) {
             LOG.error(e);
         }
 
@@ -255,7 +280,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -263,7 +288,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 

@@ -75,7 +75,7 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
         output = new ArrayList<TextPage>();
     }
 
-    public TextPagesByLinkStep(String description, String urlBeforeOffset, int offset, String urlAfterOffset, String linkpart) {
+    public TextPagesByLinkStep(final String description, final String urlBeforeOffset, final int offset, final String urlAfterOffset, final String linkpart) {
         this.description = description;
         this.urlBeforeOffset = urlBeforeOffset;
         this.urlAfterOffset = urlAfterOffset;
@@ -84,7 +84,8 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
         output = new ArrayList<TextPage>();
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         try {
 
             int tempOffset = 0;
@@ -92,12 +93,12 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
 
             while (oneSuccess) {
                 oneSuccess = false;
-                HtmlPage tempPage = webClient.getPage(urlBeforeOffset + Integer.toString(tempOffset) + urlAfterOffset);
-                List<HtmlAnchor> allLinks = tempPage.getAnchors();
-                for (HtmlAnchor link : allLinks) {
+                final HtmlPage tempPage = webClient.getPage(urlBeforeOffset + Integer.toString(tempOffset) + urlAfterOffset);
+                final List<HtmlAnchor> allLinks = tempPage.getAnchors();
+                for (final HtmlAnchor link : allLinks) {
                     if (link.getHrefAttribute().startsWith(linkpart)) {
                         oneSuccess = true;
-                        TextPage tempTextPage = link.click();
+                        final TextPage tempTextPage = link.click();
                         output.add(tempTextPage);
                     }
                 }
@@ -105,20 +106,22 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
             }
             executedSuccessfully = true;
 
-        } catch (FailingHttpStatusCodeException e) {
-            this.exception = e;
-        } catch (MalformedURLException e) {
-            this.exception = e;
-        } catch (IOException e) {
-            this.exception = e;
+        } catch (final FailingHttpStatusCodeException e) {
+            exception = e;
+        } catch (final MalformedURLException e) {
+            exception = e;
+        } catch (final IOException e) {
+            exception = e;
         }
 
     }
 
+    @Override
     public boolean executedSuccessfully() {
         return executedSuccessfully;
     }
 
+    @Override
     public Exception getException() {
         return exception;
     }
@@ -139,19 +142,19 @@ public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{
         return offset;
     }
 
-    public void setUrlBeforeOffset(String urlBeforeOffset) {
+    public void setUrlBeforeOffset(final String urlBeforeOffset) {
         this.urlBeforeOffset = urlBeforeOffset;
     }
 
-    public void setUrlAfterOffset(String urlAfterOffset) {
+    public void setUrlAfterOffset(final String urlAfterOffset) {
         this.urlAfterOffset = urlAfterOffset;
     }
 
-    public void setLinkpart(String linkpart) {
+    public void setLinkpart(final String linkpart) {
         this.linkpart = linkpart;
     }
 
-    public void setOffset(int offset) {
+    public void setOffset(final int offset) {
         this.offset = offset;
     }
 

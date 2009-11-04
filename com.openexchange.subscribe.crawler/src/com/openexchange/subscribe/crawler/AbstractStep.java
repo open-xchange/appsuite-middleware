@@ -74,7 +74,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         return this.exception;
     }
     
-    public void setWorkflow (Workflow workflow){
+    public void setWorkflow (final Workflow workflow){
         this.workflow = workflow;
     }
 
@@ -82,7 +82,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         return description;
     }
     
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -100,7 +100,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         return output;
     }
 
-    public void setInput(I input) {
+    public void setInput(final I input) {
         this.input = input;
         
     }

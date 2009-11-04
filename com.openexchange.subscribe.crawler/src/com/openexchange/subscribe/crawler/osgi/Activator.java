@@ -76,18 +76,18 @@ public class Activator implements BundleActivator {
 
     public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         services = new ArrayList<ServiceRegistration>();
-        ConfigurationService config = (ConfigurationService) context.getService(context.getServiceReference(ConfigurationService.class.getName()));
+        final ConfigurationService config = (ConfigurationService) context.getService(context.getServiceReference(ConfigurationService.class.getName()));
         if (config != null) {
-            ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
-            for (CrawlerDescription crawler : crawlers) {
-                GenericSubscribeService subscribeService = new GenericSubscribeService(
+            final ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
+            for (final CrawlerDescription crawler : crawlers) {
+                final GenericSubscribeService subscribeService = new GenericSubscribeService(
                     crawler.getDisplayName(),
                     crawler.getId(),
                     crawler.getWorkflowString(), 
                     crawler.getPriority());
-                ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
+                final ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
                 services.add(serviceRegistration);
             }
         } else {
@@ -95,31 +95,31 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
-        for (ServiceRegistration serviceRegistration : services) {
+    public void stop(final BundleContext context) throws Exception {
+        for (final ServiceRegistration serviceRegistration : services) {
             serviceRegistration.unregister();
         }
     }
 
-    public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(ConfigurationService config) {
-        ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
-        String path = config.getProperty(PATH_PROPERTY);
+    public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
+        final ArrayList<CrawlerDescription> crawlers = new ArrayList<CrawlerDescription>();
+        final String path = config.getProperty(PATH_PROPERTY);
         if (path == null) {
             LOG.warn(PATH_PROPERTY + " not set. Skipping crawler initialisation");
             return crawlers;
         }
-        File directory = new File(path);
-        File[] files = directory.listFiles();
+        final File directory = new File(path);
+        final File[] files = directory.listFiles();
         if (files == null) {
             LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
             return crawlers;
         }
-        for (File file : files) {
+        for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
                     crawlers.add((CrawlerDescription) Yaml.load(file));
                 }
-            } catch (FileNotFoundException e) {
+            } catch (final FileNotFoundException e) {
             }
         }
         return crawlers;

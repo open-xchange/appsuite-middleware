@@ -85,7 +85,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
 
     }
 
-    public FacebookAPIStep(String description, String url, String username, String password, String actionOfLoginForm, String nameOfUserField, String nameOfPasswordField, String linkAvailableAfterLogin) {
+    public FacebookAPIStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin) {
         this.description = description;
         this.url = url;
         this.username = username;
@@ -96,21 +96,22 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         output = new Contact[0];
-        ArrayList<Contact> contactObjects = new ArrayList<Contact>();
+        final ArrayList<Contact> contactObjects = new ArrayList<Contact>();
 
         try {
             // Create the client instance
-            FacebookJaxbRestClient client = new FacebookJaxbRestClient(API_KEY, SECRET);
+            final FacebookJaxbRestClient client = new FacebookJaxbRestClient(API_KEY, SECRET);
 
             // first, we need to get an auth-token to log in with
-            String token = client.auth_createToken();
+            final String token = client.auth_createToken();
 
             // Build the authentication URL for the user to fill out
-            String url = "http://www.facebook.com/login.php?api_key=" + API_KEY + "&v=1.0" + "&auth_token=" + token;
+            final String url = "http://www.facebook.com/login.php?api_key=" + API_KEY + "&v=1.0" + "&auth_token=" + token;
             // open browser for user to log in
-            LoginPageByFormActionStep step = new LoginPageByFormActionStep(
+            final LoginPageByFormActionStep step = new LoginPageByFormActionStep(
                 description,
                 url,
                 username,
@@ -126,15 +127,15 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
             webClient.closeAllWindows();
 
             // fetch session key
-            String session = client.auth_getSession(token);
+            final String session = client.auth_getSession(token);
 
             // keep track of the logged in user id
-            Long userId = client.users_getLoggedInUser();
+            final Long userId = client.users_getLoggedInUser();
 
             // Get friends list
             client.friends_get();
-            FriendsGetResponse response = (FriendsGetResponse) client.getResponsePOJO();
-            List<Long> friends = response.getUid();
+            final FriendsGetResponse response = (FriendsGetResponse) client.getResponsePOJO();
+            final List<Long> friends = response.getUid();
 
             // Go fetch the information for the user list of user ids
             client.users_getInfo(friends, EnumSet.of(
@@ -144,22 +145,22 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                 ProfileField.BIRTHDAY,
                 ProfileField.HOMETOWN_LOCATION,
                 ProfileField.PIC));
-            UsersGetInfoResponse userResponse = (UsersGetInfoResponse) client.getResponsePOJO();
-            List<User> users = userResponse.getUser();
+            final UsersGetInfoResponse userResponse = (UsersGetInfoResponse) client.getResponsePOJO();
+            final List<User> users = userResponse.getUser();
 
             // insert the information for each user into an ox contact
-            for (User user : users) {
-                Contact contact = new Contact();
-                Location location = user.getHometownLocation().getValue();
+            for (final User user : users) {
+                final Contact contact = new Contact();
+                final Location location = user.getHometownLocation().getValue();
                 contact.setDisplayName(user.getName());
                 contact.setGivenName(user.getFirstName());
                 contact.setSurName(user.getLastName());
                 if (user.getBirthday() != null) {
-                    Calendar calendar = Calendar.getInstance();
-                    String birthdayString = user.getBirthday().getValue();
-                    Pattern pattern = Pattern.compile("([a-zA-Z\u00e4\u00f6\u00fc]*)([\\s])([0-9]{1,2})([,]{0,1}[\\s]{0,1})([0-9]{0,4})");
+                    final Calendar calendar = Calendar.getInstance();
+                    final String birthdayString = user.getBirthday().getValue();
+                    final Pattern pattern = Pattern.compile("([a-zA-Z\u00e4\u00f6\u00fc]*)([\\s])([0-9]{1,2})([,]{0,1}[\\s]{0,1})([0-9]{0,4})");
                     if (birthdayString != null) {
-                        Matcher matcher = pattern.matcher(birthdayString);
+                        final Matcher matcher = pattern.matcher(birthdayString);
                         if (matcher.matches()) {
                             // only set the contacts birthday if at least day and month are available
                             if (matcher.groupCount() >= 3) {
@@ -170,30 +171,31 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                                 // set the day
                                 day = Integer.valueOf(matcher.group(3));
                                 // set the month
-                                if (matcher.group(1).equals("January"))
+                                if (matcher.group(1).equals("January")) {
                                     month = Calendar.JANUARY;
-                                else if (matcher.group(1).equals("February"))
+                                } else if (matcher.group(1).equals("February")) {
                                     month = Calendar.FEBRUARY;
-                                else if (matcher.group(1).equals("March"))
+                                } else if (matcher.group(1).equals("March")) {
                                     month = Calendar.MARCH;
-                                else if (matcher.group(1).equals("April"))
+                                } else if (matcher.group(1).equals("April")) {
                                     month = Calendar.APRIL;
-                                else if (matcher.group(1).equals("May"))
+                                } else if (matcher.group(1).equals("May")) {
                                     month = Calendar.MAY;
-                                else if (matcher.group(1).equals("June"))
+                                } else if (matcher.group(1).equals("June")) {
                                     month = Calendar.JUNE;
-                                else if (matcher.group(1).equals("July"))
+                                } else if (matcher.group(1).equals("July")) {
                                     month = Calendar.JULY;
-                                else if (matcher.group(1).equals("August"))
+                                } else if (matcher.group(1).equals("August")) {
                                     month = Calendar.AUGUST;
-                                else if (matcher.group(1).equals("September"))
+                                } else if (matcher.group(1).equals("September")) {
                                     month = Calendar.SEPTEMBER;
-                                else if (matcher.group(1).equals("October"))
+                                } else if (matcher.group(1).equals("October")) {
                                     month = Calendar.OCTOBER;
-                                else if (matcher.group(1).equals("November"))
+                                } else if (matcher.group(1).equals("November")) {
                                     month = Calendar.NOVEMBER;
-                                else if (matcher.group(1).equals("December"))
+                                } else if (matcher.group(1).equals("December")) {
                                     month = Calendar.DECEMBER;
+                                }
 
                                 // set the year
                                 if (matcher.groupCount() == 5 && !matcher.group(5).equals("")) {
@@ -208,30 +210,35 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                     }
                 }
                 if (location != null) {
-                    if (location.getStreet() != null && !location.getStreet().equals("null"))
+                    if (location.getStreet() != null && !location.getStreet().equals("null")) {
                         contact.setStreetHome(location.getStreet());
-                    if (location.getZip() != null && location.getZip() != 0)
+                    }
+                    if (location.getZip() != null && location.getZip() != 0) {
                         contact.setPostalCodeHome(Integer.toString(location.getZip()));
-                    if (location.getCity() != null && !location.getCity().equals("null"))
+                    }
+                    if (location.getCity() != null && !location.getCity().equals("null")) {
                         contact.setCityHome(location.getCity());
-                    if (location.getState() != null && !location.getState().equals("null"))
+                    }
+                    if (location.getState() != null && !location.getState().equals("null")) {
                         contact.setStateHome(location.getState());
-                    if (location.getCountry() != null && !location.getCountry().equals("null"))
+                    }
+                    if (location.getCountry() != null && !location.getCountry().equals("null")) {
                         contact.setCountryHome(location.getCountry());
+                    }
                 }
                 // add the image from a url to the contact
                 if (user.getPic() != null) {
                     try {
                         OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
-                    } catch (ConverterException e) {
+                    } catch (final ConverterException e) {
                         LOG.error(e.getMessage(), e);
                     }
                 }
                 contactObjects.add(contact);
             }
-        } catch (FacebookException e) {
+        } catch (final FacebookException e) {
             LOG.error(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         } 
         executedSuccessfully = true;
@@ -241,7 +248,8 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         }
     }
 
-    public void setInput(Object input) {
+    @Override
+    public void setInput(final Object input) {
 
     }
 
@@ -249,7 +257,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
     }
 
@@ -257,7 +265,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -265,7 +273,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -273,7 +281,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return actionOfLoginForm;
     }
 
-    public void setActionOfLoginForm(String actionOfLoginForm) {
+    public void setActionOfLoginForm(final String actionOfLoginForm) {
         this.actionOfLoginForm = actionOfLoginForm;
     }
 
@@ -281,7 +289,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return nameOfUserField;
     }
 
-    public void setNameOfUserField(String nameOfUserField) {
+    public void setNameOfUserField(final String nameOfUserField) {
         this.nameOfUserField = nameOfUserField;
     }
 
@@ -289,7 +297,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return nameOfPasswordField;
     }
 
-    public void setNameOfPasswordField(String nameOfPasswordField) {
+    public void setNameOfPasswordField(final String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
     }
 
@@ -297,7 +305,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return linkAvailableAfterLogin;
     }
 
-    public void setLinkAvailableAfterLogin(String linkAvailableAfterLogin) {
+    public void setLinkAvailableAfterLogin(final String linkAvailableAfterLogin) {
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
@@ -311,7 +319,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
     }
 
     
-    public static void setAPI_KEY(String api_key) {
+    public static void setAPI_KEY(final String api_key) {
         API_KEY = api_key;
     }
 
@@ -321,7 +329,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
     }
 
     
-    public static void setSECRET(String secret) {
+    public static void setSECRET(final String secret) {
         SECRET = secret;
     }
     

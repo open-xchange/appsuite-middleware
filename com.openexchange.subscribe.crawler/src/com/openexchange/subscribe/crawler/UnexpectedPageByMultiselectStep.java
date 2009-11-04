@@ -78,7 +78,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
         
     }
     
-    public UnexpectedPageByMultiselectStep(String description, String formName, String formAction, int formNumber, String selectName, String selectValue, String buttonName){
+    public UnexpectedPageByMultiselectStep(final String description, final String formName, final String formAction, final int formNumber, final String selectName, final String selectValue, final String buttonName){
         this.description = description;
         this.formName = formName;
         this.formAction = formAction;
@@ -88,26 +88,27 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
         this.buttonName = buttonName;
     }
     
-    public void execute(WebClient webClient) throws SubscriptionException {
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
         HtmlForm form = null;
         if (!formName.equals("")) {
             form = input.getFormByName(formName);
         } else if (!formAction.equals("")){
-            for (HtmlForm tempForm : input.getForms()){
+            for (final HtmlForm tempForm : input.getForms()){
                 if (tempForm.getActionAttribute().matches(formAction)){
                     form = tempForm;
                 }
             }
         }
         if (form != null){
-            HtmlSelect select = form.getSelectByName(selectName);
-            HtmlOption option = select.getOptionByValue(selectValue);
+            final HtmlSelect select = form.getSelectByName(selectName);
+            final HtmlOption option = select.getOptionByValue(selectValue);
             select.setSelectedAttribute(option, true);
-            HtmlSubmitInput button = form.getInputByName(buttonName);
+            final HtmlSubmitInput button = form.getInputByName(buttonName);
             
             try {
                 output = (UnexpectedPage) button.click();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e);
             }
             if (output != null) {
@@ -121,7 +122,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     }
 
     
-    public void setFormName(String formName) {
+    public void setFormName(final String formName) {
         this.formName = formName;
     }
 
@@ -131,7 +132,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     }
 
     
-    public void setFormAction(String formAction) {
+    public void setFormAction(final String formAction) {
         this.formAction = formAction;
     }
 
@@ -141,7 +142,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     }
 
     
-    public void setSelectName(String selectName) {
+    public void setSelectName(final String selectName) {
         this.selectName = selectName;
     }
 
@@ -151,7 +152,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     }
 
     
-    public void setSelectValue(String selectValue) {
+    public void setSelectValue(final String selectValue) {
         this.selectValue = selectValue;
     }
 
@@ -161,7 +162,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     }
 
     
-    public void setFormNumber(int formNumber) {
+    public void setFormNumber(final int formNumber) {
         this.formNumber = formNumber;
     }
 
@@ -171,7 +172,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     }
 
     
-    public void setButtonName(String buttonName) {
+    public void setButtonName(final String buttonName) {
         this.buttonName = buttonName;
     }
     
