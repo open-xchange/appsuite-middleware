@@ -62,6 +62,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
@@ -81,6 +82,11 @@ public final class MALPollPushListener implements PushListener {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MALPollPushListener.class);
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
+
+    /**
+     * A placeholder constant for account ID.
+     */
+    private static final int ACCOUNT_ID = 0;
 
     private static volatile String folder;
 
@@ -238,7 +244,7 @@ public final class MALPollPushListener implements PushListener {
     }
 
     private Set<String> gatherUIDs(final MailService mailService) throws MailException {
-        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, 0);
+        final MailAccess<?, ?> mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
         mailAccess.connect();
         try {
             final String fullname = folder;
@@ -268,7 +274,7 @@ public final class MALPollPushListener implements PushListener {
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
         properties.put(PushEventConstants.PROPERTY_SESSION, session);
-        properties.put(PushEventConstants.PROPERTY_FOLDER, folder);
+        properties.put(PushEventConstants.PROPERTY_FOLDER, MailFolderUtility.prepareFullname(ACCOUNT_ID, folder));
         /*
          * Create event with push topic
          */
