@@ -50,16 +50,23 @@
 package com.openexchange.subscribe.microformats.osgi;
 
 import static com.openexchange.subscribe.microformats.FormStrings.FORM_LABEL_URL;
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
+import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.datasources.HTTPOXMFDataSource;
 import com.openexchange.subscribe.microformats.parser.CybernekoOXMFFormParser;
@@ -68,31 +75,45 @@ import com.openexchange.subscribe.microformats.parser.OXMFFormParser;
 import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTransformer;
 import com.openexchange.subscribe.microformats.transformers.MapToDocumentMetadataHolderTransformer;
 
+/**
+ * {@link SubcriptionServicesActivator}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class SubcriptionServicesActivator implements BundleActivator {
 
     private ComponentRegistration componentRegistration;
 
-    public void start(BundleContext context) throws Exception {
-        componentRegistration = new ComponentRegistration(
-            context,
-            "MFS",
-            "com.openexchange.subscribe.microformats",
-            OXMFSubscriptionErrorMessage.EXCEPTIONS);
+    private List<ServiceRegistration> registrations;
 
-        HTTPOXMFDataSource dataSource = new HTTPOXMFDataSource();
-        HTMLMicroformatParserFactory parserFactory = new HTMLMicroformatParserFactory();
-        MapToContactObjectTransformer mapToContactObject = new MapToContactObjectTransformer();
+    private List<ServiceTracker> trackers;
 
-        SubscriptionSource contactSubscriptionSource = new SubscriptionSource();
+    /**
+     * Initializes a new {@link SubcriptionServicesActivator}.
+     */
+    public SubcriptionServicesActivator() {
+        super();
+    }
+
+    public void start(final BundleContext context) throws Exception {
+        componentRegistration =
+            new ComponentRegistration(context, "MFS", "com.openexchange.subscribe.microformats", OXMFSubscriptionErrorMessage.EXCEPTIONS);
+
+        final HTTPOXMFDataSource dataSource = new HTTPOXMFDataSource();
+        final HTMLMicroformatParserFactory parserFactory = new HTMLMicroformatParserFactory();
+        final MapToContactObjectTransformer mapToContactObject = new MapToContactObjectTransformer();
+
+        final SubscriptionSource contactSubscriptionSource = new SubscriptionSource();
         contactSubscriptionSource.setDisplayName("OXMF Contacts");
         contactSubscriptionSource.setId("com.openexchange.subscribe.microformats.contacts.http");
         contactSubscriptionSource.setFolderModule(FolderObject.CONTACT);
 
-        DynamicFormDescription form = new DynamicFormDescription();
+        final DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("url", FORM_LABEL_URL, true, null));
         contactSubscriptionSource.setFormDescription(form);
 
-        MicroformatSubscribeService subscribeService = new MicroformatSubscribeService();
+        final MicroformatSubscribeService subscribeService = new MicroformatSubscribeService();
         subscribeService.setOXMFParserFactory(parserFactory);
         subscribeService.setOXMFSource(dataSource);
         subscribeService.setTransformer(mapToContactObject);
@@ -102,17 +123,16 @@ public class SubcriptionServicesActivator implements BundleActivator {
 
         contactSubscriptionSource.setSubscribeService(subscribeService);
 
+        final MapToDocumentMetadataHolderTransformer mapToDocumentMetadataHolder = new MapToDocumentMetadataHolderTransformer();
 
-        MapToDocumentMetadataHolderTransformer mapToDocumentMetadataHolder = new MapToDocumentMetadataHolderTransformer();
-
-        SubscriptionSource infostoreSubscriptionSource = new SubscriptionSource();
+        final SubscriptionSource infostoreSubscriptionSource = new SubscriptionSource();
         infostoreSubscriptionSource.setDisplayName("OXMF Infostore");
         infostoreSubscriptionSource.setId("com.openexchange.subscribe.microformats.infostore.http");
         infostoreSubscriptionSource.setFolderModule(FolderObject.INFOSTORE);
 
         infostoreSubscriptionSource.setFormDescription(form);
 
-        MicroformatSubscribeService infostoreService = new MicroformatSubscribeService();
+        final MicroformatSubscribeService infostoreService = new MicroformatSubscribeService();
         infostoreService.setOXMFParserFactory(parserFactory);
         infostoreService.setOXMFSource(dataSource);
         infostoreService.setTransformer(mapToDocumentMetadataHolder);
@@ -121,16 +141,52 @@ public class SubcriptionServicesActivator implements BundleActivator {
         infostoreService.addPrefix("ox_");
 
         infostoreSubscriptionSource.setSubscribeService(infostoreService);
+        /*
+         * Add and register services
+         */
+        registrations = new ArrayList<ServiceRegistration>(4);
 
-        context.registerService(SubscribeService.class.getName(), subscribeService, null);
-        context.registerService(SubscribeService.class.getName(), infostoreService, null);
+        registrations.add(context.registerService(SubscribeService.class.getName(), subscribeService, null));
+        registrations.add(context.registerService(SubscribeService.class.getName(), infostoreService, null));
 
+        registrations.add(context.registerService(OXMFParserFactoryService.class.getName(), parserFactory, null));
+        registrations.add(context.registerService(OXMFFormParser.class.getName(), new CybernekoOXMFFormParser(), null));
+        /*
+         * Add and open service trackers
+         */
+        trackers = new ArrayList<ServiceTracker>(1);
+        trackers.add(new ServiceTracker(
+            context,
+            ConfigurationService.class.getName(),
+            new RegistryServiceTrackerCustomizer<ConfigurationService>(
+                context,
+                OXMFServiceRegistry.getInstance(),
+                ConfigurationService.class)));
 
-        context.registerService(OXMFParserFactoryService.class.getName(), parserFactory, null);
-        context.registerService(OXMFFormParser.class.getName(), new CybernekoOXMFFormParser(), null);
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
     }
 
-    public void stop(BundleContext context) throws Exception {
-        componentRegistration.unregister();
+    public void stop(final BundleContext context) throws Exception {
+        if (null != componentRegistration) {
+            componentRegistration.unregister();
+            componentRegistration = null;
+        }
+        if (null != registrations) {
+            for (final ServiceRegistration registration : registrations) {
+                registration.unregister();
+            }
+            registrations.clear();
+            registrations = null;
+        }
+        if (null != trackers) {
+            for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            trackers.clear();
+            trackers = null;
+        }
     }
+
 }

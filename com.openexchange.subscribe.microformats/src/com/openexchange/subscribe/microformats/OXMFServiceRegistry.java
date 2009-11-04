@@ -47,21 +47,34 @@
  *
  */
 
-package com.openexchange.subscribe.microformats.osgi;
+package com.openexchange.subscribe.microformats;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+
 
 /**
- * {@link Activator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link OXMFServiceRegistry} - The service registry.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class OXMFServiceRegistry extends AbstractServiceRegistry {
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new SubcriptionServicesActivator(), new ExternalSourcesActivator() };
+    private static final OXMFServiceRegistry SINGLETON = new OXMFServiceRegistry();
+    
+    /**
+     * Initializes a new {@link OXMFServiceRegistry}.
+     */
+    private OXMFServiceRegistry() {
+        super();
     }
 
+    /**
+     * Gets the service registry instance.
+     * 
+     * @return The service registry instance
+     */
+    public static OXMFServiceRegistry getInstance() {
+        return SINGLETON;
+    }
+    
 }

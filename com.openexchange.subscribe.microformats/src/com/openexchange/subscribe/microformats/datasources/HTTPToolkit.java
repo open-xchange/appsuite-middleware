@@ -64,6 +64,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 
 /**
  * {@link HTTPToolkit}
@@ -99,23 +101,40 @@ public class HTTPToolkit {
         final int length;
         {
             final URLConnection urlCon = javaURL.openConnection();
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
-            urlCon.connect();
-            final String ct = urlCon.getContentType();
-            mimeType = null == ct ? "application/octet-stream" : ct.toLowerCase(Locale.ENGLISH);
-            length = urlCon.getContentLength();
+            try {
+                urlCon.setConnectTimeout(2500);
+                urlCon.setReadTimeout(2500);
+                urlCon.connect();
+                final String ct = urlCon.getContentType();
+                mimeType = null == ct ? "application/octet-stream" : ct.toLowerCase(Locale.ENGLISH);
+                length = urlCon.getContentLength();
+            } finally {
+                /*
+                 * The inconvenient way to close an URL connection: Obtain input stream to close it
+                 */
+                urlCon.getInputStream().close();
+            }
         }
-
+        /*
+         * Check content type
+         */
         if (!mimeType.startsWith("text/htm")) {
             throw new HttpException(new StringBuilder("No HTML content. Content-Type is ").append(mimeType).toString());
         }
         /*
-         * TODO: This value needs to be loaded from configuration "MAX_UPLOAD_SIZE"
+         * Check content length
          */
-        final int maxLen = 10485760;
-        if (length != -1 && length > maxLen) {
-            throw new HttpContentTooLargeException(new StringBuilder("Content-Length is ").append(length).toString(), maxLen);
+        {
+            final int maxLen;
+            final ConfigurationService configurationService = OXMFServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null == configurationService) {
+                maxLen = -1; // unlimited
+            } else {
+                maxLen = configurationService.getIntProperty("MAX_UPLOAD_SIZE", -1);
+            }
+            if (maxLen > 0 && length > maxLen) {
+                throw new HttpContentTooLargeException(new StringBuilder("Content-Length is ").append(length).toString(), maxLen);
+            }
         }
 
         if (javaURL.getProtocol().equalsIgnoreCase("https")) {
