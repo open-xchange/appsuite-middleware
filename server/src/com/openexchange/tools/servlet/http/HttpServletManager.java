@@ -98,7 +98,7 @@ public class HttpServletManager {
     /**
      * Registers a servlet if not already contained
      * 
-     * @param id The servlet's ID or alias (e.g. <code>my/servlet</code>). Servlet's path without leading '/' character
+     * @param id The servlet's ID or alias (e.g. <code>/my/servlet</code>)
      * @param servlet The servlet instance
      * @param initParams The servlet's init parameters
      * @throws ServletException If servlet's initialization fails or another servlet has already been registered with the same alias
