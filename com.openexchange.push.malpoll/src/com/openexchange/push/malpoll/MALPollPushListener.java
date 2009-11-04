@@ -112,7 +112,7 @@ public final class MALPollPushListener implements PushListener {
      * @return A new {@link MALPollPushListener}.
      */
     public static MALPollPushListener newInstance(final Session session, final boolean startTimerTask) {
-        return new MALPollPushListener(session, !startTimerTask);
+        return new MALPollPushListener(session, startTimerTask);
     }
 
     /*
@@ -159,7 +159,7 @@ public final class MALPollPushListener implements PushListener {
      * @throws PushException If listener cannot be opened
      */
     public void open() throws PushException {
-        if (!ignoreOnGlobal) {
+        if (ignoreOnGlobal) {
             /*
              * This listener gets its own timer task and is not considered during global run
              */
