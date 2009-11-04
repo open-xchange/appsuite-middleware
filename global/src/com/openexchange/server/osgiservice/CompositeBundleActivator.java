@@ -97,6 +97,11 @@ public abstract class CompositeBundleActivator implements BundleActivator {
         }
     }
 
+    /**
+     * Gets the joined {@link BundleActivator activators} which shall be started sequentially.
+     * 
+     * @return The joined {@link BundleActivator activators}
+     */
     protected abstract BundleActivator[] getActivators();
 
 }
