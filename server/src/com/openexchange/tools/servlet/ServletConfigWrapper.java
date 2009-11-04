@@ -57,7 +57,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 /**
- * {@link ServletConfigWrapper} - A wrapper for class for {@link ServletConfig}.
+ * {@link ServletConfigWrapper} - A wrapper for class for {@link ServletConfig} interface.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
