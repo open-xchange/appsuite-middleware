@@ -75,7 +75,7 @@ public class HttpServletManager {
     }
 
     /**
-     * Determines the instance of {@link HttpServlet} that corresponds to given path; e.g. <code>/servlet/path</code>
+     * Determines the instance of {@link HttpServlet} that corresponds to given path; e.g. <code>/servlet/path</code>.
      * 
      * @param path The servlet path to lookup
      * @param pathStorage A container to keep the actual servlet path contained in servlet mapping for later servlet release
@@ -86,7 +86,7 @@ public class HttpServletManager {
     }
 
     /**
-     * Puts a servlet bound to given ID into this servlet manager's pool
+     * Puts a servlet bound to given ID into this servlet manager's pool.
      * 
      * @param path The servlet's path
      * @param servletObj The servlet instance
@@ -96,7 +96,7 @@ public class HttpServletManager {
     }
 
     /**
-     * Registers a servlet if not already contained
+     * Registers a servlet if not already contained.
      * 
      * @param id The servlet's ID or alias (e.g. <code>/my/servlet</code>)
      * @param servlet The servlet instance
