@@ -57,29 +57,28 @@ import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.database.PublicationUserDeleteListener;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 
-
 /**
  * {@link DeleteEventListenerActivator}
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class DeleteEventListenerActivator implements BundleActivator{
+public class DeleteEventListenerActivator implements BundleActivator {
 
     private ServiceRegistration serviceRegistration;
 
-    public void start(BundleContext context) throws Exception {
-        PublicationStorage storage = AbstractPublicationService.STORAGE;
-        PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
+    public void start(final BundleContext context) throws Exception {
+        final PublicationStorage storage = AbstractPublicationService.STORAGE;
+        final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setStorage(storage);
-        serviceRegistration = context.registerService(DeleteListener.class.getName(), listener, null);        
+        serviceRegistration = context.registerService(DeleteListener.class.getName(), listener, null);
     }
 
-    public void stop(BundleContext context) throws Exception {
-        if(serviceRegistration == null)
+    public void stop(final BundleContext context) throws Exception {
+        if (serviceRegistration == null) {
             return;
+        }
         serviceRegistration.unregister();
         serviceRegistration = null;
     }
-
 
 }
