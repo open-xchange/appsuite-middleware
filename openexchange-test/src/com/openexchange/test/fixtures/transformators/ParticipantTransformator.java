@@ -141,7 +141,7 @@ public class ParticipantTransformator implements Transformator {
 		    .getEntry(fixtureEntry)
 		        .getEntry()
 		            .asContact();
-		final UserParticipant participant = new UserParticipant(user.getInternalUserId());
+		final UserParticipant participant = new UserParticipant(user.getObjectID());
 		participant.setDisplayName(user.getDisplayName());
 		participant.setEmailAddress(user.getEmail1());
 		return participant;
