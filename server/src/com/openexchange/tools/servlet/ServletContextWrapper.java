@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.activation.FileTypeMap;
@@ -132,26 +133,29 @@ public class ServletContextWrapper implements ServletContext {
         this.servletconfigwrapper = servletconfigwrapper;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
-     */
     public Object getAttribute(final String name) {
         return attributes.get(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getAttributeNames()
-     */
     public Enumeration<?> getAttributeNames() {
+        return new Enumeration<String>() {
+            
+            private final Iterator<String> iterator = attributes.keySet().iterator();
+
+            public boolean hasMoreElements() {
+                return iterator.hasNext();
+            }
+
+            public String nextElement() {
+                return iterator.next();
+            }
+        };
+    }
+
+    public String getContextPath() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getContext(java.lang.String)
-     */
     public ServletContext getContext(final String uri) {
         if ((uri == null) || (uri.charAt(0) != '/')) {
             return null;
@@ -159,176 +163,92 @@ public class ServletContextWrapper implements ServletContext {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getInitParameter(java.lang.String)
-     */
     public String getInitParameter(final String name) {
         return servletconfigwrapper.getInitParameter(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getInitParameterNames()
-     */
     public Enumeration<String> getInitParameterNames() {
         return servletconfigwrapper.getInitParameterNames();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getMajorVersion()
-     */
     public int getMajorVersion() {
         return OX_SERVLET_MAJOR;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getMimeType(java.lang.String)
-     */
     public String getMimeType(final String fileName) {
         return FileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getMinorVersion()
-     */
     public int getMinorVersion() {
         return OX_SERVLET_MINOR;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getNamedDispatcher(java.lang.String)
-     */
     public RequestDispatcher getNamedDispatcher(final String string) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getRealPath(java.lang.String)
-     */
     public String getRealPath(final String string) {
         return string;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getRequestDispatcher(java.lang.String)
-     */
     public RequestDispatcher getRequestDispatcher(final String string) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getResource(java.lang.String)
-     */
     public URL getResource(final String string) throws MalformedURLException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getResourceAsStream(java.lang.String)
-     */
     public InputStream getResourceAsStream(final String path) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
-     */
     public Set<?> getResourcePaths(final String string) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getServerInfo()
-     */
     public String getServerInfo() {
         return "THE SERVER INFO";
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getServlet(java.lang.String)
-     */
     public Servlet getServlet(final String string) throws ServletException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getServletContextName()
-     */
     public String getServletContextName() {
         return servletconfigwrapper.getServletName();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getServletNames()
-     */
     public Enumeration<?> getServletNames() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#getServlets()
-     */
     public Enumeration<?> getServlets() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#log(java.lang.Exception, java.lang.String)
-     */
     public void log(final Exception exception, final String string) {
         if (LOG.isInfoEnabled()) {
             LOG.info(string, exception);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#log(java.lang.String)
-     */
     public void log(final String string) {
         if (LOG.isInfoEnabled()) {
             LOG.info(string);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#log(java.lang.String, java.lang.Throwable)
-     */
     public void log(final String string, final Throwable throwable) {
         if (LOG.isInfoEnabled()) {
             LOG.info(string, throwable);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#removeAttribute(java.lang.String)
-     */
     public void removeAttribute(final String name) {
         attributes.remove(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletContext#setAttribute(java.lang.String, java.lang.Object)
-     */
     public void setAttribute(final String name, final Object value) {
         attributes.put(name, value);
     }
