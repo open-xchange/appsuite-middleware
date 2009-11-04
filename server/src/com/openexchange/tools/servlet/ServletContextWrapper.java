@@ -123,14 +123,14 @@ public class ServletContextWrapper implements ServletContext {
     /**
      * The context attributes for this context.
      */
-    protected Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
 
     private String resourceDir;
 
-    private final ServletConfigWrapper servletconfigwrapper;
+    private final ServletConfigWrapper servletConfigWrapper;
 
-    public ServletContextWrapper(final ServletConfigWrapper servletconfigwrapper) {
-        this.servletconfigwrapper = servletconfigwrapper;
+    public ServletContextWrapper(final ServletConfigWrapper servletConfigWrapper) {
+        this.servletConfigWrapper = servletConfigWrapper;
     }
 
     public Object getAttribute(final String name) {
@@ -164,11 +164,11 @@ public class ServletContextWrapper implements ServletContext {
     }
 
     public String getInitParameter(final String name) {
-        return servletconfigwrapper.getInitParameter(name);
+        return servletConfigWrapper.getInitParameter(name);
     }
 
     public Enumeration<String> getInitParameterNames() {
-        return servletconfigwrapper.getInitParameterNames();
+        return servletConfigWrapper.getInitParameterNames();
     }
 
     public int getMajorVersion() {
@@ -216,7 +216,7 @@ public class ServletContextWrapper implements ServletContext {
     }
 
     public String getServletContextName() {
-        return servletconfigwrapper.getServletName();
+        return servletConfigWrapper.getServletName();
     }
 
     public Enumeration<?> getServletNames() {
