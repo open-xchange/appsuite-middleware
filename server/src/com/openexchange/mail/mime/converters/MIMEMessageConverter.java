@@ -1189,12 +1189,10 @@ public final class MIMEMessageConverter {
                     mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {
                     // A messaging error occurred
-                    LOG.warn(
-                        new StringBuilder(256).append(
-                            "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                            e.getMessage()).append(
-                            ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(),
-                        e);
+                    LOG.warn(new StringBuilder(256).append(
+                        "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                        e.getMessage()).append(
+                        ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
                     mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 }
             }
@@ -1750,7 +1748,7 @@ public final class MIMEMessageConverter {
      * Gets the headers denoted by specified header name and decodes its value to a unicode string if necessary.
      * 
      * <pre>
-     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&amp;uumlber&quot;
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot;    is decoded to    &quot;&#252;ber&quot;
      * </pre>
      * 
      * @param name The header name
