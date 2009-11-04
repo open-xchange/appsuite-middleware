@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -310,6 +310,12 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Nov 04 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14773: Corrected SQL statement to find matching user.
+* Mon Nov 02 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
+* Fri Oct 30 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14730: Fixed command-line parsing
 * Tue Oct 20 2009 - marcus.klein@open-xchange.com
  - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.
 * Mon Oct 05 2009 - marcus.klein@open-xchange.com
