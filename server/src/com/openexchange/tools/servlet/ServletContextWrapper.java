@@ -62,6 +62,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import com.openexchange.server.impl.Version;
 
 /**
  * {@link ServletContextWrapper} - A wrapper class for {@link ServletContext} interface.
@@ -72,11 +73,11 @@ public class ServletContextWrapper implements ServletContext {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletContextWrapper.class);
 
-    public static final int OX_SERVLET_MAJOR = 0;
+    private static final int OX_SERVLET_MAJOR = 6;
 
-    public static final int OX_SERVLET_MINOR = 8;
+    private static final int OX_SERVLET_MINOR = 14;
 
-    public static final int OX_SERVLET_PATCH = 2;
+    // private static final int OX_SERVLET_PATCH = 0;
 
     /**
      * Return a context-relative path, beginning with a "/", that represents the canonical version of the specified path after ".." and "."
@@ -139,7 +140,7 @@ public class ServletContextWrapper implements ServletContext {
 
     public Enumeration<?> getAttributeNames() {
         return new Enumeration<String>() {
-            
+
             private final Iterator<String> iterator = attributes.keySet().iterator();
 
             public boolean hasMoreElements() {
@@ -172,6 +173,16 @@ public class ServletContextWrapper implements ServletContext {
     }
 
     public int getMajorVersion() {
+        // E.g. 6.13.0-Rev5
+        final String version = Version.getVersionString();
+        final int pos = version.indexOf('.');
+        if (pos > 0) {
+            try {
+                return Integer.parseInt(version.substring(0, pos));
+            } catch (final NumberFormatException e) {
+                return OX_SERVLET_MAJOR;
+            }
+        }
         return OX_SERVLET_MAJOR;
     }
 
@@ -180,7 +191,16 @@ public class ServletContextWrapper implements ServletContext {
     }
 
     public int getMinorVersion() {
-        return OX_SERVLET_MINOR;
+        // E.g. 6.13.0-Rev5
+        final String[] tokens = Version.getVersionString().split("\\.");
+        if (tokens.length < 2) {
+            return OX_SERVLET_MINOR;
+        }
+        try {
+            return Integer.parseInt(tokens[1]);
+        } catch (final NumberFormatException e) {
+            return OX_SERVLET_MINOR;
+        }
     }
 
     public RequestDispatcher getNamedDispatcher(final String string) {
