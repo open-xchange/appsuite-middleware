@@ -164,31 +164,42 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                     /*
                      * Not available in implier cache
                      */
-                    ServletQueue queue = null;
-                    String longestImplier = null;
+                    class Implier {
+                        ServletQueue queue;
+                        String implier;
+                        Implier(final String implier, final ServletQueue queue) {
+                            this.implier = implier;
+                            this.queue = queue;
+                        }
+                        void setIfLonger(final String implier, final ServletQueue queue) {
+                            if (implier.length() > this.implier.length()) {
+                                this.implier = implier;
+                                this.queue = queue;
+                            }
+                        }
+                    }
+                    Implier implier = null;
                     for (final Iterator<Map.Entry<String, ServletQueue>> iter = servletPool.entrySet().iterator(); iter.hasNext();) {
                         final Map.Entry<String, ServletQueue> e = iter.next();
                         final String currentPath = e.getKey();
                         if (implies(currentPath, path, false)) {
-                            if (null == longestImplier) {
-                                longestImplier = currentPath;
-                                queue = e.getValue();
-                            } else if (currentPath.length() > longestImplier.length()) {
-                                longestImplier = currentPath;
-                                queue = e.getValue();
+                            if (null == implier) {
+                                implier = new Implier(currentPath, e.getValue());
+                            } else {
+                                implier.setIfLonger(currentPath, e.getValue());
                             }
                         }
                     }
-                    if (null == longestImplier) {
+                    if (null == implier) {
                         final ServletQueue errServletQueue =
                             new SingletonServletQueue(new HttpErrorServlet("No servlet bound to path/alias: " + path), null, path);
                         implierCache.put(path, errServletQueue);
                     } else {
-                        pathStorage.append(longestImplier);
-                        if (queue.isSingleton()) {
-                            implierCache.put(path, queue);
+                        pathStorage.append(implier.implier);
+                        if (implier.queue.isSingleton()) {
+                            implierCache.put(path, implier.queue);
                         }
-                        return getServletFromQueue(queue, longestImplier);
+                        return getServletFromQueue(implier.queue, implier.implier);
                     }
                 } finally {
                     /*
