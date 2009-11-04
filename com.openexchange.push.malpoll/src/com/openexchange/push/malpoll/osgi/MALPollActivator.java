@@ -241,6 +241,7 @@ public final class MALPollActivator extends DeferredActivator {
         /*
          * Create either an executor starter or a caller-run starter
          */
+        final org.apache.commons.logging.Log log = LOG;
         final Starter starter;
         if (parallel) {
             /*
@@ -263,8 +264,6 @@ public final class MALPollActivator extends DeferredActivator {
              */
             starter = new Starter() {
 
-                private final org.apache.commons.logging.Log log = LOG;
-
                 public void start(final MALPollPushListener l) {
                     /*
                      * Execute in current thread
@@ -281,8 +280,6 @@ public final class MALPollActivator extends DeferredActivator {
          * Create global runnable
          */
         final Runnable r = new Runnable() {
-
-            private final org.apache.commons.logging.Log log = LOG;
 
             public void run() {
                 try {
