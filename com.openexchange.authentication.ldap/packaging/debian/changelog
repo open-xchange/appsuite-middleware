@@ -1,3 +1,9 @@
+open-xchange-authentication-ldap (6.13.0.0-4) unstable; urgency=low
+
+  * build for 6.13 rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Nov 2009 14:27:13 +0100
+
 open-xchange-authentication-ldap (6.13.0.0-3) unstable; urgency=low
 
   * build for 6.13 rev3

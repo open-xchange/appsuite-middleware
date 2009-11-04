@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,37 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 04 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14532: Checking Content-Type and Content-Length header of provided OXMF URL
+* Tue Nov 03 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14505: Correctly handling null values when comparing InfoStore objects.
+* Mon Nov 02 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14677: Fixed performance issue when searching for a user's shared folders
+* Mon Nov 02 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14701: Wrote JDBC4 wrapper for java.sql.Connection to be compatible with Java6.
+* Sat Oct 31 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14742: Fixed setting path info in servlet's request
+* Fri Oct 30 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14741: Parsing RTF parts as "application/rtf" attachments
+* Thu Oct 29 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14495: Added update task to remove duplicate contact collector folders
+* Thu Oct 29 2009 - marcus.klein@open-xchange.com
+ - Bugfix 14724: Fixed null value returned when requesting Outlook updater the first time.
+* Wed Oct 28 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14727: Fixed NPE on missing FETCH item
+ - Partial bugfix #14495: Using a writable connection when checking for contact collector folder
+* Tue Oct 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14719: Adding commons.codec.digest export to common bundle for outlook updater bundle.
+ - Bugfix #14392: Changed a label.
+ - Bugfix #14507: Marked subscription form labels as texts to translate.
+* Tue Oct 27 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14716: More robust detection if a message contains file attachments
+ - Bugfix #14691: Fixed start-letter-search in collected contacts folder
+ - Bugfix #14681: No read permission check in image framework's delete listener
+* Mon Oct 26 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14694: Using a write-connection to check for an already existing mail account to avoid mast-slave-latency problems
+* Wed Oct 21 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14688: Dropping cached account's default folders if updated
 * Mon Oct 19 2009 - marcus.klein@open-xchange.com
  - Bugfix #14668: Reading values correctly from user_attribute table.
  - Bugfix #14672: Not removing aliases from the attributes set of a user.

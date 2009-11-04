@@ -1,3 +1,9 @@
+open-xchange-audit (6.13.0.0-5) unstable; urgency=low
+
+  * build for 6.13 rev5
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Nov 2009 14:28:28 +0100
+
 open-xchange-audit (6.13.0.0-4) unstable; urgency=low
 
   * build for 6.13 rev3

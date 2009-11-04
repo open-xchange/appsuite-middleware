@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -108,6 +108,8 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*/*.example
 
 %changelog
+* Mon Nov 02 2009 - dennis.sieben@open-xchange.com
+ - Added ability to disable PagedResults (e.g. for Fedora DS) by setting pagesize to 0
 * Mon Jul 27 2009 - marcus.klein@open-xchange.com
  - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
 * Mon Jul 13 2009 - dennis.sieben@open-xchange.com
