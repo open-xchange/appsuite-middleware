@@ -109,7 +109,6 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
                     for (Date day : getMissingDaysInbetween(appointment, null))
                         addDayBreak(blocks, ++pointer, day);
         }
-        cleanup(blocks);
         return blocks;
     }
 

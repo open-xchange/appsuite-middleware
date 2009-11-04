@@ -47,27 +47,68 @@
  *
  */
 
-package com.openexchange.groupware.calendar;
+package com.openexchange.calendar.printing.days;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import com.openexchange.calendar.printing.CPAppointment;
 
 /**
- * Some calendar constants.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link Day}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Constants {
+public class Day implements Comparable<Day> {
 
-    public static final long MILLI_SECOND = 1000L;
-    public static final long MILLI_MINUTE = 60 * MILLI_SECOND;
-    public static final long MILLI_HOUR = 60 * MILLI_MINUTE;
-    public static final long MILLI_DAY = 24 * MILLI_HOUR;
-    public static final long MILLI_WEEK = 7 * MILLI_DAY;
-    public static final long MILLI_MONTH = 31 * MILLI_DAY;
-    public static final long MILLI_YEAR = 365 * MILLI_DAY;
+    private Date time;
 
-    /**
-     * Prevent instantiation.
-     */
-    private Constants() {
+    private String name;
+
+    private List<CPAppointment> appointments = new ArrayList<CPAppointment>();
+
+    private boolean today;
+
+    private boolean outOfRange;
+
+    private int sideBySide = 1;
+
+    public Day(Date time) {
         super();
+        this.time = time;
     }
 
+    public int compareTo(Day o) {
+        return time.compareTo(o.time);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof Day) ? time.equals(((Day) obj).time) : false;
+    }
+
+    @Override
+    public int hashCode() {
+        return time.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(time.toString());
+        sb.append(':');
+        sb.append(appointments.toString());
+        return sb.toString();
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void add(CPAppointment appointment) {
+        appointments.add(appointment);
+    }
+
+    public List<CPAppointment> getAppointments() {
+        return appointments;
+    }
 }

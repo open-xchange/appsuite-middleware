@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar.printing.osgi;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
@@ -66,7 +65,7 @@ import com.openexchange.tools.servlet.http.HTTPServletRegistration;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends DeferredActivator implements BundleActivator {
+public class Activator extends DeferredActivator {
 
     /**
      * The servlet path.
@@ -123,7 +122,6 @@ public class Activator extends DeferredActivator implements BundleActivator {
         CPServlet.setCalendarTools(collectionService);
 
         registration = new HTTPServletRegistration(context, ALIAS, new CPServlet());
-
     }
 
     private void unregister() {
@@ -132,5 +130,4 @@ public class Activator extends DeferredActivator implements BundleActivator {
             registration = null;
         }
     }
-
 }

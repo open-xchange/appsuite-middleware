@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.ajax,
  com.openexchange.api,
  com.openexchange.api2,
+ com.openexchange.groupware,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,

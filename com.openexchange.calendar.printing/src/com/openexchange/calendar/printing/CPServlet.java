@@ -69,6 +69,8 @@ import com.openexchange.calendar.printing.blocks.CPPartition;
 import com.openexchange.calendar.printing.blocks.MonthPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WeekPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
+import com.openexchange.calendar.printing.days.Day;
+import com.openexchange.calendar.printing.days.Partitioner;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -87,8 +89,6 @@ public class CPServlet extends PermissionServlet {
 
     private static final long serialVersionUID = -5186422014968264569L;
 
-    private static TemplateService templates = null;
-
     private static final Log LOG = LogFactory.getLog(CPServlet.class);
 
     private static final String APPOINTMENTS = "appointments";
@@ -100,6 +100,10 @@ public class CPServlet extends PermissionServlet {
     private static final String DEBUG = "debuggingItems";
 
     private static final String FORMATTINGINFO = "formattinginfo";
+
+    private static final String DAYS = "days";
+
+    private static TemplateService templates = null;
 
     public static void setTemplateService(TemplateService service) {
         templates = service;
@@ -164,9 +168,16 @@ public class CPServlet extends PermissionServlet {
                 iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
                     Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, -1, null);
             }
+            List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
+
+            CPCalendar cal = CPCalendar.getEuropeanCalendar();
+            modifyCalendar(cal, params);
+
+            Partitioner partitioner = new Partitioner(params, cal, appointmentSql, calendarTools);
+            List<Day> perDayList = partitioner.partition(idList);
 
             List<CPAppointment> expandedAppointments = tool.expandAppointements(
-                SearchIteratorAdapter.toList(iterator),
+                idList,
                 params.getStart(),
                 params.getEnd(),
                 appointmentSql,
@@ -178,10 +189,6 @@ public class CPServlet extends PermissionServlet {
             factory.addStrategy(new WorkWeekPartitioningStrategy());
             factory.addStrategy(new WeekPartitioningStrategy());
             factory.addStrategy(new MonthPartitioningStrategy());
-
-            CPCalendar cal = CPCalendar.getEuropeanCalendar();
-            modifyCalendar(cal, params);
-
             factory.setCalendar(cal);
             factory.setTypeToProduce(CPType.getByTemplateName(params.getTemplate()));
 
@@ -193,6 +200,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(VIEW_START, params.getStart());
             variables.put(VIEW_END, params.getEnd());
             variables.put(DEBUG, debuggingItems);
+            variables.put(DAYS, perDayList);
 
             for (CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());

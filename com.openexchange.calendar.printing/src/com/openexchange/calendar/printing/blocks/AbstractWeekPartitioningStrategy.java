@@ -80,10 +80,6 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
 
     protected CPAppointment lastStoredAppointment = null;
 
-    public abstract boolean isPackaging(CPType type);
-
-    public abstract CPPartition partition(List<CPAppointment> appointments);
-
     protected abstract void cleanup(CPPartition partition);
 
     private int lastDay = -1, lastWeek = -1, lastMonth = -1, lastYear = -1;
