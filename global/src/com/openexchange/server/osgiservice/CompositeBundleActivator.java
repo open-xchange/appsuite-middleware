@@ -55,7 +55,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * With this abstract class multiple activators in a bundle can be composited.
+ * With this abstract class multiple activators in a bundle can be joined.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -63,12 +63,12 @@ public abstract class CompositeBundleActivator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(CompositeBundleActivator.class);
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         Exception first = null;
-        for (BundleActivator activator : getActivators()) {
+        for (final BundleActivator activator : getActivators()) {
             try {
                 activator.start(context);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (null == first) {
                     first = e;
                 }
@@ -80,12 +80,12 @@ public abstract class CompositeBundleActivator implements BundleActivator {
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         Exception first = null;
-        for (BundleActivator activator : getActivators()) {
+        for (final BundleActivator activator : getActivators()) {
             try {
                 activator.stop(context);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (null == first) {
                     first = e;
                 }
