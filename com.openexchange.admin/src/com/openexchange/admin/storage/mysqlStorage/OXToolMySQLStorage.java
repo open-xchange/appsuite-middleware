@@ -2104,7 +2104,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet result = null;
         boolean foundOther = false;
         try {
-            stmt = con.prepareStatement("SELECT id FROM login2user WHERE cid=? AND uid=? AND id!=?");
+            stmt = con.prepareStatement("SELECT uid FROM login2user WHERE cid=? AND uid=? AND id!=?");
             stmt.setInt(1, contextId);
             stmt.setString(2, user.getName());
             stmt.setInt(3, user.getId().intValue());
