@@ -41,5 +41,13 @@ public interface OXMFParser {
      */
     public List<Map<String, String>> parse(final String html) throws SubscriptionException;
 
+    /**
+     * Parses passed HTML content. Each container element's name-value-pairs are backed by a map. Each map is contained in list.
+     * 
+     * @param html The reader providing HTML content to parse
+     * @return A list of maps each map backing container element's name-value-pairs
+     * @throws SubscriptionException If parsing the HTML content fails
+     */
     public List<Map<String, String>> parse(final Reader html) throws SubscriptionException;
+
 }
