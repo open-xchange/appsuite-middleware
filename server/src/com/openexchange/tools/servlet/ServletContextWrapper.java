@@ -63,11 +63,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 /**
- * OXServletContext
+ * {@link ServletContextWrapper} - A wrapper class for {@link ServletContext} interface.
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class ServletContextWrapper implements ServletContext {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletContextWrapper.class);
@@ -104,7 +103,7 @@ public class ServletContextWrapper implements ServletContext {
             if (index < 0) {
                 break;
             }
-            if (index == 0) {
+            if (0 == index) {
                 /*
                  * Trying to go outside our context
                  */
