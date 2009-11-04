@@ -47,8 +47,8 @@ Import-Package: com.openexchange.config,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Bundle-ClassPath: .,
- lib/nekohtml-1.9.11.jar
+Bundle-ClassPath: lib/nekohtml-1.9.13.jar,
+ .
 Eclipse-RegisterBuddy: com.openexchange.xerces
 Export-Package: com.openexchange.subscribe.microformats,
  com.openexchange.subscribe.microformats.parser,
