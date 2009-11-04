@@ -66,12 +66,13 @@ public class CreateTableActivator implements BundleActivator {
 
     private ServiceRegistration serviceRegistration;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         serviceRegistration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         serviceRegistration.unregister();
+        serviceRegistration = null;
     }
 
 }

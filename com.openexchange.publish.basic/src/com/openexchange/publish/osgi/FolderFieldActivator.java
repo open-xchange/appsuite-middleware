@@ -51,6 +51,7 @@ package com.openexchange.publish.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.folders.IsPublished;
@@ -66,12 +67,17 @@ public class FolderFieldActivator implements BundleActivator {
 
     public static PublicationTargetDiscoveryService DISCOVERER;
 
-    public void start(BundleContext context) throws Exception {
-        context.registerService(AdditionalFolderField.class.getName(), new IsPublished(DISCOVERER), null);
+    private ServiceRegistration registerService;
+
+    public void start(final BundleContext context) throws Exception {
+        registerService = context.registerService(AdditionalFolderField.class.getName(), new IsPublished(DISCOVERER), null);
     }
 
-    public void stop(BundleContext context) throws Exception {
-
+    public void stop(final BundleContext context) throws Exception {
+        if (null != registerService) {
+            registerService.unregister();
+            registerService = null;
+        }
     }
 
 }

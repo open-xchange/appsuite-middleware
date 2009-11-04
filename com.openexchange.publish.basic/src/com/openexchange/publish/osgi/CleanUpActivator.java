@@ -73,15 +73,17 @@ import com.openexchange.server.osgiservice.Whiteboard;
  */
 public class CleanUpActivator implements BundleActivator {
 
-    private List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
+    private List<ServiceRegistration> registrations;
 
     private Whiteboard whiteboard;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
-        ContextService contexts = whiteboard.getService(ContextService.class);
+        final ContextService contexts = whiteboard.getService(ContextService.class);
 
-        EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.STORAGE);
+        final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.STORAGE);
+        
+        registrations = new LinkedList<ServiceRegistration>();
 
         registerHandler(
             context,
@@ -92,17 +94,19 @@ public class CleanUpActivator implements BundleActivator {
 
     }
 
-    public void registerHandler(BundleContext context, EventHandler handler, String topic) {
+    private void registerHandler(final BundleContext context, final EventHandler handler, final String topic) {
         final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>();
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { topic });
         registrations.add(context.registerService(EventHandler.class.getName(), handler, serviceProperties));
     }
 
-    public void stop(BundleContext context) throws Exception {
-        for (ServiceRegistration registration : registrations) {
+    public void stop(final BundleContext context) throws Exception {
+        for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }
+        registrations = null;
         whiteboard.close();
+        whiteboard = null;
     }
 
 }

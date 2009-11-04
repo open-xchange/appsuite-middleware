@@ -59,7 +59,6 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
-import com.openexchange.publish.folders.IsPublished;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.FolderSecurityStrategy;
 import com.openexchange.publish.sql.PublicationSQLStorage;
@@ -73,48 +72,55 @@ import com.openexchange.userconf.UserConfigurationService;
 public class DiscovererActivator implements BundleActivator {
 
     private ComponentRegistration componentRegistration;
+
     private ServiceRegistration discoveryRegistration;
+
     private OSGiPublicationTargetCollector pubServiceCollector;
+
     private OSGiPublicationTargetDiscovererCollector discovererCollector;
+
     private Whiteboard whiteboard;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
-        
-        
+
         pubServiceCollector = new OSGiPublicationTargetCollector(context);
         discovererCollector = new OSGiPublicationTargetDiscovererCollector(context);
 
-        
-        CompositePublicationTargetDiscoveryService compositeDiscovererCollector = new CompositePublicationTargetDiscoveryService();
+        final CompositePublicationTargetDiscoveryService compositeDiscovererCollector = new CompositePublicationTargetDiscoveryService();
         compositeDiscovererCollector.addDiscoveryService(pubServiceCollector);
         compositeDiscovererCollector.addDiscoveryService(discovererCollector);
 
         discovererCollector.ignore(compositeDiscovererCollector);
-        
-        Hashtable discoveryDict = new Hashtable();
-        discoveryDict.put(Constants.SERVICE_RANKING, 256);
-        
-        discoveryRegistration = context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
-        
+
+        final Hashtable<Object, Object> discoveryDict = new Hashtable<Object, Object>();
+        discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
+
+        discoveryRegistration =
+            context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
+
         FolderFieldActivator.DISCOVERER = compositeDiscovererCollector;
-        
-        DBProvider provider = whiteboard.getService(DBProvider.class);
-        GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
-        
+
+        final DBProvider provider = whiteboard.getService(DBProvider.class);
+        final GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
+
         AbstractPublicationService.STORAGE = new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector);
         AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(whiteboard.getService(UserConfigurationService.class));
-        
-        
+
         componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         discoveryRegistration.unregister();
+        discoveryRegistration = null;
         componentRegistration.unregister();
+        componentRegistration = null;
         pubServiceCollector.close();
+        pubServiceCollector = null;
         discovererCollector.close();
+        discovererCollector = null;
         whiteboard.close();
+        whiteboard = null;
     }
 
 }

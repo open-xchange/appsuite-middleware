@@ -64,38 +64,40 @@ import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
-
 /**
  * {@link LoaderActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class LoaderActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
+
     private ServiceRegistration dataLoaderRegistration;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
-        
-        CompositeLoaderService compositeLoader = new CompositeLoaderService();
-        
-        InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);   
-        UserService users = whiteboard.getService(UserService.class);
-        UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
+
+        final CompositeLoaderService compositeLoader = new CompositeLoaderService();
+
+        final InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);
+        final UserService users = whiteboard.getService(UserService.class);
+        final UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
         compositeLoader.registerLoader("infostore/object", new InfostoreDocumentLoader(infostore, users, userConfigs));
         compositeLoader.registerLoader("infostore", new InfostoreFolderLoader(infostore, users, userConfigs));
-        
-        ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactInterfaceFactory.class));
+
+        final ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactInterfaceFactory.class));
         compositeLoader.registerLoader("contacts", contactLoader);
-        
-        dataLoaderRegistration = context.registerService(PublicationDataLoaderService.class.getName(), new CachingLoader(whiteboard, compositeLoader), null);
+
+        dataLoaderRegistration =
+            context.registerService(PublicationDataLoaderService.class.getName(), new CachingLoader(whiteboard, compositeLoader), null);
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         dataLoaderRegistration.unregister();
+        dataLoaderRegistration = null;
         whiteboard.close();
+        whiteboard = null;
     }
 
 }
