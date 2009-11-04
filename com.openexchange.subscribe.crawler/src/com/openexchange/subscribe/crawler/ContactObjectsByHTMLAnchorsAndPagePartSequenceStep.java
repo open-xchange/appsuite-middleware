@@ -50,10 +50,9 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.Vector;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes HtmlPages that each contain contact information and converts them to ContactObjects for OX
@@ -88,7 +86,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         linkToTargetPage = "";
     }
     
-    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, String titleExceptionsRegex, String linkToTargetPage) {
+    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, final String titleExceptionsRegex, final String linkToTargetPage) {
         this.description = description;
         this.pageParts = pageParts;
         this.titleExceptionsRegex = titleExceptionsRegex;
@@ -100,26 +98,27 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         linkToTargetPage = "";
     }
 
+    @Override
     public void execute(final WebClient webClient) throws SubscriptionException {
-        final Vector<Contact> contactObjects = new Vector<Contact>();
-        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        final List<Contact> contactObjects = new ArrayList<Contact>();
+        // final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
         for (final HtmlAnchor anchor : input) {
             try {
                 HtmlPage page = anchor.click();
                 // in case the reached page is not yet the one with (all) the contact info and there is one more link to click
                 if (!linkToTargetPage.equals("")){
-                   PageByLinkRegexStep step = new PageByLinkRegexStep("", linkToTargetPage);
+                   final PageByLinkRegexStep step = new PageByLinkRegexStep("", linkToTargetPage);
                    step.setInput(page);
                    step.execute(webClient);
                    page = step.getOutput();
                 }
-                if (!page.getTitleText().matches(titleExceptionsRegex)){
-                    Contact contact = new Contact();
-                    String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
+                final String titleText = page.getTitleText();
+                if (null != titleText && !titleText.matches(titleExceptionsRegex)){
+                    final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
                     pageParts.setPage(pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
     
-                    contact = Mappings.translateMapToContact(map);
+                    final Contact contact = Mappings.translateMapToContact(map);
     
                     SANITIZER.sanitize(contact);
                     contactObjects.add(contact);
@@ -140,10 +139,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             executedSuccessfully = true;
         }
 
-        output = new Contact[contactObjects.size()];
-        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
-            output[i] = contactObjects.get(i);
-        }
+        output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
     }
 
@@ -165,7 +161,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     }
 
     
-    public void setTitleExceptionsRegex(String titleExceptionsRegex) {
+    public void setTitleExceptionsRegex(final String titleExceptionsRegex) {
         this.titleExceptionsRegex = titleExceptionsRegex;
     }
 
@@ -175,7 +171,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     }
 
     
-    public void setLinkToTargetPage(String linkToTargetPage) {
+    public void setLinkToTargetPage(final String linkToTargetPage) {
         this.linkToTargetPage = linkToTargetPage;
     }
 
