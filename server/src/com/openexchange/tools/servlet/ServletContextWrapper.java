@@ -67,7 +67,8 @@ import com.openexchange.server.impl.Version;
 /**
  * {@link ServletContextWrapper} - A wrapper class for {@link ServletContext} interface.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServletContextWrapper implements ServletContext {
 

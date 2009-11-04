@@ -109,7 +109,7 @@ public final class ServletConfigLoader {
      */
     private static ServletConfigWrapper buildConfig(final Map<String, String> props, final String clazz) {
         final ServletConfigWrapper config = new ServletConfigWrapper();
-        config.setInitParameter(props);
+        config.setInitParameters(props);
         config.setServletContextWrapper(new ServletContextWrapper(config));
         config.setServletName(getClassName(clazz));
         return config;

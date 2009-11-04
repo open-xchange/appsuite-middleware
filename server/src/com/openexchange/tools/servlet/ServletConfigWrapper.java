@@ -57,69 +57,76 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 /**
- * OXServletConfig
- * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link ServletConfigWrapper} - A wrapper for class for {@link ServletConfig}.
+ *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class ServletConfigWrapper implements ServletConfig {
 
     protected String servletName;
 
-    protected Map<String, String> initParameter = new HashMap<String, String>();
+    protected Map<String, String> initParameters = new HashMap<String, String>();
 
-    ServletContextWrapper servletcontextwrapper;
+    ServletContextWrapper servletContextWrapper;
 
+    /**
+     * Initializes a new {@link ServletConfigWrapper}.
+     */
     public ServletConfigWrapper() {
-        servletcontextwrapper = new ServletContextWrapper(this);
+        servletContextWrapper = new ServletContextWrapper(this);
     }
 
-    public void setServletName(final String servlet_name) {
-        servletName = servlet_name;
-    }
-
-    public void setInitParameter(final Map<String, String> init_parameter) {
-        initParameter = init_parameter;
-    }
-
-    public ServletContextWrapper getServletcontextwrapper() {
-        return servletcontextwrapper;
-    }
-
-    public void setServletContextWrapper(final ServletContextWrapper servletcontextwrapper) {
-        this.servletcontextwrapper = servletcontextwrapper;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletConfig#getInitParameter(java.lang.String)
+    /**
+     * Sets the servlet name.
+     * 
+     * @param servletName The servlet name
      */
+    public void setServletName(final String servletName) {
+        this.servletName = servletName;
+    }
+
+    /**
+     * Sets the init parameters
+     * 
+     * @param initParameters The init parameters
+     */
+    public void setInitParameters(final Map<String, String> initParameters) {
+        this.initParameters = initParameters;
+    }
+
+    /**
+     * Gets the servlet config wrapper.
+     * 
+     * @return The servlet config wrapper
+     */
+    public ServletContextWrapper getServletContextWrapper() {
+        return servletContextWrapper;
+    }
+
+    /**
+     * Sets the servlet config wrapper.
+     * 
+     * @param servletContextWrapper The servlet config wrapper
+     */
+    public void setServletContextWrapper(final ServletContextWrapper servletContextWrapper) {
+        this.servletContextWrapper = servletContextWrapper;
+    }
+
     public String getInitParameter(final String name) {
-        return initParameter.get(name);
+        return initParameters.get(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletConfig#getServletName()
-     */
     public String getServletName() {
         return servletName;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletConfig#getServletContext()
-     */
     public ServletContext getServletContext() {
-        return servletcontextwrapper;
+        return servletContextWrapper;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.ServletConfig#getInitParameterNames()
-     */
     public Enumeration<String> getInitParameterNames() {
-        return new IteratorEnumeration<String>(initParameter.keySet().iterator());
+        return new IteratorEnumeration<String>(initParameters.keySet().iterator());
     }
 
     /**
@@ -135,18 +142,10 @@ public class ServletConfigWrapper implements ServletConfig {
             this.iter = iter;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.Enumeration#hasMoreElements()
-         */
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.Enumeration#nextElement()
-         */
         public E nextElement() {
             return iter.next();
         }
