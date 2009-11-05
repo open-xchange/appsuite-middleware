@@ -94,10 +94,8 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
-import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -112,16 +110,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    private PropertyHandler prop = null;
-
     public OXContext(final BundleContext context) throws StorageException {
         super();
         this.context = context;
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }
-        final AdminCache cache = ClientAdminThreadExtended.cache;
-        prop = cache.getProperties();
     }
 
     public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -802,7 +796,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         validateloginmapping(ctx);
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-        String DEFAULT_ACCESS_COMBINATION_NAME = prop.getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
+        String DEFAULT_ACCESS_COMBINATION_NAME = ClientAdminThreadExtended.cache.getProperties().getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
         // If not defined or access combination name does NOT exist, use hardcoded fallback!
         UserModuleAccess createaccess = null;
         if( access == null ) {
