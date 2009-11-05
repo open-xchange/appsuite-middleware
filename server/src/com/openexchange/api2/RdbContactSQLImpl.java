@@ -495,11 +495,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                         String select = cs.getSelect();
                         final StringBuilder sb = new StringBuilder(select.length());
                         pos = select.indexOf(" FROM");
-                        if (pos < 0) {
-                            pos = select.indexOf(" from");
-                            if (pos < 0) {
-                                throw new SQLException("SELECT statement does not contain \"FROM\".");
-                            }
+                        if (pos < 0 && (pos = select.indexOf(" from")) < 0) {
+                            throw new SQLException("SELECT statement does not contain \"FROM\".");
                         }
                         select =
                             sb.append(select.substring(0, pos)).append(',').append(aliasColumn).append(select.substring(pos)).toString();
