@@ -2,6 +2,7 @@
 
  - Bugfix #14782: Lazy loading of configuration file properties.
  - Bugfix #14740: Optimized SQL query to find a not completely filled schema for creating a context.
+ - Bugfix #14708: Not loading filestore usage information when creating a context and searching for a filestore based on estimated usage. 
 
 * 2009-11-02 - marcus.klein@open-xchange.com
 

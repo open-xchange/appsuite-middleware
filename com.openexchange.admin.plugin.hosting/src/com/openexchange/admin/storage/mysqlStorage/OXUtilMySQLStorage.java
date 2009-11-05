@@ -600,12 +600,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore[] listFilestores(String pattern) throws StorageException {
-        String sqlPattern = pattern.replace('*', '%');
+        List<Integer> ids = listFilestoreIds(pattern);
+        final List<Filestore> retval = new ArrayList<Filestore>();
+        for (int id : ids) {
+            retval.add(getFilestore(id));
+        }
+        return retval.toArray(new Filestore[retval.size()]);
+    }
+
+    private List<Integer> listFilestoreIds(String pattern) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
+        } catch (PoolException e) {
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;
@@ -613,27 +620,22 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         List<Integer> ids = new ArrayList<Integer>();
         try {
             stmt = con.prepareStatement("SELECT id FROM filestore WHERE uri LIKE ?");
-            stmt.setString(1, sqlPattern);
+            stmt.setString(1, pattern.replace('*', '%'));
             result = stmt.executeQuery();
             while (result.next()) {
                 ids.add(I(result.getInt(1)));
             }
         } catch (SQLException e) {
-            LOG.error("SQL Error", e);            
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
             try {
                 cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
-        final List<Filestore> retval = new ArrayList<Filestore>();
-        for (int id : ids) {
-            retval.add(getFilestore(id));
-        }
-        return retval.toArray(new Filestore[retval.size()]);
+        return ids;
     }
 
     @Override
@@ -842,7 +844,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore findFilestoreForContext() throws StorageException {
-        Filestore[] filestores = listFilestores("*");
+        List<Integer> ids = listFilestoreIds("*");
+        final List<Filestore> filestores = new ArrayList<Filestore>();
+        for (int id : ids) {
+            filestores.add(getFilestore(id, false));
+        }
         for (Filestore filestore : filestores) {
             // This is the special value for not adding contexts to this filestore.
             if (isContextLimitReached(filestore)) {
@@ -1228,6 +1234,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore getFilestore(int id) throws StorageException {
+        return getFilestore(id, true);
+    }
+
+    /**
+     * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
+     * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
+     * the read usage of the filestore to 0.
+     * @param id unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
+     * @return all filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    private Filestore getFilestore(int id, boolean loadRealUsage) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
@@ -1262,7 +1281,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
-        final FilestoreUsage usage = getUsage(id);
+        final FilestoreUsage usage = getUsage(id, loadRealUsage);
         fs.setUsed(L(toMB(usage.getUsage())));
         fs.setCurrentContexts(I(usage.getCtxCount()));
         fs.setReserved(L(getAverageFilestoreSpace() * usage.getCtxCount()));
@@ -1320,6 +1339,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    /**
+     * @param filestoreId
+     * @return
+     * @throws StorageException
+     */
     private int[] getContextsInFilestore(int filestoreId) throws StorageException {
         final Connection con;
         try {
@@ -1352,10 +1376,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return Collections.toArray(retval);
     }
 
-    private final FilestoreUsage getUsage(int filestoreId) throws StorageException {
+    /**
+     * Loads the usage information for a filestore.
+     * @param filestoreId the unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the filestore usage from every context in it. BEWARE! This is a slow operation.
+     * @return The {@link FilestoreUsage} object for the filestore.
+     * @throws StorageException if some problem occurs loading the information.
+     */
+    private final FilestoreUsage getUsage(int filestoreId, boolean loadRealUsage) throws StorageException {
         final FilestoreUsage usage = new FilestoreUsage();
         for (int cid : getContextsInFilestore(filestoreId)) {
-            usage.addContextUsage(getContextUsedQuota(cid));
+            usage.addContextUsage(loadRealUsage ? getContextUsedQuota(cid) : 0);
         }
         return usage;
     }
