@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
@@ -75,7 +76,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     private final String sPossibleFileName;
 
-    private final String bodyPart;
+    private final byte[] bodyPart;
 
     private final int startIndex;
 
@@ -84,10 +85,17 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     /**
      * Constructs a {@link UUEncodedPart} object containing all information about the attachment.
      */
-    UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename) throws Exception {
+    UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
-        this.bodyPart = bodyPart;
+        byte[] bytes;
+        try {
+            bytes = bodyPart.getBytes("US-ASCII");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur since US-ASCII is supported by every JVM
+            bytes = bodyPart.getBytes();
+        }
+        this.bodyPart = bytes;
         sPossibleFileName = filename;
     }
 
@@ -108,7 +116,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      */
     public int getFileSize() {
         try {
-            return (bodyPart.getBytes().length);
+            return (bodyPart.length);
         } catch (final NumberFormatException nfe) {
             return (-1);
         }
@@ -138,7 +146,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      * @return inStreamPart - The inputStream
      */
     public InputStream getInputStream() {
-        final ByteArrayInputStream bStream = new UnsynchronizedByteArrayInputStream(bodyPart.getBytes());
+        final ByteArrayInputStream bStream = new UnsynchronizedByteArrayInputStream(bodyPart);
         try {
             final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
             return (inStreamPart);
@@ -159,7 +167,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
             public InputStream getInputStream() throws IOException {
                 try {
-                    return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(bodyPart.getBytes()), "uuencode");
+                    return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(bodyPart), "uuencode");
                 } catch (final MessagingException e) {
                     final IOException io = new IOException(e.getMessage());
                     io.initCause(e);
