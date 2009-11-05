@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2009-10-28 12:56+0100\n"
+"PO-Revision-Date: 2009-11-05 14:18+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -30,6 +30,8 @@ msgid "Add cipher code"
 msgstr "Chiffre hinzufügen"
 
 #: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
 msgid "URL"
 msgstr "URL"
 
@@ -63,6 +65,14 @@ msgstr ""
 "wurden, senden Sie bitte eine Mail mit der URL/Adresse dieser Seite %s an "
 "den Herausgeber der Daten:\n"
 "Daten veröffentlicht von %s am %s\n"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/FormStrings.java:61
+msgid "Login"
+msgstr "Login"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/FormStrings.java:63
+msgid "Password"
+msgstr "Passwort"
 
 #. Name of the parent folder for the private user folders.
 #: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
