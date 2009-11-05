@@ -410,8 +410,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         }
         if (searchobject.hasFolders()) {
             final int[] folders = searchobject.getFolders();
+            final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
             for (final int folderId : folders) {
-                final FolderObject contactFolder = new OXFolderAccess(ctx).getFolderObject(folderId);
+                final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
                 if (contactFolder.getModule() != FolderObject.CONTACT) {
                     throw EXCEPTIONS.createOXConflictException(14, I(folderId), I(ctx.getContextId()), I(userId));
                 }
