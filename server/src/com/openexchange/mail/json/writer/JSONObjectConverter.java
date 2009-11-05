@@ -179,14 +179,22 @@ public final class JSONObjectConverter {
              * Header stuff
              */
             copyValue(FolderChildFields.FOLDER_ID, rawJSONMailObject, jsonObject);
-            copyValue(DataFields.ID, rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.UNREAD.getKey(), rawJSONMailObject, jsonObject);
+            copyValue(MailJSONField.ACCOUNT_NAME.getKey(), rawJSONMailObject, jsonObject);
+            raw2JsonMail0(rawJSONMailObject, jsonObject);
+            return jsonObject;
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    private void raw2JsonMail0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws MailException {
+        try {
+            copyValue(DataFields.ID, rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.HAS_ATTACHMENTS.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.CONTENT_TYPE.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.SIZE.getKey(), rawJSONMailObject, jsonObject);
-            copyValue(MailJSONField.ACCOUNT_NAME.getKey(), rawJSONMailObject, jsonObject);
             raw2Json0(rawJSONMailObject, jsonObject);
-            return jsonObject;
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
@@ -323,7 +331,7 @@ public final class JSONObjectConverter {
                 for (int i = 0; i < len; i++) {
                     final JSONObject nestedMsg = nestedMsgs.getJSONObject(i);
                     final JSONObject jo = new JSONObject();
-                    raw2Json0(nestedMsg, jo);
+                    raw2JsonMail0(nestedMsg, jo);
                     nestedMessages.put(jo);
                 }
                 jsonObject.put(MailJSONField.NESTED_MESSAGES.getKey(), nestedMessages);
