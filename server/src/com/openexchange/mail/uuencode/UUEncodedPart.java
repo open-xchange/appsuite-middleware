@@ -161,11 +161,12 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      * @return A data handler for this uuencoded part
      */
     public DataHandler getDataHandler(final String contentType) {
+        final byte[] data = bodyPart;
         final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
             public InputStream getInputStream() throws IOException {
                 try {
-                    return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(bodyPart), "uuencode");
+                    return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(data), "uuencode");
                 } catch (final MessagingException e) {
                     final IOException io = new IOException(e.getMessage());
                     io.initCause(e);
