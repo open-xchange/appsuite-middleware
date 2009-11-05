@@ -374,7 +374,7 @@ public class ContactMySql implements ContactSql {
                 }
             } else {
                 /*
-                 * Create a single statement with conditions linkd with "AND"
+                 * Create a single statement with conditions linked with "AND"
                  */
                 for (final SearchFiller searchFiller : SEARCH_FILLERS) {
                     searchFiller.fillSearchCriteria(this, sb, true);
