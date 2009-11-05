@@ -204,7 +204,7 @@ public class ServerUserSetting {
      * 
      * @param cid context id
      * @param user user id
-     * @return true if mails should be collected, false otherwise
+     * @return <code>true</code> if mails should be collected, <code>false</code> otherwise
      */
     public static Boolean isContactCollectionEnabled(final int cid, final int user) throws SettingException {
         return defaultInstance.isIContactCollectionEnabled(cid, user);
@@ -289,10 +289,11 @@ public class ServerUserSetting {
      * 
      * @param cid context id
      * @param user user id
-     * @return the value or <code>null</code> if no entry is found.
+     * @return The value or <code>false</code> if no entry is found.
      */
     public Boolean isIContactCollectionEnabled(final int cid, final int user) throws SettingException {
-        return getAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED, connection);
+        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED, connection);
+        return null == attribute ? Boolean.FALSE : attribute;
     }
 
     /**
