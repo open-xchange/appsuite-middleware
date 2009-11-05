@@ -72,8 +72,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 public class UUEncodedPart extends UUEncodedMultiPart {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UUEncodedPart.class);
-
     private final String sPossibleFileName;
 
     private final byte[] bodyPart;
@@ -152,7 +150,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
             return (inStreamPart);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            org.apache.commons.logging.LogFactory.getLog(UUEncodedPart.class).error(e.getMessage(), e);
             return (null);
         }
     }
@@ -204,7 +202,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                 }
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            org.apache.commons.logging.LogFactory.getLog(UUEncodedPart.class).error(e.getMessage(), e);
         }
         return (encodedPart);
     }
@@ -225,7 +223,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                 bos.write(iChar);
             }
         } catch (final IOException ioe) {
-            LOG.error(ioe.getMessage(), ioe);
+            org.apache.commons.logging.LogFactory.getLog(UUEncodedPart.class).error(ioe.getMessage(), ioe);
             throw ioe;
         } finally {
             if (null != bos) {
