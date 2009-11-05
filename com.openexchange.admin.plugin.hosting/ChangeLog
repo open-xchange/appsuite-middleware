@@ -1,3 +1,7 @@
+* 2009-11-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #14782: Lazy loading of configuration file properties.
+
 * 2009-11-02 - marcus.klein@open-xchange.com
 
  - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
