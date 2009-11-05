@@ -67,7 +67,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 import org.apache.commons.io.FileUtils;
@@ -1355,24 +1354,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         String found = null;
-        int contexts = Integer.MAX_VALUE;
+        int count = -1;
         try {
-            stmt = con.prepareStatement("SELECT db_schema,COUNT(db_schema) FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema");
+            stmt = con.prepareStatement("SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count");
             stmt.setInt(1, poolId.intValue());
+            stmt.setInt(2, this.CONTEXTS_PER_SCHEMA);
             result = stmt.executeQuery();
-            final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-            while (result.next()) {
-                final String schema = result.getString(1);
-                final int count = result.getInt(2);
-                if (count < this.CONTEXTS_PER_SCHEMA) {
-                    if (oxt.schemaBeingLockedOrNeedsUpdate(poolId.intValue(), schema)) {
-                        LOG.debug("schema " + schema + "is locked or updated, trying next one");
-                        continue;
-                    }
-                    if (count < contexts) {
-                        found = schema;
-                        contexts = count;
-                    }
+            OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
+            while (result.next() && null == found) {
+                String schema = result.getString(1);
+                count = result.getInt(2);
+                if (oxt.schemaBeingLockedOrNeedsUpdate(poolId.intValue(), schema)) {
+                    LOG.debug("schema " + schema + "is locked or updated, trying next one");
+                } else {
+                    found = schema;
                 }
             }
         } catch (SQLException e) {
@@ -1380,7 +1375,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        LOG.debug("count =" + contexts + " of schema " + found + ", using it for next context");
+        LOG.debug("count =" + count + " of schema " + found + ", using it for next context");
         return found;
     }
 

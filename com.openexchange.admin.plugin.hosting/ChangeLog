@@ -1,6 +1,7 @@
 * 2009-11-05 - marcus.klein@open-xchange.com
 
  - Bugfix #14782: Lazy loading of configuration file properties.
+ - Bugfix #14740: Optimized SQL query to find a not completely filled schema for creating a context.
 
 * 2009-11-02 - marcus.klein@open-xchange.com
 
