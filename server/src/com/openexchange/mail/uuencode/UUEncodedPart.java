@@ -69,7 +69,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public class UUEncodedPart extends UUEncodedMultiPart {
 
     private final String sPossibleFileName;
