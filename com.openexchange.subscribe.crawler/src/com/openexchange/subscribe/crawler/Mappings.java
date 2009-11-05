@@ -50,23 +50,29 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
-
 /**
  * {@link Mappings}
- *
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Mappings {
-    
-public static Contact translateMapToContact(final HashMap<String, String> map) throws ConverterException {
-        
+
+    /**
+     * Generates a {@link Contact contact} from specified map containing crawled contact information.
+     * 
+     * @param map The map
+     * @return The generated contact
+     * @throws ConverterException If conversion fails
+     */
+    public static Contact translateMapToContact(final Map<String, String> map) throws ConverterException {
+
         final Contact contact = new Contact();
-    
+
         if (map.containsKey("first_name")) {
             contact.setGivenName(map.get("first_name"));
         }
@@ -174,8 +180,8 @@ public static Contact translateMapToContact(final HashMap<String, String> map) t
         }
         // a special kind of note containing the address of the contact (used if the address is only available as one String)
         if (map.containsKey("address_note")) {
-            final String htmlString  = map.get("address_note");
-            final String noHTMLString = htmlString.replaceAll("\\<.*?\\>", "");
+            final String htmlString = map.get("address_note");
+            final String noHTMLString = htmlString.replaceAll("<br[ \t]*/?[ \t]*>", "\n").replaceAll("<.*?>", "");
             contact.setNote(noHTMLString);
         }
         if (map.containsKey("profession")) {
@@ -190,15 +196,15 @@ public static Contact translateMapToContact(final HashMap<String, String> map) t
         if (map.containsKey("instant_messenger2")) {
             contact.setInstantMessenger2(map.get("instant_messenger2"));
         }
-        //handle birthdays
+        // handle birthdays
         Calendar cal = null;
         if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
             cal = Calendar.getInstance();
-            final int date = Integer.valueOf(map.get("birthday_day"));
-            final int month = Integer.valueOf(map.get("birthday_month"));
+            final int date = Integer.parseInt(map.get("birthday_day"));
+            final int month = Integer.parseInt(map.get("birthday_month"));
             int year = 2009;
             if (map.containsKey("birthday_year")) {
-                year = Integer.valueOf(map.get("birthday_year"));
+                year = Integer.parseInt(map.get("birthday_year"));
             }
             cal.set(year, month, date);
             contact.setBirthday(cal.getTime());
@@ -208,7 +214,7 @@ public static Contact translateMapToContact(final HashMap<String, String> map) t
         if (map.containsKey("image")) {
             OXContainerConverter.loadImageFromURL(contact, map.get("image"));
         }
-        
+
         return contact;
     }
 

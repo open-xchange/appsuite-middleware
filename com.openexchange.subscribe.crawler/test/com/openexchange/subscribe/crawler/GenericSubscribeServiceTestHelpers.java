@@ -52,10 +52,10 @@ package com.openexchange.subscribe.crawler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Calendar;
+import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -70,34 +70,34 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         super();
     }
 
-    public GenericSubscribeServiceTestHelpers(String name) {
+    public GenericSubscribeServiceTestHelpers(final String name) {
         super(name);
     }
 
-    protected void findOutIfThereAreContactsForThisConfiguration(String username, String password, CrawlerDescription crawler) {
+    protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler) {
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, false);
     }
     
-    protected void findOutIfThereAreContactsForThisConfiguration(String username, String password, CrawlerDescription crawler, boolean verbose) {
+    protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose) {
         Calendar rightNow = Calendar.getInstance();
-        long before = rightNow.getTime().getTime();
+        final long before = rightNow.getTime().getTime();
         // create a GenericSubscribeService that uses this CrawlerDescription
-        GenericSubscribeService service = new GenericSubscribeService(
+        final GenericSubscribeService service = new GenericSubscribeService(
             crawler.getDisplayName(),
             crawler.getId(),
             crawler.getWorkflowString(),
             crawler.getPriority());
 
-        Workflow testWorkflow = service.getWorkflow();
+        final Workflow testWorkflow = service.getWorkflow();
         Contact[] contacts = new Contact[0];
         try {
             contacts = testWorkflow.execute(username, password);
-        } catch (SubscriptionException e) {
+        } catch (final SubscriptionException e) {
             e.printStackTrace();
         }
         assertTrue("There are no contacts for crawler : " + crawler.getDisplayName(), contacts.length != 0);
         if (verbose){
-            for (Contact contact : contacts) {
+            for (final Contact contact : contacts) {
                 System.out.println("contact retrieved is : " + contact.getDisplayName());
                 System.out.println("contacts first name : " + contact.getGivenName());
                 System.out.println("contacts last name : " + contact.getSurName());
@@ -117,6 +117,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
                 System.out.println("contacts postal code of private address : " + contact.getPostalCodeHome());
                 System.out.println("contacts city of private address : " + contact.getCityHome());
                 System.out.println("contacts country of private address : " + contact.getCountryHome());
+                System.out.println("contacts company : " + contact.getCompany());
                 System.out.println("contacts note : " + contact.getNote());
     
                 System.out.println("----------");
@@ -124,7 +125,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         }
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
         rightNow = Calendar.getInstance();
-        long after = rightNow.getTime().getTime();
+        final long after = rightNow.getTime().getTime();
         System.out.println("Time : " + Long.toString((after - before) / 1000) + " seconds");
     }
 
@@ -133,11 +134,11 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
      * 
      * @param crawler
      */
-    protected void dumpThis(CrawlerDescription crawler, String filename) {
+    protected void dumpThis(final CrawlerDescription crawler, final String filename) {
         try {
             Yaml.dump(crawler, new File("../open-xchange-development/crawlers/" + filename + ".yml"));
             Yaml.dump(crawler, new File("conf/crawlers/" + filename + ".yml"));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             e.printStackTrace();
         }
     }

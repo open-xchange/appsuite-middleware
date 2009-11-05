@@ -2,6 +2,7 @@
 
  - Bugfix #14772: Improved SQL query performance
  - Bugfix #14781: Less strict parsing of UUEncoded mails
+ - Bugfix #14698: Crawling more information from facebook.com
 
 * 2009-11-04 - thorben.betten@open-xchange.com
 

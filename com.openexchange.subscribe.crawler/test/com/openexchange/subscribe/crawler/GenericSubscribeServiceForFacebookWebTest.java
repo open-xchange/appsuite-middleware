@@ -63,14 +63,14 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
 
     public void testGenericSubscribeServiceForFacebook() {
         // insert valid credentials here
-        String username = "";
-        String password = "";
+        final String username = "";
+        final String password = "";
 
         // create a CrawlerDescription
-        CrawlerDescription crawler = new CrawlerDescription();
+        final CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
-        List<Step> steps = new LinkedList<Step>();
+        final List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(
             "Login to facebook.com",
@@ -90,20 +90,26 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
             "\\/friends.php?.*&a&f.*",
             "\\/profile.php.*&id.*",
             ".*&id=([0-9]*)&.*"));
-        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
-        pageParts.add(new PagePart("(<div class=\"sectitle\">)([^<]*)(<\\/div>)", "display_name"));
+        final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(<div class=\"section_title\">)([^<]*)(</div>)", "display_name"));
         pageParts.add(new PagePart("(<img src=\")([^\"]*)(\")", "image"));
         pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):<\\/td><td  valign=\"top\">([^<]*)(</td>)","instant_messenger1"));
         pageParts.add(new PagePart("(Mobile Number|Handynummer):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "cellular_telephone1"));
         pageParts.add(new PagePart("(Phone|Telefon):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "telephone_business1"));
         pageParts.add(new PagePart("(Current Address|Aktuelle Adresse):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","address_note"));
-        PagePartSequence sequence = new PagePartSequence(pageParts, "");
+        pageParts.add(new PagePart("(Member of|Mitglied von):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","company"));
+        pageParts.add(new PagePart("(Hometown|Heimatstadt):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","city_home"));
+        final PagePartSequence sequence = new PagePartSequence(pageParts, "");
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
             "Get the info-bits from the contact-page.",
             sequence,
             "Facebook.*(Your Profile|Dein Profil)", ".*&v=info.*"));
-        Workflow workflow = new Workflow(steps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
+        final Workflow workflow = new Workflow(steps);
+        
+        
+        final String yamlString = Yaml.dump(workflow);
+        crawler.setWorkflowString(yamlString);
+        System.out.println(yamlString);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files

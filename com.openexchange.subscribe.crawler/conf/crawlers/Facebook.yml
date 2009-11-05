@@ -34,7 +34,7 @@ workflowString: |
         page: ""
         pageParts: 
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(<div class=\"sectitle\">)([^<]*)(<\\/div>)"
+            regex: "(<div class=\"section_title\">)([^<]*)(</div>)"
             type: 1
             typeOfInfo: display_name
           - !com.openexchange.subscribe.crawler.PagePart
@@ -57,5 +57,13 @@ workflowString: |
             regex: "(Current Address|Aktuelle Adresse):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
             type: 1
             typeOfInfo: address_note
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(Member of|Mitglied von):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
+            type: 1
+            typeOfInfo: company
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(Hometown|Heimatstadt):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
+            type: 1
+            typeOfInfo: city_home
       titleExceptionsRegex: "Facebook.*(Your Profile|Dein Profil)"
   
