@@ -72,6 +72,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
@@ -467,47 +468,46 @@ public class RdbUserStorage extends UserStorage {
      */
     @Override
     public User searchUser(String email, Context context) throws LdapException {
-        String sql = "SELECT id FROM user WHERE cid=? AND mail=?";
+        String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
         Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (final DBPoolingException e) {
+        } catch (DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
+            String pattern = StringCollection.prepareForSearch(email, false, true);
             PreparedStatement stmt = null;
             ResultSet result = null;
             int userId = -1;
             try {
                 stmt = con.prepareStatement(sql);
                 stmt.setInt(1, context.getContextId());
-                stmt.setString(2, email);
+                stmt.setString(2, pattern);
                 result = stmt.executeQuery();
                 if (result.next()) {
                     userId = result.getInt(1);
                 }
-            } catch (final SQLException e) {
-                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                    e.getMessage());
+            } catch (SQLException e) {
+                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
             try {
                 if (userId == -1) {
-                    sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value=?";
+                    sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value LIKE ?";
                     stmt = con.prepareStatement(sql);
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());
                     stmt.setString(pos++, ALIAS);
-                    stmt.setString(pos++, email);
+                    stmt.setString(pos++, pattern);
                     result = stmt.executeQuery();
                     if (result.next()) {
                         userId = result.getInt(1);
                     }
                 }
                 if (userId == -1) {
-                    throw new LdapException(EnumComponent.USER,
-                        Code.NO_USER_BY_MAIL, email);
+                    throw new LdapException(EnumComponent.USER, Code.NO_USER_BY_MAIL, email);
                 }
                 return getUser(context, con, new int[] { userId })[0];
             } catch (SQLException e) {
