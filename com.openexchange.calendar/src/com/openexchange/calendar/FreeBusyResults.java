@@ -53,15 +53,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -121,7 +123,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private final CalendarSqlImp calendarsqlimp;
 
-    private CalendarCollection recColl;
+    private final CalendarCollection recColl;
     
     private int readFolderId;
     
@@ -214,33 +216,38 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 if (recid != 0) {
                     cdao.setRecurrenceID(recid);
                 }
-                if (!rs.wasNull() && recid == oid) {
-                    cdao.setRecurrenceCalculator(rs.getInt(11));
-                    cdao.setRecurrence(rs.getString(12));
-                    recColl.fillDAO(cdao);
-                    cdao.setDelExceptions(rs.getString(13));
-                    cdao.setExceptions(rs.getString(14));
-                    cdao.setTimezone(rs.getString(15));
-                    if (recColl.fillDAO(cdao)) {
-                        try {
-                            rrs = recColl.calculateRecurring(cdao, range_start, range_end, 0);
-                        } catch (OXException x) {
-                            LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
-                            recColl.recoverForInvalidPattern(cdao);
-                            seq = -1;
+                if (!rs.wasNull()) {
+                    if (recid == oid) {
+                        // Main series
+                        cdao.setRecurrenceCalculator(rs.getInt(11));
+                        cdao.setRecurrence(rs.getString(12));
+                        recColl.fillDAO(cdao);
+                        cdao.setDelExceptions(rs.getString(13));
+                        cdao.setExceptions(rs.getString(14));
+                        cdao.setTimezone(rs.getString(15));
+                        if (recColl.fillDAO(cdao)) {
+                            try {
+                                rrs = recColl.calculateRecurring(cdao, range_start, range_end, 0);
+                            } catch (final OXException x) {
+                                LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
+                                recColl.recoverForInvalidPattern(cdao);
+                                seq = -1;
+                                rsNext();
+                                return cdao;
+                            }
+                            seq = rrs.size()-1;
+                            if (seq >= 0) {
+                                final RecurringResultInterface rr = rrs.getRecurringResult(seq);
+                                rsNext();
+                                return recurringDAO(rr);
+                            }
                             rsNext();
-                            return cdao;
+                            return null;
                         }
-                        seq = rrs.size()-1;
-                        if (seq >= 0) {
-                            final RecurringResultInterface rr = rrs.getRecurringResult(seq);
-                            rsNext();
-                            return recurringDAO(rr);
-                        }
-                        rsNext();
-                        return null;
+                    } else if (recid != 0) {
+                        // Change exception
+                        cdao.setRecurrencePosition(rs.getInt(16));
                     }
-
                 }
             }
         } catch (final SQLException sqle) {
@@ -369,10 +376,10 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             }
         } else {
             for (int a = 0, size = private_folder_array.length; a < size; a++) {
-                PrivateFolderInformationObject pfio = private_folder_array[a];
+                final PrivateFolderInformationObject pfio = private_folder_array[a];
                 if (pfio.compareObjectId(oid)) {
-                    int o = pfio.getParticipant();
-                    int p = pfio.getPrivateFolder();
+                    final int o = pfio.getParticipant();
+                    final int p = pfio.getPrivateFolder();
                     if (cfo.canReadAllInPrivateFolder(p)) {
                         readFolderId = p;
                         return true;
@@ -431,7 +438,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 }
                 if (op != null && op.length > 0) {
                     final  UserParticipant up[] = (UserParticipant[])conflict_objects;
-                    Set<Integer> upIds = new HashSet<Integer>(up.length);
+                    final Set<Integer> upIds = new HashSet<Integer>(up.length);
                     for(int a = 0, size = up.length; a < size; a++) { upIds.add(up[a].getIdentifier()); }
 
                     for (int b = 0; b < op.length; b++) {
@@ -483,7 +490,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     
     private final void preFillPrivateFolderInformation() {
 
-        List<PrivateFolderInformationObject> list = new ArrayList<PrivateFolderInformationObject>(16);
+        final List<PrivateFolderInformationObject> list = new ArrayList<PrivateFolderInformationObject>(16);
 
         int object_id = 0;
         int pfid = 0;
