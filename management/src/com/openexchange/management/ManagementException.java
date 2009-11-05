@@ -165,6 +165,8 @@ public final class ManagementException extends AbstractOXException {
 
     private static final Component JMX_COMPONENT = new Component() {
 
+        private static final long serialVersionUID = -1613394374653536986L;
+
         private static final String JMX = "JMX";
 
         public String getAbbreviation() {
