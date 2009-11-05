@@ -72,10 +72,11 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
     protected boolean executedSuccessfully;
 
     public PageByLinkRegexStep() {
-
+        super();
     }
 
     public PageByLinkRegexStep(final String description, final String linkRegex) {
+        this();
         this.description = description;
         this.linkRegex = linkRegex;
     }
