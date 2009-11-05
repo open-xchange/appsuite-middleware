@@ -106,10 +106,10 @@ public class ServerUserSetting {
         }
 
     };
-    
+
     private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_ACCESS = new Attribute<Boolean>() {
 
-        public Boolean getAttribute(ResultSet rs) throws SQLException {
+        public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
@@ -117,19 +117,19 @@ public class ServerUserSetting {
             return "contactCollectOnMailAccess";
         }
 
-        public void setAttribute(PreparedStatement pstmt, Boolean value) throws SQLException {
+        public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (value == null) {
                 pstmt.setBoolean(1, true);
             } else {
                 pstmt.setBoolean(1, value.booleanValue());
             }
         }
-        
+
     };
-    
+
     private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_TRANSPORT = new Attribute<Boolean>() {
 
-        public Boolean getAttribute(ResultSet rs) throws SQLException {
+        public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
@@ -137,19 +137,19 @@ public class ServerUserSetting {
             return "contactCollectOnMailTransport";
         }
 
-        public void setAttribute(PreparedStatement pstmt, Boolean value) throws SQLException {
+        public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (value == null) {
                 pstmt.setBoolean(1, true);
             } else {
                 pstmt.setBoolean(1, value.booleanValue());
             }
         }
-        
+
     };
 
     private static final Attribute<Integer> DEFAULT_STATUS_PRIVATE = new Attribute<Integer>() {
 
-        public Integer getAttribute(ResultSet rs) throws SQLException {
+        public Integer getAttribute(final ResultSet rs) throws SQLException {
             return Integer.valueOf(rs.getInt(getColumnName()));
         }
 
@@ -157,7 +157,7 @@ public class ServerUserSetting {
             return "defaultStatusPrivate";
         }
 
-        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+        public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
             } else {
@@ -166,10 +166,10 @@ public class ServerUserSetting {
         }
 
     };
-    
+
     private static final Attribute<Integer> DEFAULT_STATUS_PUBLIC = new Attribute<Integer>() {
 
-        public Integer getAttribute(ResultSet rs) throws SQLException {
+        public Integer getAttribute(final ResultSet rs) throws SQLException {
             return Integer.valueOf(rs.getInt(getColumnName()));
         }
 
@@ -177,7 +177,7 @@ public class ServerUserSetting {
             return "defaultStatusPublic";
         }
 
-        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+        public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
             } else {
@@ -186,7 +186,7 @@ public class ServerUserSetting {
         }
 
     };
-    
+
     private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
     /**
@@ -308,118 +308,121 @@ public class ServerUserSetting {
 
     /**
      * Returns the folder used to store collected contacts.
-     * @param cid context id
-     * @param user user id
+     * 
+     * @param cid The context id
+     * @param user The user id
      * @return folder id or <code>null</code> if no entry found.
      */
     public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
         return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, connection);
     }
-    
+
     /**
      * Sets the flag for contact collection on incoming mails.
      * 
-     * @param cid
-     * @param user
-     * @param value
-     * @throws SettingException 
+     * @param cid The context id
+     * @param user The user id
+     * @param value The flag to set
+     * @throws SettingException If a setting error occurs
      */
-    public void setContactCollectOnMailAccess(int cid, int user, boolean value) throws SettingException {
+    public void setContactCollectOnMailAccess(final int cid, final int user, final boolean value) throws SettingException {
         setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value), connection);
-    }
-    
-    /**
-     * returns the flag for contact collection on incoming mails.
-     * 
-     * @param cid
-     * @param user
-     * @return
-     * @throws SettingException 
-     */
-    public Boolean isContactCollectOnMailAccess(int cid, int user) throws SettingException {
-        return getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, connection);
-    }
-    
-    /**
-     * Sets the flag for contact collection on outgoing mails.
-     * 
-     * @param cid
-     * @param user
-     * @param value
-     * @throws SettingException 
-     */
-    public void setContactCollectOnMailTransport(int cid, int user, boolean value) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value), connection);
-    }
-    
-    /**
-     * returns the flag for contact collection on outgoing mails.
-     * 
-     * @param cid
-     * @param user
-     * @return
-     * @throws SettingException 
-     */
-    public Boolean isContactCollectOnMailTransport(int cid, int user) throws SettingException {
-        return getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, connection);
     }
 
     /**
-     * Returns the default confirmation status for private folders.
-     * If no value is set this parameter defaults to 0.
+     * Gets the flag for contact collection on incoming mails. If <code>null</code> default if <code>false</code>.
+     * 
+     * @param cid The context id
+     * @param user The user id
+     * @return The flag for contact collection on incoming mails or <code>false</code>
+     * @throws SettingException If a setting error occurs
+     */
+    public Boolean isContactCollectOnMailAccess(final int cid, final int user) throws SettingException {
+        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, connection);
+        return null == attribute ? Boolean.FALSE : attribute;
+    }
+
+    /**
+     * Sets the flag for contact collection on outgoing mails.
+     * 
+     * @param cid The context id
+     * @param user The user id
+     * @param value The flag to set
+     * @throws SettingException If a setting error occurs
+     */
+    public void setContactCollectOnMailTransport(final int cid, final int user, final boolean value) throws SettingException {
+        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value), connection);
+    }
+
+    /**
+     * Gets the flag for contact collection on outgoing mails. If <code>null</code> default if <code>false</code>.
+     * 
+     * @param cid The context id
+     * @param user The user id
+     * @return The flag for contact collection on outgoing mails or <code>false</code>
+     * @throws SettingException If a setting error occurs
+     */
+    public Boolean isContactCollectOnMailTransport(final int cid, final int user) throws SettingException {
+        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, connection);
+        return null == attribute ? Boolean.FALSE : attribute;
+    }
+
+    /**
+     * Returns the default confirmation status for private folders. If no value is set this parameter defaults to 0.
+     * 
      * @param cid
      * @param user
      * @return
-     * @throws SettingException 
+     * @throws SettingException If a setting error occurs
      */
-    public Integer getDefaultStatusPrivate(int cid, int user) throws SettingException {
+    public Integer getDefaultStatusPrivate(final int cid, final int user) throws SettingException {
         Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, connection);
         if (value == null) {
-            value = new Integer(0);
+            value = Integer.valueOf(0);
         }
         return value;
     }
-    
+
     /**
-     * Sets the default confirmation status for private folders.
-     * <code>null</code> will default to 0.
+     * Sets the default confirmation status for private folders. <code>null</code> will default to 0.
+     * 
      * @param cid
      * @param user
      * @param status
-     * @throws SettingException 
+     * @throws SettingException
      */
-    public void setDefaultStatusPrivate(int cid, int user, Integer status) throws SettingException {
+    public void setDefaultStatusPrivate(final int cid, final int user, final Integer status) throws SettingException {
         setAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, status, connection);
     }
-    
+
     /**
-     * Returns the default confirmation status for public folders.
-     * If no value is set this parameter defaults to 0.
+     * Returns the default confirmation status for public folders. If no value is set this parameter defaults to 0.
+     * 
      * @param cid
      * @param user
      * @return
-     * @throws SettingException 
+     * @throws SettingException
      */
-    public Integer getDefaultStatusPublic(int cid, int user) throws SettingException {
+    public Integer getDefaultStatusPublic(final int cid, final int user) throws SettingException {
         Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, connection);
         if (value == null) {
-            value = new Integer(0);
+            value = Integer.valueOf(0);
         }
         return value;
     }
-    
+
     /**
-     * Sets the default confirmation status for public folders.
-     * <code>null</code> will default to 0.
+     * Sets the default confirmation status for public folders. <code>null</code> will default to 0.
+     * 
      * @param cid
      * @param user
      * @param status
-     * @throws SettingException 
+     * @throws SettingException
      */
-    public void setDefaultStatusPublic(int cid, int user, Integer status) throws SettingException {
+    public void setDefaultStatusPublic(final int cid, final int user, final Integer status) throws SettingException {
         setAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, status, connection);
     }
-    
+
     private static <T> T getAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
         final Connection con;
         final boolean closeCon;
@@ -509,10 +512,9 @@ public class ServerUserSetting {
     }
 
     private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
-        final String update = "UPDATE user_setting_server SET " + attribute.getColumnName() + "=? WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(update);
+            stmt = con.prepareStatement("UPDATE user_setting_server SET " + attribute.getColumnName() + "=? WHERE cid=? AND user=?");
             attribute.setAttribute(stmt, value);
             stmt.setInt(2, cid);
             stmt.setInt(3, user);
@@ -525,10 +527,9 @@ public class ServerUserSetting {
     }
 
     private static <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
-        final String insert = "INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)";
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(insert);
+            stmt = con.prepareStatement("INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)");
             attribute.setAttribute(stmt, value);
             stmt.setInt(2, cid);
             stmt.setInt(3, user);
@@ -541,11 +542,10 @@ public class ServerUserSetting {
     }
 
     public static void deleteEntry(final int cid, final int user, final Connection con) throws SettingException {
-        final String delete = "DELETE FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
-        ResultSet rs = null;
+        final ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(delete);
+            stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE cid=? AND user=?");
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             stmt.executeUpdate();
@@ -558,11 +558,10 @@ public class ServerUserSetting {
 
     private static boolean hasEntry(final int cid, final int user, final Connection con) throws SettingException {
         boolean retval = false;
-        final String select = "SELECT user FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(select);
+            stmt = con.prepareStatement("SELECT user FROM user_setting_server WHERE cid=? AND user=?");
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
