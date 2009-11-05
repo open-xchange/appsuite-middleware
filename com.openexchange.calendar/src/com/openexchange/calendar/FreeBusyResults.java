@@ -100,6 +100,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private int pflag;
     private int owner;
     private int fid;
+    private int colorLabel;
     private String title;
     private RecurringResultsInterface rrs;
     private boolean has_next;
@@ -211,6 +212,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 fid = rs.getInt(7);
                 pflag = rs.getInt(8);
                 owner = rs.getInt(9);
+                colorLabel = rs.getInt(17); // SQL NULL would return zero which is no color label
                 cdao.setCreatedBy(owner);
                 final int recid = rs.getInt(10);
                 if (recid != 0) {
@@ -309,6 +311,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             if(checkPermissions()) {
                 cdao.setTitle(title);
                 cdao.setParentFolderID(readFolderId);
+                cdao.setLabel(colorLabel);
             }
             final Participants ret = resolveConflictingUserParticipants();
             cdao.setParticipants(ret.getList());
