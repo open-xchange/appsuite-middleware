@@ -64,7 +64,7 @@ import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * UUEncodePart UUEncode part containing all needed information about the attachment.
+ * {@link UUEncodedPart} - UUEncode part containing all needed information about the attachment.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
