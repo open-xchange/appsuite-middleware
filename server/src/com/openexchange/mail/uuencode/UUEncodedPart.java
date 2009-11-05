@@ -86,6 +86,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
      * Constructs a {@link UUEncodedPart} object containing all information about the attachment.
      */
     UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename) {
+        super();
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         byte[] bytes;
