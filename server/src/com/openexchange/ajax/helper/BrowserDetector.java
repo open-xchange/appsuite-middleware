@@ -240,7 +240,7 @@ public final class BrowserDetector {
             } else {
                 agentSubstring = userAgent.substring(versionStartIndex + 1, versionEndIndex);
             }
-            browserVersion = toFloat(agentSubstring);
+            browserVersion = Float.parseFloat(agentSubstring);
         } catch (final NumberFormatException e) {
             // Just use the default value.
         }
@@ -253,7 +253,7 @@ public final class BrowserDetector {
 
             browserName = MSIE;
             try {
-                browserVersion = toFloat(userAgent.substring(versionStartIndex, versionEndIndex));
+                browserVersion = Float.parseFloat(userAgent.substring(versionStartIndex, versionEndIndex));
             } catch (final NumberFormatException e) {
                 // Just use the default value.
             }
@@ -274,7 +274,7 @@ public final class BrowserDetector {
 
             browserName = OPERA;
             try {
-                browserVersion = toFloat(userAgent.substring(versionStartIndex, versionEndIndex));
+                browserVersion = Float.parseFloat(userAgent.substring(versionStartIndex, versionEndIndex));
             } catch (final NumberFormatException e) {
                 // Just use the default value.
             }
@@ -350,16 +350,6 @@ public final class BrowserDetector {
                 }
             }
         }
-    }
-
-    /**
-     * Helper method to convert String to a float.
-     * 
-     * @param s A String.
-     * @return The String converted to float.
-     */
-    private static float toFloat(final String s) {
-        return Float.valueOf(s).floatValue();
     }
 
     @Override
