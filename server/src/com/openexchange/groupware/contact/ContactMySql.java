@@ -181,9 +181,9 @@ public class ContactMySql implements ContactSql {
         String orderBy = getOrder();
         if (null != orderBy) {
             int pos = select.indexOf(" FROM");
-            if (-1 == pos) {
+            if (pos < 0) {
                 pos = select.indexOf(" from");
-                if (-1 == pos) {
+                if (pos < 0) {
                     throw new SQLException("SELECT statement does not contain \"FROM\".");
                 }
             }
