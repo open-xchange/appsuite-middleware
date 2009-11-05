@@ -1082,9 +1082,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                          * Trigger contact collector
                          */
                         try {
-                            if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
-                                session.getContextId(),
-                                session.getUserId()).booleanValue()) {
+                            final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+                            if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                                contextId,
+                                userId).booleanValue()) {
                                 triggerContactCollector(session, mail);
                             }
                         } catch (final SettingException e) {
@@ -1114,9 +1117,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                     } else if (wasUnseen) {
                         try {
-                            if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
-                                session.getContextId(),
-                                session.getUserId()).booleanValue()) {
+                            final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+                            if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                                contextId,
+                                userId).booleanValue()) {
                                 triggerContactCollector(session, mail);
                             }
                         } catch (final SettingException e) {
@@ -1236,9 +1242,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 new JSONObjectConverter(rawJSONMailObject, displayMode, session, usmNoSave, session.getContext()).raw2Json();
                             if (wasUnseen) {
                                 try {
-                                    if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
-                                        session.getContextId(),
-                                        session.getUserId()).booleanValue()) {
+                                    final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                                    final int contextId = session.getContextId();
+                                    final int userId = session.getUserId();
+                                    if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                                        contextId,
+                                        userId).booleanValue()) {
                                         triggerContactCollector(session, mailObject);
                                     }
                                 } catch (final SettingException e) {
@@ -1271,9 +1280,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                             mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                         } else if (wasUnseen) {
                             try {
-                                if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailAccess(
-                                    session.getContextId(),
-                                    session.getUserId()).booleanValue()) {
+                                final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                                final int contextId = session.getContextId();
+                                final int userId = session.getUserId();
+                                if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                                    contextId,
+                                    userId).booleanValue()) {
                                     triggerContactCollector(session, mail);
                                 }
                             } catch (final SettingException e) {
@@ -3860,9 +3872,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                              * Trigger contact collector
                              */
                             try {
-                                if (ServerUserSetting.getDefaultInstance().isContactCollectOnMailTransport(
-                                    session.getContextId(),
-                                    session.getUserId()).booleanValue()) {
+                                final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                                final int contextId = session.getContextId();
+                                final int userId = session.getUserId();
+                                if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                                    contextId,
+                                    userId).booleanValue()) {
                                     triggerContactCollector(session, composedMails[0]);
                                 }
                             } catch (final SettingException e) {
