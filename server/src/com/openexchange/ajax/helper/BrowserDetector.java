@@ -222,32 +222,39 @@ public final class BrowserDetector {
     private void parse() {
         if (null == userAgent || userAgent.length() == 0) {
             browserName = "unknown";
-            browserVersion = -1F;
+            browserVersion = 0F;
             browserPlatform = "unknown";
             return;
         }
         int versionStartIndex = userAgent.indexOf("/");
         int versionEndIndex = userAgent.indexOf(" ");
 
-        // Get the browser name and version.
+        /*
+         * Get the browser name and version.
+         */
         browserName = userAgent.substring(0, versionStartIndex);
         try {
-            // Not all user agents will have a space in the reported
-            // string.
-            String agentSubstring = null;
-            if (versionEndIndex < 0) {
-                agentSubstring = userAgent.substring(versionStartIndex + 1);
-            } else {
-                agentSubstring = userAgent.substring(versionStartIndex + 1, versionEndIndex);
-            }
-            browserVersion = Float.parseFloat(agentSubstring);
+            /*
+             * Not all user agents will have a space in the reported string.
+             */
+            browserVersion =
+                Float.parseFloat(versionEndIndex < 0 ? userAgent.substring(versionStartIndex + 1) : userAgent.substring(
+                    versionStartIndex + 1,
+                    versionEndIndex));
         } catch (final NumberFormatException e) {
-            // Just use the default value.
+            /*
+             * Just use the default value.
+             */
+            browserVersion = 0F;
         }
 
-        // MSIE lies about its name. Of course...
+        /*
+         * MSIE lies about its name. Of course...
+         */
         if (userAgent.indexOf(MSIE) != -1) {
-            // Ex: Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)
+            /*
+             * Ex: Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)
+             */
             versionStartIndex = (userAgent.indexOf(MSIE) + MSIE.length() + 1);
             versionEndIndex = userAgent.indexOf(";", versionStartIndex);
 
@@ -255,7 +262,10 @@ public final class BrowserDetector {
             try {
                 browserVersion = Float.parseFloat(userAgent.substring(versionStartIndex, versionEndIndex));
             } catch (final NumberFormatException e) {
-                // Just use the default value.
+                /*
+                 * Just use the default value.
+                 */
+                browserVersion = 0F;
             }
 
             // PHP code
@@ -265,10 +275,13 @@ public final class BrowserDetector {
             // $Browser_Version = strtok(";");
         }
 
-        // Opera isn't completely honest, either...
-        // Modificaton by Chris Mospaw <mospaw@polk-county.com>
+        /*
+         * Opera isn't completely honest, either... Modificaton by Chris Mospaw <mospaw@polk-county.com>
+         */
         if (userAgent.indexOf(OPERA) != -1) {
-            // Ex: Mozilla/4.0 (Windows NT 4.0;US) Opera 3.61 [en]
+            /*
+             * Ex: Mozilla/4.0 (Windows NT 4.0;US) Opera 3.61 [en]
+             */
             versionStartIndex = (userAgent.indexOf(OPERA) + OPERA.length() + 1);
             versionEndIndex = userAgent.indexOf(" ", versionStartIndex);
 
@@ -276,7 +289,10 @@ public final class BrowserDetector {
             try {
                 browserVersion = Float.parseFloat(userAgent.substring(versionStartIndex, versionEndIndex));
             } catch (final NumberFormatException e) {
-                // Just use the default value.
+                /*
+                 * Just use the default value.
+                 */
+                browserVersion = 0F;
             }
 
             // PHP code
@@ -286,7 +302,9 @@ public final class BrowserDetector {
             // $Browser_Version = strtok(";");
         }
 
-        // Try to figure out what platform.
+        /*
+         * Try to figure out what platform.
+         */
         if ((userAgent.indexOf("Windows") != -1) || (userAgent.indexOf("WinNT") != -1) || (userAgent.indexOf("Win98") != -1) || (userAgent.indexOf("Win95") != -1)) {
             browserPlatform = WINDOWS;
         }
