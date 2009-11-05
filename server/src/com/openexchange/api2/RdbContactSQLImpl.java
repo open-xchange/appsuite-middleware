@@ -503,7 +503,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                         sb.setLength(0);
                         sb.append(select);
                         sb.append(" JOIN user_attribute AS ua ON co.cid = ? AND ua.cid = ? AND co.userid = ua.id");
-                        sb.append(" WHERE ua.name = ? AND value LIKE ? AND ua.id != ?");
+                        sb.append(" WHERE ua.name = ? AND value LIKE ? AND ua.id != ? AND co.userid IS NOT NULL");
                         stmt = con.prepareStatement(sb.toString());
                     }
                     pos = 1;
