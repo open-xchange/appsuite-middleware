@@ -52,6 +52,7 @@ package com.openexchange.tools.servlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -206,7 +207,13 @@ public class ServletRequestWrapper implements ServletRequest {
                 org.apache.commons.logging.LogFactory.getLog(ServletRequestWrapper.class).error(e.getMessage(), e);
                 throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);
             }
-            if (ct.getCharsetParameter() == null) {
+            if (ct.containsCharsetParameter()) {
+                try {
+                    setCharacterEncoding(ct.getCharsetParameter());
+                } catch (final UnsupportedEncodingException e) {
+                    throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, e, ct.getCharsetParameter());
+                }
+            } else {
                 /*
                  * Although http defines to use charset "ISO-8859-1" if protocol is set to "HTTP/1.1", we use a pre-defined charset given
                  * through config file
@@ -215,12 +222,6 @@ public class ServletRequestWrapper implements ServletRequest {
                     setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
                 } catch (final UnsupportedEncodingException e) {
                     throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, e, ServerConfig.getProperty(Property.DefaultEncoding));
-                }
-            } else {
-                try {
-                    setCharacterEncoding(ct.getCharsetParameter());
-                } catch (final UnsupportedEncodingException e) {
-                    throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, e, ct.getCharsetParameter());
                 }
             }
         } else {
@@ -338,13 +339,22 @@ public class ServletRequestWrapper implements ServletRequest {
         return null;
     }
 
-    public void setCharacterEncoding(final String characterEncodingArg) throws UnsupportedEncodingException {
-        String characterEncoding = characterEncodingArg;
-        if (characterEncoding.charAt(0) == '"' && characterEncoding.charAt(characterEncoding.length() - 1) == '"') {
-            characterEncoding = characterEncoding.substring(1, characterEncoding.length() - 1);
+    public void setCharacterEncoding(final String characterEncoding) throws UnsupportedEncodingException {
+        String charset = characterEncoding;
+        final int mlen;
+        if (charset.charAt(0) == '"' && charset.charAt((mlen = charset.length() - 1)) == '"') {
+            charset = charset.substring(1, mlen);
         }
-        new String(new byte[] {}, characterEncoding);
-        this.characterEncoding = characterEncoding;
+        try {
+            if (!Charset.isSupported(charset)) {
+                throw new UnsupportedEncodingException(charset);
+            }
+        } catch (final java.nio.charset.IllegalCharsetNameException e) {
+            final UnsupportedEncodingException uee = new UnsupportedEncodingException(charset);
+            uee.initCause(e);
+            throw uee;
+        }
+        this.characterEncoding = charset;
     }
 
     /**
