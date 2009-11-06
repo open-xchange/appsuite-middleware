@@ -350,7 +350,8 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     /**
-     * Sets the protocol.
+     * Sets the protocol. The name and version of the protocol the request uses in the form protocol/majorVersion.minorVersion, for example,
+     * HTTP/1.1.
      * 
      * @param protocol The protocol to set
      */
