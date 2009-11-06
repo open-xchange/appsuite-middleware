@@ -170,56 +170,114 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarDay .appointment li                         { border-left: 5px solid #ffcb71; padding-left: 5px;  }
 #calendarDay #events                                 { width: 47%; border-right: 0; }
     </style>
-    <title>OX - Calendar - ${days[days?size / 2].month}</title>
+    <title>OX - Calendar - ${days[0].dayOfWeek}, ${days[0].monthAndDay}</title>
   </head>
   <body>
     <div id="layout" class="flexChilds">
       <div id="headArea">
       </div>
       <div id="contentArea">
-        <table border="0" id="calendarMonth" class="calendar">
-          <thead>
-            <tr>
-              <#list days as day>
-              <th>${day.dayOfWeek}</th>
-              <#if day.lastDayOfWeek><#break></#if>
-              </#list>
-            </tr>
-          </thead>
+        <table border="0" id="calendarDay" class="calendar">
           <tbody>
-            <#list days as day>
-            <#if day.firstDayOfWeek>
             <tr>
-            </#if>
-              <#if day.today>
-              <td id="currentDate">
-              <#elseif day.outOfRange>
-              <td class="outDate">
-              <#else>
-              <td>
-              </#if>
+              <td class="time">
+                0
+              </td>
+              <td class="appointment">
                 <ol>
+                  <#list days[0].getAppointmentsOfHour(0) as appointment>
                   <li>
-                    <span>${day.time?string("dd")}</span>
+                    <span>${appointment.startDate?string("HH:mm")} ${appointment.title}</span>
+                    <#if appointment.location?has_content>
+                    ${appointment.location}
+                    </#if>
+                  </li>
+                  </#list>
+                </ol>
+              </td>
+              <td id="events" rowspan="24">
+                <ol>
+                  <#if days[0].wholeDayAppointments?size != 0>
+                  <li>
+                    <span>Ganztägige Ereignisse</span>
                     <ol>
-                      <#list day.wholeDayAppointments as appointment>
-                      <li class="appointmentDayStartEnd">
-                        <span class="text">${appointment.title}</span>
-                      </li>
-                      </#list>
-                      <#list day.appointments as appointment>
+                      <#list days[0].wholeDayAppointments as appointment>
                       <li>
-                        <span class="time">${appointment.startDate?string("HH:mm")}</span>
-                        <span class="text">${appointment.title}</span>
+                        <span>${appointment.startDate?string("d.M.")} ${appointment.title}</span>
+                        <ol>
+                          <#if appointment.location?has_content>
+                          <li>
+                            <span>Ort:</span>
+                            ${appointment.location}
+                          </li>
+                          </#if>
+                          <li>
+                            <span>Teilnehmer:</span>
+                            TODO
+                          </li>
+                          <#if appointment.description?has_content>
+                          <li>
+                            <span>Notizen:</span>
+                            ${appointment.description} 
+                          </li>
+                          </#if>
+                        </ol>
                       </li>
                       </#list>
                     </ol>
                   </li>
+                  </#if>
+                  <#if days[0].appointments?size != 0>
+                  <li>
+                    <span>Ereignisse</span>
+                    <ol>
+                      <#list days[0].appointments as appointment>
+                      <li>
+                        <span>${appointment.startDate?string("HH:mm")} bis ${appointment.endDate?string("HH:mm")} ${appointment.title}</span>
+                        <ol>
+                          <#if appointment.location?has_content>
+                          <li>
+                            <span>Ort:</span>
+                            ${appointment.location}
+                          </li>
+                          </#if>
+                          <li>
+                            <span>Teilnehmer:</span>
+                            TODO
+                          </li>
+                          <#if appointment.description?has_content>
+                          <li>
+                            <span>Notizen:</span>
+                            ${appointment.description} 
+                          </li>
+                          </#if>
+                        </ol>
+                      </li>
+                      </#list>
+                    </ol>
+                  </li>
+                  </#if>
                 </ol>
               </td>
-            <#if day.lastDayOfWeek>
             </tr>
-            </#if>
+            <#list [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23] as hour>
+            <tr>
+              <td class="time"> 
+                ${hour}
+              </td>
+              <td class="appointment">
+                <ol>
+                  <#list days[0].getAppointmentsOfHour(hour) as appointment>
+                  <li>
+                    <span>${appointment.startDate?string("HH:mm")} ${appointment.title}</span>
+                    <#if appointment.location?has_content>
+                    ${appointment.location}
+                    </#if>
+                  </li>
+                  </#list>
+                </ol>
+              </td>
+            </tr>
             </#list>
           </tbody>
         </table>
