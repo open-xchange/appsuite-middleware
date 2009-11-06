@@ -120,7 +120,7 @@ public final class DataArguments {
 
     /**
      * Associates the specified value with the specified key. If the data arguments previously contained a mapping for this key, the old
-     * value is replaced by the specified value.
+     * value is replaced by the specified value. A <code>null</code> value removes the key from mapping.
      * 
      * @param key The key with which the specified value is to be associated.
      * @param value The value to be associated with the specified key.
@@ -128,6 +128,9 @@ public final class DataArguments {
      *         return can also indicate that the data arguments previously associated <code>null</code> with the specified key.
      */
     public String put(final String key, final String value) {
+        if (null == value) {
+            return remove(key);
+        }
         id = null;
         return map.put(key, value);
     }
