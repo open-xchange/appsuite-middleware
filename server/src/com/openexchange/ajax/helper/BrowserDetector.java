@@ -57,6 +57,11 @@ package com.openexchange.ajax.helper;
 public final class BrowserDetector {
 
     /**
+     * The constant for an unknown value.
+     */
+    public static final String UNKNOWN = "unknown";
+
+    /**
      * Identifier for <i>Internet Explorer</i> browser.
      */
     public static final String MSIE = "MSIE";
@@ -132,6 +137,9 @@ public final class BrowserDetector {
      */
     public BrowserDetector(final String userAgent) {
         this.userAgent = userAgent;
+        browserName = UNKNOWN;
+        browserVersion = 0F;
+        browserPlatform = UNKNOWN;
         parse();
     }
 
@@ -221,13 +229,15 @@ public final class BrowserDetector {
      */
     private void parse() {
         if (null == userAgent || userAgent.length() == 0) {
-            browserName = "unknown";
-            browserVersion = 0F;
-            browserPlatform = "unknown";
             return;
         }
-        int versionStartIndex = userAgent.indexOf("/");
-        int versionEndIndex = userAgent.indexOf(" ");
+        int versionStartIndex = userAgent.indexOf('/');
+        if (versionStartIndex < 0) {
+            // Not a valid user-agent string
+            browserName = userAgent;
+            return;
+        }
+        int versionEndIndex = userAgent.indexOf(' ', versionStartIndex);
 
         /*
          * Get the browser name and version.
@@ -251,7 +261,7 @@ public final class BrowserDetector {
         /*
          * MSIE lies about its name. Of course...
          */
-        if (userAgent.indexOf(MSIE) != -1) {
+        if (userAgent.indexOf(MSIE) >= 0) {
             /*
              * Ex: Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)
              */
@@ -278,7 +288,7 @@ public final class BrowserDetector {
         /*
          * Opera isn't completely honest, either... Modificaton by Chris Mospaw <mospaw@polk-county.com>
          */
-        if (userAgent.indexOf(OPERA) != -1) {
+        if (userAgent.indexOf(OPERA) >= 0) {
             /*
              * Ex: Mozilla/4.0 (Windows NT 4.0;US) Opera 3.61 [en]
              */
@@ -305,35 +315,35 @@ public final class BrowserDetector {
         /*
          * Try to figure out what platform.
          */
-        if ((userAgent.indexOf("Windows") != -1) || (userAgent.indexOf("WinNT") != -1) || (userAgent.indexOf("Win98") != -1) || (userAgent.indexOf("Win95") != -1)) {
+        if ((userAgent.indexOf("Windows") >= 0) || (userAgent.indexOf("WinNT") >= 0) || (userAgent.indexOf("Win98") >= 0) || (userAgent.indexOf("Win95") >= 0)) {
             browserPlatform = WINDOWS;
         }
 
-        if (userAgent.indexOf("Mac") != -1) {
+        if (userAgent.indexOf("Mac") >= 0) {
             browserPlatform = MACINTOSH;
         }
 
-        if (userAgent.indexOf("X11") != -1) {
+        if (userAgent.indexOf("X11") >= 0) {
             browserPlatform = UNIX;
         }
 
         if (WINDOWS.equals(browserPlatform)) {
             if (browserName.equals(MOZILLA)) {
-                if (browserVersion >= 3.0) {
+                if (browserVersion >= 3.0F) {
                     javascriptOK = true;
                     fileUploadOK = true;
                 }
-                if (browserVersion >= 4.0) {
+                if (browserVersion >= 4.0F) {
                     cssOK = true;
                 }
             } else if (browserName.equals(MSIE)) {
-                if (browserVersion >= 4.0) {
+                if (browserVersion >= 4.0F) {
                     javascriptOK = true;
                     fileUploadOK = true;
                     cssOK = true;
                 }
             } else if (browserName.equals(OPERA)) {
-                if (browserVersion >= 3.0) {
+                if (browserVersion >= 3.0F) {
                     javascriptOK = true;
                     fileUploadOK = true;
                     cssOK = true;
@@ -341,29 +351,29 @@ public final class BrowserDetector {
             }
         } else if (MACINTOSH.equals(browserPlatform)) {
             if (browserName.equals(MOZILLA)) {
-                if (browserVersion >= 3.0) {
+                if (browserVersion >= 3.0F) {
                     javascriptOK = true;
                     fileUploadOK = true;
                 }
-                if (browserVersion >= 4.0) {
+                if (browserVersion >= 4.0F) {
                     cssOK = true;
                 }
             } else if (browserName.equals(MSIE)) {
-                if (browserVersion >= 4.0) {
+                if (browserVersion >= 4.0F) {
                     javascriptOK = true;
                     fileUploadOK = true;
                 }
-                if (browserVersion > 4.0) {
+                if (browserVersion > 4.0F) {
                     cssOK = true;
                 }
             }
         } else if (UNIX.equals(browserPlatform)) {
             if (browserName.equals(MOZILLA)) {
-                if (browserVersion >= 3.0) {
+                if (browserVersion >= 3.0F) {
                     javascriptOK = true;
                     fileUploadOK = true;
                 }
-                if (browserVersion >= 4.0) {
+                if (browserVersion >= 4.0F) {
                     cssOK = true;
                 }
             }
@@ -372,10 +382,10 @@ public final class BrowserDetector {
 
     @Override
     public String toString() {
-        if (getBrowserName().equals(BrowserDetector.MOZILLA)) {
-            return BrowserDetector.MOZILLA;
-        }
-        return BrowserDetector.MSIE;
+        final StringBuilder sb = new StringBuilder(128).append("User agent=").append(userAgent);
+        sb.append("\nBrowser name=").append(browserName).append(", browser version=").append(browserVersion);
+        sb.append(", browser platform=").append(browserPlatform);
+        return sb.toString();
     }
 
 }
