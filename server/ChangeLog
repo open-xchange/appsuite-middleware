@@ -1,6 +1,7 @@
 * 2009-11-06 - thorben.betten@open-xchange.com
 
  - Bugfix #14706: More robust browser detection from client's "user-agent" header
+ - Bugfix #14664: Added JSON writer for field 103 "number_of_links" when writing a contact
 
 * 2009-11-05 - thorben.betten@open-xchange.com
 

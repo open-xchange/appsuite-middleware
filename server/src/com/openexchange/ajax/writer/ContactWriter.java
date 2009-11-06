@@ -59,6 +59,7 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
@@ -135,10 +136,11 @@ public class ContactWriter extends CommonWriter {
                         final String[] argsNames = imgSource.getRequiredArguments();
                         args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
                         args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
-                        imageURL = ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                            contactobject.getContextId(),
-                            imgSource,
-                            args).getImageURL();
+                        imageURL =
+                            ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
+                                contactobject.getContextId(),
+                                imgSource,
+                                args).getImageURL();
                     }
                     writeParameter(ContactFields.IMAGE1_URL, imageURL, jsonObj);
                 }
@@ -589,10 +591,11 @@ public class ContactWriter extends CommonWriter {
                             final String[] argsNames = imgSource.getRequiredArguments();
                             args.put(argsNames[0], String.valueOf(contactObject.getParentFolderID()));
                             args.put(argsNames[1], String.valueOf(contactObject.getObjectID()));
-                            imageURL = ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                                contactObject.getContextId(),
-                                imgSource,
-                                args).getImageURL();
+                            imageURL =
+                                ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
+                                    contactObject.getContextId(),
+                                    imgSource,
+                                    args).getImageURL();
                         }
                         writeValue(imageURL, jsonArray);
                     }
@@ -1068,6 +1071,13 @@ public class ContactWriter extends CommonWriter {
 
             public void write(final Contact contactObject, final JSONArray jsonArray) {
                 writeValue(contactObject.getNumberOfAttachments(), jsonArray, contactObject.containsNumberOfAttachments());
+            }
+        });
+
+        m.put(Integer.valueOf(CommonObject.NUMBER_OF_LINKS), new ContactFieldWriter() {
+
+            public void write(final Contact contactObject, final JSONArray jsonArray) {
+                writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
             }
         });
 
