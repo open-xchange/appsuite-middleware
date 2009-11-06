@@ -29,22 +29,26 @@ import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class DiscoveryActivator implements BundleActivator {
 
-
     private OSGiSubscriptionSourceCollector collector;
+
     private ServiceRegistration discoveryRegistration;
+
     private ServiceRegistration executionRegistration;
+
     private WhiteboardContextService contextService;
+
     private ComponentRegistration componentRegistration;
+
     private WhiteboardGenericConfigurationStorageService genconfStorage;
-    
+
     private Whiteboard whiteboard;
-    
-  
+
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
@@ -52,33 +56,37 @@ public class DiscoveryActivator implements BundleActivator {
         final UserService users = whiteboard.getService(UserService.class);
         final UserConfigurationService userConfigs = whiteboard.getService(UserConfigurationService.class);
         final InfostoreFacade infostore = whiteboard.getService(InfostoreFacade.class);
-        
-        final Hashtable discoveryDict = new Hashtable();
-        discoveryDict.put(Constants.SERVICE_RANKING, 256);
-        
+
+        final Hashtable<Object, Object> discoveryDict = new Hashtable<Object, Object>();
+        discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
+
         final OSGiSubscriptionSourceDiscoveryCollector discoveryCollector = new OSGiSubscriptionSourceDiscoveryCollector(context);
         discoveryCollector.addSubscriptionSourceDiscoveryService(collector);
-        
-        discoveryRegistration = context.registerService(SubscriptionSourceDiscoveryService.class.getName(), discoveryCollector, discoveryDict);
-        
+
+        discoveryRegistration =
+            context.registerService(SubscriptionSourceDiscoveryService.class.getName(), discoveryCollector, discoveryDict);
+
         FolderFieldActivator.DISCOVERY = discoveryCollector;
-        
-        componentRegistration = new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
-        
+
+        componentRegistration =
+            new ComponentRegistration(context, "SUB", "com.openexchange.subscribe", SubscriptionErrorMessage.EXCEPTIONS);
+
         final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(1);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
-        folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(users, userConfigs, infostore)));
-        
-        
+        folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
+            users,
+            userConfigs,
+            infostore)));
+
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         executionRegistration = context.registerService(SubscriptionExecutionService.class.getName(), executor, null);
-    
+
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
         final SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, discoveryCollector);
-    
+
         AbstractSubscribeService.STORAGE = storage;
-        
+
         AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
     }
 
