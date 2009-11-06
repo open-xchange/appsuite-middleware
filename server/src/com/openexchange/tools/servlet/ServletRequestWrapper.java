@@ -100,7 +100,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     private String characterEncoding;
 
-    private String protocol = "HTTP/1.1";
+    private String protocol;
 
     private String remote_addr;
 
@@ -117,22 +117,35 @@ public class ServletRequestWrapper implements ServletRequest {
     private AJPv13ServletInputStream servletInputStream;
 
     /**
-     * Initializes a new {@link ServletRequestWrapper}
+     * Initializes a new {@link ServletRequestWrapper}.
      * 
      * @throws AJPv13Exception If instantiation fails
      */
     public ServletRequestWrapper() throws AJPv13Exception {
         super();
+        protocol = "HTTP/1.1";
         attributes = new HashMap<String, Object>();
         parameters = new HashMap<String, String[]>();
         headers = new HashMap<String, String[]>();
         setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
     }
 
+    /**
+     * Sets the <code>Content-Length</code> header.
+     * 
+     * @param contentLength The content length
+     * @throws AJPv13Exception If setting <code>Content-Length</code> header fails
+     */
     public void setContentLength(final int contentLength) throws AJPv13Exception {
         setHeaderInternal(CONTENT_LENGTH, String.valueOf(contentLength), false);
     }
 
+    /**
+     * Sets the <code>Content-Type</code> header.
+     * 
+     * @param contentType The content type
+     * @throws AJPv13Exception If setting <code>Content-Type</code> header fails
+     */
     public void setContentType(final String contentType) throws AJPv13Exception {
         setHeaderInternal(CONTENT_TYPE, contentType, true);
     }
@@ -149,8 +162,16 @@ public class ServletRequestWrapper implements ServletRequest {
         }
     }
 
-    public final void setHeader(final String nameArg, final String value, final boolean isContentType) throws AJPv13Exception {
-        setHeaderInternal(nameArg.toLowerCase(Locale.ENGLISH), value, isContentType);
+    /**
+     * Sets a header value bound to given header name.
+     * 
+     * @param name The header name
+     * @param value The header value
+     * @param isContentType <code>true</code> if <tt>name</tt> denotes the <code>Content-Type</code> header; otherwise <code>false</code>
+     * @throws AJPv13Exception If setting header fails
+     */
+    public final void setHeader(final String name, final String value, final boolean isContentType) throws AJPv13Exception {
+        setHeaderInternal(name.toLowerCase(Locale.ENGLISH), value, isContentType);
     }
 
     private final void setHeaderInternal(final String name, final String value, final boolean isContentType) throws AJPv13Exception {
@@ -376,8 +397,8 @@ public class ServletRequestWrapper implements ServletRequest {
             /*
              * Determine scheme from protocol (in the form protocol/majorVersion.minorVersion) and isSecure information
              */
-            scheme = new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(
-                is_secure ? "s" : "").toString();
+            scheme =
+                new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(is_secure ? "s" : "").toString();
         }
         return scheme;
     }
