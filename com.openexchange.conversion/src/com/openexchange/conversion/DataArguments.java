@@ -167,26 +167,22 @@ public final class DataArguments {
          * Compute ID
          */
         final StringBuilder builder = new StringBuilder(10 * size);
-        final int prime = 31;
-        {
-            final String key = sortedKeys[0];
-            int result = 1;
-            result = prime * result + ((key == null) ? 0 : key.hashCode());
-            final String val = map.get(key);
-            result = prime * result + ((val == null) ? 0 : val.hashCode());
-            builder.append(Math.abs(result));
-        }
+        builder.append(computeHash(sortedKeys[0]));
         for (int i = 1; i < size; i++) {
-            final String key = sortedKeys[i];
-            int result = 1;
-            result = prime * result + ((key == null) ? 0 : key.hashCode());
-            final String val = map.get(key);
-            result = prime * result + ((val == null) ? 0 : val.hashCode());
             builder.append('-');
-            builder.append(Math.abs(result));
+            builder.append(sortedKeys[i]);
         }
         id = builder.toString();
         return id;
+    }
+
+    private int computeHash(final String key) {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        final String val = map.get(key);
+        result = prime * result + ((val == null) ? 0 : val.hashCode());
+        return (result < 0) ? -result : result;
     }
 
 }
