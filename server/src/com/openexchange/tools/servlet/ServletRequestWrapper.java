@@ -78,8 +78,6 @@ import com.openexchange.mail.mime.ContentType;
  */
 public class ServletRequestWrapper implements ServletRequest {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ServletRequestWrapper.class);
-
     private static final Set<String> singleValueHeaders = new HashSet<String>();
 
     public static final String CONTENT_TYPE = "content-type";
@@ -205,7 +203,7 @@ public class ServletRequestWrapper implements ServletRequest {
             try {
                 ct = new ContentType(value);
             } catch (final MailException e) {
-                LOG.error(e.getMessage(), e);
+                org.apache.commons.logging.LogFactory.getLog(ServletRequestWrapper.class).error(e.getMessage(), e);
                 throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, e, value);
             }
             if (ct.getCharsetParameter() == null) {
