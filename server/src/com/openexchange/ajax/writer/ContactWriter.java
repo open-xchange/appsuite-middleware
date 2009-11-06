@@ -1074,19 +1074,17 @@ public class ContactWriter extends CommonWriter {
             }
         });
 
-        m.put(Integer.valueOf(CommonObject.NUMBER_OF_LINKS), new ContactFieldWriter() {
+        {
+            final ContactFieldWriter fieldWriter = new ContactFieldWriter() {
 
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
-                writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
-            }
-        });
+                public void write(final Contact contactObject, final JSONArray jsonArray) {
+                    writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
+                }
+            };
 
-        m.put(Integer.valueOf(Contact.NUMBER_OF_LINKS), new ContactFieldWriter() {
-
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
-                writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
-            }
-        });
+            m.put(Integer.valueOf(CommonObject.NUMBER_OF_LINKS), fieldWriter);
+            m.put(Integer.valueOf(Contact.NUMBER_OF_LINKS), fieldWriter);
+        }
 
         m.put(Integer.valueOf(Contact.NUMBER_OF_DISTRIBUTIONLIST), new ContactFieldWriter() {
 
