@@ -124,8 +124,7 @@ public final class DataArguments {
      * 
      * @param key The key with which the specified value is to be associated.
      * @param value The value to be associated with the specified key.
-     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key. A <code>null</code>
-     *         return can also indicate that the data arguments previously associated <code>null</code> with the specified key.
+     * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
      */
     public String put(final String key, final String value) {
         if (null == value) {
