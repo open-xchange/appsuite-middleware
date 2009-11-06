@@ -106,8 +106,9 @@ public final class ImageData {
         this.imageArguments = imageArguments;
         this.imageSource = imageSource;
         this.hash = hashCode0();
-        url = new StringBuilder(ImageServlet.ALIAS.length() + ImageServlet.PARAMETER_UID.length() + uniqueId.length() + 3).append('/').append(
-            ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(uniqueId).toString();
+        url =
+            new StringBuilder(64).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
+                uniqueId).toString();
         this.timeToLive = timeToLive;
         lastAccessed = System.currentTimeMillis();
     }
