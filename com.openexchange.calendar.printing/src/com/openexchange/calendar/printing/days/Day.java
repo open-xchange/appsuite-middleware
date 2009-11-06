@@ -49,10 +49,16 @@
 
 package com.openexchange.calendar.printing.days;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPCalendar;
 
 /**
  * {@link Day}
@@ -61,21 +67,18 @@ import com.openexchange.calendar.printing.CPAppointment;
  */
 public class Day implements Comparable<Day> {
 
-    private Date time;
-
-    private String name;
-
-    private List<CPAppointment> appointments = new ArrayList<CPAppointment>();
-
-    private boolean today;
-
-    private boolean outOfRange;
-
+    private final Date time;
+    private final CPCalendar cal;
+    private final boolean outOfRange;
+    private List<CPAppointment> wholeDayAppointments = new ArrayList<CPAppointment>();
+    private SortedSet<CPAppointment> appointments = new TreeSet<CPAppointment>(new AppointmentStartComparator());
     private int sideBySide = 1;
 
-    public Day(Date time) {
+    public Day(Date time, CPCalendar cal, boolean outOfRange) {
         super();
         this.time = time;
+        this.cal = cal;
+        this.outOfRange = outOfRange;
     }
 
     public int compareTo(Day o) {
@@ -104,11 +107,70 @@ public class Day implements Comparable<Day> {
         return time;
     }
 
+    public boolean isOutOfRange() {
+        return outOfRange;
+    }
+
+    public String getName() {
+        DateFormat df = new SimpleDateFormat("EEEE", cal.getLocale());
+        df.setTimeZone(cal.getTimeZone());
+        return df.format(time);
+    }
+
+    public String getMonthName() {
+        DateFormat df = new SimpleDateFormat("MMMM", cal.getLocale());
+        df.setTimeZone(cal.getTimeZone());
+        return df.format(time);
+    }
+
+    public void addWholeDay(CPAppointment appointment) {
+        wholeDayAppointments.add(appointment);
+    }
+
+    public List<CPAppointment> getWholeDayAppointments() {
+        return wholeDayAppointments;
+    }
+
     public void add(CPAppointment appointment) {
         appointments.add(appointment);
     }
 
     public List<CPAppointment> getAppointments() {
-        return appointments;
+        List<CPAppointment> retval = new ArrayList<CPAppointment>(appointments.size());
+        for (CPAppointment appointment : appointments) {
+            retval.add(appointment);
+        }
+        return retval;
+    }
+
+    public boolean isToday() {
+        Date orig = cal.getTime();
+        cal.setTimeInMillis(System.currentTimeMillis());
+        CalendarTools.toDayStart(cal);
+        boolean retval = time.equals(cal.getTime());
+        cal.setTime(orig);
+        return retval;
+    }
+
+    public boolean isFirstDayOfWeek() {
+        Date orig = cal.getTime();
+        cal.setTime(time);
+        // To be consistent with UI first day of week is always Monday.
+        // int lastDayOfWeek = cal.getFirstDayOfWeek();
+        int firstDayOfWeek = Calendar.MONDAY;
+        boolean retval = firstDayOfWeek == cal.get(Calendar.DAY_OF_WEEK);
+        cal.setTime(orig);
+        return retval;
+    }
+
+    public boolean isLastDayOfWeek() {
+        Date orig = cal.getTime();
+        cal.setTime(time);
+        // To be consistent with UI last day of week is always Sunday.
+        // int lastDayOfWeek = cal.getLastDayOfWeek();
+        int lastDayOfWeek = Calendar.SUNDAY;
+        boolean retval = lastDayOfWeek == cal.get(Calendar.DAY_OF_WEEK);
+        cal.setTime(orig);
+        return retval;
     }
 }

@@ -65,7 +65,7 @@ public class CPToolTest extends AbstractDateTest {
     @Override
     protected void setUp() throws Exception {
         tool = new CPTool();
-        tool.setCalendar(CPCalendar.getEuropeanCalendar());
+        tool.setCalendar(CPCalendar.getCalendar());
         super.setUp();
     }
 

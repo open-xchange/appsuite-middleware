@@ -55,7 +55,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -170,7 +172,9 @@ public class CPServlet extends PermissionServlet {
             }
             List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
-            CPCalendar cal = CPCalendar.getEuropeanCalendar();
+            TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+            Locale locale = session.getUser().getLocale();
+            CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
 
             Partitioner partitioner = new Partitioner(params, cal, appointmentSql, calendarTools);

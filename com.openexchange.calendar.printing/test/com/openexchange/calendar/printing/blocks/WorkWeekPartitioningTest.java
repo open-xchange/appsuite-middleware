@@ -89,7 +89,7 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        CPCalendar oxCal = CPCalendar.getEuropeanCalendar();
+        CPCalendar oxCal = CPCalendar.getCalendar();
         strategy = new WorkWeekPartitioningStrategy();
         strategy.setCalendar(oxCal);
         calendar = Calendar.getInstance();
@@ -479,7 +479,7 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         app4.setStartDate(MONDAY_NEXT_WEEK());
         app4.setEndDate(plusOneHour(MONDAY_NEXT_WEEK()));
         
-        CPCalendar cal = CPCalendar.getEuropeanCalendar();
+        CPCalendar cal = CPCalendar.getCalendar();
         cal.setWorkWeekStartingDay(Calendar.WEDNESDAY);
         cal.setWorkWeekDurationInDays(2);
         strategy.setCalendar(cal);

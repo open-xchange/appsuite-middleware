@@ -68,7 +68,7 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
     protected void setUp() throws Exception {
         super.setUp();
         strategy = new WeekPartitioningStrategy();
-        strategy.setCalendar(CPCalendar.getEuropeanCalendar());
+        strategy.setCalendar(CPCalendar.getCalendar());
         calendar = Calendar.getInstance();
     }
 
@@ -336,7 +336,7 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
     }
 
     public void testShouldWorkEvenWithDifferentWeekStart(){
-        CPCalendar cal = CPCalendar.getEuropeanCalendar();
+        CPCalendar cal = CPCalendar.getCalendar();
         cal.setFirstDayOfWeek(Calendar.THURSDAY);
         
         CPAppointment app1 = new CPAppointment();

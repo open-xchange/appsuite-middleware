@@ -68,7 +68,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
     protected void setUp() throws Exception {
         super.setUp();
         strategy = new MonthPartitioningStrategy();
-        strategy.setCalendar(CPCalendar.getEuropeanCalendar());
+        strategy.setCalendar(CPCalendar.getCalendar());
         calendar = Calendar.getInstance();
     }
 

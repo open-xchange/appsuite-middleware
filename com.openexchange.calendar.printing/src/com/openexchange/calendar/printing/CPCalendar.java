@@ -54,7 +54,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * {@link CPCalendar}
@@ -64,75 +65,95 @@ import java.util.List;
 public class CPCalendar extends GregorianCalendar {
 
     private static final long serialVersionUID = -8935444361292573072L;
-    
+
+    private final Locale locale;
+
     private int workWeekStartingDay;
-    
+
     private int workWeekDurationInDays;
-    
+
     private int workDayStartingHours;
-    
+
     private int workDayDurationInMinutes;
 
     private List<Integer> workWeekDays;
-    
+
     public CPCalendar() {
-        super();
+        this(TimeZone.getDefault(), Locale.getDefault());
     }
-    
-    public static CPCalendar getEuropeanCalendar(){
+
+    public CPCalendar(TimeZone zone, Locale locale) {
+        super(zone, locale);
+        this.locale = locale;
+    }
+
+    public static CPCalendar getCalendar(TimeZone zone, Locale locale) {
+        CPCalendar cal = new CPCalendar(zone, locale);
+        setWorkWeek(cal);
+        return cal;
+    }
+
+    public static CPCalendar getCalendar() {
         CPCalendar cal = new CPCalendar();
+        setWorkWeek(cal);
+        return cal;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    private static void setWorkWeek(CPCalendar cal) {
         cal.setWorkWeekStartingDay(Calendar.MONDAY);
         cal.setWorkWeekDurationInDays(5);
         cal.setWorkDayStartingHours(9);
         cal.setWorkDayDurationInMinutes(8 * 60);
-        return cal;
     }
-
 
     public int getWorkWeekStartingDay() {
         return workWeekStartingDay;
     }
 
-    
+
     public void setWorkWeekStartingDay(int workWeekStartingDay) {
         this.workWeekStartingDay = workWeekStartingDay;
     }
 
-    
+
     public int getWorkWeekDurationInDays() {
         return workWeekDurationInDays;
     }
 
-    
+
     public void setWorkWeekDurationInDays(int workWeekDurationInDays) {
         this.workWeekDurationInDays = workWeekDurationInDays;
     }
 
-    
+
     public int getWorkDayStartingHours() {
         return workDayStartingHours;
     }
 
-    
+
     public void setWorkDayStartingHours(int workDayStartingHours) {
         this.workDayStartingHours = workDayStartingHours;
     }
 
-    
+
     public int getWorkDayDurationInMinutes() {
         return workDayDurationInMinutes;
     }
 
-    
+
     public void setWorkDayDurationInMinutes(int workDayDurationInMinutes) {
         this.workDayDurationInMinutes = workDayDurationInMinutes;
     }
 
-    
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
-    
+
     public int getLastDayOfWeek(){
         return (getFirstDayOfWeek() == 1) ? 7 : getFirstDayOfWeek() - 1;
     }
@@ -154,7 +175,7 @@ public class CPCalendar extends GregorianCalendar {
     public int getLastDayOfWorkWeek() {
         return getWorkWeekDays().get(getWorkWeekDays().size() - 1).intValue();
     }
-    
+
     public int getLastDayOfMonth() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(getTime());
@@ -163,11 +184,11 @@ public class CPCalendar extends GregorianCalendar {
         cal.add(DAY_OF_MONTH, -1);
         return cal.get(DAY_OF_MONTH);
     }
-    
+
     public int getFirstDayOfWorkWeek() {
         return getWorkWeekDays().get(0).intValue();
     }
-    
+
     public boolean isOnFirstDayOfWeek(Date day){
         Calendar cal = Calendar.getInstance();
         cal.setTime(day);
@@ -179,13 +200,13 @@ public class CPCalendar extends GregorianCalendar {
         cal.setTime(day);
         return cal.get(Calendar.DAY_OF_WEEK) == getLastDayOfWeek();
     }
-    
+
     public boolean isOnFirstDayOfWorkWeek(Date day) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(day);
         return cal.get(Calendar.DAY_OF_WEEK) == getFirstDayOfWorkWeek();
     }
-    
+
     public boolean isOnLastDayOfWorkWeek(Date day) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(day);

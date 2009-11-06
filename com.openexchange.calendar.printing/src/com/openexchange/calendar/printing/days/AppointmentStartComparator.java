@@ -49,66 +49,21 @@
 
 package com.openexchange.calendar.printing.days;
 
-import java.util.Calendar;
-import java.util.Date;
-import com.openexchange.calendar.printing.CPCalendar;
+import java.util.Comparator;
+import com.openexchange.calendar.printing.CPAppointment;
 
 /**
- * {@link CalendarTools}
+ * {@link AppointmentStartComparator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class CalendarTools {
+public class AppointmentStartComparator implements Comparator<CPAppointment> {
 
-    private CalendarTools() {
+    public AppointmentStartComparator() {
         super();
     }
 
-    public static void toDayStart(CPCalendar cal) {
-        for (int field : new int[] { Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND }) {
-            cal.set(field, cal.getActualMinimum(field));
-        }
-    }
-
-    public static void toDayEnd(CPCalendar cal) {
-        for (int field : new int[] { Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND }) {
-            cal.set(field, cal.getActualMaximum(field));
-        }
-    }
-
-    public static Date getDayStart(CPCalendar cal, Date date) {
-        Date orig = cal.getTime();
-        cal.setTime(date);
-        toDayStart(cal);
-        Date retval = cal.getTime();
-        cal.setTime(orig);
-        return retval;
-    }
-
-    public static Date getDayEnd(CPCalendar cal, Date date) {
-        Date orig = cal.getTime();
-        cal.setTime(date);
-        toDayEnd(cal);
-        Date retval = cal.getTime();
-        cal.setTime(orig);
-        return retval;
-    }
-
-    public static void moveBackToMonday(CPCalendar cal) {
-        // Week starts 1-based on Sunday
-        int weekDay = cal.get(Calendar.DAY_OF_WEEK);
-        if (weekDay > Calendar.MONDAY) {
-            cal.add(Calendar.DAY_OF_WEEK, Calendar.MONDAY - weekDay);
-        } else if (Calendar.SUNDAY == weekDay) {
-            cal.add(Calendar.DAY_OF_WEEK, -6);
-        }
-    }
-
-    public static void moveForwardToSunday(CPCalendar cal) {
-        // Week starts 1-based on Sunday
-        int weekDay = cal.get(Calendar.DAY_OF_WEEK);
-        if (weekDay > Calendar.SUNDAY) {
-            cal.add(Calendar.DAY_OF_WEEK, 8 - weekDay);
-        }
+    public int compare(CPAppointment a1, CPAppointment a2) {
+        return a1.getStartDate().compareTo(a2.getStartDate());
     }
 }

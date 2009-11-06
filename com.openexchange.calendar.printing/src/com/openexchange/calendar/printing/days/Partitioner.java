@@ -78,13 +78,14 @@ import com.openexchange.groupware.container.Appointment;
 public class Partitioner {
 
     private static final Log LOG = LogFactory.getLog(Partitioner.class);
-
     private final CPParameters params;
-    private Date displayStart;
-    private Date displayEnd;
     private final CPCalendar cal;
     private final AppointmentSQLInterface appointmentSql;
     private final CalendarCollectionService calendarTools;
+    private Date firstDay;
+    private Date lastDay;
+    private Date displayStart;
+    private Date displayEnd;
 
     public Partitioner(CPParameters params, CPCalendar cal, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) {
         super();
@@ -116,15 +117,15 @@ public class Partitioner {
         cal.setTime(displayStart);
         Date tmp = cal.getTime();
         while (!tmp.after(displayEnd)) {
-            dayMap.put(tmp, new Day(tmp));
+            dayMap.put(tmp, new Day(tmp, cal, tmp.before(firstDay) || tmp.after(new Date(lastDay.getTime() - 1))));
             cal.add(Calendar.DATE, 1);
             tmp = cal.getTime();
         }
     }
 
     private void makeFullBlock() {
-        Date firstDay = CalendarTools.getDayStart(cal, params.getStart());
-        Date lastDay = CalendarTools.getDayStart(cal, params.getEnd());
+        firstDay = CalendarTools.getDayStart(cal, params.getStart());
+        lastDay = CalendarTools.getDayStart(cal, params.getEnd());
         long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
         if (days >= 28 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
@@ -133,10 +134,14 @@ public class Partitioner {
 
     private void makeMonthBlock(Date firstDay, Date lastDay) {
         cal.setTime(firstDay);
-        cal.set(Calendar.DAY_OF_WEEK, cal.getActualMinimum(Calendar.DAY_OF_WEEK));
+        // To be consistent with UI only use Monday as week start day.
+        // cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+        CalendarTools.moveBackToMonday(cal);
         displayStart = cal.getTime();
         cal.setTime(lastDay);
-        cal.set(Calendar.DAY_OF_WEEK, cal.getActualMaximum(Calendar.DAY_OF_WEEK));
+        // To be consistent with UI only use Sunday as last day of week.
+        // cal.set(Calendar.DAY_OF_WEEK, cal.getLastDayOfWeek());
+        CalendarTools.moveForwardToSunday(cal);
         displayEnd = cal.getTime();
     }
 
@@ -171,6 +176,10 @@ public class Partitioner {
             return;
         }
         CPAppointment cpAppointment = new CPAppointment(appointment);
-        day.add(cpAppointment);
+        if (appointment.getFullTime()) {
+            day.addWholeDay(cpAppointment);
+        } else {
+            day.add(cpAppointment);
+        }
     }
 }
