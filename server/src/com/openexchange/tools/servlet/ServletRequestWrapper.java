@@ -52,7 +52,6 @@ package com.openexchange.tools.servlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,17 +101,17 @@ public class ServletRequestWrapper implements ServletRequest {
 
     private String protocol;
 
-    private String remote_addr;
+    private String remoteAddress;
 
-    private String remote_host;
+    private String remoteHost;
 
-    private String server_name;
+    private String serverName;
 
     private String scheme;
 
-    private int server_port;
+    private int serverPort;
 
-    private boolean is_secure;
+    private boolean secure;
 
     private AJPv13ServletInputStream servletInputStream;
 
@@ -150,16 +149,24 @@ public class ServletRequestWrapper implements ServletRequest {
         setHeaderInternal(CONTENT_TYPE, contentType, true);
     }
 
+    /**
+     * Sets a parameter.
+     * 
+     * @param name The parameter name
+     * @param value The parameter value
+     */
     public void setParameter(final String name, final String value) {
-        if (parameters.containsKey(name)) {
-            final String[] oldValues = parameters.get(name);
-            final String[] newValues = new String[oldValues.length + 1];
-            System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
-            newValues[newValues.length - 1] = value;
-            parameters.put(name, newValues);
+        final String[] values = parameters.get(name);
+        final String[] newValues;
+        if (null == values) {
+            newValues = new String[] { value };
         } else {
-            parameters.put(name, new String[] { value });
+            final int len = values.length;
+            newValues = new String[len + 1];
+            System.arraycopy(values, 0, newValues, 0, len);
+            newValues[len] = value;
         }
+        parameters.put(name, newValues);
     }
 
     /**
@@ -231,23 +238,52 @@ public class ServletRequestWrapper implements ServletRequest {
         }
     }
 
-    public String getHeader(final String nameArg) {
-        final String name = nameArg.toLowerCase(Locale.ENGLISH);
-        return headers.containsKey(name) ? makeString(headers.get(name)) : null;
+    /**
+     * Gets the header value associated with specified name.
+     * 
+     * @param name The header name
+     * @return The header name
+     */
+    public String getHeader(final String name) {
+        final String n = name.toLowerCase(Locale.ENGLISH);
+        return makeString(headers.get(n));
     }
 
+    /**
+     * Checks if this servlet request contains a header associated with specified name.
+     * 
+     * @param name The header name
+     * @return <code>true</code> if this servlet request contains such a header; otherwise <code>false</code>
+     */
     public boolean containsHeader(final String name) {
         return headers.containsKey(name.toLowerCase(Locale.ENGLISH));
     }
 
+    /**
+     * Gets the header values associated with specified header name.
+     * 
+     * @param name The header name
+     * @return The header values as an {@link Enumeration}
+     */
     public Enumeration<?> getHeaders(final String name) {
         return makeEnumeration(headers.get(name.toLowerCase(Locale.ENGLISH)));
     }
 
+    /**
+     * Gets the header names contained in this servlet request.
+     * 
+     * @return The header names as an {@link Enumeration}
+     */
     public Enumeration<?> getHeaderNames() {
-        return new IteratorEnumeration(headers.keySet().iterator());
+        return makeEnumeration(headers.keySet().iterator());
     }
 
+    /**
+     * Sets a parameter's values.
+     * 
+     * @param name The parameter name to which the values shall be bound
+     * @param values The parameter values
+     */
     public void setParameterValues(final String name, final String[] values) {
         parameters.put(name, values);
     }
@@ -261,7 +297,7 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     public Enumeration<?> getParameterNames() {
-        return new IteratorEnumeration(parameters.keySet().iterator());
+        return makeEnumeration(parameters.keySet().iterator());
     }
 
     public Map<?, ?> getParameterMap() {
@@ -272,12 +308,18 @@ public class ServletRequestWrapper implements ServletRequest {
         return attributes.get(name);
     }
 
+    /**
+     * Checks if this servlet request contains specified attribute.
+     * 
+     * @param name The attribute name
+     * @return <code>true</code> if this servlet request contains specified attribute; otherwise <code>false</code>
+     */
     public boolean containsAttribute(final String name) {
         return attributes.containsKey(name);
     }
 
     public Enumeration<?> getAttributeNames() {
-        return new IteratorEnumeration(attributes.keySet().iterator());
+        return makeEnumeration(attributes.keySet().iterator());
     }
 
     public void removeAttribute(final String name) {
@@ -307,6 +349,11 @@ public class ServletRequestWrapper implements ServletRequest {
         this.characterEncoding = characterEncoding;
     }
 
+    /**
+     * Sets the protocol.
+     * 
+     * @param protocol The protocol to set
+     */
     public void setProtocol(final String protocol) {
         this.protocol = protocol;
     }
@@ -324,7 +371,7 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     /**
-     * Sets the servlet input stream of this servlet request
+     * Sets the servlet input stream of this servlet request.
      * 
      * @param is The servlet input stream
      */
@@ -333,7 +380,7 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     /**
-     * Sets/appends new data to this servlet request's input stream
+     * Sets/appends new data to this servlet request's input stream.
      * 
      * @param newData The new data to set/append
      * @throws IOException If an I/O error occurs
@@ -349,6 +396,9 @@ public class ServletRequestWrapper implements ServletRequest {
         return servletInputStream;
     }
 
+    /**
+     * Removes the servlet request's input stream.
+     */
     public void removeInputStream() {
         servletInputStream = null;
     }
@@ -373,20 +423,30 @@ public class ServletRequestWrapper implements ServletRequest {
         return null;
     }
 
-    public void setRemoteAddr(final String remote_addr) {
-        this.remote_addr = remote_addr;
+    /**
+     * Sets the remote address of this request.
+     * 
+     * @param remoteAddr The remote address; either a machine name, such as "java.sun.com", or a textual representation of an IP address
+     */
+    public void setRemoteAddr(final String remoteAddr) {
+        this.remoteAddress = remoteAddr;
     }
 
     public String getRemoteAddr() {
-        return remote_addr;
+        return remoteAddress;
     }
 
-    public void setRemoteHost(final String remote_host) {
-        this.remote_host = remote_host;
+    /**
+     * Sets the remote host; the fully qualified name of the client or the last proxy that sent the request.
+     * 
+     * @param remoteHost The remote host denoting the fully qualified name of the client
+     */
+    public void setRemoteHost(final String remoteHost) {
+        this.remoteHost = remoteHost;
     }
 
     public String getRemoteHost() {
-        return remote_host;
+        return remoteHost;
     }
 
     public String getScheme() {
@@ -398,59 +458,83 @@ public class ServletRequestWrapper implements ServletRequest {
              * Determine scheme from protocol (in the form protocol/majorVersion.minorVersion) and isSecure information
              */
             scheme =
-                new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(is_secure ? "s" : "").toString();
+                new StringBuilder(protocol.substring(0, protocol.indexOf('/')).toLowerCase(Locale.ENGLISH)).append(secure ? "s" : "").toString();
         }
         return scheme;
     }
 
-    public void setServerName(final String server_name) {
-        this.server_name = server_name;
+    /**
+     * Sets the host name of the server to which the request was sent.
+     * 
+     * @param serverName The host name of the server to which the request was sent
+     */
+    public void setServerName(final String serverName) {
+        this.serverName = serverName;
     }
 
     public String getServerName() {
-        return server_name;
+        return serverName;
     }
 
-    public void setServerPort(final int server_port) {
-        this.server_port = server_port;
+    /**
+     * Sets the port number to which the request was sent.
+     * 
+     * @param serverPort The server port
+     */
+    public void setServerPort(final int serverPort) {
+        this.serverPort = serverPort;
     }
 
     public int getServerPort() {
-        return server_port;
+        return serverPort;
     }
 
-    public void setSecure(final boolean is_secure) {
-        this.is_secure = is_secure;
+    /**
+     * Sets whether this request was made using a secure channel, such as HTTPS.
+     * 
+     * @param secure <code>true</code> if this request uses a secure channel; otherwise <code>false</code>
+     */
+    public void setSecure(final boolean secure) {
+        this.secure = secure;
     }
 
     public boolean isSecure() {
-        return is_secure;
+        return secure;
     }
 
-    protected String makeString(final String[] values) {
+    /**
+     * Gets the first {@link String} element contained in given array or <code>null</code> if array is <code>null</code> or empty.
+     * 
+     * @param values The array
+     * @return The first {@link String} element or <code>null</code>
+     */
+    protected static String makeString(final String[] values) {
         if (values == null || values.length == 0) {
             return null;
         }
         return values[0];
     }
 
-    protected Enumeration<?> makeEnumeration(final Object obj) {
-        final Class<?> type = obj.getClass();
-        if (!type.isArray()) {
-            throw new IllegalArgumentException(obj.getClass().toString());
-        }
-        return (new Enumeration<Object>() {
+    /**
+     * Creates a new {@link Enumeration} for specified array.
+     * 
+     * @param <T> The array's element type
+     * @param array The array
+     * @return A new {@link Enumeration}
+     */
+    protected static <T> Enumeration<T> makeEnumeration(final T[] array) {
+        return (new Enumeration<T>() {
 
-            int size = Array.getLength(obj);
+            private final int size = array.length;
 
-            int cursor;
+            private int cursor;
 
             public boolean hasMoreElements() {
                 return (cursor < size);
             }
 
-            public Object nextElement() {
-                return Array.get(obj, cursor++);
+            public T nextElement() {
+                return array[cursor++];
             }
         });
     }
@@ -471,26 +555,17 @@ public class ServletRequestWrapper implements ServletRequest {
         return 0;
     }
 
-    /**
-     * IteratorEnumeration
-     * 
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private static class IteratorEnumeration implements Enumeration<Object> {
+    protected static <T> Enumeration<T> makeEnumeration(final Iterator<T> iter) {
+        return new Enumeration<T>() {
 
-        private final Iterator<?> iter;
+            public boolean hasMoreElements() {
+                return iter.hasNext();
+            }
 
-        public IteratorEnumeration(final Iterator<?> iter) {
-            this.iter = iter;
-        }
-
-        public boolean hasMoreElements() {
-            return iter.hasNext();
-        }
-
-        public Object nextElement() {
-            return iter.next();
-        }
-
+            public T nextElement() {
+                return iter.next();
+            }
+        };
     }
+
 }
