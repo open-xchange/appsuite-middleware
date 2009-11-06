@@ -47,48 +47,39 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.calendar.printing.days;
 
-import java.util.LinkedList;
-import java.util.List;
-import com.openexchange.calendar.printing.CPAppointment;
-import com.openexchange.calendar.printing.CPCalendar;
-import com.openexchange.calendar.printing.CPType;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link TestCalendar}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class CPFactory {
+public class TestCalendar {
 
-    private CPType type;
+    /**
+     * Initializes a new {@link TestCalendar}.
+     */
+    public TestCalendar() {
+        super();
+        // TODO Auto-generated constructor stub
 
-    private CPCalendar calendar;
-    
-    private List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
-
-    public void setTypeToProduce(CPType type) {
-        this.type = type;
-    }
-    
-    public void setCalendar(CPCalendar calendar){
-        this.calendar = calendar;
-        
-        if(strategies != null)
-            for(CPPartitioningStrategy strategy: strategies)
-                strategy.setCalendar(calendar);
     }
 
-    public void addStrategy(CPPartitioningStrategy strategy) {
-        strategies.add(strategy);
-        if(calendar != null)
-            strategy.setCalendar(calendar);
-    }
-
-    public CPPartition partition(List<CPAppointment> appointments) {
-        for (CPPartitioningStrategy strategy : strategies) {
-            if (strategy.isPackaging(type))
-                return strategy.partition(appointments);
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"), Locale.GERMANY);
+        for (int day = Calendar.SUNDAY; day <= Calendar.SATURDAY; day++) {
+            cal.set(Calendar.DAY_OF_WEEK, day);
+            System.out.println(cal.getTime());
+            cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+            System.out.println(cal.getTime());
         }
-        return new CPPartition();
     }
 }

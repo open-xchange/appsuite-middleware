@@ -72,6 +72,7 @@ public class Day implements Comparable<Day> {
     private final boolean outOfRange;
     private List<CPAppointment> wholeDayAppointments = new ArrayList<CPAppointment>();
     private SortedSet<CPAppointment> appointments = new TreeSet<CPAppointment>(new AppointmentStartComparator());
+    private List<List<CPAppointment>> hours = new ArrayList<List<CPAppointment>>(24);
     private int sideBySide = 1;
 
     public Day(Date time, CPCalendar cal, boolean outOfRange) {
@@ -79,6 +80,9 @@ public class Day implements Comparable<Day> {
         this.time = time;
         this.cal = cal;
         this.outOfRange = outOfRange;
+        for (int i=0; i < 24; i++) {
+            hours.add(new ArrayList<CPAppointment>());
+        }
     }
 
     public int compareTo(Day o) {
@@ -111,14 +115,20 @@ public class Day implements Comparable<Day> {
         return outOfRange;
     }
 
-    public String getName() {
+    public String getDayOfWeek() {
         DateFormat df = new SimpleDateFormat("EEEE", cal.getLocale());
         df.setTimeZone(cal.getTimeZone());
         return df.format(time);
     }
 
-    public String getMonthName() {
+    public String getMonth() {
         DateFormat df = new SimpleDateFormat("MMMM", cal.getLocale());
+        df.setTimeZone(cal.getTimeZone());
+        return df.format(time);
+    }
+
+    public String getMonthAndDay() {
+        DateFormat df = new SimpleDateFormat("d. MMMM", cal.getLocale());
         df.setTimeZone(cal.getTimeZone());
         return df.format(time);
     }
@@ -131,6 +141,10 @@ public class Day implements Comparable<Day> {
         return wholeDayAppointments;
     }
 
+    public boolean hasWholeDayAppointments() {
+        return wholeDayAppointments.size() != 0;
+    }
+
     public void add(CPAppointment appointment) {
         appointments.add(appointment);
     }
@@ -141,6 +155,18 @@ public class Day implements Comparable<Day> {
             retval.add(appointment);
         }
         return retval;
+    }
+
+    public boolean hasAppointments() {
+        return appointments.size() != 0;
+    }
+
+    public void addToHour(int hour, CPAppointment appointment) {
+        hours.get(hour).add(appointment);
+    }
+
+    public List<CPAppointment> getAppointmentsOfHour(int hour) {
+        return hours.get(hour);
     }
 
     public boolean isToday() {
