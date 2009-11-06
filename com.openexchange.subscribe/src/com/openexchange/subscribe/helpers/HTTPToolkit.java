@@ -53,101 +53,157 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URLConnection;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpContentTooLargeException;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
-
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 
 /**
  * {@link HTTPToolkit}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class HTTPToolkit {
-    
-    public static InputStream grabStream(String site) throws IOException {
-        HttpClient client = new HttpClient();
-        client.getParams().setSoTimeout(3000);
-        client.getParams().setIntParameter("http.connection.timeout", 3000);
-        
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
-            new DefaultHttpMethodRetryHandler(0, false));
-        
-     
-        java.net.URL javaURL = new java.net.URL(site);
+
+    private static final String UTF_8 = "UTF-8";
+
+    public static InputStream grabStream(final String site) throws IOException {
+        final HttpClient client = new HttpClient();
+        final int timeout = 3000;
+        client.getParams().setSoTimeout(timeout);
+        client.getParams().setIntParameter("http.connection.timeout", timeout);
+
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+
+        final java.net.URL javaURL = new java.net.URL(site);
+
+        checkContentAndLength(javaURL, timeout);
 
         if (javaURL.getProtocol().equalsIgnoreCase("https")) {
             int port = javaURL.getPort();
-            if(port == -1) {
+            if (port == -1) {
                 port = 443;
             }
-            
-            Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+
+            final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
             client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
-            
-            
-            GetMethod getMethod = new GetMethod(javaURL.getFile());
+
+            final GetMethod getMethod = new GetMethod(javaURL.getFile());
             getMethod.getParams().setSoTimeout(1000);
             getMethod.setQueryString(javaURL.getQuery());
             client.executeMethod(getMethod);
-            
-            return getMethod.getResponseBodyAsStream();
-        } else {
-            GetMethod getMethod = new GetMethod(site);
-            client.executeMethod(getMethod);
+
             return getMethod.getResponseBodyAsStream();
         }
+        /*
+         * No HTTPS
+         */
+        final GetMethod getMethod = new GetMethod(site);
+        client.executeMethod(getMethod);
+        return getMethod.getResponseBodyAsStream();
     }
-    
-    public static Reader grab(String site) throws HttpException, IOException {
-        return new InputStreamReader(grabStream(site), "UTF-8");
+
+    public static Reader grab(final String site) throws HttpException, IOException {
+        return new InputStreamReader(grabStream(site), UTF_8);
     }
-    
-    public static Reader post(String site, Map<String, String> values) throws HttpException, IOException {
-        HttpClient client = new HttpClient();
-        client.getParams().setSoTimeout(3000);
-        client.getParams().setIntParameter("http.connection.timeout", 3000);
-        
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
-            new DefaultHttpMethodRetryHandler(0, false));
-        
-     
-        java.net.URL javaURL = new java.net.URL(site);
+
+    public static Reader post(final String site, final Map<String, String> values) throws HttpException, IOException {
+        final HttpClient client = new HttpClient();
+        final int timeout = 3000;
+        client.getParams().setSoTimeout(timeout);
+        client.getParams().setIntParameter("http.connection.timeout", timeout);
+
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+
+        final java.net.URL javaURL = new java.net.URL(site);
+
+        checkContentAndLength(javaURL, timeout);
 
         if (javaURL.getProtocol().equalsIgnoreCase("https")) {
             int port = javaURL.getPort();
-            if(port == -1) {
+            if (port == -1) {
                 port = 443;
             }
-            
-            Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+
+            final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
             client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
-            
-            PostMethod postMethod = new PostMethod(javaURL.getFile());
-            for(Map.Entry<String, String> entry : values.entrySet()) {
+
+            final PostMethod postMethod = new PostMethod(javaURL.getFile());
+            for (final Map.Entry<String, String> entry : values.entrySet()) {
                 postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
             }
-            
+
             postMethod.getParams().setSoTimeout(1000);
             postMethod.setQueryString(javaURL.getQuery());
             client.executeMethod(postMethod);
-            
-            return new InputStreamReader(postMethod.getResponseBodyAsStream(), "UTF-8");
-        } else {
-            PostMethod postMethod = new PostMethod(site);
-            for(Map.Entry<String, String> entry : values.entrySet()) {
-                postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
+
+            return new InputStreamReader(postMethod.getResponseBodyAsStream(), UTF_8);
+        }
+        /*
+         * No HTTPS
+         */
+        final PostMethod postMethod = new PostMethod(site);
+        for (final Map.Entry<String, String> entry : values.entrySet()) {
+            postMethod.addParameter(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        client.executeMethod(postMethod);
+        return new InputStreamReader(postMethod.getResponseBodyAsStream(), UTF_8);
+    }
+
+    private static void checkContentAndLength(final java.net.URL url, final int timeout) throws IOException, HttpException {
+        /*
+         * Examine headers for a valid HTML input
+         */
+        final String mimeType;
+        final int length;
+        {
+            final URLConnection urlCon = url.openConnection();
+            try {
+                urlCon.setConnectTimeout(timeout);
+                urlCon.setReadTimeout(timeout);
+                urlCon.connect();
+                final String ct = urlCon.getContentType();
+                mimeType = null == ct ? "application/octet-stream" : ct.toLowerCase(Locale.ENGLISH);
+                length = urlCon.getContentLength();
+            } finally {
+                /*
+                 * The inconvenient way to close an URL connection: Obtain input stream to close it
+                 */
+                urlCon.getInputStream().close();
             }
-            client.executeMethod(postMethod);
-            return new InputStreamReader(postMethod.getResponseBodyAsStream(), "UTF-8");
+        }
+        /*
+         * Check content type
+         */
+        if (!mimeType.startsWith("text/htm")) {
+            throw new HttpException(new StringBuilder("No HTML content. Content-Type is ").append(mimeType).toString());
+        }
+        /*
+         * Check content length
+         */
+        {
+            final int maxLen;
+            final ConfigurationService configurationService =
+                SubscriptionServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null == configurationService) {
+                maxLen = -1; // unlimited
+            } else {
+                maxLen = configurationService.getIntProperty("MAX_UPLOAD_SIZE", -1);
+            }
+            if (maxLen > 0 && length > maxLen) {
+                throw new HttpContentTooLargeException(new StringBuilder("Content-Length is ").append(length).toString(), maxLen);
+            }
         }
     }
-}
 
+}

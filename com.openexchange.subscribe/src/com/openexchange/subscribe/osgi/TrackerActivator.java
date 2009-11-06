@@ -49,29 +49,60 @@
 
 package com.openexchange.subscribe.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * {@link TrackerActivator} - The activator for starting/stopping needed service trackers.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class TrackerActivator implements BundleActivator {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator()};
-    
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    private List<ServiceTracker> trackers;
+
+    /**
+     * Initializes a new {@link TrackerActivator}.
+     */
+    public TrackerActivator() {
+        super();
+    }
+
+    public void start(final BundleContext context) throws Exception {
+        closeTrackers();
+        openTrackers(context);
+    }
+
+    public void stop(final BundleContext context) throws Exception {
+        closeTrackers();
+    }
+
+    private void openTrackers(final BundleContext context) {
+        trackers = new ArrayList<ServiceTracker>();
+        trackers.add(new ServiceTracker(
+            context,
+            ConfigurationService.class.getName(),
+            new RegistryServiceTrackerCustomizer<ConfigurationService>(
+                context,
+                SubscriptionServiceRegistry.getInstance(),
+                ConfigurationService.class)));
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
+    }
+
+    private void closeTrackers() {
+        if (null != trackers) {
+            for (final ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            trackers = null;
+        }
     }
 
 }

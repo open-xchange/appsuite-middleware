@@ -49,29 +49,32 @@
 
 package com.openexchange.subscribe.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 
 /**
- * {@link Activator}
+ * {@link SubscriptionServiceRegistry} - The service registry.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class SubscriptionServiceRegistry extends AbstractServiceRegistry {
 
-    private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
-        new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
-        new FolderFieldActivator(),
-        new TrackerActivator()};
+    private static final SubscriptionServiceRegistry SINGLETON = new SubscriptionServiceRegistry();
     
-    @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    /**
+     * Initializes a new {@link OXMFServiceRegistry}.
+     */
+    private SubscriptionServiceRegistry() {
+        super();
+    }
+
+    /**
+     * Gets the service registry instance.
+     * 
+     * @return The service registry instance
+     */
+    public static SubscriptionServiceRegistry getInstance() {
+        return SINGLETON;
     }
 
 }
