@@ -258,14 +258,15 @@ public final class BrowserDetector {
             browserVersion = 0F;
         }
 
+        int index = -1;
         /*
          * MSIE lies about its name. Of course...
          */
-        if (userAgent.indexOf(MSIE) >= 0) {
+        if ((index = userAgent.indexOf(MSIE)) >= 0) {
             /*
              * Ex: Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)
              */
-            versionStartIndex = (userAgent.indexOf(MSIE) + MSIE.length() + 1);
+            versionStartIndex = (index + MSIE.length() + 1);
             versionEndIndex = userAgent.indexOf(";", versionStartIndex);
 
             browserName = MSIE;
@@ -288,12 +289,12 @@ public final class BrowserDetector {
         /*
          * Opera isn't completely honest, either... Modificaton by Chris Mospaw <mospaw@polk-county.com>
          */
-        if (userAgent.indexOf(OPERA) >= 0) {
+        if ((index = userAgent.indexOf(OPERA)) >= 0) {
             /*
              * Ex: Mozilla/4.0 (Windows NT 4.0;US) Opera 3.61 [en]
              */
-            versionStartIndex = (userAgent.indexOf(OPERA) + OPERA.length() + 1);
-            versionEndIndex = userAgent.indexOf(" ", versionStartIndex);
+            versionStartIndex = (index + OPERA.length() + 1);
+            versionEndIndex = userAgent.indexOf(' ', versionStartIndex);
 
             browserName = OPERA;
             try {
