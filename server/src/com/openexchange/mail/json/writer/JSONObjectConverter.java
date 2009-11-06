@@ -242,9 +242,8 @@ public final class JSONObjectConverter {
              */
             final JSONArray bodyArr = rawJSONMailObject.getJSONArray("body");
             final int bodyLen = bodyArr.length();
-            // final boolean isAlternative = rawJSONMailObject.getBoolean("alternative");
 
-            final boolean alternative = rawJSONMailObject.optBoolean("alternative");
+            // final boolean alternative = rawJSONMailObject.optBoolean("alternative");
 
             /*
              * Find appropriate content
