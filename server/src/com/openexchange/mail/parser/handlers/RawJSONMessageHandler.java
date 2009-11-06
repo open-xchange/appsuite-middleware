@@ -374,7 +374,11 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         /*
          * Append HTML content as-is
          */
-        asRawContent(id, contentType.getBaseType(), htmlContent, fileName);
+        if (containsContent("text/htm")) {
+            asAttachment(id, contentType.getBaseType(), size, fileName);
+        } else {
+            asRawContent(id, contentType.getBaseType(), htmlContent, fileName);
+        }
         return true;
 
     }
@@ -383,9 +387,13 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         /*
          * Append plain-text content as-is
          */
-        if (textWasEmpty) {
-            replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
-            textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
+        if (containsContent(contentType.getBaseType())) {
+            if (textWasEmpty) {
+                replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
+                textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
+            } else {
+                asAttachment(id, contentType.getBaseType(), size, fileName);
+            }
         } else {
             asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
             textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
@@ -666,6 +674,34 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return mailPath;
     }
 
+    private boolean containsContent(final String baseContentType) throws MailException {
+        try {
+            final JSONArray bodyArr = getBodyArr();
+            final int len = bodyArr.length();
+            for (int i = 0; i < len; i++) {
+                final String ct = bodyArr.getJSONObject(i).optString(MailJSONField.CONTENT_TYPE.getKey());
+                if (null != ct && startsWith(ct, baseContentType)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    private static String toLowerCase(final String s) {
+        final char[] chars = s.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = Character.toLowerCase(chars[i]);
+        }
+        return new String(chars);
+    }
+
+    private static boolean startsWith(final String s, final String prefix) {
+        return toLowerCase(s).startsWith(toLowerCase(prefix), 0);
+    }
+
     private void asRawContent(final String id, final String baseContentType, final String content, final String filename) throws MailException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -676,6 +712,43 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), filename);
             getBodyArr().put(jsonObject);
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        }
+    }
+
+    private void asAttachment(final String id, final String baseContentType, final long size, final String fileName) throws MailException {
+        try {
+            final JSONObject jsonObject = new JSONObject();
+            /*
+             * Sequence ID
+             */
+            jsonObject.put(MailListField.ID.getKey(), id);
+            /*
+             * Filename
+             */
+            if (fileName == null) {
+                jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
+            } else {
+                jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
+            }
+            /*
+             * Size
+             */
+            jsonObject.put(MailJSONField.SIZE.getKey(), size);
+            /*
+             * Disposition
+             */
+            jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
+            /*
+             * Content-Type
+             */
+            jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
+            /*
+             * Content
+             */
+            jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }

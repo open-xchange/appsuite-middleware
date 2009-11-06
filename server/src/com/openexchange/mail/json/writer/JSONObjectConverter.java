@@ -244,6 +244,8 @@ public final class JSONObjectConverter {
             final int bodyLen = bodyArr.length();
             // final boolean isAlternative = rawJSONMailObject.getBoolean("alternative");
 
+            final boolean alternative = rawJSONMailObject.optBoolean("alternative");
+
             /*
              * Find appropriate content
              */
@@ -257,7 +259,6 @@ public final class JSONObjectConverter {
                         jo = dummyObject();
                     } else {
                         jo = bodyArr.getJSONObject(0);
-                        bodyArr.put(0, JSONObject.NULL);
                     }
                     handleTextPart(jo, attachmentsArr);
                 } else {
@@ -276,7 +277,6 @@ public final class JSONObjectConverter {
                     } else {
                         // HTML part found
                         final JSONObject jo = bodyArr.getJSONObject(0);
-                        bodyArr.put(0, JSONObject.NULL);
                         if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
                             asDisplayText(
                                 jo,
@@ -297,16 +297,6 @@ public final class JSONObjectConverter {
                     }
                 } else {
                     handleTextPart(textObject, attachmentsArr);
-                }
-            }
-            /*
-             * Add remaining body parts as attachments
-             */
-            if (bodyLen > 1) {
-                for (int i = 0; i < bodyLen; i++) {
-                    if (!bodyArr.isNull(i)) {
-                        asAttachment(bodyArr.optJSONObject(i), attachmentsArr);
-                    }
                 }
             }
             /*
@@ -521,8 +511,6 @@ public final class JSONObjectConverter {
             final String ct = jsonObject.optString(MailJSONField.CONTENT_TYPE.getKey());
             if (null != ct && ct.startsWith(contentType)) {
                 retval = jsonObject;
-                // Remove from body array
-                bodyArr.put(i, JSONObject.NULL);
             }
         }
         return retval;
@@ -536,8 +524,6 @@ public final class JSONObjectConverter {
             final String ct = jsonObject.optString(MailJSONField.CONTENT_TYPE.getKey());
             if (null != ct && startsWithEither(ct, contentTypes)) {
                 retval = jsonObject;
-                // Remove from body array
-                bodyArr.put(i, JSONObject.NULL);
             }
         }
         return retval;

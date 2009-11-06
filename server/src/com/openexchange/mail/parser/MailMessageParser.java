@@ -328,7 +328,7 @@ public final class MailMessageParser {
             if (count == -1) {
                 throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
             }
-            final String mpId = getSequenceId(prefix, partCount);
+            final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(mpId);
             }
