@@ -72,7 +72,7 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration userMultipleService;
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private Stack<ServiceTracker> trackers;
 
     /**
      * Initializes a new {@link Activator}.
@@ -91,6 +91,7 @@ public class Activator implements BundleActivator {
             /*
              * User service tracker
              */
+            trackers = new Stack<ServiceTracker>();
             trackers.push(new ServiceTracker(context, UserService.class.getName(), new RegistryServiceTrackerCustomizer<UserService>(
                 context,
                 ServiceRegistry.getInstance(),
@@ -116,7 +117,7 @@ public class Activator implements BundleActivator {
                     context,
                     ServiceRegistry.getInstance(),
                     ContactInterfaceDiscoveryService.class)));
-            for (ServiceTracker tracker : trackers) {
+            for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
         } catch (final Exception e) {
@@ -128,8 +129,11 @@ public class Activator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
-            while (!trackers.isEmpty()) {
-                trackers.pop().close();
+            if (null != trackers) {
+                while (!trackers.isEmpty()) {
+                    trackers.pop().close();
+                }
+                trackers = null;
             }
             if (null != userMultipleService) {
                 userMultipleService.unregister();
