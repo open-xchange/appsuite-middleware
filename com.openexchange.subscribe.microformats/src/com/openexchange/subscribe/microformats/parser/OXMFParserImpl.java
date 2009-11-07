@@ -58,11 +58,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.microformats.OXMFParser;
@@ -74,8 +74,6 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXMFParserImpl implements OXMFParser {
-
-    private static final Log LOG = LogFactory.getLog(OXMFParserImpl.class);
 
     private static final String ELEM_BODY = "body";
 
@@ -122,7 +120,7 @@ public final class OXMFParserImpl implements OXMFParser {
     public void addAttributePrefix(final String prefix) {
         attributePrefixes.add(prefix);
     }
-    
+
     public List<Map<String, String>> parse(final String html) throws SubscriptionException {
         return parse(new StringReader(html));
     }
@@ -157,10 +155,15 @@ public final class OXMFParserImpl implements OXMFParser {
             try {
                 parser.close();
             } catch (final XMLStreamException e) {
-                LOG.error(e.getMessage(), e);
+                LogFactory.getLog(OXMFParserImpl.class).error(e.getMessage(), e);
             }
         }
     }
+
+    /**
+     * Pattern to split by any whitespace character: [ \t\n\x0B\f\r].
+     */
+    private static final Pattern SPLIT = Pattern.compile("\\s+");
 
     /**
      * Handles a starting element. Checks if it contains a "class" attribute whose value is contained in set of container elements.
@@ -178,8 +181,8 @@ public final class OXMFParserImpl implements OXMFParser {
                 final String attributeName = parser.getAttributeLocalName(i);
                 if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                     final String attributeValue = parser.getAttributeValue(i);
-                    String[] classes = attributeValue.split("\\s+");
-                    for (String klass : classes) {
+                    final String[] classes = SPLIT.split(attributeValue, 0);
+                    for (final String klass : classes) {
                         if (containerElements.contains(klass)) {
                             found = true;
                             break;
@@ -226,7 +229,7 @@ public final class OXMFParserImpl implements OXMFParser {
      */
     private void parseNestedElement(final XMLStreamReader parser, final Map<String, String> map) throws XMLStreamException {
         final int count = parser.getAttributeCount();
-        List<String> classList = new LinkedList<String>();
+        final List<String> classList = new LinkedList<String>();
         String text = null;
         boolean collectSrc = false;
         if (ELEM_IMG.equalsIgnoreCase(parser.getLocalName())) {
@@ -236,8 +239,8 @@ public final class OXMFParserImpl implements OXMFParser {
             final String attributeName = parser.getAttributeLocalName(i);
             if (ATTR_CLASS.equalsIgnoreCase(attributeName)) {
                 final String attributeValue = parser.getAttributeValue(i);
-                final String[] classes = attributeValue.split("\\s+");
-                for (String klass : classes) {
+                final String[] classes = SPLIT.split(attributeValue, 0);
+                for (final String klass : classes) {
                     if (attributePrefixes.contains(klass) || startsWith(klass)) {
                         classList.add(klass);
                     }
@@ -252,7 +255,7 @@ public final class OXMFParserImpl implements OXMFParser {
                 text = parser.getElementText();
                 level--;
             }
-            for (String klass : classList) {
+            for (final String klass : classList) {
                 map.put(klass, text);
             }
         }
