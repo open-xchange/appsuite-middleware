@@ -68,6 +68,7 @@ public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
      * 
      * @return The "Abort" behavior
      */
+    @SuppressWarnings("unchecked")
     public static <V> RefusedExecutionBehavior<V> getInstance() {
         return (RefusedExecutionBehavior<V>) BEHAVIOR;
     }

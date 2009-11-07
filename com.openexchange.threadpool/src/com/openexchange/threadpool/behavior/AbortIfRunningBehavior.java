@@ -68,6 +68,7 @@ public final class AbortIfRunningBehavior implements RefusedExecutionBehavior<Ob
      * 
      * @return The "Abort-If-Running" behavior
      */
+    @SuppressWarnings("unchecked")
     public static <V> RefusedExecutionBehavior<V> getInstance() {
         return (RefusedExecutionBehavior<V>) BEHAVIOR;
     }

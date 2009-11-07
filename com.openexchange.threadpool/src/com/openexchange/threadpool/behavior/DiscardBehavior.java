@@ -68,6 +68,7 @@ public final class DiscardBehavior implements RefusedExecutionBehavior<Object> {
      * 
      * @return The "Discard behavior
      */
+    @SuppressWarnings("unchecked")
     public static <V> RefusedExecutionBehavior<V> getInstance() {
         return (RefusedExecutionBehavior<V>) BEHAVIOR;
     }

@@ -69,6 +69,7 @@ public final class DiscardOldestBehavior implements RefusedExecutionBehavior<Obj
      * 
      * @return The "Discard-Oldest" behavior
      */
+    @SuppressWarnings("unchecked")
     public static <V> RefusedExecutionBehavior<V> newInstance() {
         return (RefusedExecutionBehavior<V>) INSTANCE;
     }

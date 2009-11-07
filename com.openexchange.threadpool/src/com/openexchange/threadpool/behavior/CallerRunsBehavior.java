@@ -68,6 +68,7 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object
      * 
      * @return The "Caller-Runs" behavior
      */
+    @SuppressWarnings("unchecked")
     public static <V> RefusedExecutionBehavior<V> getInstance() {
         return (RefusedExecutionBehavior<V>) INSTANCE;
     }
