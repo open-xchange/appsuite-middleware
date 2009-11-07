@@ -111,6 +111,8 @@ public final class OXMFParserImpl implements OXMFParser {
         containerElements.clear();
         attributePrefixes.clear();
         parsedContainerElements.clear();
+        body = false;
+        level = 0;
     }
 
     public void addContainerElement(final String containerElement) {
