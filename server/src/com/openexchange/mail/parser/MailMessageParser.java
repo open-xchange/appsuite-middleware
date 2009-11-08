@@ -238,10 +238,11 @@ public final class MailMessageParser {
         int partCount = partCountArg;
         final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
         final long size = mailPart.getSize();
-        final String filename =
-            getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), mailPart.getContentType().getBaseType());
-        final ContentType contentType =
-            mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MIMETypes.MIME_APPL_OCTET);
+        final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
+            MIMETypes.MIME_APPL_OCTET);
+        final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
+        final String filename = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
+
         /*
          * Parse part dependent on its MIME type
          */
@@ -251,7 +252,6 @@ public final class MailMessageParser {
          * final boolean isInline = ((disposition == null
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
-        final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
         if (isText(lcct)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
@@ -303,7 +303,7 @@ public final class MailMessageParser {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, false, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, false, lcct, filename, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -318,7 +318,7 @@ public final class MailMessageParser {
                     return;
                 }
             } else {
-                if (!handler.handleAttachment(mailPart, false, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, false, lcct, filename, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -351,13 +351,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (!handler.handleImagePart(
-                mailPart,
-                mailPart.getContentId(),
-                contentType.getBaseType(),
-                isInline,
-                filename,
-                mailPart.getSequenceId())) {
+            if (!handler.handleImagePart(mailPart, mailPart.getContentId(), lcct, isInline, filename, mailPart.getSequenceId())) {
                 stop = true;
                 return;
             }
@@ -525,8 +519,9 @@ public final class MailMessageParser {
                             /*
                              * Nested message
                              */
-                            final MimeMessage nestedMessage =
-                                TNEFMime.convert(MIMEDefaultSession.getDefaultSession(), attachment.getNestedMessage());
+                            final MimeMessage nestedMessage = TNEFMime.convert(
+                                MIMEDefaultSession.getDefaultSession(),
+                                attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
@@ -540,7 +535,7 @@ public final class MailMessageParser {
                         if (!mailPart.containsSequenceId()) {
                             mailPart.setSequenceId(getSequenceId(prefix, partCount));
                         }
-                        if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+                        if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
                             stop = true;
                             return;
                         }
@@ -575,7 +570,7 @@ public final class MailMessageParser {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -586,7 +581,7 @@ public final class MailMessageParser {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -595,7 +590,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (!handler.handleSpecialPart(mailPart, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+            if (!handler.handleSpecialPart(mailPart, lcct, filename, mailPart.getSequenceId())) {
                 stop = true;
                 return;
             }
@@ -603,7 +598,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
+            if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
                 stop = true;
                 return;
             }
@@ -691,8 +686,7 @@ public final class MailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb =
-                new StringBuilder(PREFIX.length() + sequenceId.length() + 5).append(PREFIX).append(sequenceId).append('.');
+            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -771,7 +765,7 @@ public final class MailMessageParser {
                         new UnsupportedEncodingException(cs));
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
-                if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                if (contentType.startsWith(PRIMARY_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
@@ -779,7 +773,7 @@ public final class MailMessageParser {
             }
             charset = cs;
         } else {
-            if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+            if (contentType.startsWith(PRIMARY_TEXT)) {
                 charset = CharsetDetector.detectCharset(mailPart.getInputStream());
             } else {
                 charset = MailProperties.getInstance().getDefaultMimeCharset();
