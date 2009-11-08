@@ -56,6 +56,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
@@ -105,6 +107,24 @@ public final class MailMessageParser {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessageParser.class);
 
     private static final int BUF_SIZE = 8192;
+
+    private static Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Entry<String, String> next() {
+            throw new NoSuchElementException("Iterator is empty");
+        }
+
+        @Override
+        public void remove() {
+            // Nothing to do
+        }
+    };
 
     private static interface InlineDetector {
 
@@ -668,7 +688,8 @@ public final class MailMessageParser {
         /*
          * HEADERS
          */
-        handler.handleHeaders(mail.getHeadersSize(), mail.getHeadersIterator());
+        final int headersSize = mail.getHeadersSize();
+        handler.handleHeaders(headersSize, headersSize > 0 ? mail.getHeadersIterator() : EMPTY_ITER);
     }
 
     private static final String PREFIX = "Part_";
