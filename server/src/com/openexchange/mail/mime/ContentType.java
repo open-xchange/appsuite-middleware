@@ -326,6 +326,16 @@ public final class ContentType extends ParameterizedHeader {
     }
 
     /**
+     * Checks if Content-Type's base type ignore-case starts with specified prefix.
+     * 
+     * @param prefix The prefix
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     */
+    public boolean startsWith(final String prefix) {
+        return toLowerCase(getBaseType()).startsWith(toLowerCase(prefix), 0);
+    }
+
+    /**
      * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
      * 
      * @param contentType The content-type string to process
