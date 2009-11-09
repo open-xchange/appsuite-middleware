@@ -92,11 +92,16 @@ public final class MessageUtility {
     public static String checkCharset(final MailPart p, final ContentType ct) throws MailException {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
+            StringBuilder sb = null;
             if (cs != null) {
-                LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
+                sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
             cs = CharsetDetector.detectCharset(p.getInputStream());
+            if (null != sb && LOG.isWarnEnabled()) {
+                sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
+                LOG.warn(sb.toString());
+            }
         }
         return cs;
     }
@@ -111,11 +116,16 @@ public final class MessageUtility {
     public static String checkCharset(final Part p, final ContentType ct) {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
+            StringBuilder sb = null;
             if (cs != null) {
-                LOG.warn("Unsupported encoding in a message detected and monitored: \"" + cs + '"', new UnsupportedEncodingException(cs));
+                sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
             cs = CharsetDetector.detectCharset(getPartInputStream(p));
+            if (null != sb && LOG.isWarnEnabled()) {
+                sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
+                LOG.warn(sb.toString());
+            }
         }
         return cs;
     }
