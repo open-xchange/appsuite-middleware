@@ -485,12 +485,6 @@ public final class MimeReply {
 
     private static final Pattern PATTERN_SENDER = Pattern.compile(Pattern.quote("#SENDER#"));
 
-    private static final String MULTIPART = "multipart/";
-
-    private static final String TEXT = "text/";
-
-    private static final String TEXT_HTM = "text/htm";
-
     /**
      * Gathers all text bodies and appends them to given text builder.
      * 
@@ -506,11 +500,11 @@ public final class MimeReply {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
-        if (contentType.startsWith(MULTIPART)) {
+        if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
             final ParameterContainer pc =
                 new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, locale, replyTexts);
             found |= gatherAllTextContents(msg, contentType, pc);
-        } else if (contentType.startsWith(TEXT)) {
+        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             if (retvalContentType.getPrimaryType() == null) {
                 final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
                 retvalContentType.setContentType(contentType);
@@ -522,7 +516,7 @@ public final class MimeReply {
             found = true;
         }
         if (found) {
-            final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
+            final boolean isHtml = retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL);
             String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
             {
                 final Date date = msg.getSentDate();
@@ -617,7 +611,7 @@ public final class MimeReply {
         for (int i = count - 1; i >= 0; i--) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
+            if (partContentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
                 final MailMessage enclosedMsg = (MailMessage) part.getContent();
                 found |=
                     generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
@@ -646,7 +640,9 @@ public final class MimeReply {
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
+            if (partContentType.isMimeType(preferHTML ? MIMETypes.MIME_TEXT_HTM_ALL : MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(
+                part,
+                partContentType)) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
