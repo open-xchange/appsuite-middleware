@@ -110,17 +110,14 @@ public final class MailMessageParser {
 
     private static Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
 
-        @Override
         public boolean hasNext() {
             return false;
         }
 
-        @Override
         public Entry<String, String> next() {
             throw new NoSuchElementException("Iterator is empty");
         }
 
-        @Override
         public void remove() {
             // Nothing to do
         }
