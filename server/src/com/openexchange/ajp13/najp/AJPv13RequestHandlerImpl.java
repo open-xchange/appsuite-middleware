@@ -275,8 +275,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             /*
              * We got a following request body package.
              */
-            final int bodyRequestDataLength = ajpCon.readInitialBytes(false);
-            ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(bodyRequestDataLength, true));
+            final int len = ajpCon.readInitialBytes(false);
+            ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(len, true));
             ajpRequest.processRequest(this);
         }
     }
