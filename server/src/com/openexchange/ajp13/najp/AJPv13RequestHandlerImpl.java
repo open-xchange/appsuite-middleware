@@ -257,12 +257,12 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         /*
          * Handle the important Content-Length header which controls further processing
          */
-        if (contentLength == NOT_SET) {
+        if (NOT_SET == contentLength) {
             /*
              * This condition is reached when no content-length header was present in forward request package (transfer-encoding: chunked)
              */
             request.setData(new byte[0]);
-        } else if (contentLength == 0) {
+        } else if (0 == contentLength) {
             /*
              * This condition is reached when content-length header's value is set to '0'
              */
