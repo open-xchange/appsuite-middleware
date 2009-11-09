@@ -60,23 +60,21 @@ import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link IsPublished}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class IsPublished implements AdditionalFolderField {
 
     private static final Log LOG = LogFactory.getLog(IsPublished.class);
-    
-    private PublicationTargetDiscoveryService discovery = null;
-    
+
+    private final PublicationTargetDiscoveryService discovery;
+
     public IsPublished(final PublicationTargetDiscoveryService discovery) {
         this.discovery = discovery;
     }
-    
+
     public int getColumnID() {
         return 3010;
     }
@@ -86,14 +84,19 @@ public class IsPublished implements AdditionalFolderField {
     }
 
     public Object getValue(final FolderObject folder, final ServerSession session) {
-        if(!session.getUserConfiguration().isPublication()) {
+        if (!session.getUserConfiguration().isPublication()) {
             return Boolean.FALSE;
         }
         try {
-            final Collection<PublicationTarget> targets = discovery.getTargetsForEntityType(Module.getModuleString(folder.getModule(), folder.getObjectID()));
-            for(final PublicationTarget target : targets) {
-                final boolean hasPublications  = !target.getPublicationService().getAllPublications(session.getContext(), ""+folder.getObjectID()).isEmpty();
-                if( hasPublications ) {
+            final Collection<PublicationTarget> targets =
+                discovery.getTargetsForEntityType(Module.getModuleString(folder.getModule(), folder.getObjectID()));
+            for (final PublicationTarget target : targets) {
+                final String fn = folder.getFullName();
+                final boolean hasPublications =
+                    !target.getPublicationService().getAllPublications(
+                        session.getContext(),
+                        null == fn ? String.valueOf(folder.getObjectID()) : fn).isEmpty();
+                if (hasPublications) {
                     return Boolean.TRUE;
                 }
             }

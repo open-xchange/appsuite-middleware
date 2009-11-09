@@ -65,11 +65,12 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HasSubscriptions implements AdditionalFolderField {
-    private static final Log LOG = LogFactory.getLog(HasSubscriptions.class);
-    
-    private SubscriptionSourceDiscoveryService discovery = null;
 
-    public HasSubscriptions(SubscriptionSourceDiscoveryService discovery) {
+    private static final Log LOG = LogFactory.getLog(HasSubscriptions.class);
+
+    private final SubscriptionSourceDiscoveryService discovery;
+
+    public HasSubscriptions(final SubscriptionSourceDiscoveryService discovery) {
         super();
         this.discovery = discovery;
     }
@@ -82,30 +83,32 @@ public class HasSubscriptions implements AdditionalFolderField {
         return "com.openexchange.subscribe.subscriptionFlag";
     }
 
-    public Object getValue(FolderObject folder, ServerSession session) {
+    public Object getValue(final FolderObject folder, final ServerSession session) {
         if (!session.getUserConfiguration().isSubscription()) {
-            return false;
+            return Boolean.FALSE;
         }
 
-        List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
+        final List<SubscriptionSource> sources = discovery.getSources(folder.getModule());
         try {
-            for (SubscriptionSource subscriptionSource : sources) {
-                boolean hasSubscriptions = !subscriptionSource.getSubscribeService().loadSubscriptions(
-                    session.getContext(),
-                    "" + folder.getObjectID(),
-                    session.getPassword()).isEmpty();
-                if(hasSubscriptions) {
-                    return true;
+            for (final SubscriptionSource subscriptionSource : sources) {
+                final String fn = folder.getFullName();
+                final boolean hasSubscriptions =
+                    !subscriptionSource.getSubscribeService().loadSubscriptions(
+                        session.getContext(),
+                        null == fn ? String.valueOf(folder.getObjectID()) : fn,
+                        session.getPassword()).isEmpty();
+                if (hasSubscriptions) {
+                    return Boolean.TRUE;
                 }
             }
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
         }
 
-        return false;
+        return Boolean.FALSE;
     }
 
-    public Object renderJSON(Object value) {
+    public Object renderJSON(final Object value) {
         return value;
     }
 
