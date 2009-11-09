@@ -628,19 +628,23 @@ public final class FolderWriter {
                         @Override
                         public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                             try {
-                                /*-
-                                 * TODO: Proper MailFolder-2-FolderObject conversion needed:
-                                 * 
-                                 * folderField.renderJSON(folderField.getValue(fo, session))
+                                /*
+                                 * Proper MailFolder-2-FolderObject conversion
                                  */
+                                final FolderObject fo = new FolderObject();
+                                fo.setFullName(folder.getFullname());
+                                fo.setFolderName(folder.getName());
+                                fo.setModule(FolderObject.MAIL);
+                                fo.setType(FolderObject.PRIVATE);
+
                                 if (withKey) {
                                     final String columnName = folderField.getColumnName();
                                     if (null == columnName) {
                                         return;
                                     }
-                                    ((JSONObject) jsonContainer).put(columnName, Boolean.FALSE);
+                                    ((JSONObject) jsonContainer).put(columnName, folderField.renderJSON(folderField.getValue(fo, session)));
                                 } else {
-                                    ((JSONArray) jsonContainer).put(Boolean.FALSE);
+                                    ((JSONArray) jsonContainer).put(folderField.renderJSON(folderField.getValue(fo, session)));
                                 }
                             } catch (final JSONException e) {
                                 throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
