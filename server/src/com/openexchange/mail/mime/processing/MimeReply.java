@@ -665,7 +665,7 @@ public final class MimeReply {
                     MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
                 }
                 found = true;
-            } else if (partContentType.startsWith(MULTIPART)) {
+            } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
                 found |= gatherAllTextContents(part, partContentType, pc);
             }
         }
