@@ -210,6 +210,22 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
+
+    private static final String EAS_CMD = "Cmd";
+
+    private static final String EAS_PING = "Ping";
+
+    /**
+     * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
+     * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
+     * 
+     * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
+     */
+    private final boolean isEASPingCommand() {
+        return EAS_URI.equals(request.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+    }
+
     private void handleForwardRequest(final int dataLength) throws IOException, AJPv13Exception {
         if (AJPv13Config.isLogForwardRequest()) {
             /*
@@ -237,7 +253,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         /*
          * Check for possible long-running EAS request
          */
-        ajpCon.setLongRunning(("/Microsoft-Server-ActiveSync".equals(request.getRequestURI()) && "Ping".equals(request.getParameter("Cmd"))));
+        ajpCon.setLongRunning(isEASPingCommand());
         /*
          * Handle the important Content-Length header which controls further processing
          */
