@@ -803,6 +803,7 @@ public class Folder extends SessionServlet {
                          */
                         try {
                             final FolderObject internalUsers = foldersqlinterface.getFolderById(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                            lastModified = Math.max(lastModified, internalUsers.getLastModified().getTime());
                             folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject.getFolderString(
                                 internalUsers.getObjectID(),
                                 locale), -1);
