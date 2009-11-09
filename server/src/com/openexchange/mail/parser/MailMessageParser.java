@@ -105,6 +105,8 @@ public final class MailMessageParser {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailMessageParser.class);
 
+    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
+
     private static final int BUF_SIZE = 8192;
 
     private static Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
@@ -254,8 +256,8 @@ public final class MailMessageParser {
         int partCount = partCountArg;
         final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
         final long size = mailPart.getSize();
-        final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
-            MIMETypes.MIME_APPL_OCTET);
+        final ContentType contentType =
+            mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(MIMETypes.MIME_APPL_OCTET);
         final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
         final String filename = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
 
@@ -435,7 +437,7 @@ public final class MailMessageParser {
                     try {
                         mp = ReadReceiptHandler.convert(message);
                     } catch (final RuntimeException e) {
-                        if (LOG.isWarnEnabled()) {
+                        if (WARN_ENABLED) {
                             LOG.warn("Invalid TNEF read receipt", e);
                         }
                         return;
@@ -535,9 +537,8 @@ public final class MailMessageParser {
                             /*
                              * Nested message
                              */
-                            final MimeMessage nestedMessage = TNEFMime.convert(
-                                MIMEDefaultSession.getDefaultSession(),
-                                attachment.getNestedMessage());
+                            final MimeMessage nestedMessage =
+                                TNEFMime.convert(MIMEDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
@@ -580,7 +581,7 @@ public final class MailMessageParser {
                     }
                 }
             } catch (final IOException tnefExc) {
-                if (LOG.isWarnEnabled()) {
+                if (WARN_ENABLED) {
                     LOG.warn(tnefExc.getMessage(), tnefExc);
                 }
                 if (!mailPart.containsSequenceId()) {
@@ -763,7 +764,7 @@ public final class MailMessageParser {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
+            if (WARN_ENABLED) {
                 LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
                     "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
             }
@@ -783,13 +784,13 @@ public final class MailMessageParser {
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                    if (null != sb && LOG.isWarnEnabled()) {
+                    if (WARN_ENABLED && null != sb) {
                         sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
                         LOG.warn(sb.toString());
                     }
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (null != sb && LOG.isWarnEnabled()) {
+                    if (WARN_ENABLED && null != sb) {
                         sb.append(" Using fallback encoding: \"").append(cs).append('"');
                         LOG.warn(sb.toString());
                     }
