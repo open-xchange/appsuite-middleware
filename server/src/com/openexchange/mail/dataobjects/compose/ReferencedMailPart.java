@@ -246,6 +246,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         }
     }
 
+    private static final String TEXT = "text/";
+
     private DataSource getDataSource() throws MailException {
         /*
          * Lazy creation
@@ -253,7 +255,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         if (null == dataSource) {
             try {
                 if (data != null) {
-                    if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL) && getContentType().getCharsetParameter() == null) {
+                    if (getContentType().startsWith(TEXT) && getContentType().getCharsetParameter() == null) {
                         /*
                          * Add default mail charset
                          */
@@ -262,18 +264,19 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                     return (dataSource = new MessageDataSource(data, getContentType().toString()));
                 }
                 if (file != null) {
-                    if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL) && getContentType().getCharsetParameter() == null) {
+                    if (getContentType().startsWith(TEXT) && getContentType().getCharsetParameter() == null) {
                         /*
                          * Add system charset
                          */
                         getContentType().setCharsetParameter(
                             System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
+                    final ManagedFile managedFile = file;
                     final InputStreamProvider isp = new InputStreamProvider() {
 
                         public InputStream getInputStream() throws IOException {
                             try {
-                                return file.getInputStream();
+                                return managedFile.getInputStream();
                             } catch (final ManagedFileException e) {
                                 final IOException err = new IOException();
                                 err.initCause(e);

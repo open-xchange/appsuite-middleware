@@ -219,6 +219,8 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         return new DataHandler(getDataSource());
     }
 
+    private static final String TEXT = "text/";
+
     private DataSource getDataSource() throws MailException {
         /*
          * Lazy creation
@@ -227,7 +229,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             try {
                 final ContentType contentType = getContentType();
                 if (bytes != null) {
-                    if (!contentType.containsCharsetParameter() && contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                    if (!contentType.containsCharsetParameter() && contentType.startsWith(TEXT)) {
                         /*
                          * Add default mail charset
                          */
@@ -236,17 +238,18 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                     return (dataSource = new MessageDataSource(bytes, contentType.toString()));
                 }
                 if (file != null) {
-                    if (!contentType.containsCharsetParameter() && contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                    if (!contentType.containsCharsetParameter() && contentType.startsWith(TEXT)) {
                         /*
                          * Add system charset
                          */
                         contentType.setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
+                    final ManagedFile managedFile = file;
                     final InputStreamProvider isp = new InputStreamProvider() {
 
                         public InputStream getInputStream() throws IOException {
                             try {
-                                return file.getInputStream();
+                                return managedFile.getInputStream();
                             } catch (final ManagedFileException e) {
                                 final IOException err = new IOException();
                                 err.initCause(e);
@@ -289,7 +292,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                 return file.getInputStream();
             }
             throw new MailException(MailException.Code.NO_CONTENT);
-        } catch (ManagedFileException e) {
+        } catch (final ManagedFileException e) {
             throw new MailException(e);
         }
     }
