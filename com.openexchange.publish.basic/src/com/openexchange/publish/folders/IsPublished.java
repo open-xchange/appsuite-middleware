@@ -54,11 +54,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.groupware.modules.Module;
 
 
 /**
@@ -73,7 +73,7 @@ public class IsPublished implements AdditionalFolderField {
     
     private PublicationTargetDiscoveryService discovery = null;
     
-    public IsPublished(PublicationTargetDiscoveryService discovery) {
+    public IsPublished(final PublicationTargetDiscoveryService discovery) {
         this.discovery = discovery;
     }
     
@@ -85,25 +85,25 @@ public class IsPublished implements AdditionalFolderField {
         return "com.openexchange.publish.publicationFlag";
     }
 
-    public Object getValue(FolderObject folder, ServerSession session) {
+    public Object getValue(final FolderObject folder, final ServerSession session) {
         if(!session.getUserConfiguration().isPublication()) {
-            return false;
+            return Boolean.FALSE;
         }
         try {
-            Collection<PublicationTarget> targets = discovery.getTargetsForEntityType(Module.getModuleString(folder.getModule(), folder.getObjectID()));
-            for(PublicationTarget target : targets) {
-                boolean hasPublications  = !target.getPublicationService().getAllPublications(session.getContext(), ""+folder.getObjectID()).isEmpty();
+            final Collection<PublicationTarget> targets = discovery.getTargetsForEntityType(Module.getModuleString(folder.getModule(), folder.getObjectID()));
+            for(final PublicationTarget target : targets) {
+                final boolean hasPublications  = !target.getPublicationService().getAllPublications(session.getContext(), ""+folder.getObjectID()).isEmpty();
                 if( hasPublications ) {
-                    return true;
+                    return Boolean.TRUE;
                 }
             }
-        } catch (PublicationException x) {
+        } catch (final PublicationException x) {
             LOG.error(x.getMessage(), x);
         }
-        return false;
+        return Boolean.FALSE;
     }
 
-    public Object renderJSON(Object value) {
+    public Object renderJSON(final Object value) {
         return value;
     }
 

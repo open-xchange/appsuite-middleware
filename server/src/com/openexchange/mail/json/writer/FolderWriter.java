@@ -566,7 +566,7 @@ public final class FolderWriter {
 
     private static final int BIT_USER_FLAG = (1 << 29);
 
-    private static final String STR_UNKNOWN_COLUMN = "Unknown column";
+    // private static final String STR_UNKNOWN_COLUMN = "Unknown column";
 
     /**
      * Generates appropriate field writers for given mail folder fields
