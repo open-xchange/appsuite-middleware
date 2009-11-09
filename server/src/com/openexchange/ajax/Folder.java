@@ -690,6 +690,7 @@ public class Folder extends SessionServlet {
                                     for (int i = 0; i < size; i++) {
                                         final int index = i;
                                         final MailAccount mailAccount = accounts.get(index);
+                                        final Log logger = LOG;
                                         tasks.add(new AbstractTask<Object>() {
 
                                             public Object call() throws Exception {
@@ -700,11 +701,11 @@ public class Folder extends SessionServlet {
                                                     rootFolder = mailAccess.getRootFolder();
                                                 } catch (final MailException e) {
                                                     if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
-                                                        if (LOG.isDebugEnabled()) {
-                                                            LOG.debug(e.getMessage(), e);
+                                                        if (logger.isDebugEnabled()) {
+                                                            logger.debug(e.getMessage(), e);
                                                         }
                                                     } else {
-                                                        LOG.error(e.getMessage(), e);
+                                                        logger.error(e.getMessage(), e);
                                                     }
                                                     arrays[index] = null;
                                                     return null;
@@ -749,7 +750,7 @@ public class Folder extends SessionServlet {
                                                     }
                                                     arrays[index] = ja;
                                                 } catch (final MailException e) {
-                                                    LOG.error(e.getMessage(), e);
+                                                    logger.error(e.getMessage(), e);
                                                     arrays[index] = null;
                                                 } finally {
                                                     mailAccess.close(true);
@@ -1462,6 +1463,7 @@ public class Folder extends SessionServlet {
                                 /*
                                  * Add root folders
                                  */
+                                final Log logger = LOG;
                                 tasks.add(new AbstractTask<Object>() {
 
                                     public Object call() throws Exception {
@@ -1471,7 +1473,7 @@ public class Folder extends SessionServlet {
                                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                                             rootFolder = mailAccess.getRootFolder();
                                         } catch (final MailException e) {
-                                            LOG.error(e.getMessage(), e);
+                                            logger.error(e.getMessage(), e);
                                             arrays[index] = null;
                                             return null;
                                         }
@@ -1511,7 +1513,7 @@ public class Folder extends SessionServlet {
                                             }
                                             arrays[index] = ja;
                                         } catch (final MailException e) {
-                                            LOG.error(e.getMessage(), e);
+                                            logger.error(e.getMessage(), e);
                                             arrays[index] = null;
                                         } finally {
                                             mailAccess.close(true);
