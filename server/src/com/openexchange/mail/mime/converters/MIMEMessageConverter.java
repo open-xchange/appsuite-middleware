@@ -1111,7 +1111,7 @@ public final class MIMEMessageConverter {
         }
     }
 
-    private static final String MULTI_PRIMTYPE = "multipart";
+    private static final String MULTI_PRIMTYPE = "multipart/";
 
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 

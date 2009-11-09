@@ -1005,7 +1005,7 @@ public class MIMEMessageFiller {
     }
 
     protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline) throws MessagingException, MailException, IOException {
-        if (part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+        if (part.getContentType().startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
             // TODO: Works correctly?
             final StringBuilder sb = new StringBuilder(32);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
@@ -1018,7 +1018,7 @@ public class MIMEMessageFiller {
          */
         final String fileName = part.getFileName();
         final ContentType ct = part.getContentType();
-        if (ct.isMimeType(MIMETypes.MIME_APPL_OCTET) && fileName != null) {
+        if (ct.startsWith(MIMETypes.MIME_APPL_OCTET) && fileName != null) {
             /*
              * Try to determine MIME type
              */
