@@ -67,7 +67,7 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 %define adminbundle	com.openexchange.admin.jar
 %define oxprefix	/opt/open-xchange
-%define adminhostingbundle open_xchange_admin_plugin_hosting.jar
+%define adminhostingbundle com.openexchange.admin.plugin.hosting.jar
 
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
