@@ -292,7 +292,8 @@ public class ServletRequestWrapper implements ServletRequest {
     }
 
     public String getParameter(final String name) {
-        return parameters.containsKey(name) ? (parameters.get(name))[0] : null;
+        final String[] values = parameters.get(name);
+        return null == values ? null : values[0];
     }
 
     public Enumeration<?> getParameterNames() {
