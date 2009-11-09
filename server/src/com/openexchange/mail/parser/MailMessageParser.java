@@ -900,14 +900,14 @@ public final class MailMessageParser {
     private static boolean isSpecial(final String contentType) {
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
-            for (final String subtype : SUB_SPECIAL1) {
+            for (final String subtype : SUB_SPECIAL2) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
             }
         } else if (contentType.startsWith(PRIMARY_MESSAGE, 0)) {
             final int off = PRIMARY_MESSAGE.length();
-            for (final String subtype : SUB_SPECIAL2) {
+            for (final String subtype : SUB_SPECIAL1) {
                 if (contentType.startsWith(subtype, off)) {
                     return true;
                 }
