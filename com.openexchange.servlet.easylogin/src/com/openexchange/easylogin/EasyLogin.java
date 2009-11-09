@@ -90,6 +90,32 @@ public class EasyLogin extends HttpServlet {
 			"<head>\n" +
 			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n" +
 			"<script type=\"text/javascript\">\n" +
+			
+			"function format(string, params) {\n"+
+			"var param_array = params;\n"+
+		    "if (typeof(params) != \"object\") {\n"+
+		    "param_array = new Array(arguments.length - 1);\n"+
+		    	 "for (var i = 1; i < arguments.length; i++)\n"+
+		    		 "param_array[i - 1] = arguments[i];\n"+
+		     	"}\n"+
+		     	"if (typeof string == \"function\") {\n"+
+		    	"return function() { return formatRaw(string(), param_array); };\n"+
+		     	"} else {\n"+
+		    	"return formatRaw(string, param_array);\n"+
+		     	"}\n"+
+			 "}\n\n"+
+			
+			
+			 "function formatRaw(string, params) {\n"+
+				    "var index = 0;\n"+
+				    "return String(string).replace(/%(([0-9]+)\\$)?[A-Za-z]/g,\n"+
+				        "function(match, pos, n) {\n"+
+				            "if (pos) index = n - 1;\n"+
+				            "return params[index++];\n"+
+				        "}).replace(/%%/, \"%\");\n"+
+				"}\n"+
+
+			
 			"var emptyFunction = function (){};\n" +
 			"var _=function (ss){return ss;};\n" +
 			"var format = function (ss){return ss;};\n" +
@@ -525,12 +551,10 @@ public class EasyLogin extends HttpServlet {
 	private String getJsCustomRedirect(String url,boolean popup) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("if (!status) {  \n");
-		sb.append("		// json error \n");
-		sb.append("		if (result.code == \"LGI-0006\"){  \n");
+		sb.append("		// json error \n");		
 		if(popup){
-			sb.append("			alert(_(\"Login failed. Please check your user name and password and try again.\")); \n");
-		}
-		sb.append("		}\n");
+			sb.append("alert(format(_(result.error), result.error_params))");
+		}		
 		sb.append("} else { \n");
 		sb.append("		// http error\n");
 		if(popup){
@@ -550,12 +574,10 @@ public class EasyLogin extends HttpServlet {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("if (!status) { \n");
-		sb.append("		// json error \n");
-		sb.append("		if (result.code == \"LGI-0006\"){  \n");
+		sb.append("		// json error \n");		
 		if(popup){
-			sb.append("			alert(_(\"Login failed. Please check your user name and password and try again.\")); \n");
-		}
-		sb.append("		}\n");
+			sb.append("alert(format(_(result.error), result.error_params))");
+		}		
 		sb.append("} else { \n");
 		sb.append("		// http error\n");
 		if(popup){
@@ -573,16 +595,14 @@ public class EasyLogin extends HttpServlet {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("if (!status) { \n");
-		sb.append("		// json error \n");
-		sb.append("		if (result.code == \"LGI-0006\"){ \n");
+		sb.append("		// json error \n");		
 		if(popup){
-			sb.append("			alert(_(\"Login failed. Please check your user name and password and try again.\")); \n");
-		}
-		sb.append("		}\n");
+			sb.append("alert(format(_(result.error), result.error_params))");
+		}		
 		sb.append("} else { \n");
 		sb.append("		// http error\n");
 		if(popup){
-			sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
+			sb.append("alert(\"Error: \"+status+\" - \"+result); \n");
 		}
 		sb.append("}\n");
 		sb.append("// now redirect correctly and check if referrer contains ? then add & else add ? \n");
