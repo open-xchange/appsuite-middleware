@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -58,93 +59,108 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailParserWriterTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class MailParserWriterTest extends AbstractMailTest {
 
-	/**
+    /**
 	 * 
 	 */
-	public MailParserWriterTest() {
-		super();
-	}
+    public MailParserWriterTest() {
+        super();
+    }
 
-	/**
-	 * @param name
-	 */
-	public MailParserWriterTest(final String name) {
-		super(name);
-	}
+    /**
+     * @param name
+     */
+    public MailParserWriterTest(final String name) {
+        super(name);
+    }
 
-	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.SIZE,
-			MailField.FROM, MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE, MailField.SUBJECT,
-			MailField.CONTENT_TYPE, MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
+    private static final MailField[] COMMON_LIST_FIELDS =
+        {
+            MailField.ID, MailField.FOLDER_ID, MailField.SIZE, MailField.FROM, MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE,
+            MailField.SUBJECT, MailField.CONTENT_TYPE, MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
 
-	public void testMessageWriter() {
-		try {
-			final SessionObject session = getSession();
-			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
-			mailConnection.connect(/* mailConfig */);
-			try {
-				final MailMessage[] mails = mailConnection.getMessageStorage().getAllMessages("INBOX", null, null,
-						null, new MailField[] { MailField.ID, MailField.CONTENT_TYPE });
+    public void testMessageWriter() {
+        try {
+            final SessionObject session = getSession();
+            final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
+            mailConnection.connect(/* mailConfig */);
+            try {
+                final MailMessage[] mails =
+                    mailConnection.getMessageStorage().getAllMessages(
+                        "INBOX",
+                        null,
+                        null,
+                        null,
+                        new MailField[] { MailField.ID, MailField.CONTENT_TYPE });
 
-				for (final MailMessage mail : mails) {
-					if (mail.getContentType().isMimeType("multipart/mixed")) {
-						System.out.println(MessageWriter.writeMailMessage(MailAccount.DEFAULT_ID,mailConnection.getMessageStorage()
-								.getMessage("default.INBOX", mail.getMailId(), true), DisplayMode.DISPLAY, session,
-								UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-										session.getContextId())));
-						break;
-					}
-				}
+                for (final MailMessage mail : mails) {
+                    if (mail.getContentType().isMimeType("multipart/mixed")) {
+                        System.out.println(MessageWriter.writeMailMessage(
+                            MailAccount.DEFAULT_ID,
+                            mailConnection.getMessageStorage().getMessage("default.INBOX", mail.getMailId(), true),
+                            DisplayMode.DISPLAY,
+                            session,
+                            UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId())));
+                        break;
+                    }
+                }
 
-				for (final MailMessage mail : mails) {
-					if (mail.getContentType().isMimeType("multipart/alternative")) {
-						System.out.println(MessageWriter.writeMailMessage(MailAccount.DEFAULT_ID,mailConnection.getMessageStorage()
-								.getMessage("default.INBOX", mail.getMailId(), true), DisplayMode.DISPLAY, session,
-								UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-										session.getContextId())));
-						break;
-					}
-				}
-			} finally {
-				mailConnection.close(true);
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+                for (final MailMessage mail : mails) {
+                    if (mail.getContentType().isMimeType("multipart/alternative")) {
+                        System.out.println(MessageWriter.writeMailMessage(
+                            MailAccount.DEFAULT_ID,
+                            mailConnection.getMessageStorage().getMessage("default.INBOX", mail.getMailId(), true),
+                            DisplayMode.DISPLAY,
+                            session,
+                            UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId())));
+                        break;
+                    }
+                }
+            } finally {
+                mailConnection.close(true);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	public void testFolderWriter() {
-		try {
-			final SessionObject session = getSession();
-			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
-			mailConnection.connect(/* mailConfig */);
-			try {
-				final MailFolder root = mailConnection.getFolderStorage().getRootFolder();
-				writeFolder(root, mailConnection);
+    public void testFolderWriter() {
+        try {
+            final SessionObject session = getSession();
+            final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
+            mailConnection.connect(/* mailConfig */);
+            final ServerSession ss = new ServerSessionAdapter(session);
+            try {
+                final MailFolder root = mailConnection.getFolderStorage().getRootFolder();
+                writeFolder(root, mailConnection, ss);
 
-			} finally {
-				mailConnection.close(true);
-			}
-		} catch (final MailException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+            } finally {
+                mailConnection.close(true);
+            }
+        } catch (final MailException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } catch (final ContextException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
-	private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection) throws MailException {
-		System.out.println(FolderWriter.writeMailFolder(MailAccount.DEFAULT_ID,f, mailConnection.getMailConfig()));
-		final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);
-		for (final MailFolder folder : flds) {
-			writeFolder(folder, mailConnection);
-		}
-	}
+    private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection, final ServerSession session) throws MailException, ContextException {
+        System.out.println(FolderWriter.writeMailFolder(MailAccount.DEFAULT_ID, f, mailConnection.getMailConfig(), session));
+        final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);
+        for (final MailFolder folder : flds) {
+            writeFolder(folder, mailConnection, session);
+        }
+    }
 }
