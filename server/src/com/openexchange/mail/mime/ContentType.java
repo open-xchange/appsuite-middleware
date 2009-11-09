@@ -330,8 +330,12 @@ public final class ContentType extends ParameterizedHeader {
      * 
      * @param prefix The prefix
      * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     * @throws IllegalArgumentException If specified prefix is <code>null</code>
      */
     public boolean startsWith(final String prefix) {
+        if (null == prefix) {
+            throw new IllegalArgumentException("Prefix is null");
+        }
         return toLowerCase(getBaseType()).startsWith(toLowerCase(prefix), 0);
     }
 
