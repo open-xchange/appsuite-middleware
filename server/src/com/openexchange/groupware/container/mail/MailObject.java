@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.container.mail;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import java.io.File;
 import java.io.IOException;
@@ -199,7 +198,7 @@ public class MailObject {
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
             }
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
             /*
              * Force base64 encoding to keep data as it is
              */
@@ -215,7 +214,7 @@ public class MailObject {
                 } else {
                     final ContentDisposition contentDisposition = new ContentDisposition(Part.ATTACHMENT);
                     contentDisposition.setFilenameParameter(fileName);
-                    disp = fold(21, contentDisposition.toString());
+                    disp = MIMEMessageUtility.foldContentDisposition(contentDisposition.toString());
                 }
                 bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, disp);
             } else {
@@ -224,7 +223,7 @@ public class MailObject {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             /*
              * Add to multipart
@@ -273,7 +272,7 @@ public class MailObject {
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
             }
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
             /*
              * Force base64 encoding to keep data as it is
              */
@@ -289,7 +288,7 @@ public class MailObject {
                 } else {
                     final ContentDisposition contentDisposition = new ContentDisposition(Part.ATTACHMENT);
                     contentDisposition.setFilenameParameter(fileName);
-                    disp = fold(21, contentDisposition.toString());
+                    disp = MIMEMessageUtility.foldContentDisposition(contentDisposition.toString());
                 }
                 bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, disp);
             } else {
@@ -298,7 +297,7 @@ public class MailObject {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             /*
              * Add to multipart
@@ -412,7 +411,7 @@ public class MailObject {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
                 }
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, ct.toString()));
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
                 multipart.addBodyPart(textPart, 0);
                 msg.setContent(multipart);
             }

@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link ContentType} - Parses value of MIME header <code>Content-Type</code>
@@ -343,7 +343,7 @@ public final class ContentType extends ParameterizedHeader {
      * @throws MailException If parsing content-type string fails
      */
     public static String prepareContentTypeString(final String contentType) throws MailException {
-        return fold(14, new ContentType(contentType).toString());
+        return MIMEMessageUtility.foldContentType(new ContentType(contentType).toString());
     }
 
     /**
@@ -360,7 +360,7 @@ public final class ContentType extends ParameterizedHeader {
         if (name != null && !ct.containsNameParameter()) {
             ct.setNameParameter(name);
         }
-        return fold(14, ct.toString());
+        return MIMEMessageUtility.foldContentType(ct.toString());
     }
 
     /**

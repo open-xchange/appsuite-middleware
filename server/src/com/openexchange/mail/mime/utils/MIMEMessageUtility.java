@@ -894,6 +894,30 @@ public final class MIMEMessageUtility {
         }
     }
 
+    private static final int USED_CT = 14;
+
+    /**
+     * Folds specified <code>Content-Type</code> value.
+     * 
+     * @param contentDisposition The <code>Content-Type</code> value
+     * @return The folded <code>Content-Type</code> value
+     */
+    public static String foldContentType(final String contentType) {
+        return fold(USED_CT, contentType);
+    }
+
+    private static final int USED_CD = 21;
+
+    /**
+     * Folds specified <code>Content-Disposition</code> value.
+     * 
+     * @param contentDisposition The <code>Content-Disposition</code> value
+     * @return The folded <code>Content-Disposition</code> value
+     */
+    public static String foldContentDisposition(final String contentDisposition) {
+        return fold(USED_CD, contentDisposition);
+    }
+
     /**
      * Folds a string at linear whitespace so that each line is no longer than 76 characters, if possible. If there are more than 76
      * non-whitespace characters consecutively, the string is folded at the first whitespace after that sequence. The parameter

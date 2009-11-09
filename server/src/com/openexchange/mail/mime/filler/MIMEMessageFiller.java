@@ -728,12 +728,12 @@ public class MIMEMessageFiller {
                     if (fileName != null && !ct.containsNameParameter()) {
                         ct.setNameParameter(fileName);
                     }
-                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
+                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
                     vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
                     if (fileName != null) {
                         final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                         cd.setFilenameParameter(fileName);
-                        vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+                        vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
                     }
                     /*
                      * Append body part
@@ -804,12 +804,12 @@ public class MIMEMessageFiller {
                 }
                 mimeMessage.setContent(mailText, mail.getContentType().toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, mail.getContentType().toString()));
+                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(mail.getContentType().toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
                 msgBodyPart.setContent(mail.getContent(), mail.getContentType().toString());
                 msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, mail.getContentType().toString()));
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(mail.getContentType().toString()));
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
         } else {
@@ -827,7 +827,7 @@ public class MIMEMessageFiller {
             } else {
                 final ContentDisposition contentDisposition = new ContentDisposition(disposition);
                 contentDisposition.setDisposition(Part.INLINE);
-                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, contentDisposition.toString()));
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             mp.addBodyPart(msgBodyPart);
             addMessageBodyPart(mp, mail, true);
@@ -1032,7 +1032,7 @@ public class MIMEMessageFiller {
         if (fileName != null && !ct.containsNameParameter()) {
             ct.setNameParameter(fileName);
         }
-        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
+        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
         if (!inline) {
             /*
              * Force base64 encoding to keep data as it is
@@ -1053,7 +1053,7 @@ public class MIMEMessageFiller {
         if (fileName != null && !cd.containsFilenameParameter()) {
             cd.setFilenameParameter(fileName);
         }
-        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+        messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
         /*
          * Content-ID
          */
@@ -1121,7 +1121,7 @@ public class MIMEMessageFiller {
         if (null != filename) {
             ct.setNameParameter(filename);
         }
-        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
+        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
         /*
          * Set content disposition
          */
@@ -1136,7 +1136,7 @@ public class MIMEMessageFiller {
         if (null != filename && !cd.containsFilenameParameter()) {
             cd.setFilenameParameter(filename);
         }
-        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+        origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
         mp.addBodyPart(origMsgPart);
     }
 
@@ -1359,12 +1359,12 @@ public class MIMEMessageFiller {
             if (fileName != null) {
                 contentDisposition.setFilenameParameter(fileName);
             }
-            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, contentDisposition.toString()));
+            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
             final ContentType ct = new ContentType(imageProvider.getContentType());
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
             }
-            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
+            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
             mp.addBodyPart(imgBodyPart);
         }
         return cid;

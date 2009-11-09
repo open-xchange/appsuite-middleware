@@ -77,8 +77,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -426,7 +426,7 @@ public final class MimeReply {
              */
             replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
             replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, retvalContentType.toString()));
+            replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(retvalContentType.toString()));
             replyMsg.saveChanges();
             replyMail = MIMEMessageConverter.convertMessage(replyMsg);
             if (null != msgref) {

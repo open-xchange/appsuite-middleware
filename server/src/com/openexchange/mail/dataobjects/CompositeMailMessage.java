@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.dataobjects;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,6 +68,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by the possibility to add extra parts to an existing
@@ -347,7 +347,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !mp.getContentType().containsNameParameter()) {
                     mp.getContentType().setNameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, mp.getContentType().toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(mp.getContentType().toString()));
                 final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
                 final ContentDisposition contentDisposition;
                 if (disposition == null) {
@@ -359,7 +359,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
             /*
@@ -390,7 +390,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !mp.getContentType().containsNameParameter()) {
                     mp.getContentType().setNameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, mp.getContentType().toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(mp.getContentType().toString()));
                 final String disposition = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
                 final ContentDisposition contentDisposition;
                 if (disposition == null) {
@@ -402,7 +402,7 @@ public final class CompositeMailMessage extends MailMessage {
                 if (fileName != null && !contentDisposition.containsFilenameParameter()) {
                     contentDisposition.setFilenameParameter(fileName);
                 }
-                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, contentDisposition.toString()));
+                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
             mimeMessage.setContent(mimeMultipart);

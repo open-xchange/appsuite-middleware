@@ -52,7 +52,6 @@ package com.openexchange.mail.json.parser;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertPart;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 import java.text.DateFormat;
@@ -91,6 +90,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.publish.Publication;
@@ -486,9 +486,9 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             final MimeBodyPart bodyPart = new MimeBodyPart();
             bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
             bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, "text/html; charset=UTF-8; name=links.html"));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, fold(21, "attachment; filename=links.html"));
+            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition("attachment; filename=links.html"));
             return convertPart(bodyPart, false);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);

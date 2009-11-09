@@ -191,13 +191,13 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 if (fileName != null) {
                     final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                     cd.setFilenameParameter(fileName);
-                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+                    vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
                 }
                 vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 if (fileName != null && !ct.containsNameParameter()) {
                     ct.setNameParameter(fileName);
                 }
-                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, ct.toString()));
+                vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct.toString()));
                 mimeMultipart.addBodyPart(vcardPart);
             }
             mimeMessage.setContent(mimeMultipart);

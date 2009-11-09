@@ -527,7 +527,7 @@ public final class MailMessageParser {
                             if (attachFilename != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(attachFilename);
-                                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+                                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             os.reset();
                             attachment.writeTo(os);
@@ -574,7 +574,7 @@ public final class MailMessageParser {
                         if (attachFilename != null) {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.fold(21, cd.toString()));
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
                         parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);

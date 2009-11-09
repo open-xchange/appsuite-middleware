@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -287,7 +286,7 @@ public final class MimeForward {
                     contentType.getCharsetParameter(),
                     contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, contentType.toString()));
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
@@ -324,7 +323,7 @@ public final class MimeForward {
                 originalContentType.getCharsetParameter(),
                 originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.fold(14, originalContentType.toString()));
+            forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
             forwardMail = MIMEMessageConverter.convertMessage(forwardMsg);
         } else {
@@ -345,7 +344,7 @@ public final class MimeForward {
                     originalMsg,
                     false), MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, fold(14, contentType.toString()));
+                textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
                 forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
