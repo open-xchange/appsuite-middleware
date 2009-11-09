@@ -209,7 +209,7 @@ public final class BodyTerm extends SearchTerm<String> {
             charset = CharsetDetector.detectCharset(mailPart.getInputStream());
         }
         try {
-            if (contentType.startsWith("text/htm")) {
+            if (contentType.isMimeType("text/htm*")) {
                 final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
                 HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
                 return h.getText();
