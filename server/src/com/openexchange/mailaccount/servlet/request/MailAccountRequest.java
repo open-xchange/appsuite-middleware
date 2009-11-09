@@ -324,7 +324,7 @@ public final class MailAccountRequest {
             mailAccess.connect();
             close = true;
             // Compose folder tree
-            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig());
+            final JSONObject root = FolderWriter.writeMailFolder(-1, mailAccess.getRootFolder(), mailAccess.getMailConfig(), session);
             // Recursive call
             addSubfolders(
                 root,
@@ -354,7 +354,7 @@ public final class MailAccountRequest {
         parent.put("subfolder_array", subfolderArray);
 
         for (final MailFolder subfolder : subfolders) {
-            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig);
+            final JSONObject subfolderObject = FolderWriter.writeMailFolder(-1, subfolder, mailConfig, session);
             subfolderArray.put(subfolderObject);
             // Recursive call
             addSubfolders(

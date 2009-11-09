@@ -58,6 +58,8 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
@@ -74,6 +76,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderWriter} - Writes {@link MailFolder} instances as JSON strings.
@@ -377,8 +380,9 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    final String value = folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append(
-                        '/').append(folder.getUnreadMessageCount()).append(')').toString();
+                    final String value =
+                        folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(
+                            folder.getUnreadMessageCount()).append(')').toString();
                     if (withKey) {
                         ((JSONObject) jsonContainer).put(FolderFields.SUMMARY, value);
                     } else {
@@ -545,13 +549,15 @@ public final class FolderWriter {
     /**
      * Writes whole folder as a JSON object
      * 
+     * @param accountId The account ID
      * @param folder The folder to write
+     * @param session The server session
      * @return The written JSON object
      * @throws MailException
      */
-    public static JSONObject writeMailFolder(final int accountId, final MailFolder folder, final MailConfig mailConfig) throws MailException {
+    public static JSONObject writeMailFolder(final int accountId, final MailFolder folder, final MailConfig mailConfig, final ServerSession session) throws MailException {
         final JSONObject jsonObject = new JSONObject();
-        final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS, mailConfig);
+        final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS, mailConfig, session);
         for (final MailFolderFieldWriter writer : writers) {
             writer.writeField(jsonObject, accountId, folder, true);
         }
@@ -567,14 +573,29 @@ public final class FolderWriter {
      * 
      * @param fields The fields to write
      * @param mailConfig Current mail configuration
+     * @param session The server session
      * @return Appropriate field writers as an array of {@link MailFolderFieldWriter}
      */
-    public static MailFolderFieldWriter[] getMailFolderFieldWriter(final int[] fields, final MailConfig mailConfig) {
+    public static MailFolderFieldWriter[] getMailFolderFieldWriter(final int[] fields, final MailConfig mailConfig, final ServerSession session) {
+        return getMailFolderFieldWriter(fields, mailConfig, session, Folder.getAdditionalFields());
+    }
+
+    /**
+     * Generates appropriate field writers for given mail folder fields
+     * 
+     * @param fields The fields to write
+     * @param mailConfig Current mail configuration
+     * @param session The server session
+     * @param additionalFields Additional fields
+     * @return Appropriate field writers as an array of {@link MailFolderFieldWriter}
+     */
+    public static MailFolderFieldWriter[] getMailFolderFieldWriter(final int[] fields, final MailConfig mailConfig, final ServerSession session, final AdditionalFolderFieldList additionalFields) {
         final MailFolderFieldWriter[] retval = new MailFolderFieldWriter[fields.length];
         for (int i = 0; i < retval.length; i++) {
-            final MailFolderFieldWriter mffw = WRITERS_MAP.get(Integer.valueOf(fields[i]));
+            final int curField = fields[i];
+            final MailFolderFieldWriter mffw = WRITERS_MAP.get(Integer.valueOf(curField));
             if (mffw == null) {
-                if (FolderObject.CAPABILITIES == fields[i]) {
+                if (FolderObject.CAPABILITIES == curField) {
                     retval[i] = new ExtendedMailFolderFieldWriter(mailConfig) {
 
                         @Override
@@ -596,21 +617,36 @@ public final class FolderWriter {
                         }
                     };
                 } else {
-                    LOG.error("Unknown column: " + fields[i]);
+
+                    if (!additionalFields.knows(curField) && LOG.isWarnEnabled()) {
+                        LOG.warn("Unknown folder field: " + curField);
+                    }
+
+                    final AdditionalFolderField folderField = additionalFields.get(curField);
                     retval[i] = new MailFolderFieldWriter() {
 
                         @Override
                         public void writeField(final JSONValue jsonContainer, final int accountId, final MailFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                             try {
+                                /*-
+                                 * TODO: Proper MailFolder-2-FolderObject conversion needed:
+                                 * 
+                                 * folderField.renderJSON(folderField.getValue(fo, session))
+                                 */
                                 if (withKey) {
-                                    ((JSONObject) jsonContainer).put(STR_UNKNOWN_COLUMN, JSONObject.NULL);
+                                    final String columnName = folderField.getColumnName();
+                                    if (null == columnName) {
+                                        return;
+                                    }
+                                    ((JSONObject) jsonContainer).put(columnName, Boolean.FALSE);
                                 } else {
-                                    ((JSONArray) jsonContainer).put(JSONObject.NULL);
+                                    ((JSONArray) jsonContainer).put(Boolean.FALSE);
                                 }
                             } catch (final JSONException e) {
                                 throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
                             }
                         }
+
                     };
                 }
             } else {

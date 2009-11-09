@@ -721,7 +721,8 @@ public class Folder extends SessionServlet {
                                                     final MailFolderFieldWriter[] mailFolderWriters =
                                                         com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                                                             columns,
-                                                            mailAccess.getMailConfig());
+                                                            mailAccess.getMailConfig(),
+                                                            session);
                                                     final JSONArray ja = new JSONArray();
                                                     if (mailAccount.isDefaultAccount()) {
                                                         for (int i = 0; i < mailFolderWriters.length; i++) {
@@ -977,7 +978,10 @@ public class Folder extends SessionServlet {
                      */
                     it = mailInterface.getChildFolders(parentIdentifier, all);
                     final MailFolderFieldWriter[] writers =
-                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
+                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                            columns,
+                            mailInterface.getMailConfig(),
+                            session);
                     final int size = it.size();
                     boolean inboxFound = false;
                     for (int i = 0; i < size; i++) {
@@ -1148,7 +1152,10 @@ public class Folder extends SessionServlet {
                      */
                     it = mailInterface.getPathToDefaultFolder(folderIdentifier);
                     final MailFolderFieldWriter[] writers =
-                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
+                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                            columns,
+                            mailInterface.getMailConfig(),
+                            session);
                     final int size = it.size();
                     final int accountID = mailInterface.getAccountID();
                     for (int i = 0; i < size; i++) {
@@ -1479,7 +1486,8 @@ public class Folder extends SessionServlet {
                                             final MailFolderFieldWriter[] mailFolderWriters =
                                                 com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                                                     columns,
-                                                    mailAccess.getMailConfig());
+                                                    mailAccess.getMailConfig(),
+                                                    session);
                                             final JSONArray ja = new JSONArray();
                                             if (mailAccount.isDefaultAccount()) {
                                                 for (int i = 0; i < mailFolderWriters.length; i++) {
@@ -1637,7 +1645,10 @@ public class Folder extends SessionServlet {
                     mailInterface = MailServletInterface.getInstance(session);
                     final MailFolder f = mailInterface.getFolder(folderIdentifier, true);
                     final MailFolderFieldWriter[] writers =
-                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
+                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                            columns,
+                            mailInterface.getMailConfig(),
+                            session);
                     final JSONObject jo = new JSONObject();
                     for (final MailFolderFieldWriter writer : writers) {
                         writer.writeField(jo, mailInterface.getAccountID(), f, true);
