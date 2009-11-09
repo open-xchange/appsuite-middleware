@@ -484,7 +484,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             if (determineAttachmentByHeader) {
                 final String cts = msg.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
                 if (null != cts) {
-                    msg.setHasAttachment(new ContentType(cts).isMimeType("multipart/mixed"));
+                    msg.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
                 }
             }
         } catch (final MessagingException e) {
