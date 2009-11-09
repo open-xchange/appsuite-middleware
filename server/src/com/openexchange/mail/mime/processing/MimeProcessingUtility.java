@@ -247,6 +247,8 @@ public final class MimeProcessingUtility {
         return tmp.toString();
     }
 
+    private static final String CT_TEXT_HTM = "text/htm";
+
     /**
      * Appends the appropriate text version dependent on root's content type and current text's content type
      * 
@@ -259,7 +261,7 @@ public final class MimeProcessingUtility {
     static void appendRightVersion(final ContentType rootType, final ContentType contentType, final String text, final StringBuilder textBuilder) throws IOException {
         if (rootType.getBaseType().equalsIgnoreCase(contentType.getBaseType())) {
             textBuilder.append(text);
-        } else if (rootType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+        } else if (rootType.startsWith(CT_TEXT_HTM)) {
             textBuilder.append(htmlFormat(text));
         } else {
             final HTML2TextHandler handler = new HTML2TextHandler(text.length(), false);
