@@ -68,55 +68,56 @@ public class AdditionalFolderFieldList {
 
     private static final Log LOG = LogFactory.getLog(AdditionalFolderFieldList.class);
     
-    private Map<Integer, AdditionalFolderField> byColId = new HashMap<Integer, AdditionalFolderField>();
-    private Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
+    private final Map<Integer, AdditionalFolderField> byColId = new HashMap<Integer, AdditionalFolderField>();
+    private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
     
-    public synchronized void addField(AdditionalFolderField field) {
-        if(byColId.containsKey(field.getColumnID()) || byName.containsKey(field.getColumnName())) {
+    public synchronized void addField(final AdditionalFolderField field) {
+        final Integer key = Integer.valueOf(field.getColumnID());
+        if(byColId.containsKey(key) || byName.containsKey(field.getColumnName())) {
             warnAboutCollision(field);
             return;
         }
-        byColId.put(field.getColumnID(), field);
+        byColId.put(key, field);
         byName.put(field.getColumnName(), field);
     }
 
-    private void warnAboutCollision(AdditionalFolderField field) {
+    private void warnAboutCollision(final AdditionalFolderField field) {
         LOG.warn("Collision in folder fields. Field '"+field.getColumnName()+"' : "+field.getColumnID()+" has already been taken. Ignoring second service.");
     }
 
-    public AdditionalFolderField get(int col) {
+    public AdditionalFolderField get(final int col) {
         if(!knows(col)) {
             return new NullField(col);
         }
-        return byColId.get(col);
+        return byColId.get(Integer.valueOf(col));
     }
 
-    public AdditionalFolderField get(String col) {
+    public AdditionalFolderField get(final String col) {
         return byName.get(col);
     }
 
-    public boolean knows(int col) {
-        return byColId.containsKey(col);
+    public boolean knows(final int col) {
+        return byColId.containsKey(Integer.valueOf(col));
     }
     
-    public boolean knows(String col) {
+    public boolean knows(final String col) {
         return byName.containsKey(col);
     }
 
-    public synchronized void remove(int colId) {
+    public synchronized void remove(final int colId) {
         if(!knows(colId)) {
             return;
         }
-        AdditionalFolderField f = get(colId);
+        final AdditionalFolderField f = get(colId);
         byName.remove(f.getColumnName());
-        byColId.remove(colId);
+        byColId.remove(Integer.valueOf(colId));
     }
     
     private static final class NullField implements AdditionalFolderField {
         
-        private int columnId;
+        private final int columnId;
         
-        private NullField(int columnId) {
+        NullField(final int columnId) {
             super();
             this.columnId = columnId;
         }
@@ -129,11 +130,11 @@ public class AdditionalFolderFieldList {
             return null;
         }
 
-        public Object getValue(FolderObject folder, ServerSession session) {
+        public Object getValue(final FolderObject folder, final ServerSession session) {
             return null;
         }
 
-        public Object renderJSON(Object value) {
+        public Object renderJSON(final Object value) {
             return null;
         }
         
