@@ -1180,19 +1180,17 @@ public final class MIMEMessageConverter {
                         ct.getSubType())));
                 } catch (final ClassCastException e) {
                     // Cast to javax.mail.Multipart failed
-                    LOG.warn(
-                        new StringBuilder(256).append(
-                            "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                            e.getMessage()).append(
-                            ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(),
-                        e);
+                    LOG.warn(new StringBuilder(256).append(
+                        "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
+                        e.getMessage()).append(
+                        ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                     mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {
                     // A messaging error occurred
                     LOG.warn(new StringBuilder(256).append(
                         "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                         e.getMessage()).append(
-                        ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
+                        ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                     mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
                 }
             }
