@@ -65,7 +65,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -123,8 +122,10 @@ public final class InlineContentHandler implements MailMessageHandler {
         return inlineContents;
     }
 
+    private static final String IMAGE = "image/";
+
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
-        if (part.getContentType().isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
+        if (part.getContentType().startsWith(IMAGE)) {
             String partCid = part.getContentId();
             if (partCid == null || partCid.length() == 0) {
                 partCid = part.getFirstHeader(MessageHeaders.HDR_CONTENT_ID);

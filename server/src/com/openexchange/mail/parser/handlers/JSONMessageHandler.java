@@ -531,7 +531,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             return true;
         }
         try {
-            if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED) || contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT) || contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
+            if (contentType.startsWith(MIMETypes.MIME_TEXT_ENRICHED) || contentType.startsWith(MIMETypes.MIME_TEXT_RICHTEXT) || contentType.startsWith(MIMETypes.MIME_TEXT_RTF)) {
                 if (textAppended) {
                     if (DisplayMode.DISPLAY.equals(displayMode)) {
                         /*
@@ -705,7 +705,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         /*
          * Determine if message is of MIME type multipart/alternative
          */
-        if (mp.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
+        if (mp.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
             isAlternative = true;
             altId = id;
         } else if (null != altId && !id.startsWith(altId)) {

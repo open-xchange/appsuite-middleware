@@ -209,7 +209,7 @@ public final class BodyTerm extends SearchTerm<String> {
             charset = CharsetDetector.detectCharset(mailPart.getInputStream());
         }
         try {
-            if (contentType.isMimeType("text/htm*")) {
+            if (contentType.startsWith("text/htm")) {
                 final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
                 HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
                 return h.getText();
@@ -230,7 +230,7 @@ public final class BodyTerm extends SearchTerm<String> {
     private static String getPartTextContent(final Part part) throws MailException {
         try {
             final ContentType ct = new ContentType(part.getContentType());
-            if (!ct.isMimeType("text/*")) {
+            if (!ct.startsWith("text/")) {
                 /*
                  * No textual content
                  */
@@ -240,7 +240,7 @@ public final class BodyTerm extends SearchTerm<String> {
             if (!CharsetDetector.isValid(charset)) {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
             }
-            if (ct.isMimeType("text/htm*")) {
+            if (ct.startsWith("text/htm")) {
                 final HTML2TextHandler h = new HTML2TextHandler(part.getSize(), false);
                 HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMimePart(part, charset), charset), h);
                 return h.getText();

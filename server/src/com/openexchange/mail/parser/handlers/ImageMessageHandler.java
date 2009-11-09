@@ -102,13 +102,10 @@ public final class ImageMessageHandler implements MailMessageHandler {
         return imagePart;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.parser.MailMessageHandler#handleAttachment(com.openexchange.mail.dataobjects.MailPart, boolean,
-     * java.lang.String, java.lang.String, java.lang.String)
-     */
+    private static final String IMAGE = "image/";
+
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
-        if (part.getContentType().isMimeType(MIMETypes.MIME_IMAGE_ALL) || part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+        if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MIMETypes.MIME_APPL_OCTET)) {
             String cid = part.getContentId();
             if (cid == null || cid.length() == 0) {
                 /*

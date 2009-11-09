@@ -102,9 +102,11 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
         return nonInlineParts;
     }
 
+    private static final String APPLICATION = "application/";
+
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws MailException {
-        if (!isInline || part.getContentDisposition().containsFilenameParameter() || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || part.getContentType().isMimeType(
-            MIMETypes.MIME_APPL_ALL)) {
+        if (!isInline || part.getContentDisposition().containsFilenameParameter() || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || part.getContentType().startsWith(
+            APPLICATION)) {
             nonInlineParts.add(part);
         }
         return true;
@@ -216,7 +218,8 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
     }
 
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws MailException {
-        final String disposition = part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE : Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
+        final String disposition =
+            part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE : Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
         if (!Part.INLINE.equalsIgnoreCase(disposition)) {
             nonInlineParts.add(part);
         }

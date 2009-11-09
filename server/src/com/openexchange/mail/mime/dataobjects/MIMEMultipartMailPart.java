@@ -368,7 +368,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
         if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
             return new MIMEMultipartMailPart(ct, subArr);
-        } else if (ct.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+        } else if (ct.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
             return MIMEMessageConverter.convertMessage(subArr);
         } else {
             return MIMEMessageConverter.convertPart(subArr);

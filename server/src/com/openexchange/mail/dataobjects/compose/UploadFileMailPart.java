@@ -103,13 +103,15 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         setContentDisposition(cd);
     }
 
+    private static final String TEXT = "text/";
+
     private DataSource getDataSource() {
         /*
          * Lazy creation
          */
         if (null == dataSource) {
             try {
-                if (getContentType().getCharsetParameter() == null && getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                if (getContentType().getCharsetParameter() == null && getContentType().startsWith(TEXT)) {
                     /*
                      * Guess charset for textual attachment
                      */

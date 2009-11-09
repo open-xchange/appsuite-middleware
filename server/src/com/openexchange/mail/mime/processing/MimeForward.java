@@ -450,19 +450,19 @@ public final class MimeForward {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
-        if ((contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) || contentType.isMimeType(MIMETypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
+        if ((contentType.startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) || contentType.startsWith(MIMETypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
             /*
              * Get html content
              */
             for (int i = 0; i < count; i++) {
                 final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
-                if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
+                if (partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType)) {
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     retvalContentType.setContentType(partContentType);
                     retvalContentType.setCharsetParameter(charset);
                     return MimeProcessingUtility.readContent(part, charset);
-                } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+                } else if (partContentType.startsWith(MULTIPART)) {
                     final String text = getFirstSeenText(part, retvalContentType, usm);
                     if (text != null) {
                         return text;
@@ -476,12 +476,12 @@ public final class MimeForward {
         for (int i = 0; i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.isMimeType(MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(part, partContentType)) {
+            if (partContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
                 final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
                 return MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
-            } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+            } else if (partContentType.startsWith(MULTIPART)) {
                 final String text = getFirstSeenText(part, retvalContentType, usm);
                 if (text != null) {
                     return text;

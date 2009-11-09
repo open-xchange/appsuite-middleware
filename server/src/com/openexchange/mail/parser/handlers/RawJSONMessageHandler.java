@@ -465,7 +465,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         /*
          * Determine if message is of MIME type multipart/alternative
          */
-        if (mp.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
+        if (mp.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
             isAlternative = true;
             altId = id;
         } else if (null != altId && !id.startsWith(altId)) {

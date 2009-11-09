@@ -261,7 +261,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             MailMessage tmp = null;
             if (wrapped instanceof MailMessage) {
                 tmp = (MailMessage) wrapped;
-            } else if (wrapped.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+            } else if (wrapped.getContentType().startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
                 tmp = (MailMessage) (wrapped.getContent());
             }
             if (null == tmp) {
