@@ -67,7 +67,7 @@ public class PublicationUserDeleteListener implements DeleteListener {
 
     private PublicationStorage storage;
     
-    public void setStorage(PublicationStorage storage) {
+    public void setStorage(final PublicationStorage storage) {
         this.storage = storage;
     }
 
@@ -75,15 +75,16 @@ public class PublicationUserDeleteListener implements DeleteListener {
         return storage;
     }
 
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
-        if(event.getType() != DeleteEvent.TYPE_USER)
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
+        if(event.getType() != DeleteEvent.TYPE_USER) {
             return;
-        int userID = event.getId();
-        Context context = event.getContext();
+        }
+        final int userID = event.getId();
+        final Context context = event.getContext();
         try {
-            PublicationStorage store = getStorage();
+            final PublicationStorage store = getStorage();
             store.deletePublicationsOfUser(userID, context);
-        } catch (PublicationException e) {
+        } catch (final PublicationException e) {
             throw new DeleteFailedException(e);
         }
     }
