@@ -169,6 +169,8 @@ public final class MIMEMailPart extends MailPart {
         applyPart(part);
     }
 
+    private static final String MULTIPART = "multipart/";
+
     private void applyPart(final Part part) {
         this.part = part;
         if (null == part) {
@@ -185,7 +187,7 @@ public final class MIMEMailPart extends MailPart {
                 } else {
                     this.setContentType(MIMETypes.MIME_DEFAULT);
                 }
-                tmp = getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL);
+                tmp = getContentType().startsWith(MULTIPART);
             } catch (final MailException e) {
                 LOG.error(e.getMessage(), e);
             } catch (final MessagingException e) {

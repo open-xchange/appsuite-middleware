@@ -605,14 +605,14 @@ public class MIMEMessageFiller {
         final boolean sendMultipartAlternative;
         if (mail.isDraft()) {
             sendMultipartAlternative = false;
-            if (mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE)) {
+            if (mail.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE)) {
                 /*
                  * Allow only HTML if a draft message should be "sent"
                  */
                 mail.setContentType(MIMETypes.MIME_TEXT_HTML);
             }
         } else {
-            sendMultipartAlternative = mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE);
+            sendMultipartAlternative = mail.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE);
         }
         /*
          * HTML content with embedded images

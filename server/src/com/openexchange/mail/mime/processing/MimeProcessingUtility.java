@@ -206,6 +206,8 @@ public final class MimeProcessingUtility {
         }
     }
 
+    private static final String TEXT = "text/";
+
     private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
         final String charset;
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
@@ -214,7 +216,7 @@ public final class MimeProcessingUtility {
                 if (null != cs) {
                     LOG.warn("Illegal or unsupported encoding in a message detected: \"" + cs + '"', new UnsupportedEncodingException(cs));
                 }
-                if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+                if (contentType.startsWith(TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
@@ -222,7 +224,7 @@ public final class MimeProcessingUtility {
             }
             charset = cs;
         } else {
-            if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+            if (contentType.startsWith(TEXT)) {
                 charset = CharsetDetector.detectCharset(mailPart.getInputStream());
             } else {
                 charset = MailProperties.getInstance().getDefaultMimeCharset();

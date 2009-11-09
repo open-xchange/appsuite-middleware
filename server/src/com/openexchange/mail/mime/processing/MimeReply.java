@@ -485,6 +485,12 @@ public final class MimeReply {
 
     private static final Pattern PATTERN_SENDER = Pattern.compile(Pattern.quote("#SENDER#"));
 
+    private static final String MULTIPART = "multipart/";
+
+    private static final String TEXT = "text/";
+
+    private static final String TEXT_HTM = "text/htm";
+
     /**
      * Gathers all text bodies and appends them to given text builder.
      * 
@@ -500,11 +506,11 @@ public final class MimeReply {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
-        if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+        if (contentType.startsWith(MULTIPART)) {
             final ParameterContainer pc =
                 new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, locale, replyTexts);
             found |= gatherAllTextContents(msg, contentType, pc);
-        } else if (contentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        } else if (contentType.startsWith(TEXT)) {
             if (retvalContentType.getPrimaryType() == null) {
                 final String text = MimeProcessingUtility.handleInlineTextPart(msg, contentType, usm.isDisplayHtmlInlineContent());
                 retvalContentType.setContentType(contentType);
@@ -516,7 +522,7 @@ public final class MimeReply {
             found = true;
         }
         if (found) {
-            final boolean isHtml = retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL);
+            final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
             String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
             {
                 final Date date = msg.getSentDate();
@@ -588,7 +594,7 @@ public final class MimeReply {
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
         boolean found = false;
-        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && count >= 2) {
+        if (pc.usm.isDisplayHtmlInlineContent() && mpContentType.startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && count >= 2) {
             /*
              * Prefer HTML content within multipart/alternative part
              */
@@ -611,7 +617,7 @@ public final class MimeReply {
         for (int i = count - 1; i >= 0; i--) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+            if (partContentType.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
                 final MailMessage enclosedMsg = (MailMessage) part.getContent();
                 found |=
                     generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
@@ -640,9 +646,7 @@ public final class MimeReply {
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.isMimeType(preferHTML ? MIMETypes.MIME_TEXT_HTM_ALL : MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(
-                part,
-                partContentType)) {
+            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
@@ -661,7 +665,7 @@ public final class MimeReply {
                     MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
                 }
                 found = true;
-            } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+            } else if (partContentType.startsWith(MULTIPART)) {
                 found |= gatherAllTextContents(part, partContentType, pc);
             }
         }

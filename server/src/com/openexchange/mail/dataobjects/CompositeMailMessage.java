@@ -65,7 +65,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -86,6 +85,8 @@ public final class CompositeMailMessage extends MailMessage {
 
     private final int delegateEnclosedCount;
 
+    private static final String MULTIPART = "multipart/";
+
     /**
      * Constructor
      * 
@@ -94,7 +95,7 @@ public final class CompositeMailMessage extends MailMessage {
      */
     public CompositeMailMessage(final MailMessage delegate) throws MailException {
         super();
-        if (!delegate.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+        if (!delegate.getContentType().startsWith(MULTIPART)) {
             throw new IllegalArgumentException("Specified delegate mail must be of MIME type multipart/*");
         }
         this.delegate = delegate;

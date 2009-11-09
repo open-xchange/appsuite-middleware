@@ -177,7 +177,7 @@ public class MailObject {
         final String fileName = file.getName();
         final ContentType ct = new ContentType();
         ct.setContentType(contentType);
-        if (ct.isMimeType(MIMETypes.MIME_APPL_OCTET)) {
+        if (ct.startsWith(MIMETypes.MIME_APPL_OCTET)) {
             /*
              * Try to determine MIME type
              */

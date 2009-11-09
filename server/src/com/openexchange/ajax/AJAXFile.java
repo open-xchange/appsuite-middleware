@@ -447,17 +447,17 @@ public final class AJAXFile extends PermissionServlet {
         if (FILE_TYPE_ALL.equalsIgnoreCase(filter)) {
             return true;
         } else if (FILE_TYPE_TEXT.equalsIgnoreCase(filter)) {
-            return fileContentType.isMimeType("text/*");
+            return fileContentType.startsWith("text/");
         } else if (FILE_TYPE_MEDIA.equalsIgnoreCase(filter)) {
-            return fileContentType.isMimeType("image/*") || fileContentType.isMimeType("audio/*") || fileContentType.isMimeType("video/*");
+            return fileContentType.startsWith("image/") || fileContentType.startsWith("audio/") || fileContentType.startsWith("video/");
         } else if (FILE_TYPE_IMAGE.equalsIgnoreCase(filter)) {
-            return fileContentType.isMimeType("image/*");
+            return fileContentType.startsWith("image/");
         } else if (FILE_TYPE_AUDIO.equalsIgnoreCase(filter)) {
-            return fileContentType.isMimeType("audio/*");
+            return fileContentType.startsWith("audio/");
         } else if (FILE_TYPE_VIDEO.equalsIgnoreCase(filter)) {
-            return fileContentType.isMimeType("video/*");
+            return fileContentType.startsWith("video/");
         } else if (FILE_TYPE_APPLICATION.equalsIgnoreCase(filter)) {
-            return fileContentType.isMimeType("application/*");
+            return fileContentType.startsWith("application/");
         }
         return false;
     }

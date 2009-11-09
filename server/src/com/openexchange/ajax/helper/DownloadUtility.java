@@ -96,7 +96,7 @@ public final class DownloadUtility {
          * the client decide if it's able to display.
          */
         final ContentType contentType = new ContentType(contentTypeStr);
-        if (contentType.isMimeType("application/octet-stream")) {
+        if (contentType.startsWith("application/octet-stream")) {
             /*
              * Try to determine MIME type
              */
@@ -111,7 +111,7 @@ public final class DownloadUtility {
         /*
          * Check if it's image content requested by Internet Explorer < v8
          */
-        if (contentType.isMimeType("image/*") && msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
+        if (contentType.startsWith("image/") && msieOnWindows && 8F > browserDetector.getBrowserVersion()) {
             /*
              * Get first 256 bytes
              */

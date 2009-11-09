@@ -203,9 +203,8 @@ public final class MimeForward {
              * New MIME message with a dummy session
              */
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(
-                session.getUserId(),
-                ctx) : userSettingMail;
+            final UserSettingMail usm =
+                userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
             final MimeMessage forwardMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
             {
                 /*
@@ -217,13 +216,14 @@ public final class MimeForward {
                     forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
                 } else {
                     origSubject = MIMEMessageUtility.unfold(origSubject);
-                    final String subject = MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
-                        true,
-                        0,
-                        subjectPrefix,
-                        0,
-                        subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
-                        subjectPrefix).append(origSubject).toString());
+                    final String subject =
+                        MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(
+                            true,
+                            0,
+                            subjectPrefix,
+                            0,
+                            subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
+                            subjectPrefix).append(origSubject).toString());
                     forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
                 }
             }
@@ -252,6 +252,12 @@ public final class MimeForward {
         }
     }
 
+    private static final String MULTIPART = "multipart/";
+
+    private static final String TEXT = "text/";
+
+    private static final String TEXT_HTM = "text/htm";
+
     private static MailMessage asInlineForward(final MailMessage originalMsg, final Session session, final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws MailException, MessagingException, IOException {
         /*
          * Check for message reference
@@ -259,7 +265,7 @@ public final class MimeForward {
         final MailPath msgref = originalMsg.getMailPath();
         final ContentType originalContentType = originalMsg.getContentType();
         final MailMessage forwardMail;
-        if (originalContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+        if (originalContentType.startsWith(MULTIPART)) {
             final Multipart multipart = new MimeMultipart();
             {
                 /*
@@ -282,7 +288,7 @@ public final class MimeForward {
                         firstSeenText == null ? "" : firstSeenText,
                         UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
                         originalMsg,
-                        contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
+                        contentType.startsWith(TEXT_HTM)),
                     contentType.getCharsetParameter(),
                     contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -303,7 +309,7 @@ public final class MimeForward {
                 compositeMail.addAdditionalParts(mailPart);
             }
             forwardMail = compositeMail;
-        } else if (originalContentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+        } else if (originalContentType.startsWith(TEXT)) {
             /*
              * Original message is a simple text mail: Add message body prefixed with forward text
              */
@@ -314,14 +320,11 @@ public final class MimeForward {
                 }
             }
             final String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
-            forwardMsg.setText(
-                generateForwardText(
-                    content == null ? "" : content,
-                    UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
-                    originalMsg,
-                    originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
-                originalContentType.getCharsetParameter(),
-                originalContentType.getSubType());
+            forwardMsg.setText(generateForwardText(
+                content == null ? "" : content,
+                UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
+                originalMsg,
+                originalContentType.startsWith(TEXT_HTM)), originalContentType.getCharsetParameter(), originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
@@ -422,9 +425,10 @@ public final class MimeForward {
             } else {
                 final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) originalMsg.getSize());
                 originalMsg.writeTo(tmp);
-                nested = MIMEMessageConverter.convertMessage(new MimeMessage(
-                    MIMEDefaultSession.getDefaultSession(),
-                    new UnsynchronizedByteArrayInputStream(tmp.toByteArray())));
+                nested =
+                    MIMEMessageConverter.convertMessage(new MimeMessage(
+                        MIMEDefaultSession.getDefaultSession(),
+                        new UnsynchronizedByteArrayInputStream(tmp.toByteArray())));
             }
             nested.setMsgref(originalMsg.getMailPath());
             compositeMail.addAdditionalParts(new NestedMessageMailPart(nested));
@@ -519,24 +523,27 @@ public final class MimeForward {
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {
             final InternetAddress[] from = msg.getFrom();
-            forwardPrefix = PATTERN_FROM.matcher(forwardPrefix).replaceFirst(
-                from == null || from.length == 0 ? "" : from[0].toUnicodeString());
+            forwardPrefix =
+                PATTERN_FROM.matcher(forwardPrefix).replaceFirst(from == null || from.length == 0 ? "" : from[0].toUnicodeString());
         }
         {
             final InternetAddress[] to = msg.getTo();
-            forwardPrefix = PATTERN_TO.matcher(forwardPrefix).replaceFirst(
-                to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
+            forwardPrefix =
+                PATTERN_TO.matcher(forwardPrefix).replaceFirst(to == null || to.length == 0 ? "" : MimeProcessingUtility.addrs2String(to));
         }
         {
             final InternetAddress[] cc = msg.getCc();
-            forwardPrefix = PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(MimeProcessingUtility.addrs2String(cc)).toString());
+            forwardPrefix =
+                PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
+                    cc == null || cc.length == 0 ? "" : new StringBuilder(64).append("\nCc: ").append(
+                        MimeProcessingUtility.addrs2String(cc)).toString());
         }
         {
             final Date date = msg.getSentDate();
             try {
-                forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
-                    date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
+                forwardPrefix =
+                    PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
+                        date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -544,8 +551,9 @@ public final class MimeForward {
                 forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst("");
             }
             try {
-                forwardPrefix = PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
-                    date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+                forwardPrefix =
+                    PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
+                        date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -556,8 +564,8 @@ public final class MimeForward {
         }
         {
             final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(msg.getSubject());
-            forwardPrefix = PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(
-                decodedSubject == null ? "" : Matcher.quoteReplacement(decodedSubject));
+            forwardPrefix =
+                PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : Matcher.quoteReplacement(decodedSubject));
         }
         if (html) {
             forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
