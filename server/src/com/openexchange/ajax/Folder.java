@@ -425,12 +425,11 @@ public class Folder extends SessionServlet {
             if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
                 ignoreMailfolder = true;
             }
-
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS);
             int parentId = -1;
             if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
                 // TODO: DELEGATE TO getRootFolder() if parentId is "0"
-                long lastModified = 0;
+                long lastModified = Long.MIN_VALUE;
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
                 /*
@@ -446,10 +445,8 @@ public class Folder extends SessionServlet {
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified =
-                            listFolder.getLastModified() == null ? lastModified : Math.max(
-                                lastModified,
-                                listFolder.getLastModified().getTime());
+                        final Date modified = listFolder.getLastModified();
+                        lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -469,10 +466,8 @@ public class Folder extends SessionServlet {
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified =
-                            listFolder.getLastModified() == null ? lastModified : Math.max(
-                                lastModified,
-                                listFolder.getLastModified().getTime());
+                        final Date modified = listFolder.getLastModified();
+                        lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -492,10 +487,8 @@ public class Folder extends SessionServlet {
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified =
-                            listFolder.getLastModified() == null ? lastModified : Math.max(
-                                lastModified,
-                                listFolder.getLastModified().getTime());
+                        final Date modified = listFolder.getLastModified();
+                        lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -515,10 +508,8 @@ public class Folder extends SessionServlet {
                     final Iterator<FolderObject> iter = q.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject listFolder = iter.next();
-                        lastModified =
-                            listFolder.getLastModified() == null ? lastModified : Math.max(
-                                lastModified,
-                                listFolder.getLastModified().getTime());
+                        final Date modified = listFolder.getLastModified();
+                        lastModified = modified == null ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
@@ -567,7 +558,8 @@ public class Folder extends SessionServlet {
                     final Iterator<FolderObject> iter = l.iterator();
                     for (int i = 0; i < size; i++) {
                         final FolderObject fo = iter.next();
-                        lastModified = fo.getLastModified() == null ? lastModified : Math.max(lastModified, fo.getLastModified().getTime());
+                        final Date modified = fo.getLastModified();
+                        lastModified = null == modified ? lastModified : Math.max(lastModified, modified.getTime());
                         jsonWriter.array();
                         try {
                             for (int j = 0; j < writers.length; j++) {
