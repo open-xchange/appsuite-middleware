@@ -611,7 +611,7 @@ public final class MimeReply {
         for (int i = count - 1; i >= 0; i--) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+            if (partContentType.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
                 final MailMessage enclosedMsg = (MailMessage) part.getContent();
                 found |=
                     generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
