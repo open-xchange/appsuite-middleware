@@ -151,7 +151,7 @@ public final class UpdateTaskResetVersionCLT {
                 try {
                     contextId = Integer.parseInt(optionValue.trim());
                 } catch (final NumberFormatException e) {
-                    System.err.println("Port parameter is not a number: " + optionValue);
+                    System.err.println("Context parameter is not a number: " + optionValue);
                     printHelp();
                     System.exit(0);
                 }
