@@ -51,6 +51,7 @@ package com.openexchange.calendar.printing.days;
 
 import java.util.Calendar;
 import java.util.Date;
+import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
 
 /**
@@ -110,5 +111,13 @@ public class CalendarTools {
         if (weekDay > Calendar.SUNDAY) {
             cal.add(Calendar.DAY_OF_WEEK, 8 - weekDay);
         }
+    }
+
+    public static boolean overlaps(CPAppointment appointment1, CPAppointment appointment2) {
+        return overlaps(appointment2, appointment1.getStartDate(), appointment1.getEndDate());
+    }
+
+    public static boolean overlaps(CPAppointment appointment, Date startDate, Date endDate) {
+        return appointment.getStartDate().before(endDate) && appointment.getEndDate().after(startDate);
     }
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.calendar.printing.days;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -72,17 +70,14 @@ public class Day implements Comparable<Day> {
     private final boolean outOfRange;
     private List<CPAppointment> wholeDayAppointments = new ArrayList<CPAppointment>();
     private SortedSet<CPAppointment> appointments = new TreeSet<CPAppointment>(new AppointmentStartComparator());
-    private List<List<CPAppointment>> hours = new ArrayList<List<CPAppointment>>(24);
-    private int sideBySide = 1;
+    private List<SortedSet<CPAppointment>> columns = new ArrayList<SortedSet<CPAppointment>>();
 
     public Day(Date time, CPCalendar cal, boolean outOfRange) {
         super();
         this.time = time;
         this.cal = cal;
         this.outOfRange = outOfRange;
-        for (int i=0; i < 24; i++) {
-            hours.add(new ArrayList<CPAppointment>());
-        }
+        columns.add(new TreeSet<CPAppointment>(new AppointmentStartComparator()));
     }
 
     public int compareTo(Day o) {
@@ -115,22 +110,8 @@ public class Day implements Comparable<Day> {
         return outOfRange;
     }
 
-    public String getDayOfWeek() {
-        DateFormat df = new SimpleDateFormat("EEEE", cal.getLocale());
-        df.setTimeZone(cal.getTimeZone());
-        return df.format(time);
-    }
-
-    public String getMonth() {
-        DateFormat df = new SimpleDateFormat("MMMM", cal.getLocale());
-        df.setTimeZone(cal.getTimeZone());
-        return df.format(time);
-    }
-
-    public String getMonthAndDay() {
-        DateFormat df = new SimpleDateFormat("d. MMMM", cal.getLocale());
-        df.setTimeZone(cal.getTimeZone());
-        return df.format(time);
+    public String format(String pattern, Date date) {
+        return cal.format(pattern, date);
     }
 
     public void addWholeDay(CPAppointment appointment) {
@@ -147,6 +128,22 @@ public class Day implements Comparable<Day> {
 
     public void add(CPAppointment appointment) {
         appointments.add(appointment);
+        for (SortedSet<CPAppointment> column : columns) {
+            boolean fits = true;
+            for (CPAppointment other : column) {
+                if (CalendarTools.overlaps(appointment, other)) {
+                    fits = false;
+                    break;
+                }
+            }
+            if (fits) {
+                column.add(appointment);
+                return;
+            }            
+        }
+        SortedSet<CPAppointment> newColumn = new TreeSet<CPAppointment>(new AppointmentStartComparator());
+        columns.add(newColumn);
+        newColumn.add(appointment);
     }
 
     public List<CPAppointment> getAppointments() {
@@ -161,12 +158,35 @@ public class Day implements Comparable<Day> {
         return appointments.size() != 0;
     }
 
-    public void addToHour(int hour, CPAppointment appointment) {
-        hours.get(hour).add(appointment);
+    public List<CPAppointment> getAppointmentsStartingBetween(int startMinutes, int endMinutes) {
+        Date orig = cal.getTime();
+        cal.setTime(time);
+        cal.add(Calendar.MINUTE, startMinutes);
+        Date startDate = cal.getTime();
+        cal.setTime(time);
+        cal.add(Calendar.MINUTE, endMinutes);
+        Date endDate = cal.getTime();
+        List<CPAppointment> retval = new ArrayList<CPAppointment>();
+        for (CPAppointment appointment : appointments) {
+            if (!appointment.getStartDate().before(startDate) && appointment.getStartDate().before(endDate)) {
+                retval.add(appointment);
+            }
+        }
+        cal.setTime(orig);
+        return retval;
     }
 
-    public List<CPAppointment> getAppointmentsOfHour(int hour) {
-        return hours.get(hour);
+    public List<SortedSet<CPAppointment>> getColumns() {
+        return columns;
+    }
+
+    public int getColumn(CPAppointment appointment) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns.get(i).contains(appointment)) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     public boolean isToday() {

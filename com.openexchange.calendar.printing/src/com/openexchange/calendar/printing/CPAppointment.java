@@ -50,6 +50,8 @@
 package com.openexchange.calendar.printing;
 
 import java.util.Date;
+import com.openexchange.calendar.printing.days.CalendarTools;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -64,13 +66,21 @@ public class CPAppointment {
     private Date startDate, endDate;
 
     private Appointment original;
-    
+
+    private final CPCalendar cal;
+
     public CPAppointment() {
         super();
+        this.cal = null;
     }
 
     public CPAppointment(Appointment mother) {
-        this();
+        this(mother, null);
+    }
+
+    public CPAppointment(Appointment mother, CPCalendar cal) {
+        super();
+        this.cal = cal;
         setTitle(mother.getTitle());
         setDescription(mother.getNote());
         setLocation(mother.getLocation());
@@ -95,8 +105,20 @@ public class CPAppointment {
         return startDate;
     }
 
+    public String format(String pattern, Date date) {
+        return cal.format(pattern, date);
+    }
+
+    public long getStartMinutes() {
+        return (startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime()) / Constants.MILLI_MINUTE;
+    }
+
     public Date getEndDate() {
         return endDate;
+    }
+
+    public long getDurationInMinutes() {
+        return (endDate.getTime() - startDate.getTime()) / Constants.MILLI_MINUTE;
     }
 
     public void setTitle(String title) {

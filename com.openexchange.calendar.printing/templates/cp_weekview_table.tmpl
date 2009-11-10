@@ -1,120 +1,274 @@
-<#macro timezone a_date>
-                  <span class="date timezone">${a_date?string("zzz")}</span>
-</#macro>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<#macro date a_date>
-                  <span class="date">${a_date?string("dd.MM.yyyy, EEE")}</span>
-</#macro>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style type="text/css">
+/* reset
+---------------------------------------------------*/
+*                                                 { text-decoration:none; font-size: 1em; outline: none; padding: 0; margin: 0; }
+html                                              { color: black; line-height: 1; font-family: arial, sans-serif; font-size: 125%; }
+body                                              { font-size: 50%; background-color: transparent; }
+textarea                                          { font: inherit; }
 
-<#macro datetime a_date>
-                  <span class="date time">${a_date?string("dd.MM.yyyy, HH:mm")}</span>
-</#macro>
+a,
+img,
+a img                                             { border-width: 0; }
 
-<#macro time a_date>
-                  <span class="time">${a_date?string("HH:mm")}</span>
-</#macro>
+th,
+b,
+strong,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6                                                { font-weight: normal; }
 
-<#macro do_breaks formattinginfo appointment_index> 
-   <#list formattinginfo as info>
+th,
+td                                                { text-align: left; }
 
-      <#if info.position == appointment_index && info.type == 0 && info_index != 0>
-         </td>
-      </#if>
-   	  <#if info.position == appointment_index && info.type == 1 && info_index != 0>
-   	  </tr>
-   	  
-   	  </#if>
-      <#if info.position == appointment_index && info.type == 1>
-      <tr>
-         <td colspan="7">
-            <h2 class="weekNumber">
-               Calendar week ${info.additionalInformation}
-            </h2>
-         </td>
-      </tr>
-      <tr>
-      </#if>
-      <#if info.position == appointment_index && info.type == 0>
-         <td class="day">
-            <h3 class="dayDate">
-               <@date info.additionalInformation />
-            </h3>
-      </#if>
-   </#list>
-</#macro>
+ul,
+ol                                                { list-style: none; }
+font,
+basefont                                          { color: inherit; font: inherit; font-size: 100%; }
+img                                               { border: none; margin: 0; }
+ol                                                { list-style-type: decimal; }
 
+tr,
+th,
+td                                                { width: auto; height: auto; background-color: transparent; vertical-align: inherit; border: none; }
+nobr                                              { white-space: normal; }
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+strong,
+th,
+thead td,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+dt                                                { font-weight: bold; }
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
-<head>
-   <title>OX Calendar PrintView</title>
-   <style type="text/css">
-      table, tr {
-         width: 100%;
-      }
-      th {
-         width:14%;
-      }
-      .duration {
-         font-size: 80%;
-         width: 25%;
-      }
-      .title {
-         width: 65%;
-      }
-      .appointment {
-      }
-      td h2, td h3 {
-         text-align: centered;
-      }
-      td.day {
-         vertical-align: top;
-      }
-      h1,h2,h3,h4 {
-      	font-size: 1.1em;
-      	text-align: center;
-      }
-   </style>
-</head>
+/* typography
+---------------------------------------------------*/
+body                                              { font-family: arial, sans-serif; }
+*                                                 { line-height: 1.4em; }
+h1                                                { font-size: 24px; margin: 0 0 .4em 0; line-height: 1em; }
+h2                                                { font-size: 22px; margin: 0 0 .5em 0; line-height: 1em; }
+h3                                                { font-size: 20px; margin: 0 0 .6em 0; line-height: 1.05em; }
+h4                                                { font-size: 18px; margin: 0 0 .7em 0; line-height: 1.2em; }
+h5                                                { font-size: 16px; margin: 0 0 .8em 0; line-height: 1.3em; }
+h6                                                { font-size: 14px; margin: 0 0 .9em 0 ; line-height: 1.4em; }
 
-<body>
-   <h1>
-      Week: 
-      <@date start />
-      - 
-      <@date end />
-      <@timezone start />
-   </h1>
-   
-   <table border="1">
-      <tr>
-         <th>Monday</th>
-         <th>Tuesday</th>
-         <th>Wednesday</th>
-         <th>Thursday</th>
-         <th>Friday</th>
-         <th>Saturday</th>
-         <th>Sunday</th>
-      </tr>
-      
-      <#list appointments as appointment>
-         <@do_breaks formattinginfo appointment_index />
-            <table class="appointment">
-               <tr>
-                  <td class="duration">
-                     <@time appointment.startDate />
-                     -<br />
-                     <@time appointment.endDate />
-                  </td>
-                  <td class="info">
-                     ${appointment.title}
-                  </td>
-               </tr>
-            </table>
-      </#list>
-      </tr>
-   </table>
-</body>
+p                                                 { font-size: 12px; margin-bottom: 1em; }
+a                                                 { font-size: 12px; text-decoration: none; }
+b                                                 { font-weight: bold; }
+label                                             { font-size: 12px; }
+input                                             { font-size: 12px; }
+textarea                                          { font-size: 12px; }
+legend                                            { font-size: 12px; }
+
+table                                             { font-size: 12px; }
+th                                                { font-weight: bold; }
+
+blockquote                                        { font-size: 12px; margin: 1.5em; }
+
+del                                               { font-size: 12px; text-decoration: line-through; }
+
+dfn                                               { font-size: 12px; font-weight: bold; }
+
+address                                           { font-size: 12px; margin-bottom: 1em; }
+
+ul,
+ol                                                { font-size: 12px; margin: .5em 0 1em 1.6em; }
+
+li                                                { font-size: 12px; }
+
+li ul,
+li ol                                             { margin: 0 0 0 1.6em; }
+
+dl                                                { font-size: 12px; margin:0 0 1em 0; }
+dt                                                { font-size: 12px; font-weight: bold; }
+dd                                                { font-size: 12px; margin-left:1.5em; }
+
+sub,
+sup                                               { font-size: .8em; line-height:0; }
+
+/* tags
+--------------------------------------------------------------------------------- */
+.small,
+small                                             { font-size: 1em; }
+.large                                            { font-size: 1.5em; }
+
+/* Name
+---------------------------------------------------*/
+*                                                 { }
+.calendar                                         { border: 0; border-collapse: collapse; width: 100% }
+
+.calendar th                                      { text-align: center }
+.calendar td                                      { margin: 0; vertical-align: top; }
+
+.outDate                                          { opacity: 0.4 }
+
+#currentDate                                      { background: #f5f5f5 }
+
+ol,
+ol ol                                             { list-style-type: none; margin: 0; }
+ol ol li                                          { margin: 1px 5px; margin-left: 18px; }
+ol ol ol li                                       { background: none; padding: 0 }
+
+.appointmentDay,
+.appointmentDayStart,
+.appointmentDayStartLast,
+.appointmentDayEnd,
+.appointmentDayStartEnd                           { background: #ffcb71; height: 15px; overflow: hidden; margin: 2px 0; padding-left: 5px; border: 1px solid #ec9e18;}
+
+.appointmentDayStartEnd                           { -moz-border-radius: 5px; -webkit-border-radius: 5px; margin: 2px }
+
+.appointmentDayStart,
+.appointmentDayStartLast                          { -moz-border-radius-topLeft: 5px; -moz-border-radius-bottomLeft: 5px; -webkit-border-top-left-radius: 5px; -webkit-border-bottom-left-radius: 5px; border-right: none; margin-left: 2px; margin-right: -1px; }
+.appointmentDayEnd                                { -moz-border-radius-topRight: 5px; -moz-border-radius-bottomRight: 5px; -webkit-border-top-right-radius: 5px; -webkit-border-bottom-right-radius: 5px; border-left: none; margin-right: 2px; margin-left: -1px; }
+.appointmentDay                                   { margin-right: -1px; border-right: 0; border-left: 0; }
+
+.appointmentDayStartLast                          { margin-right:0; }
+
+/* Name
+---------------------------------------------------*/
+#calendarDay                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 1000px}
+#calendarDay thead th                                { height: 30px; border-bottom: 1px solid gray; border-right: 1px solid gray;  }
+
+#calendarDay .wrapper                                { overflow: hidden; height: 30px }
+
+#calendarDay td                                      { border-right: 1px solid black; }
+#calendarDay td.last                                 { border-right: 1px solid #000000; }
+
+#calendarDay span                                    { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
+#calendarDay li li span                              { padding: 0; background: none; }
+
+#calendarDay li li { margin-top: 10px }
+#calendarDay ol ol ol li { margin-top: 1px }
+
+#calendarDay ol span                                 { text-align: left; display: block; border-bottom: 1px solid gray }
+#calendarDay ol ol span                              { display: inline; border: none; padding-left: 3px }
+
+#calendarDay .time                                   { text-align: right; vertical-align: middle; padding-right: 5px; font-weight: bold; height: 60px; width: 93px; }
+#calendarDay .appointments                           { width: 510px; border-bottom: 1px solid #999999; }
+#calendarDay .appointments span                      { border: 0; background: none; }
+#calendarDay .appointments li                        { border-left: 5px solid #ffcb71; padding-left: 5px;  }
+#calendarDay #events                                 { width: 390px}
+
+#calendarDay .appointment                            { border-left: 10px #44a4de solid; width: 500px; overflow: hidden; }
+#calendarDay .appointment_1                          { width:255px; }
+#calendarDay .appointment_2                          { margin-left: 255px; width:255px; }
+
+/* Name
+---------------------------------------------------*/
+#calendarWeek                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 100%; }
+
+#calendarWeek .appointmentsDay                        { height: 30px; border-bottom: 1px solid gray;  }
+#calendarWeek th                                      { height: 30px }
+#calendarWeek .wrapper                                { height: 30px; overflow: hidden; }
+
+#calendarWeek td                                      { border-right: 1px solid black; }
+#calendarWeek td.last                                 { border-right: 1px solid #000000; }
+
+#calendarWeek span                                    { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
+
+#calendarWeek ol span                                 { text-align: left; display: block; border-bottom: 1px solid gray }
+#calendarWeek ol ol span                              { display: inline; border: none; padding-left: 3px }
+
+#calendarWeek .days                                   { height: 30px; }
+#calendarWeek .day                                    { height: 30px; border-bottom: 1px solid #999999; }
+#calendarWeek .time                                   { text-align: right; vertical-align: middle; font-weight: bold; height: 60px; width: 5%; padding-right: 5px; }
+#calendarWeek .appointments                           { border-bottom: 1px solid #999999;}
+#calendarWeek .appointments span                      { border: 0; background: none; }
+
+#calendarWeek .appointment                            { border-left: 10px #44a4de solid; width: 110px; overflow: hidden; }
+#calendarWeek .appointments_2                         { width: 55px }
+#calendarWeek .appointments_3                         { width: 36px }
+
+#calendarWeek .day_1                                  { left: 100px }
+#calendarWeek .day_2                                  { left: 220px }
+#calendarWeek .day_3                                  { left: 340px }
+#calendarWeek .day_4                                  { left: 460px }
+#calendarWeek .day_5                                  { left: 580px }
+#calendarWeek .day_6                                  { left: 700px }
+#calendarWeek .day_7                                  { left: 820px }
+
+#calendarWeek .appointment_1                          { margin-left: 0; width: 55px;}
+#calendarWeek .appointment_2                          { margin-left: 55px; width: 55px; }
+
+#calendarMonth th                                     { border-bottom: 1px solid #000000; border-right: 1px solid white; }
+#calendarMonth td                                     { width: 14%; border-left: 1px solid #000000; border-bottom: 1px solid #000000; }
+#calendarMonth td.last                                { border-right: 1px solid #000000; }
+
+#calendarMonth li span                                { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid black; display: block; color: black}
+#calendarMonth li .text,
+#calendarMonth li .time                               { padding: 0; background: none; border: 0; display: inline; color: black; }
+
+#calendarMonth ol ol li                               { color: #ffcb71; list-style-type: disc }
+#calendarMonth li .text                               { font-weight: normal }
+    </style>
+    <title>OX - Calendar - Week ${days[0].format("w", days[0].time)}</title>
+  </head>
+  <body>
+    <div id="layout" class="flexChilds">
+      <div id="headArea">
+      </div>
+      <div id="contentArea">
+        <#assign columnWidth = 95 / days?size>
+        <table border="0" id="calendarWeek" class="calendar">
+          <thead>
+            <tr>
+              <th>
+              </th>
+              <#list days as day>
+              <th class="day" style="width: ${columnWidth}%">
+                ${day.format("EEEE", day.time)}
+              </th>
+              </#list>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+              <#list days as day>
+              <td class="appointmentsDay">
+                <div class="wrapper">
+                  <#list day.wholeDayAppointments as appointment>
+                  <div class="appointmentDayStartEnd">${appointment.title}</div>
+                  </#list>
+                </div>
+              </td>
+              </#list>
+            </tr>
+            <#list 0..23 as hour>
+            <tr>
+              <td class="time"> 
+                ${hour}
+              </td>
+              <#list days as day>
+              <td class="appointments">
+                <#assign appointmentWidth = columnWidth / day.columns?size>
+                <#list day.getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60) as appointment>
+                <div class="appointment" style="position: absolute; top: ${appointment.startMinutes + 61}px; left: ${day_index * columnWidth + day.getColumn(appointment) * appointmentWidth + 5}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%">
+                  <span>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</span>
+                  <#if appointment.location?has_content>
+                  ${appointment.location}
+                  </#if>
+                </div>
+                </#list>
+              </td>
+              </#list>
+            </tr>
+            </#list>
+          </tbody>
+        </table>
+      </div>
+      <div id="footerArea">
+      </div>
+    </div>
+  </body>
 </html>

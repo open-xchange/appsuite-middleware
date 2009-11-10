@@ -136,21 +136,10 @@ ol ol ol li                                       { background: none; padding: 0
 
 /* Name
 ---------------------------------------------------*/
+#calendarDay                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 1000px}
+#calendarDay thead th                                { height: 30px; border-bottom: 1px solid gray; border-right: 1px solid gray;  }
 
-#calendarMonth th                                 { border-bottom: 1px solid #000000; border-right: 1px solid white; }
-#calendarMonth td                                 { width: 14%; border-left: 1px solid #000000; border-bottom: 1px solid #000000; }
-#calendarMonth td.last                            { border-right: 1px solid #000000; }
-
-#calendarMonth li span                            { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid black; display: block; color: black}
-#calendarMonth li .text,
-#calendarMonth li .time                           { padding: 0; background: none; border: 0; display: inline; color: black; }
-
-#calendarMonth ol ol li                           { color: #ffcb71; list-style-type: disc }
-#calendarMonth li .text                           { font-weight: normal }
-
-/* Name
----------------------------------------------------*/
-#calendarDay                                         { border-top: 1px solid black; border-bottom: 1px solid black; margin-top: 10px}
+#calendarDay .wrapper                                { overflow: hidden; height: 30px }
 
 #calendarDay td                                      { border-right: 1px solid black; }
 #calendarDay td.last                                 { border-right: 1px solid #000000; }
@@ -164,13 +153,66 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarDay ol span                                 { text-align: left; display: block; border-bottom: 1px solid gray }
 #calendarDay ol ol span                              { display: inline; border: none; padding-left: 3px }
 
-#calendarDay .time                                   { text-align: right; vertical-align: bottom; padding-right: 5px; font-weight: bold; height: 60px; }
-#calendarDay .appointment                            { width: 47%; border-bottom: 1px solid #999999 }
-#calendarDay .appointment span                       { border: 0; background: none; }
-#calendarDay .appointment li                         { border-left: 5px solid #ffcb71; padding-left: 5px;  }
-#calendarDay #events                                 { width: 47%; border-right: 0; }
+#calendarDay .time                                   { text-align: right; vertical-align: middle; padding-right: 5px; font-weight: bold; height: 60px; width: 93px; }
+#calendarDay .appointments                           { width: 510px; border-bottom: 1px solid #999999; }
+#calendarDay .appointments span                      { border: 0; background: none; }
+#calendarDay .appointments li                        { border-left: 5px solid #ffcb71; padding-left: 5px;  }
+#calendarDay #events                                 { width: 390px}
+
+#calendarDay .appointment                            { border-left: 10px #44a4de solid; width: 500px; overflow: hidden; }
+#calendarDay .appointment_1                          { width:255px; }
+#calendarDay .appointment_2                          { margin-left: 255px; width:255px; }
+
+/* Name
+---------------------------------------------------*/
+#calendarWeek                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 100%; }
+
+#calendarWeek .appointmentsDay                        { height: 30px; border-bottom: 1px solid gray;  }
+#calendarWeek th                                      { height: 30px }
+#calendarWeek .wrapper                                { height: 30px; overflow: hidden; }
+
+#calendarWeek td                                      { border-right: 1px solid black; }
+#calendarWeek td.last                                 { border-right: 1px solid #000000; }
+
+#calendarWeek span                                    { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
+
+#calendarWeek ol span                                 { text-align: left; display: block; border-bottom: 1px solid gray }
+#calendarWeek ol ol span                              { display: inline; border: none; padding-left: 3px }
+
+#calendarWeek .days                                   { height: 30px; }
+#calendarWeek .day                                    { height: 30px; border-bottom: 1px solid #999999; }
+#calendarWeek .time                                   { text-align: right; vertical-align: middle; font-weight: bold; height: 60px; width: 5%; padding-right: 5px; }
+#calendarWeek .appointments                           { border-bottom: 1px solid #999999;}
+#calendarWeek .appointments span                      { border: 0; background: none; }
+
+#calendarWeek .appointment                            { border-left: 10px #44a4de solid; width: 110px; overflow: hidden; }
+#calendarWeek .appointments_2                         { width: 55px }
+#calendarWeek .appointments_3                         { width: 36px }
+
+#calendarWeek .day_1                                  { left: 100px }
+#calendarWeek .day_2                                  { left: 220px }
+#calendarWeek .day_3                                  { left: 340px }
+#calendarWeek .day_4                                  { left: 460px }
+#calendarWeek .day_5                                  { left: 580px }
+#calendarWeek .day_6                                  { left: 700px }
+#calendarWeek .day_7                                  { left: 820px }
+
+#calendarWeek .appointment_1                          { margin-left: 0; width: 55px;}
+#calendarWeek .appointment_2                          { margin-left: 55px; width: 55px; }
+
+#calendarMonth th                                     { border-bottom: 1px solid #000000; border-right: 1px solid white; }
+#calendarMonth td                                     { width: 14%; border-left: 1px solid #000000; border-bottom: 1px solid #000000; }
+#calendarMonth td.last                                { border-right: 1px solid #000000; }
+
+#calendarMonth li span                                { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid black; display: block; color: black}
+#calendarMonth li .text,
+#calendarMonth li .time                               { padding: 0; background: none; border: 0; display: inline; color: black; }
+
+#calendarMonth ol ol li                               { color: #ffcb71; list-style-type: disc }
+#calendarMonth li .text                               { font-weight: normal }
     </style>
-    <title>OX - Calendar - ${days[days?size / 2].monthName}</title>
+    <#assign middleDay = days[days?size / 2]>
+    <title>OX - Calendar - ${middleDay.format("MMMM", middleDay.time)}</title>
   </head>
   <body>
     <div id="layout" class="flexChilds">
@@ -181,7 +223,7 @@ ol ol ol li                                       { background: none; padding: 0
           <thead>
             <tr>
               <#list days as day>
-              <th>${day.name}</th>
+              <th>${day.format("EEEE", day.time)}</th>
               <#if day.lastDayOfWeek><#break></#if>
               </#list>
             </tr>
@@ -200,7 +242,7 @@ ol ol ol li                                       { background: none; padding: 0
               </#if>
                 <ol>
                   <li>
-                    <span>${day.time?string("dd")}</span>
+                    <span>${day.format("dd", day.time)}</span>
                     <ol>
                       <#list day.wholeDayAppointments as appointment>
                       <li class="appointmentDayStartEnd">
@@ -209,7 +251,7 @@ ol ol ol li                                       { background: none; padding: 0
                       </#list>
                       <#list day.appointments as appointment>
                       <li>
-                        <span class="time">${appointment.startDate?string("HH:mm")}</span>
+                        <span class="time">${appointment.format("HH:mm", appointment.startDate)}</span>
                         <span class="text">${appointment.title}</span>
                       </li>
                       </#list>

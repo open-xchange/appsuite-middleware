@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing.days;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Comparator;
 import com.openexchange.calendar.printing.CPAppointment;
 
@@ -63,7 +64,20 @@ public class AppointmentStartComparator implements Comparator<CPAppointment> {
         super();
     }
 
-    public int compare(CPAppointment a1, CPAppointment a2) {
-        return a1.getStartDate().compareTo(a2.getStartDate());
+    public int compare(CPAppointment appointment1, CPAppointment appointment2) {
+        int retval = appointment1.getStartDate().compareTo(appointment2.getStartDate());
+        if (0 != retval) {
+            return retval;
+        }
+        retval = appointment1.getEndDate().compareTo(appointment2.getEndDate());
+        if (0 != retval) {
+            return retval;
+        }
+        retval = appointment1.getTitle().compareTo(appointment2.getTitle());
+        if (0 != retval) {
+            return retval;
+        }
+        retval = I(appointment1.hashCode()).compareTo(I(appointment2.hashCode()));
+        return retval;
     }
 }

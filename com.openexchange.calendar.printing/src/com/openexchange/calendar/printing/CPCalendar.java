@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -78,6 +79,8 @@ public class CPCalendar extends GregorianCalendar {
 
     private List<Integer> workWeekDays;
 
+    private final SimpleDateFormat format;
+
     public CPCalendar() {
         this(TimeZone.getDefault(), Locale.getDefault());
     }
@@ -85,6 +88,8 @@ public class CPCalendar extends GregorianCalendar {
     public CPCalendar(TimeZone zone, Locale locale) {
         super(zone, locale);
         this.locale = locale;
+        format = new SimpleDateFormat("", locale);
+        format.setTimeZone(zone);
     }
 
     public static CPCalendar getCalendar(TimeZone zone, Locale locale) {
@@ -101,6 +106,11 @@ public class CPCalendar extends GregorianCalendar {
 
     public Locale getLocale() {
         return locale;
+    }
+
+    public String format(String pattern, Date date) {
+        format.applyPattern(pattern);
+        return format.format(date);
     }
 
     private static void setWorkWeek(CPCalendar cal) {

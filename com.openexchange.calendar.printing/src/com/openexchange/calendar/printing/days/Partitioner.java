@@ -129,7 +129,7 @@ public class Partitioner {
         long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
         if (days >= 28 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
-        } else if (days == 1) {
+        } else {
             displayStart = firstDay;
             displayEnd = lastDay;
         }
@@ -178,22 +178,11 @@ public class Partitioner {
         if (null == day) {
             return;
         }
-        CPAppointment cpAppointment = new CPAppointment(appointment);
+        CPAppointment cpAppointment = new CPAppointment(appointment, cal);
         if (appointment.getFullTime()) {
             day.addWholeDay(cpAppointment);
         } else {
             day.add(cpAppointment);
-            addToHours(day, cpAppointment);
         }
-    }
-
-    private void addToHours(Day day, CPAppointment appointment) {
-        cal.setTime(appointment.getStartDate());
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-        cal.setTime(appointment.getEndDate());
-        int endHour = cal.get(Calendar.HOUR_OF_DAY);
-        do {
-            day.addToHour(hour++, appointment);
-        } while (hour < endHour);
     }
 }
