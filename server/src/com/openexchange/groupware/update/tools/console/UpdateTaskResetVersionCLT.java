@@ -69,6 +69,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.update.UpdateProcess;
+import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.tools.Constants;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
@@ -88,6 +90,7 @@ public final class UpdateTaskResetVersionCLT {
         toolkitOptions.addOption("v", "version", true, "The version number to set");
         toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
         toolkitOptions.addOption("n", "name", true, "A valid schema name. This option is a replacement for '-c/--context' option. If both are present '-c/--context' is preferred.");
+        toolkitOptions.addOption("r", "run", false, "A flag indicating whether to trigger update process for target schema after version reset.");
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -203,6 +206,14 @@ public final class UpdateTaskResetVersionCLT {
 
             } finally {
                 jmxConnector.close();
+            }
+
+            if (cmd.hasOption('r')) {
+                try {
+                    new UpdateProcess(contextId).run();
+                } catch (final SchemaException e) {
+                    System.err.println("Update process failed: " + e.getMessage());
+                }
             }
 
         } catch (final ParseException e) {
