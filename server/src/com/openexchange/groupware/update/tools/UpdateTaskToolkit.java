@@ -107,7 +107,8 @@ public final class UpdateTaskToolkit {
         super();
     }
 
-    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
+    private static final String SELECT_CONTEXT =
+        "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
 
     /**
      * Loads the context by given context identifier.
@@ -294,7 +295,7 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException If an error occurs
      */
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 14 }, msg = { "A SQL error occurred while reading schema version information: %1$s." })
-    public static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
+    private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
         try {
             Connection writeCon = null;
             PreparedStatement stmt = null;
@@ -332,6 +333,27 @@ public final class UpdateTaskToolkit {
             throw EXCEPTION.create(9, e, e.getMessage());
         }
 
+    }
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Unknown schema name: %1$s." })
+    public static int getContextIdBySchema(final String schemaName) throws UpdateException {
+        final Map<String, Set<Integer>> map = getSchemasAndContexts();
+        final Set<Integer> set = map.get(schemaName);
+        if (null == set) {
+            throw EXCEPTION.create(15, schemaName);
+        }
+        return set.iterator().next().intValue();
+    }
+
+    /**
+     * Sets the schema's version number to given version number
+     * 
+     * @param versionNumber The version number to set
+     * @param schemaName A valid schema name
+     * @throws UpdateException If changing version number fails
+     */
+    public static void resetVersion(final int versionNumber, final String schemaName) throws UpdateException {
+        resetVersion(versionNumber, getContextIdBySchema(schemaName));
     }
 
     /**

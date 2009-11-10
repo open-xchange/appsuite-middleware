@@ -64,6 +64,8 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.ReflectionException;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateProcess;
+import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
@@ -87,12 +89,24 @@ public final class UpdateTaskMBean implements DynamicMBean {
 
     private MBeanInfo buildMBeanInfo() {
         /*
+         * Trigger update process
+         */
+        final MBeanParameterInfo[] tparams =
+            new MBeanParameterInfo[] {
+                new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
+        final MBeanOperationInfo triggerOperation = new MBeanOperationInfo(
+            "runUpdate",
+            "Runs the schema's update.",
+            tparams,
+            "void",
+            MBeanOperationInfo.ACTION);
+        /*
          * Reset version operation
          */
         final MBeanParameterInfo[] params =
             new MBeanParameterInfo[] {
                 new MBeanParameterInfo("versionNumber", "java.lang.Integer", "The version number to set"),
-                new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
+                new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
         final MBeanOperationInfo resetOperation =
             new MBeanOperationInfo(
                 "resetVersion",
@@ -123,7 +137,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         /*
          * Operations
          */
-        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { resetOperation, schemasAndVersionsOperation, forceOperation };
+        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { triggerOperation, resetOperation, schemasAndVersionsOperation, forceOperation };
 
         /*
          * MBean info
@@ -144,9 +158,41 @@ public final class UpdateTaskMBean implements DynamicMBean {
     }
 
     public Object invoke(final String actionName, final Object[] params, final String[] signature) throws MBeanException, ReflectionException {
-        if (actionName.equals("resetVersion")) {
+        if (actionName.equals("runUpdate")) {
             try {
-                UpdateTaskToolkit.resetVersion(((Integer) params[0]).intValue(), ((Integer) params[1]).intValue());
+                final Object param = params[0];
+                if (param instanceof Integer) {
+                    new UpdateProcess(((Integer) param).intValue()).run();
+                } else {
+                    try {
+                        new UpdateProcess(Integer.parseInt(param.toString())).run();
+                    } catch (final NumberFormatException e) {
+                        new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString())).run();
+                    }
+                }
+            } catch (final UpdateException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            } catch (final SchemaException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            }
+        } else if (actionName.equals("resetVersion")) {
+            try {
+                final int versionNumber = ((Integer) params[0]).intValue();
+
+                final Object secParam = params[1];
+                if (secParam instanceof Integer) {
+                    UpdateTaskToolkit.resetVersion(versionNumber, ((Integer) secParam).intValue());
+                } else {
+                    try {
+                        UpdateTaskToolkit.resetVersion(versionNumber, Integer.parseInt(secParam.toString()));
+                    } catch (final NumberFormatException e) {
+                        UpdateTaskToolkit.resetVersion(versionNumber, secParam.toString());
+                    }
+                }
             } catch (final UpdateException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
