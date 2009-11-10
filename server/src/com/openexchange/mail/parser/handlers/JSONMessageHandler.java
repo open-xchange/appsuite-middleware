@@ -758,8 +758,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
             /*
              * Filename (if present)
              */
-            if (mailPart.containsFileName() && mailPart.getFileName() != null) {
-                nestedObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), mailPart.getFileName());
+            if (mailPart.containsFileName()) {
+                final String name = mailPart.getFileName();
+                if (null != name) {
+                    nestedObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), name);
+                }
             }
             getNestedMsgsArr().put(nestedObject);
             return true;
