@@ -340,7 +340,7 @@ public final class UpdateTaskToolkit {
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
-            throw EXCEPTION.create(16, schemaName);
+            throw EXCEPTION.create(15, schemaName);
         }
         return set.iterator().next().intValue();
     }
