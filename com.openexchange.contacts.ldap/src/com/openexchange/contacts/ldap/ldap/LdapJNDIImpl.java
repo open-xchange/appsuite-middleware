@@ -180,13 +180,15 @@ public class LdapJNDIImpl implements LdapInterface {
         
         try {
             byte[] cookie = null;
+            // Attention: It is important that we progress the objects in a second step after the search
+            // otherwise we run into problems with pagedresults
+            final List<LdapGetter> ldapGetterList = new ArrayList<LdapGetter>();
             do {
                 final NamingEnumeration<SearchResult> search = context.search(ownBaseDN, ownFilter, searchControls);
                 while (null != search && search.hasMoreElements()) {
                     final SearchResult next = search.next();
                     final Attributes attributes = next.getAttributes();
-                    final LdapGetter ldapGetter = getLdapGetter(attributes, context, next.getNameInNamespace());
-                    closure.execute(ldapGetter);
+                    ldapGetterList.add(getLdapGetter(attributes, context, next.getNameInNamespace()));
                 }
                 // Examine the paged results control response 
                 final Control[] controls = context.getResponseControls();
@@ -204,6 +206,17 @@ public class LdapJNDIImpl implements LdapInterface {
                     context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
                 }
             } while (null != cookie);
+            
+            context.setRequestControls(null);
+            for (final LdapGetter ldapGetter : ldapGetterList) {
+                try {
+                    closure.execute(ldapGetter);
+                } catch (final LdapException e) {
+                    LOG.error("Error occured on distributionlist " + ldapGetter.getObjectFullName());
+                    throw e;
+                }
+            }
+
         } catch (final NamingException e) {
             LOG.error(e.getMessage(), e);
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, e.getMessage());

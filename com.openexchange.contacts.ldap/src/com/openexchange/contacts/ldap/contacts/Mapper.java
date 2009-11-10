@@ -632,11 +632,11 @@ public class Mapper {
         }
     }
     
-    public static Contact getDistriContact(final LdapGetter getter, Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, int folderid, int adminid) throws LdapException {
+    public static Contact getDistriContact(final LdapGetter getter, Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, int folderid, int adminid, String[] attributes) throws LdapException {
         final Contact retval = new Contact();
 
         final Mappings mappings = folderprop.getMappings();
-        retval.setDistributionList(getDistributionlist(getter, folderid, mappings));
+        retval.setDistributionList(getDistributionlist(getter, folderid, mappings, attributes));
         retval.setMarkAsDistributionlist(true);
 
         if (cols.contains(Contact.DISPLAY_NAME)) {
@@ -702,16 +702,18 @@ public class Mapper {
         }
     }
 
-    private static DistributionListEntryObject[] getDistributionlist(final LdapGetter getter, int folderid, final Mappings mappings) throws LdapException {
+    private static DistributionListEntryObject[] getDistributionlist(final LdapGetter getter, int folderid, final Mappings mappings, String[] attributes) throws LdapException {
         // Iterate over all elements, fetch them from LDAP and create the objects...
         final List<DistributionListEntryObject> distrilist = new ArrayList<DistributionListEntryObject>();
         for (final String member : getter.getMultiValueAttribute("member")) {
-            final DistributionListEntryObject distri = getDistriEntry(getter.getLdapGetterForDN(member), folderid, mappings);
+            final DistributionListEntryObject distri = getDistriEntry(getter.getLdapGetterForDN(member, attributes), folderid, mappings);
             distrilist.add(distri);
         }
         return distrilist.toArray(new DistributionListEntryObject[distrilist.size()]);
     }
 
+    // If changes are made to this method the method com.openexchange.contacts.ldap.contacts.LdapContactInterface.getDistriAttributes(FolderProperties)
+    // should also be checked for changes to be made
     private static DistributionListEntryObject getDistriEntry(final LdapGetter getter, int folderid, final Mappings mappings) throws LdapException {
         final DistributionListEntryObject retval = new DistributionListEntryObject();
         final String displayname = mappings.getDisplayname();

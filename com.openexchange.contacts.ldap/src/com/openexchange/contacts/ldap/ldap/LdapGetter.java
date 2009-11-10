@@ -93,11 +93,12 @@ public interface LdapGetter {
      * Gets an LdapGetter object for getting the attributes below the object with
      * the specified distinguished name.
      * 
-     * @param dn
+     * @param dn The dn for which the getter should be returned
+     * @param attributes The attributes which should be fetched (not all are needed)
      * @return null if no such object was found
      * @throws LdapException
      */
-    public LdapGetter getLdapGetterForDN(final String dn) throws LdapException;
+    public LdapGetter getLdapGetterForDN(final String dn, final String[] attributes) throws LdapException;
     
     /**
      * Gets the values of the object with the given name as array used

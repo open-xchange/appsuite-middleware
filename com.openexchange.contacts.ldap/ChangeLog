@@ -1,3 +1,8 @@
+* 2009-11-10 - dennis.sieben@open-xchange.com
+
+ - Fix for UNAVAIL_EXTENSION error
+ - Reduced fetching of attributes for the distributionlist members to needed ones only
+
 * 2009-11-02 - dennis.sieben@open-xchange.com
 
  - Added ability to disable PagedResults (e.g. for Fedora DS) by setting pagesize to 0

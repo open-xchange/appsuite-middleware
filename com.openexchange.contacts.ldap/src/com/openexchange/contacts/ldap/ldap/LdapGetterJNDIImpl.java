@@ -153,9 +153,9 @@ public class LdapGetterJNDIImpl implements LdapGetter {
         }
     }
 
-    public LdapGetter getLdapGetterForDN(final String dn) throws LdapException {
+    public LdapGetter getLdapGetterForDN(final String dn, String[] attributes) throws LdapException {
         try {
-            return new LdapGetterJNDIImpl(context.getAttributes(dn), context, dn);
+            return new LdapGetterJNDIImpl(context.getAttributes(dn, attributes), context, dn);
         } catch (final NamingException e) {
             throw new LdapException(Code.ERROR_GETTING_ATTRIBUTE, "AttributeDN: " + dn + " - " + e.getMessage());
         }

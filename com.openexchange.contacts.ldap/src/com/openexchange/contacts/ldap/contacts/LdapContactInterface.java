@@ -166,6 +166,8 @@ public class LdapContactInterface implements ContactInterface {
     
     private final int admin_id;
     
+    private final String[] attributes;
+    
     private final int context;
     
     private final int folderid;
@@ -182,9 +184,10 @@ public class LdapContactInterface implements ContactInterface {
         this.folderprop = folderprop;
         this.folderid = folderid;
         this.contactIFace = contactIFace;
+        this.attributes = getDistriAttributes(folderprop);
     }
-    
-    
+
+
     private static String escapeLDAPSearchFilter(final String ldapfilter) {
         // According to RFC2254 section 4 we escape the following chars so that no LDAP injection can be made:
         // Character       ASCII value
@@ -480,6 +483,31 @@ public class LdapContactInterface implements ContactInterface {
         return columns;
     }
 
+    // If changes are made to this method the method com.openexchange.contacts.ldap.contacts.Mapper.getDistriEntry(LdapGetter, int, Mappings)
+    // should also be checked for changes to be made
+    private String[] getDistriAttributes(final FolderProperties folderprop) {
+        final Mappings mappings = folderprop.getMappings();
+        final List<String> attr = new ArrayList<String>();
+        final String displayname = mappings.getDisplayname();
+        if (0 != displayname.length()) {
+            attr.add(displayname);
+        }
+        final String email1 = mappings.getEmail1();
+        if (null != email1 && 0 != email1.length()) {
+            attr.add(email1);
+        }
+        final String givenname = mappings.getGivenname();
+        if (null != givenname && 0 != givenname.length()) {
+            attr.add(givenname);
+        }
+        final String surname = mappings.getSurname();
+        if (null != surname && 0 != surname.length()) {
+            attr.add(surname);
+        }
+        return attr.toArray(new String[attr.size()]);
+    }
+
+
     @SuppressWarnings("unchecked")
     private Map<Integer, String> getKeyMappingTable() throws LdapException {
         if (contentTheSameForAll()) {
@@ -696,7 +724,7 @@ public class LdapContactInterface implements ContactInterface {
 
             public void execute(final LdapGetter ldapGetter) throws LdapException {
                 if (distributionslist) {
-                    final Contact retval = Mapper.getDistriContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, admin_id);
+                    final Contact retval = Mapper.getDistriContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, admin_id, attributes);
                     arrayList.add(retval);
                 } else {
                     final Contact contact = Mapper.getContact(ldapGetter, columns, folderprop, getUidInterface(), folderId, admin_id);
