@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -68,7 +69,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
 
 /**
  * {@link UpdateTaskResetVersionCLT} - Command-Line access to reset version via update task toolkit.
@@ -84,6 +87,7 @@ public final class UpdateTaskResetVersionCLT {
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("v", "version", true, "The version number to set");
         toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
+        toolkitOptions.addOption("n", "name", true, "A valid schema name. This option is a replacement for '-c/--context' option. If both are present '-c/--context' is preferred.");
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -142,10 +146,22 @@ public final class UpdateTaskResetVersionCLT {
                     System.exit(0);
                 }
             }
+            
             if (!cmd.hasOption('c')) {
-                System.err.println("Missing context identifier.");
-                printHelp();
-                System.exit(0);
+                if (!cmd.hasOption('n')) {
+                    System.err.println("Missing context/schema identifier.");
+                    printHelp();
+                    System.exit(0);
+                }
+                final String schemaName = cmd.getOptionValue('n');
+                final Map<String, Set<Integer>> map = UpdateTaskToolkit.getSchemasAndContexts();
+                final Set<Integer> contextIds = map.get(schemaName.trim());
+                if (null == contextIds) {
+                    System.err.println("Schema name is unknown: " + schemaName + ".\nValid schema names are: " + map.keySet().toString());
+                    System.exit(0);
+                    return;
+                }
+                contextId = contextIds.iterator().next().intValue();
             } else {
                 final String optionValue = cmd.getOptionValue('c');
                 try {
@@ -198,6 +214,8 @@ public final class UpdateTaskResetVersionCLT {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (final InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
+        } catch (final UpdateException e) {
+            System.err.println("Unexpected error: " + e.getMessage());
         } catch (final MBeanException e) {
             final Throwable t = e.getCause();
             final String message;
