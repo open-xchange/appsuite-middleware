@@ -79,7 +79,8 @@ public class HeaderCollection implements Serializable {
 
     private static final long serialVersionUID = 6939560514144351286L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
+    private static final transient org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
 
     /**
      * Read-only constant for an empty header collection
@@ -682,7 +683,8 @@ public class HeaderCollection implements Serializable {
         public void remove() {
             if (entry == null) {
                 throw new IllegalStateException(
-                    "next() method has not yet been called, or the remove()" + " method has already been called after the last call to the next() method.");
+                    new StringBuilder(64).append("next() method has not yet been called, or the remove()").append(
+                        " method has already been called after the last call to the next() method.").toString());
             }
             entry.getValue().remove(--index);
             if (entry.getValue().isEmpty()) {
