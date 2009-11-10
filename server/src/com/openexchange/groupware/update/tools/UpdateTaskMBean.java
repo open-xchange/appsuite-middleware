@@ -92,14 +92,12 @@ public final class UpdateTaskMBean implements DynamicMBean {
          * Trigger update process
          */
         final MBeanParameterInfo[] tparams =
-            new MBeanParameterInfo[] {
-                new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
-        final MBeanOperationInfo triggerOperation = new MBeanOperationInfo(
-            "runUpdate",
-            "Runs the schema's update.",
-            tparams,
-            "void",
-            MBeanOperationInfo.ACTION);
+            new MBeanParameterInfo[] { new MBeanParameterInfo(
+                "id",
+                "java.lang.String",
+                "A valid context identifier contained in target schema or a schema name") };
+        final MBeanOperationInfo triggerOperation =
+            new MBeanOperationInfo("runUpdate", "Runs the schema's update.", tparams, "void", MBeanOperationInfo.ACTION);
         /*
          * Reset version operation
          */
@@ -137,7 +135,8 @@ public final class UpdateTaskMBean implements DynamicMBean {
         /*
          * Operations
          */
-        final MBeanOperationInfo[] operations = new MBeanOperationInfo[] { triggerOperation, resetOperation, schemasAndVersionsOperation, forceOperation };
+        final MBeanOperationInfo[] operations =
+            new MBeanOperationInfo[] { triggerOperation, resetOperation, schemasAndVersionsOperation, forceOperation };
 
         /*
          * MBean info
@@ -179,6 +178,8 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             }
+            // Void
+            return null;
         } else if (actionName.equals("resetVersion")) {
             try {
                 final int versionNumber = ((Integer) params[0]).intValue();

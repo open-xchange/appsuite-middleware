@@ -335,12 +335,12 @@ public final class UpdateTaskToolkit {
 
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Unknown schema name: %1$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 16 }, msg = { "Unknown schema name: %1$s." })
     public static int getContextIdBySchema(final String schemaName) throws UpdateException {
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
-            throw EXCEPTION.create(15, schemaName);
+            throw EXCEPTION.create(16, schemaName);
         }
         return set.iterator().next().intValue();
     }
