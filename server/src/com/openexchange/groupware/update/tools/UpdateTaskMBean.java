@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.update.tools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -60,6 +63,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.ReflectionException;
+import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
@@ -85,36 +89,36 @@ public final class UpdateTaskMBean implements DynamicMBean {
         /*
          * Reset version operation
          */
-        final MBeanParameterInfo[] params = new MBeanParameterInfo[] {
-            new MBeanParameterInfo("versionNumber", "java.lang.Integer", "The version number to set"),
-            new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
-        final MBeanOperationInfo resetOperation = new MBeanOperationInfo(
-            "resetVersion",
-            "Resets the schema's version number to given value.",
-            params,
-            "void",
-            MBeanOperationInfo.ACTION);
+        final MBeanParameterInfo[] params =
+            new MBeanParameterInfo[] {
+                new MBeanParameterInfo("versionNumber", "java.lang.Integer", "The version number to set"),
+                new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
+        final MBeanOperationInfo resetOperation =
+            new MBeanOperationInfo(
+                "resetVersion",
+                "Resets the schema's version number to given value.",
+                params,
+                "void",
+                MBeanOperationInfo.ACTION);
         /*
          * Schemas and versions operation
          */
-        final MBeanOperationInfo schemasAndVersionsOperation = new MBeanOperationInfo(
-            "schemasAndVersions",
-            "Gets all schemas with versions.",
-            null,
-            "java.lang.String",
-            MBeanOperationInfo.INFO);
+        final MBeanOperationInfo schemasAndVersionsOperation =
+            new MBeanOperationInfo(
+                "schemasAndVersions",
+                "Gets all schemas with versions.",
+                null,
+                "java.lang.String",
+                MBeanOperationInfo.INFO);
         /*
          * Force re-run operation
          */
-        final MBeanParameterInfo[] forceParams = new MBeanParameterInfo[] {
-            new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
-            new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
-        final MBeanOperationInfo forceOperation = new MBeanOperationInfo(
-            "force",
-            "Forces re-run of given update task.",
-            forceParams,
-            "void",
-            MBeanOperationInfo.ACTION);
+        final MBeanParameterInfo[] forceParams =
+            new MBeanParameterInfo[] {
+                new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
+                new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
+        final MBeanOperationInfo forceOperation =
+            new MBeanOperationInfo("force", "Forces re-run of given update task.", forceParams, "void", MBeanOperationInfo.ACTION);
 
         /*
          * Operations
@@ -152,8 +156,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
             return null;
         } else if (actionName.equals("schemasAndVersions")) {
             try {
-                final Map<String, Integer> m = UpdateTaskToolkit.getSchemasAndVersions();
-                return Utility.toTable(m, new String[] { "schema", "version" });
+                final Map<String, Schema> map = UpdateTaskToolkit.getSchemasAndVersions();
+                final List<Object[]> rows = new ArrayList<Object[]>(map.size());
+                for (final Entry<String, Schema> entry : map.entrySet()) {
+                    final Schema schema = entry.getValue();
+                    rows.add(new Object[] { entry.getKey(), Integer.valueOf(schema.getDBVersion()), Boolean.valueOf(schema.isLocked()) });
+                }
+
+                return Utility.toTable(rows, new String[] { "schema", "version", "locked" }, false);
             } catch (final UpdateException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());

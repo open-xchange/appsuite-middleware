@@ -266,7 +266,7 @@ public final class UpdateTaskToolkit {
      * @return All schemas with their versions
      * @throws UpdateException If retrieving schemas and versions fails
      */
-    public static Map<String, Integer> getSchemasAndVersions() throws UpdateException {
+    public static Map<String, Schema> getSchemasAndVersions() throws UpdateException {
         /*
          * Get schemas with their context IDs
          */
@@ -275,14 +275,14 @@ public final class UpdateTaskToolkit {
          * Get version for each schema
          */
         final int size = schemasAndContexts.size();
-        final Map<String, Integer> schemasAndVersions = new HashMap<String, Integer>(size);
+        final Map<String, Schema> schemas = new HashMap<String, Schema>(size);
         final Iterator<Map.Entry<String, Set<Integer>>> it = schemasAndContexts.entrySet().iterator();
         for (int i = 0; i < size; i++) {
             final Map.Entry<String, Set<Integer>> entry = it.next();
             final Schema schema = getSchema(entry.getValue().iterator().next().intValue());
-            schemasAndVersions.put(entry.getKey(), Integer.valueOf(schema.getDBVersion()));
+            schemas.put(entry.getKey(), schema);
         }
-        return schemasAndVersions;
+        return schemas;
     }
 
     private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema, cid FROM context_server2db_pool";
@@ -399,8 +399,8 @@ public final class UpdateTaskToolkit {
             try {
                 LOG.info("Starting update task " + className + " on schema " + schema.getSchema() + ".");
                 if (task instanceof UpdateTaskV2) {
-                    ProgressState logger = new ProgressStatusImpl(className, schema.getSchema());
-                    PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
+                    final ProgressState logger = new ProgressStatusImpl(className, schema.getSchema());
+                    final PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
                     ((UpdateTaskV2) task).perform(params);
                 } else {
                     task.perform(schema, contextId);

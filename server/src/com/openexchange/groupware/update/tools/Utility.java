@@ -50,9 +50,7 @@
 package com.openexchange.groupware.update.tools;
 
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 /**
  * {@link Utility} - Utility class.
@@ -81,59 +79,95 @@ public final class Utility {
      * +---------------+---------+
      * </pre>
      * 
-     * @param m The map
+     * @param rows The rows
      * @param columnNames The map's column names
+     * @param withBorders <code>true</code> to output with table borders; otherwise <code>false</code>
      * @return A DB-style output for given map
      */
-    public static String toTable(final Map<?, ?> m, final String[] columnNames) {
-        final int[] maxLengths = { getMaxLen(m.keySet(), columnNames[0].length()), getMaxLen(m.values(), columnNames[1].length()) };
+    public static String toTable(final List<Object[]> rows, final String[] columnNames, final boolean withBorders) {
 
-        final int size = m.size();
+        /*
+         * Determine max. length for each column
+         */
+        final int[] maxLengths = new int[columnNames.length];
+        {
+            for (int i = 0; i < maxLengths.length; i++) {
+                maxLengths[i] = columnNames[i].length();
+            }
+
+            for (final Object[] row : rows) {
+                for (int i = 0; i < row.length; i++) {
+                    final int a = maxLengths[i];
+                    final int b = row[i].toString().length();
+                    maxLengths[i] = (a >= b) ? a : b;
+                }
+            }
+        }
+
+        final int size = rows.size();
 
         final StringBuilder sb = new StringBuilder(size * 64);
 
-        sb.append('+').append('-');
-        for (int i = 0; i < maxLengths[0]; i++) {
-            sb.append('-');
-        }
-        for (int i = 1; i < maxLengths.length; i++) {
-            sb.append('-').append('+').append('-');
-            for (int j = 0; j < maxLengths[i]; j++) {
+        final String delimLine;
+        if (withBorders) {
+            sb.append('+').append('-');
+            for (int i = 0; i < maxLengths[0]; i++) {
                 sb.append('-');
             }
+            for (int i = 1; i < maxLengths.length; i++) {
+                sb.append('-').append('+').append('-');
+                for (int j = 0; j < maxLengths[i]; j++) {
+                    sb.append('-');
+                }
+            }
+            sb.append('-').append('+').append('\n');
+            delimLine = sb.toString();
+            sb.setLength(0);
+        } else {
+            delimLine = "";
         }
-        sb.append('-').append('+').append('\n');
-        final String delimLine = sb.toString();
-        sb.setLength(0);
 
         sb.append(delimLine);
 
-        appendValues(columnNames, maxLengths, sb);
+        appendValues(columnNames, maxLengths, sb, withBorders);
 
         sb.append(delimLine);
 
-        final Iterator<?> iter = m.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Map.Entry<?, ?> entry = (Entry<?, ?>) iter.next();
-            final String[] values = new String[] { entry.getKey().toString(), entry.getValue().toString() };
-            appendValues(values, maxLengths, sb);
+        for (final Object[] row : rows) {
+            final String[] values = new String[row.length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = row[i].toString();
+            }
+            appendValues(values, maxLengths, sb, withBorders);
             sb.append(delimLine);
         }
+
         return sb.toString();
     }
 
-    private static void appendValues(final String[] values, final int[] maxLengths, final StringBuilder sb) {
-        sb.append('|').append(' ').append(values[0]);
+    private static void appendValues(final String[] values, final int[] maxLengths, final StringBuilder sb, final boolean withBorders) {
+        if (withBorders) {
+            sb.append('|').append(' ');
+        }
+        sb.append(values[0]);
         for (int i = values[0].length(); i < maxLengths[0]; i++) {
             sb.append(' ');
         }
         for (int i = 1; i < values.length; i++) {
-            sb.append(' ').append('|').append(' ').append(values[i]);
+            sb.append(' ');
+            if (withBorders) {
+                sb.append('|');
+            }
+            sb.append(' ');
+            sb.append(values[i]);
             for (int j = values[i].length(); j < maxLengths[i]; j++) {
                 sb.append(' ');
             }
         }
-        sb.append(' ').append('|').append('\n');
+        if (withBorders) {
+            sb.append(' ').append('|');
+        }
+        sb.append('\n');
     }
 
     private static int getMaxLen(final Collection<? extends Object> c, final int startLen) {
