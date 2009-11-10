@@ -411,12 +411,13 @@ public final class JSONMessageHandler implements MailMessageHandler {
             final JSONObject hdrObject = new JSONObject();
             for (int i = 0; i < size; i++) {
                 final Map.Entry<String, String> entry = iter.next();
-                if (MessageHeaders.HDR_DISP_NOT_TO.equalsIgnoreCase(entry.getKey())) {
+                final String headerName = entry.getKey();
+                if (MessageHeaders.HDR_DISP_NOT_TO.equalsIgnoreCase(headerName)) {
                     /*
                      * This special header is handled through handleDispositionNotification()
                      */
                     continue;
-                } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(entry.getKey())) {
+                } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
                     /*
                      * Priority
                      */
@@ -433,15 +434,28 @@ public final class JSONMessageHandler implements MailMessageHandler {
                         }
                     }
                     jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
-                } else if (MessageHeaders.HDR_X_MAILER.equalsIgnoreCase(entry.getKey())) {
-                    hdrObject.put(entry.getKey(), entry.getValue());
-                } else if (MessageHeaders.HDR_X_OX_VCARD.equalsIgnoreCase(entry.getKey())) {
+                } else if (MessageHeaders.HDR_X_MAILER.equalsIgnoreCase(headerName)) {
+                    hdrObject.put(headerName, entry.getValue());
+                } else if (MessageHeaders.HDR_X_OX_VCARD.equalsIgnoreCase(headerName)) {
                     jsonObject.put(MailJSONField.VCARD.getKey(), true);
-                } else if (MessageHeaders.HDR_X_OX_NOTIFICATION.equalsIgnoreCase(entry.getKey())) {
+                } else if (MessageHeaders.HDR_X_OX_NOTIFICATION.equalsIgnoreCase(headerName)) {
                     jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), entry.getValue());
                 } else {
-                    if (!COVERED_HEADER_NAMES.contains(HeaderName.valueOf(entry.getKey()))) {
-                        hdrObject.put(entry.getKey(), decodeMultiEncodedHeader(entry.getValue()));
+                    if (!COVERED_HEADER_NAMES.contains(HeaderName.valueOf(headerName))) {
+                        if (hdrObject.has(headerName)) {
+                            final Object previous = hdrObject.get(headerName);
+                            if (previous instanceof JSONArray) {
+                                final JSONArray ja = (JSONArray) previous;
+                                ja.put(decodeMultiEncodedHeader(entry.getValue()));
+                            } else {
+                                final JSONArray ja = new JSONArray();
+                                ja.put(previous);
+                                ja.put(decodeMultiEncodedHeader(entry.getValue()));
+                                hdrObject.put(headerName, ja);
+                            }
+                        } else {
+                            hdrObject.put(headerName, decodeMultiEncodedHeader(entry.getValue()));
+                        }
                     }
                 }
             }
@@ -705,7 +719,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         /*
          * Determine if message is of MIME type multipart/alternative
          */
-        if (mp.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
+        if (mp.getContentType().startsWith(MIMETypes.MIME_MULTIPART_ALTERNATIVE) && bodyPartCount >= 2) {
             isAlternative = true;
             altId = id;
         } else if (null != altId && !id.startsWith(altId)) {
