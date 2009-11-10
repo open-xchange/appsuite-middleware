@@ -1,3 +1,7 @@
+* 2009-11-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #14810: Correctly setting displayStart and displayEnd if range is greater than a day.
+
 * 2009-11-06 - thorben.betten@open-xchange.com
 
  - Bugfix #14706: More robust browser detection from client's "user-agent" header
