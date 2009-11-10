@@ -745,7 +745,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
                     throw MIMEMailException.handleMessagingException(e);
                 }
             } else {
-                LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+                final StringBuilder sb = new StringBuilder(128);
+                sb.append("Ignoring nested message.").append(
+                    "Cannot handle part's content which should be a RFC822 message according to its content type: ");
+                sb.append((null == content ? "null" : content.getClass().getSimpleName()));
+                LOG.error(sb.toString());
                 return true;
             }
             final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx);
