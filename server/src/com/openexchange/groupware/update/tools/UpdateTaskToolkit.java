@@ -287,8 +287,14 @@ public final class UpdateTaskToolkit {
 
     private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema, cid FROM context_server2db_pool";
 
+    /**
+     * Gets schemas and their contexts as a map.
+     * 
+     * @return A map containing schemas and their contexts.
+     * @throws UpdateException If an error occurs
+     */
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 14 }, msg = { "A SQL error occurred while reading schema version information: %1$s." })
-    private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
+    public static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
         try {
             Connection writeCon = null;
             PreparedStatement stmt = null;
