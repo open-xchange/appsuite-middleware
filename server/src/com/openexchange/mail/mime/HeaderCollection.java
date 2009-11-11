@@ -220,7 +220,7 @@ public class HeaderCollection implements Serializable {
 
         int i = 0;
         if (lines.length > 0) {
-            final StringBuilder lineBuffer = new StringBuilder(128);
+            final StringBuilder lineBuffer = new StringBuilder(76);
             boolean emptyBuffer = true;
             String line;
             String prevline = null;
