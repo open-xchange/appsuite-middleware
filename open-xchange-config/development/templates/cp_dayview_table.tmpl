@@ -246,7 +246,9 @@ ol ol ol li                                       { background: none; padding: 0
                           </#if>
                           <li>
                             <span>${i18n.tr("Participants")}:</span>
-                            TODO
+                            <#list appointment.participants as participant>
+                            ${participant}<#if participant_has_next>; </#if>
+                            </#list>
                           </li>
                           <#if appointment.description?has_content>
                           <li>
@@ -276,7 +278,9 @@ ol ol ol li                                       { background: none; padding: 0
                           </#if>
                           <li>
                             <span>${i18n.tr("Participants")}:</span>
-                            TODO
+                            <#list appointment.participants as participant>
+                            ${participant}<#if participant_has_next>; </#if>
+                            </#list>
                           </li>
                           <#if appointment.description?has_content>
                           <li>
