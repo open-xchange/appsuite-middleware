@@ -166,6 +166,12 @@ public class SearchTest extends ContactTest {
             final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
             final GetResponse getResponse = client.execute(new GetRequest(Tree.ContactCollectFolder));
             final int collectFolderId = getResponse.getInteger();
+            
+            if (-1 == collectFolderId) {
+                // Obviously contact collector folder is not present for test user
+                return;
+            }
+            
             contactIds = insertSearchableContacts(collectFolderId);
             
             final ContactSearchObject searchObject = new ContactSearchObject();
