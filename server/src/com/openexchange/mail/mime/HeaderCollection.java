@@ -179,14 +179,15 @@ public class HeaderCollection implements Serializable {
             int i = -1;
             NextRead: while ((i = inputStream.read()) != -1) {
                 int count = 0;
-                while ((i == '\r') || (i == '\n')) {
-                    if (i != -1) {
-                        buffer.write(i);
-                    }
-                    if ((i == '\n') && (++count >= 2)) {
+                while (('\r' == i) || ('\n' == i)) {
+                    buffer.write(i);
+                    if (('\n' == i) && (++count >= 2)) {
                         break NextRead;
                     }
                     i = inputStream.read();
+                    if (-1 == i) { // EOF
+                        break NextRead;
+                    }
                 }
                 buffer.write(i);
             }
