@@ -217,50 +217,51 @@ public class HeaderCollection implements Serializable {
          * Read header lines until a blank line.
          */
         final String[] lines = SPLIT.split(headerSrc, 0);
-        if (lines.length > 0) {
-            int i = 0;
-            final StringBuilder lineBuffer = new StringBuilder(76);
-            boolean emptyBuffer = true;
-            String line;
-            String prevline = null;
-            do {
-                line = lines[i];
-                if ((line.length() > 0) && isSpaceOrTab(line.charAt(0))) {
-                    /*
-                     * Header continuation
-                     */
-                    if (prevline != null) {
-                        lineBuffer.append(prevline);
-                        prevline = null;
-                    }
-                    lineBuffer.append(CRLF);
-                    lineBuffer.append(line);
-                    emptyBuffer = false;
-                } else {
-                    /*
-                     * A new header
-                     */
-                    if (prevline != null) {
-                        addHeaderLine(prevline);
-                    } else if (!emptyBuffer) {
-                        /*
-                         * Store previous header first
-                         */
-                        addHeaderLine(lineBuffer.toString());
-                        lineBuffer.setLength(0);
-                        emptyBuffer = true;
-                    }
-                    prevline = line;
+
+        final StringBuilder lineBuffer = new StringBuilder(76);
+        boolean emptyBuffer = true;
+
+        String prevline = null;
+
+        String line;
+        int length;
+
+        for (int i = 0; i < lines.length && (length = (line = lines[i]).length()) > 0; i++) {
+            if ((length > 0) && isSpaceOrTab(line.charAt(0))) {
+                /*
+                 * Header continuation
+                 */
+                if (prevline != null) {
+                    lineBuffer.append(prevline);
+                    prevline = null;
                 }
-            } while ((++i < lines.length) && (line.length() > 0));
-            /*
-             * Check for pending header line
-             */
-            if (prevline != null) {
-                addHeaderLine(prevline);
-            } else if (!emptyBuffer) {
-                addHeaderLine(lineBuffer.toString());
+                lineBuffer.append(CRLF);
+                lineBuffer.append(line);
+                emptyBuffer = false;
+            } else {
+                /*
+                 * A new header
+                 */
+                if (prevline != null) {
+                    addHeaderLine(prevline);
+                } else if (!emptyBuffer) {
+                    /*
+                     * Store previous header first
+                     */
+                    addHeaderLine(lineBuffer.toString());
+                    lineBuffer.setLength(0);
+                    emptyBuffer = true;
+                }
+                prevline = line;
             }
+        }
+        /*
+         * Check for pending header line
+         */
+        if (prevline != null) {
+            addHeaderLine(prevline);
+        } else if (!emptyBuffer) {
+            addHeaderLine(lineBuffer.toString());
         }
     }
 
