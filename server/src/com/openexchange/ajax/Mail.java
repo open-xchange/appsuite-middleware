@@ -990,7 +990,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            //final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = paramContainer.getStringParam(PARAMETER_SHOW_SRC);
             final boolean showMessageSource = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = paramContainer.getStringParam(PARAMETER_EDIT_DRAFT);
@@ -1015,6 +1015,21 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
+ 
+                final String uid;
+                {
+                    String tmp2 = paramContainer.getStringParam(PARAMETER_ID);
+                    if (null == tmp2) {
+                        tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
+                        if (null == tmp2) {
+                            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ID);
+                        }
+                        uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
+                    } else {
+                        uid = tmp2;
+                    }
+                }
+
                 if (showMessageSource) {
                     /*
                      * Get message
