@@ -217,9 +217,8 @@ public class HeaderCollection implements Serializable {
          * Read header lines until a blank line.
          */
         final String[] lines = SPLIT.split(headerSrc, 0);
-
-        int i = 0;
         if (lines.length > 0) {
+            int i = 0;
             final StringBuilder lineBuffer = new StringBuilder(76);
             boolean emptyBuffer = true;
             String line;
