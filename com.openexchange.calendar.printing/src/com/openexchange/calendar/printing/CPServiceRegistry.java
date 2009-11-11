@@ -47,60 +47,24 @@
  *
  */
 
-package com.openexchange.group.internal;
+package com.openexchange.calendar.printing;
 
-import java.util.Date;
-
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
+ * A registry for services needed by the calendar printing module.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class GroupServiceImpl implements GroupService {
+public final class CPServiceRegistry extends ServiceRegistry {
 
-    /**
-     * Default constructor.
-     */
-    public GroupServiceImpl() {
+    private static final CPServiceRegistry SINGLETON = new CPServiceRegistry();
+
+    private CPServiceRegistry() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void create(final Context ctx, final User user, final Group group)
-        throws GroupException {
-        final Create create = new Create(ctx, user, group);
-        create.perform();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void update(final Context ctx, final User user, final Group group,
-        final Date lastRead) throws GroupException {
-        final Update update = new Update(ctx, user, group, lastRead);
-        update.perform();
-    }
-
-    public void delete(final Context ctx, final User user, final int groupId,
-        final Date lastRead) throws GroupException {
-        final Delete delete = new Delete(ctx, user, groupId, lastRead);
-        delete.perform();
-    }
-
-    public Group getGroup(Context ctx, int groupId) throws GroupException {
-        try {
-            return GroupStorage.getInstance().getGroup(groupId, ctx);
-        } catch (LdapException e) {
-            throw new GroupException(e);
-        }
+    public static CPServiceRegistry getInstance() {
+        return SINGLETON;
     }
 }

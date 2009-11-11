@@ -89,5 +89,8 @@ public interface GroupService {
      * @throws GroupException if some problem occurs.
      */
     void delete(Context ctx, User user, int groupId, Date lastModified) throws
-        GroupException; 
+        GroupException;
+
+    Group getGroup(Context ctx, int groupId) throws GroupException;
+
 }

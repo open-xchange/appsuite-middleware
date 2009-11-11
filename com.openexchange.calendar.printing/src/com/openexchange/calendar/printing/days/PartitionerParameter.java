@@ -47,60 +47,31 @@
  *
  */
 
-package com.openexchange.group.internal;
+package com.openexchange.calendar.printing.days;
 
-import java.util.Date;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPParameters;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.user.UserService;
 
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
+public class PartitionerParameter {
 
-/**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public final class GroupServiceImpl implements GroupService {
+    private final CPParameters params;
 
-    /**
-     * Default constructor.
-     */
-    public GroupServiceImpl() {
-        super();
-    }
+    private final CPCalendar cal;
 
-    /**
-     * {@inheritDoc}
-     */
-    public void create(final Context ctx, final User user, final Group group)
-        throws GroupException {
-        final Create create = new Create(ctx, user, group);
-        create.perform();
-    }
+    private final AppointmentSQLInterface appointmentSql;
 
-    /**
-     * {@inheritDoc}
-     */
-    public void update(final Context ctx, final User user, final Group group,
-        final Date lastRead) throws GroupException {
-        final Update update = new Update(ctx, user, group, lastRead);
-        update.perform();
-    }
+    private final CalendarCollectionService calendarTools;
 
-    public void delete(final Context ctx, final User user, final int groupId,
-        final Date lastRead) throws GroupException {
-        final Delete delete = new Delete(ctx, user, groupId, lastRead);
-        delete.perform();
-    }
+    private final UserService userService;
 
-    public Group getGroup(Context ctx, int groupId) throws GroupException {
-        try {
-            return GroupStorage.getInstance().getGroup(groupId, ctx);
-        } catch (LdapException e) {
-            throw new GroupException(e);
-        }
+    public PartitionerParameter(CPParameters params, CPCalendar cal, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools, UserService userService) {
+        this.params = params;
+        this.cal = cal;
+        this.appointmentSql = appointmentSql;
+        this.calendarTools = calendarTools;
+        this.userService = userService;
     }
 }

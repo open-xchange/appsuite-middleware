@@ -49,18 +49,22 @@
 
 package com.openexchange.calendar.printing.osgi;
 
+import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
 import java.util.Stack;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
+import com.openexchange.user.UserService;
 
 /**
  * {@link Activator} - The activator for calendar printing.
@@ -100,6 +104,8 @@ public class Activator extends DeferredActivator {
     protected void startBundle() throws Exception {
         trackers = new Stack<ServiceTracker>();
         trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
+        trackers.add(new ServiceTracker(context, UserService.class.getName(), new RegistryCustomizer<UserService>(context, UserService.class, getInstance())));
+        trackers.add(new ServiceTracker(context, GroupService.class.getName(), new RegistryCustomizer<GroupService>(context, GroupService.class, getInstance())));
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
@@ -113,7 +119,6 @@ public class Activator extends DeferredActivator {
             preferenceItemRegistration.unregister();
             preferenceItemRegistration = null;
         }
-
         unregister();
         if (null != trackers) {
             while (!trackers.isEmpty()) {

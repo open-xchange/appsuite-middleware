@@ -49,17 +49,30 @@
 
 package com.openexchange.calendar.printing;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.printing.days.CalendarTools;
+import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.server.ServiceException;
+import com.openexchange.user.UserService;
 
 /**
  * The view of an appointment. A dumbed-down version without recurrence pattern, day spanning and so on.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CPAppointment {
+
+    private static final Log LOG = LogFactory.getLog(CPAppointment.class);
 
     private String title, description, location;
 
@@ -69,18 +82,22 @@ public class CPAppointment {
 
     private final CPCalendar cal;
 
+    private final Context context;
+
     public CPAppointment() {
         super();
         this.cal = null;
+        this.context = null;
     }
 
     public CPAppointment(Appointment mother) {
-        this(mother, null);
+        this(mother, null, null);
     }
 
-    public CPAppointment(Appointment mother, CPCalendar cal) {
+    public CPAppointment(Appointment mother, CPCalendar cal, Context context) {
         super();
         this.cal = cal;
+        this.context = context;
         setTitle(mother.getTitle());
         setDescription(mother.getNote());
         setLocation(mother.getLocation());
@@ -140,11 +157,49 @@ public class CPAppointment {
     public void setEndDate(Date end) {
         this.endDate = end;
     }
-    
+
+    public List<String> getParticipants() {
+        List<String> retval = new ArrayList<String>();
+        for (Participant participant : original.getParticipants()) {
+            switch (participant.getType()) {
+            case Participant.USER:
+                try {
+                    UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
+                    retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
+                } catch (UserException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (ServiceException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                break;
+            case Participant.GROUP:
+                try {
+                    GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
+                    retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
+                } catch (ServiceException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (GroupException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                break;
+            case Participant.EXTERNAL_USER:
+                if (null != participant.getDisplayName()) {
+                    retval.add(participant.getDisplayName());
+                } else {
+                    retval.add(participant.getEmailAddress());
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        return retval;
+    }
+
     public void setOriginal(Appointment original) {
         this.original = original;
     }
-    
+
     public Appointment getOriginal() {
         return original;
     }
@@ -153,6 +208,6 @@ public class CPAppointment {
     public String toString() {
         return getStartDate() + " - " + getEndDate() +": " + getTitle();
     }
-    
-    
+
+
 }

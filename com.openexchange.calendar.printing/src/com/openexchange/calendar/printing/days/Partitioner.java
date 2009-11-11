@@ -69,6 +69,7 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * Takes the list of appointments and calculates on which days an appointment has to appear.
@@ -82,15 +83,17 @@ public class Partitioner {
     private final CPCalendar cal;
     private final AppointmentSQLInterface appointmentSql;
     private final CalendarCollectionService calendarTools;
+    private final Context context;
     private Date firstDay;
     private Date lastDay;
     private Date displayStart;
     private Date displayEnd;
 
-    public Partitioner(CPParameters params, CPCalendar cal, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) {
+    public Partitioner(CPParameters params, CPCalendar cal, Context context, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools) {
         super();
         this.params = params;
         this.cal = cal;
+        this.context = context;
         this.appointmentSql = appointmentSql;
         this.calendarTools = calendarTools;
     }
@@ -178,7 +181,7 @@ public class Partitioner {
         if (null == day) {
             return;
         }
-        CPAppointment cpAppointment = new CPAppointment(appointment, cal);
+        CPAppointment cpAppointment = new CPAppointment(appointment, cal, context);
         if (appointment.getFullTime()) {
             day.addWholeDay(cpAppointment);
         } else {
