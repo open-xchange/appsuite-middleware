@@ -76,11 +76,17 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
 
     private boolean failOnError;
 
+    private boolean messageId;
+
+    public void setMessageId(final boolean messageId) {
+        this.messageId = messageId;
+    }
+
     public boolean doesFailOnError() {
         return failOnError;
     }
 
-    public void setFailOnError(boolean failOnError) {
+    public void setFailOnError(final boolean failOnError) {
         this.failOnError = failOnError;
     }
 
@@ -88,7 +94,7 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return folderID;
     }
 
-    public void setFolderID(String folderID) {
+    public void setFolderID(final String folderID) {
         this.folderID = folderID;
     }
 
@@ -96,7 +102,7 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return mailID;
     }
 
-    public void setMailID(String mailID) {
+    public void setMailID(final String mailID) {
         this.mailID = mailID;
     }
 
@@ -104,7 +110,7 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return flags;
     }
 
-    public void setFlags(int flags) {
+    public void setFlags(final int flags) {
         this.flags = flags;
     }
 
@@ -112,7 +118,7 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return color;
     }
 
-    public void setColor(int color) {
+    public void setColor(final int color) {
         this.color = color;
     }
 
@@ -135,14 +141,14 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
     /**
      * Initializes a new {@link UpdateMailRequest}.
      */
-    public UpdateMailRequest(String folderID, String mailID) {
+    public UpdateMailRequest(final String folderID, final String mailID) {
         super();
         this.folderID = folderID;
         this.mailID = mailID;
     }
 
     public Object getBody() throws JSONException {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
         json.put("color_label", color);
         json.put("flags", flags);
         json.put("value", !removeFlags);
@@ -154,11 +160,11 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
     }
 
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        List<Parameter> list = new LinkedList<Parameter>();
+        final List<Parameter> list = new LinkedList<Parameter>();
 
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_UPDATE));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, folderID));
-        list.add(new Parameter(Mail.PARAMETER_ID, mailID));
+        list.add(new Parameter(messageId ? Mail.PARAMETER_MESSAGE_ID : Mail.PARAMETER_ID, mailID));
 
         return list.toArray(new Parameter[list.size()]);
     }

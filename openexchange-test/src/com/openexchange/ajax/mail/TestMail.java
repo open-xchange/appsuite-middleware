@@ -94,6 +94,22 @@ public class TestMail implements IdentitySource<TestMail> {
         return flags;
     }
 
+    /**
+     * Gets specified header
+     * 
+     * @param name The header name
+     * @return Either a <code>String</code> or a <code>JSONArray</code> instance if header has multiple values in mail headers
+     */
+    public Object getHeader(final String name) {
+        if (null == headers) {
+            return null;
+        }
+        if (!headers.hasAndNotNull(name)) {
+            return null;
+        }
+        return headers.opt(name);
+    }
+
     public Set<MailFlag> getFlagsAsSet() {
         return MailFlag.transform(flags);
     }
