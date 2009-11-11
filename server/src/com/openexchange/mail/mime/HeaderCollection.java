@@ -49,12 +49,10 @@
 
 package com.openexchange.mail.mime;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +62,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import com.openexchange.mail.MailException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -197,6 +196,8 @@ public class HeaderCollection implements Serializable {
         }
     }
 
+    private static final Pattern SPLIT = Pattern.compile("\r?\n");
+
     /**
      * Read and parse the given headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source till the blank
      * line separating the header from the body.
@@ -208,21 +209,24 @@ public class HeaderCollection implements Serializable {
      * @throws MailException If reading from headers' source fails
      */
     public void load(final String headerSrc) throws MailException {
-        if (null == headerSrc || 0 == headerSrc.length()) {
+        if ((null == headerSrc) || (0 == headerSrc.length())) {
             // Nothing to load
             return;
         }
         /*
          * Read header lines until a blank line.
          */
-        final BufferedReader reader = new BufferedReader(new StringReader(headerSrc));
-        final StringBuilder lineBuffer = new StringBuilder(128);
-        String line;
-        String prevline = null;
-        try {
+        final String[] lines = SPLIT.split(headerSrc, 0);
+
+        int i = 0;
+        if (lines.length > 0) {
+            final StringBuilder lineBuffer = new StringBuilder(128);
+            boolean emptyBuffer = true;
+            String line;
+            String prevline = null;
             do {
-                line = reader.readLine();
-                if (line != null && line.length() > 0 && (line.charAt(0) == ' ' || line.charAt(0) == '\t')) {
+                line = lines[i];
+                if ((line.length() > 0) && isSpaceOrTab(line.charAt(0))) {
                     /*
                      * Header continuation
                      */
@@ -232,25 +236,37 @@ public class HeaderCollection implements Serializable {
                     }
                     lineBuffer.append(CRLF);
                     lineBuffer.append(line);
+                    emptyBuffer = false;
                 } else {
                     /*
                      * A new header
                      */
                     if (prevline != null) {
                         addHeaderLine(prevline);
-                    } else if (lineBuffer.length() > 0) {
+                    } else if (!emptyBuffer) {
                         /*
                          * Store previous header first
                          */
                         addHeaderLine(lineBuffer.toString());
                         lineBuffer.setLength(0);
+                        emptyBuffer = true;
                     }
                     prevline = line;
                 }
-            } while (line != null && line.length() > 0);
-        } catch (final IOException ioex) {
-            throw new MailException(MailException.Code.IO_ERROR, ioex, ioex.getMessage());
+            } while ((++i < lines.length) && (line.length() > 0));
+            /*
+             * Check for pending header line
+             */
+            if (prevline != null) {
+                addHeaderLine(prevline);
+            } else if (!emptyBuffer) {
+                addHeaderLine(lineBuffer.toString());
+            }
         }
+    }
+
+    private static boolean isSpaceOrTab(final char c) {
+        return (c == ' ' || c == '\t');
     }
 
     private final void addHeaderLine(final String headerLine) {
