@@ -110,12 +110,14 @@ small                                             { font-size: 1em; }
 .calendar th                                      { text-align: center }
 .calendar td                                      { margin: 0; vertical-align: top; }
 
-.outDate                                          { opacity: 0.4 }
+.outDate                                          { filter:alpha(opacity=40); opacity: 0.4; background-color: #E0E0EF !important; }
 
-#currentDate                                      { background: #f5f5f5 }
+#currentDate                                      { background-color: #C6CCD9 !important; }
+
+.normalDay                                        { background-color: #FBFBD9 !important; }
 
 ol,
-ol ol                                             { list-style-type: none; margin: 0; }
+ol ol                                             { list-style-type: none; margin: 0; min-height: 60px }
 ol ol li                                          { margin: 1px 5px; margin-left: 18px; }
 ol ol ol li                                       { background: none; padding: 0 }
 
@@ -123,7 +125,7 @@ ol ol ol li                                       { background: none; padding: 0
 .appointmentDayStart,
 .appointmentDayStartLast,
 .appointmentDayEnd,
-.appointmentDayStartEnd                           { background: #ffcb71; height: 15px; overflow: hidden; margin: 2px 0; padding-left: 5px; border: 1px solid #ec9e18;}
+.appointmentDayStartEnd                           { background: #E0E0EF !important; height: 15px; overflow: hidden; margin: 2px 0; padding: 0 0 2px 5px; border: 1px solid #808080;}
 
 .appointmentDayStartEnd                           { -moz-border-radius: 5px; -webkit-border-radius: 5px; margin: 2px }
 
@@ -200,15 +202,15 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarWeek .appointment_1                          { margin-left: 0; width: 55px;}
 #calendarWeek .appointment_2                          { margin-left: 55px; width: 55px; }
 
-#calendarMonth th                                     { border-bottom: 1px solid #000000; border-right: 1px solid white; }
-#calendarMonth td                                     { width: 14%; border-left: 1px solid #000000; border-bottom: 1px solid #000000; }
-#calendarMonth td.last                                { border-right: 1px solid #000000; }
+#calendarMonth th                                     { border-bottom: 1px solid #C0C0C0; border-right: 1px solid white; }
+#calendarMonth td                                     { width: 14%; border-left: 1px solid #C0C0C0; border-bottom: 1px solid #C0C0C0; }
+#calendarMonth td.last                                { border-right: 1px solid #C0C0C0; }
 
-#calendarMonth li span                                { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid black; display: block; color: black}
+#calendarMonth li span                                { padding: 2px 4px 1px 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid #C0C0C0; display: block; color: black; text-align: right; }
 #calendarMonth li .text,
 #calendarMonth li .time                               { padding: 0; background: none; border: 0; display: inline; color: black; }
 
-#calendarMonth ol ol li                               { color: #ffcb71; list-style-type: disc }
+#calendarMonth ol ol li                               { color: #808080; list-style-type: disc }
 #calendarMonth li .text                               { font-weight: normal }
     </style>
     <#assign middleDay = days[days?size / 2]>
@@ -238,7 +240,7 @@ ol ol ol li                                       { background: none; padding: 0
               <#elseif day.outOfRange>
               <td class="outDate">
               <#else>
-              <td>
+              <td class="normalDay">
               </#if>
                 <ol>
                   <li>
