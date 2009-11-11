@@ -90,9 +90,9 @@ public class GetResponse extends AbstractAJAXResponse {
     }
 
     /**
-     * Gets the <code>String</code> value or <code>null</code> if not present.
+     * Gets the <code>java.lang.String</code> value or <code>null</code> if not present.
      * 
-     * @return The <code>String</code> value or <code>null</code> if not present
+     * @return The <code>java.lang.String</code> value or <code>null</code> if not present
      */
     public String getString() {
         fetchValue();
