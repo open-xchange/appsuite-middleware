@@ -68,7 +68,7 @@ public class UpdateMailTest extends AbstractMailTest {
 
     private UserValues values;
 
-    public UpdateMailTest(String name) {
+    public UpdateMailTest(final String name) {
         super(name);
     }
     
@@ -86,12 +86,45 @@ public class UpdateMailTest extends AbstractMailTest {
     }
 
     public void testShouldBeAbleToAddFlags() throws AjaxException, IOException, SAXException, JSONException{
-        String mail = values.getSendAddress();
+        final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag", "ALTERNATE", "Just a little bit").toString() );
-        TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
+        final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
         
-        UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
-        int additionalFlag = MailMessage.FLAG_FLAGGED; //note: doesn't work for 16 (recent) and 64 (user)
+        final UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
+        final int additionalFlag = MailMessage.FLAG_FLAGGED; //note: doesn't work for 16 (recent) and 64 (user)
+        updateRequest.setFlags( additionalFlag );
+        updateRequest.updateFlags();
+        UpdateMailResponse updateResponse = getClient().execute(updateRequest);
+        
+        TestMail updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
+        assertTrue("Flag should have been changed", (updatedMail.getFlags() & additionalFlag) == additionalFlag);
+        
+        updateRequest.removeFlags();
+        updateResponse = getClient().execute(updateRequest);
+        
+        updatedMail = getMail(updateResponse.getFolder(), updateResponse.getID());
+        assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
+    }
+
+    public void testShouldBeAbleToAddFlagsByMessageId() throws AjaxException, IOException, SAXException, JSONException{
+        final String mail = values.getSendAddress();
+        sendMail( createEMail(mail, "Update test for adding and removing a flag by message id", "ALTERNATE", "Just a little bit").toString() );
+        final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
+        
+        final String messageId;
+        {
+            final Object obj = myMail.getHeader("Message-Id");
+            if (null == obj) {
+                messageId = null;
+            } else {
+                messageId = obj.toString();
+            }
+        }
+        assertNotNull("Message-ID header not found.", messageId);
+
+        
+        final UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), messageId ).setMessageId(true);
+        final int additionalFlag = MailMessage.FLAG_FLAGGED; //note: doesn't work for 16 (recent) and 64 (user)
         updateRequest.setFlags( additionalFlag );
         updateRequest.updateFlags();
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
@@ -108,11 +141,11 @@ public class UpdateMailTest extends AbstractMailTest {
 
     
     public void testShouldBeAbleToSetColors() throws AjaxException, IOException, SAXException, JSONException{
-        String mail = values.getSendAddress();
+        final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for changing colors", "ALTERNATE", "Just a little bit").toString() );
-        TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
+        final TestMail myMail = new TestMail( getFirstMailInFolder(values.getInboxFolder() ) );
         
-        UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
+        final UpdateMailRequest updateRequest = new UpdateMailRequest( myMail.getFolder(), myMail.getId() );
         int myColor = 8;
         updateRequest.setColor(myColor );
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
