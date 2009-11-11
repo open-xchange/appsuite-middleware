@@ -209,9 +209,9 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarMonth ol ol li                           { color: #ffcb71; list-style-type: disc }
 #calendarMonth li .text                           { font-weight: normal }
     </style>
-    <title>OX - Calendar - ${day.format("EEEE", day.time)}, ${day.format("d. MMMM", day.time)}</title>
+    <title>OX - ${i18n.tr("Calendar")} - ${day.format("EEEE", day.time)}, ${day.format("d. MMMM", day.time)}</title>
   </head>
-  <body> <!-- onload="window.print()"> -->
+  <body onload="window.print()">
     <div id="layout" class="flexChilds">
       <div id="headArea">
       </div>
@@ -232,7 +232,7 @@ ol ol ol li                                       { background: none; padding: 0
                 <ol>
                   <#if days[0].wholeDayAppointments?size != 0>
                   <li>
-                    <span>Ganztägige Ereignisse</span>
+                    <span>${i18n.tr("All-day events")}</span>
                     <ol>
                       <#list days[0].wholeDayAppointments as appointment>
                       <li>
@@ -240,17 +240,17 @@ ol ol ol li                                       { background: none; padding: 0
                         <ol>
                           <#if appointment.location?has_content>
                           <li>
-                            <span>Ort:</span>
+                            <span>${i18n.tr("Location")}:</span>
                             ${appointment.location}
                           </li>
                           </#if>
                           <li>
-                            <span>Teilnehmer:</span>
+                            <span>${i18n.tr("Participants")}:</span>
                             TODO
                           </li>
                           <#if appointment.description?has_content>
                           <li>
-                            <span>Notizen:</span>
+                            <span>${i18n.tr("Comments")}:</span>
                             ${appointment.description}
                           </li>
                           </#if>
@@ -262,7 +262,7 @@ ol ol ol li                                       { background: none; padding: 0
                   </#if>
                   <#if days[0].appointments?size != 0>
                   <li>
-                    <span>Ereignisse</span>
+                    <span>${i18n.tr("Events")}</span>
                     <ol>
                       <#list days[0].appointments as appointment>
                       <li>
@@ -270,17 +270,17 @@ ol ol ol li                                       { background: none; padding: 0
                         <ol>
                           <#if appointment.location?has_content>
                           <li>
-                            <span>Ort:</span>
+                            <span>${i18n.tr("Location")}:</span>
                             ${appointment.location}
                           </li>
                           </#if>
                           <li>
-                            <span>Teilnehmer:</span>
+                            <span>${i18n.tr("Participants")}:</span>
                             TODO
                           </li>
                           <#if appointment.description?has_content>
                           <li>
-                            <span>Notizen:</span>
+                            <span>${i18n.tr("Comments")}:</span>
                             ${appointment.description}
                           </li>
                           </#if>
