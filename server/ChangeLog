@@ -1,3 +1,7 @@
+* 2009-11-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #14723: Always putting a complete table into the print view.
+
 * 2009-11-10 - marcus.klein@open-xchange.com
 
  - Bugfix #14810: Correctly setting displayStart and displayEnd if range is greater than a day.
