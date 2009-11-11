@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2009-11-05 14:18+0100\n"
+"PO-Revision-Date: 2009-11-11 17:11+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: KBabel 1.11.4\n"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
+msgstr "Kalender"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
+msgid "All-day events"
+msgstr "Ganztägige Ereignisse"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
+msgid "Events"
+msgstr "Ereignisse"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
+msgid "Location"
+msgstr "Ort"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
+msgid "Participants"
+msgstr "Teilnehmer"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
+msgid "Comments"
+msgstr "Kommentare"
 
 #: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
 msgid "Site"
@@ -138,10 +163,6 @@ msgstr "Weitere InfoStore-Ordner"
 #: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
 msgstr "Aufgaben"
-
-#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Calendar"
-msgstr "Kalender"
 
 #: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
