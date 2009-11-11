@@ -119,8 +119,16 @@ public class GetResponse extends AbstractAJAXResponse {
         return null == value ? false : ((Boolean) value).booleanValue();
     }
 
+    /**
+     * Gets the <code>java.lang.Object[]</code> value or <code>null</code> if not present.
+     * 
+     * @return The <code>java.lang.Object[]</code> value or <code>null</code> if not present
+     */
     public Object[] getArray() throws JSONException {
         fetchValue();
+        if (null == value) {
+            return null;
+        }
         final JSONArray array = (JSONArray) value;
         final Object[] retval = new Object[array.length()];
         for (int i = 0; i < array.length(); i++) {
