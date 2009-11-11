@@ -175,6 +175,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -279,6 +280,8 @@ public class Mail extends PermissionServlet implements UploadListener {
     public static final String PARAMETER_FILTER = "filter";
 
     public static final String PARAMETER_COL = "col";
+
+    public static final String PARAMETER_MESSAGE_ID = "message_id";
 
     private static final String VIEW_RAW = "raw";
 
@@ -2906,7 +2909,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         jsonWriter.object();
         try {
-            final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String sourceFolder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final JSONObject bodyObj = new JSONObject(body);
             final String destFolder = bodyObj.hasAndNotNull(FolderFields.FOLDER_ID) ? bodyObj.getString(FolderFields.FOLDER_ID) : null;
@@ -2933,6 +2935,21 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
+
+                final String uid;
+                {
+                    String tmp = paramContainer.getStringParam(PARAMETER_ID);
+                    if (null == tmp) {
+                        tmp = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
+                        if (null == tmp) {
+                            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ID);
+                        }
+                        uid = mailInterface.getMailIDByMessageID(sourceFolder, tmp);
+                    } else {
+                        uid = tmp;
+                    }
+                }
+
                 String folderId = sourceFolder;
                 String mailId = uid;
                 if (colorLabel != null) {
