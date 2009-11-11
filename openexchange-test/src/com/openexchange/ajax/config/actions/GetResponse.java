@@ -129,8 +129,13 @@ public class GetResponse extends AbstractAJAXResponse {
         return retval;
     }
 
+    /**
+     * Gets the <code>org.json.JSONObject</code> value or <code>null</code> if not present.
+     * 
+     * @return The <code>org.json.JSONObject</code> value or <code>null</code> if not present
+     */
     public JSONObject getJSON() {
         fetchValue();
-        return (JSONObject) value;
+        return null == value ? null : (JSONObject) value;
     }
 }
