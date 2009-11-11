@@ -1,0 +1,1395 @@
+# translation of server.de_DE.po to deutsch
+# Antje Faber, 2007.
+# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009.
+# translation of server.new.de_DE.po to
+# translation of server.de_DE.po to
+msgid ""
+msgstr ""
+"Project-Id-Version: server.de_DE\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2006-11-13 15:15+0100\n"
+"PO-Revision-Date: 2009-11-11 17:11+0100\n"
+"Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
+"Language-Team: deutsch <de@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
+msgstr "Kalender"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
+msgid "All-day events"
+msgstr "Ganztägige Ereignisse"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
+msgid "Events"
+msgstr "Ereignisse"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
+msgid "Location"
+msgstr "Ort"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
+msgid "Participants"
+msgstr "Teilnehmer"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
+msgid "Comments"
+msgstr "Kommentare"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
+msgid "Site"
+msgstr "Site"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
+msgid "Template (optional)"
+msgstr "Template (optional)"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
+msgid "Add cipher code"
+msgstr "Chiffre hinzufügen"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
+msgid "URL"
+msgstr "URL"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
+msgid ""
+"Privacy:\n"
+"The data and any references contained in this webpage are shared with you "
+"under the assumption that the owner of the data was entitled to make them "
+"available to you. Neither Open-Xchange, nor any of its subsidiaries or "
+"affiliates shall be liable for its publication or re-publication.\n"
+"Any unauthorized use or dissemination of this data is prohibited. If you "
+"intend to store, process, or pass on this data, please make sure that you "
+"have the right to do so.\n"
+"If you are one of the people listed or responsible for a resource listed on "
+"this page and you don't agree with the publication, please send an email "
+"containing the URL (the link) to this webpage to %s and the publisher of the "
+"data:\n"
+"Data published by %s on %s\n"
+msgstr ""
+"Datenschutzhinweis:\n"
+"Alle Daten und Verweise, die Sie auf dieser Webseite sehen, wurden unter der "
+"Annahme veröffentlicht, dass der Inhaber der Daten zur Weitergabe der Daten "
+"berechtigt war. Open-Xchange und seine verbundenen Unternehmen sind nicht "
+"verantwortlich für die Weitergabe der Daten. Jede unberechtigte Verwendung "
+"oder Weitergabe dieser Daten ist verboten.\n"
+"Wenn Sie beabsichtigen, diese Daten zu speichern, zu verarbeiten oder "
+"weiterzugeben, stellen Sie bitte sicher, dass Sie dazu die entsprechenden "
+"Rechte haben, insbesondere die Zustimmung der betroffenen Personen.\n"
+"Wenn Sie feststellen, dass Ihre personenbezogenen Daten ohne Ihr "
+"Einverständnis oder andere Daten fälschlicherweise hier veröffentlicht "
+"wurden, senden Sie bitte eine Mail mit der URL/Adresse dieser Seite %s an "
+"den Herausgeber der Daten:\n"
+"Daten veröffentlicht von %s am %s\n"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/FormStrings.java:61
+msgid "Login"
+msgstr "Login"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/FormStrings.java:63
+msgid "Password"
+msgstr "Passwort"
+
+#. Name of the parent folder for the private user folders.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
+msgid "Private folders"
+msgstr "Persönliche Ordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
+msgid "Public folders"
+msgstr "Öffentliche Ordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
+msgid "Shared folders"
+msgstr "Freigegebene Ordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
+msgid "System"
+msgstr "System"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:70
+msgid "Shared address book"
+msgstr "Freigegebenes Adressbuch"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
+msgid "Global address book"
+msgstr "Globales Adressbuch"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:74
+msgid "OX folders"
+msgstr "OX-Ordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:76
+msgid "Projects"
+msgstr "Projekte"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:78
+msgid "Infostore"
+msgstr "InfoStore"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
+msgid "Userstore"
+msgstr "Userstore"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
+msgid "Public infostore"
+msgstr "Öffentlicher InfoStore"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:84
+msgid "Other task folders"
+msgstr "Weitere Aufgabenordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:86
+msgid "Other calendar folders"
+msgstr "Weitere Kalenderordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:88
+msgid "Other contact folders"
+msgstr "Weitere Kontaktordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
+msgid "Other infostore folders"
+msgstr "Weitere InfoStore-Ordner"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
+msgid "Tasks"
+msgstr "Aufgaben"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
+msgid "Contacts"
+msgstr "Kontakte"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/FolderStrings.java:98
+msgid "Collected addresses"
+msgstr "Gesammelte Adressen"
+
+#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:68
+msgid "All users"
+msgstr "Alle Anwender"
+
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Groups.java:71
+msgid "Standard group"
+msgstr "Standardgruppe"
+
+#. The internationalized subject for a read acknowledgement
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:69
+msgid "Read Acknowledgement"
+msgstr "Lesebestätigung"
+
+#. The text body of a received read acknowledgement
+#. #DATE# is replaced with the sent date of referenced email
+#. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
+#. #SUBJECT# is replaced with referenced email's subject
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:75
+msgid ""
+"This is a delivery receipt for the mail that you sent on #DATE# to "
+"#RECIPIENT# with subject \"#SUBJECT#\".\n"
+"\n"
+"Note: This delivery receipt only acknowledges that the message was displayed "
+"on the recipients computer. There is no guarantee that the recipient has "
+"read or understood the message contents."
+msgstr ""
+"Dies ist eine Empfangsbestätigung für die am #DATE# gesendete E-Mail an "
+"#RECIPIENT# mit dem Betreff \"#SUBJECT#\".\n"
+"\n"
+"Bitte beachten Sie, dass diese Empfangsbestätigung lediglich das Anzeigen "
+"der Nachricht auf dem Rechner des Empfängers bestätigt. Es gibt keine "
+"Garantie, dass der Empfänger die E-Mail gelesen oder deren Inhalt verstanden "
+"hat."
+
+#. The prefixed text on reply.
+#. #DATE# is replaced with the sent date of referenced email
+#. #TIME# is replaced with time of referenced email
+#. #SENDER# is replaced with personal and/or email address of the sender
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:81
+msgid "On #DATE# at #TIME# #SENDER# wrote:"
+msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
+
+#. The prefixed text on inline forward.
+#. #FROM# is replaced with personal and/or email address of original message's From header
+#. #TO# is replaced with personal and/or email address(es) of original message's To header
+#. #CC_LINE# is replaced with personal and/or email address(es) of original message's Cc header prefixed with "\nCc: " (which needs not
+#. to be internationalized
+#. #DATE# is replaced with the sent date of referenced email
+#. #TIME# is replaced with time of referenced email
+#. #SUBJECT# is replaced with referenced email's subject
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:91
+msgid ""
+"---------- Original Message ----------\n"
+"From: #FROM#\n"
+"To: #TO##CC_LINE#\n"
+"Date: #DATE# at #TIME#\n"
+"Subject: #SUBJECT#"
+msgstr ""
+"---------- Ursprüngliche Nachricht ----------\n"
+"Von: #FROM#\n"
+"An: #TO##CC_LINE#\n"
+"Datum: #DATE# um #TIME#\n"
+"Betreff: #SUBJECT#"
+
+#. The internationalized default subject.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:94
+msgid "[No Subject]"
+msgstr "[Kein Betreff]"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Hints to the available attachments for affected message
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:98
+msgid "The available attachments for this E-Mail can be accessed via the links:"
+msgstr "Die für diese E-Mail verfügbaren Anhänge sind über diese Links verfügbar:"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the elapsed date for affected message's attachments
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/MailStrings.java:102
+msgid "The links will be deleted by #DATE#"
+msgstr "Die Links werden bis #DATE# gelöscht"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:61
+msgid ""
+"A new appointment was created by [created_by].\n"
+"You can check this appointment in your calendar:\n"
+"[link]\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Ein neuer Termin wurde erstellt von [created_by].\n"
+"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[link]\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Teilnehmer\n"
+"==========\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"==========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:94
+msgid ""
+"A new appointment was created by [created_by].\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Ein neuer Termin wurde erstellt von [created_by].\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"====================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:130
+msgid ""
+"A new task was created by [created_by].\n"
+"You can check this task in your tasks:\n"
+"[link]\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Eine neue Aufgabe wurde erstellt von [created_by].\n"
+"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"[link]\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von: [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:162
+msgid ""
+"A new task was created by [created_by].\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Eine neue Aufgabe wurde erstellt von [created_by].\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:202
+msgid ""
+"This appointment does not take place.\n"
+"It was either deleted by [changed_by] or\n"
+"you have been removed from the list of participants.\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by:  [created_by]\n"
+"Created at:  [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Dieser Termin findet nicht statt.\n"
+"Er wurde entweder von [changed_by] gelöscht oder\n"
+"Sie wurden von der Liste der Teilnehmer entfernt.\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am:  [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:235
+msgid ""
+"This task was either deleted by [changed_by] or\n"
+"you have been removed from the list of participants.\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by:  [created_by]\n"
+"Created at:  [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+msgstr ""
+"Diese Aufgabe wurde entweder von [changed_by] gelöscht\n"
+"oder Sie wurden aus der Liste der Teilnehmer entfernt.\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am:  [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:270
+msgid ""
+"This appointment was changed by [changed_by].\n"
+"You can check this appointment in your calendar:\n"
+"[link]\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Dieser Termin wurde geändert von [changed_by].\n"
+"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[link]\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:303
+msgid ""
+"This appointment was changed by [changed_by].\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Dieser Termin wurde geändert von [changed_by].\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:340
+msgid ""
+"This task was changed by [changed_by].\n"
+"You can check this task in your tasks:\n"
+"[link]\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Diese Aufgabe wurde geändert von [changed_by].\n"
+"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"[link]\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:372
+msgid ""
+"This task was changed by [changed_by].\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"Diese Aufgabe wurde geändert von [changed_by].\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:412
+msgid ""
+"[changed_by] has [confirmation_action] this appointment.\n"
+"You can check this appointment in your calendar:\n"
+"[link]\n"
+"\n"
+"Appointment\n"
+"===========\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"[changed_by] hat diesen Termin [confirmation_action].\n"
+"Sie können diesen Termin in Ihrem Kalender prüfen:\n"
+"[link]\n"
+"\n"
+"Termin\n"
+"======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:445
+msgid ""
+"[changed_by] has [confirmation_action] this task.\n"
+"You can check this task in your tasks:\n"
+"[link]\n"
+"\n"
+"Task\n"
+"====\n"
+"Created by: [created_by]\n"
+"Created at: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Participants\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Resources\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+msgstr ""
+"[changed_by] hat diese Aufgabe [confirmation_action].\n"
+"Sie können diese Aufgabe in Ihren Aufgaben prüfen:\n"
+"[link]\n"
+"\n"
+"Aufgabe\n"
+"=======\n"
+"Erstellt von:  [created_by]\n"
+"Erstellt am: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Teilnehmer\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Ressourcen\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
+
+#. -
+#. * MESSAGE SUBJECT PREFIXES
+#.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:480
+msgid "New Appointment"
+msgstr "Neuer Termin"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:482
+msgid "Appointment changed"
+msgstr "Termin geändert"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:484
+msgid "Appointment deleted"
+msgstr "Termin gelöscht"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:486
+msgid "Appointment (accepted)"
+msgstr "Termin (bestätigt)"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:488
+msgid "Appointment (declined)"
+msgstr "Termin (abgelehnt)"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:490
+msgid "Appointment (tentative)"
+msgstr "Termin (vorläufig)"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:492
+msgid "New task"
+msgstr "Neue Aufgabe"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:494
+msgid "Task changed"
+msgstr "Aufgabe geändert"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:496
+msgid "Task deleted"
+msgstr "Aufgabe gelöscht"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:498
+msgid "Task (accepted)"
+msgstr "Aufgabe (bestätigt)"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:500
+msgid "Task (declined)"
+msgstr "Aufgabe (abgelehnt)"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:502
+msgid "Task (tentative)"
+msgstr "Aufgabe (vorläufig)"
+
+#. -
+#. * MISC
+#.
+#. No resources have been scheduled.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:509
+msgid "No resources have been scheduled."
+msgstr "Es wurden keine Ressourcen zugewiesen."
+
+#. No series
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:512
+msgid "No series"
+msgstr "Keine Serie"
+
+#. No start date
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:515
+msgid "No start date"
+msgstr "Kein Startdatum"
+
+#. No end date
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:518
+msgid "No end date"
+msgstr "Kein Enddatum"
+
+#. No due date
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:521
+msgid "No due date"
+msgstr "Kein Fälligkeitsdatum"
+
+#. No delete exceptions
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:524
+msgid "No delete exceptions"
+msgstr "Keine Löschausnahmen"
+
+#. No change exceptions
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:527
+msgid "No change exceptions"
+msgstr "Keine Änderungsausnahmen"
+
+#. Mail to resource %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:530
+msgid "Mail to resource %1$s"
+msgstr "E-Mail an Ressource %1$s"
+
+#. Resource
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:533
+msgid "Resource"
+msgstr "Ressource"
+
+#. Not set
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:536
+msgid "Not set"
+msgstr "Nicht festgelegt"
+
+#. -
+#. * Confirmation actions
+#.
+#. accepted
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:542
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:569
+msgid "accepted"
+msgstr "bestätigt"
+
+#. declined
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:544
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:572
+msgid "declined"
+msgstr "abgelehnt"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:546
+msgid "tentatively accepted"
+msgstr "vorläufig bestätigt"
+
+#. -
+#. * TASK PRIORITIES
+#.
+#. low
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:553
+msgid "Low"
+msgstr "Niedrig"
+
+#. normal
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:556
+msgid "Normal"
+msgstr "Normal"
+
+#. high
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:559
+msgid "High"
+msgstr "Hoch"
+
+#. -
+#. * Confirmation statuses
+#.
+#. waiting
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:566
+msgid "waiting"
+msgstr "Wartestatus"
+
+#. tentative
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:575
+msgid "tentative"
+msgstr "vorläufig"
+
+#. external
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:578
+msgid "external"
+msgstr "extern"
+
+#. -
+#. * Line patterns
+#.
+#. Location: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:585
+msgid "Location: %1$s"
+msgstr "Ort: %1$s"
+
+#. Description: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:588
+msgid "Description: %1$s"
+msgstr "Beschreibung: %1$s"
+
+#. Folder: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:591
+msgid "Folder: %1$s"
+msgstr "Ordner: %1$s"
+
+#. Start date: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:594
+msgid "Start date: %1$s"
+msgstr "Startdatum: %1$s"
+
+#. End date: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:597
+msgid "End date: %1$s"
+msgstr "Enddatum: %1$s"
+
+#. Due date: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:600
+msgid "Due date: %1$s"
+msgstr "Fälligkeitsdatum: %1$s"
+
+#. Series: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:603
+msgid "Series: %1$s"
+msgstr "Serie: %1$s"
+
+#. Comments:
+#. %1$s: Placeholder for comments
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:607
+msgid ""
+"Comments:\n"
+"%1$s"
+msgstr ""
+"Kommentare:\n"
+"%1$s"
+
+#. Priority: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:610
+msgid "Priority: %1$s"
+msgstr "Priorität: %1$s"
+
+#. Status: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:613
+msgid "Status: %1$s"
+msgstr "Status: %1$s"
+
+#. Delete exceptions: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:616
+msgid "Delete exceptions: %1$s"
+msgstr "Löschausnahme: %1$s"
+
+#. Change exceptions: %1$s
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:619
+msgid "Change exceptions: %1$s"
+msgstr "Änderungsausnahme: %1$s"
+
+#. Change exception of %1$s on %2$s
+#. %1$s: Placeholder for recurrence title
+#. %2$s: Placeholder for change exception's date
+#. Example: My Recurring Appointment on 2009-12-06
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:625
+msgid "Change exception of %1$s on %2$s"
+msgstr "Änderungsausnahme von %1$s am %2$s"
+
+#. -
+#. * Task statuses
+#.
+#. Not started
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:632
+msgid "Not started"
+msgstr "Nicht begonnen"
+
+#. In progress
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:635
+msgid "In progress"
+msgstr "In Bearbeitung"
+
+#. Done
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:638
+msgid "Done"
+msgstr "Erledigt"
+
+#. Waiting
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:641
+msgid "Waiting"
+msgstr "Wartestatus"
+
+#. Deferred
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:644
+msgid "Deferred"
+msgstr "Verschoben"
+
+#. -
+#. * Added/Removed participant
+#.
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:650
+msgid "Added"
+msgstr "Hinzugefügt"
+
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:652
+msgid "Removed"
+msgstr "Entfernt"
+
+#. -
+#. * Numeric recurrence templates
+#.
+#. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:659
+msgid "st"
+msgstr "."
+
+#. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:662
+msgid "nd"
+msgstr "."
+
+#. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:665
+msgid "rd"
+msgstr "."
+
+#. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:668
+msgid "th"
+msgstr "."
+
+#. -
+#. * Recurrence templates
+#.
+#. and
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:675
+msgid "and"
+msgstr "und"
+
+#. Each day
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:678
+msgid "Each day"
+msgstr "Jeden Tag"
+
+#. Each %1$s days; e.g. "Each 2 days"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:681
+msgid "Each %1$s days"
+msgstr "Alle %1$s Tage"
+
+#. Each week on %1$s; e.g. "Each week on Monday"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:684
+msgid "Each week on %1$s"
+msgstr "Jede Woche am %1$s"
+
+#. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:687
+msgid "Each %1$s weeks on %2$s"
+msgstr "Alle %1$s Wochen am %2$s"
+
+#. On %1$s day every month; e.g. "On 1st day every month"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:690
+msgid "On %1$s day every month"
+msgstr "Am %1$s Tag jeden Monats"
+
+#. On %1$s day every %2$s month; e.g. "On 1st day every 2nd month"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:693
+msgid "On %1$s day every %2$s month"
+msgstr "Am %1$s Tag jeden %2$s Monat"
+
+#. On %1$s %2$s each month; e.g. "On first Monday each month"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:696
+msgid "On %1$s %2$s each month"
+msgstr "Am %1$s %2$s jeden Monats"
+
+#. On %1$s %2$s each %3$s month; e.g. "On first Monday each 3rd month"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:699
+msgid "On %1$s %2$s each %3$s month"
+msgstr "Am %1$s %2$s jeden %3$s Monats"
+
+#. Each %1$s %2$s; e.g. "Each 10th October"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:702
+msgid "Each %1$s %2$s"
+msgstr "Jeden %1$s %2$s"
+
+#. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:705
+msgid "On %1$s %2$s in %3$s"
+msgstr "Am %1$s %2$s in %3$s"
+
+#. ", ends after %1$s appointment(s)"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:708
+msgid ", ends after %1$s appointment(s)"
+msgstr ", endet nach %1$s Termin(en)"
+
+#. ", ends after %1$s task(s)"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:711
+msgid ", ends after %1$s task(s)"
+msgstr ", endet nach %1$s Aufgab(en)"
+
+#. ", ends on %1$s"
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:714
+msgid ", ends on %1$s"
+msgstr ", endet am %1$s"
+
+#. -
+#. * Months
+#.
+#. January
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:721
+msgid "January"
+msgstr "Januar"
+
+#. February
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:724
+msgid "February"
+msgstr "Februar"
+
+#. March
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:727
+msgid "March"
+msgstr "März"
+
+#. April
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:730
+msgid "April"
+msgstr "April"
+
+#. May
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:733
+msgid "May"
+msgstr "Mai"
+
+#. June
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:736
+msgid "June"
+msgstr "Juni"
+
+#. July
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:739
+msgid "July"
+msgstr "Juli"
+
+#. August
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:742
+msgid "August"
+msgstr "August"
+
+#. September
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:745
+msgid "September"
+msgstr "September"
+
+#. October
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:748
+msgid "October"
+msgstr "Oktober"
+
+#. November
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:751
+msgid "November"
+msgstr "November"
+
+#. December
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:754
+msgid "December"
+msgstr "Dezember"
+
+#. -
+#. * Weekdays
+#.
+#. Monday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:761
+msgid "Monday"
+msgstr "Montag"
+
+#. Tuesday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:764
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#. Wednesday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:767
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#. Thursday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:770
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#. Friday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:773
+msgid "Friday"
+msgstr "Freitag"
+
+#. Saturday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:776
+msgid "Saturday"
+msgstr "Samstag"
+
+#. Sunday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:779
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:782
+msgid "Sunday"
+msgstr "Sonntag"
+
+#. Weekday
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:785
+msgid "Weekday"
+msgstr "Wochentag"
+
+#. Weekend day
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:788
+msgid "Weekend day"
+msgstr "Wochenendtag"
+
+#. -
+#. * Monthly1 constants
+#.
+#. first
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:795
+msgid "first"
+msgstr "ersten"
+
+#. second
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:798
+msgid "second"
+msgstr "zweiten"
+
+#. third
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:801
+msgid "third"
+msgstr "dritten"
+
+#. fourth
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:804
+msgid "fourth"
+msgstr "vierten"
+
+#. last
+#: /var/lib/hudson/jobs/unstableCreateServerPOT/workspace/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:807
+msgid "last"
+msgstr "letzten"
+
