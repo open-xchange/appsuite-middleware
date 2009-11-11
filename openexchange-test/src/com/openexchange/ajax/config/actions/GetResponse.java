@@ -52,7 +52,6 @@ package com.openexchange.ajax.config.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -80,24 +79,44 @@ public class GetResponse extends AbstractAJAXResponse {
         }
     }
 
+    /**
+     * Gets the <code>int</code> value or <code>-1</code> if not present.
+     * 
+     * @return The <code>int</code> value or <code>-1</code> if not present
+     */
     public int getInteger() {
         fetchValue();
-        return ((Integer) value).intValue();
+        return null == value ? -1 : ((Integer) value).intValue();
     }
 
+    /**
+     * Gets the <code>String</code> value or <code>null</code> if not present.
+     * 
+     * @return The <code>String</code> value or <code>null</code> if not present
+     */
     public String getString() {
         fetchValue();
-        return (String) value;
+        return null == value ? null : (String) value;
     }
 
+    /**
+     * Gets the <code>long</code> value or <code>-1</code> if not present.
+     * 
+     * @return The <code>long</code> value or <code>-1</code> if not present
+     */
     public long getLong() {
         fetchValue();
-        return ((Long) value).longValue();
+        return null == value ? -1 : ((Long) value).longValue();
     }
 
+    /**
+     * Gets the <code>boolean</code> value or <code>false</code> if not present.
+     * 
+     * @return The <code>boolean</code> value or <code>false</code> if not present
+     */
     public boolean getBoolean() {
         fetchValue();
-        return ((Boolean) value).booleanValue();
+        return null == value ? false : ((Boolean) value).booleanValue();
     }
 
     public Object[] getArray() throws JSONException {
