@@ -208,7 +208,7 @@ public class HeaderCollection implements Serializable {
      * @throws MailException If reading from headers' source fails
      */
     public void load(final String headerSrc) throws MailException {
-        if (null == headerSrc || headerSrc.length() == 0) {
+        if (null == headerSrc || 0 == headerSrc.length()) {
             // Nothing to load
             return;
         }
