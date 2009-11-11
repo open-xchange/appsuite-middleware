@@ -105,6 +105,8 @@ public class CPServlet extends PermissionServlet {
 
     private static final String DAYS = "days";
 
+    private static final String I18N = "i18n";
+
     private static TemplateService templates = null;
 
     public static void setTemplateService(TemplateService service) {
@@ -205,6 +207,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(VIEW_END, params.getEnd());
             variables.put(DEBUG, debuggingItems);
             variables.put(DAYS, perDayList);
+            variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
 
             for (CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());

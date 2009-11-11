@@ -49,12 +49,15 @@
 
 package com.openexchange.calendar.printing.osgi;
 
+import java.util.Stack;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.i18n.I18nService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
@@ -76,6 +79,8 @@ public class Activator extends DeferredActivator {
 
     private ServiceRegistration preferenceItemRegistration;
 
+    private Stack<ServiceTracker> trackers;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class };
@@ -93,6 +98,11 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        trackers = new Stack<ServiceTracker>();
+        trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
         register();
         preferenceItemRegistration = context.registerService(PreferencesItemService.class.getName(), new CalendarPrintingEnabled(), null);
     }
@@ -105,6 +115,12 @@ public class Activator extends DeferredActivator {
         }
 
         unregister();
+        if (null != trackers) {
+            while (!trackers.isEmpty()) {
+                trackers.pop().close();
+            }
+            trackers = null;
+        }
     }
 
     private void register() {
