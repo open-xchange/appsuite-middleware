@@ -81,11 +81,13 @@ public class TestMail implements IdentitySource<TestMail> {
 
     private List<JSONObject> attachment;
 
+    private JSONObject headers;
+
     private String subject, body, contentType, folder, id;
 
     private int priority, flags, color;
 
-    private List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] {
+    private final List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] {
         new PlainTextStrategy(), new AlternativeStrategy(), new FallbackStrategy() });
 
     public int getFlags() {
@@ -96,7 +98,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return MailFlag.transform(flags);
     }
 
-    public void setFlags(int flags) {
+    public void setFlags(final int flags) {
         this.flags = flags;
     }
 
@@ -104,7 +106,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return color;
     }
 
-    public void setColor(int color) {
+    public void setColor(final int color) {
         this.color = color;
     }
 
@@ -112,7 +114,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(final int priority) {
         this.priority = priority;
     }
 
@@ -120,7 +122,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return from;
     }
 
-    public void setFrom(List<String> from) {
+    public void setFrom(final List<String> from) {
         this.from = from;
     }
 
@@ -128,7 +130,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return to;
     }
 
-    public void setTo(List<String> to) {
+    public void setTo(final List<String> to) {
         this.to = to;
     }
 
@@ -136,7 +138,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return cc;
     }
 
-    public void setCc(List<String> cc) {
+    public void setCc(final List<String> cc) {
         this.cc = cc;
     }
 
@@ -144,7 +146,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return bcc;
     }
 
-    public void setBcc(List<String> bcc) {
+    public void setBcc(final List<String> bcc) {
         this.bcc = bcc;
     }
 
@@ -152,7 +154,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return subject;
     }
 
-    public void setSubject(String subject) {
+    public void setSubject(final String subject) {
         this.subject = subject;
     }
 
@@ -160,7 +162,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return body;
     }
 
-    public void setBody(String body) {
+    public void setBody(final String body) {
         this.body = body;
     }
 
@@ -168,7 +170,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
@@ -176,12 +178,12 @@ public class TestMail implements IdentitySource<TestMail> {
         return new String[] { getFolder(), getId() };
     }
 
-    public void setFolderAndID(String[] folderAndID) {
+    public void setFolderAndID(final String[] folderAndID) {
         setFolder(folderAndID[0]);
         setId(folderAndID[1]);
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -189,7 +191,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return id;
     }
 
-    public void setFolder(String folder) {
+    public void setFolder(final String folder) {
         this.folder = folder;
     }
 
@@ -201,29 +203,29 @@ public class TestMail implements IdentitySource<TestMail> {
         return attachment;
     }
 
-    public void setAttachment(List<JSONObject> attachment) {
+    public void setAttachment(final List<JSONObject> attachment) {
         this.attachment = attachment;
     }
 
     public TestMail() {
     }
 
-    public TestMail(JSONObject obj) throws JSONException {
+    public TestMail(final JSONObject obj) throws JSONException {
         this();
         read(obj);
     }
 
-    public TestMail(int[] columns, JSONArray values) throws JSONException {
+    public TestMail(final int[] columns, final JSONArray values) throws JSONException {
         this();
         read(columns, values);
     }
 
-    public TestMail(Map<String, String> map) throws JSONException {
+    public TestMail(final Map<String, String> map) throws JSONException {
         this();
         read(map);
     }
 
-    public TestMail(String sender, String recipient, String subject, String contentType, String text) throws JSONException {
+    public TestMail(final String sender, final String recipient, final String subject, final String contentType, final String text) throws JSONException {
         setFrom(Arrays.asList(new String[] { sender }));
         setTo(Arrays.asList(new String[] { recipient }));
         setSubject(subject);
@@ -238,12 +240,13 @@ public class TestMail implements IdentitySource<TestMail> {
      * @param map A map, where the keys are taken from MailListField or TestMailField
      * @throws JSONException
      */
-    public void read(Map<String, String> map) throws JSONException {
-        Set<String> keys = map.keySet();
-        for (String key : keys) {
-            MailListField field = MailListField.getBy(key);
-            if (key == null)
+    public void read(final Map<String, String> map) throws JSONException {
+        final Set<String> keys = map.keySet();
+        for (final String key : keys) {
+            final MailListField field = MailListField.getBy(key);
+            if (key == null) {
                 continue;
+            }
 
             setBy(field, map.get(key));
         }
@@ -257,16 +260,17 @@ public class TestMail implements IdentitySource<TestMail> {
      * @param json
      * @throws JSONException
      */
-    public void read(JSONObject json) throws JSONException {
+    public void read(final JSONObject json) throws JSONException {
         // lists
-        MailJSONField[] values = MailJSONField.values();
-        List<Integer> columns = new LinkedList<Integer>();
-        JSONArray jsonArray = new JSONArray();
+        final MailJSONField[] values = MailJSONField.values();
+        final List<Integer> columns = new LinkedList<Integer>();
+        final JSONArray jsonArray = new JSONArray();
 
-        for (MailJSONField jsonField : values) {
-            MailListField listField = MailListField.getBy(jsonField.getKey());
-            if (listField == null || !json.has(jsonField.getKey()))
+        for (final MailJSONField jsonField : values) {
+            final MailListField listField = MailListField.getBy(jsonField.getKey());
+            if (listField == null || !json.has(jsonField.getKey())) {
                 continue;
+            }
             columns.add(I(listField.getField()));
             jsonArray.put(json.get(jsonField.getKey()));
         }
@@ -284,11 +288,16 @@ public class TestMail implements IdentitySource<TestMail> {
         }
         field = MailJSONField.ATTACHMENTS.getKey();
         if (json.has(field)) {
-            JSONArray array = json.getJSONArray(field);
+            final JSONArray array = json.getJSONArray(field);
             attachment = new LinkedList<JSONObject>();
             for (int i = 0, size = array.length(); i < size; i++) {
                 attachment.add(array.getJSONObject(i));
             }
+        }
+        field = MailJSONField.HEADERS.getKey();
+        if (json.has(field)) {
+            final JSONObject hdrObject = json.getJSONObject(field);
+            this.headers = hdrObject;
         }
         sanitize();
     }
@@ -300,9 +309,9 @@ public class TestMail implements IdentitySource<TestMail> {
      * @param values A JSONArray carrying values for a TestMail
      * @throws JSONException
      */
-    public void read(int[] columns, JSONArray values) throws JSONException {
+    public void read(final int[] columns, final JSONArray values) throws JSONException {
         for (int index = 0; index < columns.length; index++) {
-            MailListField field = MailListField.getField(columns[index]);
+            final MailListField field = MailListField.getField(columns[index]);
             // lists
             if (field == MailListField.FROM) {
                 setFrom(j2l(values.getJSONArray(index)));
@@ -335,16 +344,17 @@ public class TestMail implements IdentitySource<TestMail> {
             }
             if (field == MailListField.FLAGS) {
                 try{
-                    int flags = values.getInt(index);
+                    final int flags = values.getInt(index);
                     setFlags(flags);
-                } catch (JSONException e){
-                    String flagString = values.getString(index);
-                    String[] flags = flagString.split(",");
+                } catch (final JSONException e){
+                    final String flagString = values.getString(index);
+                    final String[] flags = flagString.split(",");
                     int bitmask = 0;
-                    for(String flagName : flags){
-                        MailFlag flag = MailFlag.getByName(flagName);
-                        if(flag != null)
+                    for(final String flagName : flags){
+                        final MailFlag flag = MailFlag.getByName(flagName);
+                        if(flag != null) {
                             bitmask += flag.getValue();
+                        }
                     }
                     setFlags(bitmask);
                 }
@@ -358,14 +368,15 @@ public class TestMail implements IdentitySource<TestMail> {
         sanitize();
     }
 
-    public Object getBy(TestMailField field) {
-        if (field == TestMailField.MESSAGE)
+    public Object getBy(final TestMailField field) {
+        if (field == TestMailField.MESSAGE) {
             return getBody();
+        }
 
         return null;
     }
 
-    public Object getBy(MailListField field) {
+    public Object getBy(final MailListField field) {
         if (field == MailListField.FROM) {
             return getFrom();
         }
@@ -405,13 +416,13 @@ public class TestMail implements IdentitySource<TestMail> {
         return null;
     }
 
-    public void setBy(TestMailField field, Object value) {
+    public void setBy(final TestMailField field, final Object value) {
         if (field == TestMailField.MESSAGE) {
             setBody((String) value);
         }
     }
 
-    public void setBy(MailListField field, Object value) {
+    public void setBy(final MailListField field, final Object value) {
         if (field == MailListField.FROM) {
             setFrom(addresses2list((String) value));
         }
@@ -442,16 +453,17 @@ public class TestMail implements IdentitySource<TestMail> {
             setColor(Integer.valueOf((String) value).intValue());
         }
         if (field == MailListField.FLAGS) {
-            String myValue = (String) value;
+            final String myValue = (String) value;
             try {
                 setFlags(Integer.valueOf(myValue).intValue());
-            } catch (NumberFormatException e) {
-                String[] flags = myValue.split(",");
+            } catch (final NumberFormatException e) {
+                final String[] flags = myValue.split(",");
                 int bitmask = 0;
-                for(String flagName : flags){
-                    MailFlag flag = MailFlag.getByName(flagName);
-                    if(flag != null)
+                for(final String flagName : flags){
+                    final MailFlag flag = MailFlag.getByName(flagName);
+                    if(flag != null) {
                         bitmask += flag.getValue();
+                    }
                 }
                 setFlags(bitmask);
             }
@@ -465,14 +477,14 @@ public class TestMail implements IdentitySource<TestMail> {
     /**
      * Converts a JSON array into a string list.
      */
-    protected List<String> j2l(JSONArray array) throws JSONException {
+    protected List<String> j2l(final JSONArray array) throws JSONException {
         return JSON.jsonArray2list(array);
     }
 
-    protected List<String> addresses2list(String mailAddresses) {
-        LinkedList<String> addresses = new LinkedList<String>();
-        String[] strings = mailAddresses.split(",");
-        for (String address : strings) {
+    protected List<String> addresses2list(final String mailAddresses) {
+        final LinkedList<String> addresses = new LinkedList<String>();
+        final String[] strings = mailAddresses.split(",");
+        for (final String address : strings) {
             addresses.add(address.trim());
         }
         return addresses;
@@ -485,7 +497,7 @@ public class TestMail implements IdentitySource<TestMail> {
      * @throws JSONException
      */
     public void sanitize() throws JSONException {
-        for (MailTypeStrategy strategy : strategies) {
+        for (final MailTypeStrategy strategy : strategies) {
             if (strategy.isResponsibleFor(this)) {
                 strategy.sanitize(this);
             }
@@ -499,17 +511,18 @@ public class TestMail implements IdentitySource<TestMail> {
      * @throws JSONException
      */
     public JSONObject toJSON() throws JSONException {
-        JSONObject result = new JSONObject();
+        final JSONObject result = new JSONObject();
         result.put(MailJSONField.FROM.getKey(), correctMailAddresses(getFrom()));
         result.put(MailJSONField.RECIPIENT_TO.getKey(), getTo() != null ? correctMailAddresses(getTo()) : "");
         result.put(MailJSONField.RECIPIENT_BCC.getKey(), getBcc() != null ? correctMailAddresses(getBcc()) : "");
         result.put(MailJSONField.RECIPIENT_CC.getKey(), getCc() != null ? correctMailAddresses(getCc()) : "");
-        if (getSubject() != null)
+        if (getSubject() != null) {
             result.put(MailJSONField.SUBJECT.getKey(), getSubject());
+        }
 
         if (getBody() != null) {
-            JSONArray attachments = new JSONArray();
-            JSONObject jsonbody = new JSONObject();
+            final JSONArray attachments = new JSONArray();
+            final JSONObject jsonbody = new JSONObject();
             jsonbody.put(MailJSONField.CONTENT.getKey(), getBody());
             jsonbody.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
             attachments.put(jsonbody);
@@ -520,24 +533,25 @@ public class TestMail implements IdentitySource<TestMail> {
         return result;
     }
 
-    public JSONArray correctMailAddresses(List<String> list) {
-        JSONArray corrected = new JSONArray();
-        for (String recipient : list) {
-            JSONArray adress = correctMailAdress(recipient);
+    public JSONArray correctMailAddresses(final List<String> list) {
+        final JSONArray corrected = new JSONArray();
+        for (final String recipient : list) {
+            final JSONArray adress = correctMailAdress(recipient);
             corrected.put(adress);
         }
         return corrected;
     }
 
-    public JSONArray correctMailAdress(String recipient) {
-        JSONArray corrected = new JSONArray();
+    public JSONArray correctMailAdress(final String recipient) {
+        final JSONArray corrected = new JSONArray();
         corrected.put(recipient);
         corrected.put(recipient);
         return corrected;
     }
 
+    @Override
     public String toString() {
-        StringBuilder bob = new StringBuilder();
+        final StringBuilder bob = new StringBuilder();
         bob.append("Folder = " + getFolder() + ", ID = " + getId() + "\n");
         if (from != null) {
             bob.append("From: ");
@@ -566,12 +580,12 @@ public class TestMail implements IdentitySource<TestMail> {
         return bob.toString();
     }
 
-    public void assumeIdentity(TestMail entry) {
+    public void assumeIdentity(final TestMail entry) {
         entry.setId(getId());
         entry.setFolder(getFolder());
     }
 
-    public void forgetIdentity(TestMail entry) {
+    public void forgetIdentity(final TestMail entry) {
 
     }
 
@@ -579,7 +593,7 @@ public class TestMail implements IdentitySource<TestMail> {
         return TestMail.class;
     }
 
-    public void rememberIdentityValues(TestMail entry) {
+    public void rememberIdentityValues(final TestMail entry) {
         setId(entry.getId());
         setFolder(entry.getFolder());
     }
@@ -594,7 +608,7 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -604,7 +618,7 @@ public class TestMail implements IdentitySource<TestMail> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        TestMail other = (TestMail) obj;
+        final TestMail other = (TestMail) obj;
         if (folder == null) {
             if (other.folder != null) {
                 return false;
