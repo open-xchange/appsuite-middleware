@@ -78,8 +78,9 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
 
     private boolean messageId;
 
-    public void setMessageId(final boolean messageId) {
+    public UpdateMailRequest setMessageId(final boolean messageId) {
         this.messageId = messageId;
+        return this;
     }
 
     public boolean doesFailOnError() {
