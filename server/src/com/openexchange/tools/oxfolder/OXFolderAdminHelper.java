@@ -308,6 +308,8 @@ public final class OXFolderAdminHelper {
                     /*
                      * Global permission enabled for global address book folder; nothing to be restored for this context.
                      */
+                    LOG.warn("Cannot restore individual global address book permissions since global permission is active. Restoring global permission instead.");
+                    updateGABWritePermission(cid, enable, writeCon);
                     return;
                 }
             } catch (final SQLException e) {
@@ -447,9 +449,10 @@ public final class OXFolderAdminHelper {
                     /*
                      * Nothing to be done for a single non-admin user
                      */
-                    LOG.warn("Denying update of individual user permission on global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+                    LOG.warn("Denying update of individual non-admin user permission on global address book folder since global permission is active. user=" + userId + ", context=" + cid);
                     return;
                 }
+                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. Updating global permission instead. admin-id=" + userId + ", context=" + cid);
                 updateGABWritePermission(cid, enable, writeCon);
             }
         } catch (final SQLException e) {
