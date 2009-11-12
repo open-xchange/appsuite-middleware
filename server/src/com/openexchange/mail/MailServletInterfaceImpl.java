@@ -112,6 +112,7 @@ import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.search.service.SearchTermMapper;
@@ -1901,6 +1902,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public String getMailIDByMessageID(final String folder, final String messageID) throws MailException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        final MailMessage[] messages = mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new HeaderTerm("Message-Id", messageID), FIELDS_ID_INFO);
+        if (null == messages || 1 != messages.length) {
+            throw new MailException(MailException.Code.MAIL_NOT_FOUN_BY_MESSAGE_ID, fullname, messageID);
+        }
+        return messages[0].getMailId();
     }
 
     @Override

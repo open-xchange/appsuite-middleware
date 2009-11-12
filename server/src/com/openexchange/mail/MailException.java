@@ -384,7 +384,11 @@ public class MailException extends AbstractOXException {
         /**
          * No connection available to access mailbox
          */
-        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 74);
+        NOT_CONNECTED("No connection available to access mailbox", Category.CODE_ERROR, 74),
+        /**
+         * Mail could not be found in folder %1$s for Message-Id: %2$s
+         */
+        MAIL_NOT_FOUN_BY_MESSAGE_ID("Mail could not be found in folder %1$s for Message-Id: %2$s", Category.CODE_ERROR, 32);
 
         private final String message;
 

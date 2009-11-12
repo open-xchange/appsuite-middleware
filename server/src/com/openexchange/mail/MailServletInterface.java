@@ -108,6 +108,16 @@ public abstract class MailServletInterface {
     public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
     /**
+     * Gets a mail's ID by specified "Message-Id" header.
+     * 
+     * @param folder The folder to search in
+     * @param messageID The "Message-Id" header
+     * @return The ID of the mail corresponding to specified "Message-Id" header
+     * @throws MailException If no mauil could be found
+     */
+    public abstract String getMailIDByMessageID(final String folder, final String messageID) throws MailException;
+
+    /**
      * Returns all message counts in specified folder in an <code>int</code> array as follows: <code>0</code>: Message Count, <code>1</code>
      * : New Message Count, <code>2</code>: Unread MessageCount, <code>3</code>: Deleted Message Count
      */
