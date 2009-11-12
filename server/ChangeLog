@@ -2,6 +2,7 @@
 
  - Bugfix #14530: More resillience towards disappearing subscription sources and publication targets.
  - Bugfix #14402: Consider two companies different.
+ - Bugfix #14027: Generate absoulte URLs for publications.
 
 * 2009-11-11 - marcus.klein@open-xchange.com
 
