@@ -70,4 +70,14 @@ public class OXFolderNotFoundException extends OXFolderException {
         super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()));
     }
 
+    /**
+     * Initializes a new {@link OXFolderNotFoundException}.
+     * 
+     * @param fuid The folder ID
+     * @param cid The context ID
+     */
+    public OXFolderNotFoundException(final String fuid, final Context ctx) {
+        super(FolderCode.NOT_EXISTS, fuid, Integer.valueOf(ctx.getContextId()));
+    }
+
 }
