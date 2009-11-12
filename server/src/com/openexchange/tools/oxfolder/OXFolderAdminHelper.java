@@ -96,6 +96,9 @@ public final class OXFolderAdminHelper {
 
     private static final boolean ADMIN_EDITABLE = false;
 
+    /**
+     * Initializes a new {@link OXFolderAdminHelper}.
+     */
     public OXFolderAdminHelper() {
         super();
     }
@@ -297,10 +300,23 @@ public final class OXFolderAdminHelper {
             throw new OXException(e);
         }
         try {
-            final List<Integer> users;
+            /*
+             * Check if global permission is enabled for global address book folder in current context
+             */
+            try {
+                if (checkGlobalGABPermissionExistence(cid, writeCon)) {
+                    /*
+                     * Global permission enabled for global address book folder; nothing to be restored for this context.
+                     */
+                    return;
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            }
             /*
              * Get context's users
              */
+            final List<Integer> users;
             {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -348,17 +364,30 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public boolean isGlobalAddressBookEnabled(final int cid, final int userId, final Connection readCon) throws OXException {
+        /*
+         * Check if global permission is enabled for global address book folder
+         */
+        final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
+        try {
+            final int[] perms = getPermissionValue(cid, globalAddressBookId, OCLPermission.ALL_GROUPS_AND_USERS, readCon);
+            if (null != perms) {
+                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user=" + userId + ", context=" + cid);
+                return (perms[0] >= OCLPermission.READ_FOLDER);
+            }
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = readCon.prepareStatement("SELECT fp, orp FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            stmt.setInt(pos++, globalAddressBookId);
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) >= OCLPermission.READ_FOLDER && rs.getInt(2) >= OCLPermission.READ_ALL_OBJECTS;
+                return rs.getInt(1) >= OCLPermission.READ_FOLDER; // && rs.getInt(2) >= OCLPermission.READ_ALL_OBJECTS;
             }
             return false;
         } catch (final SQLException e) {
@@ -405,6 +434,26 @@ public final class OXFolderAdminHelper {
             } catch (final SQLException e) {
                 throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
             }
+        }
+        /*
+         * Check if global permission is enabled for global address book folder
+         */
+        try {
+            if (checkGlobalGABPermissionExistence(cid, writeCon)) {
+                /*
+                 * Global permission enabled for global address book folder
+                 */
+                if (!isAdmin) {
+                    /*
+                     * Nothing to be done for a single non-admin user
+                     */
+                    LOG.warn("Denying update of individual user permission on global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+                    return;
+                }
+                updateGABWritePermission(cid, enable, writeCon);
+            }
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -864,6 +913,18 @@ public final class OXFolderAdminHelper {
     }
 
     /**
+     * Checks permission existence for all-groups-abd-users on GAB folder in given context.
+     * 
+     * @param cid The context ID
+     * @param con A connection
+     * @return <code>true</code> if a permission exists; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    private static boolean checkGlobalGABPermissionExistence(final int cid, final Connection con) throws SQLException {
+        return checkPermissionExistence(cid, FolderObject.SYSTEM_LDAP_FOLDER_ID, OCLPermission.ALL_GROUPS_AND_USERS, con);
+    }
+
+    /**
      * Checks permission existence in given folder in given context for given user.
      * 
      * @param cid The context ID
@@ -875,14 +936,44 @@ public final class OXFolderAdminHelper {
      */
     private static boolean checkPermissionExistence(final int cid, final int folderId, final int userId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT permission_id FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             stmt.setInt(1, cid);
             stmt.setInt(2, folderId);
             stmt.setInt(3, userId);
-            return stmt.executeQuery().next();
+            return (rs = stmt.executeQuery()).next();
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Checks permission values for folder, object-read, object-write and object-delete permission.
+     * 
+     * @param cid The context ID
+     * @param folderId The folder ID
+     * @param entityId The entity ID
+     * @param con A connection
+     * @return The permissions as an array or <code>null</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    private static int[] getPermissionValue(final int cid, final int folderId, final int entityId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt =
+                con.prepareStatement("SELECT fp, orp, owp, odp FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, folderId);
+            stmt.setInt(3, entityId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            return new int[] { rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4) };
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -1357,13 +1448,18 @@ public final class OXFolderAdminHelper {
              * Add user to global address book permissions if not present
              */
             final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
-            if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
-                final OCLPermission p = new OCLPermission();
-                p.setEntity(userId);
-                p.setGroupPermission(false);
-                setGABPermissions(p);
-                p.setFolderAdmin(false);
-                createSinglePermission(globalAddressBookId, p, cid, writeCon);
+            final boolean globalPermEnabled = checkGlobalGABPermissionExistence(cid, writeCon);
+            if (globalPermEnabled) {
+                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+            } else {
+                if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
+                    final OCLPermission p = new OCLPermission();
+                    p.setEntity(userId);
+                    p.setGroupPermission(false);
+                    setGABPermissions(p);
+                    p.setFolderAdmin(false);
+                    createSinglePermission(globalAddressBookId, p, cid, writeCon);
+                }
             }
             /*
              * Proceed
@@ -1475,6 +1571,34 @@ public final class OXFolderAdminHelper {
             OCLPermission.READ_ALL_OBJECTS,
             OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS);
+    }
+
+    private void updateGABWritePermission(final int contextId, final boolean enable, final Connection con) throws OXException {
+        PreparedStatement ps = null;
+        try {
+            ps =
+                con.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            int pos = 1;
+            if (enable) {
+                ps.setInt(pos++, OCLPermission.READ_FOLDER);
+                ps.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
+                ps.setInt(
+                    pos++,
+                    OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+            } else {
+                ps.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                ps.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                ps.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+            }
+            ps.setInt(pos++, contextId);
+            ps.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            ps.setInt(pos++, OCLPermission.ALL_GROUPS_AND_USERS);
+            ps.executeUpdate();
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(ps);
+        }
     }
 
 }
