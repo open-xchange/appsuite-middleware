@@ -137,7 +137,12 @@ public class CrawlerOfferingServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
+        String sourceName = req.getParameter("crawler");
+        SubscriptionSource source = sources.getSource(sourceName);
+        if(source == null) {
+            sourceNotFound(resp, sourceName);
+            return;
+        }
         Map<String, Object> parameters = collectParameters(req, source);
 
         Subscription subscription = new Subscription();
@@ -229,7 +234,11 @@ public class CrawlerOfferingServlet extends HttpServlet {
     private void fillSourceTemplate(OXTemplate template, HttpServletRequest req, HttpServletResponse resp) throws TemplateException, IOException {
         List<Map<String, String>> elements = new ArrayList<Map<String, String>>();
 
-        SubscriptionSource source = sources.getSource(req.getParameter("crawler"));
+        String sourceName = req.getParameter("crawler");
+        SubscriptionSource source = sources.getSource(sourceName);
+        if(source == null) {
+            sourceNotFound(resp, sourceName);
+        }
         DynamicFormDescription formDescription = source.getFormDescription();
 
         for (FormElement element : formDescription) {
@@ -263,6 +272,11 @@ public class CrawlerOfferingServlet extends HttpServlet {
     private boolean auth(HttpServletRequest req) {
         Authentication authentication = new Whitelist(configService);
         return authentication.auth(req);
+    }
+    
+    private void sourceNotFound(HttpServletResponse res, String sourceName) throws IOException {
+        res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        res.getWriter().println("Source "+sourceName+" was not found on this server.");
     }
 
 }

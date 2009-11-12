@@ -82,9 +82,10 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
      */
     ParsingError(Category.CODE_ERROR, 6, "Check value to parse.", "Parsing error."),
     
-    INVALID_LOGIN(Category.USER_INPUT, 1, "Please correct the password and try again", "The password you entered was wrong"),
-    COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 2, "Make sure, that the Service is still available, and there are no major changes on the website", "Service unavailable"),
-    INVALID_WORKFLOW(Category.SETUP_ERROR, 3, "Please correct the steps of this workflow so that output of one step and input of the next step match", "The steps of this crawling workflow do not fit together");
+    INVALID_LOGIN(Category.USER_INPUT, 7, "Please correct the password and try again", "The password you entered was wrong"),
+    COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 8, "Make sure, that the Service is still available, and there are no major changes on the website", "Service unavailable"),
+    INVALID_WORKFLOW(Category.SETUP_ERROR, 9, "Please correct the steps of this workflow so that output of one step and input of the next step match", "The steps of this crawling workflow do not fit together"),
+    INACTIVE_SOURCE(Category.SETUP_ERROR, 10, "Ask an administrator to check the available subscription sources", "The subscription source this subscription belongs to is currently inactive, and cannot provide data.");
 
     private Category category;
     private int errorCode;

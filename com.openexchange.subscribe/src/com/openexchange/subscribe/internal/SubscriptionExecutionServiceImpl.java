@@ -64,6 +64,7 @@ import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}
@@ -121,6 +122,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     public void executeSubscription(Context context, int subscriptionId) throws AbstractOXException {
         SubscriptionSource source = discoverer.getSource(context, subscriptionId);
+        if(source == null) {
+            throw INACTIVE_SOURCE.create();
+        }
         SubscribeService subscribeService = source.getSubscribeService();
         Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
         Collection data = subscribeService.getContent(subscription);
@@ -130,7 +134,11 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
     public void executeSubscriptions(List<Subscription> subscriptionsToRefresh) throws AbstractOXException {
         for (Subscription subscription : subscriptionsToRefresh) {
-            SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+            SubscriptionSource source = subscription.getSource();
+            if(source == null) {
+                throw INACTIVE_SOURCE.create();
+            }
+            SubscribeService subscribeService = source.getSubscribeService();
             Collection data = subscribeService.getContent(subscription);
             storeData(data, subscription);
         }

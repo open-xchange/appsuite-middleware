@@ -165,10 +165,13 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
-            Subscription subscription = subscribeService.loadSubscription(context, id, session.getPassword());
-            if (subscription != null) {
-                subscriptions.add(subscription);
+            SubscriptionSource source = discovery.getSource(context, id);
+            if(source != null) {
+                SubscribeService subscribeService = source.getSubscribeService();
+                Subscription subscription = subscribeService.loadSubscription(context, id, session.getPassword());
+                if (subscription != null) {
+                    subscriptions.add(subscription);
+                }
             }
         }
         String[] basicColumns = getBasicColumns(request);
@@ -279,9 +282,17 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     private Subscription loadSubscription(int id, Context context, String source, String secret) throws AbstractOXException {
         SubscribeService service = null;
         if (source != null && !source.equals("")) {
-            service = discovery.getSource(source).getSubscribeService();
+            SubscriptionSource s = discovery.getSource(source);
+            if(s == null) {
+                return null;
+            }
+            service = s.getSubscribeService();
         } else {
-            service = discovery.getSource(context, id).getSubscribeService();
+            SubscriptionSource s = discovery.getSource(context, id);
+            if(s == null) {
+                return null;
+            }
+            service = s.getSubscribeService();
         }
         return service.loadSubscription(context, id, secret);
     }
@@ -291,7 +302,11 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         Context context = session.getContext();
         for (int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            SubscribeService subscribeService = discovery.getSource(context, id).getSubscribeService();
+            SubscriptionSource s = discovery.getSource(context, id);
+            if(s == null) {
+                continue;
+            }
+            SubscribeService subscribeService = s.getSubscribeService();
             Subscription subscription = new Subscription();
             subscription.setContext(context);
             subscription.setId(id);

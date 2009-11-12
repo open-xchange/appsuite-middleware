@@ -86,10 +86,11 @@ public class SubscriptionJSONParser {
         subscription.setFolderId(object.getString("folder"));
         SubscriptionSource source = discovery.getSource(object.getString("source"));
         subscription.setSource(source);
-        JSONObject config = object.getJSONObject(subscription.getSource().getId());
-        Map<String, Object> configuration = formParser.parse(config, source.getFormDescription());
-        subscription.setConfiguration(configuration);
-
+        if(source != null) {
+            JSONObject config = object.getJSONObject(subscription.getSource().getId());
+            Map<String, Object> configuration = formParser.parse(config, source.getFormDescription());
+            subscription.setConfiguration(configuration);
+        }
         return subscription;
     }
 
