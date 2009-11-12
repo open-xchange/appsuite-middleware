@@ -60,6 +60,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class Constants {
 
+    /**
+     * The object name for update task MBeans.
+     */
     public static final ObjectName OBJECT_NAME = initReportingName();
 
     /**
