@@ -38,7 +38,7 @@ workflowString: |
             type: 1
             typeOfInfo: display_name
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(<img src=\")([^\"]*)(\")"
+            regex: "(<img src=\")(http:\\/\\/profile\\.ak\\.fbcdn\\.net[^\"]*)(\")"
             type: 1
             typeOfInfo: image
           - !com.openexchange.subscribe.crawler.PagePart
