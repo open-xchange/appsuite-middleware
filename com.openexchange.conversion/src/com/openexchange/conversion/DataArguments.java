@@ -68,7 +68,7 @@ public final class DataArguments {
 
     private final Map<String, String> map;
 
-    private String id;
+    private volatile String id;
 
     /**
      * Initializes a new {@link DataArguments} with the default initial capacity (4).
@@ -153,29 +153,35 @@ public final class DataArguments {
      * @return The ID for this data properties
      */
     public String getID() {
-        if (id != null) {
-            return id;
+        String retval = id;
+        if (retval != null) {
+            return retval;
         }
         if (map.isEmpty()) {
             return "";
         }
-        /*
-         * Sort keys
-         */
-        final int size = map.size();
-        final String[] sortedKeys = map.keySet().toArray(new String[size]);
-        Arrays.sort(sortedKeys);
-        /*
-         * Compute ID
-         */
-        final StringBuilder builder = new StringBuilder(10 * size);
-        builder.append(computeHash(sortedKeys[0]));
-        for (int i = 1; i < size; i++) {
-            builder.append('-');
-            builder.append(sortedKeys[i]);
+        synchronized (map) {
+            retval = id;
+            if (retval == null) {
+                /*
+                 * Sort keys
+                 */
+                final int size = map.size();
+                final String[] sortedKeys = map.keySet().toArray(new String[size]);
+                Arrays.sort(sortedKeys);
+                /*
+                 * Compute ID
+                 */
+                final StringBuilder builder = new StringBuilder(10 * size);
+                builder.append(computeHash(sortedKeys[0]));
+                for (int i = 1; i < size; i++) {
+                    builder.append('-');
+                    builder.append(computeHash(sortedKeys[i]));
+                }
+                retval = id = builder.toString();
+            }
         }
-        id = builder.toString();
-        return id;
+        return retval;
     }
 
     private int computeHash(final String key) {

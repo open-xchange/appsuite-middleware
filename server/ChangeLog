@@ -1,3 +1,7 @@
+* 2009-11-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #14851: Fixed composing image URL
+
 * 2009-11-12 - francisco.laguna@open-xchange.com
 
  - Bugfix #14530: More resillience towards disappearing subscription sources and publication targets.
