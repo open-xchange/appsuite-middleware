@@ -81,18 +81,18 @@ public class SubscriptionJSONWriter {
 
     private static final String SOURCE = "source";
 
-    public JSONObject write(Subscription subscription, DynamicFormDescription form) throws JSONException, SubscriptionJSONException {
+    public JSONObject write(Subscription subscription, DynamicFormDescription form, String urlPrefix) throws JSONException, SubscriptionJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
         object.put(DISPLAYNAME, subscription.getDisplayName());
         object.put(SOURCE, subscription.getSource().getId());
-        writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form);
+        writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
         return object;
     }
 
-    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form) throws JSONException, SubscriptionJSONException {
-        JSONObject config = formContentWriter.write(form, configuration);
+    private void writeConfiguration(JSONObject object, String id, Map<String, Object> configuration, DynamicFormDescription form, String urlPrefix) throws JSONException, SubscriptionJSONException {
+        JSONObject config = formContentWriter.write(form, configuration, urlPrefix);
         object.put(id, config);
     }
 

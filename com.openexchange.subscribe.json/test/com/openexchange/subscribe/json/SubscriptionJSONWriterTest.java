@@ -95,7 +95,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
     public void testWriteAsObject() throws JSONException, SubscriptionJSONException {
 
-        JSONObject object = new SubscriptionJSONWriter().write(subscription, form);
+        JSONObject object = new SubscriptionJSONWriter().write(subscription, form, null);
 
         JSONAssertion assertion = 
             new JSONAssertion()

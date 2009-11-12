@@ -251,7 +251,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         String target = request.optString("target");
         Context context = session.getContext();
         Publication publication = loadPublication(id, context, target);
-        return createResponse(publication);
+        return createResponse(publication, request.optString("__serverURL"));
     }
 
     private Publication loadPublication(int id, Context context, String target) throws AbstractOXException {
@@ -320,8 +320,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return rows;
     }
 
-    private Object createResponse(Publication publication) throws JSONException, PublicationJSONException {
-        JSONObject asJson = new PublicationWriter().write(publication);
+    private Object createResponse(Publication publication, String urlPrefix) throws JSONException, PublicationJSONException {
+        JSONObject asJson = new PublicationWriter().write(publication, urlPrefix);
         return asJson;
     }
 

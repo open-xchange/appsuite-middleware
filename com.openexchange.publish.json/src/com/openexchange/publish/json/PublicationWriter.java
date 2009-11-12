@@ -82,7 +82,7 @@ public class PublicationWriter {
     public PublicationWriter() {
     }
 
-    public JSONObject write(Publication publication) throws JSONException, PublicationJSONException {
+    public JSONObject write(Publication publication, String urlPrefix) throws JSONException, PublicationJSONException {
         JSONObject object = new JSONObject();
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));
@@ -90,7 +90,7 @@ public class PublicationWriter {
         object.put(DISPLAYNAME, publication.getDisplayName());
         String targetId = publication.getTarget().getId();
         object.put(TARGET, targetId);
-        object.put(targetId, formWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration()));
+        object.put(targetId, formWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration(), urlPrefix));
         return object;
     }
 

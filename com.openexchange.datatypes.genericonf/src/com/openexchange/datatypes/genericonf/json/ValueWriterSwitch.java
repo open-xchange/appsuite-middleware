@@ -76,7 +76,9 @@ public class ValueWriterSwitch implements WidgetSwitcher {
     }
 
     public Object link(Object... args) {
-        return args[0];
+        String link = (String) args[0];
+        String prefix = (String) args[1];
+        return link.charAt(0) == '/' ? prefix + link : link;
     }
 
     public Object text(Object... args) {

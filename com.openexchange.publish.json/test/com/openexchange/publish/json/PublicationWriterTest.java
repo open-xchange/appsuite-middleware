@@ -99,7 +99,7 @@ public class PublicationWriterTest extends TestCase {
     
     public void testWriteObject() throws JSONException, PublicationJSONException {
         PublicationWriter writer = new PublicationWriter();
-        JSONObject object = writer.write(publication);
+        JSONObject object = writer.write(publication, null);
         
         JSONAssertion assertion = new JSONAssertion()
                 .hasKey("id").withValue(23)

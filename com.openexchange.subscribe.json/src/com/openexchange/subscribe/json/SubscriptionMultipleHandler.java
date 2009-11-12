@@ -271,11 +271,11 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         String source = request.optString("source");
         Context context = session.getContext();
         Subscription subscription = loadSubscription(id, context, source, session.getPassword());
-        return createResponse(subscription);
+        return createResponse(subscription, request.optString("__serverURL"));
     }
 
-    private Object createResponse(Subscription subscription) throws JSONException, SubscriptionJSONException {
-        JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription());
+    private Object createResponse(Subscription subscription, String urlPrefix) throws JSONException, SubscriptionJSONException {
+        JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
         return object;
     }
 

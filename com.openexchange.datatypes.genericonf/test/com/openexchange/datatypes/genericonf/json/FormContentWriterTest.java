@@ -75,19 +75,24 @@ public class FormContentWriterTest extends TestCase {
         content = new HashMap<String, Object>();
         form = new DynamicFormDescription();
         
-        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox"));
+        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox")).add(FormElement.link("url", "URL")).add(FormElement.link("absolute", "Absolute URL"));
         
         content.put("login", "blupp");
         content.put("password", "geheim");
         content.put("checkbox", true);
+        content.put("url", "/server/relative");
+        content.put("absolute", "http://www.somewhere.invalid/absoluteURL");
+        
     }
     
     public void testWrite() throws JSONException {
-        JSONObject object = new FormContentWriter().write(form, content);
+        JSONObject object = new FormContentWriter().write(form, content, "https://myserver.invalid");
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("login").withValue("blupp")
             .hasKey("password").withValue("xxxxxxxx")
             .hasKey("checkbox").withValue(true)
+            .hasKey("url").withValue("https://myserver.invalid/server/relative")
+            .hasKey("absolute").withValue("http://www.somewhere.invalid/absoluteURL")
        .objectEnds();
         
         assertValidates(assertion, object);

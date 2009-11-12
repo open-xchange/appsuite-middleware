@@ -87,7 +87,13 @@ public class PublicationServlet extends MultipleAdapterServlet {
     @Override
     protected JSONObject modify(HttpServletRequest req, String action, JSONObject request) throws JSONException {
         request.put("__query", req.getQueryString());
+        request.put("__serverURL", getServerURL(req));
         return request;
+    }
+    
+    protected String getServerURL(HttpServletRequest req) {
+        String protocol = req.isSecure() ? "https://" : "http://";
+        return protocol + req.getServerName();
     }
 
 }
