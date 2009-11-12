@@ -216,7 +216,7 @@ ol ol ol li                                       { background: none; padding: 0
     <#assign middleDay = days[days?size / 2]>
     <title>OX - Calendar - ${middleDay.format("MMMM", middleDay.time)}</title>
   </head>
-  <body>
+  <body onload="window.print()">
     <div id="layout" class="flexChilds">
       <div id="headArea">
       </div>
