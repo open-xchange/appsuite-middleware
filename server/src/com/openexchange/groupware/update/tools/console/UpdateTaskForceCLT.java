@@ -83,7 +83,17 @@ public final class UpdateTaskForceCLT {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("t", "task", true, "The update task's class name");
-        toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
+
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append("A valid context identifier contained in target schema;");
+        sb.append(" if missing and '-n/--name' option is also absent all schemas are considered.");
+        toolkitOptions.addOption("c", "context", true, sb.toString());
+
+        sb.setLength(0);
+        sb.append("A valid schema name. This option is a replacement for '-c/--context' option.");
+        sb.append(" If both are present '-c/--context' is preferred. If both absent all schemas are considered.");
+        toolkitOptions.addOption("n", "name", true, sb.toString());
+
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -104,6 +114,7 @@ public final class UpdateTaskForceCLT {
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
         int contextId = -1;
+        String schemaName = null;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -136,11 +147,8 @@ public final class UpdateTaskForceCLT {
             } else {
                 className = cmd.getOptionValue('t');
             }
-            if (!cmd.hasOption('c')) {
-                System.err.println("Missing context identifier.");
-                printHelp();
-                System.exit(0);
-            } else {
+
+            if (cmd.hasOption('c')) {
                 final String optionValue = cmd.getOptionValue('c');
                 try {
                     contextId = Integer.parseInt(optionValue.trim());
@@ -148,6 +156,10 @@ public final class UpdateTaskForceCLT {
                     System.err.println("Context identifier parameter is not a number: " + optionValue);
                     printHelp();
                     System.exit(0);
+                }
+            } else {
+                if (cmd.hasOption('n')) {
+                    schemaName = cmd.getOptionValue('n');
                 }
             }
 
@@ -168,12 +180,19 @@ public final class UpdateTaskForceCLT {
                 environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(new String[] { jmxLogin, jmxPassword }));
             }
 
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            final JMXServiceURL url =
+                new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append("/server").toString());
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-                mbsc.invoke(Constants.OBJECT_NAME, "force", new Object[] { className, Integer.valueOf(contextId) }, null);
+                final boolean noName = (null == schemaName);
+                if (noName && (-1 == contextId)) {
+                    mbsc.invoke(Constants.OBJECT_NAME, "forceOnAllSchemas", new Object[] { className }, null);
+                } else {
+                    final String param = (noName ? String.valueOf(contextId) : schemaName);
+                    mbsc.invoke(Constants.OBJECT_NAME, "force", new Object[] { className, param }, null);
+                }
 
             } finally {
                 jmxConnector.close();
