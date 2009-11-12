@@ -824,47 +824,47 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     final int folderId = getUnsignedInteger(folderIdentifier);
 
                     if (folderId < 0) {
-                        throw new OXFolderNotFoundException(folderIdentifier, ctx);
-                    }
-
-                    if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
-                        retval = true;
-                    } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                        /*
-                         * A virtual database folder
-                         */
-                        retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
+                        retval = false;
                     } else {
-                        /*
-                         * A non-virtual database folder
-                         */
-
-                        if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
-                            /*
-                             * The system shared folder
-                             */
+                        if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                             retval = true;
-                        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                        } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
                             /*
-                             * The system public folder
+                             * A virtual database folder
                              */
-                            retval = true;
-                        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
-                            /*
-                             * The system infostore folder
-                             */
-                            retval = true;
-                        } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
-                            /*
-                             * The system private folder
-                             */
-                            retval = true;
+                            retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
                         } else {
                             /*
-                             * Check for shared folder, that is folder is of type private and requesting user is different from folder's
-                             * owner
+                             * A non-virtual database folder
                              */
-                            retval = OXFolderSQL.exists(folderId, con, ctx);
+
+                            if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                                /*
+                                 * The system shared folder
+                                 */
+                                retval = true;
+                            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                                /*
+                                 * The system public folder
+                                 */
+                                retval = true;
+                            } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                                /*
+                                 * The system infostore folder
+                                 */
+                                retval = true;
+                            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                                /*
+                                 * The system private folder
+                                 */
+                                retval = true;
+                            } else {
+                                /*
+                                 * Check for shared folder, that is folder is of type private and requesting user is different from folder's
+                                 * owner
+                                 */
+                                retval = OXFolderSQL.exists(folderId, con, ctx);
+                            }
                         }
                     }
                 }
@@ -872,10 +872,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 final int folderId = getUnsignedInteger(folderIdentifier);
 
                 if (folderId < 0) {
-                    throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                    retval = false;
+                } else {
+                    retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
                 }
-
-                retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
             }
             return retval;
         } catch (final DBPoolingException e) {
