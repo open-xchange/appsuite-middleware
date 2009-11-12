@@ -1,3 +1,7 @@
+* 2009-11-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #14722: Added command so print view directly opens print dialogue.
+
 * 2009-11-12 - thorben.betten@open-xchange.com
 
  - Bugfix #14851: Fixed composing image URL
