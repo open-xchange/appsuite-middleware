@@ -123,7 +123,7 @@ ol ol ol li                                       { background: none; padding: 0
 .appointmentDayStart,
 .appointmentDayStartLast,
 .appointmentDayEnd,
-.appointmentDayStartEnd                           { background: #ffcb71; height: 15px; overflow: hidden; margin: 2px 0; padding-left: 5px; border: 1px solid #ec9e18;}
+.appointmentDayStartEnd                           { background: #E0E0EF; height: 15px; overflow: hidden; margin: 2px 0; padding-left: 5px; border: 1px solid #808080;}
 
 .appointmentDayStartEnd                           { -moz-border-radius: 5px; -webkit-border-radius: 5px; margin: 2px }
 
@@ -167,12 +167,12 @@ ol ol ol li                                       { background: none; padding: 0
 ---------------------------------------------------*/
 #calendarWeek                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 100%; }
 
-#calendarWeek .appointmentsDay                        { height: 30px; border-bottom: 1px solid gray;  }
+#calendarWeek .appointmentsDay                        { height: 30px; border-bottom: 1px solid gray; }
 #calendarWeek th                                      { height: 30px }
 #calendarWeek .wrapper                                { height: 30px; overflow: hidden; }
 
-#calendarWeek td                                      { border-right: 1px solid black; }
-#calendarWeek td.last                                 { border-right: 1px solid #000000; }
+#calendarWeek td                                      { border-right: 1px solid #C0C0C0; }
+#calendarWeek td.last                                 { border-right: 1px solid #C0C0C0; }
 
 #calendarWeek span                                    { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
 
@@ -182,10 +182,11 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarWeek .days                                   { height: 30px; }
 #calendarWeek .day                                    { height: 30px; border-bottom: 1px solid #999999; }
 #calendarWeek .time                                   { text-align: right; vertical-align: middle; font-weight: bold; height: 60px; width: 5%; padding-right: 5px; }
-#calendarWeek .appointments                           { border-bottom: 1px solid #999999;}
+#calendarWeek .appointments                           { border-bottom: 1px solid #C0C0C0; width: 12%; background-color: #FBFBD9; }
+#calendarWeek .appointmentsWeekEnd                    { border-bottom: 1px solid #C0C0C0; width: 12%; background-color: #F8EFC2; }
 #calendarWeek .appointments span                      { border: 0; background: none; }
 
-#calendarWeek .appointment                            { border-left: 10px #44a4de solid; width: 110px; overflow: hidden; }
+#calendarWeek .appointment                            { border-left: 10px #44a4de solid; overflow: hidden;  background-color: #F5F5F5;}
 #calendarWeek .appointments_2                         { width: 55px }
 #calendarWeek .appointments_3                         { width: 36px }
 
@@ -250,14 +251,22 @@ ol ol ol li                                       { background: none; padding: 0
                 ${hour}
               </td>
               <#list days as day>
+              <#if day.weekEnd>
+              <td class="appointmentsWeekEnd">
+              <#else>
               <td class="appointments">
+              </#if>
                 <#assign appointmentWidth = columnWidth / day.columns?size>
                 <#list day.getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60) as appointment>
-                <div class="appointment" style="position: absolute; top: ${appointment.startMinutes + 61}px; left: ${day_index * columnWidth + day.getColumn(appointment) * appointmentWidth + 5}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%">
-                  <span>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</span>
-                  <#if appointment.location?has_content>
-                  ${appointment.location}
-                  </#if>
+                <div style="position: absolute; top: ${(appointment.startMinutes + 61)?round}px; left: ${(day_index * columnWidth + day.getColumn(appointment) * appointmentWidth + 5)?round}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth?round}%">
+	                <div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px; border: 1px solid #808080;">
+		                <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
+		                  <div style="background-color: #EEEEEE; padding: 2px 2px 2px 3px; ">${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
+		                  <#if appointment.location?has_content>
+		                  ${appointment.location}
+		                  </#if>
+		                </div>
+	                </div>
                 </div>
                 </#list>
               </td>

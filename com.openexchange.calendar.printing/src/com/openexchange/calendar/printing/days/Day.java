@@ -219,4 +219,13 @@ public class Day implements Comparable<Day> {
         cal.setTime(orig);
         return retval;
     }
+    
+    public boolean isWeekEnd() {
+        Date orig = cal.getTime();
+        cal.setTime(time);
+        final int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+        boolean retval = (Calendar.SATURDAY == dayOfWeek) || (Calendar.SUNDAY == dayOfWeek);
+        cal.setTime(orig);
+        return retval;
+    }
 }
