@@ -54,6 +54,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
@@ -76,6 +82,10 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * <tt>OXFolderProperties</tt> contains both folder properties and folder cache properties
@@ -108,7 +118,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private boolean ignoreSharedAddressbook = false;
 
-    private boolean enableInternalUsersEdit = false;
+    private volatile boolean enableInternalUsersEdit = false;
 
     private OXFolderProperties() {
         super();
@@ -221,9 +231,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         /*
          * ENABLE_INTERNAL_USER_EDIT and add listener
          */
+        final org.apache.commons.logging.Log logger = LOG;
         value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT", (propertyListener = new PropertyListener() {
-
-            private final org.apache.commons.logging.Log logger = LOG;
 
             public void onPropertyChange(final PropertyEvent event) {
                 if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
@@ -244,17 +253,41 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     }
                     enableInternalUsersEdit = false;
                 }
+                final ThreadPoolService pool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                if (null == pool) {
+                    // Run in this thread
+                    updatePermissions();
+                } else {
+                    // Run in separate thread
+                    final Runnable r = new Runnable() {
+                        
+                        public void run() {
+                            updatePermissions();
+                        }
+                    };
+                    pool.submit(ThreadPools.task(r), CallerRunsBehavior.getInstance());
+                }
+            }
+
+            private void updatePermissions() {
+                /*
+                 * Update permissions
+                 */
+                final Map<String, Set<Integer>> map = getSchemasAndContexts();
+                if (!map.isEmpty()) {
+                    final int size = map.size();
+                    final Iterator<Set<Integer>> iter = map.values().iterator();
+                    for (int i = 0; i < size; i++) {
+                        final Set<Integer> cids = iter.next();
+                        if (!cids.isEmpty()) {
+                            updateGABWritePermission(cids.iterator().next().intValue());
+                        }
+                    }
+                }
                 if (logger.isInfoEnabled()) {
                     logger.info(MessageFormat.format(
                         "Property ''ENABLE_INTERNAL_USER_EDIT'' change propagated. ENABLE_INTERNAL_USER_EDIT={0}",
                         Boolean.valueOf(enableInternalUsersEdit)));
-                }
-                /*
-                 * Update permissions
-                 */
-                final int contextId = getValidContextId();
-                if (-1 != contextId) {
-                    updateGABWritePermission(contextId);
                 }
                 /*
                  * Clear folder cache to ensure removal of all cached instances of global address book
@@ -287,36 +320,49 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     } catch (final SQLException e) {
                         logger.error(e.getMessage(), e);
                     } finally {
+                        DBUtils.closeSQLStuff(ps);
                         Database.back(contextId, true, con);
                     }
                 }
             }
 
-            private int getValidContextId() {
-                Connection configDBCon = null;
+            private Map<String, Set<Integer>> getSchemasAndContexts() {
                 try {
-                    configDBCon = Database.get(false);
-                } catch (final DBPoolingException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                if (null != configDBCon) {
-                    PreparedStatement ps = null;
+                    Connection writeCon = null;
+                    PreparedStatement stmt = null;
                     ResultSet rs = null;
                     try {
-                        ps = configDBCon.prepareStatement("SELECT cid FROM login2context");
-                        rs = ps.executeQuery();
-                        if (rs.next()) {
-                            return rs.getInt(1);
+                        writeCon = Database.get(false);
+                        stmt = writeCon.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool");
+                        rs = stmt.executeQuery();
+
+                        final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
+
+                        while (rs.next()) {
+                            final String schemaName = rs.getString(1);
+                            final int contextId = rs.getInt(2);
+
+                            Set<Integer> contextIds = schemasAndContexts.get(schemaName);
+                            if (null == contextIds) {
+                                contextIds = new HashSet<Integer>();
+                                schemasAndContexts.put(schemaName, contextIds);
+                            }
+                            contextIds.add(Integer.valueOf(contextId));
                         }
-                        logger.error("No context found!", new Throwable());
-                        return -1;
-                    } catch (final SQLException e) {
-                        logger.error(e.getMessage(), e);
+
+                        return schemasAndContexts;
                     } finally {
-                        Database.back(false, configDBCon);
+                        DBUtils.closeSQLStuff(rs, stmt);
+                        if (writeCon != null) {
+                            Database.back(false, writeCon);
+                        }
                     }
+                } catch (final DBPoolingException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (final SQLException e) {
+                    logger.error(e.getMessage(), e);
                 }
-                return -1;
+                return Collections.emptyMap();
             }
 
         }));
