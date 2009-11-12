@@ -1,3 +1,9 @@
+* 2009-11-12 - thomas.schweiger@open-xchange.com
+
+ - API change: Due to SoftwareChange_Request-170 the "oxreport" call in "oxsysreport"
+               script has been changed to "report". "oxreport" isn't available
+               within 6.14 anymore.
+               
 * 2009-11-05 - marcus.klein@open-xchange.com
 
  - Bugfix #14782: Lazy loading of configuration file properties.
