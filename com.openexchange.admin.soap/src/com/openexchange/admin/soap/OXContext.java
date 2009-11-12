@@ -242,7 +242,6 @@ public class OXContext extends OXSOAPRMIMapper {
             reconnect(true);
             ((OXContextInterface)rmistub).delete(ctx, auth);
         }
-        throw new RemoteException(RMI_CONNECT_ERROR);
     }
 
     /**
