@@ -82,13 +82,13 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         // For the sake of simplicity we assume that equal names mean equal contacts
         // TODO: This needs to be diversified in the form of "unique-in-context" later (if there«s only one "Max Mustermann" in a folder it
         // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
-        if (eq(original.getGivenName(), candidate.getGivenName())) {
+        if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
         }
-        if (eq(original.getSurName(), candidate.getSurName())) {
+        if ((isset(original.getSurName()) || isset(candidate.getSurName())) && eq(original.getSurName(), candidate.getSurName())) {
             score += 5;
         }
-        if (eq(original.getDisplayName(), candidate.getDisplayName())) {
+        if ((isset(original.getDisplayName()) || isset(candidate.getDisplayName())) && eq(original.getDisplayName(), candidate.getDisplayName())) {
             score += 10;
         }
         // an email-address is unique so if this is identical the contact should be the same
@@ -106,6 +106,10 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         }
 
         return score;
+    }
+
+    private boolean isset(String s) {
+        return s == null || s.length() > 0;
     }
 
     protected boolean eq(Object o1, Object o2) {

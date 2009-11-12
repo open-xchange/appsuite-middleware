@@ -111,6 +111,23 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         
     }
     
+    public void testTwoCompaniesDiffer() throws AbstractOXException {
+        Contact contact = new Contact();
+        contact.setGivenName("");
+        contact.setSurName("");
+        
+        contact.setCompany("Wunderwerk GmbH");
+        
+        Contact contact2 = new Contact();
+        contact2.setGivenName("");
+        contact2.setSurName("");
+        contact2.setCompany("Schokoladenfabrik Inc.");
+        
+        int score = strategy.calculateSimilarityScore(contact, contact2, null);
+        
+        assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshhold(null));
+    }
+    
     public void testNameChangedButMailAdressStayedTheSame() throws AbstractOXException {
         // First name is not enough
         Contact contact = new Contact();
