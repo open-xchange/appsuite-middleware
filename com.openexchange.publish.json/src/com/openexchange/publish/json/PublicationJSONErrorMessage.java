@@ -64,7 +64,8 @@ public enum PublicationJSONErrorMessage implements OXErrorMessage {
     MISSING_PARAMETER(Category.USER_INPUT, 2, "Please correct the client program", "Missing value for parameter %s"),
     UNKNOWN_ACTION(Category.USER_INPUT, 3, "Please correct the client program","Unknown Action: %s"),
     UNKOWN_ENTITY_MODULE(Category.USER_INPUT, 4, "Please use only entity modules known to the server", "Unknown entity module: %s"),
-    UNKNOWN_COLUMN(Category.USER_INPUT, 5, "Please ask only for columns known to the server", "Unknown column: %s");
+    UNKNOWN_COLUMN(Category.USER_INPUT, 5, "Please ask only for columns known to the server", "Unknown column: %s"),
+    UNKNOWN_TARGET(Category.USER_INPUT, 6, "Please check the spelling of the id, or load a list of known targets", "Unknown Target: %s");
 
     private Category category;
     private int errorCode;

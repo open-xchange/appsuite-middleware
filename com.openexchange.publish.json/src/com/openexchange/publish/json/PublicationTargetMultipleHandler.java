@@ -51,6 +51,7 @@ package com.openexchange.publish.json;
 
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.MISSING_PARAMETER;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_ACTION;
+import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_TARGET;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -116,6 +117,9 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             throw MISSING_PARAMETER.create("id");
         }
         PublicationTarget target = discoverer.getTarget(identifier);
+        if(target == null) {
+            throw UNKNOWN_TARGET.create(identifier);
+        }
         JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target);
         return data;
     }

@@ -147,11 +147,15 @@ public class PublicationMultipleHandler implements MultipleHandler {
         List<Publication> publications = new ArrayList<Publication>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            PublicationService publicationService = discovery.getTarget(context, id).getPublicationService();
-            Publication publication = publicationService.load(context, id);
-            if (publication != null) {
-                publications.add(publication);
+            PublicationTarget target = discovery.getTarget(context, id);
+            if(target != null) {
+                PublicationService publicationService = target.getPublicationService();
+                Publication publication = publicationService.load(context, id);
+                if (publication != null) {
+                    publications.add(publication);
+                }
             }
+            
         }
         String[] basicColumns = getBasicColumns(request);
         Map<String, String[]> dynamicColumns = getDynamicColumns(request);
@@ -257,6 +261,9 @@ public class PublicationMultipleHandler implements MultipleHandler {
         } else {
             service = discovery.getTarget(context, id).getPublicationService();
         }
+        if(service == null) {
+            return null;
+        }
         return service.load(context, id);
     }
 
@@ -265,7 +272,11 @@ public class PublicationMultipleHandler implements MultipleHandler {
         Context context = session.getContext();
         for (int i = 0, size = ids.length(); i < size; i++) {
             int id = ids.getInt(i);
-            PublicationService publisher = discovery.getTarget(context, id).getPublicationService();
+            PublicationTarget target = discovery.getTarget(context, id);
+            if(target == null) {
+                continue;
+            }
+            PublicationService publisher = target.getPublicationService();
             Publication publication = new Publication();
             publication.setContext(context);
             publication.setId(id);

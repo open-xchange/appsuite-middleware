@@ -127,7 +127,7 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     protected Publication loadInternally(Context ctx, int publicationId) throws PublicationException {
         Publication publication = STORAGE.getPublication(ctx, publicationId);
-        if (publication.getTarget().getId().equals(getTarget().getId())) {
+        if (publication.getTarget() != null && publication.getTarget().getId().equals(getTarget().getId())) {
             return publication;
         }
         return null;
