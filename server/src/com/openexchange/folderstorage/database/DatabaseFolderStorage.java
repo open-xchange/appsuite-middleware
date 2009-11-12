@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -107,6 +108,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -251,8 +253,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    private static final int[] PUBLIC_FOLDER_IDS = {
-        FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
+    private static final int[] PUBLIC_FOLDER_IDS =
+        {
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
+            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     private static int getFolderType(final int folderIdArg, final StorageParameters storageParameters, final FolderType folderType) throws OXException {
         int type = -1;
@@ -350,9 +354,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }
 
-    private static final int[] VIRTUAL_IDS = {
-        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+    private static final int[] VIRTUAL_IDS =
+        {
+            FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+            FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         try {
@@ -378,7 +383,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     /*
                      * A numeric folder identifier
                      */
-                    final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                    final int folderId = getUnsignedInteger(folderIdentifier);
+
+                    if (folderId < 0) {
+                        throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                    }
+
                     if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                         retval = SystemRootFolder.getSystemRootFolder();
                     } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
@@ -443,15 +453,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Get from backup tables
                  */
-                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
-                final FolderObject fo = FolderObject.loadFolderObjectFromDB(
-                    folderId,
-                    ctx,
-                    con,
-                    true,
-                    false,
-                    "del_oxfolder_tree",
-                    "del_oxfolder_permissions");
+                final int folderId = getUnsignedInteger(folderIdentifier);
+
+                if (folderId < 0) {
+                    throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                }
+
+                final FolderObject fo =
+                    FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
                 retval = new DatabaseFolder(fo);
             }
             retval.setTreeID(treeId);
@@ -812,7 +821,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     /*
                      * A numeric folder identifier
                      */
-                    final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                    final int folderId = getUnsignedInteger(folderIdentifier);
+
+                    if (folderId < 0) {
+                        throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                    }
+
                     if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                         retval = true;
                     } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
@@ -855,7 +869,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     }
                 }
             } else {
-                final int folderId = DatabaseFolderStorageUtility.getUnsignedInteger(folderIdentifier);
+                final int folderId = getUnsignedInteger(folderIdentifier);
+
+                if (folderId < 0) {
+                    throw new OXFolderNotFoundException(folderIdentifier, ctx);
+                }
+
                 retval = OXFolderSQL.exists(folderId, con, ctx, "del_oxfolder_tree");
             }
             return retval;
@@ -873,10 +892,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
             final Context ctx = storageParameters.getContext();
 
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(
-                timeStamp == null ? new Date(0) : timeStamp,
-                ctx,
-                con)).asQueue();
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(
+                    timeStamp == null ? new Date(0) : timeStamp,
+                    ctx,
+                    con)).asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iterator = q.iterator();
             final String[] ret = new String[size];
@@ -907,13 +927,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
 
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(
-                timeStamp,
-                user.getId(),
-                user.getGroups(),
-                userConfiguration.getAccessibleModules(),
-                ctx,
-                con)).asQueue();
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(
+                    timeStamp,
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    ctx,
+                    con)).asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iterator = q.iterator();
             final String[] ret = new String[size];
