@@ -66,17 +66,62 @@ public final class DatabaseFolderStorageUtility {
     }
 
     /**
-     * Parses specified string into an unsigned <code>int</code> value.
-     * 
-     * @param str The string to parse
-     * @return The parsed unsigned <code>int</code> value or a value less than zero if string does not denote an unsigned integer.
+     * The radix for base <code>10</code>.
      */
-    public static int getUnsignedInteger(final String str) {
-        try {
-            return Integer.parseInt(str);
-        } catch (final NumberFormatException e) {
+    private static final int RADIX = 10;
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     * 
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static int getUnsignedInteger(final String s) {
+        if (s == null) {
             return -1;
         }
+
+        final int max = s.length();
+
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        int result = 0;
+        int i = 0;
+
+        final int limit = -Integer.MAX_VALUE;
+        final int multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
     }
 
     /**
