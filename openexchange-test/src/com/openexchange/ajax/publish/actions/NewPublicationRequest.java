@@ -77,7 +77,7 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
 
     public Object getBody() throws JSONException {
         try {
-            return new PublicationWriter().write(publication);
+            return new PublicationWriter().write(publication, null);
         } catch (PublicationJSONException e) {
             throw new JSONException(e);
         }

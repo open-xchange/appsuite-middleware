@@ -97,7 +97,7 @@ public class UpdateSubscriptionRequest extends AbstractSubscriptionRequest<Updat
     public Object getBody() throws JSONException {
         SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         try {
-            return writer.write(subscription, getFormDescription());
+            return writer.write(subscription, getFormDescription(), null);
         } catch (SubscriptionJSONException e) {
             throw new JSONException(e);
         }

@@ -83,7 +83,7 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
     
     public Object getBody() throws JSONException {
         try {
-            return new PublicationWriter().write(getPublication());
+            return new PublicationWriter().write(getPublication(), null);
         } catch (PublicationJSONException e) {
             throw new JSONException(e);
         }
