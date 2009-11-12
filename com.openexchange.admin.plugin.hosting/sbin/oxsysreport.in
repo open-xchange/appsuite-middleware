@@ -83,7 +83,7 @@ FILES_DIRS="
 /etc/*apache*
 "
 
-PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;oxreport --detail;listbundles;listservices'
+PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;report -d;listbundles;listservices'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
@@ -248,7 +248,7 @@ clean_up(){
 
 echo creating logdir $TMP/$LOGDIR
 mkdir -p $TMP/$LOGDIR/commands/
-echo collecting files into $TMP/$LOGDIR/ox_files_and_logs.tar.gz 
+echo collecting files into $TMP/$LOGDIR/ox_files_and_logs.tar.bz2 
 collect_files
 echo collecting system data into $TMP/$LOGDIR
 collect_output
