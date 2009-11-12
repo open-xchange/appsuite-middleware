@@ -224,38 +224,90 @@ public final class UpdateTaskToolkit {
      * Force (re-)run of update task denoted by given class name
      * 
      * @param className The update task's class name
+     * @param schemaName A valid schema name
+     * @throws UpdateException If update task cannot be performed
+     */
+    public static void forceUpdateTask(final String className, final String schemaName) throws UpdateException {
+        forceUpdateTask(className, getContextIdBySchema(schemaName));
+    }
+
+    /**
+     * Force (re-)run of update task denoted by given class name
+     * 
+     * @param className The update task's class name
      * @param contextId The context identifier
      * @throws UpdateException If update task cannot be performed
      */
     public static void forceUpdateTask(final String className, final int contextId) throws UpdateException {
         synchronized (LOCK) {
+            forceUpdateTask0(getUpdateTask(className), contextId);
+        }
+    }
+
+    /**
+     * Force (re-)run of update task denoted by given class name. This method should only be called when holding <code>LOCK</code>.
+     * 
+     * @param task The update task
+     * @param contextId The context identifier
+     * @throws UpdateException If update task cannot be performed
+     */
+    private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws UpdateException {
+        /*
+         * Get schema for given context ID
+         */
+        final Schema schema = getSchema(contextId);
+        /*
+         * Lock schema
+         */
+        lockSchema(schema, contextId);
+        try {
             /*
-             * Get schema for given context ID
+             * Apply new version number
              */
-            final Schema schema = getSchema(contextId);
+            runUpdateTask(task, schema, contextId);
+        } finally {
             /*
-             * Lock schema
+             * Unlock schema
              */
-            lockSchema(schema, contextId);
+            unlockSchema(schema, contextId);
+            /*
+             * Invalidate schema's contexts
+             */
             try {
-                /*
-                 * Apply new version number
-                 */
-                runUpdateTask(className, schema, contextId);
-            } finally {
-                /*
-                 * Unlock schema
-                 */
-                unlockSchema(schema, contextId);
-                /*
-                 * Invalidate schema's contexts
-                 */
-                try {
-                    removeContexts(contextId);
-                } catch (final DBPoolingException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (final ContextException e) {
-                    LOG.error(e.getMessage(), e);
+                removeContexts(contextId);
+            } catch (final DBPoolingException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final ContextException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Force (re-)run of update task denoted by given class name on all schemas.
+     * 
+     * @param className The update task's class name
+     * @throws UpdateException If update task cannot be performed
+     */
+    public static void forceUpdateTaskOnAllSchemas(final String className) throws UpdateException {
+        synchronized (LOCK) {
+            /*
+             * Get update task by class name
+             */
+            final UpdateTask updateTask = getUpdateTask(className);
+            /*
+             * Get all available schemas
+             */
+            final Map<String, Set<Integer>> map = getSchemasAndContexts();
+            final int size = map.size();
+            /*
+             * ... and iterate them
+             */
+            final Iterator<Set<Integer>> iter = map.values().iterator();
+            for (int i = 0; i < size; i++) {
+                final Set<Integer> set = iter.next();
+                if (!set.isEmpty()) {
+                    forceUpdateTask0(updateTask, set.iterator().next().intValue());
                 }
             }
         }
@@ -340,7 +392,7 @@ public final class UpdateTaskToolkit {
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
-            throw EXCEPTION.create(15, schemaName);
+            throw EXCEPTION.create(16, schemaName);
         }
         return set.iterator().next().intValue();
     }
@@ -405,29 +457,37 @@ public final class UpdateTaskToolkit {
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Error loading update task \"%1$s\"." })
-    private static void runUpdateTask(final String className, final Schema schema, final int contextId) throws UpdateException {
+    private static UpdateTask getUpdateTask(final String className) throws UpdateException {
+        /*
+         * Load update task by class name
+         */
+        try {
+            return Class.forName(className).asSubclass(UpdateTask.class).newInstance();
+        } catch (final InstantiationException e) {
+            throw EXCEPTION.create(15, e, className);
+        } catch (final IllegalAccessException e) {
+            throw EXCEPTION.create(15, e, className);
+        } catch (final ClassNotFoundException e) {
+            throw EXCEPTION.create(15, e, className);
+        }
+    }
+
+    private static void runUpdateTask(final UpdateTask task, final Schema schema, final int contextId) throws UpdateException {
         try {
             /*
              * Remove affected contexts and kick active sessions
              */
             removeContexts(contextId);
             /*
-             * Load update task by class name
+             * Get class name
              */
-            UpdateTask task;
+            final String className = task.getClass().getName();
+            final String schemaName = schema.getSchema();
             try {
-                task = Class.forName(className).asSubclass(UpdateTask.class).newInstance();
-            } catch (final InstantiationException e) {
-                throw EXCEPTION.create(15, e, className);
-            } catch (final IllegalAccessException e) {
-                throw EXCEPTION.create(15, e, className);
-            } catch (final ClassNotFoundException e) {
-                throw EXCEPTION.create(15, e, className);
-            }
-            try {
-                LOG.info("Starting update task " + className + " on schema " + schema.getSchema() + ".");
+                LOG.info(new StringBuilder(64).append("Starting update task ").append(className).append(" on schema ").append(schemaName).append(
+                    '.').toString());
                 if (task instanceof UpdateTaskV2) {
-                    final ProgressState logger = new ProgressStatusImpl(className, schema.getSchema());
+                    final ProgressState logger = new ProgressStatusImpl(className, schemaName);
                     final PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
                     ((UpdateTaskV2) task).perform(params);
                 } else {
@@ -437,8 +497,7 @@ public final class UpdateTaskToolkit {
                 LOG.error(e.getMessage(), e);
                 throw new UpdateException(e);
             }
-            LOG.info("Update task " + className + " on schema " + schema.getSchema() + " done.");
-
+            LOG.info(new StringBuilder(64).append("Update task ").append(className).append(schemaName).append(" done.").toString());
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
             throw new UpdateException(e);

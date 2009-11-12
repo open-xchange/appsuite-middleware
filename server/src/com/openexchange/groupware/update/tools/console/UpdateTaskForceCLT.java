@@ -128,12 +128,13 @@ public final class UpdateTaskForceCLT {
                     try {
                         port = Integer.parseInt(val.trim());
                     } catch (final NumberFormatException e) {
-                        System.err.println("Port parameter is not a number: " + val);
+                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
                         printHelp();
                         System.exit(0);
                     }
                     if (port < 1 || port > 65535) {
-                        System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
+                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
+                            ". Valid range is from 1 to 65535.").toString());
                         printHelp();
                         System.exit(0);
                     }

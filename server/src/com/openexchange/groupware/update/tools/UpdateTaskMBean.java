@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tools;
 
+import static com.openexchange.groupware.update.tools.Utility.parsePositiveInt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,15 +129,24 @@ public final class UpdateTaskMBean implements DynamicMBean {
         final MBeanParameterInfo[] forceParams =
             new MBeanParameterInfo[] {
                 new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
-                new MBeanParameterInfo("contextId", "java.lang.Integer", "A valid context identifier contained in target schema") };
+                new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
         final MBeanOperationInfo forceOperation =
             new MBeanOperationInfo("force", "Forces re-run of given update task.", forceParams, "void", MBeanOperationInfo.ACTION);
+        
+        /*
+         * Force re-run operation on all schemas
+         */
+        final MBeanParameterInfo[] forceAllParams =
+            new MBeanParameterInfo[] {
+                new MBeanParameterInfo("className", "java.lang.String", "The update task's class name") };
+        final MBeanOperationInfo forceAllOperation =
+            new MBeanOperationInfo("forceOnAllSchemas", "Forces re-run of given update task on all schemas.", forceAllParams, "void", MBeanOperationInfo.ACTION);
 
         /*
          * Operations
          */
         final MBeanOperationInfo[] operations =
-            new MBeanOperationInfo[] { triggerOperation, resetOperation, schemasAndVersionsOperation, forceOperation };
+            new MBeanOperationInfo[] { triggerOperation, resetOperation, schemasAndVersionsOperation, forceOperation, forceAllOperation };
 
         /*
          * MBean info
@@ -188,10 +198,12 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 if (secParam instanceof Integer) {
                     UpdateTaskToolkit.resetVersion(versionNumber, ((Integer) secParam).intValue());
                 } else {
-                    try {
-                        UpdateTaskToolkit.resetVersion(versionNumber, Integer.parseInt(secParam.toString()));
-                    } catch (final NumberFormatException e) {
-                        UpdateTaskToolkit.resetVersion(versionNumber, secParam.toString());
+                    final String sParam = secParam.toString();
+                    final int parsed = parsePositiveInt(sParam);
+                    if (parsed >= 0) {
+                        UpdateTaskToolkit.resetVersion(versionNumber, parsed);
+                    } else {
+                        UpdateTaskToolkit.resetVersion(versionNumber, sParam);
                     }
                 }
             } catch (final UpdateException e) {
@@ -218,7 +230,29 @@ public final class UpdateTaskMBean implements DynamicMBean {
             }
         } else if (actionName.equals("force")) {
             try {
+                final Object secParam = params[1];
+                if (secParam instanceof Integer) {
+                    UpdateTaskToolkit.forceUpdateTask(((String) params[0]), ((Integer) secParam).intValue());
+                } else {
+                    final String sParam = secParam.toString();
+                    final int parsed = parsePositiveInt(sParam);
+                    if (parsed >= 0) {
+                        UpdateTaskToolkit.forceUpdateTask(((String) params[0]), parsed);
+                    } else {
+                        UpdateTaskToolkit.forceUpdateTask(((String) params[0]), sParam);
+                    }
+                }
                 UpdateTaskToolkit.forceUpdateTask(((String) params[0]), ((Integer) params[1]).intValue());
+            } catch (final UpdateException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            }
+            // Void
+            return null;
+        } else if (actionName.equals("forceOnAllSchemas")) {
+            try {
+                UpdateTaskToolkit.forceUpdateTaskOnAllSchemas(((String) params[0]));
             } catch (final UpdateException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
