@@ -88,7 +88,7 @@ public final class UpdateTaskResetVersionCLT {
             "n",
             "name",
             true,
-            "A valid schema name. This option is a replacement for '-c/--context' option. If both are present '-c/--context' is preferred.");
+            "A valid schema name. This option is a substitute for '-c/--context' option. If both are present '-c/--context' is preferred.");
         toolkitOptions.addOption(
             "r",
             "run",

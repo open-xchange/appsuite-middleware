@@ -90,7 +90,7 @@ public final class UpdateTaskForceCLT {
         toolkitOptions.addOption("c", "context", true, sb.toString());
 
         sb.setLength(0);
-        sb.append("A valid schema name. This option is a replacement for '-c/--context' option.");
+        sb.append("A valid schema name. This option is a substitute for '-c/--context' option.");
         sb.append(" If both are present '-c/--context' is preferred. If both absent all schemas are considered.");
         toolkitOptions.addOption("n", "name", true, sb.toString());
 
