@@ -7,6 +7,16 @@
 	</#if>
 </#macro>
 
+<#macro render_pre key value title>
+	<#if value != "">
+		<tr>
+			<td class="key">${title}:</td> 
+			<td class="${key} value"><pre>${value?html}</pre></td>
+		</tr>
+	</#if>
+</#macro>
+
+
 <#macro render_scalar key value title>
 		<tr>
 			<td class="key">${title}:</td> 
@@ -158,7 +168,7 @@
 				<@render key="ox_creationDate" title="Creation Date" value=timeFormat.format(infoitem.creationDate) />
 				<@render key="ox_lastModified" title="Last Modified" value=timeFormat.format(infoitem.lastModified) />
 				<@render key="ox_tags" title="Tags" value=infoitem.categories!"" />
-				<@render key="ox_comment" title="Comment" value=infoitem.description!"" />
+				<@render_pre key="ox_comment" title="Comment" value=infoitem.description!"" />
 				<#if infoitem.fileName??>
 					<@render key="ox_fileName" title="File Name" value=infoitem.fileName!"" />
 					<@render_scalar key="ox_fileSize" title="File Size" value=infoitem.fileSize!"" />
