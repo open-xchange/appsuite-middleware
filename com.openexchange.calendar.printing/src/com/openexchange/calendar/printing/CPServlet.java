@@ -139,7 +139,8 @@ public class CPServlet extends PermissionServlet {
 
         ServerSession session = getSessionObject(req);
         try {
-            CPParameters params = new CPParameters(req);
+            TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+            CPParameters params = new CPParameters(req, zone);
             if (params.hasUnparseableFields()) {
                 throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(
                     params.getUnparseableFields(),
@@ -174,7 +175,6 @@ public class CPServlet extends PermissionServlet {
             }
             List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
-            TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
             Locale locale = session.getUser().getLocale();
             CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);

@@ -93,9 +93,9 @@ public class CPParameters {
         super();
     }
 
-    public CPParameters(HttpServletRequest req) {
+    public CPParameters(HttpServletRequest req, TimeZone zone) {
         this();
-        parseRequest(req);
+        parseRequest(req, zone);
     }
 
     public Date getStart() {
@@ -246,13 +246,13 @@ public class CPParameters {
         return unparseableFields.size() > 0;
     }
 
-    public void parseRequest(HttpServletRequest req) {
+    public void parseRequest(HttpServletRequest req, TimeZone zone) {
         unparseableFields = new LinkedList<String>();
 
-        start = extractMandatoryDateParam(req, AJAXServlet.PARAMETER_START);
-        end = extractMandatoryDateParam(req, AJAXServlet.PARAMETER_END);
-        workDayStart = extractOptionalDateParam(req, PARAMETER_WORK_DAY_START_TIME);
-        workDayEnd = extractOptionalDateParam(req, PARAMETER_WORK_DAY_END_TIME);
+        start = extractMandatoryDateParam(req, AJAXServlet.PARAMETER_START, zone);
+        end = extractMandatoryDateParam(req, AJAXServlet.PARAMETER_END, zone);
+        workDayStart = extractOptionalDateParam(req, PARAMETER_WORK_DAY_START_TIME, zone);
+        workDayEnd = extractOptionalDateParam(req, PARAMETER_WORK_DAY_END_TIME, zone);
         weekStart = extractOptionalIntParam(req, PARAMETER_WEEK_START_DAY);
         workWeekStart = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_START_DAY);
         workWeekDuration = extractOptionalIntParam(req, PARAMETER_WORK_WEEK_DURATION);
@@ -262,13 +262,15 @@ public class CPParameters {
         timezone = extractOptionalTimezoneParam(req, AJAXServlet.PARAMETER_TIMEZONE);
     }
 
-    private Date extractOptionalDateParam(HttpServletRequest req, String parameter) {
+    private Date extractOptionalDateParam(HttpServletRequest req, String parameter, TimeZone zone) {
         String val = req.getParameter(parameter);
         if (val == null)
             missingOptionalFields.add(parameter);
         else {
             try {
-                return new Date(Long.valueOf(val).longValue());
+                long time = Long.parseLong(val);
+                int offset = zone.getOffset(time);
+                return new Date(time - offset);
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
                 missingOptionalFields.add(parameter);
@@ -277,13 +279,15 @@ public class CPParameters {
         return null;
     }
 
-    private Date extractMandatoryDateParam(HttpServletRequest req, String parameter) {
+    private Date extractMandatoryDateParam(HttpServletRequest req, String parameter, TimeZone zone) {
         String val = req.getParameter(parameter);
         if (val == null)
             missingMandatoryFields.add(parameter);
         else {
             try {
-                return new Date(Long.valueOf(val).longValue());
+                long time = Long.parseLong(val);
+                int offset = zone.getOffset(time);
+                return new Date(time - offset);
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
                 missingMandatoryFields.add(parameter);
@@ -298,7 +302,7 @@ public class CPParameters {
             missingOptionalFields.add(parameter);
         else {
             try {
-                return Integer.valueOf(val).intValue();
+                return Integer.parseInt(val);
             } catch (NumberFormatException e) {
                 unparseableFields.add(parameter);
                 missingOptionalFields.add(parameter);

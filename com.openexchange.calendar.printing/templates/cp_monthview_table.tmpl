@@ -119,7 +119,7 @@ small                                             { font-size: 1em; }
 .weekEndDay                                       { background-color: #F8EFC2 !important; }
 
 ol,
-ol ol                                             { list-style-type: none; margin: 0; min-height: 60px }
+ol ol                                             { list-style-type: none; margin: 0; min-height: 60px; }
 ol ol li                                          { margin: 1px 5px; margin-left: 18px; }
 ol ol ol li                                       { background: none; padding: 0 }
 
@@ -140,80 +140,77 @@ ol ol ol li                                       { background: none; padding: 0
 
 /* Name
 ---------------------------------------------------*/
-#calendarDay                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 1000px}
-#calendarDay thead th                                { height: 30px; border-bottom: 1px solid gray; border-right: 1px solid gray;  }
+#calendarDay                                      { border-top: 1px solid black; border-bottom: 1px solid black; width: 100%; }
 
-#calendarDay .wrapper                                { overflow: hidden; height: 30px }
+#calendarDay .wrapper                             { overflow: hidden; }
 
-#calendarDay td                                      { border-right: 1px solid black; }
-#calendarDay td.last                                 { border-right: 1px solid #000000; }
+#calendarDay td                                   { border-right: 1px solid black; }
 
-#calendarDay span                                    { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
-#calendarDay li li span                              { padding: 0; background: none; }
+#calendarDay span                                 { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
+#calendarDay li li span                           { padding: 0; background: none; }
 
-#calendarDay li li { margin-top: 10px }
-#calendarDay ol ol ol li { margin-top: 1px }
+#calendarDay li li                                { margin-top: 10px }
+#calendarDay ol ol ol                             { margin-left: 60px; }
+#calendarDay ol ol ol li                          { margin-top: 1px }
 
-#calendarDay ol span                                 { text-align: left; display: block; border-bottom: 1px solid gray }
-#calendarDay ol ol span                              { display: inline; border: none; padding-left: 3px }
+#calendarDay ol span                              { text-align: left; display: block; border-bottom: 1px solid gray }
+#calendarDay ol ol span                           { display: inline; border: none; padding-left: 3px }
 
-#calendarDay .time                                   { text-align: right; vertical-align: middle; padding-right: 5px; font-weight: bold; height: 60px; width: 93px; }
-#calendarDay .appointments                           { width: 510px; border-bottom: 1px solid #999999; }
-#calendarDay .appointments span                      { border: 0; background: none; }
-#calendarDay .appointments li                        { border-left: 5px solid #ffcb71; padding-left: 5px;  }
-#calendarDay #events                                 { width: 390px}
+#calendarDay .time                                { text-align: right; vertical-align: middle; padding-right: 5px; font-weight: bold; }
+#calendarDay .appointments                        { width: 50%; border-bottom: 1px solid #999999; height: 60px; background-color: #FBFBD9; }
+#calendarDay .appointments span                   { border: 0; background: none; font-weight: normal; }
+#calendarDay .appointments li                     { border-left: 5px solid #ffcb71; padding-left: 5px; }
+#calendarDay #events                              { width: 50%; }
 
-#calendarDay .appointment                            { border-left: 10px #44a4de solid; width: 500px; overflow: hidden; }
-#calendarDay .appointment_1                          { width:255px; }
-#calendarDay .appointment_2                          { margin-left: 255px; width:255px; }
+#calendarDay .appointment                         { border-left: 10px #44a4de solid; overflow: hidden; background-color: #F5F5F5; }
 
 /* Name
 ---------------------------------------------------*/
-#calendarWeek                                         { border-top: 1px solid black; border-bottom: 1px solid black; width: 100%; }
+#calendarWeek                                     { border-top: 1px solid black; border-bottom: 1px solid black; width: 100%; }
 
-#calendarWeek .appointmentsDay                        { height: 30px; border-bottom: 1px solid gray;  }
-#calendarWeek th                                      { height: 30px }
-#calendarWeek .wrapper                                { height: 30px; overflow: hidden; }
+#calendarWeek .appointmentsDay                    { height: 30px; border-bottom: 1px solid gray;  }
+#calendarWeek th                                  { height: 30px }
+#calendarWeek .wrapper                            { height: 30px; overflow: hidden; }
 
-#calendarWeek td                                      { border-right: 1px solid black; }
-#calendarWeek td.last                                 { border-right: 1px solid #000000; }
+#calendarWeek td                                  { border-right: 1px solid black; }
+#calendarWeek td.last                             { border-right: 1px solid #000000; }
 
-#calendarWeek span                                    { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
+#calendarWeek span                                { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; }
 
-#calendarWeek ol span                                 { text-align: left; display: block; border-bottom: 1px solid gray }
-#calendarWeek ol ol span                              { display: inline; border: none; padding-left: 3px }
+#calendarWeek ol span                             { text-align: left; display: block; border-bottom: 1px solid gray }
+#calendarWeek ol ol span                          { display: inline; border: none; padding-left: 3px }
 
-#calendarWeek .days                                   { height: 30px; }
-#calendarWeek .day                                    { height: 30px; border-bottom: 1px solid #999999; }
-#calendarWeek .time                                   { text-align: right; vertical-align: middle; font-weight: bold; height: 60px; width: 5%; padding-right: 5px; }
-#calendarWeek .appointments                           { border-bottom: 1px solid #999999;}
-#calendarWeek .appointments span                      { border: 0; background: none; }
+#calendarWeek .days                               { height: 30px; }
+#calendarWeek .day                                { height: 30px; border-bottom: 1px solid #999999; }
+#calendarWeek .time                               { text-align: right; vertical-align: middle; font-weight: bold; height: 60px; width: 5%; padding-right: 5px; }
+#calendarWeek .appointments                       { border-bottom: 1px solid #999999;}
+#calendarWeek .appointments span                  { border: 0; background: none; }
 
-#calendarWeek .appointment                            { border-left: 10px #44a4de solid; width: 110px; overflow: hidden; }
-#calendarWeek .appointments_2                         { width: 55px }
-#calendarWeek .appointments_3                         { width: 36px }
+#calendarWeek .appointment                        { border-left: 10px #44a4de solid; width: 110px; overflow: hidden; }
+#calendarWeek .appointments_2                     { width: 55px }
+#calendarWeek .appointments_3                     { width: 36px }
 
-#calendarWeek .day_1                                  { left: 100px }
-#calendarWeek .day_2                                  { left: 220px }
-#calendarWeek .day_3                                  { left: 340px }
-#calendarWeek .day_4                                  { left: 460px }
-#calendarWeek .day_5                                  { left: 580px }
-#calendarWeek .day_6                                  { left: 700px }
-#calendarWeek .day_7                                  { left: 820px }
+#calendarWeek .day_1                              { left: 100px }
+#calendarWeek .day_2                              { left: 220px }
+#calendarWeek .day_3                              { left: 340px }
+#calendarWeek .day_4                              { left: 460px }
+#calendarWeek .day_5                              { left: 580px }
+#calendarWeek .day_6                              { left: 700px }
+#calendarWeek .day_7                              { left: 820px }
 
-#calendarWeek .appointment_1                          { margin-left: 0; width: 55px;}
-#calendarWeek .appointment_2                          { margin-left: 55px; width: 55px; }
+#calendarWeek .appointment_1                      { margin-left: 0; width: 55px;}
+#calendarWeek .appointment_2                      { margin-left: 55px; width: 55px; }
 
-#calendarMonth th                                     { border-bottom: 1px solid #C0C0C0; border-right: 1px solid white; }
-#calendarMonth td                                     { width: 14%; border-left: 1px solid #C0C0C0; border-bottom: 1px solid #C0C0C0; }
-#calendarMonth td.last                                { border-right: 1px solid #C0C0C0; }
+#calendarMonth th                                 { border-bottom: 1px solid #C0C0C0; border-right: 1px solid white; }
+#calendarMonth td                                 { width: 14%; border-left: 1px solid #C0C0C0; border-bottom: 1px solid #C0C0C0; }
+#calendarMonth td.last                            { border-right: 1px solid #C0C0C0; }
 
-#calendarMonth li span                                { padding: 2px 4px 1px 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid #C0C0C0; display: block; color: black; text-align: right; }
+#calendarMonth li span                            { padding: 2px 4px 1px 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid #C0C0C0; display: block; color: black; text-align: right; }
 #calendarMonth li .text,
-#calendarMonth li .time                               { padding: 0; background: none; border: 0; display: inline; color: black; }
+#calendarMonth li .time                           { padding: 0; background: none; border: 0; display: inline; color: black; }
 
-#calendarMonth ol ol li                               { color: #808080; list-style-type: disc }
-#calendarMonth li .text                               { font-weight: normal }
+#calendarMonth ol ol li                           { color: #808080; list-style-type: disc }
+#calendarMonth li .text                           { font-weight: normal }
     </style>
     <#assign middleDay = days[days?size / 2]>
     <title>OX - Calendar - ${middleDay.format("MMMM", middleDay.time)}</title>

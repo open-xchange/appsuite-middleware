@@ -128,7 +128,8 @@ public class Partitioner {
 
     private void makeFullBlock() {
         firstDay = CalendarTools.getDayStart(cal, params.getStart());
-        lastDay = CalendarTools.getDayStart(cal, params.getEnd());
+        // omit the last millisecond of the end, because this must be exclusive and we calculate always inclusive.
+        lastDay = CalendarTools.getDayStart(cal, new Date(params.getEnd().getTime() - 1));
         long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
         if (days >= 28 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
@@ -176,16 +177,34 @@ public class Partitioner {
     }
 
     private void addToMap(SortedMap<Date, Day> dayMap, Appointment appointment) {
+        if (appointment.getFullTime()) {
+            // always have time at 00:00 UTC -> move to 00:00 of user time zone to ease following calculation
+            long start = appointment.getStartDate().getTime();
+            appointment.setStartDate(new Date(start - cal.getTimeZone().getOffset(start)));
+            long end = appointment.getEndDate().getTime();
+            appointment.setEndDate(new Date(end - cal.getTimeZone().getOffset(end)));
+        }
         Date dest = CalendarTools.getDayStart(cal, appointment.getStartDate());
         Day day = dayMap.get(dest);
-        if (null == day) {
-            return;
-        }
-        CPAppointment cpAppointment = new CPAppointment(appointment, cal, context);
-        if (appointment.getFullTime()) {
-            day.addWholeDay(cpAppointment);
-        } else {
-            day.add(cpAppointment);
-        }
+        Date endOfDay = CalendarTools.getDayEnd(cal, dest);
+        do {
+            CPAppointment cpAppointment = new CPAppointment(appointment, cal, context);
+            if (dest.after(appointment.getStartDate())) {
+                cpAppointment.setStartDate(dest);
+            }
+            if (!endOfDay.after(appointment.getEndDate())) {
+                cpAppointment.setEndDate(endOfDay);
+            }
+            if (null != day) {
+                if (appointment.getFullTime()) {
+                    day.addWholeDay(cpAppointment);
+                } else {
+                    day.add(cpAppointment);
+                }
+            }
+            dest = CalendarTools.getDayStart(cal, new Date(endOfDay.getTime() + 1));
+            day = dayMap.get(dest);
+            endOfDay = CalendarTools.getDayEnd(cal, dest);
+        } while (appointment.getEndDate().after(dest));
     }
 }
