@@ -132,7 +132,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     }
 
     /**
-     * Tests if the beta feature enablement of a user can be changed.
+     * Tests if the beta feature support of a user can be changed.
      */
     public void testBeta() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.Beta);
