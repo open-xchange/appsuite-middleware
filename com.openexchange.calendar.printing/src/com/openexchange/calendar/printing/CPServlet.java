@@ -135,7 +135,7 @@ public class CPServlet extends PermissionServlet {
         List<String> debuggingItems = new LinkedList<String>();
         CPTool tool = new CPTool();
 
-        resp.setContentType("text/html");
+        resp.setContentType("text/html; charset=UTF-8");
 
         ServerSession session = getSessionObject(req);
         try {
