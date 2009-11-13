@@ -131,7 +131,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
 							final Contact[] groupMembers = groupResolver.resolveGroup(group.getIdentifier());
 							if (null != groupMembers) {
 								for (Contact groupMember : groupMembers) {
-									final UserParticipant userParticipant = new UserParticipant(groupMember.getInternalUserId());
+									final UserParticipant userParticipant = new UserParticipant(groupMember.getObjectID());
 									userParticipant.setDisplayName(groupMember.getDisplayName());
 									userParticipant.setEmailAddress(groupMember.getEmail1());
 									users.add(userParticipant);
