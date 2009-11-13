@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,8 +459,28 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Nov 12 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #14530: More resillience towards disappearing subscription sources and publication targets.
+ - Bugfix #14402: Consider two companies different.
+ - Bugfix #14027: Generate absoulte URLs for publications.
+* Thu Nov 12 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14851: Fixed composing image URL
+* Thu Nov 12 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14722: Added command so print view directly opens print dialogue.
+* Wed Nov 11 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14723: Always putting a complete table into the print view.
+* Tue Nov 10 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14810: Correctly setting displayStart and displayEnd if range is greater than a day.
+* Fri Nov 06 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14706: More robust browser detection from client's "user-agent" header
+ - Bugfix #14664: Added JSON writer for field 103 "number_of_links" when writing a contact
+* Thu Nov 05 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14772: Improved SQL query performance
+ - Bugfix #14781: Less strict parsing of UUEncoded mails
+ - Bugfix #14698: Crawling more information from facebook.com
 * Wed Nov 04 2009 - thorben.betten@open-xchange.com
  - Bugfix #14532: Checking Content-Type and Content-Length header of provided OXMF URL
+ - Partial bugfix #14698: Fixed NPE on missing title
 * Tue Nov 03 2009 - marcus.klein@open-xchange.com
  - Bugfix #14505: Correctly handling null values when comparing InfoStore objects.
 * Mon Nov 02 2009 - thorben.betten@open-xchange.com

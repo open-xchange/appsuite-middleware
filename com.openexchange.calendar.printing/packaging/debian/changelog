@@ -1,3 +1,9 @@
+open-xchange-calendar-printing (6.14.0.0-1) unstable; urgency=low
+
+  * build for 6.14 rev1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 Nov 2009 15:08:25 +0100
+
 open-xchange-calendar-printing (6.13.0.0-1) unstable; urgency=low
 
   * build for 6.13 rev5
