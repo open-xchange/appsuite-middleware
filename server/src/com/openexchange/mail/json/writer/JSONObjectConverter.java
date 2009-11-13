@@ -191,6 +191,7 @@ public final class JSONObjectConverter {
     private void raw2JsonMail0(final JSONObject rawJSONMailObject, final JSONObject jsonObject) throws MailException {
         try {
             copyValue(DataFields.ID, rawJSONMailObject, jsonObject);
+            copyValue(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.HAS_ATTACHMENTS.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.CONTENT_TYPE.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.SIZE.getKey(), rawJSONMailObject, jsonObject);
@@ -569,7 +570,7 @@ public final class JSONObjectConverter {
      */
     private static void copyValue(final String key, final JSONObject src, final JSONObject dst) throws JSONException {
         if (src.hasAndNotNull(key)) {
-            dst.put(key, src.get(key));
+            dst.put(key, src.opt(key));
         }
     }
 
