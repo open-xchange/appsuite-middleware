@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -84,9 +85,31 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     public void testReadSettings() throws Throwable {
         final GetRequest request = new GetRequest(Tree.ALL);
         final GetResponse response = getClient().execute(request);
-        JSONObject settings = response.getJSON();
+        final JSONObject settings = response.getJSON();
         LOG.trace("Settings: " + settings.toString());
         assertTrue("Got no value from server.", settings.length() > 0);
+    }
+
+    /**
+     * Tests if the modules can be read from the server.
+     */
+    public void testReadModules() throws Throwable {
+        final GetRequest request = new GetRequest(Tree.AvailableModules);
+        final GetResponse response = getClient().execute(request);
+        final Object[] array = response.getArray();
+        LOG.trace("Modules: " + Arrays.toString(array));
+        assertTrue("Got no modules from server.", array.length > 0);
+    }
+
+    /**
+     * Tests if the spam-button setting can be read from the server.
+     */
+    public void testHasSpam() throws Throwable {
+        final GetRequest request = new GetRequest(Tree.SpamButton);
+        final GetResponse response = getClient().execute(request);
+        final boolean spamButtonEnabled = response.getBoolean();
+        LOG.trace("Spam Button enabled: " + spamButtonEnabled);
+        assertTrue("Got no spam-button-enabled flag from server.", response.hasValue());
     }
 
     /**
