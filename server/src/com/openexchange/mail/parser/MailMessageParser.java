@@ -109,7 +109,7 @@ public final class MailMessageParser {
 
     private static final int BUF_SIZE = 8192;
 
-    private static Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
+    private static final Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
 
         public boolean hasNext() {
             return false;
