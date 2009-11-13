@@ -57,6 +57,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
@@ -381,14 +382,14 @@ public class CPParameterTest extends TestCase {
 
     public void testShouldCryIfMissingFields() {
         MockRequest mockRequest = new MockRequest();
-        CPParameters params = new CPParameters(mockRequest);
+        CPParameters params = new CPParameters(mockRequest, TimeZone.getDefault());
         assertTrue("No parameters given, should miss fields", params.isMissingMandatoryFields());
     }
 
     public void testShouldCryIfCannotParseValue() {
         MockRequest mockRequest = new MockRequest();
         mockRequest.setParameter(CPParameters.PARAMETER_WEEK_START_DAY, "Elvis");
-        CPParameters params = new CPParameters(mockRequest);
+        CPParameters params = new CPParameters(mockRequest, TimeZone.getDefault());
         assertTrue("Parameter with bullshit value given, should fail", params.hasUnparseableFields());
         assertTrue("Parameter with bullshit value given, should be listed as missing field", params.getUnparseableFields().contains(
             CPParameters.PARAMETER_WEEK_START_DAY));
@@ -397,7 +398,7 @@ public class CPParameterTest extends TestCase {
     public void testShouldNotLeaveMissingParamFieldEmptyWhenEncounteringNumberFormatExceptionWhileParsingFieldValue() {
         MockRequest mockRequest = new MockRequest();
         mockRequest.setAttribute(CPParameters.PARAMETER_WEEK_START_DAY, "Elvis");
-        CPParameters params = new CPParameters(mockRequest);
+        CPParameters params = new CPParameters(mockRequest, TimeZone.getDefault());
         assertTrue("Should still miss fields", params.isMissingOptionalFields());
         assertTrue("Should at least miss the field it was trying to parse", params.getMissingOptionalFields().contains(CPParameters.PARAMETER_WEEK_START_DAY));
 
