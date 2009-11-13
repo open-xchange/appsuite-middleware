@@ -73,6 +73,8 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.parser.handlers.RawJSONMessageHandler;
+import com.openexchange.mail.structure.StructureMailMessageParser;
+import com.openexchange.mail.structure.parser.MIMEStructureHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
@@ -86,13 +88,28 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageWriter {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageWriter.class);
+    // private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageWriter.class);
 
     /**
      * No instantiation
      */
     private MessageWriter() {
         super();
+    }
+
+    /**
+     * Writes specified mail's structure as a JSON object.
+     * 
+     * @param accountId The mail's account ID
+     * @param mail The mail to write
+     * @param maxSize The allowed max. size
+     * @return The structure as a JSON object
+     * @throws MailException If writing structure fails
+     */
+    public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws MailException {
+        final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
+        new StructureMailMessageParser().parseMailMessage(mail, handler);
+        return handler.getMailJsonObject();
     }
 
     /**

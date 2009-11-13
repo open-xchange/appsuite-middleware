@@ -345,6 +345,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionGetForward(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
             actionGetMessage(req, resp);
+        } else if (actionStr.equalsIgnoreCase(ACTION_GET_STRUCTURE)) {
+            actionGetStructure(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_MATTACH)) {
             actionGetAttachment(req, resp);
         } else if (actionStr.equalsIgnoreCase(ACTION_ZIP_MATTACH)) {
@@ -944,6 +946,160 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
+        return response;
+    }
+
+    public void actionGetStructure(final ServerSession session, final JSONWriter writer, final JSONObject requestObj, final MailServletInterface mi) throws JSONException {
+        final Response response = actionGetStructure(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi);
+        if (null != response) {
+            ResponseWriter.write(response, writer);
+        }
+    }
+
+    private final void actionGetStructure(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        try {
+            final Response response =
+                actionGetStructure(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null);
+            if (null != response) {
+                ResponseWriter.write(response, resp.getWriter());
+            }
+        } catch (final JSONException e) {
+            final OXJSONException oxe = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+            LOG.error(oxe.getMessage(), oxe);
+            final Response response = new Response();
+            response.setException(oxe);
+            try {
+                ResponseWriter.write(response, resp.getWriter());
+            } catch (final JSONException e1) {
+                LOG.error(RESPONSE_ERROR, e1);
+                sendError(resp);
+            }
+        }
+    }
+
+    private final Response actionGetStructure(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
+        final long s = DEBUG ? System.currentTimeMillis() : 0L;
+        /*
+         * Some variables
+         */
+        final Response response = new Response();
+        Object data = JSONObject.NULL;
+        /*
+         * Start response
+         */
+        try {
+            /*
+             * Read in parameters
+             */
+            final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
+            //final String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            final boolean unseen;
+            {
+                final String tmp = paramContainer.getStringParam(PARAMETER_UNSEEN);
+                unseen = (tmp != null && (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)));
+            }
+            final long maxSize;
+            {
+                final String tmp = paramContainer.getStringParam("max_size");
+                if (null == tmp) {
+                    maxSize = -1;
+                } else {
+                    long l = -1;
+                    try {
+                        l = Long.parseLong(tmp.trim());
+                    } catch (final NumberFormatException e) {
+                        l = -1;
+                    }
+                    maxSize = l;
+                }
+            }
+            
+            MailServletInterface mailInterface = mailInterfaceArg;
+            boolean closeMailInterface = false;
+            try {
+                if (mailInterface == null) {
+                    mailInterface = MailServletInterface.getInstance(session);
+                    closeMailInterface = true;
+                }
+                
+                final String uid;
+                {
+                    String tmp2 = paramContainer.getStringParam(PARAMETER_ID);
+                    if (null == tmp2) {
+                        tmp2 = paramContainer.getStringParam(PARAMETER_MESSAGE_ID);
+                        if (null == tmp2) {
+                            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ID);
+                        }
+                        uid = mailInterface.getMailIDByMessageID(folderPath, tmp2);
+                    } else {
+                        uid = tmp2;
+                    }
+                }
+                
+                /*
+                 * Get message
+                 */
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                if (mail == null) {
+                    throw new MailException(MailException.Code.MAIL_NOT_FOUND, uid, folderPath);
+                }
+                final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                final boolean doUnseen = (unseen && wasUnseen);
+                if (doUnseen) {
+                    mail.setFlag(MailMessage.FLAG_SEEN, false);
+                    final int unreadMsgs = mail.getUnreadMessages();
+                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+                }
+                data = MessageWriter.writeStructure(mailInterface.getAccountID(), mail, maxSize);
+                if (doUnseen) {
+                    /*
+                     * Leave mail as unseen
+                     */
+                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                } else if (wasUnseen) {
+                    try {
+                        final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                        final int contextId = session.getContextId();
+                        final int userId = session.getUserId();
+                        if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                            contextId,
+                            userId).booleanValue()) {
+                            triggerContactCollector(session, mail);
+                        }
+                    } catch (final SettingException e) {
+                        LOG.warn("Contact collector could not be triggered.", e);
+                    }
+                }
+                
+                
+            } finally {
+                if (closeMailInterface && mailInterface != null) {
+                    mailInterface.close(true);
+                }
+            }
+                
+            
+            
+        } catch (final MailException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (final Exception e) {
+            final AbstractOXException wrapper = getWrappingOXException(e);
+            LOG.error(wrapper.getMessage(), wrapper);
+            response.setException(wrapper);
+        }
+        /*
+         * Close response and flush print writer
+         */
+        response.setData(data);
+        response.setTimestamp(null);
+        if (DEBUG) {
+            final long d = System.currentTimeMillis() - s;
+            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=get performed in ").append(d).append("msec"));
+        }
         return response;
     }
 

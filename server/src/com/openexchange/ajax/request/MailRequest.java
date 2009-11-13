@@ -148,6 +148,8 @@ public final class MailRequest {
             } else {
                 MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
             }
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET_STRUCTURE)) {
+            MAIL_SERVLET.actionGetStructure(session, writer, jsonObject, mailInterface);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
             MAIL_SERVLET.actionGetAttachment();
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_MSGS)) {
