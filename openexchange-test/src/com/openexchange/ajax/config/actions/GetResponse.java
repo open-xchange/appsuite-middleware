@@ -80,6 +80,16 @@ public class GetResponse extends AbstractAJAXResponse {
     }
 
     /**
+     * Checks if obtained value is not <code>null</code>
+     * 
+     * @return <code>true</code> if obtained value is not <code>null</code>; otherwise <code>false</code>
+     */
+    public boolean hasValue() {
+        fetchValue();
+        return null != value;
+    }
+
+    /**
      * Gets the <code>int</code> value or <code>-1</code> if not present.
      * 
      * @return The <code>int</code> value or <code>-1</code> if not present
