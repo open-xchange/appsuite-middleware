@@ -80,8 +80,8 @@ public class UpdateMailTest extends AbstractMailTest {
 
     @Override
     protected void tearDown() throws Exception {
-        clearFolder( values.getSentFolder() );
-        clearFolder( values.getInboxFolder() );
+//        clearFolder( values.getSentFolder() );
+//        clearFolder( values.getInboxFolder() );
         super.tearDown();
     }
 
@@ -113,7 +113,7 @@ public class UpdateMailTest extends AbstractMailTest {
         
         final String messageId;
         {
-            final Object obj = myMail.getHeader("Message-Id");
+            final Object obj = myMail.getHeader("Message-ID");
             if (null == obj) {
                 messageId = null;
             } else {
