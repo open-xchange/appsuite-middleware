@@ -111,12 +111,16 @@ small                                             { font-size: 1em; }
 .calendar th                                      { text-align: center }
 .calendar td                                      { margin: 0; vertical-align: top; }
 
-.outDate                                          { opacity: 0.4 }
+.outDate                                          { filter:alpha(opacity=40); opacity: 0.4; background-color: #E0E0EF !important; }
 
-#currentDate                                      { background: #f5f5f5 }
+#currentDate                                      { background-color: #C6CCD9 !important; }
+
+.normalDay                                        { background-color: #FBFBD9 !important; }
+
+.weekEndDay                                       { background-color: #F8EFC2 !important; }
 
 ol,
-ol ol                                             { list-style-type: none; margin: 0; }
+ol ol                                             { list-style-type: none; margin: 0; min-height: 60px; }
 ol ol li                                          { margin: 1px 5px; margin-left: 18px; }
 ol ol ol li                                       { background: none; padding: 0 }
 
@@ -124,7 +128,7 @@ ol ol ol li                                       { background: none; padding: 0
 .appointmentDayStart,
 .appointmentDayStartLast,
 .appointmentDayEnd,
-.appointmentDayStartEnd                           { background: #E0E0EF; height: 15px; overflow: hidden; margin: 2px 0; padding-left: 5px; border: 1px solid #808080;}
+.appointmentDayStartEnd                           { background: #E0E0EF !important; height: 15px; overflow: hidden; margin: 2px 0; padding: 0 0 2px 5px; border: 1px solid #808080;}
 
 .appointmentDayStartEnd                           { -moz-border-radius: 5px; -webkit-border-radius: 5px; margin: 2px }
 
@@ -147,7 +151,7 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarDay li li span                           { padding: 0; background: none; }
 
 #calendarDay li li                                { margin-top: 10px }
-#calendarDay ol ol ol							  { margin-left: 60px; }
+#calendarDay ol ol ol                             { margin-left: 60px; }
 #calendarDay ol ol ol li                          { margin-top: 1px }
 
 #calendarDay ol span                              { text-align: left; display: block; border-bottom: 1px solid gray }
@@ -159,7 +163,7 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarDay .appointments li                     { border-left: 5px solid #ffcb71; padding-left: 5px; }
 #calendarDay #events                              { width: 50%; }
 
-#calendarDay .appointment                         { border-left: 10px #44a4de solid;  overflow: hidden; background-color: #F5F5F5; }
+#calendarDay .appointment                         { border-left: 10px #44a4de solid; overflow: hidden; background-color: #F5F5F5; }
 
 /* Name
 ---------------------------------------------------*/
@@ -198,15 +202,15 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarWeek .appointment_1                      { margin-left: 0; width: 55px;}
 #calendarWeek .appointment_2                      { margin-left: 55px; width: 55px; }
 
-#calendarMonth th                                 { border-bottom: 1px solid #000000; border-right: 1px solid white; }
-#calendarMonth td                                 { width: 14%; border-left: 1px solid #000000; border-bottom: 1px solid #000000; }
-#calendarMonth td.last                            { border-right: 1px solid #000000; }
+#calendarMonth th                                 { border-bottom: 1px solid #C0C0C0; border-right: 1px solid white; }
+#calendarMonth td                                 { width: 14%; border-left: 1px solid #C0C0C0; border-bottom: 1px solid #C0C0C0; }
+#calendarMonth td.last                            { border-right: 1px solid #C0C0C0; }
 
-#calendarMonth li span                            { padding: 2px 2px 0 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid black; display: block; color: black}
+#calendarMonth li span                            { padding: 2px 4px 1px 2px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid #C0C0C0; display: block; color: black; text-align: right; }
 #calendarMonth li .text,
 #calendarMonth li .time                           { padding: 0; background: none; border: 0; display: inline; color: black; }
 
-#calendarMonth ol ol li                           { color: #ffcb71; list-style-type: disc }
+#calendarMonth ol ol li                           { color: #808080; list-style-type: disc }
 #calendarMonth li .text                           { font-weight: normal }
     </style>
     <title>OX - ${i18n.tr("Calendar")} - ${day.format("EEEE", day.time)}, ${day.format("d. MMMM", day.time)}</title>
@@ -218,6 +222,8 @@ ol ol ol li                                       { background: none; padding: 0
       <div id="contentArea">
         <table border="0" id="calendarDay" class="calendar">
           <tbody>
+            <#setting locale="en"/>
+            <#setting number_format="0.##">
             <#assign width = 100 / days[0].columns?size>
             <tr>
               <td />	
@@ -306,7 +312,7 @@ ol ol ol li                                       { background: none; padding: 0
                 <div style="position: relative; ">
                   <#assign appointmentsBetween = days[0].getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60)>
                   <#list appointmentsBetween as appointment>
-                  <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; height: ${appointment.durationInMinutes}px; width: ${width?round}%; margin-left: ${(days[0].getColumn(appointment) * width)?round}%; ">
+                  <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; margin-left: ${days[0].getColumn(appointment) * width}%; height: ${appointment.durationInMinutes}px; width: ${width}%; ">
                   	<div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px; border: 1px solid #808080;">
 	                  <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
 	                    <div style="background-color: #EEEEEE; padding: 2px 2px 2px 3px; ">${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
