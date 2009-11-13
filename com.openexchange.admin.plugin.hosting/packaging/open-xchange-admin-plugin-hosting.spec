@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,14 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Nov 12 2009 - thomas.schweiger@open-xchange.com
+ - API change: Due to SoftwareChange_Request-170 the "oxreport" call in "oxsysreport"
+               script has been changed to "report". "oxreport" isn't available
+               within 6.14 anymore.
+* Thu Nov 05 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14782: Lazy loading of configuration file properties.
+ - Bugfix #14740: Optimized SQL query to find a not completely filled schema for creating a context.
+ - Bugfix #14708: Not loading filestore usage information when creating a context and searching for a filestore based on estimated usage. 
 * Mon Nov 02 2009 - marcus.klein@open-xchange.com
  - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
 * Tue Oct 20 2009 - marcus.klein@open-xchange.com
