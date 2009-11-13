@@ -113,7 +113,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     }
 
     /**
-     * Tests if the timezone of a user can be changed.
+     * Tests if the time zone of a user can be changed.
      */
     public void testTimeZone() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.TimeZone);
