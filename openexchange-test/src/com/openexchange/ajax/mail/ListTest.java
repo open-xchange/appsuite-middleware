@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail;
 
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ListRequest;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.mail.MailListField;
@@ -123,7 +124,7 @@ public final class ListTest extends AbstractMailTest {
         /*
          * Clean everything
          */
-        clearFolder(getInboxFolder());
+        Executor.execute(getSession(), new DeleteRequest(folderAndIDs, true));
         clearFolder(getSentFolder());
         clearFolder(getTrashFolder());
     }
