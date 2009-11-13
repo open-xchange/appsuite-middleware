@@ -91,12 +91,19 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
     private String view;
 
+    private boolean structure;
+
     public GetRequest(final String folder, final String ID) {
         this(new String[] { folder, ID }, true);
     }
 
     public GetRequest(final String folder, final String ID, final boolean failOnError) {
         this(new String[] { folder, ID }, failOnError);
+    }
+
+    public GetRequest setStructure(final boolean structure) {
+        this.structure = structure;
+        return this;
     }
 
     /**
@@ -150,10 +157,10 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
      */
     public Parameter[] getParameters() {
         final List<Parameter> l = new ArrayList<Parameter>(4);
-        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, structure ? AJAXServlet.ACTION_GET_STRUCTURE : AJAXServlet.ACTION_GET));
         l.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]));
         l.add(new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]));
-        if (null != view) {
+        if (null != view && !structure) {
             l.add(new Parameter(Mail.PARAMETER_VIEW, view));
         }
         return l.toArray(new Parameter[l.size()]);
