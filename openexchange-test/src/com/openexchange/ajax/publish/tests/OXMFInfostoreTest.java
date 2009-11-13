@@ -93,9 +93,8 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
         
         pubMgr.newAction(publication);
-        String base = AJAXConfig.getProperty(Property.PROTOCOL) + "://" + AJAXConfig.getProperty(Property.HOSTNAME);
         String pubUrl = (String) publication.getConfiguration().get("url");
-        String website = getWebsite(base + pubUrl);
+        String website = getWebsite(pubUrl);
 
         //note: This is very mucho _fragile_, a change in OXMF or the template might break these checks. 
         assertTrue("Should contain reference to a published infostore item", website.contains("<div class=\"ox_infoitem\" id=\"infoitem_0\">"));
@@ -131,10 +130,9 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
         
         pubMgr.newAction(publication);
-        String base = AJAXConfig.getProperty(Property.PROTOCOL) + "://" + AJAXConfig.getProperty(Property.HOSTNAME);
         String pubUrl = (String) publication.getConfiguration().get("url");
 
-        assertSameStream("Comparing uploaded files", new FileInputStream(upload), getDownload((base + pubUrl)));
+        assertSameStream("Comparing uploaded files", new FileInputStream(upload), getDownload((pubUrl)));
     }
 
 }
