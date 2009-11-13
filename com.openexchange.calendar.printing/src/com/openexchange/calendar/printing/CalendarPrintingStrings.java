@@ -60,6 +60,8 @@ public final class CalendarPrintingStrings implements LocalizableStrings {
 
     public static final String CALENDAR = "Calendar";
 
+    public static final String WEEK = "Week";
+
     public static final String ALL_DAY_EVENTS = "All-day events";
 
     public static final String EVENTS = "Events";
