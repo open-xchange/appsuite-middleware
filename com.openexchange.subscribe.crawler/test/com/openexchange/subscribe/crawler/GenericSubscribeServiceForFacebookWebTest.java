@@ -92,12 +92,15 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
             ".*&id=([0-9]*)&.*"));
         final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<div class=\"section_title\">)([^<]*)(</div>)", "display_name"));
-        pageParts.add(new PagePart("(<img src=\")([^\"]*)(\")", "image"));
+        pageParts.add(new PagePart("(<img src=\")(http:\\/\\/profile\\.ak\\.fbcdn\\.net[^\"]*)(\")", "image"));
         pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):<\\/td><td  valign=\"top\">([^<]*)(</td>)","instant_messenger1"));
         pageParts.add(new PagePart("(Mobile Number|Handynummer):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "cellular_telephone1"));
         pageParts.add(new PagePart("(Phone|Telefon):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "telephone_business1"));
         pageParts.add(new PagePart("(Current Address|Aktuelle Adresse):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","address_note"));
         pageParts.add(new PagePart("(Member of|Mitglied von):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","company"));
+        pageParts.add(new PagePart("(Birthday|Geburtstag):<\\/td><td  valign=\"top\">([0-9]{2})(\\.)", "birthday_day"));
+        pageParts.add(new PagePart("(\\s)([^,]*)(,)", "birthday_month_string"));
+        pageParts.add(new PagePart("(\\s)([0-9]{4})(<)", "birthday_year"));
         pageParts.add(new PagePart("(Hometown|Heimatstadt):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","city_home"));
         final PagePartSequence sequence = new PagePartSequence(pageParts, "");
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
@@ -109,7 +112,7 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         
         final String yamlString = Yaml.dump(workflow);
         crawler.setWorkflowString(yamlString);
-        System.out.println(yamlString);
+        //System.out.println(yamlString);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files

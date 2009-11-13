@@ -197,6 +197,21 @@ public class Mappings {
             contact.setInstantMessenger2(map.get("instant_messenger2"));
         }
         // handle birthdays
+        if (map.containsKey("birthday_month_string")){
+            String month = map.get("birthday_month_string");
+            if (month.matches("(Januar|January)")) {map.put("birthday_month", "1");}
+            if (month.matches("(Februar|February)")) {map.put("birthday_month", "2");}
+            if (month.matches("(M\u00e4rz|March)")) {map.put("birthday_month", "3");}
+            if (month.matches("(April|April)")) {map.put("birthday_month", "4");}
+            if (month.matches("(Mai|May)")) {map.put("birthday_month", "5");}
+            if (month.matches("(Juni|June)")) {map.put("birthday_month", "6");}
+            if (month.matches("(Juli|July)")) {map.put("birthday_month", "7");}
+            if (month.matches("(August|August)")) {map.put("birthday_month", "8");}
+            if (month.matches("(September|September)")) {map.put("birthday_month", "9");}
+            if (month.matches("(Oktober|October)")) {map.put("birthday_month", "10");}
+            if (month.matches("(November|November)")) {map.put("birthday_month", "11");}
+            if (month.matches("(Dezember|December)")) {map.put("birthday_month", "12");}
+        }
         Calendar cal = null;
         if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
             cal = Calendar.getInstance();

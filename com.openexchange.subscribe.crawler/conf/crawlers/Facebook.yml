@@ -62,6 +62,18 @@ workflowString: |
             type: 1
             typeOfInfo: company
           - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(Birthday|Geburtstag):<\\/td><td  valign=\"top\">([0-9]{2})(\\.)"
+            type: 1
+            typeOfInfo: birthday_day
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(\\s)([^,]*)(,)"
+            type: 1
+            typeOfInfo: birthday_month_string
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(\\s)([0-9]{4})(<)"
+            type: 1
+            typeOfInfo: birthday_year
+          - !com.openexchange.subscribe.crawler.PagePart
             regex: "(Hometown|Heimatstadt):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
             type: 1
             typeOfInfo: city_home
