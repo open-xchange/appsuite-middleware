@@ -223,6 +223,9 @@ public enum Tree {
     
     /** [inside GUI] "true" or "false" */
     ShowInfoBoxOnStartUp("/gui/portal/tooltip"),
+    
+    /** [inside GUI] "true" or "false" */
+    LaunchWizardOnStart("/gui/wizard/launchOnStart"),
 
     //TODO: more gui settings
 
