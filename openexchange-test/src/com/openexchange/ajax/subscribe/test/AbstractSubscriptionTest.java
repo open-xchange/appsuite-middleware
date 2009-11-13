@@ -101,7 +101,7 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
         subscription.setSource(source);
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("url", "http://ox.open-xchange.com/1");
+        config.put("url", "http://ox.open-xchange.com");
         subscription.setConfiguration(config);
 
         return subscription;
