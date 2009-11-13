@@ -1,22 +1,11 @@
 <project name="openexchange-test" default="default" basedir=".">
 
     <!-- Customizable values -->
-    <property name="destdir" value=""/>
-    <property name="prefix" value="/opt/open-xchange"/>
+    <property name="bundlesdir" value="bundles"/>
 
     <!-- Constants -->
     <property name="conf.dir" value="conf"/>
     <property name="tmp.dir" value="tmp"/>
-
-    <property file="META-INF/MANIFEST.MF"/>
-    <property file="build.properties"/>
-
-    <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
-    <property name="composite.name" value="open-xchange-global-${version}" />
-
-    <!-- Install Constants -->
-    <property name="bundlesdir" value="${prefix}/bundles"/>
 
        <!-- Compile Constants -->
     <property name="src.common" value="common"/>
