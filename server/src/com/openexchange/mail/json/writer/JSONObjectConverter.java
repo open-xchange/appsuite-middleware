@@ -267,8 +267,7 @@ public final class JSONObjectConverter {
                 }
             } else {
                 // Text
-                final JSONObject textObject =
-                    extractObject(bodyArr, new String[] { "text/plain", "text/enriched", "text/richtext", "text/rtf" });
+                final JSONObject textObject = extractObject(bodyArr, "text/plain", "text/enriched", "text/richtext", "text/rtf");
                 if (null == textObject) {
                     // No text part found
                     if (bodyLen == 0) {
@@ -503,20 +502,7 @@ public final class JSONObjectConverter {
         return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
     }
 
-    private static JSONObject extractObject(final JSONArray bodyArr, final String contentType) throws JSONException {
-        JSONObject retval = null;
-        final int bodyLen = bodyArr.length();
-        for (int i = 0; null == retval && i < bodyLen; i++) {
-            final JSONObject jsonObject = bodyArr.getJSONObject(i);
-            final String ct = jsonObject.optString(MailJSONField.CONTENT_TYPE.getKey());
-            if (null != ct && ct.startsWith(contentType)) {
-                retval = jsonObject;
-            }
-        }
-        return retval;
-    }
-
-    private static JSONObject extractObject(final JSONArray bodyArr, final String[] contentTypes) throws JSONException {
+    private static JSONObject extractObject(final JSONArray bodyArr, final String... contentTypes) throws JSONException {
         JSONObject retval = null;
         final int bodyLen = bodyArr.length();
         for (int i = 0; null == retval && i < bodyLen; i++) {
