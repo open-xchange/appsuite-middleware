@@ -118,6 +118,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.DBService;
@@ -732,7 +733,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
         InfostoreIterator iter = null;
         try {
-            iter = InfostoreIterator.documentsByFilename(folderId, filename, new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, getProvider(), ctx);
+            iter = InfostoreIterator.documentsByFilename(folderId, filename, new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, new AlwaysWriteConnectionProvider(getProvider()), ctx);
             while(iter.hasNext()) {
                 final DocumentMetadata dm = iter.next();
                 if(dm.getId() != id) {
