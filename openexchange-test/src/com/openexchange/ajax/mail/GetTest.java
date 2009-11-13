@@ -49,62 +49,95 @@
 
 package com.openexchange.ajax.mail;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
-import com.openexchange.ajax.mail.actions.SendResponse;
 
 /**
  * {@link GetTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class GetTest extends AbstractMailTest {
 
-	/**
-	 * Default constructor.
-	 * 
-	 * @param name
-	 *            Name of this test.
-	 */
-	public GetTest(final String name) {
-		super(name);
-	}
+    /**
+     * Default constructor.
+     * 
+     * @param name Name of this test.
+     */
+    public GetTest(final String name) {
+        super(name);
+    }
 
-	/**
-	 * Tests the <code>action=get</code> request on INBOX folder
-	 * 
-	 * @throws Throwable
-	 */
-	public void testGet() throws Throwable {
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
-		/*
-		 * Insert mail through a send request
-		 */
-		final String[] folderAndID = ((SendResponse) Executor.execute(getSession(), new SendRequest(mailObject_25kb)))
-				.getFolderAndID();
-		/*
-		 * Perform action=get
-		 */
-		final GetResponse response = (GetResponse) Executor.execute(getSession(), new GetRequest(folderAndID[0],
-				folderAndID[1]));
-		assertTrue("", response.getMail(getTimeZone()) != null);
-		/*
-		 * Clean everything
-		 */
-		clearFolder(getInboxFolder());
-		clearFolder(getSentFolder());
-		clearFolder(getTrashFolder());
-	}
+    /**
+     * Tests the <code>action=get</code> request on INBOX folder
+     * 
+     * @throws Throwable
+     */
+    public void testGet() throws Throwable {
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+        /*
+         * Insert mail through a send request
+         */
+        final String[] folderAndID = (Executor.execute(getSession(), new SendRequest(mailObject_25kb))).getFolderAndID();
+        /*
+         * Perform action=get
+         */
+        final GetResponse response = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
+        assertTrue("", response.getMail(getTimeZone()) != null);
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+    }
+
+    /**
+     * Tests the <code>action=get_structure</code> request on INBOX folder
+     * 
+     * @throws Throwable
+     */
+    public void testGetStructure() throws Throwable {
+        /*
+         * Clean everything
+         */
+//        clearFolder(getInboxFolder());
+//        clearFolder(getSentFolder());
+//        clearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+        /*
+         * Insert mail through a send request
+         */
+        final String[] folderAndID = (Executor.execute(getSession(), new SendRequest(mailObject_25kb))).getFolderAndID();
+        /*
+         * Perform action=get
+         */
+        final GetResponse response = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]).setStructure(true));
+        
+        final JSONObject obj = (JSONObject) response.getData();
+        
+        assertNotNull("Structured JSON mail object is null, but shouldn't", obj);
+        /*
+         * Clean everything
+         */
+//        clearFolder(getInboxFolder());
+//        clearFolder(getSentFolder());
+//        clearFolder(getTrashFolder());
+    }
+
 }
