@@ -83,7 +83,8 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.ByteBuffers;
+import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -98,9 +99,9 @@ public final class MIMEStructureHandler implements StructureHandler {
     private final LinkedList<JSONObject> mailJsonObjectQueue;
 
     private JSONObject currentMailObject;
-    
+
     private JSONValue currentBodyObject;
-    
+
     private int multipartCount;
 
     private final long maxSize;
@@ -175,7 +176,14 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     public boolean handleColorLabel(final int colorLabel) throws MailException {
         try {
-            getUserFlags().put(MailMessage.getColorLabelStringValue(colorLabel));
+            /*-
+             * TODO: Decide whether to add separate "color_label" field or add it to user flags:
+             * 
+             * Uncomment this for adding to user flags:
+             * 
+             *   getUserFlags().put(MailMessage.getColorLabelStringValue(colorLabel));
+             */
+            currentMailObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
             return true;
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
@@ -194,7 +202,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
         } catch (final Exception e) {
             final Throwable t =
-                new Throwable(new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn(t.getMessage(), t);
         }
         /*
@@ -238,8 +246,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         addBodyPart(size, new InputStreamProvider() {
 
             public InputStream getInputStream() throws IOException {
-                return new UnsynchronizedByteArrayInputStream(decodedTextContent.getBytes("UTF-8"));
-
+                return ByteBuffers.newUnsynchronizedInputStream(Charsets.UTF_8.encode(decodedTextContent));
             }
         }, id, headers.entrySet().iterator());
         return true;
@@ -248,15 +255,16 @@ public final class MIMEStructureHandler implements StructureHandler {
     public boolean handleMultipartStart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
         try {
             // Increment
-            multipartCount++;
-            // Create a new mail object
-            final JSONObject newMailObject = new JSONObject();
-            // Apply new mail object to current mail object's body element
-            add2BodyJsonObject(newMailObject);
-            // Assign new mail object to current mail object
-            currentMailObject = newMailObject;
-            mailJsonObjectQueue.addLast(currentMailObject);
-            currentBodyObject = null;
+            if (++multipartCount > 1) {
+                // Create a new mail object
+                final JSONObject newMailObject = new JSONObject();
+                // Apply new mail object to current mail object's body element
+                add2BodyJsonObject(newMailObject);
+                // Assign new mail object to current mail object
+                currentMailObject = newMailObject;
+                mailJsonObjectQueue.addLast(currentMailObject);
+                currentBodyObject = null;
+            }
             return true;
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
@@ -264,12 +272,13 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     public boolean handleMultipartEnd(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
-        // Dequeue
-        mailJsonObjectQueue.removeLast();
-        currentMailObject = mailJsonObjectQueue.getLast();
-        currentBodyObject = (JSONValue) currentMailObject.opt("body");
         // Decrement
-        multipartCount--;
+        if (--multipartCount > 0) {
+            // Dequeue
+            mailJsonObjectQueue.removeLast();
+            currentMailObject = mailJsonObjectQueue.getLast();
+            currentBodyObject = (JSONValue) currentMailObject.opt("body");
+        }
         return true;
     }
 
@@ -421,7 +430,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                     }
                 }
-                bodyObject.put("data", new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
+                final String base64 = new String(Base64.encodeBase64(bytes, false), "US-ASCII");
+                bodyObject.put("data", /* base64 */"SOME-BASE64-DATA");
             }
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur since US-ASCII is supported
@@ -461,7 +471,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                     }
                 }
-                bodyObject.put("data", new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
+                final String base64 = new String(Base64.encodeBase64(bytes, false), "US-ASCII");
+                bodyObject.put("data", /* base64 */"SOME-BASE64-DATA");
             }
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur since US-ASCII is supported
