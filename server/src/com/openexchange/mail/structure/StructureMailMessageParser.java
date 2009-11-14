@@ -604,9 +604,7 @@ public final class StructureMailMessageParser {
         /*
          * RECEIVED DATE
          */
-        if (mail.getReceivedDate() != null) {
-            handler.handleReceivedDate(mail.getReceivedDate());
-        }
+        handler.handleReceivedDate(mail.getReceivedDate());
         /*
          * FLAGS
          */

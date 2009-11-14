@@ -94,7 +94,24 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MIMEStructureHandler implements StructureHandler {
 
+    /**
+     * The logger.
+     */
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class);
+
+    /*-
+     * #####################################################################################
+     */
+
+    private static final String BODY = "body";
+
+    private static final String DATA = "data";
+
+    private static final String CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
+
+    private static final String CONTENT_DISPOSITION = "Content-Disposition";
+
+    private static final String CONTENT_TYPE = "Content-Type";
 
     private final LinkedList<JSONObject> mailJsonObjectQueue;
 
@@ -145,7 +162,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              * Nothing applied before
              */
             currentBodyObject = bodyObject;
-            currentMailObject.put("body", currentBodyObject);
+            currentMailObject.put(BODY, currentBodyObject);
         } else {
             /*
              * Already applied, turn to an array (if not done before) and append given JSON object
@@ -161,7 +178,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 /*
                  * Replace
                  */
-                currentMailObject.put("body", currentBodyObject);
+                currentMailObject.put(BODY, currentBodyObject);
             }
             jsonArray.put(bodyObject);
         }
@@ -216,10 +233,10 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final UnsupportedEncodingException e) {
             throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         }
-        headers.put("Content-Type", sb.append(contentType).append("; name=").append(encodeFN).toString());
+        headers.put(CONTENT_TYPE, sb.append(contentType).append("; name=").append(encodeFN).toString());
         sb.setLength(0);
-        headers.put("Content-Disposition", new StringBuilder(Part.ATTACHMENT).append("; filename=").append(encodeFN).toString());
-        headers.put("Content-Transfer-Encoding", "base64");
+        headers.put(CONTENT_DISPOSITION, new StringBuilder(Part.ATTACHMENT).append("; filename=").append(encodeFN).toString());
+        headers.put(CONTENT_TRANSFER_ENCODING, "base64");
         /*
          * Add body part
          */
@@ -237,9 +254,9 @@ public final class MIMEStructureHandler implements StructureHandler {
          * Dummy headers
          */
         final Map<String, String> headers = new HashMap<String, String>(4);
-        headers.put("Content-Type", "text/plain; charset=UTF-8");
-        headers.put("Content-Disposition", Part.INLINE);
-        headers.put("Content-Transfer-Encoding", "7bit");
+        headers.put(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        headers.put(CONTENT_DISPOSITION, Part.INLINE);
+        headers.put(CONTENT_TRANSFER_ENCODING, "7bit");
         /*
          * Add body part
          */
@@ -266,7 +283,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 currentBodyObject = null;
                 // Add multipart's headers
                 final Map<String, String> headers = new HashMap<String, String>(1);
-                headers.put("Content-Type", mp.getContentType().toString());
+                headers.put(CONTENT_TYPE, mp.getContentType().toString());
                 generateHeadersObject(headers.entrySet().iterator(), currentMailObject);
             }
             return true;
@@ -281,7 +298,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Dequeue
             mailJsonObjectQueue.removeLast();
             currentMailObject = mailJsonObjectQueue.getLast();
-            currentBodyObject = (JSONValue) currentMailObject.opt("body");
+            currentBodyObject = (JSONValue) currentMailObject.opt(BODY);
         }
         return true;
     }
@@ -320,7 +337,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                 // Put headers
                 generateHeadersObject(mailPart.getHeadersIterator(), bodyObject);
                 // Put body
-                bodyObject.put("body", inner.getJSONMailObject());
+                final JSONObject jsonMailObject = inner.getJSONMailObject();
+                jsonMailObject.put(MailListField.ID.getKey(), mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
+                bodyObject.put(BODY, jsonMailObject);
             }
             add2BodyJsonObject(bodyObject);
             return true;
@@ -375,7 +394,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 // Put body
                 final JSONObject body = new JSONObject();
                 fillBodyPart(body, part, id);
-                bodyObject.put("body", body);
+                bodyObject.put(BODY, body);
             } else {
                 // Put direct
                 fillBodyPart(bodyObject, part, id);
@@ -395,7 +414,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 // Put body
                 final JSONObject body = new JSONObject();
                 fillBodyPart(body, size, isp, id);
-                bodyObject.put("body", body);
+                bodyObject.put(BODY, body);
             } else {
                 // Put direct
                 fillBodyPart(bodyObject, size, isp, id);
@@ -411,7 +430,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             bodyObject.put(MailListField.ID.getKey(), id);
             final long size = part.getSize();
             if (maxSize > 0 && size > maxSize) {
-                bodyObject.put("data", JSONObject.NULL);
+                bodyObject.put(DATA, JSONObject.NULL);
             } else {
                 final byte[] bytes;
                 {
@@ -434,8 +453,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                     }
                 }
-                final String base64 = new String(Base64.encodeBase64(bytes, false), "US-ASCII");
-                bodyObject.put("data", /* base64 */"SOME-BASE64-DATA");
+                bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
             }
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur since US-ASCII is supported
@@ -449,7 +467,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             bodyObject.put(MailListField.ID.getKey(), id);
             if (maxSize > 0 && size > maxSize) {
-                bodyObject.put("data", JSONObject.NULL);
+                bodyObject.put(DATA, JSONObject.NULL);
             } else {
                 final byte[] bytes;
                 {
@@ -475,8 +493,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                     }
                 }
-                final String base64 = new String(Base64.encodeBase64(bytes, false), "US-ASCII");
-                bodyObject.put("data", /* base64 */"SOME-BASE64-DATA");
+                bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
             }
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur since US-ASCII is supported
