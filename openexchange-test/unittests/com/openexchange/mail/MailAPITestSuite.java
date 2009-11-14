@@ -112,6 +112,13 @@ public final class MailAPITestSuite extends TestSuite {
 		 * Bugfix tests
 		 */
 		mailSuite.addTestSuite(com.openexchange.mail.MailBugfixTest.class);
+		/*
+		 * Structured output tests
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.structure.MailSimpleStructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.MailMultipartAlternativeStructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.MailMultipartMixedStructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.MailNestedMessageStructureTest.class);
 		return mailSuite;
 	}
 }
