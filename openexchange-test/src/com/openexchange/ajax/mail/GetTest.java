@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.GetRequest;
@@ -113,9 +114,9 @@ public final class GetTest extends AbstractMailTest {
         /*
          * Clean everything
          */
-//        clearFolder(getInboxFolder());
-//        clearFolder(getSentFolder());
-//        clearFolder(getTrashFolder());
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
         /*
          * Create JSON mail object
          */
@@ -128,16 +129,20 @@ public final class GetTest extends AbstractMailTest {
          * Perform action=get
          */
         final GetResponse response = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]).setStructure(true));
-        
+
         final JSONObject obj = (JSONObject) response.getData();
-        
         assertNotNull("Structured JSON mail object is null, but shouldn't", obj);
+
+        final JSONArray bodyArray = obj.getJSONArray("body");
+        final int length = bodyArray.length();
+        assertTrue("Expected two body parts, but wasn't.", length > 0);
+
         /*
          * Clean everything
          */
-//        clearFolder(getInboxFolder());
-//        clearFolder(getSentFolder());
-//        clearFolder(getTrashFolder());
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
     }
 
 }
