@@ -109,7 +109,7 @@ public final class MessageWriter {
     public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws MailException {
         final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
         new StructureMailMessageParser().parseMailMessage(mail, handler);
-        return handler.getMailJsonObject();
+        return handler.getJSONMailObject();
     }
 
     /**

@@ -127,7 +127,7 @@ public final class MIMEStructureHandler implements StructureHandler {
      * 
      * @return The JSON representation of mail's MIME structure
      */
-    public JSONObject getMailJsonObject() {
+    public JSONObject getJSONMailObject() {
         return mailJsonObjectQueue.getFirst();
     }
 
@@ -255,7 +255,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     public boolean handleMultipartStart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
         try {
             // Increment
-            if (++multipartCount > 1) {
+            if (++multipartCount > 1) { // Enqueue nested multipart
                 // Create a new mail object
                 final JSONObject newMailObject = new JSONObject();
                 // Apply new mail object to current mail object's body element
@@ -264,6 +264,10 @@ public final class MIMEStructureHandler implements StructureHandler {
                 currentMailObject = newMailObject;
                 mailJsonObjectQueue.addLast(currentMailObject);
                 currentBodyObject = null;
+                // Add multipart's headers
+                final Map<String, String> headers = new HashMap<String, String>(1);
+                headers.put("Content-Type", mp.getContentType().toString());
+                generateHeadersObject(headers.entrySet().iterator(), currentMailObject);
             }
             return true;
         } catch (final JSONException e) {
@@ -273,7 +277,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     public boolean handleMultipartEnd(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
         // Decrement
-        if (--multipartCount > 0) {
+        if (--multipartCount > 0) { // Dequeue nested multipart
             // Dequeue
             mailJsonObjectQueue.removeLast();
             currentMailObject = mailJsonObjectQueue.getLast();
@@ -316,7 +320,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 // Put headers
                 generateHeadersObject(mailPart.getHeadersIterator(), bodyObject);
                 // Put body
-                bodyObject.put("body", inner.getMailJsonObject());
+                bodyObject.put("body", inner.getJSONMailObject());
             }
             add2BodyJsonObject(bodyObject);
             return true;
