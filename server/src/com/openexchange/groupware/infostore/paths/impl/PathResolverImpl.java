@@ -57,6 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
@@ -86,6 +88,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	private Mode MODE;
 	
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PathResolverImpl.class);
+	private static final Log LOG = LogFactory.getLog(PathResolverImpl.class);
 	
 	private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
 	private final ThreadLocal<Map<Integer,WebdavPath>> docPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
@@ -244,7 +247,8 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
                         String fname = rs.getString(2);
                         if(fname.equals(component)) {
                             if( found ) {
-                                throw EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
+                                InfostoreException e = EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
+                                LOG.warn(e.getMessage(), e);
                             }
                             folderid = rs.getInt(1);
                             found = true;
@@ -266,7 +270,8 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
                                 String name = rs.getString(2);
                                 if(name.equals(component)) {
                                     if(found) {
-                                        throw EXCEPTIONS.create(1, Integer.valueOf(parentId), component, ctx.getContextId());
+                                        InfostoreException e = EXCEPTIONS.create(1, Integer.valueOf(parentId), component, ctx.getContextId());
+                                        LOG.warn(e.getMessage(), e);
                                     }
                                     found = true;
                                     id = rs.getInt(1);
