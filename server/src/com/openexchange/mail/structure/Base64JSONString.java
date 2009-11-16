@@ -89,15 +89,14 @@ public final class Base64JSONString implements JSONString {
         if (!inReference.compareAndSet(in, null)) {
             return "null";
         }
-        final byte[] bytes;
+        final ByteArrayOutputStream out;
         try {
             final byte[] buf = new byte[BUFLEN];
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
+            out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
             int read;
             while ((read = in.read(buf, 0, BUFLEN)) >= 0) {
                 out.write(buf, 0, read);
             }
-            bytes = out.toByteArray();
         } catch (final IOException e) {
             throw new IllegalStateException("Input stream could not be read", e);
         } finally {
@@ -108,7 +107,7 @@ public final class Base64JSONString implements JSONString {
             }
         }
         try {
-            return JSONObject.quote(new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
+            return JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), "US-ASCII"));
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw new IllegalStateException(e);
