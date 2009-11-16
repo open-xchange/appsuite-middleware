@@ -42,19 +42,20 @@ workflowString: |
             type: 1
             typeOfInfo: image
           - !com.openexchange.subscribe.crawler.PagePart
+            addInfo: 1
             regex: "(AIM|Google Talk|Skype|Windows Live|Yahoo):<\\/td><td  valign=\"top\">([^<]*)(</td>)"
             type: 1
             typeOfInfo: instant_messenger1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(Mobile Number|Handynummer):</td><td ><a href=\"tel:[0-9]*\">([0-9\\s\\+\\-\\/\\(\\)]*)(<\\/a>)"
+            regex: "(Mobile Number|Handynummer|Numéro de mobile|Número de móvil):</td><td ><a href=\"tel:[0-9]*\">([0-9\\s\\+\\-\\/\\(\\)]*)(<\\/a>)"
             type: 1
             typeOfInfo: cellular_telephone1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(Phone|Telefon):</td><td ><a href=\"tel:[0-9]*\">([0-9\\s\\+\\-\\/\\(\\)]*)(<\\/a>)"
+            regex: "(Phone|Telefon|Téléphone|Teléfono):</td><td ><a href=\"tel:[0-9]*\">([0-9\\s\\+\\-\\/\\(\\)]*)(<\\/a>)"
             type: 1
             typeOfInfo: telephone_business1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(Current Address|Aktuelle Adresse):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
+            regex: "(Current address|Aktuelle Adresse|Adresse actuelle|Dirección actual):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
             type: 1
             typeOfInfo: address_note
           - !com.openexchange.subscribe.crawler.PagePart
@@ -62,11 +63,11 @@ workflowString: |
             type: 1
             typeOfInfo: company
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(Birthday|Geburtstag):<\\/td><td  valign=\"top\">([0-9]{2})(\\.)"
+            regex: "(Birthday|Geburtstag|Date de naissance|Fecha de nacimiento):<\\/td><td  valign=\"top\">([0-9]{1,2})(\\.|\\sde|)"
             type: 1
             typeOfInfo: birthday_day
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(\\s)([^,]*)(,)"
+            regex: "(\\s)([^,0-9\\s]*)(,|)"
             type: 1
             typeOfInfo: birthday_month_string
           - !com.openexchange.subscribe.crawler.PagePart
@@ -74,8 +75,12 @@ workflowString: |
             type: 1
             typeOfInfo: birthday_year
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "(Hometown|Heimatstadt):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
+            regex: "(Hometown|Heimatstadt|Originaire de|Ciudad):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)"
             type: 1
             typeOfInfo: city_home
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(Firma|Company|Entreprise|Empresa):<\\/td><td  valign=\"top\">([^<]*)(<\\/td>)"
+            type: 1
+            typeOfInfo: company
       titleExceptionsRegex: "Facebook.*(Your Profile|Dein Profil)"
   
