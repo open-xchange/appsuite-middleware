@@ -1168,13 +1168,13 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);
     }
     
-    public void testCorrectUntitCalculation()  throws Throwable {
+    public void testCorrectUntilCalculation()  throws Throwable {
         final RecurringResultsInterface m = null;
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
-        cdao.setTitle("testCorrectUntitCalculation");
+        cdao.setTitle("testCorrectUntilCalculation");
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
         cdao.setInterval(1);
         cdao.setDays(Appointment.WEDNESDAY);
@@ -1203,7 +1203,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao2.setTimezone(TIMEZONE);
         CalendarTest.fillDatesInDao(cdao2);
         cdao2.removeUntil();
-        cdao2.setTitle("testCorrectUntitCalculation yearly");
+        cdao2.setTitle("testCorrectUntilCalculation yearly");
         cdao2.setRecurrenceType(CalendarObject.YEARLY);
         cdao2.setInterval(1);
         cdao2.setMonth(Calendar.AUGUST);
@@ -1221,7 +1221,9 @@ public class CalendarRecurringTests extends TestCase {
         check_until2.set(Calendar.MONTH, Calendar.AUGUST);
         check_until2.set(Calendar.DAY_OF_MONTH, 21);
         
-        assertEquals("Check correct until for yearly " , coll.normalizeLong(check_until2.getTimeInMillis()) , cdao2.getUntil().getTime());
+        Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
+        Date actual = cdao2.getUntil();
+        assertEquals("Check correct until for yearly " , expected, actual);
     }
     
     public void testFlagSingleException() throws Throwable {
@@ -1230,7 +1232,6 @@ public class CalendarRecurringTests extends TestCase {
         
         final int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
-        final RecurringResultsInterface m = null;
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         cdao.setContext(context);
