@@ -82,10 +82,6 @@ public final class Base64JSONString implements JSONString {
     }
 
     public String toJSONString() {
-        /*-
-         * TODO: Update to commons codec 1.4 library and user org.apache.commons.codec.binary.Base64InputStream to stream base64-encoded
-         * data directly to output.
-         */
         final InputStream in = inReference.get();
         if (null == in) {
             return "null";
