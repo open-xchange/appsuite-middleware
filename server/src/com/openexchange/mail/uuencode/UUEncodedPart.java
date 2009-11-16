@@ -184,7 +184,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     /**
      * Gets the encoded part as StringBuffer
      * 
-     * @return part - The part
+     * @return The part
      */
     public StringBuilder getPart() {
         final StringBuilder encodedPart = new StringBuilder();
