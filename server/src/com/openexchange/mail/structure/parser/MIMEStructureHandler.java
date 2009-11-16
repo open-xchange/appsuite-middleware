@@ -80,6 +80,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
@@ -432,32 +433,8 @@ public final class MIMEStructureHandler implements StructureHandler {
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
-                final byte[] bytes;
-                {
-                    final InputStream inputStream = part.getInputStream();
-                    try {
-                        final byte[] buf = new byte[BUFLEN];
-                        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
-                        int read;
-                        while ((read = inputStream.read(buf, 0, BUFLEN)) >= 0) {
-                            out.write(buf, 0, read);
-                        }
-                        bytes = out.toByteArray();
-                    } catch (final IOException e) {
-                        throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-                    } finally {
-                        try {
-                            inputStream.close();
-                        } catch (final IOException e) {
-                            org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class).error(e.getMessage(), e);
-                        }
-                    }
-                }
-                bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
+                fillBase64JSONString(part.getInputStream(), bodyObject, true);
             }
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur since US-ASCII is supported
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
@@ -469,11 +446,23 @@ public final class MIMEStructureHandler implements StructureHandler {
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
+                fillBase64JSONString(isp.getInputStream(), bodyObject, true);
+            }
+        } catch (final JSONException e) {
+            throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+        }
+    }
+
+    private static void fillBase64JSONString(final InputStream inputStream, final JSONObject bodyObject, final boolean streaming) throws MailException {
+        try {
+            if (streaming) {
+                bodyObject.put(DATA, new Base64JSONString(inputStream));
+            } else {
                 final byte[] bytes;
                 {
-                    InputStream inputStream = null;
                     try {
-                        inputStream = isp.getInputStream();
                         final byte[] buf = new byte[BUFLEN];
                         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
                         int read;
@@ -493,11 +482,11 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                     }
                 }
+                // Add own JSONString implementation to support streaming
                 bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
             }
         } catch (final UnsupportedEncodingException e) {
-            // Cannot occur since US-ASCII is supported
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
+            throw new MailException(MailException.Code.ENCODING_ERROR, e, "US-ASCII");
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
