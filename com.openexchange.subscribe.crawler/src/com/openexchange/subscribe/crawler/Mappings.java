@@ -199,18 +199,18 @@ public class Mappings {
         // handle birthdays
         if (map.containsKey("birthday_month_string")){
             String month = map.get("birthday_month_string");
-            if (month.matches("(Januar|January)")) {map.put("birthday_month", "1");}
-            if (month.matches("(Februar|February)")) {map.put("birthday_month", "2");}
-            if (month.matches("(M\u00e4rz|March)")) {map.put("birthday_month", "3");}
-            if (month.matches("(April|April)")) {map.put("birthday_month", "4");}
-            if (month.matches("(Mai|May)")) {map.put("birthday_month", "5");}
-            if (month.matches("(Juni|June)")) {map.put("birthday_month", "6");}
-            if (month.matches("(Juli|July)")) {map.put("birthday_month", "7");}
-            if (month.matches("(August|August)")) {map.put("birthday_month", "8");}
-            if (month.matches("(September|September)")) {map.put("birthday_month", "9");}
-            if (month.matches("(Oktober|October)")) {map.put("birthday_month", "10");}
-            if (month.matches("(November|November)")) {map.put("birthday_month", "11");}
-            if (month.matches("(Dezember|December)")) {map.put("birthday_month", "12");}
+            if (month.matches("(Januar|January|janvier|enero)")) {map.put("birthday_month", "0");}
+            if (month.matches("(Februar|February|f\u00e9vrier|febrero)")) {map.put("birthday_month", "1");}
+            if (month.matches("(M\u00e4rz|March|mars|marzo)")) {map.put("birthday_month", "2");}
+            if (month.matches("(April|April|avril|abril)")) {map.put("birthday_month", "3");}
+            if (month.matches("(Mai|May|mai|mayo)")) {map.put("birthday_month", "4");}
+            if (month.matches("(Juni|June|juin|junio)")) {map.put("birthday_month", "5");}
+            if (month.matches("(Juli|July|juillet|julio)")) {map.put("birthday_month", "6");}
+            if (month.matches("(August|August|ao\u00fbt|agosto)")) {map.put("birthday_month", "7");}
+            if (month.matches("(September|September|septembre|septiembre)")) {map.put("birthday_month", "8");}
+            if (month.matches("(Oktober|October|octobre|octubre)")) {map.put("birthday_month", "9");}
+            if (month.matches("(November|November|novembre|noviembre)")) {map.put("birthday_month", "10");}
+            if (month.matches("(Dezember|December|d\u00e9cembre|diciembre)")) {map.put("birthday_month", "11");}
         }
         Calendar cal = null;
         if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {

@@ -70,12 +70,22 @@ public class PagePart {
     private String regex;
 
     private String typeOfInfo;
+    
+    private int addInfo;
 
     public PagePart() {
 
     }
 
     public PagePart(final String regex, final String typeOfInfo) {
+        type = INFO;
+        this.regex = regex;
+        this.typeOfInfo = typeOfInfo;
+        this.addInfo = 0;
+    }
+    
+    public PagePart(final String regex, final String typeOfInfo, int addInfo) {
+        this.addInfo = addInfo;
         type = INFO;
         this.regex = regex;
         this.typeOfInfo = typeOfInfo;
@@ -110,4 +120,15 @@ public class PagePart {
         this.typeOfInfo = typeOfInfo;
     }
 
+    
+    public int getAddInfo() {
+        return addInfo;
+    }
+
+    
+    public void setAddInfo(int addInfo) {
+        this.addInfo = addInfo;
+    }
+
+    
 }

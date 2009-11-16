@@ -90,8 +90,10 @@ public class PagePartSequence {
                 // if it is an info-part and its info is not empty get its info and put it into the map
                 if (pagePart.getType() == PagePart.INFO && matcher.groupCount() == 3) {
                     final String info = matcher.group(2);
-                    if (!info.equals("")) {
+                    if (!info.equals("") && pagePart.getAddInfo() == 0) {
                         retrievedInformation.put(pagePart.getTypeOfInfo(), info);
+                    } else if (!info.equals("") && pagePart.getAddInfo() != 0 && pagePart.getAddInfo() <= 3 && pagePart.getAddInfo() >=1) {
+                        retrievedInformation.put(pagePart.getTypeOfInfo(), info + " ("+matcher.group(pagePart.getAddInfo())+")");
                     }
                 }
                 // set the page to the rest (after this part)

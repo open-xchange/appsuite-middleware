@@ -93,15 +93,16 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<div class=\"section_title\">)([^<]*)(</div>)", "display_name"));
         pageParts.add(new PagePart("(<img src=\")(http:\\/\\/profile\\.ak\\.fbcdn\\.net[^\"]*)(\")", "image"));
-        pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):<\\/td><td  valign=\"top\">([^<]*)(</td>)","instant_messenger1"));
-        pageParts.add(new PagePart("(Mobile Number|Handynummer):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "cellular_telephone1"));
-        pageParts.add(new PagePart("(Phone|Telefon):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "telephone_business1"));
-        pageParts.add(new PagePart("(Current Address|Aktuelle Adresse):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","address_note"));
+        pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):<\\/td><td  valign=\"top\">([^<]*)(</td>)","instant_messenger1",1));
+        pageParts.add(new PagePart("(Mobile Number|Handynummer|Num\u00e9ro de mobile|N\u00famero de m\u00f3vil):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "cellular_telephone1"));
+        pageParts.add(new PagePart("(Phone|Telefon|T\u00e9l\u00e9phone|Tel\u00e9fono):</td><td ><a href=\"tel:[0-9]*\">"+VALID_PHONE_REGEX+"(<\\/a>)", "telephone_business1"));
+        pageParts.add(new PagePart("(Current address|Aktuelle Adresse|Adresse actuelle|Direcci\u00f3n actual):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","address_note"));
         pageParts.add(new PagePart("(Member of|Mitglied von):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","company"));
-        pageParts.add(new PagePart("(Birthday|Geburtstag):<\\/td><td  valign=\"top\">([0-9]{2})(\\.)", "birthday_day"));
-        pageParts.add(new PagePart("(\\s)([^,]*)(,)", "birthday_month_string"));
+        pageParts.add(new PagePart("(Birthday|Geburtstag|Date de naissance|Fecha de nacimiento):<\\/td><td  valign=\"top\">([0-9]{1,2})(\\.|\\sde|)", "birthday_day"));
+        pageParts.add(new PagePart("(\\s)([^,0-9\\s]*)(,|)", "birthday_month_string"));
         pageParts.add(new PagePart("(\\s)([0-9]{4})(<)", "birthday_year"));
-        pageParts.add(new PagePart("(Hometown|Heimatstadt):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","city_home"));
+        pageParts.add(new PagePart("(Hometown|Heimatstadt|Originaire de|Ciudad):<\\/td><td  valign=\"top\">(.+?)(<\\/td>)","city_home"));
+        pageParts.add(new PagePart("(Firma|Company|Entreprise|Empresa):<\\/td><td  valign=\"top\">([^<]*)(<\\/td>)", "company"));
         final PagePartSequence sequence = new PagePartSequence(pageParts, "");
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
             "Get the info-bits from the contact-page.",
