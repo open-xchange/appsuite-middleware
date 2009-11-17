@@ -192,7 +192,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 			category = { Category.CODE_ERROR, Category.CODE_ERROR },
 			desc = { "A folder contains two folders with the same folder name. This points to an inconsistency in the database, as the second folder by the same name should not have been created. This will certainly cause some headaches in R&D.", "A faulty SQL statement was sent to the DB. R&D must fix this." },
 			exceptionId = { 1,2 },
-			msg = { "Folder %d has two subfolders named %s. The database for context %i is not consistent.", "Incorrect SQL Query: %s" }
+			msg = { "Folder %d has two subfolders named %s. The database for context %d is not consistent.", "Incorrect SQL Query: %s" }
 	)
 	public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException,
@@ -248,7 +248,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
                         if(fname.equals(component)) {
                             if( found ) {
                                 InfostoreException e = EXCEPTIONS.create(1, Integer.valueOf(parentId), component);
-                                LOG.warn(e.getMessage(), e);
+                                LOG.warn(e.toString(), e);
                             }
                             folderid = rs.getInt(1);
                             found = true;
@@ -271,7 +271,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
                                 if(name.equals(component)) {
                                     if(found) {
                                         InfostoreException e = EXCEPTIONS.create(1, Integer.valueOf(parentId), component, ctx.getContextId());
-                                        LOG.warn(e.getMessage(), e);
+                                        LOG.warn(e.toString(), e);
                                     }
                                     found = true;
                                     id = rs.getInt(1);
