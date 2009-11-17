@@ -1216,10 +1216,10 @@ public class CalendarRecurringTests extends TestCase {
         check_until2.setTime(cdao2.getStartDate());
         // No longer any calculation, just say, what is expected...
         // (-1) in years because internal calculation is 1-based.
-        // 21st of August, because we need the 24:00:00 of the day of the last occurrence, which is 00:00:00 of the following day.
+        // 20th of August, because the until date is defined as _inclusive_
         check_until2.add(Calendar.YEAR, coll.MAXTC - 1);
         check_until2.set(Calendar.MONTH, Calendar.AUGUST);
-        check_until2.set(Calendar.DAY_OF_MONTH, 21);
+        check_until2.set(Calendar.DAY_OF_MONTH, 20);
         
         Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
         Date actual = cdao2.getUntil();
