@@ -413,7 +413,7 @@ public final class JSONMessageCache {
      * @param fullname The fullname
      * @param id The mail ID
      * @param seen <code>true</code> to set \Seen flag; otherwise <code>false</code>
-     * @param unread The unread count
+     * @param unread The unread count for specified folder
      * @param userId The user ID
      * @param cid The context ID
      * @throws MailException If an error occurs
