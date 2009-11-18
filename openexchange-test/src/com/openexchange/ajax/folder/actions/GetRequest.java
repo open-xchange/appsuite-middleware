@@ -115,29 +115,14 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         this(folderId, columns, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     public Object getBody() throws JSONException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
@@ -146,11 +131,6 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     public GetParser getParser() {
         return new GetParser(failOnError);
     }
