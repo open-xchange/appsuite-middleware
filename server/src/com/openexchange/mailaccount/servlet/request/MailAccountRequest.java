@@ -71,7 +71,6 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.mail.transport.MailTransport;
@@ -220,7 +219,7 @@ public final class MailAccountRequest {
             }
 
             // Create a mail access instance
-            final MailAccess<?, ?> mailAccess = getMailAccess(mailAccount);
+            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
             return actionValidateTree0(mailAccess);
         } catch (final AbstractOXException exc) {
             throw new OXException(exc);
@@ -461,58 +460,6 @@ public final class MailAccountRequest {
             mailConfig.setServer(server.substring(0, pos));
         }
         mailConfig.setSecure(accountDescription.isMailSecure());
-        mailAccess.setCacheable(false);
-        return mailAccess;
-    }
-
-    private MailAccess<?, ?> getMailAccess(final MailAccount account) throws MailException {
-        final String mailServerURL = account.generateMailServerURL();
-        // Get the appropriate mail provider by mail server URL
-        final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
-        if (null == mailProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
-            }
-            return null;
-        }
-        // Create a mail access instance
-        final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
-        final MailConfig mailConfig = mailAccess.getMailConfig();
-        // Set login and password
-        mailConfig.setLogin(account.getLogin());
-        try {
-            final String mailAccountPassword = account.getPassword();
-            mailConfig.setPassword(MailPasswordUtil.decrypt(mailAccountPassword, session.getPassword()));
-        } catch (final GeneralSecurityException e) {
-            throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
-                e,
-                account.getLogin(),
-                account.getMailServer(),
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId())));
-        }
-        // Set server and port
-        final String server;
-        {
-            final String[] tmp = MailConfig.parseProtocol(mailServerURL);
-            server = tmp == null ? mailServerURL : tmp[1];
-        }
-        final int pos = server.indexOf(':');
-        if (pos == -1) {
-            mailConfig.setPort(143);
-            mailConfig.setServer(server);
-        } else {
-            final String sPort = server.substring(pos + 1);
-            try {
-                mailConfig.setPort(Integer.parseInt(sPort));
-            } catch (final NumberFormatException e) {
-                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
-                    "\". Using fallback 143 instead."), e);
-                mailConfig.setPort(143);
-            }
-            mailConfig.setServer(server.substring(0, pos));
-        }
-        mailConfig.setSecure(account.isMailSecure());
         mailAccess.setCacheable(false);
         return mailAccess;
     }
