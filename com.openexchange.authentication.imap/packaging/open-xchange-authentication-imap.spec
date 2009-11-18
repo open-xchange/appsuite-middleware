@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -99,6 +99,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/groupware/imapauth.properties
 
 %changelog
+* Wed Nov 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14891: Using proper login to check IMAP authentication
 * Mon Oct 05 2009 - dennis.sieben@open-xchange.com
  - Bugfix #14634: imap authentication bundle doesn't support utf-8 passwords
    - Added configuration setting to configure charset

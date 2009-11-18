@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,13 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 18 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14889: Using the same connection for deleting reminder when a user is deleted.
+ - Bugfix #14834: Not trying to initialize the nested cause of a ServletException because this gives a IllegalStateException.
+   Logging nested cause instead additionally.
+* Wed Nov 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14891: Using proper login to check IMAP authentication
+ - Bugfix #14336: Ignoring invalid FETCH response line
 * Thu Nov 12 2009 - francisco.laguna@open-xchange.com
  - Bugfix #14530: More resillience towards disappearing subscription sources and publication targets.
  - Bugfix #14402: Consider two companies different.
