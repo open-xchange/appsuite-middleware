@@ -157,7 +157,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                 for (final String mailId : validIDs) {
                     if (overwrite || !cache.containsKey(accountId, fullname, mailId, session)) {
                         final SetableFutureTask<JSONObject> f =
-                            new SetableFutureTask<JSONObject>(new MessageLoadCallable(mailId, fullname, accountId, session), mailId);
+                            new SetableFutureTask<JSONObject>(new MessageLoadCallable(mailId, fullname, accountId, session, LOG), mailId);
                         futures.add(f);
                         cache.put(accountId, fullname, mailId, f, session);
                     }
@@ -273,10 +273,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
         }
     }
 
-    private static class MessageLoadCallable implements Callable<JSONObject> {
-
-        private static final org.apache.commons.logging.Log LOG1 =
-            org.apache.commons.logging.LogFactory.getLog(MailPrefetcherCallable.MessageLoadCallable.class);
+    private static final class MessageLoadCallable implements Callable<JSONObject> {
 
         private final Session session;
 
@@ -286,12 +283,15 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
         private final String fullname;
 
-        MessageLoadCallable(final String mailId, final String fullname, final int accountId, final Session session) {
+        private final org.apache.commons.logging.Log logger;
+
+        MessageLoadCallable(final String mailId, final String fullname, final int accountId, final Session session, final org.apache.commons.logging.Log logger) {
             super();
             this.session = session;
             this.accountId = accountId;
             this.mailId = mailId;
             this.fullname = fullname;
+            this.logger = logger;
         }
 
         public JSONObject call() throws Exception {
@@ -317,7 +317,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                     mailAccess.close(true);
                 }
             } catch (final Exception e) {
-                LOG1.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
                 throw e;
             }
         }
@@ -328,7 +328,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
         final String mailId;
 
-        boolean exceptionSet;
+        volatile boolean exceptionSet;
 
         SetableFutureTask(final Callable<V> callable, final String mailId) {
             super(callable);
