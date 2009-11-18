@@ -1330,7 +1330,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                              */
                             final String flagsKey = MailJSONField.FLAGS.getKey();
                             final int flags = rawJSONMailObject.getInt(flagsKey);
-                            final boolean wasUnseen = (flags & MailMessage.FLAG_SEEN) == 0;
+                            final boolean wasUnseen = ((flags & MailMessage.FLAG_SEEN) == 0);
                             final boolean doUnseen = (unseen && wasUnseen);
                             if (!doUnseen && wasUnseen) {
                                 /*
