@@ -1356,6 +1356,9 @@ public final class IMAPCommandsCollection {
                 } else {
                     p.handleResult(response);
                 }
+                /*
+                 * Consume remaining responses
+                 */
                 p.notifyResponseHandlers(r);
                 return retval;
             }
