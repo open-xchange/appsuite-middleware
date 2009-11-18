@@ -125,7 +125,13 @@ public final class MailPrefetcherCallable implements Callable<Object> {
             try {
                 final Set<String> validIDs;
                 {
-                    final Set<String> unreadIDs;
+                    /*
+                     * Valid IDs
+                     */
+                    validIDs = new HashSet<String>(Arrays.asList(mailIds));
+                    /*
+                     * Check for unseen-only
+                     */
                     if (JSONMessageCacheConfiguration.getInstance().isUnseenOnly()) {
                         final MailMessage[] unreadMails =
                             mailAccess.getMessageStorage().getUnreadMessages(
@@ -134,18 +140,10 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                                 OrderDirection.ASC,
                                 new MailField[] { MailField.ID },
                                 mailIds.length);
-                        unreadIDs = new HashSet<String>(unreadMails.length);
+                        final Set<String> unreadIDs = new HashSet<String>(unreadMails.length);
                         for (final MailMessage unreadMail : unreadMails) {
                             unreadIDs.add(unreadMail.getMailId());
                         }
-                    } else {
-                        unreadIDs = null;
-                    }
-                    /*
-                     * Valid IDs
-                     */
-                    validIDs = new HashSet<String>(Arrays.asList(mailIds));
-                    if (null != unreadIDs) {
                         /*
                          * Retain unread only
                          */
