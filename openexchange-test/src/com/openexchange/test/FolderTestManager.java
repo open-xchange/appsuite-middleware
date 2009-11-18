@@ -75,7 +75,10 @@ import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.SystemObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.Arrays;
 import com.openexchange.tools.servlet.AjaxException;
@@ -399,11 +402,12 @@ public class FolderTestManager extends TestCase {
         UpdatesRequest request = new UpdatesRequest(folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
         try {
             CommonUpdatesResponse response = (CommonUpdatesResponse) client.execute(request);
+            int idPos = findIDPosition(response.getColumns());
             final JSONArray data = (JSONArray) response.getResponse().getData();
             FolderObject fo = new FolderObject();
             for (int i = 0; i < data.length(); i++) {
                 JSONArray tempArray = data.getJSONArray(i);
-                fo = this.getFolderFromServer(tempArray.getInt(0), true);
+                fo = this.getFolderFromServer(tempArray.getInt(idPos), true);
                 allFolders.add(fo);
             }
             setLastResponse(response);
@@ -414,6 +418,17 @@ public class FolderTestManager extends TestCase {
         FolderObject[] folderArray = new FolderObject[allFolders.size()];
         allFolders.copyInto(folderArray);
         return folderArray;
+    }
+
+    private int findPositionOfColumn(int[] haystack, int needle) {
+        for(int i = 0; i < haystack.length; i++)
+            if(haystack[i] == needle)
+                return i;
+        return -1;
+    }
+
+    private int findIDPosition(int[] columns) {
+        return findPositionOfColumn(columns, Appointment.OBJECT_ID);
     }
 
     private void remember(FolderObject folder) {
