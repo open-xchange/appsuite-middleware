@@ -5,6 +5,8 @@
 * 2009-11-18 - marcus.klein@open-xchange.com
 
  - Bugfix #14889: Using the same connection for deleting reminder when a user is deleted.
+ - Bugfix #14834: Not trying to initialize the nested cause of a ServletException because this gives a IllegalStateException.
+   Logging nested cause instead additionally.
 
 * 2009-11-12 - marcus.klein@open-xchange.com
 
