@@ -1,3 +1,7 @@
+* 2009-11-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #14891: Using proper login to check IMAP authentication
+
 * 2009-10-05 - dennis.sieben@open-xchange.com
 
  - Bugfix #14634: imap authentication bundle doesn't support utf-8 passwords
