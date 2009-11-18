@@ -257,15 +257,45 @@ public class IMAPAuthentication implements AuthenticationService {
                 }
             }
 
+            final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+            final String sPort = String.valueOf(port);
             if (USE_IMAPS) {
-                imapprops.put("mail.imap.socketFactory.class", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
-                imapprops.put("mail.imap.socketFactory.port", "" + port);
+                /*
+                 * Enables the use of the STARTTLS command.
+                 */
+                // imapProps.put("mail.imap.starttls.enable", "true");
+                /*
+                 * Set main socket factory to a SSL socket factory
+                 */
+                imapprops.put("mail.imap.socketFactory.class", socketFactoryClass);
+                imapprops.put("mail.imap.socketFactory.port", sPort);
                 imapprops.put("mail.imap.socketFactory.fallback", "false");
-                imapprops.put("mail.imap.starttls.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4
                  */
-                java.security.Security.setProperty("ssl.SocketFactory.provider", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+                // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+            } else {
+                /*
+                 * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
+                 */
+                imapprops.put("mail.imap.starttls.enable", "true");
+                /*
+                 * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
+                 * so.
+                 */
+                imapprops.put("mail.imap.socketFactory.port", sPort);
+                imapprops.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
+                imapprops.put("mail.imap.ssl.socketFactory.port", sPort);
+                imapprops.put("mail.imap.socketFactory.fallback", "false");
+                /*
+                 * Specify SSL protocols
+                 */
+                imapprops.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+                // imapProps.put("mail.imap.ssl.enable", "true");
+                /*
+                 * Needed for JavaMail >= 1.4
+                 */
+                // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
             }
 
             session = Session.getInstance(imapprops, null);
