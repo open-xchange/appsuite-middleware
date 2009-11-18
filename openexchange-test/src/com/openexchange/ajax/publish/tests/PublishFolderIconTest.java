@@ -72,6 +72,8 @@ import com.openexchange.publish.SimPublicationTargetDiscoveryService;
  */
 public class PublishFolderIconTest extends AbstractPublicationTest {
 
+    private static final int FLAG_PUBLISHED = 3010;
+    
     private FolderObject folder;
 
     public PublishFolderIconTest(String name) {
@@ -94,8 +96,6 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
         Contact contact = generateContact("Herbert", "Meier");
         contact.setParentFolderID(folder.getObjectID());
         cMgr.newAction(contact);
-
-        // publish
     }
 
     protected void publish() throws Exception {
@@ -110,7 +110,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
 
     public void testShouldSetTheIconViaGet() throws Exception {
         // check negative
-        fMgr.getFolderFromServer(folder.getObjectID(), false, new int[] { 3010 });
+        fMgr.getFolderFromServer(folder.getObjectID(), false, new int[] { FLAG_PUBLISHED });
         GetResponse response = (GetResponse) fMgr.getLastResponse();
         JSONObject data = (JSONObject) response.getData();
         assertTrue(
