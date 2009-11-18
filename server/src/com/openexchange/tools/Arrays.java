@@ -86,6 +86,8 @@ public final class Arrays {
     }
 
     public static int[] addUniquely(final int[] toExtend, final int... other) {
+        if(other == null)
+            return toExtend;
         final Set<Integer> tmp = new HashSet<Integer>();
         for (final int i : toExtend) {
             tmp.add(I(i));
