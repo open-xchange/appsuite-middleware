@@ -352,6 +352,16 @@ public final class AJPv13Task implements Task<Object> {
                             writeEndResponse(client, false);
                         }
                     } catch (final UploadServletException e) {
+                        /*
+                         * Log ServletException's own root cause separately
+                         */
+                        final Throwable rootCause = e.getRootCause();
+                        if (null != rootCause) {
+                            LOG.error(rootCause.getMessage(), rootCause);
+                        }
+                        /*
+                         * Now log actual UploadServletException
+                         */
                         LOG.error(e.getMessage(), e);
                         closeAndKeepAlive((HttpServletResponseWrapper) e.getRes(), e.getData().getBytes("UTF-8"), ajpCon);
                     } catch (final ServletException e) {
