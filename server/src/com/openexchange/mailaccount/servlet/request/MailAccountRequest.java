@@ -71,6 +71,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.mail.transport.MailTransport;
@@ -142,20 +143,22 @@ public final class MailAccountRequest {
      * @throws OXJSONException If a JSON error occurs
      */
     public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
-        if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+        if (AJAXServlet.ACTION_DELETE.equalsIgnoreCase(action)) {
             return actionDelete(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+        } else if (AJAXServlet.ACTION_NEW.equalsIgnoreCase(action)) {
             return actionNew(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+        } else if (AJAXServlet.ACTION_UPDATE.equalsIgnoreCase(action)) {
             return actionUpate(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+        } else if (AJAXServlet.ACTION_GET.equalsIgnoreCase(action)) {
             return actionGet(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+        } else if (AJAXServlet.ACTION_ALL.equalsIgnoreCase(action)) {
             return actionAll(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+        } else if (AJAXServlet.ACTION_LIST.equalsIgnoreCase(action)) {
             return actionList(jsonObject);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_VALIDATE)) {
+        } else if (AJAXServlet.ACTION_VALIDATE.equalsIgnoreCase(action)) {
             return actionValidate(jsonObject);
+        } else if ("get_tree".equalsIgnoreCase(action)) {
+            return actionGetTree(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -187,6 +190,38 @@ public final class MailAccountRequest {
 
             final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
             return jsonAccount;
+        } catch (final AbstractOXException exc) {
+            throw new OXException(exc);
+        }
+    }
+
+    private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXJSONException, AjaxException {
+        final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+
+        try {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+
+            if (isUnifiedINBOXAccount(mailAccount)) {
+                // Treat as no hit
+                throw MailAccountExceptionMessages.NOT_FOUND.create(
+                    Integer.valueOf(id),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+                throw MailAccountExceptionFactory.getInstance().create(
+                    MailAccountExceptionMessages.NOT_ENABLED,
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()));
+            }
+
+            // Create a mail access instance
+            final MailAccess<?, ?> mailAccess = getMailAccess(mailAccount);
+            return actionValidateTree0(mailAccess);
         } catch (final AbstractOXException exc) {
             throw new OXException(exc);
         }
@@ -318,6 +353,10 @@ public final class MailAccountRequest {
         }
         // Create a mail access instance
         final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription);
+        return actionValidateTree0(mailAccess);
+    }
+
+    private JSONObject actionValidateTree0(final MailAccess<?, ?> mailAccess) throws JSONException {
         // Now try to connect
         boolean close = false;
         try {
@@ -422,6 +461,58 @@ public final class MailAccountRequest {
             mailConfig.setServer(server.substring(0, pos));
         }
         mailConfig.setSecure(accountDescription.isMailSecure());
+        mailAccess.setCacheable(false);
+        return mailAccess;
+    }
+
+    private MailAccess<?, ?> getMailAccess(final MailAccount account) throws MailException {
+        final String mailServerURL = account.generateMailServerURL();
+        // Get the appropriate mail provider by mail server URL
+        final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
+        if (null == mailProvider) {
+            if (DEBUG) {
+                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
+            }
+            return null;
+        }
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
+        final MailConfig mailConfig = mailAccess.getMailConfig();
+        // Set login and password
+        mailConfig.setLogin(account.getLogin());
+        try {
+            final String mailAccountPassword = account.getPassword();
+            mailConfig.setPassword(MailPasswordUtil.decrypt(mailAccountPassword, session.getPassword()));
+        } catch (final GeneralSecurityException e) {
+            throw new MailConfigException(MailAccountExceptionMessages.PASSWORD_DECRYPTION_FAILED.create(
+                e,
+                account.getLogin(),
+                account.getMailServer(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId())));
+        }
+        // Set server and port
+        final String server;
+        {
+            final String[] tmp = MailConfig.parseProtocol(mailServerURL);
+            server = tmp == null ? mailServerURL : tmp[1];
+        }
+        final int pos = server.indexOf(':');
+        if (pos == -1) {
+            mailConfig.setPort(143);
+            mailConfig.setServer(server);
+        } else {
+            final String sPort = server.substring(pos + 1);
+            try {
+                mailConfig.setPort(Integer.parseInt(sPort));
+            } catch (final NumberFormatException e) {
+                LOG.warn(new StringBuilder().append("Cannot parse port out of string: \"").append(sPort).append(
+                    "\". Using fallback 143 instead."), e);
+                mailConfig.setPort(143);
+            }
+            mailConfig.setServer(server.substring(0, pos));
+        }
+        mailConfig.setSecure(account.isMailSecure());
         mailAccess.setCacheable(false);
         return mailAccess;
     }
