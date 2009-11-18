@@ -55,6 +55,7 @@ import com.openexchange.ajax.publish.tests.DeletePublicationTest;
 import com.openexchange.ajax.publish.tests.GetPublicationTest;
 import com.openexchange.ajax.publish.tests.ListPublicationsTest;
 import com.openexchange.ajax.publish.tests.OXMFInfostoreTest;
+import com.openexchange.ajax.publish.tests.PublishFolderIconTest;
 import com.openexchange.ajax.publish.tests.UpdatePublicationTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -80,6 +81,7 @@ public final class PublishTestSuite extends TestSuite {
         suite.addTestSuite(ListPublicationsTest.class);
         suite.addTestSuite(UpdatePublicationTest.class);
         suite.addTestSuite(OXMFInfostoreTest.class);
+        suite.addTestSuite(PublishFolderIconTest.class);
         return suite;
         
     }
