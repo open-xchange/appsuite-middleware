@@ -51,27 +51,30 @@ package com.openexchange.ajax.publish.tests;
 
 import java.util.Date;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 
 /**
- * Test to check whether field 3010 does properly indicated a published folder
+ * Test to check whether field 3010 does properly indicate a published folder
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class FolderIconTest extends AbstractPublicationTest {
+public class PublishFolderIconTest extends AbstractPublicationTest {
 
     private FolderObject folder;
 
-    public FolderIconTest(String name) {
+    public PublishFolderIconTest(String name) {
         super(name);
     }
 
@@ -136,70 +139,81 @@ public class FolderIconTest extends AbstractPublicationTest {
         // check negative
         fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { 3010 });
         AbstractAJAXResponse response = fMgr.getLastResponse();
-        JSONArray arr = (JSONArray) response.getData();
-        assertTrue("Should return at least one folder", arr.length() > 0);
-        //PENDING
-        JSONObject data = null;
+        JSONArray folders = (JSONArray) response.getData();
+        assertTrue("Should return at least one folder", folders.length() > 0);
+        boolean found = false;
+        for(int i = 0; i < folders.length(); i++){
+            JSONArray subfolder = folders.getJSONArray(i);
+            int id = subfolder.getInt(1); //note: this work only as long as we have this stupid "oh, I'll add the folder id anyways" feature in that request
+            boolean published = subfolder.getBoolean(0);
+            if(id == folder.getObjectID()){
+                found = true;
+                assertFalse("Folder "+id+" should not be published already", published);
+            }
+        }
+        assertTrue("Should find folder " + folder.getObjectID() +" as a subfolder of " + folder.getParentFolderID() + ".", found);
         
-        assertTrue(
-            "Should contain the key 'com.openexchange.publish.publicationFlag' even before publication",
-            data.has("com.openexchange.publish.publicationFlag"));
-        assertFalse(
-            "Key 'com.openexchange.publish.publicationFlag' should have 'false' value before publication",
-            data.getBoolean("com.openexchange.publish.publicationFlag"));
-
         // publish
         publish();
 
         // check positive
-        fMgr.getFolderFromServer(folder.getParentFolderID(), false, new int[] { 3010 });
-        response = (GetResponse) fMgr.getLastResponse();
-        arr = (JSONArray) response.getData();
-        assertTrue("Should return at least one field", arr.length() > 0);
-        data = arr.getJSONObject(0);
-
-        assertTrue(
-            "Should contain the key 'com.openexchange.publish.publicationFlag'",
-            data.has("com.openexchange.publish.publicationFlag"));
-        assertTrue(
-            "Key 'com.openexchange.publish.publicationFlag' should have 'true' value after publication",
-            data.getBoolean("com.openexchange.publish.publicationFlag"));
+        fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { 3010 });
+        response = fMgr.getLastResponse();
+        folders = (JSONArray) response.getData();
+        assertTrue("Should return at least one folder", folders.length() > 0);
+        found = false;
+        for(int i = 0; i < folders.length(); i++){
+            JSONArray subfolder = folders.getJSONArray(i);
+            int id = subfolder.getInt(1); //note: this work only as long as we have this stupid "oh, I'll add the folder id anyways" feature in that request
+            boolean published = subfolder.getBoolean(0);
+            if(id == folder.getObjectID()){
+                found = true;
+                assertTrue("Folder "+id+" should not published", published);
+            }
+        }
+        assertTrue("Should find folder " + folder.getObjectID() +" as a subfolder of " + folder.getParentFolderID() + ".", found);
+   
     }
 
     public void testShouldSetTheIconViaUpdates() throws Exception {
         //  check negative
-        Date lastModified = fMgr.getLastResponse().getTimestamp();
-        fMgr.getUpdatedFoldersOnServer(folder.getObjectID(), lastModified, new int[] { 3010 });
-        AbstractAJAXResponse response = fMgr.getLastResponse();
-        
+        Date lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
+        fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
+        FolderUpdatesResponse response = (FolderUpdatesResponse) fMgr.getLastResponse();
+        int idPos = findPositionOfColumn(response.getColumns(), CalendarObject.OBJECT_ID);
+        int flagPos = findPositionOfColumn(response.getColumns(), 3010);
         JSONArray arr = (JSONArray) response.getData();
-        assertTrue("Should return at least one field", arr.length() > 0);
-        JSONObject data = arr.getJSONObject(0);
-        assertTrue(
-            "Should contain the key 'com.openexchange.publish.publicationFlag' even before publication",
-            data.has("com.openexchange.publish.publicationFlag"));
-        assertFalse(
-            "Key 'com.openexchange.publish.publicationFlag' should have 'false' value before publication",
-            data.getBoolean("com.openexchange.publish.publicationFlag"));
-
+        assertTrue("Should return at least one update", arr.length() > 0);
+        int folderPos = findPosition(arr,folder.getObjectID(), idPos);
+        JSONArray data = arr.getJSONArray(folderPos);
+        assertFalse("Should be false if not published", data.getBoolean(flagPos));
         
         // publish
         publish();
 
         // check positive
-        lastModified = fMgr.getLastResponse().getTimestamp();
-        fMgr.getUpdatedFoldersOnServer(folder.getObjectID(), lastModified, new int[] { 3010 });
-        response = (GetResponse) fMgr.getLastResponse();
-        
+        lastModified = new Date(fMgr.getLastResponse().getTimestamp().getTime() - 1);
+        fMgr.getUpdatedFoldersOnServer(folder.getParentFolderID(), lastModified, new int[] { 3010 });
+        response = (FolderUpdatesResponse) fMgr.getLastResponse();
         arr = (JSONArray) response.getData();
-        assertTrue("Should return at least one field", arr.length() > 0);
-        data = arr.getJSONObject(0);
+        assertTrue("Should return at least one update", arr.length() > 0);
+        folderPos = findPosition(arr,folder.getObjectID(), idPos);
+        data = arr.getJSONArray(folderPos);
+        assertTrue("Should be true if published", data.getBoolean(flagPos));
+    }
 
-        assertTrue(
-            "Should contain the key 'com.openexchange.publish.publicationFlag'",
-            data.has("com.openexchange.publish.publicationFlag"));
-        assertTrue(
-            "Key 'com.openexchange.publish.publicationFlag' should have 'true' value after publication",
-            data.getBoolean("com.openexchange.publish.publicationFlag"));
+
+    private int findPositionOfColumn(int[] haystack, int needle) {
+        for(int i = 0; i < haystack.length; i++)
+            if(haystack[i] == needle)
+                return i;
+        return -1;
+    }
+
+    private int findPosition(JSONArray arr, int objectID, int idPos) throws JSONException {
+        for(int i = 0; i < arr.length(); i++)
+            if(arr.getJSONArray(i).getInt(idPos) == objectID)
+                return i;
+        return -1;
     }
 }
