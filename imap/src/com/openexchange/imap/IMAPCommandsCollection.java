@@ -1317,6 +1317,7 @@ public final class IMAPCommandsCollection {
                 long[] retval = null;
                 if (response.isOK()) {
                     final Set<Long> set = new TreeSet<Long>();
+                    final String flagsItemName = "FLAGS";
                     for (int i = 0; i < mlen; i++) {
                         if (!(r[i] instanceof FetchResponse)) {
                             continue;
@@ -1324,7 +1325,7 @@ public final class IMAPCommandsCollection {
                         final FetchResponse fr = (FetchResponse) r[i];
                         final boolean deleted;
                         {
-                            final FLAGS item = getItemOf(FLAGS.class, fr, "FLAGS");
+                            final FLAGS item = getItemOf(FLAGS.class, fr, flagsItemName);
                             deleted = item.contains(Flags.Flag.DELETED);
                         }
                         if (deleted) {
