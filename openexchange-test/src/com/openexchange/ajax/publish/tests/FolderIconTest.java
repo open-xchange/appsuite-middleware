@@ -134,11 +134,13 @@ public class FolderIconTest extends AbstractPublicationTest {
 
     public void testShouldSetTheIconViaList() throws Exception {
         // check negative
-        fMgr.listFoldersOnServer(folder.getObjectID(), new int[] { 3010 });
+        fMgr.listFoldersOnServer(folder.getParentFolderID(), new int[] { 3010 });
         AbstractAJAXResponse response = fMgr.getLastResponse();
         JSONArray arr = (JSONArray) response.getData();
-        assertTrue("Should return at least one field", arr.length() > 0);
-        JSONObject data = arr.getJSONObject(0);
+        assertTrue("Should return at least one folder", arr.length() > 0);
+        //PENDING
+        JSONObject data = null;
+        
         assertTrue(
             "Should contain the key 'com.openexchange.publish.publicationFlag' even before publication",
             data.has("com.openexchange.publish.publicationFlag"));
@@ -150,7 +152,7 @@ public class FolderIconTest extends AbstractPublicationTest {
         publish();
 
         // check positive
-        fMgr.getFolderFromServer(folder.getObjectID(), false, new int[] { 3010 });
+        fMgr.getFolderFromServer(folder.getParentFolderID(), false, new int[] { 3010 });
         response = (GetResponse) fMgr.getLastResponse();
         arr = (JSONArray) response.getData();
         assertTrue("Should return at least one field", arr.length() > 0);
