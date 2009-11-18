@@ -1344,51 +1344,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 } else {
                                     // In another thread
                                     final org.apache.commons.logging.Log logger = LOG;
+                                    final MailServletInterface msi = mailInterface;
                                     final Callable<Object> seenCallable = new Callable<Object>() {
 
                                         public Object call() throws Exception {
                                             try {
-                                                final String[] ids = new String[] { uid };
-                                                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-                                                mailAccess.connect(false);
-                                                final int unread;
-                                                try {
-                                                    mailAccess.getMessageStorage().updateMessageFlags(
-                                                        fullname,
-                                                        ids,
-                                                        MailMessage.FLAG_SEEN,
-                                                        true);
-                                                    unread = mailAccess.getUnreadMessagesCount(fullname);
-                                                } finally {
-                                                    mailAccess.close(true);
-                                                }
-                                                /*
-                                                 * Update caches
-                                                 */
-                                                cache.switchSeenFlag(accountId, fullname, ids, true, unread, session);
-                                                try {
-                                                    final int userId = session.getUserId();
-                                                    final int cid = session.getContextId();
-                                                    if (MailMessageCache.getInstance().containsFolderMessages(
-                                                        accountId,
-                                                        fullname,
-                                                        userId,
-                                                        cid)) {
-                                                        /*
-                                                         * Update cache entries
-                                                         */
-                                                        MailMessageCache.getInstance().updateCachedMessages(
-                                                            ids,
-                                                            accountId,
-                                                            fullname,
-                                                            userId,
-                                                            cid,
-                                                            new MailListField[] { MailListField.FLAGS },
-                                                            new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
-                                                    }
-                                                } catch (final OXCachingException e) {
-                                                    logger.error(e.getMessage(), e);
-                                                }
+                                                msi.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);
                                                 return null;
                                             } catch (final Exception e) {
                                                 logger.error(e.getMessage(), e);
