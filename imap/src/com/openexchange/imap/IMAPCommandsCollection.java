@@ -1312,11 +1312,11 @@ public final class IMAPCommandsCollection {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final Response[] r = p.command(FETCH_FLAGS, null);
-                final Response response = r[r.length - 1];
+                final int mlen = r.length - 1;
+                final Response response = r[mlen];
                 long[] retval = null;
                 if (response.isOK()) {
                     final Set<Long> set = new TreeSet<Long>();
-                    final int mlen = r.length - 1;
                     for (int i = 0; i < mlen; i++) {
                         if (!(r[i] instanceof FetchResponse)) {
                             continue;
