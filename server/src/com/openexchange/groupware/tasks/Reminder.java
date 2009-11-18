@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -214,16 +215,15 @@ final class Reminder {
         }
     }
 
-    static void deleteReminder(final Context ctx, final Task task) throws TaskException {
+    static void deleteReminder(Context ctx, Connection con, Task task) throws TaskException {
         final ReminderSQLInterface reminder = new ReminderHandler(ctx);
         try {
-            reminder.deleteReminder(task.getObjectID(), Types.TASK);
-        } catch (final ReminderException e) {
-            if (ReminderException.Code.NOT_FOUND.getDetailNumber() != e
-                .getDetailNumber()) {
+            reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
+        } catch (ReminderException e) {
+            if (ReminderException.Code.NOT_FOUND.getDetailNumber() != e.getDetailNumber()) {
                 throw new TaskException(e);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new TaskException(e);
         }
     }

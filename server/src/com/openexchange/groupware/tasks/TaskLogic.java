@@ -791,6 +791,7 @@ public final class TaskLogic {
         try {
             con.setAutoCommit(false);
             deleteTask(ctx, con, userId, task, lastModified);
+            informDelete(session, ctx, con, task);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -806,7 +807,6 @@ public final class TaskLogic {
             }
             DBPool.closeWriterSilent(ctx, con);
         }
-        informDelete(session, ctx, task);
     }
 
     private static Set<Folder> deleteParticipants(final Context ctx,
@@ -846,19 +846,20 @@ public final class TaskLogic {
     /**
      * Informs other systems about a deleted task.
      * @param session Session.
+     * @param ctx the context.
+     * @param con writable database connection.
      * @param task Task object.
      * @throws TaskException if an exception occurs.
      */
-    static void informDelete(final Session session, final Context ctx,
-        final Task task) throws TaskException {
-        Reminder.deleteReminder(ctx, task);
+    static void informDelete(Session session, Context ctx, Connection con, Task task) throws TaskException {
+        Reminder.deleteReminder(ctx, con, task);
         try {
             new EventClient(session).delete(task);
-        } catch (final EventException e) {
+        } catch (EventException e) {
             throw new TaskException(Code.EVENT, e);
-        } catch (final ContextException e) {
+        } catch (ContextException e) {
             throw new TaskException(Code.EVENT, e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new TaskException(Code.EVENT, e);
         }
     }
@@ -875,18 +876,13 @@ public final class TaskLogic {
      * {@link StorageType#DELETED}).
      * @throws TaskException if an exception occurs.
      */
-    public static void removeTask(final Session session, final Context ctx,
-        final Connection con, final int folderId, final int taskId,
-        final StorageType type) throws TaskException {
+    public static void removeTask(Session session, Context ctx, Connection con, int folderId, int taskId, StorageType type) throws TaskException {
         // Load the task.
         final Task task = storage.selectTask(ctx, con, taskId, type);
         task.setParentFolderID(folderId);
-        final Set<InternalParticipant> internal = partStor.selectInternal(ctx,
-            con, taskId, type);
-        final Set<ExternalParticipant> external = partStor.selectExternal(ctx,
-            con, taskId, type);
-        final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId,
-            type);
+        final Set<InternalParticipant> internal = partStor.selectInternal(ctx, con, taskId, type);
+        final Set<ExternalParticipant> external = partStor.selectExternal(ctx, con, taskId, type);
+        final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, type);
         final Set<TaskParticipant> parts = new HashSet<TaskParticipant>();
         parts.addAll(internal); parts.addAll(external);
         task.setParticipants(TaskLogic.createParticipants(parts));
@@ -894,15 +890,14 @@ public final class TaskLogic {
         // Now remove it.
         partStor.deleteInternal(ctx, con, taskId, internal, type, true);
         if (ACTIVE == type) {
-            final Set<InternalParticipant> removed = partStor.selectInternal(
-                ctx, con, taskId, REMOVED);
+            final Set<InternalParticipant> removed = partStor.selectInternal(ctx, con, taskId, REMOVED);
             partStor.deleteInternal(ctx, con, taskId, removed, REMOVED, true);
         }
         partStor.deleteExternal(ctx, con, taskId, external, type, true);
         foldStor.deleteFolder(ctx, con, taskId, folders, type);
         storage.delete(ctx, con, taskId, task.getLastModified(), type);
         if (ACTIVE == type) {
-            informDelete(session, ctx, task);
+            informDelete(session, ctx, con, task);
         }
     }
 }

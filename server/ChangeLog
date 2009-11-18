@@ -1,3 +1,7 @@
+* 2009-11-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #14889: Using the same connection for deleting reminder when a user is deleted.
+
 * 2009-11-12 - marcus.klein@open-xchange.com
 
  - Bugfix #14722: Added command so print view directly opens print dialogue.
