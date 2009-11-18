@@ -54,6 +54,7 @@ import com.openexchange.ajax.subscribe.test.NewSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.DeleteSubscriptionTest;
 import com.openexchange.ajax.subscribe.test.ListSubscriptionsTest;
 import com.openexchange.ajax.subscribe.test.RefreshSubscriptionTest;
+import com.openexchange.ajax.subscribe.test.SubscriptionFolderIconTest;
 import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -78,6 +79,7 @@ public class SubscribeTestSuite extends TestSuite {
         suite.addTestSuite(AllSubscriptionsTest.class);
         suite.addTestSuite(UpdateSubscriptionTest.class);
         suite.addTestSuite(RefreshSubscriptionTest.class);
+        suite.addTestSuite(SubscriptionFolderIconTest.class);
         return suite;
     }
 }
