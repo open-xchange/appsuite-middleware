@@ -141,7 +141,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * Invalid parameter "%1$s": %2$s
          */
-        InvalidParameterValue("Invalid parameter \"%1$s\": %2$s", Category.CODE_ERROR, 10);
+        InvalidParameterValue("Invalid parameter \"%1$s\": %2$s", Category.CODE_ERROR, 10),
+        /**
+         * Unexpected error: %1$s
+         */
+        UnexpectedError("Unexpected error: %1$s", Category.CODE_ERROR, 11);
 
         /**
          * Message of the exception.
