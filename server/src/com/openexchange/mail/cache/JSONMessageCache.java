@@ -275,7 +275,7 @@ public final class JSONMessageCache {
     }
 
     /**
-     * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
+     * Gets the JSON mail object associated with specified account ID, folder fullname and mail ID.
      * 
      * @param accountId The account ID
      * @param fullname The folder fullname
