@@ -243,7 +243,7 @@ public final class AllFetch {
                 }
                 return sb.toString();
             }
-            
+
         });
 
         private final String item;
@@ -370,11 +370,11 @@ public final class AllFetch {
                     final List<MailMessage> l = new ArrayList<MailMessage>(len);
                     if (response.isOK()) {
                         final String fullname = imapFolder.getFullName();
-                        try {
-                            for (int j = 0; j < len; j++) {
-                                final Response resp = r[j];
-                                if (resp instanceof FetchResponse) {
-                                    final FetchResponse fr = (FetchResponse) resp;
+                        for (int j = 0; j < len; j++) {
+                            final Response resp = r[j];
+                            if (resp instanceof FetchResponse) {
+                                final FetchResponse fr = (FetchResponse) resp;
+                                try {
                                     final MailMessage m = new IDMailMessage(null, fullname);
                                     for (final LowCostItem lowCostItem : items) {
                                         final Item item =
@@ -386,17 +386,19 @@ public final class AllFetch {
                                         }
                                     }
                                     l.add(m);
-                                    r[j] = null;
+                                } catch (final ProtocolException e) {
+                                    if (tracerState != null) {
+                                        final StringBuilder sb = sbout.getTrace();
+                                        sb.insert(0, "\nIMAP trace:\n");
+                                        sb.insert(0, e.getMessage());
+                                        sb.insert(0, "Detected invalid FETCH response which will be ignored. Error:\n");
+                                        logger.warn(sb.toString(), e);
+                                    } else {
+                                        logger.warn(e.getMessage(), e);
+                                    }
                                 }
+                                r[j] = null;
                             }
-                        } catch (final ProtocolException e) {
-                            if (tracerState != null) {
-                                final StringBuilder sb = sbout.getTrace();
-                                sb.insert(0, "\nIMAP trace:\n");
-                                sb.insert(0, e.getMessage());
-                                logger.error(sb.toString());
-                            }
-                            throw e;
                         }
                         p.notifyResponseHandlers(r);
                     } else if (response.isBAD()) {

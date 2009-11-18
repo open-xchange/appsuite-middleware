@@ -1,6 +1,7 @@
 * 2009-11-18 - thorben.betten@open-xchange.com
 
  - Bugfix #14891: Using proper login to check IMAP authentication
+ - Bugfix #14336: Ignoring invalid FETCH response line
 
 * 2009-11-18 - marcus.klein@open-xchange.com
 
