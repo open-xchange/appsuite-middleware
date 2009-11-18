@@ -1918,26 +1918,28 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public void updateMessageFlags(final String folder, final String[] msgUID, final int flagBits, final boolean flagVal) throws MailException {
+    public void updateMessageFlags(final String folder, final String[] mailIDs, final int flagBits, final boolean flagVal) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
-        mailAccess.getMessageStorage().updateMessageFlags(fullname, msgUID, flagBits, flagVal);
+        mailAccess.getMessageStorage().updateMessageFlags(fullname, mailIDs, flagBits, flagVal);
         /*
          * Update caches
          */
         {
             final JSONMessageCache jsonMessageCache = JSONMessageCache.getInstance();
             if (null != jsonMessageCache) {
-                final List<String> updateIds = new ArrayList<String>(msgUID.length);
-                for (int i = 0; i < msgUID.length; i++) {
-                    final String uid = msgUID[i];
+                final List<String> updateIds = new ArrayList<String>(mailIDs.length);
+                for (int i = 0; i < mailIDs.length; i++) {
+                    final String uid = mailIDs[i];
                     if (jsonMessageCache.containsKey(accountId, fullname, uid, session)) {
                         updateIds.add(uid);
                     }
                 }
                 if (!updateIds.isEmpty()) {
+                    // toArray
+                    final String[] updateIdsArr = updateIds.toArray(new String[updateIds.size()]);
                     // Optimize for set to seen/unseen
                     int flags = flagBits;
                     if ((flags & MailMessage.FLAG_SEEN) > 0) {
@@ -1945,9 +1947,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         flags = (flags & ~MailMessage.FLAG_SEEN);
                         // Invoke special method for \Seen flag
                         final int unread = mailAccess.getUnreadMessagesCount(fullname);
-                        jsonMessageCache.switchSeenFlag(accountId, fullname, msgUID, flagVal, unread, session);
+                        jsonMessageCache.switchSeenFlag(accountId, fullname, updateIdsArr, flagVal, unread, session);
                     }
-                    jsonMessageCache.updateFlags(accountId, fullname, msgUID, flags, flagVal, session);
+                    if (flags > 0) { // Any flags left after \Seen removed?
+                        jsonMessageCache.updateFlags(accountId, fullname, updateIdsArr, flags, flagVal, session);
+                    }
                 }
             }
         }
@@ -1957,7 +1961,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             try {
                 if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
-                    MailMessageCache.getInstance().removeMessages(msgUID, accountId, fullname, session.getUserId(), contextId);
+                    MailMessageCache.getInstance().removeMessages(mailIDs, accountId, fullname, session.getUserId(), contextId);
 
                 }
             } catch (final OXCachingException e) {
@@ -1970,7 +1974,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      * Update cache entries
                      */
                     MailMessageCache.getInstance().updateCachedMessages(
-                        msgUID,
+                        mailIDs,
                         accountId,
                         fullname,
                         session.getUserId(),
