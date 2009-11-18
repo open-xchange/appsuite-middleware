@@ -70,12 +70,14 @@ import com.openexchange.ajax.folder.actions.RootRequest;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.Arrays;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -87,11 +89,15 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class FolderTestManager extends TestCase {
 
+    private AbstractAJAXResponse lastResponse;
+    
     private List<FolderObject> createdItems;
 
     private AJAXClient client;
 
     private boolean failOnError;
+
+    private boolean ignoreMailFolders = true;
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
@@ -109,7 +115,14 @@ public class FolderTestManager extends TestCase {
         this.ignoreMailFolders = ignoreMailFolders;
     }
 
-    private boolean ignoreMailFolders = true;
+    public void setLastResponse(AbstractAJAXResponse lastResponse) {
+        this.lastResponse = lastResponse;
+    }
+
+    public AbstractAJAXResponse getLastResponse() {
+        return lastResponse;
+    }
+
 
     public FolderTestManager(AJAXClient client) {
         this.client = client;
@@ -128,7 +141,7 @@ public class FolderTestManager extends TestCase {
         } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
-
+        setLastResponse(response);
         response.fillObject(folderToCreate);
         createdItems.add(folderToCreate);
         return folderToCreate;
@@ -149,7 +162,7 @@ public class FolderTestManager extends TestCase {
     public FolderObject updateFolderOnServer(FolderObject folder) {
         UpdateRequest request = new UpdateRequest(folder);
         try {
-            client.execute(request);
+            setLastResponse(client.execute(request));
             remember(folder);
         } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest");
@@ -163,7 +176,7 @@ public class FolderTestManager extends TestCase {
      */
     public void deleteFolderOnServer(FolderObject folderToDelete) throws AjaxException, IOException, SAXException, JSONException {
         DeleteRequest request = new DeleteRequest(folderToDelete);
-        client.execute(request);
+        setLastResponse(client.execute(request));
         removeFolderFromCleanupList(folderToDelete);
     }
 
@@ -222,6 +235,23 @@ public class FolderTestManager extends TestCase {
             return getFolderFromServer(folder.getObjectID(), failOnError);
         }
     }
+    
+    public FolderObject getFolderFromServer(int folderID, boolean failOnError, int[] additionalColumns) {
+        boolean oldValue = getFailOnError();
+        setFailOnError(failOnError);
+        FolderObject returnedFolder = null;
+        GetRequest request = new GetRequest(folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
+        GetResponse response = null;
+        try {
+            response = (GetResponse) client.execute(request);
+            setLastResponse(response);
+            returnedFolder = response.getFolder();
+            setFailOnError(oldValue);
+        } catch (Exception e) {
+            doExceptionHandling(e, "GetRequest for folder with id " + folderID);
+        }
+        return returnedFolder;
+    }
 
     public FolderObject getFolderFromServer(String name) {
         return getFolderFromServer(name, true);
@@ -236,6 +266,7 @@ public class FolderTestManager extends TestCase {
         GetResponse response = null;
         try {
             response = (GetResponse) client.execute(request);
+            setLastResponse(response);
             returnedFolder = response.getFolder();
         } catch (Exception e) {
             doExceptionHandling(e, "GetRequest");
@@ -254,6 +285,7 @@ public class FolderTestManager extends TestCase {
         GetResponse response = null;
         try {
             response = (GetResponse) client.execute(request);
+            setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
         } catch (Exception e) {
@@ -287,15 +319,19 @@ public class FolderTestManager extends TestCase {
      * get all folders in one parent folder via the HTTP-API (List-Request)
      */
     public FolderObject[] listFoldersOnServer(int parentFolderId) {
+        return listFoldersOnServer(parentFolderId, null);
+    }
+
+    public FolderObject[] listFoldersOnServer(int parentFolderId, int[] additionalFields) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        ListRequest request = new ListRequest(Integer.toString(parentFolderId), new int[] { FolderObject.OBJECT_ID }, true);
+        ListRequest request = new ListRequest(Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), true);
         try {
             ListResponse response = client.execute(request);
             Iterator<FolderObject> iterator = response.getFolder();
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
             }
+            setLastResponse(response);
         } catch (Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
@@ -304,7 +340,7 @@ public class FolderTestManager extends TestCase {
         allFolders.copyInto(folderArray);
         return folderArray;
     }
-
+    
     /**
      * get all folders in one parent folder via the HTTP-API
      */
@@ -317,6 +353,7 @@ public class FolderTestManager extends TestCase {
         ListRequest request = new ListRequest(folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, true);
         try {
             ListResponse response = client.execute(request);
+            setLastResponse(response);
             Iterator<FolderObject> iterator = response.getFolder();
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
@@ -329,13 +366,14 @@ public class FolderTestManager extends TestCase {
         allFolders.copyInto(folderArray);
         return folderArray;
     }
-
+    
     public FolderObject[] listRootFoldersOnServer() {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
         RootRequest request = new RootRequest(new int[] { FolderObject.OBJECT_ID }, ignoreMailFolders);
         try {
             ListResponse response = client.execute(request);
+            setLastResponse(response);
             Iterator<FolderObject> iterator = response.getFolder();
             while (iterator.hasNext()) {
                 allFolders.add(iterator.next());
@@ -353,8 +391,12 @@ public class FolderTestManager extends TestCase {
      * Get folders in a parent folder that were updated since a specific date via the HTTP-API
      */
     public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified) {
+        return getUpdatedFoldersOnServer(folderId, lastModified, null);
+    }
+    
+    public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified, int[] additionalFields) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        UpdatesRequest request = new UpdatesRequest(folderId, new int[] { FolderObject.OBJECT_ID }, -1, null, lastModified);
+        UpdatesRequest request = new UpdatesRequest(folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
         try {
             CommonUpdatesResponse response = (CommonUpdatesResponse) client.execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
@@ -364,6 +406,7 @@ public class FolderTestManager extends TestCase {
                 fo = this.getFolderFromServer(tempArray.getInt(0), true);
                 allFolders.add(fo);
             }
+            setLastResponse(response);
         } catch (Exception e) {
             doExceptionHandling(e, "AllRequest");
         }
@@ -400,6 +443,7 @@ public class FolderTestManager extends TestCase {
                 FolderObject tempFolder = getFolderFromServer(tempFolderId);
                 allFolders.add(tempFolder);
             }
+            setLastResponse(response);
         } catch (Exception e) {
             doExceptionHandling(e, "AllRequest");
         }
