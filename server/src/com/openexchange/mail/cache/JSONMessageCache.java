@@ -275,13 +275,13 @@ public final class JSONMessageCache {
     }
 
     /**
-     * Gets the JSON mail object associated with specified account ID, folder fullname and mail ID.
+     * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
      * 
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
      * @param session The session providing user and context information
-     * @return The JSON mail object or <code>null</code>
+     * @return The <b>cloned</b> JSON mail object or <code>null</code>
      * @throws MailException If JSON mail object cannot be returned
      */
     public JSONObject get(final int accountId, final String fullname, final String id, final Session session) throws MailException {

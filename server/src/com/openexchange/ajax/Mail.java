@@ -1360,7 +1360,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                     threadPool.submit(ThreadPools.task(seenCallable));
                                 }
                                 /*
-                                 * Switch \Seen flag in JSON mail object
+                                 * Set \Seen flag in JSON mail object
                                  */
                                 rawJSONMailObject.put(flagsKey, (flags | MailMessage.FLAG_SEEN));
                                 /*
