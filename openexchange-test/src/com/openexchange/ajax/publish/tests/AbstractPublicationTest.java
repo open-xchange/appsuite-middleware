@@ -49,13 +49,6 @@
 
 package com.openexchange.ajax.publish.tests;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 
