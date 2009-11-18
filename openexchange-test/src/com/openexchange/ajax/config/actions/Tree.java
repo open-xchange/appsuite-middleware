@@ -430,6 +430,10 @@ public enum Tree {
     AvailableModules("/availableModules"),
 
     MailFilter("/modules/mailfilter"),
+    
+    OXUpdater("/modules/com.openexchange.oxupdater"),
+    
+    ActiveSync("/modules/com.openexchange.usm.eas/module"),
     ;
 
     private final String path;

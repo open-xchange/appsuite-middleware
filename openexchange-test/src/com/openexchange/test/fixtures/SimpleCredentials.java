@@ -118,6 +118,14 @@ public class SimpleCredentials implements Cloneable {
     public boolean hasFullGroupware(){
         return getConfig().getBool(Tree.InfostoreEnabled);
     }
+    
+    public boolean hasActiveSync(){
+        return getConfig().getBool(Tree.ActiveSync);
+    }
+    
+    public boolean hasOXUpdater(){
+        return getConfig().getBool(Tree.OXUpdater);
+    }
 
     public TimeZone getTimeZone() {
     	return TimeZone.getTimeZone(getConfig().getString(Tree.TimeZone));
