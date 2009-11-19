@@ -259,6 +259,9 @@ public class MailAccountParser extends DataParser {
         if (json.hasAndNotNull(MailAccountFields.POP3_PATH)) {
             props.put("pop3.path", json.getString(MailAccountFields.POP3_PATH).trim());
             attributes.add(Attribute.POP3_PATH_LITERAL);
+        } else if (account.getMailProtocol().toLowerCase().startsWith("pop")) {
+            props.put("pop3.path", "mailaccount");
+            attributes.add(Attribute.POP3_PATH_LITERAL);
         }
         account.setProperties(props);
         return attributes;
