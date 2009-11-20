@@ -57,14 +57,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -73,7 +67,6 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
-import com.openexchange.voipnow.json.http.TrustAllAdapter;
 
 /**
  * {@link NewCallAction} - Maps the action to a <tt>newcall</tt> action.
@@ -82,22 +75,12 @@ import com.openexchange.voipnow.json.http.TrustAllAdapter;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NewCallAction extends AbstractVoipNowAction {
-
-    /**
-     * The HTTPS identifier constant.
-     */
-    private static final String HTTPS = "https";
+public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
 
     /**
      * The call API request to perform.
      */
     private static final String REQUEST_NEWCALL = "request=newcall";
-
-    /**
-     * The HTTP protocol constant.
-     */
-    private static final Protocol PROTOCOL_HTTP = Protocol.getProtocol("http");
 
     /**
      * The <tt>call</tt> action string.
@@ -135,81 +118,28 @@ public final class NewCallAction extends AbstractVoipNowAction {
                 }
                 callerNumber = set.iterator().next();
             }
+            final boolean xml = false;
             final VoipNowServerSetting setting = getVoipNowServerSetting(session);
             /*
-             * Perform a HTTP GET request using HttpClient
+             * Compose and apply query string without starting '?' character
              */
-            final HttpClient client = new HttpClient();
-            {
-                final int httpTimeout = 3000;
-                client.getParams().setSoTimeout(httpTimeout);
-                client.getParams().setIntParameter("http.connection.timeout", httpTimeout);
-            }
-            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-            /*
-             * Create host configuration or URI
-             */
-            final String host = setting.getHost();
-            final HostConfiguration hostConfiguration;
-            if (setting.isSecure()) {
-                int port = setting.getPort();
-                if (port == -1) {
-                    port = 443;
-                }
-                /*
-                 * Own HTTPS host configuration and relative URI
-                 */
-                final Protocol httpsProtocol = new Protocol(HTTPS, ((ProtocolSocketFactory) new TrustAllAdapter()), port);
-                hostConfiguration = new HostConfiguration();
-                hostConfiguration.setHost(host, port, httpsProtocol);
-            } else {
-                int port = setting.getPort();
-                if (port == -1) {
-                    port = 80;
-                }
-                /*
-                 * HTTP host configuration and relative URI
-                 */
-                hostConfiguration = new HostConfiguration();
-                hostConfiguration.setHost(host, port, PROTOCOL_HTTP);
+            final StringBuilder builder = new StringBuilder(256);
+            builder.append(REQUEST_NEWCALL);
+            builder.append('&').append("user=").append(ActionUtility.urlEncode("admin"/* session.getLogin() */)); // TODO: Full login?
+            // builder.append('&').append("shapass=").append(ActionUtility.SHA1("oxSecure"/* session.getLogin() */));
+            builder.append('&').append("pass=").append("oxSecure");
+            builder.append('&').append("phone=").append(receiverNumber);
+            builder.append('&').append("callerid=").append(ActionUtility.urlEncode(receiverDisplayName));
+            builder.append('&').append("timeout=").append(timeout);
+            builder.append('&').append("from=").append(callerNumber);
+            if (xml) {
+                builder.append('&').append("interactive=xml");
             }
             /*
              * Perform GET request
              */
-            final GetMethod getMethod = new GetMethod(CALLAPI_PATH);
+            final GetMethod getMethod = configure(setting, builder.toString());
             try {
-                getMethod.getParams().setSoTimeout(1000);
-                /*
-                 * Decide whether to request XML version or HTML version
-                 */
-                final boolean xml = false;
-                /*
-                 * Compose and apply query string without starting '?' character
-                 */
-                final StringBuilder builder = new StringBuilder(256);
-                builder.append(REQUEST_NEWCALL);
-                builder.append('&').append("user=").append(ActionUtility.urlEncode("admin"/* session.getLogin() */)); // TODO: Full login?
-                // builder.append('&').append("shapass=").append(ActionUtility.SHA1("oxSecure"/* session.getLogin() */));
-                builder.append('&').append("pass=").append("oxSecure");
-                builder.append('&').append("phone=").append(receiverNumber);
-                builder.append('&').append("callerid=").append(ActionUtility.urlEncode(receiverDisplayName));
-                builder.append('&').append("timeout=").append(timeout);
-                builder.append('&').append("from=").append(callerNumber);
-                if (xml) {
-                    builder.append('&').append("interactive=xml");
-                }
-                getMethod.setQueryString(builder.toString());
-                /*
-                 * Fire request
-                 */
-                final int responseCode = client.executeMethod(hostConfiguration, getMethod);
-                /*
-                 * Check response code
-                 */
-                if (200 != responseCode) {
-                    // GET request failed
-                    throw VoipNowExceptionCodes.HTTP_REQUEST_FAILED.create(host, getMethod.getStatusLine().toString());
-                }
                 return xml ? parseXML(getMethod) : parseHTML(getMethod);
             } finally {
                 getMethod.releaseConnection();
@@ -221,9 +151,9 @@ public final class NewCallAction extends AbstractVoipNowAction {
         // throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
         // }
         catch (final HttpException e) {
-            throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
+            throw VoipNowExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
-            throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
+            throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -297,6 +227,21 @@ public final class NewCallAction extends AbstractVoipNowAction {
                 org.apache.commons.logging.LogFactory.getLog(NewCallAction.class).error(e.getMessage(), e);
             }
         }
+    }
+
+    @Override
+    protected String getPath() {
+        return "/callapi/callapi.php";
+    }
+
+    @Override
+    protected int getTimeout() {
+        return 3000;
+    }
+
+    @Override
+    protected GetMethod newHttpMethod() {
+        return new GetMethod();
     }
 
 }

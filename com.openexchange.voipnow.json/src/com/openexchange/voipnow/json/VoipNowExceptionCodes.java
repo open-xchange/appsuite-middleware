@@ -83,8 +83,20 @@ public enum VoipNowExceptionCodes implements OXErrorMessage {
     /**
      * VoipNow request failed. Error code: %1$s. Error message: %2$s
      */
-    VOIPNOW_REQUEST_FAILED(VoipNowExceptionMessages.VOIPNOW_REQUEST_FAILED_MSG, Category.CODE_ERROR, 6);
-    
+    VOIPNOW_REQUEST_FAILED(VoipNowExceptionMessages.VOIPNOW_REQUEST_FAILED_MSG, Category.CODE_ERROR, 6),
+    /**
+     * A remote error occurred: %1$s
+     */
+    REMOTE_ERROR(VoipNowExceptionMessages.REMOTE_ERROR_MSG, Category.CODE_ERROR, 7),
+    /**
+     * A SOAP fault occurred: %1$s
+     */
+    SOAP_FAULT(VoipNowExceptionMessages.SOAP_FAULT_MSG, Category.CODE_ERROR, 8),
+    /**
+     * A HTTP error occurred: %1$s
+     */
+    HTTP_ERROR(VoipNowExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 9);
+
     private final Category category;
 
     private final int detailNumber;

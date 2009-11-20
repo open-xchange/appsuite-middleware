@@ -49,6 +49,8 @@
 
 package com.openexchange.voipnow.json.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -58,12 +60,15 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
 import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.exception.VoipNowExceptionFactory;
 import com.openexchange.voipnow.json.multiple.VoipNowMultipleHandlerFactory;
+import com.openexchange.voipnow.json.preferences.VoipNowEnabled;
+import com.openexchange.voipnow.json.preferences.VoipNowFaxAddress;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
@@ -75,7 +80,7 @@ public class Activator implements BundleActivator {
 
     private ComponentRegistration componentRegistration;
 
-    private ServiceRegistration voipnowMultipleService;
+    private List<ServiceRegistration> serviceRegistrations;
 
     private Stack<ServiceTracker> trackers;
 
@@ -100,8 +105,10 @@ public class Activator implements BundleActivator {
             /*
              * Register user multiple service
              */
-            voipnowMultipleService =
-                context.registerService(MultipleHandlerFactoryService.class.getName(), new VoipNowMultipleHandlerFactory(), null);
+            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+            serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new VoipNowMultipleHandlerFactory(), null));
+            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowEnabled(), null));
+            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowFaxAddress(), null));
             /*
              * User service tracker
              */
@@ -143,15 +150,24 @@ public class Activator implements BundleActivator {
 
     public void stop(final BundleContext context) throws Exception {
         try {
+            /*
+             * Close trackers
+             */
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.pop().close();
                 }
                 trackers = null;
             }
-            if (null != voipnowMultipleService) {
-                voipnowMultipleService.unregister();
-                voipnowMultipleService = null;
+            /*
+             * Unregister all
+             */
+            if (null != serviceRegistrations) {
+                for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
+                    serviceRegistration.unregister();
+                }
+                serviceRegistrations.clear();
+                serviceRegistrations = null;
             }
             /*
              * Unregister component

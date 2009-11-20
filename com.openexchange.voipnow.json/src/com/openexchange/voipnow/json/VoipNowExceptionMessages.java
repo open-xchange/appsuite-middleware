@@ -76,6 +76,15 @@ public final class VoipNowExceptionMessages implements LocalizableStrings {
     // VoipNow request failed. Error code: %1$s. Error message: %2$s
     public static final String VOIPNOW_REQUEST_FAILED_MSG = "VoipNow request failed. Error code: %1$s. Error message: %2$s";
 
+    // A remote error occurred: %1$s
+    public static final String REMOTE_ERROR_MSG = "A remote error occurred: %1$s";
+
+    // A SOAP fault occurred: %1$s
+    public static final String SOAP_FAULT_MSG = "A SOAP fault occurred: %1$s";
+
+    // A HTTP error occurred: %1$s
+    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
+
     /**
      * Initializes a new {@link VoipNowExceptionMessages}.
      */

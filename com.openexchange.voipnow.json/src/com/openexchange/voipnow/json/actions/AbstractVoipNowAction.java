@@ -54,8 +54,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.voipnow.json.VoipNowException;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
  * {@link AbstractVoipNowAction} - An abstract VoipNow action.
@@ -65,26 +63,15 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
-     * The path to VoipNow server's call API: <code><i>/callapi/callapi.php</i></code>.
+     * The HTTPS identifier constant.
      */
-    protected static final String CALLAPI_PATH = "/callapi/callapi.php";
+    protected static final String HTTPS = "https";
 
     /**
      * Initializes a new {@link AbstractVoipNowAction}.
      */
     protected AbstractVoipNowAction() {
         super();
-    }
-
-    /**
-     * Creates a new VoipNow exception for a failed request to VoipNow server.
-     * 
-     * @param code The error code (and <code>int</code> greater than zero)
-     * @param message The error message or <code>null</code> if none available
-     * @return A new VoipNow exception for failed request
-     */
-    protected static VoipNowException newRequestFailedException(final int code, final String message) {
-        return VoipNowExceptionCodes.VOIPNOW_REQUEST_FAILED.create(Integer.valueOf(code), message == null ? "" : message);
     }
 
     /**
