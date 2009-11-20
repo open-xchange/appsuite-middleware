@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
+import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
@@ -124,7 +126,7 @@ public class UserModuleAccess implements Serializable {
 
     private boolean USM = true;
 
-    private boolean GlobalAddressBook = true;
+    private boolean GlobalAddressBookDisabled = false;
 
     private boolean PublicFolderEditable = true;
 
@@ -135,49 +137,6 @@ public class UserModuleAccess implements Serializable {
         super();
     }
 
-    /**
-     * @param calendar
-     * @param contacts
-     * @param delegateTask
-     * @param editPublicFolders
-     * @param forum
-     * @param ical
-     * @param infostore
-     * @param pinboardWrite
-     * @param projects
-     * @param readCreateSharedFolders
-     * @param rssBookmarks
-     * @param rssPortal
-     * @param syncml
-     * @param tasks
-     * @param vcard
-     * @param webdav
-     * @param webdavXml
-     * @param webmail
-     * @deprecated
-     */
-    @Deprecated
-    public UserModuleAccess(final boolean calendar, final boolean contacts, final boolean delegateTask, final boolean editPublicFolders, final boolean forum, final boolean ical, final boolean infostore, final boolean pinboardWrite, final boolean projects, final boolean readCreateSharedFolders, final boolean rssBookmarks, final boolean rssPortal, final boolean syncml, final boolean tasks, final boolean vcard, final boolean webdav, final boolean webdavXml, final boolean webmail) {
-        super();
-        this.calendar = calendar;
-        this.contacts = contacts;
-        this.delegateTask = delegateTask;
-        this.editPublicFolders = editPublicFolders;
-        this.forum = forum;
-        this.ical = ical;
-        this.infostore = infostore;
-        this.PinboardWrite = pinboardWrite;
-        this.Projects = projects;
-        this.readCreateSharedFolders = readCreateSharedFolders;
-        this.RssBookmarks = rssBookmarks;
-        this.RssPortal = rssPortal;
-        this.Syncml = syncml;
-        this.Tasks = tasks;
-        this.Vcard = vcard;
-        this.Webdav = webdav;
-        this.WebdavXml = webdavXml;
-        this.Webmail = webmail;
-    }
 
     /**
      * Enable all modules
@@ -210,7 +169,7 @@ public class UserModuleAccess implements Serializable {
         this.Publication = true;
         this.ActiveSync = true;
         this.USM = true;
-        this.GlobalAddressBook = true;
+        this.GlobalAddressBookDisabled = false;
         this.PublicFolderEditable = true;
     }
 
@@ -245,7 +204,7 @@ public class UserModuleAccess implements Serializable {
         this.Publication = false;
         this.ActiveSync = false;
         this.USM = false;
-        this.GlobalAddressBook = false;
+        this.GlobalAddressBookDisabled = true;
         this.PublicFolderEditable = false;
     }
 
@@ -567,12 +526,12 @@ public class UserModuleAccess implements Serializable {
         this.USM = val;
     }
 
-    public boolean isGlobalAddressBook() {
-        return GlobalAddressBook;
+    public boolean isGlobalAddressBookDisabled() {
+        return GlobalAddressBookDisabled;
     }
 
-    public void setGlobalAddressBook(final boolean val) {
-        this.GlobalAddressBook = val;
+    public void setGlobalAddressBookDisabled(final boolean val) {
+        this.GlobalAddressBookDisabled = val;
     }
 
     public boolean isPublicFolderEditable() {

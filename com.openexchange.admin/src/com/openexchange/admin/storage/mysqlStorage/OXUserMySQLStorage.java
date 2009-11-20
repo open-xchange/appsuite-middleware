@@ -2007,7 +2007,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setActiveSync(user.hasActiveSync());
             acc.setUSM(user.hasUSM());
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
-            acc.setGlobalAddressBook(adminHelper.isGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, read_ox_con));
+            acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(ctx.getId().intValue(), user_id, read_ox_con));
 
             return acc;
@@ -2331,7 +2331,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setUSM(access.isUSM());
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
-            adminHelper.setGlobalAddressBookEnabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBook(), write_ox_con);
+            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBookDisabled(), write_ox_con);
             adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), user_id, write_ox_con);
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
