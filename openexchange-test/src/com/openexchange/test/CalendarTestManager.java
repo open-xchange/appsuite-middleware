@@ -50,9 +50,12 @@
 package com.openexchange.test;
 
 import static junit.framework.Assert.fail;
+import static com.openexchange.java.Autoboxing.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -63,6 +66,7 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
@@ -71,15 +75,18 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.api.OXConflictException;
+import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link CalendarTestManager}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - basic design
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - extension
  */
 public class CalendarTestManager {
 
@@ -89,8 +96,14 @@ public class CalendarTestManager {
 
     private TimeZone timezone;
 
+    private AbstractAJAXResponse lastResponse;
+
+    private boolean failOnError;
+
+    private Exception lastException;
+
     public CalendarTestManager(AJAXClient client) {
-        this.client = client;
+        this.setClient(client);
 
         try {
             timezone = client.getValues().getTimeZone();
@@ -105,29 +118,43 @@ public class CalendarTestManager {
         }
     }
 
-    public void insertAppointmentOnServer(Appointment appointment) {
-        InsertRequest insertRequest = new InsertRequest(appointment, timezone);
-        AppointmentInsertResponse insertResponse = execute(insertRequest);
-
-        createdEntities.add(appointment);
-        insertResponse.fillAppointment(appointment);
+    public void setClient(AJAXClient client) {
+        this.client = client;
     }
 
-    public void deleteAppointmentOnServer(Appointment appointment, boolean failOnError) {
-        createdEntities.remove(appointment);
-        DeleteRequest deleteRequest = new DeleteRequest(
-            appointment.getObjectID(),
-            appointment.getParentFolderID(),
-            new Date(Long.MAX_VALUE),
-            failOnError);
-        execute(deleteRequest);
+    public AJAXClient getClient() {
+        return client;
     }
 
-    public void deleteAppointmentOnServer(Appointment appointment) {
-        createdEntities.remove(appointment); //TODO: Does this remove the right object or does equals() suck?
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        DeleteRequest deleteRequest = new DeleteRequest(appointment);
-        execute(deleteRequest);
+    public void setLastResponse(AbstractAJAXResponse lastResponse) {
+        this.lastResponse = lastResponse;
+    }
+
+    public AbstractAJAXResponse getLastResponse() {
+        return lastResponse;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean getFailOnError() {
+        return failOnError;
+    }
+
+    public void setLastException(Exception lastException) {
+        this.lastException = lastException;
+    }
+
+    public Exception getLastException() {
+        return lastException;
+    }
+    public boolean hasLastException(){
+        return lastException != null;
+    }
+
+    public int getPrivateFolder() throws AjaxException, IOException, SAXException, JSONException {
+        return getClient().getValues().getPrivateAppointmentFolder();
     }
 
     public void cleanUp() {
@@ -138,86 +165,99 @@ public class CalendarTestManager {
 
     private <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
         try {
-            return client.execute(request);
+            return getClient().execute(request);
         } catch (AjaxException e) {
-            fail("AjaxException during task creation: " + e.getLocalizedMessage());
+            setLastException(e);
+            if (failOnError)
+                fail("AjaxException during task creation: " + e.getLocalizedMessage());
         } catch (IOException e) {
-            fail("IOException during task creation: " + e.getLocalizedMessage());
+            setLastException(e);
+            if (failOnError)
+                fail("IOException during task creation: " + e.getLocalizedMessage());
         } catch (SAXException e) {
-            fail("SAXException during task creation: " + e.getLocalizedMessage());
+            setLastException(e);
+            if (failOnError)
+                fail("SAXException during task creation: " + e.getLocalizedMessage());
         } catch (JSONException e) {
-            fail("JsonException during task creation: " + e.getLocalizedMessage());
+            setLastException(e);
+            if (failOnError)
+                fail("JsonException during task creation: " + e.getLocalizedMessage());
         }
         return null;
     }
 
-    public int getPrivateFolder() throws AjaxException, IOException, SAXException, JSONException {
-        return client.getValues().getPrivateAppointmentFolder();
+    /*
+     * Requests
+     */
+    public Appointment insertAppointmentOnServer(Appointment appointment) {
+        InsertRequest insertRequest = new InsertRequest(appointment, timezone);
+        AppointmentInsertResponse insertResponse = execute(insertRequest);
+        setLastResponse(insertResponse);
+        createdEntities.add(appointment);
+        insertResponse.fillAppointment(appointment);
+        return appointment;
     }
 
     public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
         GetRequest get = new GetRequest(parentFolderID, objectID);
         GetResponse response = execute(get);
-
+        setLastResponse(response);
         return response.getAppointment(timezone);
     }
 
     public Appointment getAppointmentFromServer(Appointment appointment) throws OXException, JSONException {
         GetRequest get = new GetRequest(appointment);
         GetResponse response = execute(get);
-
+        setLastResponse(response);
         return response.getAppointment(timezone);
     }
-    
+
     public Appointment getAppointmentFromServer(Appointment appointment, boolean failOnError) throws OXException, JSONException {
         try {
             GetRequest get = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
-            GetResponse response = execute(get);        
+            GetResponse response = execute(get);
+            setLastResponse(response);
             return response.getAppointment(timezone);
-        } catch (OXException e){
-            if(failOnError )
+        } catch (OXException e) {
+            if (failOnError)
                 throw e;
             return null;
         }
     }
-    
+
     public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean failOnError) throws OXException, JSONException {
         try {
             GetRequest get = new GetRequest(parentFolderID, objectID, failOnError);
-            GetResponse response = execute(get);        
+            GetResponse response = execute(get);
+            setLastResponse(response);
             return response.getAppointment(timezone);
-        } catch (OXException e){
-            if(failOnError )
+        } catch (OXException e) {
+            if (failOnError)
                 throw e;
             return null;
         }
     }
-    
-    public List<Appointment> getUpdates(final int folderId,final Date timestamp, final boolean recurrenceMaster){
+
+    public List<Appointment> getUpdates(final int folderId, final Date timestamp, final boolean recurrenceMaster) {
         return getUpdates(folderId, Appointment.ALL_COLUMNS, timestamp, recurrenceMaster);
     }
-    
-    public List<Appointment> getUpdates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster){
+
+    public List<Appointment> getUpdates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
         UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster);
         UpdatesResponse resp = execute(req);
+        setLastResponse(resp);
         try {
             return resp.getAppointments(timezone);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-    public Appointment createIdentifyingCopy(Appointment appointment) {
-        Appointment copy = new Appointment();
-        copy.setObjectID(appointment.getObjectID());
-        copy.setParentFolderID(appointment.getParentFolderID());
-        copy.setLastModified(appointment.getLastModified());
-        return copy;
-    }
 
     public void updateAppointmentOnServer(Appointment updatedAppointment) {
-        UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone);
+        UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone, getFailOnError());
         UpdateResponse updateResponse = execute(updateRequest);
+        setLastResponse(updateResponse);
         updatedAppointment.setLastModified(updateResponse.getTimestamp());
         for (Appointment createdAppoinment : createdEntities) {
             if (createdAppoinment.getObjectID() == updatedAppointment.getObjectID()) {
@@ -227,14 +267,35 @@ public class CalendarTestManager {
         }
     }
 
-    /**
-     * @param parentFolderID
-     * @return
-     */
+    public List<Appointment> list(ListIDs foldersAndIds, int[] columns) {
+        ListRequest req = new ListRequest(foldersAndIds, addNecessaryColumns(columns), getFailOnError());
+        CommonListResponse resp = execute(req);
+        List<Appointment> list = new LinkedList<Appointment>();
+        int[] cols = resp.getColumns();
+        Object[][] arr = resp.getArray();
+        for(Object[] values : arr){
+            Appointment temp = new Appointment();
+            list.add(temp);
+            for(int i = 0; i < cols.length; i++)
+                temp.set(cols[i], values[i]);
+        }
+        return list;
+
+    }
+
+    private int[] addNecessaryColumns(int[] columns) {
+        List<Integer> cols = new LinkedList<Integer>(Arrays.asList(i2I(columns)));
+        if(!cols.contains(I(CommonObject.FOLDER_ID)))
+            cols.add(I(CommonObject.FOLDER_ID));
+        if(!cols.contains(I(CommonObject.OBJECT_ID)))
+            cols.add(I(CommonObject.OBJECT_ID));
+        return I2i(cols);
+    }
+
     public Appointment[] getAllAppointmentsOnServer(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
-
+        setLastResponse(response);
         List<Appointment> appointments = new ArrayList<Appointment>();
 
         for (Object[] row : response.getArray()) {
@@ -260,6 +321,34 @@ public class CalendarTestManager {
         }
 
         return appointments.toArray(new Appointment[appointments.size()]);
+    }
+
+    public void deleteAppointmentOnServer(Appointment appointment, boolean failOnError) {
+        createdEntities.remove(appointment);
+        DeleteRequest deleteRequest = new DeleteRequest(
+            appointment.getObjectID(),
+            appointment.getParentFolderID(),
+            new Date(Long.MAX_VALUE),
+            failOnError);
+        setLastResponse(execute(deleteRequest));
+    }
+
+    public void deleteAppointmentOnServer(Appointment appointment) {
+        createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
+        appointment.setLastModified(new Date(Long.MAX_VALUE));
+        DeleteRequest deleteRequest = new DeleteRequest(appointment);
+        setLastResponse(execute(deleteRequest));
+    }
+
+    /*
+     * Helper methods
+     */
+    public Appointment createIdentifyingCopy(Appointment appointment) {
+        Appointment copy = new Appointment();
+        copy.setObjectID(appointment.getObjectID());
+        copy.setParentFolderID(appointment.getParentFolderID());
+        copy.setLastModified(appointment.getLastModified());
+        return copy;
     }
 
     private boolean tryInteger(Appointment app, int field, Long value) {
