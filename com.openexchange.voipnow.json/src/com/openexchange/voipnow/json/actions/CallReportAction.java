@@ -58,6 +58,8 @@ import com._4psa.headerdata_xsd._2_0_3.UserCredentials;
 import com._4psa.headerdata_xsd._2_0_3.UserCredentialsSequence_type0;
 import com._4psa.reportmessages_xsd._2_0_3.CallReportRequest;
 import com._4psa.reportmessages_xsd._2_0_3.CallReportRequestChoice_type0;
+import com._4psa.reportmessages_xsd._2_0_3.CallReportRequestChoice_type1;
+import com._4psa.reportmessages_xsd._2_0_3.CallReportRequestSequence_type0;
 import com._4psa.reportmessages_xsd._2_0_3.CallReportResponse;
 import com._4psa.reportmessagesinfo_xsd._2_0_3.CallCostsResponseType;
 import com._4psa.voipnowservice._2_0_3.ReportPortStub;
@@ -101,6 +103,10 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             final boolean answered = Boolean.parseBoolean(checkStringParameter("answered", request));
             final String userId = checkStringParameter("id", request);
             final String identifier = checkStringParameter("identifier", request);
+            final int month = checkIntParameter("month", request);
+            final int year = checkIntParameter("year", request);
+            // final long start = checkLongParameter("start", request);
+            // final long end = checkLongParameter("end", request);
             // final String flow = checkStringParameter("flow", request);
             /*
              * Get setting
@@ -114,20 +120,42 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
              * Call report request
              */
             final CallReportRequest callReportRequest = new CallReportRequest();
-            /*
-             * Set answered parameter
-             */
-            final _boolean answeredParam = new _boolean();
-            answeredParam.set_boolean(answered);
-            callReportRequest.setAnswered(answeredParam);
-            /*
-             * Set choice 0
-             */
-            final CallReportRequestChoice_type0 choiceType0 = new CallReportRequestChoice_type0();
-            final PositiveInteger userIdParam = new PositiveInteger();
-            userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-            choiceType0.setUserID(userIdParam);
-            callReportRequest.setCallReportRequestChoice_type0(choiceType0);
+            {
+                /*
+                 * Set answered parameter
+                 */
+                final _boolean answeredParam = new _boolean();
+                answeredParam.set_boolean(answered);
+                callReportRequest.setAnswered(answeredParam);
+                /*
+                 * Set choice 0
+                 */
+                final CallReportRequestChoice_type0 choiceType0 = new CallReportRequestChoice_type0();
+                final PositiveInteger userIdParam = new PositiveInteger();
+                userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
+                choiceType0.setUserID(userIdParam);
+                callReportRequest.setCallReportRequestChoice_type0(choiceType0);
+                /*
+                 * Set choice 1
+                 */
+                final CallReportRequestChoice_type1 choiceType1 = new CallReportRequestChoice_type1();
+                final CallReportRequestSequence_type0 sequenceType0 = new CallReportRequestSequence_type0();
+                final UnsignedInt monthParam = new UnsignedInt();
+                monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(month));
+                sequenceType0.setMonth(monthParam);
+                final UnsignedInt yearParam = new UnsignedInt();
+                monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(year));
+                sequenceType0.setYear(yearParam);
+                choiceType1.setCallReportRequestSequence_type0(sequenceType0);
+                callReportRequest.setCallReportRequestChoice_type1(choiceType1);
+                /*-
+                 * Inteval
+                final Interval_type0 intervalParam = new Interval_type0();
+                intervalParam.setEndDate(new Date(end));
+                intervalParam.setStartDate(new Date(start));
+                choiceType1.setInterval(intervalParam);
+                 */
+            }
             /*
              * Create user credentials
              */
