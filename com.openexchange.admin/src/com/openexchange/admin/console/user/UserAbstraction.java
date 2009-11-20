@@ -216,7 +216,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
     protected static final String OPT_ACCESS_USM = "access-usm";
-    protected static final String OPT_ACCESS_GAB = "access-global-address-book";
+    protected static final String OPT_DISABLE_GAB = "access-global-address-book-disabled";
     protected static final String OPT_ACCESS_PUBLIC_FOLDER_EDITABLE = "access-public-folder-editable";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     
@@ -591,7 +591,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setPublication(accessOption2BooleanCreate(parser,this.accessPublication));
         access.setActiveSync(accessOption2BooleanCreate(parser,this.accessActiveSync));
         access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
-        access.setGlobalAddressBook(accessOption2BooleanCreate(parser, this.accessGAB));
+        access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
         access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
     }
     
@@ -725,7 +725,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         	changed = true;
         }
         if((String) parser.getOptionValue(this.accessGAB) != null) {
-            access.setGlobalAddressBook(accessOption2BooleanCreate(parser, this.accessGAB));
+            access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
             changed = true;
         }
         if((String) parser.getOptionValue(this.accessPublicFolderEditable) != null) {
@@ -815,7 +815,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
-        this.accessGAB = setLongOpt(admp, OPT_ACCESS_GAB, "on/off", "Global Address Book access (Default is off)", true, false, true);
+        this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, false, true);
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, false, true);
     }
 
