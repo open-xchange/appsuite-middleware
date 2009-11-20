@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
@@ -66,7 +67,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactsByCsvFileStep extends AbstractStep<Contact[], UnexpectedPage>{
+public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage>{
     
     private boolean ignoreFirstLine;
     

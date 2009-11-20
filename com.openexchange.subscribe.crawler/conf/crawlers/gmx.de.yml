@@ -17,54 +17,56 @@ workflowString: |
       username: ""
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
       description: Click on the addressbook link in the menu to the left.
-      url: "https:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
+      url: "http:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
+    - !com.openexchange.subscribe.crawler.PageByFrameNumberStep
+      description: Get the first iframe
+      frameNumber: 1
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
-      description: Click on the options link in the menu to the left.
-      url: "https:\\/\\/service\\.gmx\\.net\\/de/cgi/addrbk\\.fcgi.*site=options"
+      description: "Click on the manage-Addressbook-Link in the upper right "
+      url: "categories.*"
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
-      description: Click on the import/export link in the middle of the screen.
-      url: "https:\\/\\/service\\.gmx\\.net\\/de/cgi/addrbk\\.fcgi.*site=importexport"
-    - !com.openexchange.subscribe.crawler.UnexpectedPageByMultiselectStep
-      buttonName: b_export
-      description: Select Microsoft Outlook 2002 in the form and submit it.
-      formAction: ""
-      formName: export_form
-      selectName: dataformat
-      selectValue: o2002
+      description: Click on the Export-link to the left
+      url: "exportcontacts.*"
+    - !com.openexchange.subscribe.crawler.TextPageByMultiselectStep
+      buttonName: export
+      description: Select Microsoft Outlook 2003 in the form and submit it.
+      formAction: exportcontacts
+      formName: ""
+      selectName: raw_format
+      selectValue: csv_Outlook2003
     - !com.openexchange.subscribe.crawler.ContactsByCsvFileStep
       description: Map csv fields to Contact-Fields
       fields: 
-        "0": title
-        "1": first_name
-        "2": last_name
-        "3": company
-        "4": department
-        "5": position
-        "6": street_business
-        "7": city_business
-        "8": postal_code_business
-        "9": country_business
-        "10": street_home
-        "11": city_home
-        "12": postal_code_home
-        "13": country_home
-        "14": street_other
-        "17": city_other
-        "19": country_other
-        "18": postal_code_other
-        "21": telephone_business1
-        "20": fax_business
-        "23": telephone_home1
-        "22": fax_home
-        "25": fax_other
-        "24": cellular_telephone1
-        "27": cellular_telephone2
-        "26": telephone_other
-        "29": email2
-        "28": email1
-        "31": birthday
-        "30": email3
-        "32": note
-        "33": url
+        "0": last_name
+        "1": title
+        "2": first_name
+        "5": birthday
+        "6": position
+        "7": department
+        "8": company
+        "9": email1
+        "11": email2
+        "13": email3
+        "15": telephone_business1
+        "16": telephone_business2
+        "19": telephone_home1
+        "18": telephone_home1
+        "21": cellular_telephone2
+        "20": cellular_telephone1
+        "23": fax_home
+        "24": fax_business
+        "27": street_business
+        "29": postal_code_business
+        "28": city_business
+        "31": street_home
+        "30": country_business
+        "34": country_home
+        "35": street_other
+        "32": city_home
+        "33": postal_code_home
+        "38": country_other
+        "39": note
+        "36": city_other
+        "37": postal_code_other
       ignoreFirstLine: true
   

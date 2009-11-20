@@ -82,51 +82,53 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
             "p",
             "https://service.gmx.net",        
             ""));
-        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", "https:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
-        steps.add(new PageByLinkRegexStep("Click on the options link in the menu to the left.", "https:\\/\\/service\\.gmx\\.net\\/de/cgi/addrbk\\.fcgi.*site=options"));
-        steps.add(new PageByLinkRegexStep("Click on the import/export link in the middle of the screen.", "https:\\/\\/service\\.gmx\\.net\\/de/cgi/addrbk\\.fcgi.*site=importexport"));
-        steps.add(new UnexpectedPageByMultiselectStep("Select Microsoft Outlook 2002 in the form and submit it.", "export_form", "", 0, "dataformat", "o2002", "b_export"));
+        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", "http:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
+        steps.add(new PageByFrameNumberStep("Get the first iframe", 1));
+        steps.add(new PageByLinkRegexStep("Click on the manage-Addressbook-Link in the upper right ","categories.*"));
+        steps.add(new PageByLinkRegexStep("Click on the Export-link to the left","exportcontacts.*"));
+        
+        steps.add(new TextPageByMultiselectStep("Select Microsoft Outlook 2003 in the form and submit it.", "", "exportcontacts", 0, "raw_format", "csv_Outlook2003", "export"));
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
-        fieldMapping.put(0, "title");
-        fieldMapping.put(1, "first_name");
-        fieldMapping.put(2, "last_name");
-        fieldMapping.put(3, "company");
-        fieldMapping.put(4, "department");
-        fieldMapping.put(5, "position");
-        fieldMapping.put(6, "street_business");
-        fieldMapping.put(7, "city_business");
-        fieldMapping.put(8, "postal_code_business");
-        fieldMapping.put(9, "country_business");
-        fieldMapping.put(10, "street_home");
-        fieldMapping.put(11, "city_home");
-        fieldMapping.put(12, "postal_code_home");
-        fieldMapping.put(13, "country_home");
-        fieldMapping.put(14, "street_other");        
-        fieldMapping.put(17, "city_other");
-        fieldMapping.put(18, "postal_code_other");
-        fieldMapping.put(19, "country_other");
-        fieldMapping.put(20, "fax_business");
-        fieldMapping.put(21, "telephone_business1");
-        fieldMapping.put(22, "fax_home");
-        fieldMapping.put(23, "telephone_home1");
-        fieldMapping.put(24, "cellular_telephone1");
-        fieldMapping.put(25, "fax_other");
-        fieldMapping.put(26, "telephone_other");
-        fieldMapping.put(27, "cellular_telephone2");
-        fieldMapping.put(28, "email1");
-        fieldMapping.put(29, "email2");
-        fieldMapping.put(30, "email3");
-        fieldMapping.put(31, "birthday");
-        fieldMapping.put(32, "note");
-        fieldMapping.put(33, "url");        
+        fieldMapping.put(0, "last_name");
+        fieldMapping.put(1, "title");
+        fieldMapping.put(2, "first_name");
+        fieldMapping.put(5, "birthday");
+        fieldMapping.put(6, "position");
+        fieldMapping.put(7, "department");
+        fieldMapping.put(8, "company");
+        fieldMapping.put(9, "email1");
+        fieldMapping.put(11, "email2");
+        fieldMapping.put(13, "email3");
+        fieldMapping.put(15, "telephone_business1");
+        fieldMapping.put(16, "telephone_business2");
+        fieldMapping.put(18, "telephone_home1");
+        fieldMapping.put(19, "telephone_home1");
+        fieldMapping.put(20, "cellular_telephone1");
+        fieldMapping.put(21, "cellular_telephone2");
+        fieldMapping.put(23, "fax_home");
+        fieldMapping.put(24, "fax_business");
+        fieldMapping.put(27, "street_business");
+        fieldMapping.put(28, "city_business");
+        fieldMapping.put(29, "postal_code_business");
+        fieldMapping.put(30, "country_business");
+        fieldMapping.put(31, "street_home");
+        fieldMapping.put(32, "city_home");
+        fieldMapping.put(33, "postal_code_home");
+        fieldMapping.put(34, "country_home");
+        fieldMapping.put(35, "street_other");        
+        fieldMapping.put(36, "city_other");
+        fieldMapping.put(37, "postal_code_other");
+        fieldMapping.put(38, "country_other");
+        fieldMapping.put(39, "note");
+        
         boolean ignoreFirstLine = true;
         steps.add(new ContactsByCsvFileStep("Map csv fields to Contact-Fields", ignoreFirstLine, fieldMapping));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }
