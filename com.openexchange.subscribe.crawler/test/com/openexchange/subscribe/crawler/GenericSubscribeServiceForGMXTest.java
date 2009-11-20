@@ -61,7 +61,7 @@ import org.ho.yaml.Yaml;
  */
 public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGenericSubscribeServiceForGMX() {
+	public void testGenericSubscribeServiceForGMX() {
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -127,8 +127,8 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+        dumpThis(crawler, crawler.getDisplayName());
     }
 }
