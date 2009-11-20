@@ -51,6 +51,7 @@ package com.openexchange.ajax.helper;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -174,6 +175,11 @@ public abstract class ParamContainer {
         }
     }
 
+    /**
+     * Split pattern for CSV.
+     */
+    static final Pattern SPLIT = Pattern.compile(" *, *");
+
     private static final class MapParamContainer extends ParamContainer {
 
         private final Map<String, String> map;
@@ -227,7 +233,7 @@ public abstract class ParamContainer {
                     null,
                     paramName);
             }
-            final String[] sa = tmp.split(SPLIT_PAT);
+            final String[] sa = SPLIT.split(tmp, 0);
             final int intArray[] = new int[sa.length];
             for (int a = 0; a < sa.length; a++) {
                 try {
@@ -344,7 +350,7 @@ public abstract class ParamContainer {
             if (tmp == null) {
                 return null;
             }
-            final String[] sa = tmp.split(SPLIT_PAT);
+            final String[] sa = SPLIT.split(tmp, 0);
             final int intArray[] = new int[sa.length];
             for (int a = 0; a < sa.length; a++) {
                 try {
@@ -475,7 +481,7 @@ public abstract class ParamContainer {
                     null,
                     paramName);
             }
-            final String[] sa = tmp.split(SPLIT_PAT);
+            final String[] sa = SPLIT.split(tmp, 0);
             final int intArray[] = new int[sa.length];
             for (int a = 0; a < sa.length; a++) {
                 try {
@@ -592,7 +598,7 @@ public abstract class ParamContainer {
             if (tmp == null) {
                 return null;
             }
-            final String[] sa = tmp.split(SPLIT_PAT);
+            final String[] sa = SPLIT.split(tmp, 0);
             final int intArray[] = new int[sa.length];
             for (int a = 0; a < sa.length; a++) {
                 try {
@@ -718,7 +724,7 @@ public abstract class ParamContainer {
             }
             String[] tmp;
             try {
-                tmp = jo.getString(paramName).split(SPLIT_PAT);
+                tmp = SPLIT.split(jo.getString(paramName), 0);
             } catch (final JSONException e1) {
                 throw new ParamContainerException(
                     component,
@@ -853,7 +859,7 @@ public abstract class ParamContainer {
             }
             String[] tmp;
             try {
-                tmp = jo.getString(paramName).split(SPLIT_PAT);
+                tmp = SPLIT.split(jo.getString(paramName), 0);
             } catch (final JSONException e1) {
                 throw new ParamContainerException(
                     component,
@@ -944,8 +950,6 @@ public abstract class ParamContainer {
             return null;
         }
     }
-
-    private static final String SPLIT_PAT = " *, *";
 
     public static final int NOT_FOUND = -9999;
 
