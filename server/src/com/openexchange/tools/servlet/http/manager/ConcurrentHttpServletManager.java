@@ -165,12 +165,16 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                      * Not available in implier cache
                      */
                     class Implier {
+
                         ServletQueue queue;
+
                         String implier;
+
                         Implier(final String implier, final ServletQueue queue) {
                             this.implier = implier;
                             this.queue = queue;
                         }
+
                         void setIfLonger(final String implier, final ServletQueue queue) {
                             if (implier.length() > this.implier.length()) {
                                 this.implier = implier;
@@ -337,7 +341,14 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
                 return;
             }
-            configLoader.removeConfig(servletPool.get(path).dequeue().getClass().getCanonicalName());
+            final ServletQueue servletQueue = servletPool.get(path);
+            if (null == servletQueue) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Servlet un-registration failed. No servlet is bound to path: " + path);
+                }
+                return;
+            }
+            configLoader.removeConfig(servletQueue.dequeue().getClass().getCanonicalName());
             servletPool.remove(path);
             implierCache.clear();
         } catch (final URISyntaxException e) {

@@ -267,7 +267,14 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
                 return;
             }
-            configLoader.removeConfig(servletPool.get(path).dequeue().getClass().getCanonicalName());
+            final ServletQueue servletQueue = servletPool.get(path);
+            if (null == servletQueue) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Servlet un-registration failed. No servlet is bound to path: " + path);
+                }
+                return;
+            }
+            configLoader.removeConfig(servletQueue.dequeue().getClass().getCanonicalName());
             servletPool.remove(path);
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
