@@ -97,7 +97,6 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.cache.MailPrefetcherCallable;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -869,7 +868,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] getMessageList(final String folder, final String[] uids, final int[] fields) throws MailException {
+    public MailMessage[] getMessageList(final String folder, final String[] uids, final int[] fields, final String[] headerFields) throws MailException {
         /*
          * Although message cache is only used within mail implementation, we have to examine if cache already holds desired messages. If
          * the cache holds the desired messages no connection has to be fetched/established. This avoids a lot of overhead.
@@ -899,8 +898,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error(e.getMessage(), e);
         }
         initConnection(accountId);
-        final MailMessage[] mails =
-            mailAccess.getMessageStorage().getMessages(fullname, uids, MailField.toFields(MailListField.getFields(fields)));
+        final MailField[] mailFields;
+        if (null == headerFields || 0 == headerFields.length) {
+            mailFields = MailField.toFields(MailListField.getFields(fields));
+        } else {
+            final MailField[] fields2 = MailField.toFields(MailListField.getFields(fields));
+            final int length = fields2.length;
+            mailFields = new MailField[length + 1];
+            System.arraycopy(fields2, 0, mailFields, 0, length);
+            mailFields[length] = MailField.HEADERS;
+        }
+        final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, uids, mailFields);
         try {
             if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
@@ -968,7 +976,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> createEmptyIterator();
         }
-        final boolean cachable = (mails.length < MailProperties.getInstance().getMailFetchLimit());
+        final boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
         final MailField[] useFields;
         final boolean onlyFolderAndID;
         if (cachable) {
@@ -1003,7 +1011,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             // TODO: JSONMessageCache.getInstance().removeAllFoldersExcept(accountId, fullname, session);
             MailMessageCache.getInstance().removeUserMessages(session.getUserId(), contextId);
-            if ((mails != null) && (mails.length > 0) && (cachable)) {
+            if ((cachable) && (mails != null) && (mails.length > 0)) {
                 /*
                  * ... and put new ones
                  */
@@ -1179,7 +1187,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailField[] useFields;
         final boolean onlyFolderAndID;
-        if (mails.length < MailProperties.getInstance().getMailFetchLimit()) {
+        if (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit()) {
             /*
              * Selection fits into cache: Prepare for caching
              */
@@ -1221,7 +1229,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Remove old user cache entries
              */
             MailMessageCache.getInstance().removeFolderMessages(accountId, fullname, session.getUserId(), contextId);
-            if ((mails.length > 0) && (mails.length < MailProperties.getInstance().getMailFetchLimit())) {
+            if ((mails.length > 0) && (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit())) {
                 /*
                  * ... and put new ones
                  */
@@ -1396,9 +1404,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (origMail != null) {
                 if (origMail.isDraft() && null != msgref) {
                     if (msgref.getAccountId() == accountId) {
-                        mailAccess.getMessageStorage().deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID()} , true);
+                        mailAccess.getMessageStorage().deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
                     } else if (null != otherAccess) {
-                        otherAccess.getMessageStorage().deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID()} , true);
+                        otherAccess.getMessageStorage().deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
                     }
                 }
                 draftMail.setMsgref(null);
@@ -1910,7 +1918,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullname = argument.getFullname();
-        final MailMessage[] messages = mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new HeaderTerm("Message-Id", messageID), FIELDS_ID_INFO);
+        final MailMessage[] messages =
+            mailAccess.getMessageStorage().searchMessages(
+                fullname,
+                null,
+                MailSortField.RECEIVED_DATE,
+                OrderDirection.ASC,
+                new HeaderTerm("Message-Id", messageID),
+                FIELDS_ID_INFO);
         if (null == messages || 1 != messages.length) {
             throw new MailException(MailException.Code.MAIL_NOT_FOUN_BY_MESSAGE_ID, fullname, messageID);
         }

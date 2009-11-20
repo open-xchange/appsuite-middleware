@@ -283,6 +283,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     public static final String PARAMETER_MESSAGE_ID = "message_id";
 
+    public static final String PARAMETER_HEADERS = "headers";
+
     private static final String VIEW_RAW = "raw";
 
     private static final String VIEW_TEXT = "text";
@@ -992,7 +994,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            //final String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final boolean unseen;
             {
                 final String tmp = paramContainer.getStringParam(PARAMETER_UNSEEN);
@@ -1013,7 +1015,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     maxSize = l;
                 }
             }
-            
+
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -1021,7 +1023,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                
+
                 final String uid;
                 {
                     String tmp2 = paramContainer.getStringParam(PARAMETER_ID);
@@ -1035,7 +1037,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         uid = tmp2;
                     }
                 }
-                
+
                 /*
                  * Get message
                  */
@@ -1070,16 +1072,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                         LOG.warn("Contact collector could not be triggered.", e);
                     }
                 }
-                
-                
+
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
                 }
             }
-                
-            
-            
+
         } catch (final MailException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
@@ -1146,7 +1145,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Read in parameters
              */
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-            //final String uid = paramContainer.checkStringParam(PARAMETER_ID);
+            // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = paramContainer.getStringParam(PARAMETER_SHOW_SRC);
             final boolean showMessageSource = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = paramContainer.getStringParam(PARAMETER_EDIT_DRAFT);
@@ -1171,7 +1170,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
- 
+
                 final String uid;
                 {
                     String tmp2 = paramContainer.getStringParam(PARAMETER_ID);
@@ -2786,6 +2785,8 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
     private final Response actionPutMailList(final ServerSession session, final String body, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
         /*
          * Some variables
@@ -2798,6 +2799,11 @@ public class Mail extends PermissionServlet implements UploadListener {
         jsonWriter.array();
         try {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
+            final String[] headers;
+            {
+                final String tmp = paramContainer.getStringParam(PARAMETER_HEADERS);
+                headers = null == tmp ? null : SPLIT.split(tmp, 0);
+            }
             final JSONArray jsonIDs = new JSONArray(body);
             final int length = jsonIDs.length();
             if (length > 0) {
@@ -2805,6 +2811,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Pre-Select field writers
                  */
                 final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
+                /*
+                 * Get map
+                 */
                 final Map<String, List<String>> idMap = newHashMap(4);
                 fillMapByArray(idMap, jsonIDs, length);
                 final int size = idMap.size();
@@ -2838,13 +2848,19 @@ public class Mail extends PermissionServlet implements UploadListener {
                          */
                         final List<String> list = entry.getValue();
                         final MailMessage[] mails =
-                            mailInterface.getMessageList(entry.getKey(), list.toArray(new String[list.size()]), columns);
+                            mailInterface.getMessageList(entry.getKey(), list.toArray(new String[list.size()]), columns, headers);
+                        final int accountID = mailInterface.getAccountID();
                         for (int i = 0; i < mails.length; i++) {
                             final MailMessage mail = mails[i];
                             if (mail != null) {
                                 final JSONArray ja = new JSONArray();
                                 for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                    writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                                }
+                                if (null != headerWriters) {
+                                    for (int j = 0; j < headerWriters.length; j++) {
+                                        headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                                    }
                                 }
                                 jsonWriter.value(ja);
                             }

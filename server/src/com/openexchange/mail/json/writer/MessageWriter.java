@@ -570,6 +570,55 @@ public final class MessageWriter {
     }
 
     /**
+     * Gets writers for specified header names.
+     * 
+     * @param headers The header names
+     * @return The writers for specified header names
+     */
+    public static MailFieldWriter[] getHeaderFieldWriter(final String[] headers) {
+        if (null == headers) {
+            return new MailFieldWriter[0];
+        }
+        final MailFieldWriter[] retval = new MailFieldWriter[headers.length];
+        for (int i = 0; i < headers.length; i++) {
+            final String headerName = headers[i];
+            retval[i] = new MailFieldWriter() {
+
+                public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey,
+                        final int accountId, final int user, final int cid) throws MailException {
+                    final Object value;
+                    {
+                        final String[] headerValues = mail.getHeader(headerName);
+                        if (null == headerValues || 0 == headerValues.length) {
+                            value = null;
+                        } else if (1 == headerValues.length) {
+                            value = headerValues[0];
+                        } else {
+                            final JSONArray ja = new JSONArray();
+                            for (int j = 0; j < headerValues.length; j++) {
+                                ja.put(headerValues[j]);
+                            }
+                            value = ja;
+                        }
+                    }
+                    if (withKey) {
+                        if (null != value) {
+                            try {
+                                ((JSONObject) jsonContainer).put(headerName, value);
+                            } catch (final JSONException e) {
+                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                            }
+                        }
+                    } else {
+                        ((JSONArray) jsonContainer).put(null == value ? JSONObject.NULL : value);
+                    }
+                }
+            };
+        }
+        return retval;
+    }
+
+    /**
      * Adds the user time zone offset to given date time
      * 
      * @param time The date time

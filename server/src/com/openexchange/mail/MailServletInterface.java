@@ -202,7 +202,7 @@ public abstract class MailServletInterface {
      * Returns the an array of messages located in given folder. If <code>fromToUID</code> is not <code>null</code> only messages fitting
      * into uid range will be returned.
      */
-    public abstract MailMessage[] getMessageList(String folder, String[] uids, int[] fields) throws MailException;
+    public abstract MailMessage[] getMessageList(String folder, String[] uids, int[] fields, String[] headerFields) throws MailException;
 
     /**
      * Gets the mail identified through given ID from store located in given folder.
