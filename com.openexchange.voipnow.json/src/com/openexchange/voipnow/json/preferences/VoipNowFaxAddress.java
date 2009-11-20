@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
  */
 public class VoipNowFaxAddress implements PreferencesItemService {
 
-    private static final String[] PATH = new String[] { "modules", "com.4psa.voipnow", "fax=fax@voip.open-xchange.com" };
+    private static final String[] PATH = new String[] { "modules", "com.4psa.voipnow", "fax" };
 
     /**
      * Initializes a new {@link VoipNowFaxAddress}.
@@ -84,7 +84,7 @@ public class VoipNowFaxAddress implements PreferencesItemService {
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 // TODO: Set proper mail-2-fax address
-                setting.setSingleValue("aabbcc@sdsdfsdf.com");
+                setting.setSingleValue("fax@voip.open-xchange.com");
             }
 
             /**
