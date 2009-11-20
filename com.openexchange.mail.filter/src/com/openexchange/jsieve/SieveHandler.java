@@ -279,7 +279,7 @@ public class SieveHandler {
              * directly as response for the STARTTLS command.
              */
             String implementation = capa.getImplementation();
-            if (implementation.startsWith("Cyrus") || implementation.startsWith("NEMESIS")) {
+            if (implementation.matches("^Cyrus.*v([0-1]\\.[0-9]|2\\.[0-2]).*$") || implementation.startsWith("NEMESIS")) {
 	            measureStart();
 	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
 	            bos_sieve.flush();
