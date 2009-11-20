@@ -47,30 +47,67 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.ajax.appointment.recurrence.RecurrenceUpdateTests;
-import com.openexchange.ajax.appointment.test.UpdateWithRecurrenceIdTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.appointment.helper.Changes;
+import com.openexchange.ajax.appointment.helper.Expectations;
+import com.openexchange.ajax.appointment.helper.PositiveAssertion;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 
 /**
- * Suite for systematic tests to check the expected behaviour 
- * of the HTTP API for the calendar.
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class NewAppointmentHttpApiTestSuite extends TestSuite{
+public class RecurrenceUpdateTests extends AppointmentTest {
 
-    private NewAppointmentHttpApiTestSuite() {
-        super();
+    private CalendarTestManager calendarManager;
+    
+    public RecurrenceUpdateTests(String name) {
+        super(name);
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(RecurrenceUpdateTests.class);
-        tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
-        return tests;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        calendarManager = new CalendarTestManager(getClient());
     }
+
+    public void testFirst() throws Exception{
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, I(1));
+        changes.put(Appointment.RECURRENCE_COUNT, I(7));
+        changes.put(Appointment.INTERVAL, I(1));
+        
+        Expectations expectations = new Expectations(changes);
+        
+        new PositiveAssertion(changes, expectations, calendarManager);
+    }
+    
+    public void testMissingIntervalInformation() throws Exception{
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, I(1));
+        changes.put(Appointment.RECURRENCE_COUNT, I(7));
+        
+        Expectations expectations = new Expectations(changes);
+        
+        //TODO: Needs to throw exception
+        new PositiveAssertion(changes, expectations, calendarManager);
+    }
+    
+    public void testSendingUnneccessaryDayInformation() throws Exception{
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, I(1));
+        changes.put(Appointment.RECURRENCE_COUNT, I(7));
+        changes.put(Appointment.INTERVAL, I(1));
+        changes.put(Appointment.DAYS, I(127));
+        
+        Expectations expectations = new Expectations(changes);
+        
+        //TODO: Needs to throw exception
+        new PositiveAssertion(changes, expectations, calendarManager);
+    }
+
 }
