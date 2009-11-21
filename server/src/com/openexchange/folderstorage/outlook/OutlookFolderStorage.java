@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
@@ -92,6 +93,11 @@ public final class OutlookFolderStorage implements FolderStorage {
      * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
      */
     public static final String OUTLOOK_TREE_ID = "1";
+
+    /**
+     * The name of Outlook root folder.
+     */
+    private static final String OUTLOOK_ROOT_NAME = "IPM-Root";
 
     /**
      * The real tree identifier.
@@ -148,11 +154,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
-        // TODO: Exclude unsupported folders like infostore folders
-
-        /*-
-         * 
-         * 
+        // Exclude unsupported folders like infostore folders
         final Folder folder =
             folderStorageRegistry.getDedicatedFolderStorage(FolderStorage.REAL_TREE_ID, folderId).getFolder(
                 FolderStorage.REAL_TREE_ID,
@@ -162,19 +164,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (InfostoreContentType.getInstance().equals(folder.getContentType())) {
             return false;
         }
-         */
-
         return true;
-
-        /*-
-         * 
-        return Select.containsFolder(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
-            storageParameters.getUser().getId(),
-            folderId,
-            storageType);
-         */
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
@@ -284,7 +274,11 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
             }
             final OutlookFolder outlookRootFolder = new OutlookFolder(rootFolder);
+            outlookRootFolder.setName(OUTLOOK_ROOT_NAME);
             outlookRootFolder.setTreeID(treeId);
+            /*
+             * Set subfolder IDs to null to force getSubfolders() invocation
+             */
             outlookRootFolder.setSubfolderIDs(null);
             return outlookRootFolder;
         }
@@ -386,7 +380,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get folder
-                    ids = folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, parentId, storageParameters);
+                    final SortableId[] subfolders = folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, parentId, storageParameters);
+                    // Drop infostore folder; last entry
+                    ids = new SortableId[subfolders.length - 1];
+                    System.arraycopy(subfolders, 0, ids, 0, ids.length);
                     folderStorage.commitTransaction(storageParameters);
                 } catch (final FolderException e) {
                     folderStorage.rollback(storageParameters);
