@@ -154,11 +154,11 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             /*
              * Get some data from response type; e.g client's address
              */
-            final com._4psa.common_xsd._2_0_3.String addressString = clientDetailsResponseType.getAddress();
+            final com._4psa.common_xsd._2_0_3.Email emailString = clientDetailsResponseType.getEmail();
             /*
              * Return client data
              */
-            return new AJAXRequestResult(addressString.getString());
+            return new AJAXRequestResult(emailString.getEmail());
         } catch (final AxisFault e) {
             throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
         } catch (final RemoteException e) {
