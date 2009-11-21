@@ -64,28 +64,32 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
  */
 public class FolderFieldCollector implements ServiceTrackerCustomizer {
 
-    private AdditionalFolderFieldList list;
-    private BundleContext context;
+    private final AdditionalFolderFieldList list;
+    private final BundleContext context;
     
-    public FolderFieldCollector(BundleContext context, AdditionalFolderFieldList list) {
+    public FolderFieldCollector(final BundleContext context, final AdditionalFolderFieldList list) {
         super();
         this.list = list;
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        AdditionalFolderField field = (AdditionalFolderField) context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final AdditionalFolderField field = (AdditionalFolderField) context.getService(reference);
         list.addField(field);
         return field;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
-
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do
     }
 
-    public void removedService(ServiceReference reference, Object service) {
-        AdditionalFolderField field = (AdditionalFolderField) service;
-        list.remove(field.getColumnID());
+    public void removedService(final ServiceReference reference, final Object service) {
+        try {
+            final AdditionalFolderField field = (AdditionalFolderField) service;
+            list.remove(field.getColumnID());
+        } finally {
+            context.ungetService(reference);
+        }
     }
 
 }
