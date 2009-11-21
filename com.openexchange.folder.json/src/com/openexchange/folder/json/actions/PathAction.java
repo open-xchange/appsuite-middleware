@@ -54,6 +54,7 @@ import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
@@ -117,7 +118,7 @@ public final class PathAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders);
+        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         /*
          * Return appropriate result
          */

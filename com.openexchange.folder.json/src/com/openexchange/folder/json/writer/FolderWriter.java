@@ -57,6 +57,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
@@ -64,9 +66,11 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FolderWriter} - TODO Short description of this class' purpose.
+ * {@link FolderWriter} - Write methods for folder module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -388,16 +392,37 @@ public final class FolderWriter {
      * @return The JSON array carrying JSON arrays of given folders
      * @throws FolderException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders) throws FolderException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws FolderException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            final int curCol = cols[i];
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(curCol));
             if (null == ffw) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
+                if (additionalFolderFieldList.knows(curCol)) {
+                    final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
+                    ffw = new FolderFieldWriter() {
+
+                        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                            final FolderObject fo = new FolderObject();
+                            final int numFolderId = getUnsignedInteger(folder.getID());
+                            if (numFolderId < 0) {
+                                fo.setFullName(folder.getID());
+                            } else {
+                                fo.setObjectID(numFolderId);
+                            }
+                            fo.setFolderName(folder.getName());
+                            fo.setModule(folder.getContentType().getModule());
+                            fo.setType(folder.getType().getType());
+                            jsonPutter.put(additionalFolderField.getColumnName(), additionalFolderField.getValue(fo, serverSession));
+                        }
+                    };
+                } else {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Unknown field: " + curCol, new Throwable());
+                    }
+                    ffw = UNKNOWN_FIELD_FFW;
                 }
-                ffw = UNKNOWN_FIELD_FFW;
             }
             ffws[i] = ffw;
         }
@@ -575,4 +600,64 @@ public final class FolderWriter {
         }
         return retval;
     }
+
+    /**
+     * The radix for base <code>10</code>.
+     */
+    private static final int RADIX = 10;
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     * 
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    static final int getUnsignedInteger(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        final int max = s.length();
+
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        int result = 0;
+        int i = 0;
+
+        final int limit = -Integer.MAX_VALUE;
+        final int multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
 }
