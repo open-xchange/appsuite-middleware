@@ -64,7 +64,7 @@ public final class Constants {
     /**
      * The folder module identifier.
      */
-    public static final String MODULE = "folders";
+    public static final String MODULE = "folder2";
 
     /**
      * The folder servlet path.
