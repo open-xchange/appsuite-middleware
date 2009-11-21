@@ -47,37 +47,60 @@
  *
  */
 
-package com.openexchange.folder.json;
+package com.openexchange.folder.json.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 
 /**
- * {@link Constants} for the HTTP JSON interface of the folder component.
+ * {@link FolderFieldCollector} - Collector for additional folder fields.
  * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public class FolderFieldCollector implements ServiceTrackerCustomizer {
 
     /**
-     * The folder module identifier.
+     * The list.
      */
-    public static final String MODULE = "folder2";
+    private final AdditionalFolderFieldList list;
 
     /**
-     * The folder servlet path.
+     * The bundle context.
      */
-    public static final String SERVLET_PATH = "/ajax/" + MODULE;
+    private final BundleContext context;
 
     /**
-     * The list for additional folder fields.
+     * Initializes a new {@link FolderFieldCollector}.
+     * 
+     * @param context The bundle context
+     * @param list The additional folder field list used to store tracked fields.
      */
-    public static AdditionalFolderFieldList ADDITIONAL_FOLDER_FIELD_LIST = new AdditionalFolderFieldList();
-
-    /**
-     * No instantiation.
-     */
-    private Constants() {
+    public FolderFieldCollector(final BundleContext context, final AdditionalFolderFieldList list) {
         super();
+        this.list = list;
+        this.context = context;
     }
+
+    public Object addingService(final ServiceReference reference) {
+        final AdditionalFolderField field = (AdditionalFolderField) context.getService(reference);
+        list.addField(field);
+        return field;
+    }
+
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do
+    }
+
+    public void removedService(final ServiceReference reference, final Object service) {
+        try {
+            final AdditionalFolderField field = (AdditionalFolderField) service;
+            list.remove(field.getColumnID());
+        } finally {
+            context.ungetService(reference);
+        }
+    }
+
 }

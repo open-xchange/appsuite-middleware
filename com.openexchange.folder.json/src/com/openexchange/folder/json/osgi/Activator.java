@@ -57,12 +57,19 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
+/**
+ * {@link Activator} - Activator for JSON folder interface.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class Activator implements BundleActivator {
 
     private ServiceRegistration folderMultipleService;
@@ -72,6 +79,9 @@ public class Activator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         folderMultipleService =
             context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null);
+        /*
+         * Service trackers
+         */
         trackers = new ArrayList<ServiceTracker>(6);
         trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
             context,
@@ -82,6 +92,9 @@ public class Activator implements BundleActivator {
             context,
             ContentTypeDiscoveryService.class.getName(),
             new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
+        trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
+            context,
+            Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
         /*
          * Open trackers
          */
@@ -95,14 +108,15 @@ public class Activator implements BundleActivator {
             /*
              * Close trackers
              */
-            for (final ServiceTracker tracker : trackers) {
-                tracker.close();
+            while (!trackers.isEmpty()) {
+                trackers.remove(0).close();
             }
-            trackers.clear();
             trackers = null;
         }
-        folderMultipleService.unregister();
-        folderMultipleService = null;
+        if (null != folderMultipleService) {
+            folderMultipleService.unregister();
+            folderMultipleService = null;
+        }
     }
 
 }
