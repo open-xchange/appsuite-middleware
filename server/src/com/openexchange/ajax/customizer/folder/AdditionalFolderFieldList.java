@@ -56,24 +56,29 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link AdditionalFolderFieldList}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AdditionalFolderFieldList {
+
     // TODO: Track service ranking and allow fields to overwrite other fields.
 
     private static final Log LOG = LogFactory.getLog(AdditionalFolderFieldList.class);
-    
+
     private final Map<Integer, AdditionalFolderField> byColId = new HashMap<Integer, AdditionalFolderField>();
     private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
-    
+
+    /**
+     * Adds an additional folder field to this list.
+     * 
+     * @param field The additional folder field
+     */
     public synchronized void addField(final AdditionalFolderField field) {
         final Integer key = Integer.valueOf(field.getColumnID());
-        if(byColId.containsKey(key) || byName.containsKey(field.getColumnName())) {
+        if (byColId.containsKey(key) || byName.containsKey(field.getColumnName())) {
             warnAboutCollision(field);
             return;
         }
@@ -82,41 +87,71 @@ public class AdditionalFolderFieldList {
     }
 
     private void warnAboutCollision(final AdditionalFolderField field) {
-        LOG.warn("Collision in folder fields. Field '"+field.getColumnName()+"' : "+field.getColumnID()+" has already been taken. Ignoring second service.");
+        LOG.warn("Collision in folder fields. Field '" + field.getColumnName() + "' : " + field.getColumnID() + " has already been taken. Ignoring second service.");
     }
 
+    /**
+     * Gets the additional folder field associated with specified column number.
+     * 
+     * @param col The column number
+     * @return The additional folder field associated with specified column number or a neutral <code>null</code> field
+     */
     public AdditionalFolderField get(final int col) {
-        if(!knows(col)) {
-            return new NullField(col);
-        }
-        return byColId.get(Integer.valueOf(col));
+        final AdditionalFolderField additionalFolderField = byColId.get(Integer.valueOf(col));
+        return null == additionalFolderField ? new NullField(col) : additionalFolderField;
     }
 
+    /**
+     * Gets the additional folder field associated with specified column name.
+     * 
+     * @param col The column name
+     * @return The additional folder field associated with specified column name or a neutral <code>null</code> field
+     */
     public AdditionalFolderField get(final String col) {
         return byName.get(col);
     }
 
+    /**
+     * Checks if an additional folder field is associated with specified column number.
+     * 
+     * @param col The column number
+     * @return <code>true</code> if an additional folder field is associated with specified column number; otherwise <code>false</code>
+     */
     public boolean knows(final int col) {
         return byColId.containsKey(Integer.valueOf(col));
     }
-    
+
+    /**
+     * Checks if an additional folder field is associated with specified column name.
+     * 
+     * @param col The column name
+     * @return <code>true</code> if an additional folder field is associated with specified column name; otherwise <code>false</code>
+     */
     public boolean knows(final String col) {
         return byName.containsKey(col);
     }
 
+    /**
+     * Removes the additional folder field associated with specified column number.
+     * 
+     * @param colId The column number
+     */
     public synchronized void remove(final int colId) {
-        if(!knows(colId)) {
+        if (!knows(colId)) {
             return;
         }
         final AdditionalFolderField f = get(colId);
         byName.remove(f.getColumnName());
         byColId.remove(Integer.valueOf(colId));
     }
-    
+
+    /**
+     * A neutral <code>null</code> field implementation.
+     */
     private static final class NullField implements AdditionalFolderField {
-        
+
         private final int columnId;
-        
+
         NullField(final int columnId) {
             super();
             this.columnId = columnId;
@@ -137,6 +172,6 @@ public class AdditionalFolderFieldList {
         public Object renderJSON(final Object value) {
             return null;
         }
-        
+
     }
 }
