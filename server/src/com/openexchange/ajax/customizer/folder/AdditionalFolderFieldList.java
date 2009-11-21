@@ -105,7 +105,7 @@ public class AdditionalFolderFieldList {
      * Gets the additional folder field associated with specified column name.
      * 
      * @param col The column name
-     * @return The additional folder field associated with specified column name or a neutral <code>null</code> field
+     * @return The additional folder field associated with specified column name or a <code>null</code>
      */
     public AdditionalFolderField get(final String col) {
         return byName.get(col);
