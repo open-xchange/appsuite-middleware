@@ -381,9 +381,9 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * Splits user name and context.
      * 
-     * @param loginInfo combined information seperated by an @ sign.
+     * @param loginInfo combined information separated by an @ sign.
      * @return a string array with context and user name (in this order).
-     * @throws LoginException if no seperator is found.
+     * @throws LoginException if no separator is found.
      */
     private String[] split(final String loginInfo) throws LoginException {
         return split(loginInfo, '@');
@@ -392,10 +392,10 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * Splits user name and context.
      * 
-     * @param loginInfo combined information seperated by an @ sign.
-     * @param separator for spliting user name and context.
+     * @param loginInfo combined information separated by an @ sign.
+     * @param separator for splitting user name and context.
      * @return a string array with context and user name (in this order).
-     * @throws LoginException if no seperator is found.
+     * @throws LoginException if no separator is found.
      */
     private String[] split(final String loginInfo, final char separator) {
         final int pos = loginInfo.lastIndexOf(separator);
