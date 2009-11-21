@@ -49,9 +49,7 @@
 
 package com.openexchange.folder.json;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 
 /**
  * {@link Constants} for the HTTP JSON interface of the folder component.
@@ -72,12 +70,9 @@ public final class Constants {
     public static final String SERVLET_PATH = "/ajax/" + MODULE;
 
     /**
-     * The (thread-safe) copy-on-write list for additional folder fields.
-     * <p>
-     * A thread-safe variant of {@link java.util.ArrayList} in which all mutative operations (add, set, and so on) are implemented by making
-     * a fresh copy of the underlying array.
+     * The list for additional folder fields.
      */
-    public static List<AdditionalFolderField> ADDITIONAL_FOLDER_FIELD_LIST = new CopyOnWriteArrayList<AdditionalFolderField>();
+    public static AdditionalFolderFieldList ADDITIONAL_FOLDER_FIELD_LIST = new AdditionalFolderFieldList();
 
     /**
      * No instantiation.
