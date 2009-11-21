@@ -50,6 +50,7 @@
 package com.openexchange.voipnow.json.actions;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.Stub;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -103,6 +104,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
     protected final S configureStub(final VoipNowServerSetting setting) throws AxisFault {
         final S soapStub = newSOAPStub();
         final Options options = soapStub._getServiceClient().getOptions();
+        final EndpointReference endpointReference;
         if (setting.isSecure()) {
             int port = setting.getPort();
             if (port == -1) {
@@ -113,7 +115,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
             /*
              * Create stub from custom URI and assign its options
              */
-            options.setTo(new org.apache.axis2.addressing.EndpointReference(sb.toString()));
+            endpointReference = new EndpointReference(sb.toString());
             /*
              * Custom SSL socket factory
              */
@@ -129,10 +131,14 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
             /*
              * Create stub from custom URI
              */
-            options.setTo(new org.apache.axis2.addressing.EndpointReference(sb.toString()));
+            endpointReference = new EndpointReference(sb.toString());
         }
         /*
-         * Set timeout
+         * Set end-point reference
+         */
+        options.setTo(endpointReference);
+        /*
+         * Set timeout and other options
          */
         final int soapTimeout = getSOAPTimeout();
         final Integer timeout = Integer.valueOf(soapTimeout);
@@ -140,6 +146,8 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
         options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, timeout);
         options.setTimeOutInMilliSeconds(soapTimeout);
         options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE);
+        options.setCallTransportCleanup(true);
+        options.setExceptionToBeThrownOnSOAPFault(false);
         return soapStub;
     }
 
