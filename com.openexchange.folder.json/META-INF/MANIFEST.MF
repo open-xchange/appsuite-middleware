@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.folder.json.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.requesthandler,
  com.openexchange.folderstorage,
  com.openexchange.groupware,
