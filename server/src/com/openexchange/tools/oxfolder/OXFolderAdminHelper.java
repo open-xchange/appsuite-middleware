@@ -344,12 +344,12 @@ public final class OXFolderAdminHelper {
                 final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
                 final int size = users.size();
                 for (int i = 1; i < size; i++) {
-                    setGlobalAddressBookEnabled(cid, users.get(i).intValue(), enable, writeCon, admin, false);
+                    setGlobalAddressBookDisabled(cid, users.get(i).intValue(), !enable, writeCon, admin, false);
                 }
                 /*
                  * Propagate with last update
                  */
-                setGlobalAddressBookEnabled(cid, users.get(0).intValue(), enable, writeCon, admin, true);
+                setGlobalAddressBookDisabled(cid, users.get(0).intValue(), !enable, writeCon, admin, true);
             }
         } finally {
             Database.back(cid, true, writeCon);
@@ -362,10 +362,10 @@ public final class OXFolderAdminHelper {
      * @param cid The context ID
      * @param userId The user ID
      * @param readCon A readable connection
-     * @return <code>true</code> if global address book is enabled; otherwise <code>false</code>
+     * @return <code>true</code> if global address book is disabled; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    public boolean isGlobalAddressBookEnabled(final int cid, final int userId, final Connection readCon) throws OXException {
+    public boolean isGlobalAddressBookDisabled(final int cid, final int userId, final Connection readCon) throws OXException {
         /*
          * Check if global permission is enabled for global address book folder
          */
@@ -374,7 +374,7 @@ public final class OXFolderAdminHelper {
             final int[] perms = getPermissionValue(cid, globalAddressBookId, OCLPermission.ALL_GROUPS_AND_USERS, readCon);
             if (null != perms) {
                 LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user=" + userId + ", context=" + cid);
-                return (perms[0] >= OCLPermission.READ_FOLDER);
+                return (perms[0] == OCLPermission.NO_PERMISSIONS);
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
@@ -389,9 +389,9 @@ public final class OXFolderAdminHelper {
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) >= OCLPermission.READ_FOLDER; // && rs.getInt(2) >= OCLPermission.READ_ALL_OBJECTS;
+                return rs.getInt(1) == OCLPermission.NO_PERMISSIONS; // && rs.getInt(2) >= OCLPermission.READ_ALL_OBJECTS;
             }
-            return false;
+            return true;
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } finally {
@@ -404,12 +404,12 @@ public final class OXFolderAdminHelper {
      * 
      * @param cid The context ID
      * @param userId The user ID
-     * @param enable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
+     * @param disable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
-    public void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon) throws OXException {
-        setGlobalAddressBookEnabled(cid, userId, enable, writeCon, null, true);
+    public void setGlobalAddressBookDisabled(final int cid, final int userId, final boolean disable, final Connection writeCon) throws OXException {
+        setGlobalAddressBookDisabled(cid, userId, disable, writeCon, null, true);
     }
 
     /**
@@ -417,11 +417,11 @@ public final class OXFolderAdminHelper {
      * 
      * @param cid The context ID
      * @param userId The user ID
-     * @param enable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
+     * @param disable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
-    private void setGlobalAddressBookEnabled(final int cid, final int userId, final boolean enable, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
+    private void setGlobalAddressBookDisabled(final int cid, final int userId, final boolean disable, final Connection writeCon, final Integer adminId, final boolean propagate) throws OXException {
         final int admin = adminId == null ? getContextAdminID(cid, writeCon) : adminId.intValue();
         final boolean isAdmin = (admin == userId);
         final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
@@ -472,16 +472,16 @@ public final class OXFolderAdminHelper {
                 stmt =
                     writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
                 pos = 1;
-                if (enable) {
+                if (disable) {
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                } else {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER);
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
                     stmt.setInt(
                         pos++,
                         OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
-                } else {
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
                 }
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -496,16 +496,16 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, cid); // cid
                 stmt.setInt(pos++, globalAddressBookId); // fuid
                 stmt.setInt(pos++, userId); // permission_id
-                if (enable) {
+                if (disable) {
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // fp
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
+                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
+                } else {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS); // orp
                     stmt.setInt(
                         pos++,
                         OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
-                } else {
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // fp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
                 }
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                 stmt.setInt(pos++, isAdmin ? 1 : 0); // admin_flag
