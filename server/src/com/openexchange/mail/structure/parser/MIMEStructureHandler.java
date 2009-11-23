@@ -54,14 +54,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import javax.mail.MessagingException;
 import javax.mail.Part;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.binary.Base64;
@@ -74,12 +82,18 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.ParameterizedHeader;
+import com.openexchange.mail.mime.PlainTextAddress;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
@@ -128,6 +142,8 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private JSONArray userFlags;
 
+    private boolean prepare;
+
     /**
      * Initializes a new {@link MIMEStructureHandler}.
      * 
@@ -138,6 +154,17 @@ public final class MIMEStructureHandler implements StructureHandler {
         mailJsonObjectQueue = new LinkedList<JSONObject>();
         mailJsonObjectQueue.addLast((currentMailObject = new JSONObject()));
         this.maxSize = maxSize;
+    }
+
+    /**
+     * Set the prepare flag.
+     * 
+     * @param prepare The prepare flag
+     * @return This handler with new prepare flag applied
+     */
+    public MIMEStructureHandler setPrepare(final boolean prepare) {
+        this.prepare = prepare;
+        return this;
     }
 
     /**
@@ -219,8 +246,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
         } catch (final Exception e) {
-            final Throwable t =
-                new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
+            final Throwable t = new Throwable(
+                new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn(t.getMessage(), t);
         }
         /*
@@ -312,8 +339,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                 nestedMail = (MailMessage) content;
             } else if (content instanceof InputStream) {
                 try {
-                    nestedMail =
-                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                    nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                        MIMEDefaultSession.getDefaultSession(),
+                        (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
@@ -328,7 +356,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Inner parser
              */
-            final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize);
+            final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize).setPrepare(prepare);
             new StructureMailMessageParser().parseMailMessage(nestedMail, inner, id);
             /*
              * Apply to this
@@ -492,32 +520,169 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private static void generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
+    private static final HeaderName HN_CONTENT_TYPE = HeaderName.valueOf(CONTENT_TYPE);
+
+    private static final Set<HeaderName> PARAMETERIZED_HEADERS = new HashSet<HeaderName>(Arrays.asList(
+        HN_CONTENT_TYPE,
+        HeaderName.valueOf(CONTENT_DISPOSITION)));
+
+    private static final Set<HeaderName> ADDRESS_HEADERS = new HashSet<HeaderName>(Arrays.asList(
+        HeaderName.valueOf("From"),
+        HeaderName.valueOf("To"),
+        HeaderName.valueOf("Cc"),
+        HeaderName.valueOf("Bcc"),
+        HeaderName.valueOf("Reply-To"),
+        HeaderName.valueOf("Sender"),
+        HeaderName.valueOf("Errors-To")));
+
+    private static final MailDateFormat MAIL_DATE_FORMAT = new MailDateFormat();
+
+    private void generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
         try {
             final JSONObject hdrObject = new JSONObject();
-            while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
-                final String headerName = entry.getKey();
-                if (hdrObject.has(headerName)) {
-                    final Object previous = hdrObject.get(headerName);
-                    final JSONArray ja;
-                    if (previous instanceof JSONArray) {
-                        ja = (JSONArray) previous;
+            if (prepare) {
+                while (iter.hasNext()) {
+                    final Entry<String, String> entry = iter.next();
+                    final String name = prepare ? entry.getKey().toLowerCase(Locale.ENGLISH) : entry.getKey();
+                    final HeaderName headerName = HeaderName.valueOf(name);
+                    if (ADDRESS_HEADERS.contains(headerName)) {
+                        final InternetAddress[] internetAddresses = getAddressHeader(entry.getValue());
+                        final JSONArray ja;
+                        if (hdrObject.has(name)) {
+                            ja = hdrObject.getJSONArray(name);
+                        } else {
+                            ja = new JSONArray();
+                        }
+                        for (final InternetAddress internetAddress : internetAddresses) {
+                            final JSONObject addressJsonObject = new JSONObject();
+                            final String personal = internetAddress.getPersonal();
+                            if (null != personal) {
+                                addressJsonObject.put("personal", personal);
+                            }
+                            addressJsonObject.put("address", internetAddress.getAddress());
+                            ja.put(addressJsonObject);
+                        }
+                    } else if (PARAMETERIZED_HEADERS.contains(headerName)) {
+                        final JSONObject parameterJsonObject = new JSONObject();
+                        {
+                            final ParameterizedHeader parameterizedHeader;
+                            if (HN_CONTENT_TYPE.equals(headerName)) {
+                                final ContentType ct = new ContentType(entry.getValue());
+                                parameterJsonObject.put("type", ct.getBaseType().toLowerCase(Locale.ENGLISH));
+                                parameterizedHeader = ct;
+                            } else {
+                                final ContentDisposition cd = new ContentDisposition(entry.getValue());
+                                parameterJsonObject.put("type", cd.getDisposition().toLowerCase(Locale.ENGLISH));
+                                parameterizedHeader = cd;
+                            }
+                            final JSONObject paramListJsonObject = new JSONObject();
+                            for (final Iterator<String> pi = parameterizedHeader.getParameterNames(); pi.hasNext();) {
+                                final String paramName = pi.next();
+                                if ("read-date".equalsIgnoreCase(paramName)) {
+                                    final String paramVal = parameterizedHeader.getParameter(paramName);
+                                    synchronized (MAIL_DATE_FORMAT) {
+                                        try {
+                                            paramListJsonObject.put(
+                                                paramName.toLowerCase(Locale.ENGLISH),
+                                                MAIL_DATE_FORMAT.parse(paramVal).getTime());
+                                        } catch (final ParseException pex) {
+                                            paramListJsonObject.put(paramName.toLowerCase(Locale.ENGLISH), paramVal);
+                                        }
+                                    }
+                                } else {
+                                    paramListJsonObject.put(
+                                        paramName.toLowerCase(Locale.ENGLISH),
+                                        parameterizedHeader.getParameter(paramName));
+                                }
+                            }
+                            parameterJsonObject.put("params", paramListJsonObject);
+                        }
+                        if (hdrObject.has(name)) {
+                            final Object previous = hdrObject.get(name);
+                            final JSONArray ja;
+                            if (previous instanceof JSONArray) {
+                                ja = (JSONArray) previous;
+                            } else {
+                                ja = new JSONArray();
+                                hdrObject.put(name, ja);
+                                ja.put(previous);
+                            }
+                            ja.put(parameterJsonObject);
+                        } else {
+                            hdrObject.put(name, parameterJsonObject);
+                        }
+                    } else {
+                        if (hdrObject.has(name)) {
+                            final Object previous = hdrObject.get(name);
+                            final JSONArray ja;
+                            if (previous instanceof JSONArray) {
+                                ja = (JSONArray) previous;
+                            } else {
+                                ja = new JSONArray();
+                                hdrObject.put(name, ja);
+                                ja.put(previous);
+                            }
+                            ja.put(MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
+                        } else {
+                            hdrObject.put(name, MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
+                        }
+                    }
+                }
+            } else {
+                while (iter.hasNext()) {
+                    final Entry<String, String> entry = iter.next();
+                    final String headerName = entry.getKey();
+                    if (hdrObject.has(headerName)) {
+                        final Object previous = hdrObject.get(headerName);
+                        final JSONArray ja;
+                        if (previous instanceof JSONArray) {
+                            ja = (JSONArray) previous;
+                        } else {
+                            ja = new JSONArray();
+                            hdrObject.put(headerName, ja);
+                            ja.put(previous);
+                        }
                         ja.put(entry.getValue());
                     } else {
-                        ja = new JSONArray();
-                        hdrObject.put(headerName, ja);
-                        ja.put(previous);
+                        hdrObject.put(headerName, entry.getValue());
                     }
-                    ja.put(entry.getValue());
-                } else {
-                    hdrObject.put(headerName, entry.getValue());
                 }
             }
             parent.put(MailJSONField.HEADERS.getKey(), hdrObject.length() > 0 ? hdrObject : JSONObject.NULL);
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the address headers denoted by specified header name in a safe manner.
+     * <p>
+     * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
+     * address header as it is.
+     * 
+     * @param name The address header name
+     * @param message The message providing the address header
+     * @return The parsed address headers as an array of {@link InternetAddress} instances
+     */
+    private static InternetAddress[] getAddressHeader(final String addresses) {
+        if (null == addresses || 0 == addresses.length()) {
+            return new InternetAddress[0];
+        }
+        try {
+            return QuotedInternetAddress.parseHeader(addresses, true);
+        } catch (final AddressException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                    new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
+                        "\". Using plain addresses' string representation instead.").toString(),
+                    e);
+            }
+            return getAddressesOnParseError(addresses);
+        }
+    }
+
+    private static InternetAddress[] getAddressesOnParseError(final String addr) {
+        return new InternetAddress[] { new PlainTextAddress(addr) };
     }
 
     private static interface InputStreamProvider {
