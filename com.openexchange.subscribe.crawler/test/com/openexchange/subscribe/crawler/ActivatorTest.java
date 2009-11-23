@@ -69,7 +69,7 @@ public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
         
         HashMap<String, String> map = null;
         try {
-            map = (HashMap<String, String>)Yaml.load(new File("/Users/karstenwill/Desktop/crawlerCredentials.yml"));
+            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -95,4 +95,21 @@ public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
 
     }
 
+    private File getSecretsFile() {
+        String value = System.getProperty("secretFile");
+        if (null == value) {
+            fail("File for crawler credentials is not defined.");
+        }
+        File secrets = new File(value);
+        if (!secrets.exists()) {
+            fail("File for crawler credentials does not exist.");
+        }
+        if (!secrets.isFile()) {
+            fail("File for crawler credentials is not a file.");
+        }
+        if (!secrets.canRead()) {
+            fail("File for crawler credentials can not be read.");
+        }
+        return secrets;
+    }
 }
