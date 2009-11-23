@@ -218,6 +218,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_USM = "access-usm";
     protected static final String OPT_DISABLE_GAB = "access-global-address-book-disabled";
     protected static final String OPT_ACCESS_PUBLIC_FOLDER_EDITABLE = "access-public-folder-editable";
+    protected static final String OPT_ACCESS_VOIPNOW = "access-voipnow";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     
     
@@ -288,6 +289,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessUSM = null;
     protected CLIOption accessGAB = null;
     protected CLIOption accessPublicFolderEditable = null;
+    protected CLIOption accessVoipNow = null;
     
     
     // non-generic extended option
@@ -593,6 +595,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
         access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
         access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
+        access.setVoipNow(accessOption2BooleanCreate(parser, this.accessVoipNow));
     }
     
     protected final boolean accessOption2BooleanCreate(final AdminParser parser,final CLIOption accessOption){
@@ -732,6 +735,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
             changed = true;
         }
+        if((String) parser.getOptionValue(this.accessVoipNow) != null) {
+            access.setVoipNow(accessOption2BooleanCreate(parser, this.accessVoipNow));
+            changed = true;
+        }
         return changed;
     }
     
@@ -817,6 +824,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
         this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, false, true);
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, false, true);
+        this.accessVoipNow = setLongOpt(admp, OPT_ACCESS_VOIPNOW, "on/off", "VoipNow access (Default is off)", true, false, true);
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
