@@ -72,6 +72,8 @@ public final class Base64JSONString implements JSONString {
 
     /**
      * Initializes a new {@link Base64JSONString}.
+     * 
+     * @throws MailException If initialization fails
      */
     public Base64JSONString(final InputStream in) throws MailException {
         super();
