@@ -139,8 +139,10 @@ public final class UserAttributeAccess {
         /*
          * Create a modifiable map from existing unmodifiable map
          */
-        final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(attributes.size());
-        for (final Iterator<Entry<String, Set<String>>> iter = attributes.entrySet().iterator(); iter.hasNext();) {
+        final int size = attributes.size();
+        final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(size);
+        final Iterator<Entry<String, Set<String>>> iter = attributes.entrySet().iterator();
+        for (int i = 0; i < size; i++) {
             final Entry<String, Set<String>> entry = iter.next();
             newAttributes.put(entry.getKey(), new HashSet<String>(entry.getValue()));
         }
