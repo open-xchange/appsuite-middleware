@@ -971,10 +971,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @throws LdapException If user cannot be fetched from storage
      */
     private boolean hasBetaEnabled() throws LdapException {
-        return UserAttributeAccess.getBooleanAttribute(
-            BETA,
-            UserStorage.getInstance().getUser(userId, ctx),
-            UserAttributeAccess.getBooleanProperty(PROP_BETA, true));
+        final UserAttributeAccess uaa = UserAttributeAccess.getDefaultInstance();
+        return uaa.getBooleanAttribute(BETA, UserStorage.getInstance().getUser(userId, ctx), uaa.getBooleanProperty(PROP_BETA, true));
     }
 
 }

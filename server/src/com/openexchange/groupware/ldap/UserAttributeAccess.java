@@ -57,6 +57,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -66,11 +68,45 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class UserAttributeAccess {
 
+    private static volatile UserAttributeAccess instance;
+
     /**
-     * No instantiation.
+     * Gets the default instance.
+     * 
+     * @return The default instance
+     */
+    public static UserAttributeAccess getDefaultInstance() {
+        UserAttributeAccess tmp = instance;
+        if (null == tmp) {
+            synchronized (UserAttributeAccess.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = instance = new UserAttributeAccess();
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /*-
+     * Member stuff
+     */
+
+    private final UserStorage userStorage;
+
+    /**
+     * Initializes a new {@link UserAttributeAccess}.
      */
     private UserAttributeAccess() {
+        this(UserStorage.getInstance());
+    }
+
+    /**
+     * Initializes a new {@link UserAttributeAccess}.
+     */
+    public UserAttributeAccess(final UserStorage userStorage) {
         super();
+        this.userStorage = userStorage;
     }
 
     /**
@@ -80,7 +116,7 @@ public final class UserAttributeAccess {
      * @param defaultValue The default <code>boolean</code> value to return if property is missing
      * @return The <code>boolean</code> value
      */
-    public static boolean getBooleanProperty(final String name, final boolean defaultValue) {
+    public boolean getBooleanProperty(final String name, final boolean defaultValue) {
         final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null == service) {
             return defaultValue;
@@ -99,7 +135,7 @@ public final class UserAttributeAccess {
      * @param defaultValue The default value to return if user has no attribute of specified name
      * @return The value of the <code>boolean</code> attribute
      */
-    public static boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) {
+    public boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) {
         return getBooleanAttribute(name, UserStorage.getStorageUser(userId, contextId), defaultValue);
     }
 
@@ -113,7 +149,7 @@ public final class UserAttributeAccess {
      * @param defaultValue The default value to return if user has no attribute of specified name
      * @return The value of the <code>boolean</code> attribute
      */
-    public static boolean getBooleanAttribute(final String name, final User user, final boolean defaultValue) {
+    public boolean getBooleanAttribute(final String name, final User user, final boolean defaultValue) {
         final Map<String, Set<String>> attributes = user.getAttributes();
         if (null == attributes) {
             return defaultValue;
@@ -133,8 +169,23 @@ public final class UserAttributeAccess {
      * @param user The user
      * @param context The context
      * @throws LdapException If setting <code>boolean</code> attribute fails
+     * @throws ContextException If context look-up fails
      */
-    public static void setBooleanAttribute(final String name, final boolean value, final User user, final Context context) throws LdapException {
+    public void setBooleanAttribute(final String name, final boolean value, final int userId, final int contextId) throws LdapException, ContextException {
+        final Context context = ContextStorage.getStorageContext(contextId);
+        setBooleanAttribute(name, value, userStorage.getUser(userId, context), context);
+    }
+
+    /**
+     * Set specified <code>boolean</code> attribute for given user.
+     * 
+     * @param name The attribute name
+     * @param value The attribute <code>boolean</code> value
+     * @param user The user
+     * @param context The context
+     * @throws LdapException If setting <code>boolean</code> attribute fails
+     */
+    public void setBooleanAttribute(final String name, final boolean value, final User user, final Context context) throws LdapException {
         final Map<String, Set<String>> attributes = user.getAttributes();
         /*
          * Create a modifiable map from existing unmodifiable map
@@ -164,7 +215,7 @@ public final class UserAttributeAccess {
         // userImpl.setTimeZone(user.getTimeZone());
         // userImpl.setPreferredLanguage(user.getPreferredLanguage());
         userImpl.setAttributes(newAttributes);
-        UserStorage.getInstance().updateUser(user, context);
+        userStorage.updateUser(user, context);
     }
 
 }
