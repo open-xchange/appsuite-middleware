@@ -125,6 +125,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.isUSM()));
         datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
         datarow.add(String.valueOf(access.isPublicFolderEditable()));
+        datarow.add(String.valueOf(access.isVoipNow()));
         data.add(datarow);
         doCSVOutput(getAccessColums(),data);        
     }
@@ -160,6 +161,7 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_USM);
         columnnames.add(UserAbstraction.OPT_DISABLE_GAB);
         columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
+        columnnames.add(UserAbstraction.OPT_ACCESS_VOIPNOW);
         return columnnames;
     }
 
