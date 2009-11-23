@@ -595,48 +595,41 @@ public final class MessageParser {
                 final JSONObject attachment = attachmentArray.getJSONObject(i);
                 final String seqId =
                     attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
-                if (null == seqId) {
-                    final String key = MailJSONField.CONTENT.getKey();
-                    if (attachment.hasAndNotNull(key)) {
+                if (null == seqId && attachment.hasAndNotNull(MailJSONField.CONTENT.getKey())) {
+                    /*
+                     * A direct attachment, as data part
+                     */
+                    final String contentType = parseContentType(attachment.getString(MailJSONField.CONTENT_TYPE.getKey()));
+                    final String charsetName = "UTF-8";
+                    final byte[] content;
+                    try {
                         /*
-                         * A direct attachment, as data part
+                         * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content
+                         * type.
                          */
-                        final String contentType = parseContentType(attachment.getString(MailJSONField.CONTENT_TYPE.getKey()));
-                        final String charsetName = "UTF-8";
-                        final byte[] content;
-                        try {
-                            /*
-                             * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content type.
-                             */
-                            final String validHtml = HTMLProcessing.getConformHTML(attachment.getString(key), "US-ASCII");                          
-                            if (MIMETypes.MIME_TEXT_PLAIN.equals(contentType)) {
-                                final HTML2TextHandler html2textHandler = new HTML2TextHandler(4096, true);
-                                HTMLParser.parse(validHtml, html2textHandler);
-                                content = html2textHandler.getText().getBytes(charsetName);
-                            } else {
-                                content = validHtml.getBytes(charsetName);
-                            }
+                        final String validHtml = HTMLProcessing.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "US-ASCII");
+                        if (MIMETypes.MIME_TEXT_PLAIN.equals(contentType)) {
+                            final HTML2TextHandler html2textHandler = new HTML2TextHandler(4096, true);
+                            HTMLParser.parse(validHtml, html2textHandler);
+                            content = html2textHandler.getText().getBytes(charsetName);
+                        } else {
+                            content = validHtml.getBytes(charsetName);
+                        }
 
-                        } catch (final UnsupportedEncodingException e) {
-                            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-                        }
-                        /*
-                         * As data object
-                         */
-                        final DataProperties properties = new DataProperties();
-                        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType);
-                        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(content.length));
-                        properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
-                        final Data<byte[]> data = new SimpleData<byte[]>(content, properties);
-                        final DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
-                        attachmentHandler.addAttachment(dataMailPart);
-                    } else {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Invalid JSON attachment object: Missing \"content\" field.");
-                        }
-                        continue NextAttachment;
+                    } catch (final UnsupportedEncodingException e) {
+                        throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
                     }
-                } else if (seqId.startsWith(FILE_PREFIX, 0)) {
+                    /*
+                     * As data object
+                     */
+                    final DataProperties properties = new DataProperties();
+                    properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType);
+                    properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(content.length));
+                    properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
+                    final Data<byte[]> data = new SimpleData<byte[]>(content, properties);
+                    final DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
+                    attachmentHandler.addAttachment(dataMailPart);
+                } else if (null != seqId && seqId.startsWith(FILE_PREFIX, 0)) {
                     /*
                      * A file reference
                      */
