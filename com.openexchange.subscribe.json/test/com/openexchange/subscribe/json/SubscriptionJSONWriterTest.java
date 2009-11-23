@@ -158,7 +158,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
         String[] basicCols = new String[] { "id", "unknownColumn" };
         
         try {
-            JSONArray array = new SubscriptionJSONWriter().writeArray(
+            new SubscriptionJSONWriter().writeArray(
                 subscription,
                 basicCols,
                 specialCols,

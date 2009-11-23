@@ -77,6 +77,14 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
         this(context, serviceName, service, null, whiteboard);
     }
     
+    public ServiceDependentRegistration(BundleContext context, String serviceName, Whiteboard whiteboard) {
+        this(context, serviceName, (T) null, whiteboard);
+    }
+    
+    public ServiceDependentRegistration(BundleContext context, String serviceName, Dictionary dict, Whiteboard whiteboard) {
+        this(context, serviceName, null, dict, whiteboard);
+    }
+    
     /**
      * Override to configure the service
      * @param service

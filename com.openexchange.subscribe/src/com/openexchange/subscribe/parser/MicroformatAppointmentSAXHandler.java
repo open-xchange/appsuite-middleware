@@ -66,7 +66,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
  */
 public class MicroformatAppointmentSAXHandler extends AbstractMicroformatSAXHandler<CalendarDataObject>{
     
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss z"); //iso 8601, this one should be locale-independend    
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss z"); //iso 8601, this one should be locale-independend    
     private List<Exception> exceptions = new LinkedList<Exception>();
     
     public void startElement(String uri, String name, String qName, Attributes atts) {

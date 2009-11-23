@@ -76,8 +76,16 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     public static SecurityStrategy FOLDER_ADMIN_ONLY = new AllowEverything(); // Must be overwritten by activator
 
-    public static PublicationStorage STORAGE = new DummyStorage();
+    private static PublicationStorage STORAGE = new DummyStorage(); // Must be overwritten by activator
 
+    public static void setDefaultStorage(PublicationStorage storage) {
+        STORAGE = storage;
+    }
+    
+    public static PublicationStorage getDefaultStorage() {
+        return STORAGE;
+    }
+    
     public void create(Publication publication) throws PublicationException {
         checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);

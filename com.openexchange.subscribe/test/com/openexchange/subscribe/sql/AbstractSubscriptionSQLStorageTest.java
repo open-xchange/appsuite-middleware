@@ -81,30 +81,30 @@ import com.openexchange.tools.sql.SQLTestCase;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
-    
+
     protected SubscriptionStorage storage = null;
-    
+
     protected Subscription subscription = null;
-    
+
     protected Subscription subscription2 = null;
-    
+
     protected List<Integer> subscriptionsToDelete = new ArrayList<Integer>();
-    
+
     protected Context ctx = new SimContext(1);
-    
+
     protected String folderId = "eins";
-    
+
     protected int userId = 44;
-    
+
     protected long lastUpdate;
-    
+
     public void setUp() throws Exception {
         SubscriptionErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.subscribe");
         SubscriptionErrorMessage.EXCEPTIONS.setComponent(new StringComponent("SUBS"));
-        
+
         loadProperties();
         super.setUp();
-        
+
         // First
         FormElement formElementLogin = new FormElement();
         formElementLogin.setName("login");
@@ -129,11 +129,11 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscriptionSource.setIcon("http://path/to/icon");
         subscriptionSource.setFormDescription(formDescription);
         subscriptionSource.setFolderModule(FolderObject.CONTACT);
-        
+
         Map<String, Object> configuration = new HashMap<String, Object>();
         configuration.put("login", "user_a");
         configuration.put("password", "password_a");
-        
+
         subscription = new Subscription();
         subscription.setContext(ctx);
         subscription.setFolderId(folderId);
@@ -142,7 +142,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription.setUserId(userId);
         subscription.setSource(subscriptionSource);
         subscription.setConfiguration(configuration);
-        
+
         // Second
         FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
@@ -167,11 +167,11 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscriptionSource2.setIcon("http://path/to/icon2");
         subscriptionSource2.setFormDescription(formDescription2);
         subscriptionSource2.setFolderModule(FolderObject.CONTACT);
-        
+
         Map<String, Object> configuration2 = new HashMap<String, Object>();
         configuration2.put("login", "user_a2");
         configuration2.put("password", "password_a2");
-        
+
         subscription2 = new Subscription();
         subscription2.setContext(ctx);
         subscription2.setFolderId(folderId);
@@ -180,14 +180,13 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription2.setUserId(userId);
         subscription2.setSource(subscriptionSource2);
         subscription2.setConfiguration(configuration2);
-        
-        
+
         SimSubscriptionSourceDiscoveryService discoveryService = new SimSubscriptionSourceDiscoveryService();
         discoveryService.addSource(subscriptionSource);
         discoveryService.addSource(subscriptionSource2);
         storage = new SubscriptionSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
     }
-    
+
     public void tearDown() throws Exception {
         if (subscriptionsToDelete.size() > 0) {
             for (int delId : subscriptionsToDelete) {
@@ -197,7 +196,8 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
                 storage.forgetSubscription(subscriptionToDelete);
             }
 
-            DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", SQLTools.createLIST(subscriptionsToDelete.size(), PLACEHOLDER))));
+            DELETE delete = new DELETE().FROM(subscriptions).WHERE(
+                new EQUALS("cid", PLACEHOLDER).AND(new IN("id", SQLTools.createLIST(subscriptionsToDelete.size(), PLACEHOLDER))));
 
             Connection writeConnection = getDBProvider().getWriteConnection(ctx);
             List<Integer> values = new ArrayList<Integer>();
@@ -210,22 +210,25 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
 
         super.tearDown();
     }
-    
-    
+
     protected void clearFolder(String folderId) throws Exception {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-        
+
         DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("folder_id", PLACEHOLDER));
         List<Object> values = new ArrayList<Object>();
         values.add(folderId);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
-        
+
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
-    
+
     protected void assertEquals(Subscription expected, Subscription actual) {
         if (expected != null) {
             assertNotNull(actual);
+        }
+        if (expected == null) {
+            assertTrue("Expected null", actual == null);
+            return;
         }
         assertEquals(expected.getContext().getContextId(), actual.getContext().getContextId());
         assertEquals(expected.getFolderId(), actual.getFolderId());
@@ -235,10 +238,14 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getSource(), actual.getSource());
         assertEquals(expected.getDescription(), actual.getDescription());
     }
-    
+
     protected void assertEquals(SubscriptionSource expected, SubscriptionSource actual) {
         if (expected != null) {
             assertNotNull(actual);
+        }
+        if (expected == null) {
+            assertTrue("Expected null", actual == null);
+            return;
         }
         assertEquals(expected.getDisplayName(), actual.getDisplayName());
         assertEquals(expected.getFolderModule(), actual.getFolderModule());
@@ -246,7 +253,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getFormDescription(), actual.getFormDescription());
     }
-    
+
     protected void assertEquals(DynamicFormDescription expected, DynamicFormDescription actual) {
         assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
         for (FormElement formElementExpected : expected.getFormElements()) {
@@ -262,10 +269,14 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
             }
         }
     }
-    
+
     protected void assertEquals(FormElement expected, FormElement actual) {
         if (expected != null) {
             assertNotNull(actual);
+        }
+        if (expected == null) {
+            assertTrue("Expected null", actual == null);
+            return;
         }
         assertEquals(expected.getDefaultValue(), actual.getDefaultValue());
         assertEquals(expected.getDisplayName(), actual.getDisplayName());

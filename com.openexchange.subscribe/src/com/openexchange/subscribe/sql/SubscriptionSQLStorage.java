@@ -500,8 +500,10 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw new SubscriptionException(e);
         } finally {
             try {
-                writeConnection.rollback();
-                writeConnection.setAutoCommit(true);
+                if(writeConnection != null) {
+                    writeConnection.rollback();
+                    writeConnection.setAutoCommit(true);
+                }
             } catch (SQLException e) {
                 throw SQLException.create(e);
             }
@@ -533,8 +535,10 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             throw SQLException.create(e);
         } finally {
             try {
-                writeConnection.rollback();
-                writeConnection.setAutoCommit(true);
+                if(writeConnection != null) {
+                    writeConnection.rollback();
+                    writeConnection.setAutoCommit(true);
+                }
             } catch (SQLException e) {
                 throw SQLException.create(e);
             }

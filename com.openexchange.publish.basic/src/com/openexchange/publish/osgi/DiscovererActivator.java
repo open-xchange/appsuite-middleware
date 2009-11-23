@@ -99,12 +99,12 @@ public class DiscovererActivator implements BundleActivator {
         discoveryRegistration =
             context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
 
-        FolderFieldActivator.DISCOVERER = compositeDiscovererCollector;
+        FolderFieldActivator.setDiscoverer( compositeDiscovererCollector );
 
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         final GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
 
-        AbstractPublicationService.STORAGE = new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector);
+        AbstractPublicationService.setDefaultStorage( new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector) );
         AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(whiteboard.getService(UserConfigurationService.class));
 
         componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);

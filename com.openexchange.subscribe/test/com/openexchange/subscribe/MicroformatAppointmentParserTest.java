@@ -13,7 +13,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 public class MicroformatAppointmentParserTest extends TestCase {
     public Date defaultStartDate; 
     public Date defaultEndDate;
-    public SimpleDateFormat dateFormat = MicroformatAppointmentSAXHandler.dateFormat;
+    public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss z");
     
     public String wellBehavedHtml;
     

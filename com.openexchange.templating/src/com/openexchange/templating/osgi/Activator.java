@@ -76,7 +76,7 @@ public class Activator implements BundleActivator {
         whiteboard = new Whiteboard(context);
         
         
-        this.serviceRegistration = new ServiceDependentRegistration<TemplateServiceImpl>(context, TemplateService.class.getName(), null, whiteboard) {
+        this.serviceRegistration = new ServiceDependentRegistration<TemplateServiceImpl>(context, TemplateService.class.getName(), whiteboard) {
             private ConfigurationService config;
 
             @Override

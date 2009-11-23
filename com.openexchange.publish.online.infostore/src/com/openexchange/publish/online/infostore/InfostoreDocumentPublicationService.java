@@ -134,7 +134,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     public Publication getPublication(Context ctx, String secret) throws PublicationException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put(SECRET, secret);
-        Collection<Publication> result = STORAGE.search(ctx, getTarget().getId(), query);
+        Collection<Publication> result = getDefaultStorage().search(ctx, getTarget().getId(), query);
         if(result == null || result.isEmpty()) {
             return null;
         }

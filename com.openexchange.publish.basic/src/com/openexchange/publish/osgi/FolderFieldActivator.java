@@ -65,8 +65,12 @@ import com.openexchange.publish.folders.IsPublished;
  */
 public class FolderFieldActivator implements BundleActivator {
 
-    public static PublicationTargetDiscoveryService DISCOVERER;
+    private static PublicationTargetDiscoveryService DISCOVERER;
 
+    public static void setDiscoverer(PublicationTargetDiscoveryService discoverer) {
+        DISCOVERER = discoverer;
+    }
+    
     private ServiceRegistration registerService;
 
     public void start(final BundleContext context) throws Exception {

@@ -66,7 +66,7 @@ public enum TemplateErrorMessage implements OXErrorMessage {
     private String help;
     private String message;
     
-    public static TemplateExceptionFactory EXCEPTIONS = new TemplateExceptionFactory();
+    public static final TemplateExceptionFactory EXCEPTIONS = new TemplateExceptionFactory();
     
     private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
         this.category = category;

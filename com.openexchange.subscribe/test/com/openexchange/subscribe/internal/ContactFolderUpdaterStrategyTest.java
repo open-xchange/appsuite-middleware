@@ -107,7 +107,6 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         
         int newScore = strategy.calculateSimilarityScore(contact, contact2, null);
         assertTrue("Similarity score for matching birthdays should be bigger", newScore > score);
-        score = newScore;
         
     }
     

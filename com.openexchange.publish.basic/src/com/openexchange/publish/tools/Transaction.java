@@ -76,60 +76,71 @@ public class Transaction {
     }
 
     public List<Integer> executeStatement(String sql, Object... objects) throws DBPoolingException, SQLException {
-        if (connection == null) {
-            connection = Database.get(contextId, true);
-            connection.setAutoCommit(false);
-        }
-
-        PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        for (int i = 0; i < objects.length; i++) {
-            statement.setObject(i + 1, objects[i]);
-        }
-
-        statement.execute();
-
-        ResultSet keys = statement.getGeneratedKeys();
+        PreparedStatement statement = null;
+        ResultSet keys = null;        
         List<Integer> retval = new ArrayList<Integer>();
-        while (keys.next()) {
-            retval.add(keys.getInt(1));
+        try {
+            if (connection == null) {
+                connection = Database.get(contextId, true);
+                connection.setAutoCommit(false);
+            }
+
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < objects.length; i++) {
+                statement.setObject(i + 1, objects[i]);
+            }
+
+            statement.execute();
+
+            keys = statement.getGeneratedKeys();
+            while (keys.next()) {
+                retval.add(keys.getInt(1));
+            }
+        } finally {
+            closeSQLStuff(null, statement, keys);
         }
 
-        closeSQLStuff(null, statement, keys);
 
         return retval;
     }
 
     public List<Map<String, Object>> executeQuery(String sql, Object... objects) throws DBPoolingException, SQLException {
-        Connection con;
-        if (connection == null) {
-            con = Database.get(contextId, false);
-        } else {
-            con = connection;
-        }
-
-        PreparedStatement statement = con.prepareStatement(sql);
-        for (int i = 0; i < objects.length; i++) {
-            statement.setObject(i + 1, objects[i]);
-        }
-
-        ResultSet rs = statement.executeQuery();
-        ResultSetMetaData rsmd = rs.getMetaData();
+        Connection con = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
         List<Map<String, Object>> retval = new ArrayList<Map<String, Object>>();
-        while (rs.next()) {
-            Map<String, Object> row = new HashMap<String, Object>();
-            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                String column = rsmd.getColumnName(i);
-                row.put(column, rs.getObject(column));
+
+        try {
+            if (connection == null) {
+                con = Database.get(contextId, false);
+            } else {
+                con = connection;
             }
-            retval.add(row);
+
+            statement = con.prepareStatement(sql);
+            for (int i = 0; i < objects.length; i++) {
+                statement.setObject(i + 1, objects[i]);
+            }
+
+            rs = statement.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<String, Object>();
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    String column = rsmd.getColumnName(i);
+                    row.put(column, rs.getObject(column));
+                }
+                retval.add(row);
+            }
+        } finally {
+            closeSQLStuff(null, statement, rs);
+
+            if (connection == null) {
+                closeSQLStuff(con, null, null);
+                Database.back(contextId, false, con);
+            }
         }
 
-        closeSQLStuff(null, statement, rs);
-
-        if (connection == null) {
-            closeSQLStuff(con, null, null);
-            Database.back(contextId, false, con);
-        }
 
         return retval;
     }

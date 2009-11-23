@@ -67,7 +67,7 @@ public class DeleteEventListenerActivator implements BundleActivator {
     private ServiceRegistration serviceRegistration;
 
     public void start(final BundleContext context) throws Exception {
-        final PublicationStorage storage = AbstractPublicationService.STORAGE;
+        final PublicationStorage storage = AbstractPublicationService.getDefaultStorage();
         final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setStorage(storage);
         serviceRegistration = context.registerService(DeleteListener.class.getName(), listener, null);

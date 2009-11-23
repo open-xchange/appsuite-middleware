@@ -74,7 +74,7 @@ import static com.openexchange.groupware.infostore.utils.Metadata.*;
  */
 public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransformer {
 
-    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
     static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }

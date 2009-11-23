@@ -81,7 +81,7 @@ public class CleanUpActivator implements BundleActivator {
         whiteboard = new Whiteboard(context);
         final ContextService contexts = whiteboard.getService(ContextService.class);
 
-        final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.STORAGE);
+        final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.getDefaultStorage());
         
         registrations = new LinkedList<ServiceRegistration>();
 

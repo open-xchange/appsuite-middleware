@@ -73,7 +73,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class MapToContactObjectTransformer implements MapToObjectTransformer{
 	
-    private static final DateFormat DATE = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat DATE = new SimpleDateFormat("yyyy-MM-dd");
     static {
         DATE.setTimeZone(TimeZone.getTimeZone("UTC"));
     }

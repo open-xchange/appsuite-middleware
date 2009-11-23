@@ -147,7 +147,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         if (request.has("id")) {
             int id = request.getInt("id");
             Subscription subscription = loadSubscription(id, context, request.optString("source"), session.getPassword());
-            if (!ids.contains(ids)) {
+            if (!ids.contains(id)) {
                 ids.add(id);
                 subscriptionsToRefresh.add(subscription);
             }
@@ -225,7 +225,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
         for (String identifier : identifiers) {
             String columns = request.optString(identifier);
-            if (columns != null || !columns.equals("")) {
+            if (columns != null && !columns.equals("")) {
                 dynamicColumns.put(identifier, columns.split("\\s*,\\s*"));
             }
         }

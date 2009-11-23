@@ -82,7 +82,7 @@ public enum SubscriptionJSONErrorMessages implements OXErrorMessage {
 
     private int errorCode;
     
-    public static SubscriptionJSONExceptions FACTORY = new SubscriptionJSONExceptions();
+    public static final SubscriptionJSONExceptions FACTORY = new SubscriptionJSONExceptions();
     
     /**
      * Initializes a new {@link SubscriptionJSONErrorMessages}.

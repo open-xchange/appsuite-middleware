@@ -90,15 +90,23 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
      * @throws IOException
      */
     protected String readSubscription(Subscription subscription) throws IOException{
-        URL url = null; //new URL(subscription.getUrl());
-        URLConnection connection = url.openConnection();
-        BufferedReader buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
+        BufferedReader buffy = null;
         StringBuilder bob = new StringBuilder();
-        String line = buffy.readLine();
-        while (line != null){
-            bob.append (line);
-            bob.append ("\n");
-            line = buffy.readLine();
+               
+        try {
+            URL url = new URL(""); //new URL(subscription.getUrl());
+            URLConnection connection = url.openConnection();
+            buffy = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
+            String line = buffy.readLine();
+            while (line != null){
+                bob.append (line);
+                bob.append ("\n");
+                line = buffy.readLine();
+            }
+        } finally {
+            if(buffy != null) {
+                buffy.close();
+            }
         }
         return bob.toString();
     }
