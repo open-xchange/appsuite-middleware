@@ -300,6 +300,9 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                 mailAccess.connect(false);
                 try {
                     final MailMessage mm = mailAccess.getMessageStorage().getMessage(fullname, mailId, false);
+                    if (null == mm) {
+                        throw new MailException(MailException.Code.MAIL_NOT_FOUND, mailId, fullname);
+                    }
                     final boolean unseen = !mm.isSeen();
                     final JSONObject rawMailMessage = MessageWriter.writeRawMailMessage(accountId, mm);
                     if (unseen) {
