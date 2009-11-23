@@ -97,7 +97,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                 try {
                     value = new Integer(String.valueOf(setting.getSingleValue()));
                 } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue());
+                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue().toString(), "contactCollectFolder");
                 }
                 ServerUserSetting.getDefaultInstance().setIContactCollectionFolder(ctx.getContextId(), user.getId(), value);
             }
