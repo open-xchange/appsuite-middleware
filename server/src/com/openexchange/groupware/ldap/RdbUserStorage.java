@@ -147,35 +147,35 @@ public class RdbUserStorage extends UserStorage {
         final Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
             return getUser(context, con, new int[] { userId })[0];
-        } catch (UserException e) {
+        } catch (final UserException e) {
             throw new LdapException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
     }
 
-    private User[] getUser(Context ctx, Connection con, int[] userIds) throws UserException {
+    private User[] getUser(final Context ctx, final Connection con, final int[] userIds) throws UserException {
         if (0 == userIds.length) {
             return new User[0];
         }
-        Map<Integer, UserImpl> users = new HashMap<Integer, UserImpl>();
+        final Map<Integer, UserImpl> users = new HashMap<Integer, UserImpl>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(getIN(SELECT_USER, userIds.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            for (int userId : userIds) {
+            for (final int userId : userIds) {
                 stmt.setInt(pos++, userId);
             }
             result = stmt.executeQuery();
             while (result.next()) {
-                UserImpl user = new UserImpl();
+                final UserImpl user = new UserImpl();
                 pos = 1;
                 user.setId(result.getInt(pos++));
                 user.setUserPassword(result.getString(pos++));
@@ -195,12 +195,12 @@ public class RdbUserStorage extends UserStorage {
                 user.setContactId(result.getInt(pos++));
                 users.put(I(user.getId()), user);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        for (int userId : userIds) {
+        for (final int userId : userIds) {
             if (!users.containsKey(I(userId))) {
                 throw new UserException(UserException.Code.USER_NOT_FOUND, I(userId), I(ctx.getContextId()));
             }
@@ -213,11 +213,11 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(Context ctx) throws UserException {
+    public User[] getUser(final Context ctx) throws UserException {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new UserException(e);
         }
         try {
@@ -228,14 +228,14 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User[] getUser(Context ctx, int[] userIds) throws UserException {
+    public User[] getUser(final Context ctx, final int[] userIds) throws UserException {
         if (0 == userIds.length) {
             return new User[0];
         }
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new UserException(e);
         }
         try {
@@ -245,97 +245,97 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void loadLoginInfo(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
+    private void loadLoginInfo(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            String sql = getIN(SELECT_LOGIN, users.size());
+            final String sql = getIN(SELECT_LOGIN, users.size());
             stmt = con.prepareStatement(sql);
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
-            for (Integer userId : users.keySet()) {
+            for (final Integer userId : users.keySet()) {
                 stmt.setInt(pos++, userId.intValue());
             }
             result = stmt.executeQuery();
             while (result.next()) {
                 users.get(I(result.getInt(1))).setLoginInfo(result.getString(2));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
     }
 
-    private void loadContact(Context ctx, Connection con, Map<Integer, UserImpl> users) throws UserException {
+    private void loadContact(final Context ctx, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(getIN(SELECT_CONTACT, users.size()));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(users.size(), 1);
-            for (UserImpl user : users.values()) {
+            final Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(users.size(), 1);
+            for (final UserImpl user : users.values()) {
                 stmt.setInt(pos++, user.getContactId());
                 userByContactId.put(I(user.getContactId()), user);
             }
             result = stmt.executeQuery();
             while (result.next()) {
                 pos = 1;
-                UserImpl user = userByContactId.get(I(result.getInt(pos++)));
+                final UserImpl user = userByContactId.get(I(result.getInt(pos++)));
                 user.setGivenName(result.getString(pos++));
                 user.setSurname(result.getString(pos++));
                 user.setDisplayName(result.getString(pos++));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
     }
 
-    private void loadGroups(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
-        Map<Integer, List<Integer>> tmp = new HashMap<Integer, List<Integer>>(users.size(), 1);
-        for (User user : users.values()) {
-            List<Integer> userGroups = new ArrayList<Integer>();
+    private void loadGroups(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
+        final Map<Integer, List<Integer>> tmp = new HashMap<Integer, List<Integer>>(users.size(), 1);
+        for (final User user : users.values()) {
+            final List<Integer> userGroups = new ArrayList<Integer>();
             userGroups.add(I(0));
             tmp.put(I(user.getId()), userGroups);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", users.size());
+            final String sql = getIN("SELECT member,id FROM groups_member WHERE cid=? AND member IN (", users.size());
             stmt = con.prepareStatement(sql);
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
-            for (User user : users.values()) {
+            for (final User user : users.values()) {
                 stmt.setInt(pos++, user.getId());
             }
             result = stmt.executeQuery();
             while (result.next()) {
                 tmp.get(I(result.getInt(1))).add(I(result.getInt(2)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        for (UserImpl user : users.values()) {
+        for (final UserImpl user : users.values()) {
             user.setGroups(I2i(tmp.get(I(user.getId()))));
         }
     }
     
     private static final String STR_ALIAS = "alias";
     
-    private void loadAttributes(Context context, Connection con, Map<Integer, UserImpl> users) throws UserException {
-        Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
+    private void loadAttributes(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws UserException {
+        final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(getIN(SELECT_ATTRS, users.size()));
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
-            for (User user : users.values()) {
+            for (final User user : users.values()) {
                 stmt.setInt(pos++, user.getId());
                 usersAttrs.put(I(user.getId()), new HashMap<String, Set<String>>());
             }
@@ -344,7 +344,7 @@ public class RdbUserStorage extends UserStorage {
              * Gather attributes
              */
             while (result.next()) {
-                Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
+                final Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
                 final String name = result.getString(2);
                 Set<String> set = attrs.get(name);
                 if (null == set) {
@@ -353,18 +353,18 @@ public class RdbUserStorage extends UserStorage {
                 }
                 set.add(result.getString(3));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        for (UserImpl user : users.values()) {
-            Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
+        for (final UserImpl user : users.values()) {
+            final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
             /*
              * Check for aliases
              */
             {
-                Set<String> aliases = attrs.get(STR_ALIAS);
+                final Set<String> aliases = attrs.get(STR_ALIAS);
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
@@ -374,7 +374,7 @@ public class RdbUserStorage extends UserStorage {
             /*
              * Apply attributes
              */
-            for (Map.Entry<String, Set<String>> entry : attrs.entrySet()) {
+            for (final Map.Entry<String, Set<String>> entry : attrs.entrySet()) {
                 entry.setValue(Collections.unmodifiableSet(entry.getValue()));
             }
             user.setAttributes(Collections.unmodifiableMap(attrs));
@@ -395,22 +395,26 @@ public class RdbUserStorage extends UserStorage {
             /*
              * Update time zone and language
              */
-            PreparedStatement stmt = null;
-            try {
-                final String sql = "UPDATE user SET " + TIMEZONE + "=?," + LANGUAGE
-                    + "=? WHERE cid=? AND id=?";
-                stmt = con.prepareStatement(sql);
-                int pos = 1;
-                stmt.setString(pos++, user.getTimeZone());
-                stmt.setString(pos++, user.getPreferredLanguage());
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, id);
-                stmt.execute();
-            } catch (final SQLException e) {
-                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                    e.getMessage());
-            } finally {
-                closeSQLStuff(null, stmt);
+            final String timeZone = user.getTimeZone();
+            final String preferredLanguage = user.getPreferredLanguage();
+            if (null != timeZone && null != preferredLanguage) {
+                PreparedStatement stmt = null;
+                try {
+                    final String sql = "UPDATE user SET " + TIMEZONE + "=?," + LANGUAGE
+                        + "=? WHERE cid=? AND id=?";
+                    stmt = con.prepareStatement(sql);
+                    int pos = 1;
+                    stmt.setString(pos++, timeZone);
+                    stmt.setString(pos++, preferredLanguage);
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, id);
+                    stmt.execute();
+                } catch (final SQLException e) {
+                    throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
+                        e.getMessage());
+                } finally {
+                    closeSQLStuff(null, stmt);
+                }
             }
             /*
              * Check if attributes are set
@@ -420,6 +424,7 @@ public class RdbUserStorage extends UserStorage {
                 /*
                  * Update attributes
                  */
+                PreparedStatement stmt = null;
                 try {
                     /*
                      * Clear all attributes
@@ -467,16 +472,16 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public User searchUser(String email, Context context) throws LdapException {
+    public User searchUser(final String email, final Context context) throws LdapException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
         Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
-            String pattern = StringCollection.prepareForSearch(email, false, true);
+            final String pattern = StringCollection.prepareForSearch(email, false, true);
             PreparedStatement stmt = null;
             ResultSet result = null;
             int userId = -1;
@@ -488,7 +493,7 @@ public class RdbUserStorage extends UserStorage {
                 if (result.next()) {
                     userId = result.getInt(1);
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
@@ -510,12 +515,12 @@ public class RdbUserStorage extends UserStorage {
                     throw new LdapException(EnumComponent.USER, Code.NO_USER_BY_MAIL, email);
                 }
                 return getUser(context, con, new int[] { userId })[0];
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
             }
-        } catch (UserException e) {
+        } catch (final UserException e) {
             throw new LdapException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
@@ -568,7 +573,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public int[] listAllUser(Context context) throws UserException {
+    public int[] listAllUser(final Context context) throws UserException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -582,7 +587,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private int[] listAllUser(Context ctx, Connection con) throws UserException {
+    private int[] listAllUser(final Context ctx, final Connection con) throws UserException {
         final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -590,7 +595,7 @@ public class RdbUserStorage extends UserStorage {
             stmt = con.prepareStatement("SELECT id FROM user WHERE user.cid=?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            List<Integer> tmp = new ArrayList<Integer>();
+            final List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
                 tmp.add(I(result.getInt(1)));
             }
@@ -598,7 +603,7 @@ public class RdbUserStorage extends UserStorage {
             for (int i = 0; i < users.length; i++) {
                 users[i] = tmp.get(i).intValue();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
