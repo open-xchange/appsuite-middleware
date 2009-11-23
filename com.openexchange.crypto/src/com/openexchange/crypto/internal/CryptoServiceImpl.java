@@ -82,42 +82,42 @@ public class CryptoServiceImpl implements CryptoService {
     /**
      * Hash Algorithm for generating PBE-Keys.
      */
-    private final String KEY_ALGORITHM = "HMacSHA1";
+    private static final String KEY_ALGORITHM = "HMacSHA1";
 
     /**
      * Key Charset
      */
-    private final String CHARSET = "UTF-8";
+    private static final String CHARSET = "UTF-8";
     
     /**
      * Algorithm for creating random salt.
      */
-    private final String RANDOM_ALGORITHM = "SHA1PRNG";
+    private static final String RANDOM_ALGORITHM = "SHA1PRNG";
     
     /**
      * Key length
      */
-    private final int KEY_LENGTH = 16;
+    private static final int KEY_LENGTH = 16;
 
     /**
      * The algorithm.
      */
-    private final String ALGORITHM = "AES";
+    private static final String ALGORITHM = "AES";
 
     /**
      * The mode.
      */
-    private final String MODE = "CBC";
+    private static final String MODE = "CBC";
 
     /**
      * The padding.
      */
-    private final String PADDING = "PKCS5Padding";
+    private static final String PADDING = "PKCS5Padding";
 
     /**
      * The transformation following pattern <i>"algorithm/mode/padding"</i>.
      */
-    private final String CIPHER_TYPE = ALGORITHM + "/" + MODE + "/" + PADDING;
+    private static final String CIPHER_TYPE = ALGORITHM + "/" + MODE + "/" + PADDING;
 
     /**
      * Initialization Vector
