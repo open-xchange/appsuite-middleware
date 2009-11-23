@@ -64,13 +64,7 @@ public class AllCrawlersTestSuite{
 
     public static Test suite() {
         final TestSuite testSuite = new TestSuite();
-//        testSuite.addTestSuite(GenericSubscribeServiceForFacebookWebTest.class);
-//        testSuite.addTestSuite(GenericSubscribeServiceForGMXTest.class);
-//        testSuite.addTestSuite(GenericSubscribeServiceForGoogleAPITest.class);
-//        testSuite.addTestSuite(GenericSubscribeServiceForLinkedInTest.class);
-//        testSuite.addTestSuite(GenericSubscribeServiceForWebDeTest.class);
-//        testSuite.addTestSuite(GenericSubscribeServiceForXingTest.class);
-//        testSuite.addTestSuite(GenericSubscribeServiceForYahooComTest.class);
+        testSuite.addTestSuite(ActivatorTest.class);
         return testSuite;
     }
 }
