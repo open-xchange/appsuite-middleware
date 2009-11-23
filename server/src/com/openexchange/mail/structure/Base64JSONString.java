@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.json.JSONString;
@@ -68,7 +67,7 @@ public final class Base64JSONString implements JSONString {
 
     private static final int BUFLEN = 8192;
 
-    private final AtomicReference<InputStream> inReference;
+    private final String value;
 
     /**
      * Initializes a new {@link Base64JSONString}.
@@ -78,17 +77,9 @@ public final class Base64JSONString implements JSONString {
         if (null == in) {
             throw new NullPointerException("Input stream is null.");
         }
-        inReference = new AtomicReference<InputStream>(in);
-    }
-
-    public String toJSONString() {
-        final InputStream in = inReference.get();
-        if (null == in) {
-            return "null";
-        }
-        if (!inReference.compareAndSet(in, null)) {
-            return "null";
-        }
+        /*
+         * Suck input stream
+         */
         final ByteArrayOutputStream out;
         try {
             final byte[] buf = new byte[BUFLEN];
@@ -107,11 +98,15 @@ public final class Base64JSONString implements JSONString {
             }
         }
         try {
-            return JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), "US-ASCII"));
+            value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), "US-ASCII"));
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw new IllegalStateException(e);
         }
+    }
+
+    public String toJSONString() {
+        return value;
     }
 
 }
