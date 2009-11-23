@@ -17,7 +17,7 @@ workflowString: |
       username: ""
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
       description: Click on the addressbook link in the menu to the left.
-      url: "http:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
+      url: ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
     - !com.openexchange.subscribe.crawler.PageByFrameNumberStep
       description: Get the first iframe
       frameNumber: 1

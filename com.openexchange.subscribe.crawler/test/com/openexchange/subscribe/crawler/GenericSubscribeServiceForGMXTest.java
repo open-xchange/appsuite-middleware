@@ -82,7 +82,8 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
             "p",
             "https://service.gmx.net",        
             ""));
-        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", "http:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
+        //new ConditionalStep needed "https://service.gmx.net/de/cgi/g.fcgi/application/navigator"
+        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
         steps.add(new PageByFrameNumberStep("Get the first iframe", 1));
         steps.add(new PageByLinkRegexStep("Click on the manage-Addressbook-Link in the upper right ","categories.*"));
         steps.add(new PageByLinkRegexStep("Click on the Export-link to the left","exportcontacts.*"));
