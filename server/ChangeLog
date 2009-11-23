@@ -1,3 +1,7 @@
+* 2009-11-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #14944: Fixed NPE in mail prefetcher
+
 * 2009-11-20 - thorben.betten@open-xchange.com
 
  - Bugfix #14940: Fixed NPE when unregistering from unknown servlet path
