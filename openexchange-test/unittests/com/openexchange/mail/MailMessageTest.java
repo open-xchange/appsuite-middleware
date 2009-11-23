@@ -191,7 +191,7 @@ public final class MailMessageTest extends AbstractMailTest {
 			return;
 		}
 		if (msgs == null) {
-			assertTrue("Not all messages returned!", msgs.length == folder.getMessageCount());
+			fail("Not all messages returned! Got none, expected: " + folder.getMessageCount());
 			return;
 		}
 
