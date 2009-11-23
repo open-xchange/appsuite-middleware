@@ -671,6 +671,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
         OXFolderUtility.checkFolderPermissions(folderObj, user.getId(), ctx);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(folderObj, ctx);
+        OXFolderUtility.checkSystemFolderPermissions(folderObj.getObjectID(), folderObj.getNonSystemPermissionsAsArray(), user, ctx);
         if (FolderObject.PUBLIC == folderObj.getType()) {
             {
                 final OCLPermission[] removedPerms =

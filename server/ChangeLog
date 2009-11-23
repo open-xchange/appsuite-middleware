@@ -1,6 +1,7 @@
 * 2009-11-23 - thorben.betten@open-xchange.com
 
  - Bugfix #14944: Fixed NPE in mail prefetcher
+ - Bugfix #14949: Checking changed permissions for system folders
 
 * 2009-11-20 - thorben.betten@open-xchange.com
 
