@@ -76,7 +76,7 @@ public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
         
         SimConfigurationService config = new SimConfigurationService();
         //test with the real crawlers
-        config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
+        config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
         Activator activator = new Activator();
         ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
 
