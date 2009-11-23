@@ -51,6 +51,7 @@ package com.openexchange.voipnow.json.preferences;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -84,7 +85,7 @@ public class VoipNowEnabled implements PreferencesItemService {
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
                 // TODO: Check VoipNow is enabled
-                setting.setSingleValue(Boolean.TRUE);
+                setting.setSingleValue(Boolean.valueOf(UserAttributeAccess.getDefaultInstance().getBooleanAttribute("com.4psa.voipnow", user, false)));
             }
 
             /**
