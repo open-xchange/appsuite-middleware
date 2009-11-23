@@ -286,6 +286,9 @@ public final class OXFolderUtility {
      * @throws OXFolderException If changing system folder's permission is denied
      */
     public static void checkSystemFolderPermissions(final int folderId, final OCLPermission[] newPerms, final User user, final Context ctx) throws OXFolderException {
+        if (folderId >= FolderObject.MIN_FOLDER_ID) {
+            return;
+        }
         final int[] allowedObjectPermissions = maxAllowedObjectPermissions(folderId);
         final int admin = ctx.getMailadmin();
         for (int i = 0; i < newPerms.length; i++) {
