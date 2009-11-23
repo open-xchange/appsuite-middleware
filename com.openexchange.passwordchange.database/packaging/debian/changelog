@@ -1,8 +1,8 @@
-open-xchange-passwordchange-database (6.15.0.0-0) unstable; urgency=low
+open-xchange-passwordchange-database (6.14.0.0-3) unstable; urgency=low
 
-  * new unstable cycle 6.15
+  * build for 6.14 rev3
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Nov 2009 11:19:23 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Nov 2009 12:19:52 +0100
 
 open-xchange-passwordchange-database (6.14.0.0-2) unstable; urgency=low
 

@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Nov 20 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14940: Fixed NPE when unregistering from unknown servlet path
 * Wed Nov 18 2009 - marcus.klein@open-xchange.com
  - Bugfix #14889: Using the same connection for deleting reminder when a user is deleted.
  - Bugfix #14834: Not trying to initialize the nested cause of a ServletException because this gives a IllegalStateException.
