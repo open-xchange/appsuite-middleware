@@ -205,7 +205,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                      */
                     final List<String> markUnseen = new ArrayList<String>(size);
                     for (final SetableFutureTask<JSONObject> f : futures) {
-                        if (!f.hasException()) {
+                        if (!f.hasException() && !f.hasValue()) {
                             final MailMessage m = q.take();
                             try {
                                 if (!m.isSeen()) {
@@ -333,6 +333,8 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
         volatile boolean exceptionSet;
 
+        volatile boolean valueSet;
+
         SetableFutureTask(final Callable<V> callable, final String mailId) {
             super(callable);
             this.mailId = mailId;
@@ -347,6 +349,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
         @Override
         public void set(final V v) {
             super.set(v);
+            valueSet = true;
         }
 
         /**
@@ -368,6 +371,15 @@ public final class MailPrefetcherCallable implements Callable<Object> {
          */
         public boolean hasException() {
             return exceptionSet;
+        }
+
+        /**
+         * Checks whether a value was previously set by {@link #set(Object)}.
+         * 
+         * @return <code>true</code> if a value was set; otherwise <code>false</code>
+         */
+        public boolean hasValue() {
+            return valueSet;
         }
 
     } // End of SetableFutureTask
