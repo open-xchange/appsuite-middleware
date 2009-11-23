@@ -1,3 +1,9 @@
+* 2009-11-23 - marcus.klein@open-xchange.com
+
+ - Toggled the user permission bit for access to the global address book, so the user still has permission to it although the client may
+   have no information about that permission bit.
+ - Bugfix #14953: Correctly configuring disabled access to global address book when using access combination names.
+
 * 2009-11-04 - marcus.klein@open-xchange.com
 
  - Bugfix #14773: Corrected SQL statement to find matching user.

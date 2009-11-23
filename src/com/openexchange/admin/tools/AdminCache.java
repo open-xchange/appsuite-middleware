@@ -227,6 +227,7 @@ public class AdminCache {
             if (predefined_modules != null && predefined_modules.trim().length() > 0) {
                 UserModuleAccess us = new UserModuleAccess();
                 us.disableAll();
+                us.setGlobalAddressBookDisabled(false); // by default this is enabled.
                 String[] modules = predefined_modules.split(",");
                 for (String module : modules) {
                     if (!module_method_mapping.containsKey(module)) {
