@@ -57,6 +57,8 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public class I18NException extends AbstractOXException {
 
+    private static final long serialVersionUID = 3315937352754824744L;
+
     public I18NException(final ErrorMessage message, final Throwable cause, final Object... args) {
         super(message.getComponent(), message.getCategory(), message.getDetailNumber(), message.getMessage(), cause);
         setMessageArgs(args);

@@ -62,6 +62,8 @@ public final class DataException extends AbstractOXException {
 
     public static final Component CONV_COMPONENT = new Component() {
 
+        private static final long serialVersionUID = 2476194450101168518L;
+
         public String getAbbreviation() {
             return STR_COMPONENT;
         }
