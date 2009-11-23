@@ -58,6 +58,7 @@ import java.util.Map.Entry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -169,10 +170,15 @@ public final class UserAttributeAccess {
      * @param user The user
      * @param context The context
      * @throws LdapException If setting <code>boolean</code> attribute fails
-     * @throws ContextException If context look-up fails
      */
-    public void setBooleanAttribute(final String name, final boolean value, final int userId, final int contextId) throws LdapException, ContextException {
-        final Context context = ContextStorage.getStorageContext(contextId);
+    public void setBooleanAttribute(final String name, final boolean value, final int userId, final int contextId) throws LdapException {
+        Context context = null;
+        try {
+            context = ContextStorage.getStorageContext(contextId);
+        } catch (final ContextException e) {
+            // Occurs if a context's admin is created
+            context = new ContextImpl(contextId);
+        }
         setBooleanAttribute(name, value, userStorage.getUser(userId, context), context);
     }
 
