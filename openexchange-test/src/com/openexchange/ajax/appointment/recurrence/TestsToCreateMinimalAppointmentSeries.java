@@ -57,20 +57,19 @@ import com.openexchange.ajax.appointment.helper.ExceptionAssertion;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.ajax.appointment.helper.PositiveAssertion;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
 /**
- * Tests specifically for the interval parameter, explaining the fun you can have with it.
+ * Find out which parameters are needed to create an appointment and which are not enough.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class IntervalParameterTests extends AppointmentTest {
+public class TestsToCreateMinimalAppointmentSeries extends AppointmentTest {
 
     private CalendarTestManager calendarManager;
 
-    public IntervalParameterTests(String name) {
+    public TestsToCreateMinimalAppointmentSeries(String name) {
         super(name);
     }
 
