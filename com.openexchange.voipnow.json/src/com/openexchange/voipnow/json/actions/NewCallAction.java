@@ -99,9 +99,9 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             /*
              * Parse parameters
              */
-            final String receiverNumber = checkStringParameter("phone", request);
-            final String receiverDisplayName = checkStringParameter("callerid", request);
-            final int timeout = parseIntParameter("timeout", request, 10);
+            final String receiverNumber = checkStringParameter(request, "phone");
+            final String receiverDisplayName = checkStringParameter(request, "callerid");
+            final int timeout = parseIntParameter(request, "timeout", 10);
             /*
              * Get main extension
              */
@@ -109,7 +109,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             {
                 final User sessionUser = session.getUser();
                 final Map<String, Set<String>> attributes = sessionUser.getAttributes();
-                final String attributeName = "mainExtension";
+                final String attributeName = "com.4psa.voipnow/mainExtension";
                 final Set<String> set = attributes.get(attributeName);
                 if (null == set || set.isEmpty()) {
                     throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(

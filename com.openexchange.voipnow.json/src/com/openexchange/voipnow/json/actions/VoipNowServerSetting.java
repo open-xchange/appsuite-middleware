@@ -62,6 +62,10 @@ public final class VoipNowServerSetting {
 
     private boolean secure;
 
+    private String login;
+
+    private String password;
+
     /**
      * Initializes a new {@link VoipNowServerSetting}.
      */
@@ -106,21 +110,57 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Gets the secure
+     * Gets the secure flag
      * 
-     * @return The secure
+     * @return The secure flag
      */
     public boolean isSecure() {
         return secure;
     }
 
     /**
-     * Sets the secure
+     * Sets the secure flag
      * 
-     * @param secure The secure to set
+     * @param secure The secure flag to set
      */
     public void setSecure(final boolean secure) {
         this.secure = secure;
+    }
+
+    /**
+     * Gets the login
+     * 
+     * @return The login
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     * Sets the login
+     * 
+     * @param login The login to set
+     */
+    public void setLogin(final String login) {
+        this.login = login;
+    }
+
+    /**
+     * Gets the password
+     * 
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password
+     * 
+     * @param password The password to set
+     */
+    public void setPassword(final String password) {
+        this.password = password;
     }
 
 }

@@ -100,14 +100,32 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             /*
              * Parse parameters
              */
-            final boolean answered = Boolean.parseBoolean(checkStringParameter("answered", request));
-            final String userId = checkStringParameter("id", request);
-            final String identifier = checkStringParameter("identifier", request);
-            final int month = checkIntParameter("month", request);
-            final int year = checkIntParameter("year", request);
-            // final long start = checkLongParameter("start", request);
-            // final long end = checkLongParameter("end", request);
-            // final String flow = checkStringParameter("flow", request);
+            /*
+             * Answered call flag.
+             */
+            final boolean answered = Boolean.parseBoolean(checkStringParameter(request, "answered"));
+            /*
+             * Either the (numeric) user id or its identifier
+             */
+            final String userId;
+            final String identifier;
+            {
+                final String[] eitherOf = checkEitherOfStringParameter(request, "id", "identifier");
+                userId = eitherOf[0];
+                identifier = eitherOf[1];
+            }
+            /*
+             * Search month. Default: current month
+             */
+            final int month = checkIntParameter(request, "month");
+            /*
+             * Search year. Default: current year
+             */
+            final int year = checkIntParameter(request, "year");
+            /*
+             * Call flow: either in, out, or both
+             */
+            // final String flow = checkStringParameter(request, "flow");
             /*
              * Get setting
              */
@@ -124,36 +142,48 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                 /*
                  * Set answered parameter
                  */
-                final _boolean answeredParam = new _boolean();
-                answeredParam.set_boolean(answered);
-                callReportRequest.setAnswered(answeredParam);
+                {
+                    final _boolean answeredParam = new _boolean();
+                    answeredParam.set_boolean(answered);
+                    callReportRequest.setAnswered(answeredParam);
+                }
                 /*
-                 * Set choice 0
+                 * Set choice 0: user ID OR identifier
                  */
-                final CallReportRequestChoice_type0 choiceType0 = new CallReportRequestChoice_type0();
-                final PositiveInteger userIdParam = new PositiveInteger();
-                userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-                choiceType0.setUserID(userIdParam);
-                callReportRequest.setCallReportRequestChoice_type0(choiceType0);
+                {
+                    final CallReportRequestChoice_type0 userIdORidentifier = new CallReportRequestChoice_type0();
+                    if (null == identifier) {
+                        final PositiveInteger userIdParam = new PositiveInteger();
+                        userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
+                        userIdORidentifier.setUserID(userIdParam);
+                    } else {
+                        final com._4psa.common_xsd._2_0_3.String identifierString = new com._4psa.common_xsd._2_0_3.String();
+                        identifierString.setString(identifier);
+                        userIdORidentifier.setUserIdentifier(identifierString);
+                    }
+                    callReportRequest.setCallReportRequestChoice_type0(userIdORidentifier);
+                }
                 /*
-                 * Set choice 1
+                 * Set choice 1: interval OR month-and-year
                  */
-                final CallReportRequestChoice_type1 choiceType1 = new CallReportRequestChoice_type1();
-                final CallReportRequestSequence_type0 sequenceType0 = new CallReportRequestSequence_type0();
-                final UnsignedInt monthParam = new UnsignedInt();
-                monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(month));
-                sequenceType0.setMonth(monthParam);
-                final UnsignedInt yearParam = new UnsignedInt();
-                monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(year));
-                sequenceType0.setYear(yearParam);
-                choiceType1.setCallReportRequestSequence_type0(sequenceType0);
-                callReportRequest.setCallReportRequestChoice_type1(choiceType1);
-                /*-
-                 * Inteval
-                final Interval_type0 intervalParam = new Interval_type0();
-                intervalParam.setEndDate(new Date(end));
-                intervalParam.setStartDate(new Date(start));
-                choiceType1.setInterval(intervalParam);
+                {
+                    final CallReportRequestChoice_type1 intervalORmonthAndYear = new CallReportRequestChoice_type1();
+
+                    final CallReportRequestSequence_type0 sequenceType0 = new CallReportRequestSequence_type0();
+                    final UnsignedInt monthParam = new UnsignedInt();
+                    monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(month));
+                    sequenceType0.setMonth(monthParam);
+
+                    final UnsignedInt yearParam = new UnsignedInt();
+                    yearParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(year));
+                    sequenceType0.setYear(yearParam);
+
+                    intervalORmonthAndYear.setCallReportRequestSequence_type0(sequenceType0);
+
+                    callReportRequest.setCallReportRequestChoice_type1(intervalORmonthAndYear);
+                }
+                /*
+                 * Flow is set to "both" by default
                  */
             }
             /*
@@ -163,11 +193,11 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             {
                 final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
                 final com._4psa.common_xsd._2_0_3.Password pw = new com._4psa.common_xsd._2_0_3.Password();
-                pw.setPassword("oxSecure");
+                pw.setPassword(setting.getPassword());
                 sequenceType0.setPassword(pw);
 
                 final com._4psa.common_xsd._2_0_3.String login = new com._4psa.common_xsd._2_0_3.String();
-                login.setString("admin");
+                login.setString(setting.getLogin());
                 sequenceType0.setUsername(login);
                 userCredentials.setUserCredentialsSequence_type0(sequenceType0);
             }
