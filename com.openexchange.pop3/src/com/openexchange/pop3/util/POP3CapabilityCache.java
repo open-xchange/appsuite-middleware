@@ -181,11 +181,8 @@ public final class POP3CapabilityCache {
     public static String getCapability(final InetSocketAddress address, final boolean isSecure, final int connectionTimeout, final int timeout) throws IOException {
         Future<Capability> f = MAP.get(address);
         if (null == f) {
-            final FutureTask<Capability> ft = new FutureTask<Capability>(new CapabilityCallable(
-                address,
-                isSecure,
-                connectionTimeout,
-                timeout));
+            final FutureTask<Capability> ft =
+                new FutureTask<Capability>(new CapabilityCallable(address, isSecure, connectionTimeout, timeout));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -405,7 +402,10 @@ public final class POP3CapabilityCache {
                         }
                         capabilities = sb.toString();
                     } else {
-                        throw new IOException("Unexpected response start: " + pre);
+                        if (Character.isDefined(pre)) {
+                            throw new IOException(new StringBuilder("Unexpected CAPA response start: ").append(pre).toString());
+                        }
+                        throw new IOException(new StringBuilder("Invalid unicode character: ").append(((int) pre)).toString());
                     }
                 }
                 /*
