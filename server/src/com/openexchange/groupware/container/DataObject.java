@@ -231,6 +231,7 @@ public abstract class DataObject extends SystemObject {
     public void set(int field, Object value) {
         switch (field) {
         case LAST_MODIFIED:
+        case LAST_MODIFIED_UTC:
             setLastModified((Date) value);
             break;
         case OBJECT_ID:
@@ -253,6 +254,7 @@ public abstract class DataObject extends SystemObject {
     public Object get(int field) {
         switch (field) {
         case LAST_MODIFIED:
+        case LAST_MODIFIED_UTC:
             return getLastModified();
         case OBJECT_ID:
             return getObjectID();
@@ -270,6 +272,7 @@ public abstract class DataObject extends SystemObject {
     public boolean contains(int field) {
         switch (field) {
         case LAST_MODIFIED:
+        case LAST_MODIFIED_UTC:
             return containsLastModified();
         case OBJECT_ID:
             return containsObjectID();
@@ -300,6 +303,9 @@ public abstract class DataObject extends SystemObject {
             break;
         case CREATED_BY:
             removeCreatedBy();
+            break;
+        case LAST_MODIFIED_UTC:
+            removeLastModified();
             break;
         default:
             throw new IllegalArgumentException("I don't know how to remove field " + field);
