@@ -113,10 +113,11 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
     public GetRequest(Appointment appointment){
     	this(appointment.getParentFolderID(), appointment.getObjectID());
     }
+
+    public GetRequest(Appointment appointment, final boolean failOnError){
+        this(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
+    }
     
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() throws JSONException {
         return null;
     }
