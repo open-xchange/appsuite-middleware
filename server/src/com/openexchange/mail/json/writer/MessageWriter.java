@@ -99,15 +99,25 @@ public final class MessageWriter {
 
     /**
      * Writes specified mail's structure as a JSON object.
+     * <p>
+     * Optionally a prepared version can be returned, this includes following actions:
+     * <ol>
+     * <li>Header names are inserted to JSON lower-case</li>
+     * <li>Mail-safe encoded header values as per RFC 2047 are decoded;<br>
+     * e.g.&nbsp;<code><i>To:&nbsp;=?iso-8859-1?q?Keld_J=F8rn?=&nbsp;&lt;keld@xyz.dk&gt;</i></code></li>
+     * <li>Address headers are delivered as JSON objects with a <code>"personal"</code> and an <code>"address"</code> field</li>
+     * <li>Parameterized headers are delivered as JSON objects with a <code>"type"</code> and a <code>"params"</code> field</li>
+     * </ol>
      * 
      * @param accountId The mail's account ID
      * @param mail The mail to write
      * @param maxSize The allowed max. size
+     * @param prepare <code>true</code> to return a prepared version; otherwise <code>false</code>
      * @return The structure as a JSON object
      * @throws MailException If writing structure fails
      */
-    public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws MailException {
-        final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
+    public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize, final boolean prepare) throws MailException {
+        final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize).setPrepare(prepare);
         new StructureMailMessageParser().parseMailMessage(mail, handler);
         return handler.getJSONMailObject();
     }
@@ -584,8 +594,7 @@ public final class MessageWriter {
             final String headerName = headers[i];
             retval[i] = new MailFieldWriter() {
 
-                public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey,
-                        final int accountId, final int user, final int cid) throws MailException {
+                public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws MailException {
                     final Object value;
                     {
                         final String[] headerValues = mail.getHeader(headerName);

@@ -543,7 +543,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             if (prepare) {
                 while (iter.hasNext()) {
                     final Entry<String, String> entry = iter.next();
-                    final String name = prepare ? entry.getKey().toLowerCase(Locale.ENGLISH) : entry.getKey();
+                    final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
                     final HeaderName headerName = HeaderName.valueOf(name);
                     if (ADDRESS_HEADERS.contains(headerName)) {
                         final InternetAddress[] internetAddresses = getAddressHeader(entry.getValue());
@@ -631,20 +631,20 @@ public final class MIMEStructureHandler implements StructureHandler {
             } else {
                 while (iter.hasNext()) {
                     final Entry<String, String> entry = iter.next();
-                    final String headerName = entry.getKey();
-                    if (hdrObject.has(headerName)) {
-                        final Object previous = hdrObject.get(headerName);
+                    final String name = entry.getKey();
+                    if (hdrObject.has(name)) {
+                        final Object previous = hdrObject.get(name);
                         final JSONArray ja;
                         if (previous instanceof JSONArray) {
                             ja = (JSONArray) previous;
                         } else {
                             ja = new JSONArray();
-                            hdrObject.put(headerName, ja);
+                            hdrObject.put(name, ja);
                             ja.put(previous);
                         }
                         ja.put(entry.getValue());
                     } else {
-                        hdrObject.put(headerName, entry.getValue());
+                        hdrObject.put(name, entry.getValue());
                     }
                 }
             }
