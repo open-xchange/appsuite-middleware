@@ -80,6 +80,7 @@ import org.json.JSONValue;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -89,6 +90,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -97,6 +99,8 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
+import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.tools.ByteBuffers;
 import com.openexchange.tools.encoding.Charsets;
@@ -142,18 +146,33 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private JSONArray userFlags;
 
+    private InlineDetector inlineDetector;
+
     private boolean prepare;
 
     /**
      * Initializes a new {@link MIMEStructureHandler}.
      * 
-     * @param maxSize The max. size of a mail part to let its content being inserted as base64 encoded string.
+     * @param maxSize The max. size of a mail part to let its content being inserted as base64 encoded or UTF-8 string.
      */
     public MIMEStructureHandler(final long maxSize) {
         super();
         mailJsonObjectQueue = new LinkedList<JSONObject>();
         mailJsonObjectQueue.addLast((currentMailObject = new JSONObject()));
         this.maxSize = maxSize;
+        inlineDetector = LENIENT_DETECTOR;
+        // prepare = true;
+    }
+
+    /**
+     * Switches the INLINE detector behavior.
+     * 
+     * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
+     * @return This handler with new behavior applied
+     */
+    public MIMEStructureHandler setInlineDetectorBehavior(final boolean strict) {
+        inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
+        return this;
     }
 
     /**
@@ -246,8 +265,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
         } catch (final Exception e) {
-            final Throwable t = new Throwable(
-                new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
+            final Throwable t =
+                new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn(t.getMessage(), t);
         }
         /*
@@ -273,7 +292,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             public InputStream getInputStream() throws IOException {
                 return part.getInputStream();
             }
-        }, id, headers.entrySet().iterator());
+        }, new ContentType(contentType), false, id, headers.entrySet().iterator());
         return true;
     }
 
@@ -293,7 +312,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             public InputStream getInputStream() throws IOException {
                 return ByteBuffers.newUnsynchronizedInputStream(Charsets.UTF_8.encode(decodedTextContent));
             }
-        }, id, headers.entrySet().iterator());
+        }, contentType, true, id, headers.entrySet().iterator());
         return true;
     }
 
@@ -339,9 +358,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 nestedMail = (MailMessage) content;
             } else if (content instanceof InputStream) {
                 try {
-                    nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
-                        MIMEDefaultSession.getDefaultSession(),
-                        (InputStream) content));
+                    nestedMail =
+                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
@@ -417,16 +435,18 @@ public final class MIMEStructureHandler implements StructureHandler {
     private void addBodyPart(final MailPart part, final String id) throws MailException {
         try {
             final JSONObject bodyObject = new JSONObject();
+            final String disposition = part.containsContentDisposition() ? part.getContentDisposition().getDisposition() : null;
+            final boolean isInline = inlineDetector.isInline(disposition, part.getFileName());
             if (multipartCount > 0) {
                 // Put headers
                 generateHeadersObject(part.getHeadersIterator(), bodyObject);
                 // Put body
                 final JSONObject body = new JSONObject();
-                fillBodyPart(body, part, id);
+                fillBodyPart(body, part, isInline, id);
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, part, id);
+                fillBodyPart(bodyObject, part, isInline, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -434,7 +454,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void addBodyPart(final long size, final InputStreamProvider isp, final String id, final Iterator<Entry<String, String>> iter) throws MailException {
+    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final boolean inline, final String id, final Iterator<Entry<String, String>> iter) throws MailException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
@@ -442,11 +462,11 @@ public final class MIMEStructureHandler implements StructureHandler {
                 generateHeadersObject(iter, bodyObject);
                 // Put body
                 final JSONObject body = new JSONObject();
-                fillBodyPart(body, size, isp, id);
+                fillBodyPart(body, size, isp, contentType, inline, id);
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, size, isp, id);
+                fillBodyPart(bodyObject, size, isp, contentType, inline, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -454,27 +474,39 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final String id) throws MailException {
+    private static final String PRIMARY_TEXT = "text/";
+
+    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final boolean inline, final String id) throws MailException {
         try {
             bodyObject.put(MailListField.ID.getKey(), id);
             final long size = part.getSize();
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
-                fillBase64JSONString(part.getInputStream(), bodyObject, true);
+                if (prepare && inline && part.getContentType().startsWith(PRIMARY_TEXT)) {
+                    bodyObject.put(DATA, readContent(part, part.getContentType()));
+                } else {
+                    fillBase64JSONString(part.getInputStream(), bodyObject, true);
+                }
             }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
-    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final String id) throws MailException {
+    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final boolean inline, final String id) throws MailException {
         try {
             bodyObject.put(MailListField.ID.getKey(), id);
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
-                fillBase64JSONString(isp.getInputStream(), bodyObject, true);
+                if (prepare && inline && contentType.startsWith(PRIMARY_TEXT)) {
+                    bodyObject.put(DATA, readContent(isp, contentType));
+                } else {
+                    fillBase64JSONString(isp.getInputStream(), bodyObject, true);
+                }
             }
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
@@ -522,18 +554,18 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final HeaderName HN_CONTENT_TYPE = HeaderName.valueOf(CONTENT_TYPE);
 
-    private static final Set<HeaderName> PARAMETERIZED_HEADERS = new HashSet<HeaderName>(Arrays.asList(
-        HN_CONTENT_TYPE,
-        HeaderName.valueOf(CONTENT_DISPOSITION)));
+    private static final Set<HeaderName> PARAMETERIZED_HEADERS =
+        new HashSet<HeaderName>(Arrays.asList(HN_CONTENT_TYPE, HeaderName.valueOf(CONTENT_DISPOSITION)));
 
-    private static final Set<HeaderName> ADDRESS_HEADERS = new HashSet<HeaderName>(Arrays.asList(
-        HeaderName.valueOf("From"),
-        HeaderName.valueOf("To"),
-        HeaderName.valueOf("Cc"),
-        HeaderName.valueOf("Bcc"),
-        HeaderName.valueOf("Reply-To"),
-        HeaderName.valueOf("Sender"),
-        HeaderName.valueOf("Errors-To")));
+    private static final Set<HeaderName> ADDRESS_HEADERS =
+        new HashSet<HeaderName>(Arrays.asList(
+            HeaderName.valueOf("From"),
+            HeaderName.valueOf("To"),
+            HeaderName.valueOf("Cc"),
+            HeaderName.valueOf("Bcc"),
+            HeaderName.valueOf("Reply-To"),
+            HeaderName.valueOf("Sender"),
+            HeaderName.valueOf("Errors-To")));
 
     private static final MailDateFormat MAIL_DATE_FORMAT = new MailDateFormat();
 
@@ -552,6 +584,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                             ja = hdrObject.getJSONArray(name);
                         } else {
                             ja = new JSONArray();
+                            hdrObject.put(name, ja);
                         }
                         for (final InternetAddress internetAddress : internetAddresses) {
                             final JSONObject addressJsonObject = new JSONObject();
@@ -685,9 +718,110 @@ public final class MIMEStructureHandler implements StructureHandler {
         return new InternetAddress[] { new PlainTextAddress(addr) };
     }
 
+    private static String readContent(final MailPart mailPart, final ContentType contentType) throws MailException, IOException {
+        final String charset = getCharset(mailPart, contentType);
+        try {
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "US-ASCII";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+            }
+            return MessageUtility.readMailPart(mailPart, fallback);
+        }
+    }
+
+    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws MailException {
+        final String charset;
+        if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
+            String cs = contentType.getCharsetParameter();
+            if (!CharsetDetector.isValid(cs)) {
+                StringBuilder sb = null;
+                if (null != cs) {
+                    sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                }
+                if (contentType.startsWith(PRIMARY_TEXT)) {
+                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                    if (LOG.isWarnEnabled() && null != sb) {
+                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                } else {
+                    cs = MailProperties.getInstance().getDefaultMimeCharset();
+                    if (LOG.isWarnEnabled() && null != sb) {
+                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                }
+            }
+            charset = cs;
+        } else {
+            if (contentType.startsWith(PRIMARY_TEXT)) {
+                charset = CharsetDetector.detectCharset(mailPart.getInputStream());
+            } else {
+                charset = MailProperties.getInstance().getDefaultMimeCharset();
+            }
+        }
+        return charset;
+    }
+
+    private static String readContent(final InputStreamProvider isp, final ContentType contentType) throws MailException, IOException {
+        final String charset = getCharset(isp, contentType);
+        try {
+            return MessageUtility.readStream(isp.getInputStream(), charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "US-ASCII";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+            }
+            return MessageUtility.readStream(isp.getInputStream(), fallback);
+        }
+    }
+
+    private static String getCharset(final InputStreamProvider isp, final ContentType contentType) throws IOException {
+        final String charset;
+        if (contentType.startsWith(PRIMARY_TEXT)) {
+            charset = CharsetDetector.detectCharset(isp.getInputStream());
+        } else {
+            charset = MailProperties.getInstance().getDefaultMimeCharset();
+        }
+        return charset;
+    }
+
     private static interface InputStreamProvider {
 
         InputStream getInputStream() throws IOException;
     }
+
+    private static interface InlineDetector {
+
+        public boolean isInline(String disposition, String fileName);
+    }
+
+    /**
+     * If disposition equals ignore-case <code>"INLINE"</code>, then it is treated as inline in any case.<br>
+     * Only if disposition is <code>null</code> the file name is examined.
+     */
+    private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
+
+        public boolean isInline(final String disposition, final String fileName) {
+            return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
+        }
+    };
+
+    /**
+     * Considered as inline if disposition equals ignore-case <code>"INLINE"</code> OR is <code>null</code>, but in any case the file name
+     * must be <code>null</code>.
+     */
+    private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
+
+        public boolean isInline(final String disposition, final String fileName) {
+            return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
+        }
+    };
 
 }
