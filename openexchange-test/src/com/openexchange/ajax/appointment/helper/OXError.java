@@ -51,66 +51,59 @@ package com.openexchange.ajax.appointment.helper;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ExceptionAssertion extends AbstractAssertion {
+public class OXError {
 
-    public ExceptionAssertion(Changes changes, OXError expectedError, CalendarTestManager manager) {
-        super();
-        this.manager = manager;
-        manager.setFailOnError(false);
+    private String category;
 
-        try {
-            createAndCheck(changes, expectedError);
-            updateAndCheck(changes, expectedError);
-        } finally {
-            manager.cleanUp();
-        }
+    private int number;
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    private void updateAndCheck(Changes changes, OXError expectedError) {
-        Appointment app;
-        try {
-            app = generateDefaultAppointment();
-        } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
-            return;
-        }
-
-        create(app);
-        update(app, changes);
-
-        checkForError(expectedError);
+    public String getCategory() {
+        return category;
     }
 
-    private void createAndCheck(Changes changes, OXError expectedError) {
-        Appointment app = null;
-        try {
-            app = generateDefaultAppointment();
-        } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
-            return;
-        }
-
-        changes.update(app);
-        create(app);
-
-        checkForError(expectedError);
+    public void setNumber(int number) {
+        this.number = number;
     }
 
-    private void checkForError(OXError expectedError) {
-        assertTrue("Expecting exception, did not get one", manager.hasLastException());
-        try {
-            AbstractOXException lastException = (AbstractOXException) manager.getLastException();
-            assertTrue(
-                "Given error " + lastException.getErrorCode() + " does not match expected error " + expectedError,
-                expectedError.matches(lastException));
-        } catch (ClassCastException e) {
-            fail("Should have an OXException, but could not cast it into one");
-        }
+    public int getNumber() {
+        return number;
+    }
+
+    public OXError(String category, int number) {
+        setNumber(number);
+        setCategory(category);
+    }
+
+    public boolean matches(OXError other) {
+        boolean matchesNumber = false, matchesCategory = false;
+
+        if (category == null || other.getCategory() == null)
+            matchesCategory = true;
+        else
+            matchesCategory = category.equals(other.getCategory());
+
+        if (number == -1 || other.getNumber() == -1)
+            matchesNumber = true;
+        else
+            matchesNumber = number == other.getNumber();
+
+        return matchesNumber && matchesCategory;
+    }
+
+    public boolean matches(AbstractOXException exception) {
+        return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%3s-%04d", category, number);
     }
 }

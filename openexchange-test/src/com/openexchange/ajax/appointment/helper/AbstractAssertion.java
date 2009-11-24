@@ -49,68 +49,64 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.List;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.tools.servlet.AjaxException;
+import junit.framework.Assert;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link AbstractAssertion}
+ *
+ * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
-public class ExceptionAssertion extends AbstractAssertion {
+public class AbstractAssertion extends Assert {
 
-    public ExceptionAssertion(Changes changes, OXError expectedError, CalendarTestManager manager) {
+    protected CalendarTestManager manager;
+
+    public AbstractAssertion() {
         super();
-        this.manager = manager;
-        manager.setFailOnError(false);
-
-        try {
-            createAndCheck(changes, expectedError);
-            updateAndCheck(changes, expectedError);
-        } finally {
-            manager.cleanUp();
-        }
     }
 
-    private void updateAndCheck(Changes changes, OXError expectedError) {
-        Appointment app;
-        try {
-            app = generateDefaultAppointment();
-        } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
-            return;
-        }
-
-        create(app);
-        update(app, changes);
-
-        checkForError(expectedError);
+    protected Appointment find(List<Appointment> appointments, int folder, int id) {
+        for(Appointment app: appointments)
+            if(app.getParentFolderID() == folder && app.getObjectID() == id)
+                return app;
+        return null;
     }
 
-    private void createAndCheck(Changes changes, OXError expectedError) {
-        Appointment app = null;
-        try {
-            app = generateDefaultAppointment();
-        } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
-            return;
-        }
-
-        changes.update(app);
-        create(app);
-
-        checkForError(expectedError);
+    protected Appointment generateDefaultAppointment() throws AjaxException, IOException, SAXException, JSONException {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -1);
+        cal.set(Calendar.DAY_OF_YEAR, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 1);
+    
+        Appointment app = new Appointment();
+        app.setTitle("Generic recurrence test appointment");
+        app.setStartDate(cal.getTime());
+        cal.add(Calendar.HOUR, 1);
+        app.setEndDate(cal.getTime());
+    
+        app.setParentFolderID(manager.getClient().getValues().getPrivateAppointmentFolder());
+        return app;
     }
 
-    private void checkForError(OXError expectedError) {
-        assertTrue("Expecting exception, did not get one", manager.hasLastException());
-        try {
-            AbstractOXException lastException = (AbstractOXException) manager.getLastException();
-            assertTrue(
-                "Given error " + lastException.getErrorCode() + " does not match expected error " + expectedError,
-                expectedError.matches(lastException));
-        } catch (ClassCastException e) {
-            fail("Should have an OXException, but could not cast it into one");
-        }
+    protected Appointment create(Appointment app) {
+        return manager.insertAppointmentOnServer(app);
     }
+
+    protected void update(Appointment app, Changes changes) {
+        Appointment update = new Appointment();
+        update.setParentFolderID(app.getParentFolderID());
+        update.setObjectID(app.getObjectID());
+        update.setLastModified(app.getLastModified());
+        
+        changes.update(update);
+        manager.updateAppointmentOnServer(update);
+    }
+
 }

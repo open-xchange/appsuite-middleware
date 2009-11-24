@@ -50,11 +50,10 @@
 package com.openexchange.ajax.appointment.helper;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
-import junit.framework.Assert;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.folder.GetMailInboxTest;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -63,15 +62,10 @@ import com.openexchange.tools.servlet.AjaxException;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class PositiveAssertion extends Assert{
-
-    private CalendarTestManager manager;
-
-    private int folder;
+public class PositiveAssertion extends AbstractAssertion{
 
     public PositiveAssertion(Changes changes, Expectations expectations, CalendarTestManager manager) throws AjaxException, IOException, SAXException, JSONException {
         this.manager = manager;
-        this.folder = manager.getClient().getValues().getPrivateAppointmentFolder();
         
         try {
             createAndCheck(changes, expectations);
@@ -82,7 +76,14 @@ public class PositiveAssertion extends Assert{
     }
 
     protected void updateAndCheck(Changes changes, Expectations expectations) {
-        Appointment app = generateDefaultAppointment();
+        Appointment app;
+        try {
+            app = generateDefaultAppointment();
+        } catch (Exception e) {
+            fail("Could not generate default appointment: " + e);
+            return;
+        }
+        
         create(app);
         update(app, changes);
         checkViaGet(app.getParentFolderID(), app.getObjectID(), expectations);
@@ -90,9 +91,18 @@ public class PositiveAssertion extends Assert{
     }
 
     protected void createAndCheck(Changes changes, Expectations expectations) {
-        Appointment app = generateDefaultAppointment();
+        Appointment app = null;
+        try {
+            app = generateDefaultAppointment();
+        } catch (Exception e) {
+            fail("Could not generate default appointment: " + e);
+            return;
+        }
+        
         changes.update(app);
         create(app);
+        if(manager.hasLastException())
+            fail("Could not create appointment, error: " + manager.getLastException());
         checkViaGet(app.getParentFolderID(), app.getObjectID(), expectations);
         checkViaList(app.getParentFolderID(), app.getObjectID(), expectations);
     }
@@ -111,13 +121,6 @@ public class PositiveAssertion extends Assert{
         
     }
 
-    private Appointment find(List<Appointment> appointments, int folder, int id) {
-        for(Appointment app: appointments)
-            if(app.getParentFolderID() == folder && app.getObjectID() == id)
-                return app;
-        return null;
-    }
-
     protected void checkViaGet(int folder, int id, Expectations expectations) {
         Appointment actual;
         try {
@@ -129,36 +132,6 @@ public class PositiveAssertion extends Assert{
             return;
         }
         expectations.verify(actual);
-    }
-
-    protected Appointment create(Appointment app) {
-        return manager.insertAppointmentOnServer(app);
-    }
-
-    protected void update(Appointment app, Changes changes) {
-        Appointment update = new Appointment();
-        update.setParentFolderID(app.getParentFolderID());
-        update.setObjectID(app.getObjectID());
-        update.setLastModified(app.getLastModified());
-        
-        changes.update(update);
-        manager.updateAppointmentOnServer(update);
-    }
-
-    protected Appointment generateDefaultAppointment() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-        cal.set(Calendar.DAY_OF_YEAR, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 1);
-
-        Appointment app = new Appointment();
-        app.setTitle("Generic recurrence test appointment");
-        app.setStartDate(cal.getTime());
-        cal.add(Calendar.HOUR, 1);
-        app.setEndDate(cal.getTime());
-
-        app.setParentFolderID(folder);
-        return app;
     }
 
 }
