@@ -59,9 +59,18 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse> {
 
-    private final int id;
+    public static enum Flow {
+        IN("in"), OUT("out"), BOTH("both");
 
-    private final String identifier;
+        final String str;
+
+        private Flow(final String str) {
+            this.str = str;
+        }
+
+    }
+
+    private final int id;
 
     private final boolean answered;
 
@@ -69,16 +78,25 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
 
     private final int year;
 
+    private final Flow flow;
+
     /**
      * Default constructor.
      */
-    public CallReportRequest(final int id, final String identifier, final boolean answered, final int month, final int year) {
+    public CallReportRequest(final int id, final boolean answered, final int month, final int year) {
+        this(id, answered, month, year, Flow.BOTH);
+    }
+
+    /**
+     * Default constructor.
+     */
+    public CallReportRequest(final int id, final boolean answered, final int month, final int year, final Flow flow) {
         super();
         this.id = id;
-        this.identifier = identifier;
         this.answered = answered;
         this.month = month;
         this.year = year;
+        this.flow = flow;
     }
 
     /**
@@ -102,11 +120,10 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "callreport"),
             new Parameter("id", id),
-            new Parameter("identifier", identifier),
             new Parameter("answered", answered),
             new Parameter("month", month),
-            new Parameter("year", year)
-        };
+            new Parameter("year", year),
+            new Parameter("flow", flow.str) };
     }
 
     /**

@@ -76,7 +76,7 @@ public class CallReportTest extends AbstractAJAXSession {
     }
 
     public void testCallReport() throws Exception {
-        final CallReportRequest detailsRequest = new CallReportRequest(20, "thorben.betten", true, 11, 2009);
+        final CallReportRequest detailsRequest = new CallReportRequest(20, true, 11, 2009);
         final CallReportResponse detailsResponse = Executor.execute(client, detailsRequest);
 
         final Object body = detailsResponse.getData();
