@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import com.openexchange.ajax.appointment.recurrence.TestsForChangingFromOneRecurrenceTypeToAnother;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
 import com.openexchange.ajax.appointment.test.UpdateWithRecurrenceIdTest;
 import junit.framework.Test;
@@ -70,6 +71,7 @@ public class NewAppointmentHttpApiTestSuite extends TestSuite{
     public static Test suite(){
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(TestsToCreateMinimalAppointmentSeries.class);
+        tests.addTestSuite(TestsForChangingFromOneRecurrenceTypeToAnother.class);
         tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
         return tests;
     }
