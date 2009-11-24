@@ -341,7 +341,9 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check if duplicate folder exists
          */
         try {
-            if (OXFolderSQL.lookUpFolder(folderObj.getParentFolderID(), folderObj.getFolderName(), folderObj.getModule(), readCon, ctx) != -1) {
+            final int parentFolderID = folderObj.getParentFolderID();
+            final String folderName = folderObj.getFolderName();
+            if (OXFolderSQL.lookUpFolder(parentFolderID, folderName, folderObj.getModule(), readCon, ctx) != -1) {
                 /*
                  * A duplicate folder exists
                  */
@@ -349,6 +351,31 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     FolderCode.NO_DUPLICATE_FOLDER,
                     OXFolderUtility.getFolderName(parentFolder),
                     Integer.valueOf(ctx.getContextId()));
+            }
+            /*
+             * Check i18n strings, too
+             */
+            if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
+                if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, user.getLocale()).equalsIgnoreCase(folderName)) {
+                    final String parentFolderName =
+                        new StringBuilder(FolderObject.getFolderString(parentFolderID, user.getLocale())).append(" (").append(
+                            parentFolderID).append(')').toString();
+                    /*
+                     * A duplicate folder exists
+                     */
+                    throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, parentFolderName, Integer.valueOf(ctx.getContextId()));
+                }
+                if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
+                    FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
+                    user.getLocale()).equalsIgnoreCase(folderName)) {
+                    final String parentFolderName =
+                        new StringBuilder(FolderObject.getFolderString(parentFolderID, user.getLocale())).append(" (").append(
+                            parentFolderID).append(')').toString();
+                    /*
+                     * A duplicate folder exists
+                     */
+                    throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, parentFolderName, Integer.valueOf(ctx.getContextId()));
+                }
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
