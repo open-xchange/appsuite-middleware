@@ -50,10 +50,8 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -90,6 +88,11 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
 
     public DeleteRequest(final Appointment appointment) {
         this(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified());
+    }
+    
+
+    public DeleteRequest(final Appointment appointment, boolean failOnError) {
+        this(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified(), failOnError);
     }
 
     /**
