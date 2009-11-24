@@ -439,7 +439,8 @@ public class CLIParser {
         int position = 0;
         while (position < args.length) {
             final String argument = args[position];
-            if ('-' == argument.charAt(0)) {
+            final int len = argument.length();
+            if ((len > 0) && ('-' == argument.charAt(0))) {
                 if (OPT_START.equals(argument)) {
                     /*
                      * End of options
@@ -447,7 +448,6 @@ public class CLIParser {
                     position++;
                     break;
                 }
-                final int len = argument.length();
                 if (len > 1 && '-' == argument.charAt(1)) {
                     /*
                      * Distinguish between "--arg=value" and "--arg value"
