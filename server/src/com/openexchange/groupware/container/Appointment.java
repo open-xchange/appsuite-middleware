@@ -309,6 +309,11 @@ public class Appointment extends CalendarObject implements Cloneable {
     public Object clone() {
         try {
             final Appointment appointmentobject = (Appointment) super.clone();/* new AppointmentObject(); */
+
+            for(int field: ALL_COLUMNS)
+                if(contains(field))
+                    appointmentobject.set(field, get(field));
+            
             if (containsLabel()) {
                 appointmentobject.setLabel(getLabel());
             }
