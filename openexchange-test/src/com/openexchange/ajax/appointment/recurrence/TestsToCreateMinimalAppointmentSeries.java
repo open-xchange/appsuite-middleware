@@ -50,34 +50,23 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
-import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.ExceptionAssertion;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.ajax.appointment.helper.PositiveAssertion;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.test.CalendarTestManager;
 
 /**
  * Find out which parameters are needed to create an appointment and which are not enough.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TestsToCreateMinimalAppointmentSeries extends AppointmentTest {
-
-    private CalendarTestManager calendarManager;
+public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTest {
 
     public TestsToCreateMinimalAppointmentSeries(String name) {
         super(name);
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        calendarManager = new CalendarTestManager(getClient());
-    }
-
 
     public void testSendingUnneccessaryDayInformation() throws Exception {
         Changes changes = new Changes();
