@@ -108,9 +108,13 @@ public class CalendarTestManager {
         try {
             timezone = client.getValues().getTimeZone();
         } catch (AjaxException e) {
+            // wait for finally block
         } catch (IOException e) {
+            // wait for finally block
         } catch (SAXException e) {
+            // wait for finally block
         } catch (JSONException e) {
+            // wait for finally block
         } finally {
             if (timezone == null) {
                 timezone = TimeZone.getTimeZone("Europe/Berlin");
@@ -142,10 +146,10 @@ public class CalendarTestManager {
         return failOnError;
     }
 
-    public boolean doesFailOnError(){
+    public boolean doesFailOnError() {
         return getFailOnError();
     }
-    
+
     public void setLastException(Exception lastException) {
         this.lastException = lastException;
     }
@@ -153,7 +157,8 @@ public class CalendarTestManager {
     public Exception getLastException() {
         return lastException;
     }
-    public boolean hasLastException(){
+
+    public boolean hasLastException() {
         return lastException != null;
     }
 
@@ -198,7 +203,7 @@ public class CalendarTestManager {
         AppointmentInsertResponse insertResponse = execute(insertRequest);
         extractInfo(insertResponse);
         insertResponse.fillAppointment(appointment);
-        if(doesFailOnError() || appointment.getObjectID() != 0)
+        if (doesFailOnError() || appointment.getObjectID() != 0)
             createdEntities.add(appointment);
         return appointment;
     }
@@ -266,10 +271,10 @@ public class CalendarTestManager {
         List<Appointment> list = new LinkedList<Appointment>();
         int[] cols = resp.getColumns();
         Object[][] arr = resp.getArray();
-        for(Object[] values : arr){
+        for (Object[] values : arr) {
             Appointment temp = new Appointment();
             list.add(temp);
-            for(int i = 0; i < cols.length; i++)
+            for (int i = 0; i < cols.length; i++)
                 temp.set(cols[i], values[i]);
         }
         return list;
@@ -278,9 +283,9 @@ public class CalendarTestManager {
 
     private int[] addNecessaryColumns(int[] columns) {
         List<Integer> cols = new LinkedList<Integer>(Arrays.asList(i2I(columns)));
-        if(!cols.contains(I(CommonObject.FOLDER_ID)))
+        if (!cols.contains(I(CommonObject.FOLDER_ID)))
             cols.add(I(CommonObject.FOLDER_ID));
-        if(!cols.contains(I(CommonObject.OBJECT_ID)))
+        if (!cols.contains(I(CommonObject.OBJECT_ID)))
             cols.add(I(CommonObject.OBJECT_ID));
         return I2i(cols);
     }
@@ -316,13 +321,13 @@ public class CalendarTestManager {
         return appointments.toArray(new Appointment[appointments.size()]);
     }
 
-    public void deleteAppointmentOnServer(Appointment appointment, boolean failOnError) {
+    public void deleteAppointmentOnServer(Appointment appointment, boolean failOnErrorOverride) {
         createdEntities.remove(appointment);
         DeleteRequest deleteRequest = new DeleteRequest(
             appointment.getObjectID(),
             appointment.getParentFolderID(),
             new Date(Long.MAX_VALUE),
-            failOnError);
+            failOnErrorOverride);
         extractInfo(execute(deleteRequest));
     }
 
@@ -367,12 +372,11 @@ public class CalendarTestManager {
             deleteAppointmentOnServer(app);
         }
     }
-    
+
     protected void extractInfo(AbstractAJAXResponse response) {
         setLastResponse(response);
-        if(response.hasError())
+        if (response.hasError())
             setLastException(response.getException());
     }
-
 
 }
