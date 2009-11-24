@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.folder.GetMailInboxTest;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -65,46 +64,39 @@ import com.openexchange.tools.servlet.AjaxException;
 public class PositiveAssertion extends AbstractAssertion{
 
     public PositiveAssertion(Changes changes, Expectations expectations, CalendarTestManager manager) throws AjaxException, IOException, SAXException, JSONException {
+        this(generateDefaultAppointment(), changes, expectations, manager);
+    }
+
+    public PositiveAssertion(Appointment startAppointment, Changes changes, Expectations expectations, CalendarTestManager manager) throws AjaxException, IOException, SAXException, JSONException {
         this.manager = manager;
         
+        if(!startAppointment.containsParentFolderID())
+            startAppointment.setParentFolderID(getPrivateAppointmentFolder());
+        
+        Appointment startAppointmentCopy = (Appointment) startAppointment.clone();
+        
         try {
-            createAndCheck(changes, expectations);
-            updateAndCheck(changes, expectations);
+            createAndCheck(startAppointment, changes, expectations);
+            updateAndCheck(startAppointmentCopy, changes, expectations);
         } finally {
             manager.cleanUp();
         }
     }
-
-    protected void updateAndCheck(Changes changes, Expectations expectations) {
-        Appointment app;
-        try {
-            app = generateDefaultAppointment();
-        } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
-            return;
-        }
-        
-        create(app);
-        update(app, changes);
-        checkViaGet(app.getParentFolderID(), app.getObjectID(), expectations);
-        checkViaList(app.getParentFolderID(), app.getObjectID(), expectations);
+    
+    protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
+        create(startAppointment);
+        update(startAppointment, changes);
+        checkViaGet(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
+        checkViaList(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
     }
 
-    protected void createAndCheck(Changes changes, Expectations expectations) {
-        Appointment app = null;
-        try {
-            app = generateDefaultAppointment();
-        } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
-            return;
-        }
-        
-        changes.update(app);
-        create(app);
+    protected void createAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {       
+        changes.update(startAppointment);
+        create(startAppointment);
         if(manager.hasLastException())
             fail("Could not create appointment, error: " + manager.getLastException());
-        checkViaGet(app.getParentFolderID(), app.getObjectID(), expectations);
-        checkViaList(app.getParentFolderID(), app.getObjectID(), expectations);
+        checkViaGet(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
+        checkViaList(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
     }
 
     protected void checkViaList(int folder, int id, Expectations expectations){

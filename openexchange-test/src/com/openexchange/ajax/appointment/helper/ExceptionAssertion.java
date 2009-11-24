@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -76,6 +75,7 @@ public class ExceptionAssertion extends AbstractAssertion {
         Appointment app;
         try {
             app = generateDefaultAppointment();
+            app.setParentFolderID(getPrivateAppointmentFolder());
         } catch (Exception e) {
             fail("Could not generate default appointment: " + e);
             return;
@@ -91,6 +91,7 @@ public class ExceptionAssertion extends AbstractAssertion {
         Appointment app = null;
         try {
             app = generateDefaultAppointment();
+            app.setParentFolderID(getPrivateAppointmentFolder());
         } catch (Exception e) {
             fail("Could not generate default appointment: " + e);
             return;

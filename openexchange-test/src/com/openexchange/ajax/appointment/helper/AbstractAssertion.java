@@ -61,7 +61,7 @@ import junit.framework.Assert;
 
 /**
  * {@link AbstractAssertion}
- *
+ * 
  * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
  */
 public class AbstractAssertion extends Assert {
@@ -73,25 +73,30 @@ public class AbstractAssertion extends Assert {
     }
 
     protected Appointment find(List<Appointment> appointments, int folder, int id) {
-        for(Appointment app: appointments)
-            if(app.getParentFolderID() == folder && app.getObjectID() == id)
+        for (Appointment app : appointments)
+            if (app.getParentFolderID() == folder && app.getObjectID() == id)
                 return app;
         return null;
     }
 
-    protected Appointment generateDefaultAppointment() throws AjaxException, IOException, SAXException, JSONException {
+    protected static Appointment generateDefaultAppointment(int folder) {
+        Appointment app = generateDefaultAppointment();
+        app.setParentFolderID(folder);
+        return app;
+    }
+
+    protected static Appointment generateDefaultAppointment() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
         cal.set(Calendar.DAY_OF_YEAR, 1);
         cal.set(Calendar.HOUR_OF_DAY, 1);
-    
+
         Appointment app = new Appointment();
         app.setTitle("Generic recurrence test appointment");
         app.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
         app.setEndDate(cal.getTime());
-    
-        app.setParentFolderID(manager.getClient().getValues().getPrivateAppointmentFolder());
+
         return app;
     }
 
@@ -104,9 +109,13 @@ public class AbstractAssertion extends Assert {
         update.setParentFolderID(app.getParentFolderID());
         update.setObjectID(app.getObjectID());
         update.setLastModified(app.getLastModified());
-        
+
         changes.update(update);
         manager.updateAppointmentOnServer(update);
+    }
+
+    protected int getPrivateAppointmentFolder() throws AjaxException, IOException, SAXException, JSONException {
+        return manager.getClient().getValues().getPrivateAppointmentFolder();
     }
 
 }
