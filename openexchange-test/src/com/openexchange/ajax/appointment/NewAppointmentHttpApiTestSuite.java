@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.ajax.appointment.recurrence.RecurrenceUpdateTests;
+import com.openexchange.ajax.appointment.recurrence.IntervalParameterTests;
 import com.openexchange.ajax.appointment.test.UpdateWithRecurrenceIdTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -69,7 +69,7 @@ public class NewAppointmentHttpApiTestSuite extends TestSuite{
 
     public static Test suite(){
         final TestSuite tests = new TestSuite();
-        tests.addTestSuite(RecurrenceUpdateTests.class);
+        tests.addTestSuite(IntervalParameterTests.class);
         tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
         return tests;
     }
