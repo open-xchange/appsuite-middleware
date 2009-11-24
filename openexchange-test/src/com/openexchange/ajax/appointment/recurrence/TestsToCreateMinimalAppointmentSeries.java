@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.Changes;
@@ -85,7 +84,7 @@ public class TestsToCreateMinimalAppointmentSeries extends AppointmentTest {
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
         changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
-        changes.put(Appointment.DAYS, I(127));
+        changes.put(Appointment.DAYS, 127);
 
         // TODO: Needs to throw exception
         new ExceptionAssertion(changes, new OXError("APP", 999), calendarManager);
@@ -104,7 +103,7 @@ public class TestsToCreateMinimalAppointmentSeries extends AppointmentTest {
 
     public void testShouldCreateWeeklyIntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_TYPE, I(Appointment.WEEKLY));
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.WEEKLY);
         changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
 
@@ -116,7 +115,7 @@ public class TestsToCreateMinimalAppointmentSeries extends AppointmentTest {
 
     public void testShouldCreateWeeklyIntervalWithDaysFieldDifferentThan127() throws Exception {
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_TYPE, I(Appointment.WEEKLY));
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.WEEKLY);
         changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY + Appointment.TUESDAY);
@@ -217,7 +216,7 @@ public class TestsToCreateMinimalAppointmentSeries extends AppointmentTest {
     
     public void testShouldCreateYearly2IntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_TYPE, I(Appointment.YEARLY));
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
