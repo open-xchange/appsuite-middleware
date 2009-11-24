@@ -105,7 +105,7 @@ public class ParallelExecutor {
                                                                               */
 
         for (final Callable callable : callables) {
-            completionService.submit(callable);
+            //completionService.submit(callable);
         }
         /*
          * Wait for completion
@@ -113,7 +113,7 @@ public class ParallelExecutor {
         final int maxRunningMillis = 60000;
         try {
             for (int i = 0; i < callables.size(); i++) {
-                final Future<ArrayList<Contact>> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
+                final Future<ArrayList<Contact>> f = null; //completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
                 if (null != f) {
                     results.addAll(f.get());
                 }
