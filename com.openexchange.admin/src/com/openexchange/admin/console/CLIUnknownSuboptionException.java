@@ -63,7 +63,7 @@ public final class CLIUnknownSuboptionException extends CLIUnknownOptionExceptio
     private final char suboption;
 
     CLIUnknownSuboptionException(final String option, final char suboption) {
-        super(option, MessageFormat.format("Illegal option: ''{0}'' in ''{1}''", Character.valueOf(suboption), option));
+        super(option, MessageFormat.format("Illegal option: ``{0}'' in ``{1}''", Character.valueOf(suboption), option));
         this.suboption = suboption;
     }
 
