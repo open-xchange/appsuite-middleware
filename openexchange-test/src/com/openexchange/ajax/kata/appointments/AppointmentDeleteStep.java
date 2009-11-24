@@ -73,14 +73,16 @@ public class AppointmentDeleteStep extends NeedExistingStep<Appointment> {
     }
 
     public void cleanUp() throws Exception {
+        //no cleaning needed
     }
 
-    public void perform(AJAXClient client) throws Exception {
+    public void perform(AJAXClient ajaxclient) throws Exception {
         assumeIdentity(entry);
-        CalendarTestManager manager = new CalendarTestManager(client);
-        Assert.assertNotNull("Should have found appointment before deletion" , manager.getAppointmentFromServer(this.entry , false) );        
+        CalendarTestManager manager = new CalendarTestManager(ajaxclient);
+        manager.setFailOnError(false);
+        Assert.assertNotNull("Should have found appointment before deletion" , manager.getAppointmentFromServer(this.entry) );        
         manager.deleteAppointmentOnServer(this.entry, false);
-        Assert.assertNull("Should not have found appointment after deletion" , manager.getAppointmentFromServer(this.entry , false) );
+        Assert.assertNull("Should not have found appointment after deletion" , manager.getAppointmentFromServer(this.entry) );
         forgetIdentity(entry);
     }
 
