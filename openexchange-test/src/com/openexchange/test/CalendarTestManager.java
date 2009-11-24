@@ -142,6 +142,10 @@ public class CalendarTestManager {
         return failOnError;
     }
 
+    public boolean doesFailOnError(){
+        return getFailOnError();
+    }
+    
     public void setLastException(Exception lastException) {
         this.lastException = lastException;
     }
@@ -190,46 +194,34 @@ public class CalendarTestManager {
      * Requests
      */
     public Appointment insertAppointmentOnServer(Appointment appointment) {
-        InsertRequest insertRequest = new InsertRequest(appointment, timezone);
+        InsertRequest insertRequest = new InsertRequest(appointment, timezone, getFailOnError());
         AppointmentInsertResponse insertResponse = execute(insertRequest);
-        setLastResponse(insertResponse);
-        createdEntities.add(appointment);
+        extractInfo(insertResponse);
         insertResponse.fillAppointment(appointment);
+        if(doesFailOnError() || appointment.getObjectID() != 0)
+            createdEntities.add(appointment);
         return appointment;
     }
 
     public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
-        GetRequest get = new GetRequest(parentFolderID, objectID);
+        GetRequest get = new GetRequest(parentFolderID, objectID, getFailOnError());
         GetResponse response = execute(get);
-        setLastResponse(response);
+        extractInfo(response);
         return response.getAppointment(timezone);
     }
 
     public Appointment getAppointmentFromServer(Appointment appointment) throws OXException, JSONException {
-        GetRequest get = new GetRequest(appointment);
+        GetRequest get = new GetRequest(appointment, getFailOnError());
         GetResponse response = execute(get);
-        setLastResponse(response);
+        extractInfo(response);
         return response.getAppointment(timezone);
     }
 
-    public Appointment getAppointmentFromServer(Appointment appointment, boolean failOnError) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException, JSONException {
         try {
-            GetRequest get = new GetRequest(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
+            GetRequest get = new GetRequest(parentFolderID, objectID, pleaseFailOnError);
             GetResponse response = execute(get);
-            setLastResponse(response);
-            return response.getAppointment(timezone);
-        } catch (OXException e) {
-            if (failOnError)
-                throw e;
-            return null;
-        }
-    }
-
-    public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean failOnError) throws OXException, JSONException {
-        try {
-            GetRequest get = new GetRequest(parentFolderID, objectID, failOnError);
-            GetResponse response = execute(get);
-            setLastResponse(response);
+            extractInfo(response);
             return response.getAppointment(timezone);
         } catch (OXException e) {
             if (failOnError)
@@ -245,7 +237,7 @@ public class CalendarTestManager {
     public List<Appointment> getUpdates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
         UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster);
         UpdatesResponse resp = execute(req);
-        setLastResponse(resp);
+        extractInfo(resp);
         try {
             return resp.getAppointments(timezone);
         } catch (Exception e) {
@@ -257,7 +249,7 @@ public class CalendarTestManager {
     public void updateAppointmentOnServer(Appointment updatedAppointment) {
         UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone, getFailOnError());
         UpdateResponse updateResponse = execute(updateRequest);
-        setLastResponse(updateResponse);
+        extractInfo(updateResponse);
         updatedAppointment.setLastModified(updateResponse.getTimestamp());
         for (Appointment createdAppoinment : createdEntities) {
             if (createdAppoinment.getObjectID() == updatedAppointment.getObjectID()) {
@@ -270,6 +262,7 @@ public class CalendarTestManager {
     public List<Appointment> list(ListIDs foldersAndIds, int[] columns) {
         ListRequest req = new ListRequest(foldersAndIds, addNecessaryColumns(columns), getFailOnError());
         CommonListResponse resp = execute(req);
+        extractInfo(resp);
         List<Appointment> list = new LinkedList<Appointment>();
         int[] cols = resp.getColumns();
         Object[][] arr = resp.getArray();
@@ -295,7 +288,7 @@ public class CalendarTestManager {
     public Appointment[] getAllAppointmentsOnServer(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
-        setLastResponse(response);
+        extractInfo(response);
         List<Appointment> appointments = new ArrayList<Appointment>();
 
         for (Object[] row : response.getArray()) {
@@ -330,14 +323,14 @@ public class CalendarTestManager {
             appointment.getParentFolderID(),
             new Date(Long.MAX_VALUE),
             failOnError);
-        setLastResponse(execute(deleteRequest));
+        extractInfo(execute(deleteRequest));
     }
 
     public void deleteAppointmentOnServer(Appointment appointment) {
         createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest deleteRequest = new DeleteRequest(appointment);
-        setLastResponse(execute(deleteRequest));
+        extractInfo(execute(deleteRequest));
     }
 
     /*
@@ -374,4 +367,12 @@ public class CalendarTestManager {
             deleteAppointmentOnServer(app);
         }
     }
+    
+    protected void extractInfo(AbstractAJAXResponse response) {
+        setLastResponse(response);
+        if(response.hasError())
+            setLastException(response.getException());
+    }
+
+
 }
