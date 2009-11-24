@@ -63,11 +63,11 @@ public class CLIUnknownOptionException extends CLIOptionException {
     private String optionName = null;
 
     CLIUnknownOptionException(final String optionName) {
-        this(optionName, MessageFormat.format("Unknown option ''{0}''", optionName));
+        this(optionName, MessageFormat.format("Unknown option ``{0}''", optionName));
     }
 
     CLIUnknownOptionException(final String optionName, final Throwable cause) {
-        this(optionName, MessageFormat.format("Unknown option ''{0}''", optionName), cause);
+        this(optionName, MessageFormat.format("Unknown option ``{0}''", optionName), cause);
     }
 
     CLIUnknownOptionException(final String optionName, final String msg) {
