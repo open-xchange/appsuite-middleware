@@ -60,17 +60,20 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.update.Updater;
@@ -83,6 +86,10 @@ import com.openexchange.groupware.update.exception.UpdateException;
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
     private final static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
+
+    private static final String FALLBACK_LANGUAGE_CREATE = "en";
+
+    private static final String FALLBACK_COUNTRY_CREATE = "US";
 
     @Override
     public boolean domainInUse(final Context ctx, final String domain) throws StorageException {        
@@ -2131,5 +2138,98 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         final User tmp = new User(-1);
         tmp.setName(username);
         return existsUserName(ctx,tmp);
+    }
+
+    @Override
+    public void checkCreateUserData(Context ctx, User usr) throws InvalidDataException, EnforceableDataObjectException, StorageException {
+        checkAndSetLanguage(usr);
+        GenericChecks.checkCreateValidPasswordMech(usr);
+        if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
+            throw new InvalidDataException("Empty password is not allowed.");
+        }
+        if (!usr.mandatoryCreateMembersSet()) {
+            throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers());
+        }
+        if (!usr.isContextadmin() && prop.getUserProp(AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
+            if (existsDisplayName(ctx, usr)) {
+                throw new InvalidDataException("The displayname is already used");
+            }
+        }
+        if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+            validateUserName(usr.getName());
+        }
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+            usr.setName(usr.getName().toLowerCase());
+        }
+        // checks below throw InvalidDataException
+        checkValidEmailsInUserObject(usr);
+        // ### Do some mail attribute checks cause of bug 5444
+        // check if primary email address is also set in Email1,
+        if (!usr.getPrimaryEmail().equals(usr.getEmail1())) {
+             throw new InvalidDataException("primarymail must have the same value as email1");
+        }
+        // if default sender address is != primary mail, add it to list of aliases
+        if (usr.getDefaultSenderAddress() != null) {
+            usr.addAlias(usr.getDefaultSenderAddress());
+        } else {
+            // if default sender address is not set, set it to primary mail address
+            usr.setDefaultSenderAddress(usr.getPrimaryEmail());
+        }
+        // put primary mail in the aliases,
+        usr.addAlias(usr.getPrimaryEmail());
+        // Check mail attributes
+        {
+            HashSet<String> useraliases = usr.getAliases();
+            String primaryEmail = usr.getPrimaryEmail();
+            String email1 = usr.getEmail1();
+            boolean foundPrimaryMail = useraliases.contains(primaryEmail);
+            boolean foundEmail1 = useraliases.contains(email1);
+            boolean foundDefaultSenderAddress = useraliases.contains(usr.getDefaultSenderAddress());
+            if (!foundPrimaryMail || !foundEmail1 || !foundDefaultSenderAddress) {
+                throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
+            }
+            // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+            // which is not very good when just changing the display name for example
+            if (primaryEmail != null && email1 == null) {
+                throw new InvalidDataException("email1 not set but required!");
+            }
+        }
+    }
+
+    private void checkAndSetLanguage(User user) throws InvalidDataException {
+        String lang = user.getLanguage();
+        if (lang == null) {
+            user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
+        } else {
+            if (lang.indexOf('_') == -1) {
+                throw new InvalidDataException("language must contain an underscore, e.g. en_US");
+            }
+        }
+    }
+
+    @Override
+    public void validateUserName(String userName) throws InvalidDataException {
+        // Check for allowed chars:
+        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
+        String usrUidRegexp = prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
+        String illegal = userName.replaceAll(usrUidRegexp,"");
+        if (illegal.length() > 0) {
+            throw new InvalidDataException("Illegal chars: \"" + illegal + "\"");
+        }
+    }
+
+    @Override
+    public void checkValidEmailsInUserObject(User usr) throws InvalidDataException {
+        GenericChecks.checkValidMailAddress(usr.getPrimaryEmail());
+        GenericChecks.checkValidMailAddress(usr.getEmail1());
+        GenericChecks.checkValidMailAddress(usr.getEmail2());
+        GenericChecks.checkValidMailAddress(usr.getEmail3());
+        GenericChecks.checkValidMailAddress(usr.getDefaultSenderAddress());
+        HashSet<String> aliases = usr.getAliases();
+        if (aliases != null) {
+            for (final String addr : aliases) {
+                GenericChecks.checkValidMailAddress(addr);
+            }
+        }
     }
 }

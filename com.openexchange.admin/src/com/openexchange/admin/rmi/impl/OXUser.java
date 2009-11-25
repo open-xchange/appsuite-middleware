@@ -105,10 +105,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private final static Log log = LogFactory.getLog(OXUser.class);
 
-    private static final String FALLBACK_LANGUAGE_CREATE = "en";
-
-    private static final String FALLBACK_COUNTRY_CREATE = "US";
-
     private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
 
     private static final String NAME_OXCACHE = "oxcache";
@@ -189,7 +185,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if(usernameIsChangeable() && usrdata.getId() !=null && usrdata.getName()!=null){
                 // check new username 
                 if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-                    validateUserName(usrdata.getName());
+                    tool.validateUserName(usrdata.getName());
                 }
             
                 if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
@@ -504,8 +500,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
 
-    public User create(final Context ctx, final User usrdata, final Credentials auth)
-		throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+    public User create(Context ctx, User usrdata, Credentials auth)	throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
 
 		/*
 		 * Resolve current access rights from the specified context (admin) as
@@ -539,7 +534,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
      */
-    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    private User createUserCommon(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
     	
     	try {
             doNullCheck(usr,access);
@@ -557,7 +552,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             
             checkContextAndSchema(ctx);
             
-            checkCreateUserData(ctx, usr, this.prop);
+            tool.checkCreateUserData(ctx, usr);
 
             if (tool.existsUserName(ctx, usr.getName())) {
                 throw new InvalidDataException("User " + usr.getName() + " already exists in this context");
@@ -1119,7 +1114,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         if (!tool.isContextAdmin(ctx, newuser.getId().intValue())) {
             // checks below throw InvalidDataException
-            checkValidEmailsInUserObject(newuser);
+            tool.checkValidEmailsInUserObject(newuser);
             HashSet<String> useraliases = newuser.getAliases();
             if (useraliases == null) {
                 useraliases = dbuser.getAliases();
@@ -1178,102 +1173,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    public static void checkAndSetLanguage(User user) throws InvalidDataException {
-		final String lang = user.getLanguage();
-		if (lang == null) {
-			user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' +FALLBACK_COUNTRY_CREATE);
-		} else {
-			if (lang.indexOf('_') == -1) {
-				throw new InvalidDataException("language must contain an underscore, e.g. en_US");
-			}
-		}
-	}
-
-    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
-
-        checkAndSetLanguage(usr);
-        
-        GenericChecks.checkCreateValidPasswordMech(usr);
-
-        if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
-            throw new InvalidDataException("Empty password is not allowed");
-        }
-
-        if (!usr.mandatoryCreateMembersSet()) {
-            throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers() );
-        }
-        
-        if (prop.getUserProp(AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
-            if (tool.existsDisplayName(ctx, usr)) {
-                throw new InvalidDataException("The displayname is already used");
-            }
-        }
-    
-        if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-            validateUserName(usr.getName());
-        }
-    
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
-            usr.setName(usr.getName().toLowerCase());
-        }
-    
-        // checks below throw InvalidDataException
-        checkValidEmailsInUserObject(usr);
-            
-        // ### Do some mail attribute checks cause of bug 5444
-        // check if primary email address is also set in Email1,
-        if (!usr.getPrimaryEmail().equals(usr.getEmail1())) {
-        	 throw new InvalidDataException("primarymail must have the same value as email1");
-        }
-    
-        // if default sender address is != primary mail, add it to list of aliases
-        if(usr.getDefaultSenderAddress() != null ) {
-            usr.addAlias(usr.getDefaultSenderAddress());
-        } else {
-            // if default sender address is not set, set it to primary mail address
-            usr.setDefaultSenderAddress(usr.getPrimaryEmail());
-        }
-        
-        // put primary mail in the aliases,
-        usr.addAlias(usr.getPrimaryEmail());
-
-        // Check mail attributes
-        {
-			final HashSet<String> useraliases = usr.getAliases();
-			final String primaryEmail = usr.getPrimaryEmail();
-			final String email1 = usr.getEmail1();
-
-			final boolean found_primary_mail = useraliases.contains(primaryEmail);
-			final boolean found_email1 = useraliases.contains(email1);
-			final boolean found_default_sender_address = useraliases.contains(usr.getDefaultSenderAddress());
-			if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-				throw new InvalidDataException(
-						"primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
-			}
-			// added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
-			// which is not very good when just changing the display name for example
-			if (primaryEmail != null && email1 == null) {
-				throw new InvalidDataException("email1 not set but required!");
-
-			}
-		}
-
-    }
-
-    private void checkValidEmailsInUserObject(final User usr) throws InvalidDataException {
-        GenericChecks.checkValidMailAddress(usr.getPrimaryEmail());
-        GenericChecks.checkValidMailAddress(usr.getEmail1());
-        GenericChecks.checkValidMailAddress(usr.getEmail2());
-        GenericChecks.checkValidMailAddress(usr.getEmail3());
-        GenericChecks.checkValidMailAddress(usr.getDefaultSenderAddress());
-        final HashSet<String> aliases = usr.getAliases();
-        if (aliases != null) {
-            for (final String addr : aliases) {
-                GenericChecks.checkValidMailAddress(addr);
-            }
-        }
-    }
-
     private String getUserIdArrayFromUsersAsString(final User[] users) throws InvalidDataException {
 		if (null == users) {
 			return null;
@@ -1308,18 +1207,4 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         return list.toArray(new User[list.size()]);
     }
-
-    private void validateUserName(final String userName) throws InvalidDataException {
-        // Check for allowed chars:
-        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
-        final String illegal = userName.replaceAll(usr_uid_regexp,"");
-        if( illegal.length() > 0 ) {
-            throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
-        }
-    }
-
-
-	
-	
 }

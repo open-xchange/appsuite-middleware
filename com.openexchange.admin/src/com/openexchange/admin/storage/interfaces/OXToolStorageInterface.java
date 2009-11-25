@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
@@ -441,5 +442,11 @@ public abstract class OXToolStorageInterface {
     public abstract boolean storeInUse(final int store_id) throws StorageException;
 
     public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
+
+    public abstract void checkCreateUserData(Context ctx, User usr) throws InvalidDataException, EnforceableDataObjectException, StorageException;
+
+    public abstract void validateUserName(String name) throws InvalidDataException;
+
+    public abstract void checkValidEmailsInUserObject(User user) throws InvalidDataException;
 
 }
