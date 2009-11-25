@@ -149,7 +149,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * A parameter conflict occurred.
          */
-        ParameterConflict("A parameter conflict occurred.", Category.CODE_ERROR, 12);
+        ParameterConflict("A parameter conflict occurred.", Category.CODE_ERROR, 12),
+        /**
+         * Parameter "%1$s" conflicts with parameter "%2$s".
+         */
+        EitherParameterConflict("Parameter \"%1$s\" conflicts with parameter \"%2$s\".", Category.CODE_ERROR, 13);
 
         /**
          * Message of the exception.
