@@ -2811,20 +2811,32 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final String tmp = paramContainer.getStringParam(PARAMETER_HEADERS);
                 headers = null == tmp ? null : SPLIT.split(tmp, 0);
             }
-            final JSONArray jsonIDs = new JSONArray(body);
-            final int length = jsonIDs.length();
-            if (length > 0) {
-                /*
-                 * Pre-Select field writers
-                 */
-                final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
-                final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
-                /*
-                 * Get map
-                 */
-                final Map<String, List<String>> idMap = newHashMap(4);
+            /*
+             * Pre-Select field writers
+             */
+            final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+            final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
+            /*
+             * Get map
+             */
+            final Map<String, List<String>> idMap = newHashMap(4);
+            final int size;
+            {
+                final JSONArray jsonIDs = new JSONArray(body);
+                final int length = jsonIDs.length();
+                if (length <= 0) {
+                    /*
+                     * Request body is an empty JSON array
+                     */
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Empty JSON array detected in request body.", new Throwable());
+                    }
+                    final Response r = new Response();
+                    r.setData(EMPTY_JSON_ARR);
+                    return r;
+                }
                 fillMapByArray(idMap, jsonIDs, length);
-                final int size = idMap.size();
+                size = idMap.size();
                 if (size == 0) {
                     /*
                      * Must not be zero since JSON array's length is greater than zero.
@@ -2838,45 +2850,52 @@ public class Mail extends PermissionServlet implements UploadListener {
                     r.setData(EMPTY_JSON_ARR);
                     return r;
                 }
-                MailServletInterface mailInterface = mailInterfaceArg;
-                boolean closeMailInterface = false;
-                try {
-                    if (mailInterface == null) {
-                        mailInterface = MailServletInterface.getInstance(session);
-                        closeMailInterface = true;
+            }
+            /*
+             * Proceed
+             */
+            MailServletInterface mailInterface = mailInterfaceArg;
+            boolean closeMailInterface = false;
+            try {
+                if (mailInterface == null) {
+                    mailInterface = MailServletInterface.getInstance(session);
+                    closeMailInterface = true;
+                }
+                final Iterator<Map.Entry<String, List<String>>> iter = idMap.entrySet().iterator();
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
+                for (int k = 0; k < size; k++) {
+                    final Map.Entry<String, List<String>> entry = iter.next();
+                    /*
+                     * Get message list
+                     */
+                    final List<String> list = entry.getValue();
+                    final String folder = entry.getKey();
+                    if (null == folder) {
+                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_FOLDERID);
                     }
-                    final Iterator<Map.Entry<String, List<String>>> iter = idMap.entrySet().iterator();
-                    final int userId = session.getUserId();
-                    final int contextId = session.getContextId();
-                    for (int k = 0; k < size; k++) {
-                        final Map.Entry<String, List<String>> entry = iter.next();
-                        /*
-                         * Get message list
-                         */
-                        final List<String> list = entry.getValue();
-                        final MailMessage[] mails =
-                            mailInterface.getMessageList(entry.getKey(), list.toArray(new String[list.size()]), columns, headers);
-                        final int accountID = mailInterface.getAccountID();
-                        for (int i = 0; i < mails.length; i++) {
-                            final MailMessage mail = mails[i];
-                            if (mail != null) {
-                                final JSONArray ja = new JSONArray();
-                                for (int j = 0; j < writers.length; j++) {
-                                    writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
-                                }
-                                if (null != headerWriters) {
-                                    for (int j = 0; j < headerWriters.length; j++) {
-                                        headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
-                                    }
-                                }
-                                jsonWriter.value(ja);
+                    final MailMessage[] mails =
+                        mailInterface.getMessageList(folder, list.toArray(new String[list.size()]), columns, headers);
+                    final int accountID = mailInterface.getAccountID();
+                    for (int i = 0; i < mails.length; i++) {
+                        final MailMessage mail = mails[i];
+                        if (mail != null) {
+                            final JSONArray ja = new JSONArray();
+                            for (int j = 0; j < writers.length; j++) {
+                                writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
                             }
+                            if (null != headerWriters) {
+                                for (int j = 0; j < headerWriters.length; j++) {
+                                    headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                                }
+                            }
+                            jsonWriter.value(ja);
                         }
                     }
-                } finally {
-                    if (closeMailInterface && mailInterface != null) {
-                        mailInterface.close(true);
-                    }
+                }
+            } finally {
+                if (closeMailInterface && mailInterface != null) {
+                    mailInterface.close(true);
                 }
             }
         } catch (final MailException e) {
