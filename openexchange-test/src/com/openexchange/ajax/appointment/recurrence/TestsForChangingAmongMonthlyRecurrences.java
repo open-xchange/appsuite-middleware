@@ -49,101 +49,93 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import java.io.IOException;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
-
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TestsForChangingFromOneRecurrenceTypeToAnother extends ManagedAppointmentTest {
+public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentTest {
 
-    public TestsForChangingFromOneRecurrenceTypeToAnother(String name) {
+    public TestsForChangingAmongMonthlyRecurrences(String name) {
         super(name);
     }
-    
-    public void testShouldChangeFromMonthly1ToMonthly2() throws Exception{
+
+    private Appointment generateMonthlyAppointment() throws AjaxException, IOException, SAXException, JSONException {
         Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         app.set(Appointment.INTERVAL, 1);
         app.set(Appointment.DAY_IN_MONTH, 1);
-        
-        Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.INTERVAL, 1);
-        changes.put(Appointment.DAY_IN_MONTH, 1);
-        changes.put(Appointment.DAYS, Appointment.MONDAY); //this is the actual change
-        
-        Expectations expectations = new Expectations(changes);
-        
-        positiveAssertion.check(app, changes, expectations);
-    }
-    
-    public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception{
-        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        
-        Changes changes = new Changes();
-        changes.put(Appointment.DAYS, Appointment.MONDAY);
-               
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",999));
+        app.set(Appointment.DAYS, Appointment.MONDAY);
+        return app;
     }
 
-    
-    public void testShouldChangeFromMonthly2ToMonthly1With127() throws Exception{
-        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.DAYS, Appointment.MONDAY);
-        
+    public void testShouldChangeFromMonthly1ToMonthly2() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.DAYS, 127); //DUH!
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
-        
+        changes.put(Appointment.DAYS, Appointment.MONDAY); // this is the actual change
+
         Expectations expectations = new Expectations(changes);
-        
+
         positiveAssertion.check(app, changes, expectations);
     }
-    
-    public void testShouldChangeFromMonthly2ToMonthly1WithNull() throws Exception{
-        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.DAYS, Appointment.MONDAY);
-        
+
+    public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = new Changes();
+        changes.put(Appointment.DAYS, Appointment.MONDAY);
+
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
+    }
+
+    public void testShouldChangeFromMonthly2ToMonthly1With127() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        changes.put(Appointment.DAYS, 127); // DUH!
+        changes.put(Appointment.INTERVAL, 1);
+        changes.put(Appointment.DAY_IN_MONTH, 1);
+
+        Expectations expectations = new Expectations(changes);
+
+        positiveAssertion.check(app, changes, expectations);
+    }
+
+    public void testShouldChangeFromMonthly2ToMonthly1WithNull() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, null);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
-        
+
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.DAYS, 127);
-        
+
         positiveAssertion.check(app, changes, expectations);
     }
-    
-    
-    public void testShouldFailChangingFromMonthly2ToMonthly1UsingOnlyAdditionalData() throws Exception{
-        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.DAYS, Appointment.MONDAY);
-        
+
+    public void testShouldFailChangingFromMonthly2ToMonthly1UsingOnlyAdditionalData() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, 127);
-                
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",999));
+
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
 }
